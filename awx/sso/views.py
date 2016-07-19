@@ -3,6 +3,7 @@
 
 # Python
 import urllib
+import logging
 
 # Django
 from django.core.urlresolvers import reverse
@@ -10,6 +11,7 @@ from django.http import HttpResponse
 from django.utils.timezone import now, utc
 from django.views.generic import View
 from django.views.generic.base import RedirectView
+from django.utils.encoding import smart_text
 
 # Django REST Framework
 from rest_framework.renderers import JSONRenderer
@@ -18,6 +20,7 @@ from rest_framework.renderers import JSONRenderer
 from awx.main.models import AuthToken
 from awx.api.serializers import UserSerializer
 
+logger = logging.getLogger('awx.sso.views')
 
 class BaseRedirectView(RedirectView):
 
@@ -45,9 +48,11 @@ class CompleteView(BaseRedirectView):
                                                  request_hash=request_hash,
                                                  expires__gt=now())[0]
                 token.refresh()
+                logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
             except IndexError:
                 token = AuthToken.objects.create(user=request.user,
                                                  request_hash=request_hash)
+                logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
             request.session['auth_token_key'] = token.key
             token_key = urllib.quote('"%s"' % token.key)
             response.set_cookie('token', token_key)

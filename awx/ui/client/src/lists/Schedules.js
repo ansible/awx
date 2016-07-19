@@ -13,65 +13,67 @@ export default
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        well: false,
+        listTitle: 'Schedules',
         index: false,
         hover: true,
 
         fields: {
+            toggleSchedule: {
+                label: '',
+                columnClass: 'List-staticColumn--toggle',
+                type: "toggle",
+                ngClick: "toggleSchedule($event, schedule.id)",
+                awToolTip: "{{ schedule.play_tip }}",
+                dataTipWatch: "schedule.play_tip",
+                dataPlacement: "right",
+                searchable: false,
+                nosort: true,
+            },
             name: {
                 key: true,
                 label: 'Name',
                 ngClick: "editSchedule(schedule.id)",
-                columnClass: "col-md-3 col-sm-3 col-xs-3"
+                columnClass: "col-md-3 col-sm-3 col-xs-6"
             },
             dtstart: {
                 label: 'First Run',
                 filter: "longDate",
                 searchable: false,
-                columnClass: "col-md-2 col-sm-3 hidden-xs"
+                columnClass: "List-staticColumn--schedulerTime hidden-sm hidden-xs"
             },
             next_run: {
                 label: 'Next Run',
                 filter: "longDate",
                 searchable: false,
-                columnClass: "col-md-2 col-sm-3 col-xs-3"
+                columnClass: "List-staticColumn--schedulerTime hidden-xs"
             },
             dtend: {
                 label: 'Final Run',
                 filter: "longDate",
                 searchable: false,
-                columnClass: "col-md-2 col-sm-3 hidden-xs"
-            }
+                columnClass: "List-staticColumn--schedulerTime hidden-xs"
+            },
         },
 
         actions: {
-            add: {
-                mode: 'all',
-                ngClick: 'addSchedule()',
-                awToolTip: 'Add a new schedule'
-            },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshSchedules()"
+                ngClick: "refreshSchedules()",
+                actionClass: 'btn List-buttonDefault',
+                ngShow: "socketStatus == 'error'",
+                buttonContent: 'REFRESH'
             },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+            add: {
+                mode: 'all',
+                ngClick: 'addSchedule()',
+                awToolTip: 'Add a new schedule',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
         fieldActions: {
-            "play": {
-                mode: "all",
-                ngClick: "toggleSchedule($event, schedule.id)",
-                awToolTip: "{{ schedule.play_tip }}",
-                dataTipWatch: "schedule.play_tip",
-                iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
-                dataPlacement: "top"
-            },
             edit: {
                 label: 'Edit',
                 ngClick: "editSchedule(schedule.id)",

@@ -9,13 +9,13 @@ export default
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
         'LookUpInit', 'OrganizationList', 'inventory_script',
-        '$scope', 'transitionTo',
+        '$scope', '$state',
         function(
             Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath,
             GenerateForm, SearchInit, PaginateInit,
             LookUpInit, OrganizationList, inventory_script,
-            $scope, transitionTo
+            $scope, $state
         ) {
             var generator = GenerateForm,
                 id = inventory_script.id,
@@ -27,7 +27,6 @@ export default
             generator.inject(form, {
                     mode: 'edit' ,
                     scope:$scope,
-                    breadCrumbs: true,
                     related: false,
                     activityStream: false
                 });
@@ -62,6 +61,11 @@ export default
                                 data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                         }
                     }
+                    $scope.canEdit = data.script !== null;
+                    if (!$scope.canEdit) {
+                        $scope.script = "Script contents hidden";
+                    }
+                    $scope.inventory_script_obj = data;
                     Wait('stop');
                 })
                 .error(function (data, status) {
@@ -80,9 +84,8 @@ export default
                     script: $scope.script
                 })
                     .success(function () {
-                        transitionTo('inventoryScriptsList');
+                        $state.go($state.current, null, {reload: true});
                         Wait('stop');
-
                     })
                     .error(function (data, status) {
                         ProcessErrors($scope, data, status, form, { hdr: 'Error!',
@@ -90,13 +93,8 @@ export default
                     });
             };
 
-            $scope.formReset = function () {
-                generator.reset();
-                for (var fld in master) {
-                    $scope[fld] = master[fld];
-                }
-                $scope.organization_name = master.organization_name;
-
+            $scope.formCancel = function () {
+                $state.transitionTo('inventoryScripts');
             };
 
         }

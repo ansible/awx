@@ -1,0 +1,16 @@
+# Ansible CloudForms external inventory script settings
+#
+
+[cloudforms]
+
+# The version of CloudForms (this is not used yet)
+version = 3.1
+
+# The hostname of the CloudForms server
+hostname = #insert your hostname here
+
+# Username for CloudForms
+username = #insert your cloudforms user here
+
+# Password for CloudForms user
+password = #password 

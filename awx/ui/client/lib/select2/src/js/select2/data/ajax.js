@@ -10,7 +10,7 @@ define([
       this.processResults = this.ajaxOptions.processResults;
     }
 
-    ArrayAdapter.__super__.constructor.call(this, $element, options);
+    AjaxAdapter.__super__.constructor.call(this, $element, options);
   }
 
   Utils.Extend(AjaxAdapter, ArrayAdapter);
@@ -18,9 +18,9 @@ define([
   AjaxAdapter.prototype._applyDefaults = function (options) {
     var defaults = {
       data: function (params) {
-        return {
+        return $.extend({}, params, {
           q: params.term
-        };
+        });
       },
       transport: function (params, success, failure) {
         var $request = $.ajax(params);
@@ -57,11 +57,11 @@ define([
     }, this.ajaxOptions);
 
     if (typeof options.url === 'function') {
-      options.url = options.url(params);
+      options.url = options.url.call(this.$element, params);
     }
 
     if (typeof options.data === 'function') {
-      options.data = options.data(params);
+      options.data = options.data.call(this.$element, params);
     }
 
     function request () {
@@ -80,7 +80,9 @@ define([
 
         callback(results);
       }, function () {
-        // TODO: Handle AJAX errors
+        self.trigger('results:message', {
+          message: 'errorLoading'
+        });
       });
 
       self._request = $request;

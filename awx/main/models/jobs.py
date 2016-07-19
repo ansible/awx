@@ -6,6 +6,7 @@ import hmac
 import json
 import yaml
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -22,9 +23,14 @@ from jsonfield import JSONField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner
+from awx.main.redact import PlainTextCleaner, REPLACE_STR
+from awx.main.conf import tower_settings
+from awx.main.fields import ImplicitRoleField
+from awx.main.models.mixins import ResourceMixin
+
 
 logger = logging.getLogger('awx.main.models.jobs')
 
@@ -47,7 +53,9 @@ class JobOptions(BaseModel):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='%(class)ss',
+        blank=True,
         null=True,
+        default=None,
         on_delete=models.SET_NULL,
     )
     project = models.ForeignKey(
@@ -74,6 +82,14 @@ class JobOptions(BaseModel):
     cloud_credential = models.ForeignKey(
         'Credential',
         related_name='%(class)ss_as_cloud_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    network_credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss_as_network_credential+',
         blank=True,
         null=True,
         default=None,
@@ -120,7 +136,6 @@ class JobOptions(BaseModel):
         default=False,
     )
 
-
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     def clean_credential(self):
@@ -128,6 +143,14 @@ class JobOptions(BaseModel):
         if cred and cred.kind != 'ssh':
             raise ValidationError(
                 'You must provide a machine / SSH credential.',
+            )
+        return cred
+
+    def clean_network_credential(self):
+        cred = self.network_credential
+        if cred and cred.kind != 'net':
+            raise ValidationError(
+                'You must provide a network credential.',
             )
         return cred
 
@@ -143,12 +166,12 @@ class JobOptions(BaseModel):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential and self.credential.active:
+        if self.credential:
             return self.credential.passwords_needed
         else:
             return []
 
-class JobTemplate(UnifiedJobTemplate, JobOptions):
+class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -168,6 +191,26 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default=False,
     )
+    ask_limit_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_tags_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_job_type_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_inventory_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
+    ask_credential_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
 
     survey_enabled = models.BooleanField(
         default=False,
@@ -177,6 +220,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         blank=True,
         default={},
     )
+    admin_role = ImplicitRoleField(
+        parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
+    )
+    execute_role = ImplicitRoleField(
+        parent_role=['admin_role'],
+    )
+    read_role = ImplicitRoleField(
+        parent_role=['project.organization.auditor_role', 'inventory.organization.auditor_role', 'execute_role', 'admin_role'],
+    )
+    allow_simultaneous = models.BooleanField(
+        default=False,
+    )
+
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -185,9 +241,42 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'job_type', 'inventory', 'project',
-                'playbook', 'credential', 'cloud_credential', 'forks', 'schedule',
+                'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
-                'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled']
+                'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
+                'labels',]
+
+    def resource_validation_data(self):
+        '''
+        Process consistency errors and need-for-launch related fields.
+        '''
+        resources_needed_to_start = []
+        validation_errors = {}
+
+        # Inventory and Credential related checks
+        if self.inventory is None:
+            resources_needed_to_start.append('inventory')
+            if not self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Job Template must provide 'inventory' or allow prompting for it.",]
+        if self.credential is None:
+            resources_needed_to_start.append('credential')
+            if not self.ask_credential_on_launch:
+                validation_errors['credential'] = ["Job Template must provide 'credential' or allow prompting for it.",]
+
+        # Job type dependent checks
+        if self.job_type == 'scan':
+            if self.inventory is None or self.ask_inventory_on_launch:
+                validation_errors['inventory'] = ["Scan jobs must be assigned a fixed inventory.",]
+        elif self.project is None:
+            resources_needed_to_start.append('project')
+            validation_errors['project'] = ["Job types 'run' and 'check' must have assigned a project.",]
+
+        return (validation_errors, resources_needed_to_start)
+
+    @property
+    def resources_needed_to_start(self):
+        validation_errors, resources_needed_to_start = self.resource_validation_data()
+        return resources_needed_to_start
 
     def create_job(self, **kwargs):
         '''
@@ -203,7 +292,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not len(self.passwords_needed_to_start) and not len(self.variables_needed_to_start))
+        prompting_needed = False
+        for value in self._ask_for_vars_dict().values():
+            if value:
+                prompting_needed = True
+        return (not prompting_needed and
+                not self.passwords_needed_to_start and
+                not self.variables_needed_to_start)
 
     @property
     def variables_needed_to_start(self):
@@ -228,60 +323,60 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         if not self.survey_enabled:
             return errors
         if 'name' not in self.survey_spec:
-            errors.append("'name' missing from survey spec")
+            errors.append("'name' missing from survey spec.")
         if 'description' not in self.survey_spec:
-            errors.append("'description' missing from survey spec")
+            errors.append("'description' missing from survey spec.")
         for survey_element in self.survey_spec.get("spec", []):
             if survey_element['variable'] not in data and \
                survey_element['required']:
                 errors.append("'%s' value missing" % survey_element['variable'])
             elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
+                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
+                       data[survey_element['variable']] < int(survey_element['min']):
+                        errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                       data[survey_element['variable']] > int(survey_element['max']):
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) != int:
-                        errors.append("Value %s for %s expected to be an integer" % (data[survey_element['variable']],
-                                                                                     survey_element['variable']))
+                        errors.append("Value %s for '%s' expected to be an integer." % (data[survey_element['variable']],
+                                                                                        survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < survey_element['min']:
-                        errors.append("'%s' value %s is too small (must be at least %s)" %
+                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < float(survey_element['min']):
+                        errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > survey_element['max']:
-                        errors.append("'%s' value %s is too large (must be no more than %s)" %
+                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > float(survey_element['max']):
+                        errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
                     if type(data[survey_element['variable']]) not in (float, int):
-                        errors.append("Value %s for %s expected to be a numeric type" % (data[survey_element['variable']],
-                                                                                         survey_element['variable']))
+                        errors.append("Value %s for '%s' expected to be a numeric type." % (data[survey_element['variable']],
+                                                                                            survey_element['variable']))
             elif survey_element['type'] == 'multiselect':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != list:
-                        errors.append("'%s' value is expected to be a list" % survey_element['variable'])
+                        errors.append("'%s' value is expected to be a list." % survey_element['variable'])
                     else:
                         for val in data[survey_element['variable']]:
                             if val not in survey_element['choices']:
-                                errors.append("Value %s for %s expected to be one of %s" % (val, survey_element['variable'],
-                                                                                            survey_element['choices']))
+                                errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
+                                                                                               survey_element['choices']))
             elif survey_element['type'] == 'multiplechoice':
                 if survey_element['variable'] in data:
                     if data[survey_element['variable']] not in survey_element['choices']:
-                        errors.append("Value %s for %s expected to be one of %s" % (data[survey_element['variable']],
-                                                                                    survey_element['variable'],
-                                                                                    survey_element['choices']))
+                        errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
+                                                                                       survey_element['variable'],
+                                                                                       survey_element['choices']))
         return errors
 
     def _update_unified_job_kwargs(self, **kwargs):
@@ -306,7 +401,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
                 except Exception:
                     try:
                         kwargs_extra_vars = yaml.safe_load(kwargs_extra_vars)
-                        assert type(kwargs_extra_vars) is dict
+                        assert isinstance(kwargs_extra_vars, dict)
                     except:
                         kwargs_extra_vars = {}
         else:
@@ -318,17 +413,76 @@ class JobTemplate(UnifiedJobTemplate, JobOptions):
         kwargs['extra_vars'] = json.dumps(extra_vars)
         return kwargs
 
+    def _ask_for_vars_dict(self):
+        return dict(
+            extra_vars=self.ask_variables_on_launch,
+            limit=self.ask_limit_on_launch,
+            job_tags=self.ask_tags_on_launch,
+            skip_tags=self.ask_tags_on_launch,
+            job_type=self.ask_job_type_on_launch,
+            inventory=self.ask_inventory_on_launch,
+            credential=self.ask_credential_on_launch
+        )
+
+    def _accept_or_ignore_job_kwargs(self, **kwargs):
+        # Sort the runtime fields allowed and disallowed by job template
+        ignored_fields = {}
+        prompted_fields = {}
+
+        ask_for_vars_dict = self._ask_for_vars_dict()
+
+        for field in ask_for_vars_dict:
+            if field in kwargs:
+                if field == 'extra_vars':
+                    prompted_fields[field] = {}
+                    ignored_fields[field] = {}
+                if ask_for_vars_dict[field]:
+                    prompted_fields[field] = kwargs[field]
+                else:
+                    if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
+                        # Accept vars defined in the survey and no others
+                        survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
+                        for key in kwargs[field]:
+                            if key in survey_vars:
+                                prompted_fields[field][key] = kwargs[field][key]
+                            else:
+                                ignored_fields[field][key] = kwargs[field][key]
+                    else:
+                        ignored_fields[field] = kwargs[field]
+
+        # Special case to ignore inventory if it is a scan job
+        if prompted_fields.get('job_type', None) == 'scan' or self.job_type == 'scan':
+            if 'inventory' in prompted_fields:
+                ignored_fields['inventory'] = prompted_fields.pop('inventory')
+
+        return prompted_fields, ignored_fields
+
     @property
     def cache_timeout_blocked(self):
-        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
+        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(tower_settings, 'SCHEDULE_MAX_JOBS', 10):
             logger.error("Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
-                         (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
+                         (self.name, getattr(tower_settings, 'SCHEDULE_MAX_JOBS', 10)))
             return True
         return False
 
     def _can_update(self):
         return self.can_start_without_user_input()
 
+    @property
+    def notification_templates(self):
+        # Return all notification_templates defined on the Job Template, on the Project, and on the Organization for each trigger type
+        # TODO: Currently there is no org fk on project so this will need to be added once that is
+        #       available after the rbac pr
+        base_notification_templates = NotificationTemplate.objects
+        error_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_errors__in=[self, self.project]))
+        success_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_success__in=[self, self.project]))
+        any_notification_templates = list(base_notification_templates.filter(unifiedjobtemplate_notification_templates_for_any__in=[self, self.project]))
+        # Get Organization NotificationTemplates
+        if self.project is not None and self.project.organization is not None:
+            error_notification_templates = set(error_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_errors=self.project.organization)))
+            success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.project.organization)))
+            any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
+        return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
 class Job(UnifiedJob, JobOptions):
     '''
@@ -368,6 +522,9 @@ class Job(UnifiedJob, JobOptions):
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
 
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
+
     @property
     def task_auth_token(self):
         '''Return temporary auth token used for task requests via API.'''
@@ -381,6 +538,36 @@ class Job(UnifiedJob, JobOptions):
             return self.job_template.ask_variables_on_launch
         return False
 
+    @property
+    def ask_limit_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_limit_on_launch
+        return False
+
+    @property
+    def ask_tags_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_tags_on_launch
+        return False
+
+    @property
+    def ask_job_type_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_job_type_on_launch
+        return False
+
+    @property
+    def ask_inventory_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_inventory_on_launch
+        return False
+
+    @property
+    def ask_credential_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_credential_on_launch
+        return False
+
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
@@ -392,14 +579,15 @@ class Job(UnifiedJob, JobOptions):
     def is_blocked_by(self, obj):
         from awx.main.models import InventoryUpdate, ProjectUpdate
         if type(obj) == Job:
-            if obj.job_template is not None and obj.job_template == self.job_template:
-                if obj.launch_type == 'callback' and self.launch_type == 'callback':
-                    if obj.limit != self.limit:
-                        # NOTE: This is overriden by api/views.py.JobTemplateCallback.post() check
-                        # which limits job runs on a JT to one per host in a callback scenario
-                        # I'm leaving this here in case we change that
+            if obj.job_template is not None and obj.inventory is not None:
+                if obj.job_template == self.job_template and \
+                   obj.inventory == self.inventory:
+                    if self.job_template.allow_simultaneous:
                         return False
-                return True
+                    if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
+                       obj.limit != self.limit:
+                        return False
+                    return True
             return False
         if type(obj) == InventoryUpdate:
             if self.inventory == obj.inventory_source.inventory:
@@ -451,14 +639,12 @@ class Job(UnifiedJob, JobOptions):
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate, ProjectUpdate
-        if self.inventory is None or self.project is None:
-            return []
-        inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter(update_on_launch=True)
         project_found = False
         inventory_sources_found = []
         dependencies = []
         for obj in active_tasks:
-            if type(obj) == ProjectUpdate:
+            if type(obj) == ProjectUpdate and self.project is not None:
                 if obj.project == self.project:
                     project_found = True
             if type(obj) == InventoryUpdate:
@@ -476,7 +662,7 @@ class Job(UnifiedJob, JobOptions):
             for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
                 if source not in inventory_sources_found:
                     inventory_sources_found.append(source)
-        if not project_found and self.project.needs_update_on_launch:
+        if not project_found and self.project is not None and self.project.needs_update_on_launch:
             dependencies.append(self.project.create_project_update(launch_type='dependency'))
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
@@ -484,9 +670,29 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
+    def notification_data(self):
+        data = super(Job, self).notification_data()
+        all_hosts = {}
+        for h in self.job_host_summaries.all():
+            all_hosts[h.host_name] = dict(failed=h.failed,
+                                          changed=h.changed,
+                                          dark=h.dark,
+                                          failures=h.failures,
+                                          ok=h.ok,
+                                          processed=h.processed,
+                                          skipped=h.skipped)
+        data.update(dict(inventory=self.inventory.name if self.inventory else None,
+                         project=self.project.name if self.project else None,
+                         playbook=self.playbook,
+                         credential=self.credential.name if self.credential else None,
+                         limit=self.limit,
+                         extra_vars=self.extra_vars,
+                         hosts=all_hosts))
+        return data
+
     def handle_extra_data(self, extra_data):
         extra_vars = {}
-        if type(extra_data) == dict:
+        if isinstance(extra_data, dict):
             extra_vars = extra_data
         elif extra_data is None:
             return
@@ -495,11 +701,26 @@ class Job(UnifiedJob, JobOptions):
                 return
             try:
                 extra_vars = json.loads(extra_data)
-            except Exception, e:
+            except Exception as e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
         evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
+
+    def display_extra_vars(self):
+        '''
+        Hides fields marked as passwords in survey.
+        '''
+        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
+            try:
+                extra_vars = json.loads(self.extra_vars)
+                for key in self.job_template.survey_password_variables():
+                    if key in extra_vars:
+                        extra_vars[key] = REPLACE_STR
+                return json.dumps(extra_vars)
+            except ValueError:
+                pass
+        return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.
@@ -522,8 +743,10 @@ class Job(UnifiedJob, JobOptions):
 
     def copy(self):
         presets = {}
-        for kw in self.job_template._get_unified_job_field_names():
+        for kw in JobTemplate._get_unified_job_field_names():
             presets[kw] = getattr(self, kw)
+        if not self.job_template:
+            self.job_template = JobTemplate(name='temporary')
         return self.job_template.create_unified_job(**presets)
 
     # Job Credential required
@@ -532,7 +755,7 @@ class Job(UnifiedJob, JobOptions):
         if not super(Job, self).can_start:
             return False
 
-        if not (self.credential and self.credential.active):
+        if not (self.credential):
             return False
 
         return True
@@ -991,7 +1214,6 @@ class SystemJobOptions(BaseModel):
     SYSTEM_JOB_TYPE = [
         ('cleanup_jobs', _('Remove jobs older than a certain number of days')),
         ('cleanup_activitystream', _('Remove activity stream entries older than a certain number of days')),
-        ('cleanup_deleted', _('Purge previously deleted items from the database')),
         ('cleanup_facts', _('Purge and/or reduce the granularity of system tracking data')),
     ]
 
@@ -1025,6 +1247,19 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
     def cache_timeout_blocked(self):
         return False
 
+    @property
+    def notification_templates(self):
+        # TODO: Go through RBAC instead of calling all(). Need to account for orphaned NotificationTemplates
+        base_notification_templates = NotificationTemplate.objects.all()
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
 
 class SystemJob(UnifiedJob, SystemJobOptions):
@@ -1064,12 +1299,15 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     def get_absolute_url(self):
         return reverse('api:system_job_detail', args=(self.pk,))
 
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
+
     def is_blocked_by(self, obj):
         return True
 
     def handle_extra_data(self, extra_data):
         extra_vars = {}
-        if type(extra_data) == dict:
+        if isinstance(extra_data, dict):
             extra_vars = extra_data
         elif extra_data is None:
             return
@@ -1078,7 +1316,7 @@ class SystemJob(UnifiedJob, SystemJobOptions):
                 return
             try:
                 extra_vars = json.loads(extra_data)
-            except Exception, e:
+            except Exception as e:
                 logger.warn("Exception deserializing extra vars: " + str(e))
         evars = self.extra_vars_dict
         evars.update(extra_vars)

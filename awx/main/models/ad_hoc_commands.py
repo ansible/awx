@@ -5,6 +5,7 @@
 import hmac
 import json
 import logging
+from urlparse import urljoin
 
 # Django
 from django.conf import settings
@@ -21,6 +22,7 @@ from jsonfield import JSONField
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import decrypt_field
+from awx.main.conf import tower_settings
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
@@ -29,15 +31,12 @@ __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 
 class AdHocCommand(UnifiedJob):
 
-    MODULE_NAME_CHOICES = [(x,x) for x in settings.AD_HOC_COMMANDS]
-    MODULE_NAME_DEFAULT = 'command' if 'command' in settings.AD_HOC_COMMANDS else None
-
     class Meta(object):
         app_label = 'main'
 
     job_type = models.CharField(
         max_length=64,
-        choices=JOB_TYPE_CHOICES,
+        choices=AD_HOC_JOB_TYPE_CHOICES,
         default='run',
     )
     inventory = models.ForeignKey(
@@ -60,9 +59,8 @@ class AdHocCommand(UnifiedJob):
     )
     module_name = models.CharField(
         max_length=1024,
-        default=MODULE_NAME_DEFAULT,
-        choices=MODULE_NAME_CHOICES,
-        blank=bool(MODULE_NAME_DEFAULT),
+        default='',
+        blank=True,
     )
     module_args = models.TextField(
         blank=True,
@@ -86,6 +84,18 @@ class AdHocCommand(UnifiedJob):
         editable=False,
         through='AdHocCommandEvent',
     )
+    extra_vars = models.TextField(
+        blank=True,
+        default='',
+    )
+
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
+
+    def clean_inventory(self):
+        inv = self.inventory
+        if not inv:
+            raise ValidationError('No valid inventory.')
+        return inv
 
     def clean_credential(self):
         cred = self.credential
@@ -104,7 +114,7 @@ class AdHocCommand(UnifiedJob):
         if type(self.module_name) not in (str, unicode):
             raise ValidationError("Invalid type for ad hoc command")
         module_name = self.module_name.strip() or 'command'
-        if module_name not in settings.AD_HOC_COMMANDS:
+        if module_name not in tower_settings.AD_HOC_COMMANDS:
             raise ValidationError('Unsupported module for ad hoc commands.')
         return module_name
 
@@ -119,7 +129,7 @@ class AdHocCommand(UnifiedJob):
     @property
     def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        if self.credential and self.credential.active:
+        if self.credential:
             return self.credential.passwords_needed
         else:
             return []
@@ -136,12 +146,34 @@ class AdHocCommand(UnifiedJob):
     def get_absolute_url(self):
         return reverse('api:ad_hoc_command_detail', args=(self.pk,))
 
+    def get_ui_url(self):
+        return urljoin(tower_settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
+
     @property
     def task_auth_token(self):
         '''Return temporary auth token used for task requests via API.'''
         if self.status == 'running':
             h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
             return '%d-%s' % (self.pk, h.hexdigest())
+
+    @property
+    def notification_templates(self):
+        all_inventory_sources = set()
+        for h in self.hosts.all():
+            for invsrc in h.inventory_sources.all():
+                all_inventory_sources.add(invsrc)
+        active_templates = dict(error=set(),
+                                success=set(),
+                                any=set())
+        for invsrc in all_inventory_sources:
+            notifications_dict = invsrc.notification_templates
+            for notification_type in active_templates.keys():
+                for templ in notifications_dict[notification_type]:
+                    active_templates[notification_type].add(templ)
+        active_templates['error'] = list(active_templates['error'])
+        active_templates['any'] = list(active_templates['any'])
+        active_templates['success'] = list(active_templates['success'])
+        return active_templates
 
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
@@ -157,14 +189,14 @@ class AdHocCommand(UnifiedJob):
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
-        count_hosts = Host.objects.filter(active=True, enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
+        count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
 
     def generate_dependencies(self, active_tasks):
         from awx.main.models import InventoryUpdate
         if not self.inventory:
             return []
-        inventory_sources = self.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
         inventory_sources_found = []
         dependencies = []
         for obj in active_tasks:

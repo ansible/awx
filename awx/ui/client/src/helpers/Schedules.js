@@ -20,65 +20,10 @@ export default
     angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
-        .factory('ShowSchedulerModal', ['Wait', 'CreateDialog', function(Wait, CreateDialog) {
-            return function(params) {
-                // Set modal dimensions based on viewport width
-
-                var buttons,
-                    scope = params.scope,
-                    callback = params.callback,
-                    title = params.title;
-
-                buttons = [{
-                    "label": "Cancel",
-                    "onClick": function() {
-                        $(this).dialog('close');
-                    },
-                    "icon": "fa-times",
-                    "class": "btn btn-default",
-                    "id": "schedule-close-button"
-                },{
-                    "label": "Save",
-                    "onClick": function() {
-                        setTimeout(function(){
-                            scope.$apply(function(){
-                                scope.saveSchedule();
-                            });
-                        });
-                    },
-                    "icon": "fa-check",
-                    "class": "btn btn-primary",
-                    "id": "schedule-save-button"
-                }];
-
-                CreateDialog({
-                    id: 'scheduler-modal-dialog',
-                    scope: scope,
-                    buttons: buttons,
-                    title: title,
-                    width: 700,
-                    height: 725,
-                    minWidth: 400,
-                    onClose: function() {
-                        $('#scheduler-modal-dialog #form-container').empty();
-                    },
-                    onOpen: function() {
-                        Wait('stop');
-                        $('#scheduler-tabs a:first').tab('show');
-                        $('#schedulerName').focus();
-                        $('#rrule_nlp_description').dblclick(function() {
-                            setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
-                        });
-                    },
-                    callback: callback
-                });
-            };
-        }])
-
-        .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait',
-        'Rest', 'ProcessErrors', 'GetBasePath', 'SchedulePost',
-        function(SchedulerInit, ShowSchedulerModal, Wait, Rest, ProcessErrors,
-            GetBasePath, SchedulePost) {
+        .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest',
+        'ProcessErrors', 'GetBasePath', 'SchedulePost', '$state',
+        function(SchedulerInit, $rootScope, Wait, Rest, ProcessErrors,
+            GetBasePath, SchedulePost, $state) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
@@ -143,24 +88,6 @@ export default
                     }
                 }
 
-                if (scope.removeDialogReady) {
-                    scope.removeDialogReady();
-                }
-                scope.removeDialogReady = scope.$on('DialogReady', function() {
-                    $('#scheduler-modal-dialog').dialog('open');
-                    $('#schedulerName').focus();
-                    setTimeout(function() {
-                        scope.$apply(function() {
-                            scheduler.setRRule(schedule.rrule);
-                            scheduler.setName(schedule.name);
-                            if(scope.isFactCleanup || scope.cleanupJob){
-                                setGranularity();
-                            }
-
-                        });
-                    }, 300);
-                });
-
                 if (scope.removeScheduleFound) {
                     scope.removeScheduleFound();
                 }
@@ -175,24 +102,33 @@ export default
                     }
                     schedule.rrule = schedule.rrule.replace(/ RRULE:/,';');
                     schedule.rrule = schedule.rrule.replace(/DTSTART:/,'DTSTART=');
-                    ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Edit Schedule' });
+                    scope.$on("htmlDetailReady", function() {
+                        scheduler.setRRule(schedule.rrule);
+                        scheduler.setName(schedule.name);
+                        $rootScope.$broadcast("ScheduleFormCreated", scope);
+                    });
                     scope.showRRuleDetail = false;
+
+                    scheduler.setRRule(schedule.rrule);
+                    scheduler.setName(schedule.name);
+                    if(scope.isFactCleanup || scope.cleanupJob){
+                        setGranularity();
+                    }
                 });
 
 
                 if (scope.removeScheduleSaved) {
                     scope.removeScheduleSaved();
                 }
-                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function(e, data) {
                     Wait('stop');
-                    $('#scheduler-modal-dialog').dialog('close');
                     if (callback) {
-                        scope.$emit(callback);
+                        scope.$emit(callback, data);
                     }
+                    $state.go("^");
                 });
-
                 scope.saveSchedule = function() {
-                    $('#scheduler-tabs a:first').tab('show');
+                    schedule.extra_data = scope.extraVars;
                     SchedulePost({
                         scope: scope,
                         url: url,
@@ -203,16 +139,6 @@ export default
                     });
                 };
 
-
-
-                $('#scheduler-tabs li a').on('shown.bs.tab', function(e) {
-                    if ($(e.target).text() === 'Details') {
-                        if (!scheduler.isValid()) {
-                            $('#scheduler-tabs a:first').tab('show');
-                        }
-                    }
-                });
-
                 Wait('start');
 
                 // Get the existing record
@@ -220,12 +146,16 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        scope.extraVars = data.extra_data === '' ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
+
                         if(schedule.extra_data.hasOwnProperty('granularity')){
                             scope.isFactCleanup = true;
                         }
                         if (schedule.extra_data.hasOwnProperty('days')){
                             scope.cleanupJob = true;
                         }
+
+                        scope.schedule_obj = data;
 
                         scope.$emit('ScheduleFound');
                     })
@@ -236,25 +166,43 @@ export default
             };
         }])
 
-        .factory('AddSchedule', ['$location', '$routeParams', 'SchedulerInit', 'ShowSchedulerModal', 'Wait', 'GetBasePath', 'Empty',
-            'SchedulePost',
-        function($location, $routeParams, SchedulerInit, ShowSchedulerModal, Wait, GetBasePath, Empty, SchedulePost) {
+        .factory('AddSchedule', ['$location', '$rootScope', '$stateParams',
+        'SchedulerInit', 'Wait', 'GetBasePath', 'Empty', 'SchedulePost', '$state', 'Rest', 'ProcessErrors',
+        function($location, $rootScope, $stateParams, SchedulerInit,
+            Wait, GetBasePath, Empty, SchedulePost, $state, Rest,
+            ProcessErrors) {
             return function(params) {
                 var scope = params.scope,
                     callback= params.callback,
-                    base = $location.path().replace(/^\//, '').split('/')[0],
-                    url =  GetBasePath(base),
+                    base = params.base || $location.path().replace(/^\//, '').split('/')[0],
+                    url = params.url || null,
                     scheduler;
 
-                if (!Empty($routeParams.template_id)) {
-                    url += $routeParams.template_id + '/schedules/';
+                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
-                else if (!Empty($routeParams.id)) {
-                    url += $routeParams.id + '/schedules/';
+                else if(base === "inventories"){
+                    if (!params.url){
+                        url = GetBasePath('groups') + $stateParams.id + '/';
+                        Rest.setUrl(url);
+                        Rest.get().
+                        then(function (data) {
+                                url = data.data.related.inventory_source + 'schedules/';
+                            }).catch(function (response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get inventory group info. GET returned status: ' +
+                                response.status
+                            });
+                        });
+                    }
+                    else {
+                        url = params.url;
+                    }
                 }
-                else if (!Empty($routeParams.management_job)) {
-                    url += $routeParams.management_job + '/schedules/';
-                    if(scope.management_job.id === 4){
+                else if (base === 'system_job_templates') {
+                    url = GetBasePath(base) + $stateParams.id + '/schedules/';
+                    if($stateParams.id  === 4){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -290,36 +238,43 @@ export default
                     }
                 }
 
-                if (scope.removeDialogReady) {
-                    scope.removeDialogReady();
-                }
-                scope.removeDialogReady = scope.$on('DialogReady', function() {
-                    $('#scheduler-modal-dialog').dialog('open');
-                    $('#schedulerName').focus();
-                });
-
                 Wait('start');
                 $('#form-container').empty();
                 scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
+                if(scope.schedulerUTCTime) {
+                    // The UTC time is already set
+                    scope.processSchedulerEndDt();
+                }
+                else {
+                    // We need to wait for it to be set by angular-scheduler because the following function depends
+                    // on it
+                    var schedulerUTCTimeWatcher = scope.$watch('schedulerUTCTime', function(newVal) {
+                        if(newVal) {
+                            // Remove the watcher
+                            schedulerUTCTimeWatcher();
+                            scope.processSchedulerEndDt();
+                        }
+                    });
+                }
                 scheduler.inject('form-container', false);
                 scheduler.injectDetail('occurrences', false);
                 scheduler.clear();
-                ShowSchedulerModal({ scope: scope, callback: 'DialogReady', title: 'Add Schedule' });
+                scope.$on("htmlDetailReady", function() {
+                    $rootScope.$broadcast("ScheduleFormCreated", scope);
+                });
                 scope.showRRuleDetail = false;
 
                 if (scope.removeScheduleSaved) {
                     scope.removeScheduleSaved();
                 }
-                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function() {
+                scope.removeScheduleSaved = scope.$on('ScheduleSaved', function(e, data) {
                     Wait('stop');
-                    $('#scheduler-modal-dialog').dialog('close');
                     if (callback) {
-                        scope.$emit(callback);
+                        scope.$emit(callback, data);
                     }
+                    $state.go("^");
                 });
-
                 scope.saveSchedule = function() {
-                    $('#scheduler-tabs a:first').tab('show');
                     SchedulePost({
                         scope: scope,
                         url: url,
@@ -339,7 +294,8 @@ export default
             };
         }])
 
-        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait', function(Rest, ProcessErrors, RRuleToAPI, Wait) {
+        .factory('SchedulePost', ['Rest', 'ProcessErrors', 'RRuleToAPI', 'Wait',
+            function(Rest, ProcessErrors, RRuleToAPI, Wait) {
             return function(params) {
                 var scope = params.scope,
                     url = params.url,
@@ -348,7 +304,6 @@ export default
                     schedule = (params.schedule) ? params.schedule : {},
                     callback = params.callback,
                     newSchedule, rrule, extra_vars;
-
                 if (scheduler.isValid()) {
                     Wait('start');
                     newSchedule = scheduler.getValue();
@@ -362,14 +317,17 @@ export default
                             "older_than": scope.scheduler_form.keep_amount.$viewValue + scope.scheduler_form.keep_unit.$viewValue.value,
                             "granularity": scope.scheduler_form.granularity_keep_amount.$viewValue + scope.scheduler_form.granularity_keep_unit.$viewValue.value
                         };
+                        schedule.extra_data = JSON.stringify(extra_vars);
                     } else if (scope.cleanupJob) {
                         extra_vars = {
                             "days" : scope.scheduler_form.schedulerPurgeDays.$viewValue
                         };
+                        schedule.extra_data = JSON.stringify(extra_vars);
                     }
-                    schedule.extra_data = JSON.stringify(extra_vars);
-
-
+                    else if(scope.extraVars){
+                        schedule.extra_data = scope.parseType === 'yaml' ?
+                            (scope.extraVars === '---' ? "" : jsyaml.safeLoad(scope.extraVars)) : scope.extraVars;
+                    }
                     Rest.setUrl(url);
                     if (mode === 'add') {
                         Rest.post(schedule)
@@ -390,7 +348,7 @@ export default
                         Rest.put(schedule)
                             .success(function(){
                                 if (callback) {
-                                    scope.$emit(callback);
+                                    scope.$emit(callback, schedule);
                                 }
                                 else {
                                     Wait('stop');
@@ -405,34 +363,6 @@ export default
                 else {
                     return false;
                 }
-            };
-        }])
-
-        /**
-         * Inject the scheduler_dialog.html wherever needed
-         */
-        .factory('LoadDialogPartial', ['Rest', '$compile', 'ProcessErrors', function(Rest, $compile, ProcessErrors) {
-            return function(params) {
-
-                var scope = params.scope,
-                    element_id = params.element_id,
-                    callback = params.callback,
-                    url;
-
-                // Add the schedule_dialog.html partial
-                url = '/static/partials/schedule_dialog.html';
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        var e = angular.element(document.getElementById(element_id));
-                        e.append(data);
-                        $compile(e)(scope);
-                        scope.$emit(callback);
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + ' failed. GET returned: ' + status });
-                    });
             };
         }])
 
@@ -499,8 +429,10 @@ export default
          * })
          *
          */
-        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Find',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find) {
+        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait',
+        'ProcessErrors', 'Prompt', 'Find', '$location', '$filter',
+        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find,
+            $location, $filter) {
             return function(params) {
 
                 var scope = params.scope,
@@ -526,6 +458,9 @@ export default
                         .success(function () {
                             $('#prompt-modal').modal('hide');
                             scope.$emit(callback, id);
+                            if (new RegExp('/' + id + '$').test($location.$$url)) {
+                                $location.url($location.url().replace(/[/][0-9]+$/, "")); // go to list view
+                            }
                         })
                         .error(function (data, status) {
                             try {
@@ -541,8 +476,9 @@ export default
 
                 Prompt({
                     hdr: hdr,
-                    body: "<div class=\"alert alert-info\">Are you sure you want to delete the <em>" + schedule.name  + "</em> schedule?</div>",
+                    body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the schedule below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(schedule.name) + '</div>',
                     action: action,
+                    actionText: 'DELETE',
                     backdrop: false
                 });
 
@@ -563,16 +499,15 @@ export default
             };
         }])
 
-
-        .factory('SchedulesControllerInit', ['$location', 'ToggleSchedule',
-        'DeleteSchedule', 'EditSchedule', 'AddSchedule',
-            function($location, ToggleSchedule, DeleteSchedule, EditSchedule,
-                AddSchedule) {
+        .factory('SchedulesControllerInit', ['$state', '$location',
+        'ToggleSchedule', 'DeleteSchedule', 'ParamPass',
+            function($state, $location, ToggleSchedule, DeleteSchedule,
+                ParamPass) {
             return function(params) {
                 var scope = params.scope,
                     parent_scope = params.parent_scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator,
-                    base = $location.path().replace(/^\//, '').split('/')[0];
+                    base = params.base || $location.path().replace(/^\//, '').split('/')[0];
 
                 scope.toggleSchedule = function(event, id) {
                     try {
@@ -597,18 +532,36 @@ export default
                 };
 
                 scope.editSchedule = function(id) {
-                    EditSchedule({
-                        scope: scope,
-                        id: id,
-                        callback: 'SchedulesRefresh'
-                    });
+                    if ($state.includes('inventoryManage')){
+                        $state.go('inventoryManage.schedules.edit', {schedule_id: id});
+                    }
+                    else if ($state.current.name === 'jobs'){
+                        // id === schedule object in this case
+                        var stateDictionary = {
+                            // type: stateName
+                            job: 'jobTemplateSchedules.edit',
+                            system_job: 'managementJobSchedules.edit',
+                            project_update: 'projectSchedules.edit',
+                        };
+                        $state.go(stateDictionary[id.type], {schedule_id: id.id, id: id.summary_fields.unified_job_template.id});
+                    }
+                    else{
+                        var base = $state.current.name.split(".")[0];
+                        $state.go(base + ".edit", {schedule_id: id});
+                    }
                 };
 
                 scope.addSchedule = function() {
-                    AddSchedule({
-                        scope: scope,
-                        callback: 'SchedulesRefresh'
-                    });
+                    if ($state.includes('inventoryManage')){
+                        scope.schedule_url = parent_scope.current_url.split('?')[0];
+                        ParamPass.set(scope.schedule_url);
+                        $state.go('inventoryManage.schedules.add');
+                    }
+                    else{
+                        var base = $state.current.name.split(".")[0];
+                        ParamPass.set(scope.schedule_url);
+                        $state.go(base + ".add");
+                    }
                 };
 
                 scope.refreshSchedules = function() {
@@ -623,7 +576,7 @@ export default
                 if (scope.removeSchedulesRefresh) {
                     scope.removeSchedulesRefresh();
                 }
-                scope.$on('SchedulesRefresh', function() {
+                scope.removeSchedulesRefresh = scope.$on('SchedulesRefresh', function() {
                     scope.search(iterator);
                 });
             };
@@ -690,9 +643,9 @@ export default
          *  Called from a controller to setup the scope for a schedules list
          *
          */
-        .factory('LoadSchedulesScope', ['$compile', '$location', '$routeParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
+        .factory('LoadSchedulesScope', ['$compile', '$location', '$stateParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
             'SchedulesListInit',
-            function($compile, $location, $routeParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
+            function($compile, $location, $stateParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
             return function(params) {
                 var parent_scope = params.parent_scope,
                     scope = params.scope,
@@ -700,17 +653,17 @@ export default
                     id = params.id,
                     url = params.url,
                     searchSize = params.searchSize,
-                    pageSize = params.pageSize || 5,
+                    pageSize = params.pageSize || 10,
                     spinner = (params.spinner === undefined) ? true : params.spinner;
 
 
                 GenerateList.inject(list, {
                     mode: 'edit',
                     id: id,
-                    breadCrumbs: false,
                     scope: scope,
                     searchSize: (searchSize) ? searchSize : 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
-                    showSearch: true
+                    showSearch: true,
+                    title: true,
                 });
 
                 SearchInit({
@@ -746,9 +699,9 @@ export default
                     parent_scope.$emit('listLoaded');
                 });
 
-                if ($routeParams.id__int) {
+                if ($stateParams.id__int) {
                     scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
                     scope[list.iterator + 'SearchFieldLabel'] = 'ID';
                 }
 

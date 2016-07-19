@@ -29,12 +29,10 @@ class UriCleaner(object):
                 username = o.username
                 password = o.password
 
-            # Given a python MatchObject, with respect to redactedtext, find and 
+            # Given a python MatchObject, with respect to redactedtext, find and
             # replace the first occurance of username and the first and second
             # occurance of password
 
-            # TODO: Ideally, we would replace username and password using the index
-            # that they were found at.
             uri_str = redactedtext[match.start():match.end()]
             if username:
                 uri_str = uri_str.replace(username, UriCleaner.REPLACE_STR, 1)

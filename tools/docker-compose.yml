@@ -1,30 +1,37 @@
-tower:
-  build: ./docker-compose
-  ports:
-    - "8080:8080"
-    - "8013:8013"
-  links:
-    - postgres
-    - redis
-    - mongo
-  volumes:
-    - ../:/tower_devel
-postgres:
-  image: postgres:9.4.1
-  # ports:
-  #   - 5432:5432
-redis:
-  image: redis:3.0.1
-  # ports:
-  #   - 6379:6379
-mongo:
-  image: mongo:3.0
-  # ports:
-  #   - 27017:27017
-dockerui:
-  image: dockerui/dockerui
-  ports:
-    - "9000:9000"
-  privileged: true
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
+version: '2'
+services:
+  # Primary Tower Development Container
+  tower:
+    build: ./docker-compose
+    ports:
+      - "8080:8080"
+      - "8013:8013"
+    links:
+      - postgres
+      - redis
+    #   - sync
+    # volumes_from:
+    #   - sync
+    volumes:
+      - "../:/tower_devel"
+
+  # Postgres Database Container
+  postgres:
+    image: postgres:9.4.1
+
+  # Redis Container
+  redis:
+    image: redis:3.0.1
+
+  # Source Code Synchronization Container
+  # sync:
+  #     build:
+  #         context: ./docker-compose
+  #         dockerfile: Dockerfile-sync
+  #     command: "lsyncd -delay 1 -nodaemon -rsync /src /tower_devel"
+  #     volumes:
+  #         - /tower_devel
+  #         - "../:/src"
+  #     working_dir: /src
+  #     stdin_open: true
+  #     tty: true

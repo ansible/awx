@@ -4,14 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-import Admins from "./lists/Admins";
 import CloudCredentials from "./lists/CloudCredentials";
 import CompletedJobs from "./lists/CompletedJobs";
 import AllJobs from "./lists/AllJobs";
 import Credentials from "./lists/Credentials";
 import Groups from "./lists/Groups";
-import HomeGroups from "./lists/HomeGroups";
-import HomeHosts from "./lists/HomeHosts";
 import Hosts from "./lists/Hosts";
 import Inventories from "./lists/Inventories";
 import InventoryGroups from "./lists/InventoryGroups";
@@ -32,14 +29,11 @@ import Teams from "./lists/Teams";
 import Users from "./lists/Users";
 
 export
-    {   Admins,
-        CloudCredentials,
+    {   CloudCredentials,
         CompletedJobs,
         AllJobs,
         Credentials,
         Groups,
-        HomeGroups,
-        HomeHosts,
         Hosts,
         Inventories,
         InventoryGroups,

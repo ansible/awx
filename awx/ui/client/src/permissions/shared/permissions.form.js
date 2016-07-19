@@ -18,17 +18,6 @@ export default function() {
         well: true, //Wrap the form with TB well
         forceListeners: true,
 
-        stream: {
-            'class': "btn-primary btn-xs activity-btn",
-            ngClick: "showActivity()",
-            awToolTip: "View Activity Stream",
-            awFeature: 'activity_streams',
-            dataPlacement: "top",
-            icon: "icon-comments-alt",
-            mode: 'edit',
-            iconSize: 'large'
-        },
-
         fields: {
             category: {
                 label: 'Permission Type',
@@ -142,12 +131,12 @@ export default function() {
         },
 
         buttons: {
-            save: {
-                ngClick: 'formSave()',
-                ngDisabled: true
-            },
             reset: {
                 ngClick: 'formReset()',
+                ngDisabled: true
+            },
+            save: {
+                ngClick: 'formSave()',
                 ngDisabled: true
             }
         },

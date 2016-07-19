@@ -28,7 +28,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Get the license data.
         license_reader = TaskSerializer()
-        license_data = license_reader.from_file()
+        license_data = license_reader.from_database()
 
         # Does the license have features, at all?
         # If there is no license yet, then all features are clearly off.

@@ -11,24 +11,26 @@ import FactTemplate from './compare-facts/fact-template';
 
 function controller($rootScope,
                     $scope,
-                    $routeParams,
+                    $stateParams,
                     $location,
                     $q,
+                    $state,
                     moduleOptions,
+                    inventory,
+                    hosts,
                     getDataForComparison,
                     waitIndicator,
                     moment,
                     _) {
 
-    // var inventoryId = $routeParams.id;
-    var hostIds = $routeParams.hosts.split(',');
-    var hosts = $routeParams.model.hosts;
-    var moduleParam = $routeParams.module || 'packages';
+    // var inventoryId = $stateParams.id;
+    var hostIds = $stateParams.hostIds.split(',');
+    var moduleParam = $stateParams.module || 'packages';
 
     $scope.compareMode =
         hostIds.length === 1 ? 'single-host' : 'host-to-host';
-    $scope.hostIds = $routeParams.hosts;
-    $scope.inventory = $routeParams.model.inventory;
+    $scope.hostIds = $stateParams.hosts;
+    $scope.inventory = inventory;
     $scope.noModuleData = false;
 
     // this means no scans have been run
@@ -87,7 +89,15 @@ function controller($rootScope,
                             leftRange,
                             rightRange)
                 .then(function(responses) {
-                    var data = _.pluck(responses, 'fact');
+                    var data = [];
+                    _.each(responses, function(response) {
+                        if(response.fact) {
+                            data.push(response.fact);
+                        } else if (response.facts) {
+                            data.push(response.facts);
+                        }
+                    });
+
                     if (_.isEmpty(data[0]) && _.isEmpty(data[1])) {
                         return _.reject({
                                 name: 'NoScanData',
@@ -251,7 +261,6 @@ function controller($rootScope,
                         $scope.factData =  info.factData;
                         $scope.isNestedDisplay = info.isNestedDisplay;
                     }
-
                     return info;
 
                 }).catch(function(error) {
@@ -314,10 +323,13 @@ function controller($rootScope,
 export default
     [   '$rootScope',
         '$scope',
-        '$routeParams',
+        '$stateParams',
         '$location',
         '$q',
+        '$state',
         'moduleOptions',
+        'inventory',
+        'hosts',
         'getDataForComparison',
         'Wait',
         'moment',

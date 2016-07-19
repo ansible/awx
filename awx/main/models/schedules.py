@@ -27,7 +27,7 @@ __all__ = ['Schedule']
 class ScheduleFilterMethods(object):
 
     def enabled(self, enabled=True):
-        return self.filter(enabled=enabled, active=enabled)
+        return self.filter(enabled=enabled)
 
     def before(self, dt):
         return self.filter(next_run__lt=dt)
@@ -47,7 +47,7 @@ class ScheduleManager(ScheduleFilterMethods, models.Manager):
 
     use_for_related_objects = True
 
-    def get_query_set(self):
+    def get_queryset(self):
         return ScheduleQuerySet(self.model, using=self._db)
 
 

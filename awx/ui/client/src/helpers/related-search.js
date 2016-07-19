@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:related-search
@@ -86,7 +86,7 @@ export default
                                 if (form.related[set].fields[f].searchType &&
                                         (form.related[set].fields[f].searchType === 'boolean' || form.related[set].fields[f].searchType === 'select')) {
                                     scope[iterator + 'SelectShow'] = true;
-                                    scope[iterator + 'SearchSelectOpts'] = form.fields[f].searchOptions;
+                                    scope[iterator + 'SearchSelectOpts'] = form.related[set].fields[f].searchOptions;
                                 }
                                 if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType === 'gtzero') {
                                     scope[iterator + "InputHide"] = true;
@@ -167,6 +167,13 @@ export default
                             scope[iterator + 'ShowStartBtn'] = false;
                         }
 
+                        if(scope[iterator + 'SearchValue'] && scope[iterator + 'SearchValue'] !== '') {
+                            scope[iterator + '_active_search'] = true;
+                        }
+                        else {
+                            scope[iterator + '_active_search'] = false;
+                        }
+
                         if (iterator === 'host') {
                             if (scope.hostSearchField === 'has_active_failures') {
                                 if (scope.hostSearchSelectValue && scope.hostSearchSelectValue.value === 1) {
@@ -230,9 +237,16 @@ export default
                         url += (url.match(/\/$/)) ? '?' : '&';
                         url += scope[iterator + 'SearchParams'];
                         url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
+                        if (scope[iterator + 'SearchFilters']){
+                            url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                        }
                         RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
                     };
 
+
+                    scope.$on("refreshList", function(e, iterator) {
+                        scope.search(iterator);
+                    });
 
                     scope.sort = function (iterator, fld) {
                         var sort_order, icon, direction, set;

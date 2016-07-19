@@ -5,7 +5,7 @@ Make a POST request to this resource to launch the system job template.
 An extra parameter `extra_vars` is suggested in order to pass extra parameters
 to the system job task.
 
-For example on `cleanup_jobs`, `cleanup_deleted`, and `cleanup_activitystream`:
+For example on `cleanup_jobs` and `cleanup_activitystream`:
 
 `{"days": 30}`
 

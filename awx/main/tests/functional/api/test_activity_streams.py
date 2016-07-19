@@ -1,0 +1,154 @@
+import mock
+import pytest
+
+from awx.main.middleware import ActivityStreamMiddleware
+from awx.main.models.activity_stream import ActivityStream
+from awx.main.access import ActivityStreamAccess
+
+from django.core.urlresolvers import reverse
+from django.conf import settings
+
+def mock_feature_enabled(feature, bypass_database=None):
+    return True
+
+@pytest.fixture
+def activity_stream_entry(organization, org_admin):
+    return ActivityStream.objects.filter(organization__pk=organization.pk, user=org_admin, operation='associate').first()
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_get_activity_stream_list(monkeypatch, organization, get, user):
+    url = reverse('api:activity_stream_list')
+    response = get(url, user('admin', True))
+
+    assert response.status_code == 200
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_basic_fields(monkeypatch, organization, get, user):
+    u = user('admin', True)
+    activity_stream = ActivityStream.objects.filter(organization=organization).latest('pk')
+    activity_stream.actor = u
+    activity_stream.save()
+
+    aspk = activity_stream.pk
+    url = reverse('api:activity_stream_detail', args=(aspk,))
+    response = get(url, user('admin', True))
+
+    assert response.status_code == 200
+    assert 'related' in response.data
+    assert 'organization' in response.data['related']
+    assert 'summary_fields' in response.data
+    assert 'organization' in response.data['summary_fields']
+    assert response.data['summary_fields']['organization'][0]['name'] == 'test-org'
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_middleware_actor_added(monkeypatch, post, get, user):
+    u = user('admin-poster', True)
+
+    url = reverse('api:organization_list')
+    response = post(url,
+                    dict(name='test-org', description='test-desc'),
+                    u,
+                    middleware=ActivityStreamMiddleware())
+    assert response.status_code == 201
+
+    org_id = response.data['id']
+    activity_stream = ActivityStream.objects.filter(organization__pk=org_id).first()
+
+    url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
+    response = get(url, u)
+
+    assert response.status_code == 200
+    assert response.data['summary_fields']['actor']['username'] == 'admin-poster'
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_rbac_stream_resource_roles(activity_stream_entry, organization, org_admin):
+
+    assert activity_stream_entry.user.first() == org_admin
+    assert activity_stream_entry.organization.first() == organization
+    assert activity_stream_entry.role.first() == organization.admin_role
+    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+@pytest.mark.django_db
+def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin):
+
+    assert activity_stream_entry.user.first() == org_admin
+    assert activity_stream_entry.organization.first() == organization
+    assert activity_stream_entry.role.first() == organization.admin_role
+    assert activity_stream_entry.object_relationship_type == 'awx.main.models.organization.Organization.admin_role'
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+def test_stream_access_cant_change(activity_stream_entry, organization, org_admin):
+    access = ActivityStreamAccess(org_admin)
+    # These should always return false because the activity stream can not be edited
+    assert not access.can_add(activity_stream_entry)
+    assert not access.can_change(activity_stream_entry, {'organization': None})
+    assert not access.can_delete(activity_stream_entry)
+
+@pytest.mark.django_db
+@pytest.mark.activity_stream_access
+@pytest.mark.skipif(not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True), reason="Activity stream not enabled")
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+def test_stream_queryset_hides_shows_items(
+        activity_stream_entry, organization, user, org_admin,
+        project, org_credential, inventory, label, deploy_jobtemplate,
+        notification_template, group, host, team):
+    # this user is not in any organizations and should not see any resource activity
+    no_access_user = user('no-access-user', False)
+    queryset = ActivityStreamAccess(no_access_user).get_queryset()
+
+    assert not queryset.filter(project__pk=project.pk)
+    assert not queryset.filter(credential__pk=org_credential.pk)
+    assert not queryset.filter(inventory__pk=inventory.pk)
+    assert not queryset.filter(label__pk=label.pk)
+    assert not queryset.filter(job_template__pk=deploy_jobtemplate.pk)
+    assert not queryset.filter(group__pk=group.pk)
+    assert not queryset.filter(host__pk=host.pk)
+    assert not queryset.filter(team__pk=team.pk)
+    assert not queryset.filter(notification_template__pk=notification_template.pk)
+
+    # Organization admin should be able to see most things in the ActivityStream
+    queryset = ActivityStreamAccess(org_admin).get_queryset()
+
+    assert queryset.filter(project__pk=project.pk, operation='create').count() == 1
+    assert queryset.filter(credential__pk=org_credential.pk, operation='create').count() == 1
+    assert queryset.filter(inventory__pk=inventory.pk, operation='create').count() == 1
+    assert queryset.filter(label__pk=label.pk, operation='create').count() == 1
+    assert queryset.filter(job_template__pk=deploy_jobtemplate.pk, operation='create').count() == 1
+    assert queryset.filter(group__pk=group.pk, operation='create').count() == 1
+    assert queryset.filter(host__pk=host.pk, operation='create').count() == 1
+    assert queryset.filter(team__pk=team.pk, operation='create').count() == 1
+    assert queryset.filter(notification_template__pk=notification_template.pk, operation='create').count() == 1
+
+@pytest.mark.django_db
+@mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
+def test_stream_user_direct_role_updates(get, post, organization_factory):
+    objects = organization_factory('test_org',
+                                   superusers=['admin'],
+                                   users=['test'],
+                                   inventories=['inv1'])
+
+    url = reverse('api:user_roles_list', args=(objects.users.test.pk,))
+    post(url, dict(id=objects.inventories.inv1.read_role.pk), objects.superusers.admin)
+
+    activity_stream = ActivityStream.objects.filter(
+        inventory__pk=objects.inventories.inv1.pk,
+        user__pk=objects.users.test.pk,
+        role__pk=objects.inventories.inv1.read_role.pk).first()
+    url = reverse('api:activity_stream_detail', args=(activity_stream.pk,))
+    response = get(url, objects.users.test)
+
+    assert response.data['object1'] == 'user'
+    assert response.data['object2'] == 'inventory'

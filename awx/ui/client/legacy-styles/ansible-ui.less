@@ -36,13 +36,15 @@
 @import "breadcrumbs.less";
 @import "stdout.less";
 @import "lists.less";
+@import "forms.less";
 @import "dashboard.less";
 @import "jPushMenu.less";
 @import "survey-maker.less";
-@import "portal.less";
 @import "text-label.less";
 @import "./bootstrap-datepicker.less";
-
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+// Bootstrap default overrides
+@import "awx/ui/client/src/shared/bootstrap-settings.less";
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
 body.modal-open {
@@ -78,6 +80,12 @@ a.red-txt:active {
     text-overflow: ellipsis;
 }
 
+.name-column {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 blockquote {
     font-size: 14px;
 }
@@ -97,16 +105,18 @@ a:focus {
   color: @blue-dark;
   text-decoration: none;
 }
-
+.btn{
+  text-transform: uppercase;
+}
 /* Old style TB default button with grey background */
 .btn-grey {
-  color: #333;
-  background-color: #ccc;
-  border-color: #ccc;
+  color: @default-data-txt;
+  background-color: @d7grey;
+  border-color: @d7grey;
 }
 
 .btn-grey:hover {
-  background-color: #FFF;
+  background-color: @default-bg;
 }
 
 #cowsay {
@@ -142,11 +152,11 @@ a:focus {
 
 /* Bring primary (blue) buttons in line with link colors */
 .btn-primary {
-   background-color: @blue-link;
+   background-color: @default-link;
 }
 
 .btn-primary:hover {
-   background-color: @blue-dark;
+   background-color: @default-link-hov;
 }
 
 /* List Actions column */
@@ -193,6 +203,10 @@ i:active,
     }
 }
 
+.IdleModal-remainingSeconds{
+    color: @default-err;
+}
+
 #configure-schedules-tab {
     position: relative;
     top: 0;
@@ -213,7 +227,7 @@ i:active,
     height: 46px;
     padding-top: 10px;
     text-align: right;
-    border-top: 1px solid #A6C9E2;
+    border-top: 1px solid @default-border;
     margin-top: 5px;
     a {
         margin-right: 8px;
@@ -226,16 +240,16 @@ i:active,
     top: 0;
     left: 0;
     display: none;
-    border: 1px solid #e5e5e5;
+    border: 1px solid @default-border;
     border-radius: 4px;
-    box-shadow: 3px 3px 6px 0 #666;
+    box-shadow: 3px 3px 6px 0 @default-dark;
     padding: 0 10px 15px 8px;
     background-color: @white;
     z-index: 200;
 }
 
 #configure-schedules-title {
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid @default-border;
     padding-bottom: 8px;
     margin-bottom: 10px;
     margin-top: 0;
@@ -316,8 +330,8 @@ i:active,
 #home_groups_table .actions .cancel { padding-right: 3px; }
 
 .success-badge {
-  color: #ffffff;
-  background-color: #5cb85c;
+  color: @default-bg;
+  background-color: @default-succ;
 }
 
 .bold-text .checkbox-inline {
@@ -341,7 +355,7 @@ textarea.allowresize {
   width: 138px;
   height: 50px;
   text-align:center;
-  color: #eee;
+  color: @d7grey;
   background-color: @black;
   border: 1px solid @grey;
   border-radius: 6px;
@@ -396,6 +410,10 @@ textarea.allowresize {
 /* TB tooltip overrides */
   .popover-content {
       width: 100%;
+
+      .table>tbody>tr>td {
+          border-top: 1px solid @b7grey;
+      }
   }
   h3.popover-title, .popover-content, .popover-content blockquote, .popover-content a {
       font-size: 12px;
@@ -406,11 +424,44 @@ textarea.allowresize {
   .popover-title {
       padding-top: 5px;
       padding-bottom: 5px;
+      background-color: @default-interface-txt;
+      color: @default-bg;
+      font-weight: 600;
+      border-bottom: none;
+      text-transform: uppercase;
   }
   .popover {
       z-index: 2000;
       min-width: 200px;
       max-width: 325px;
+      background-color: @default-interface-txt;
+      color: @default-bg; //white
+      text-align: left;
+
+      code {
+          color: @default-data-txt;
+          background-color: @default-white-button-bord;
+          line-height: 18px;
+      }
+
+      a {
+          color: @default-warning;
+          &:hover {
+              color: @default-warning-hov;
+          }
+      }
+  }
+  .popover.right>.arrow:after  {
+      border-right-color: @default-interface-txt;
+  }
+  .popover.left>.arrow:after {
+      border-left-color: @default-interface-txt;
+  }
+  .popover.bottom>.arrow:after {
+      border-bottom-color: @default-interface-txt;
+  }
+  .popover.top>.arrow:after {
+      border-top-color: @default-interface-txt;
   }
   .popover pre {
       white-space: pre-wrap;
@@ -427,10 +478,17 @@ textarea.allowresize {
           border-radius: 3px;
       }
   }
-  .tooltip {
-      z-index: 2050;
-      opacity: 1.0;
-  }
+
+.tooltip {
+  z-index: 2050;
+  opacity: 1.0;
+}
+
+.tooltip-inner {
+  padding: 10px;
+  text-align:left;
+  max-width: 150px;
+}
 
 .alert {
     margin-top: 15px;
@@ -438,7 +496,7 @@ textarea.allowresize {
 }
 
 hr {
-  border-color: #e3e3e3;
+  border-color: @default-border;
 }
 
 .help {
@@ -490,13 +548,13 @@ td.actions {
 }
 
 .btn .caret {
-  border-top-color: #696969;
+  border-top-color: @default-icon;
 }
 
 .btn-light {
-  color: #333;
-  background-color: #ddd;
-  border-color: #ddd;
+  color: @default-data-txt;
+  background-color: @d7grey;
+  border-color: @d7grey;
 }
 
 .refresh-grp {
@@ -513,13 +571,9 @@ td.actions {
 }
 
 .btn-light:hover {
-  color: #333;
-  background-color: #ccc;
-  border-color: #ccc;
-}
-
-.ssh-key-field, .mono-space {
-  font-family: Fixed, monospace;
+  color: @d7grey;
+  background-color: @default-icon;
+  border-color: @default-icon;
 }
 
 /* Make a div or any element behave like pre. Use in conjunction with .mono-space */
@@ -549,7 +603,7 @@ dd {
 
 #navbar-container, .main-menu {
   width: 100%;
-  background-color: @black;
+  background-color: @default-dark;
 }
 
 .text-justify {
@@ -568,7 +622,7 @@ dd {
 
 .help-link:hover,
 .ui-widget-content a.help-link:hover {
-  color: @black;
+  color: @default-icon;
   text-decoration: none;
 }
 
@@ -592,16 +646,6 @@ dd {
     font-weight: bold;
     padding-left: 15px;
     margin-bottom: 10px;
-}
-
-.aw-form-well {
-    border: 1px solid @grey;
-    padding: 9px;
-    border-radius: 4px;
-}
-
-.form-group {
-   margin-bottom: 25px;
 }
 
 .form-cancel {
@@ -637,12 +681,27 @@ dd {
 
 /* Outline required fields in Red when there is an error */
   .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
-      border-color: rgba(255, 88, 80, 0.8);
+      border-color: @default-err;
       outline: 0;
       -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
               box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(255, 88, 80, 0.6);
   }
 
+  .form-control.ng-dirty.ng-invalid + .select2 .select2-selection,
+  .form-control.ng-dirty.ng-invalid + .select2 .select2-selection:focus {
+      border-color: @default-err !important;
+      outline: 0 !important;
+      box-shadow: none !important;
+  }
+
+  .form-control.ng-dirty.ng-pristine {
+      border-color: @d7grey;
+      box-shadow: none;
+  }
+
+  .form-control.ng-dirty.ng-pristine:focus {
+      border-color: @default-link;
+  }
 /* For some reason TB 3 RC1 does not provide an input-mini */
 
 .input-mini {
@@ -701,9 +760,21 @@ legend {
     margin-bottom: 7px;
   }
 
-  .pagination > li > a {
+  .pagination>li>a,
+  .pagination>li>span {
+    border: 1px solid @grey-border;
     padding: 3px 6px;
     font-size: 10px;
+  }
+
+  .pagination li {
+    a#next-page {
+      border-radius: 0 4px 4px 0;
+    }
+
+    a#previous-page {
+      border-radius: 4px 0 0 4px;
+    }
   }
 
   .modal-body {
@@ -717,10 +788,20 @@ legend {
           padding-bottom: 0;
       }
       .pagination > .active > a {
-          background-color: #fff;
+          background-color: @default-bg;
           color: #428bca;
           border-color: none;
-          border: 1px solid #428bca;
+          border: 1px solid @default-link;
+      }
+      .alert {
+          padding: 0;
+          border: none;
+          margin: 0;
+      }
+      .alert-danger {
+          background-color: @default-bg;
+          border: none;
+          color: @default-interface-txt;
       }
   }
 
@@ -787,28 +868,6 @@ select.page-size {
     vertical-align: middle;
   }
 
-  #search_value_input {
-    padding-right: 25px;
-  }
-
-  .search-reset-start {
-    color: @grey;
-    float: right;
-    position: relative;
-    top: -25px;
-    left: -10px;
-    z-index: 10;
-  }
-
-  .search-reset-start:hover {
-    cursor: pointer;
-    color: @black;
-  }
-
-  .ui-widget-content a.search-reset-start {
-      color: @grey;
-  }
-
   #search-widget-spacer {
       height: 20px;
   }
@@ -820,10 +879,10 @@ select.page-size {
     margin-bottom: 15px;
     font-size: 14px;
     font-weight: bold;
-    background-color: #f5f5f5;
-    border: 1px solid #d8d8d8;
+    background-color: @default-no-items-bord;
+    border: 1px solid @d7grey;
     border-radius: 6px;
-    box-shadow: 3px 3px 4px 0 #808080;
+    box-shadow: 3px 3px 4px 0 @default-icon;
 
     .breadcrumb {
       display: inline-block;
@@ -878,7 +937,6 @@ select.page-size {
 */
 /* end */
 
-
 .greeting {
   padding-right: 22px;
 }
@@ -901,10 +959,6 @@ select.field-mini-height {
   font-size: 10.5px;
 }
 
-.ask-checkbox {
-  margin-left: 10px;
-}
-
 .no-padding {
   padding: 0;
   margin: 0;
@@ -922,6 +976,10 @@ input[type="checkbox"].checkbox-no-label {
   .checkbox-inline, .radio-inline {
     margin-right: 10px;
   }
+
+  .checkbox-inline.stack-inline {
+      display: block;
+  }
 }
 
 .checkbox-options {
@@ -931,16 +989,12 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Display list actions next to search widget */
 .list-actions {
-  text-align: right;
-  margin-bottom: 10px;
+    text-align: right;
+    margin-bottom: 20px;
 
-  button {
-    margin-left: 4px;
-  }
-
-  .fa-lg {
-    vertical-align: -8%;
-  }
+    .fa-lg {
+        vertical-align: -8%;
+    }
 }
 
 .jqui-accordion {
@@ -973,7 +1027,7 @@ input[type="checkbox"].checkbox-no-label {
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  background-color: #fff;
+  background-color: @default-bg;
 }
 
 .table-hover-inverse tbody tr:hover > td,
@@ -1008,11 +1062,11 @@ input[type="checkbox"].checkbox-no-label {
 .table-summary thead > tr > td,
 .table-summary tbody > tr > td,
 .table-summary tfoot > tr > td {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid @d7grey;
 }
 
 .table-summary thead > tr > th {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid @d7grey;
 }
 
 /* Table without row borders */
@@ -1043,6 +1097,12 @@ input[type="checkbox"].checkbox-no-label {
   }
 }
 
+.table.table-condensed.flyout {
+    thead>tr>th {
+        border: none;
+    }
+}
+
 
 /* Table info rows */
 
@@ -1061,7 +1121,7 @@ input[type="checkbox"].checkbox-no-label {
   .active-failures-true a:active,
   .job-failed,
   .job-error {
-    color: #da4f49;
+    color: @default-err;
   }
 
   .icon-failures-true a:hover {
@@ -1070,7 +1130,7 @@ input[type="checkbox"].checkbox-no-label {
 
   .job-failures-true {
     padding-top: 5px;
-    color: #da4f49;
+    color: @default-err;
   }
 
   .job-event-status,
@@ -1093,13 +1153,13 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-changed:before,
   .icon-job-ok:before,
   .icon-job-OK:before,
+  .icon-job-failed:before,
   .icon-job-skipped:before {
       content: "\f111";
   }
 
   .icon-job-stopped:before,
   .icon-job-error:before,
-  .icon-job-failed:before,
   .icon-job-canceled:before,
   .icon-job-unreachable:before {
       content: "\f06a";
@@ -1176,13 +1236,6 @@ input[type="checkbox"].checkbox-no-label {
       color: @warning;
   }
 
-  .badge {
-    padding: 2px 3px 3px 4px;
-    font-size: 10px;
-    font-weight: normal;
-    line-height: 1;
-  }
-
 /* job_events page */
 
   #jobevents_table {
@@ -1204,12 +1257,12 @@ input[type="checkbox"].checkbox-no-label {
 /* Inventory job status badge */
   .failures-true {
     background-color: @red;
-    color: #fff;
+    color: @default-bg;
   }
 
   .failures-false {
     background-color: @green;
-    color: #fff;
+    color: @default-bg;
   }
 
 /* Cloud inventory status. i.e. inventory_source.status values */
@@ -1306,11 +1359,11 @@ input[type="checkbox"].checkbox-no-label {
 /* end */
 
   .field-success {
-    color: #5bb75b;
+    color: @default-succ;
   }
 
   .field-success input {
-    border-color: #5bb75b;
+    border-color: @default-succ;
   }
 
   .field-failure {
@@ -1382,8 +1435,8 @@ input[type="checkbox"].checkbox-no-label {
 
       input[readonly],
       textarea[readonly] {
-          background-color: #FBFBFB;
-          border: 1px solid #E0E0E0;
+          background-color: @default-border;
+          border: 1px solid @default-icon;
       }
 
       .fa-external-link {
@@ -1392,13 +1445,13 @@ input[type="checkbox"].checkbox-no-label {
       }
 
       .free-button {
-          background-color: #ff5850;
-          border: 1px solid #ff5850;
+          background-color: @default-err;
+          border: 1px solid @default-err;
           color: @white;
       }
       .free-button:hover {
-          background-color: #E64F48;
-          border: 1px solid #E64F48;
+          background-color: @default-err-hov;
+          border: 1px solid @default-err-hov;
           color: @white;
       }
   }
@@ -1432,10 +1485,6 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Inventory Edit */
 
-  #groups-container.col-lg-6 {
-      padding-right: 7px;
-  }
-
   #hosts-container.col-lg-6 {
       padding-left: 7px;
       padding-right: 17px;
@@ -1449,7 +1498,7 @@ input[type="checkbox"].checkbox-no-label {
 
   #inventories_table i[class*="icon-job-"],
   #home_groups_table i[class*="icon-job-"] {
-      margin-left: 10px;
+      margin-left: 5px;
   }
 
   .selected {
@@ -1464,8 +1513,8 @@ input[type="checkbox"].checkbox-no-label {
 
   .active-row {
      background-color: @white;
-     border-bottom: 1px solid #ddd;
-     border-right: 1px solid #ddd;
+     border-bottom: 1px solid @default-tertiary-bg;
+     border-right: 1px solid @default-tertiary-bg;
   }
 
   .node-toggle, .node-no-toggle {
@@ -1558,6 +1607,12 @@ a.btn-disabled:hover {
 
   .parse-select .parse-label {
       margin-left: 3px;
+      color: @field-input-text;
+  }
+
+  .parse-label {
+      color: @field-input-text;
+      font-weight: normal;
   }
 
   .external-editor-link {
@@ -1583,7 +1638,7 @@ a.btn-disabled:hover {
 }
 
 .list-header .icon-sort {
-  color: #ccc;
+  color: @default-icon;
 }
 
 .list-header .icon-sort-down,
@@ -1622,7 +1677,7 @@ tr td button i {
   margin-top: 0;
   margin-bottom: 10px;
   font-weight: bold;
-  border-bottom: 1px solid #d8d8d8;
+  border-bottom: 1px solid @default-border;
 }
 
 .modal-backdrop,
@@ -1638,15 +1693,15 @@ tr td button i {
 /* overrides to TB modal */
 
 .modal-header {
-  padding: 15px 10px;
-  color: #2078be;
-  border-bottom: 1px solid #eee;
-  -webkit-border-top-right-radius: 3px;
-     -moz-border-top-right-radius: 3px;
-          border-top-right-radius: 3px;
-  -webkit-border-top-left-radius: 3px;
-     -moz-border-top-left-radius: 3px;
-          border-top-left-radius: 3px;
+    color: @default-interface-txt;
+    margin: .1em 0;
+    white-space: nowrap;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    border: none;
+    padding: 12px 14px 0 12px;
 }
 
 .modal {
@@ -1665,13 +1720,18 @@ tr td button i {
 
 .modal-header h3 {
   margin: 0;
-  font-size: 22px;
-  font-weight: bold;
   text-rendering: optimizeLegibility;
+  font-size: 15px;
+    color: @default-interface-txt;
+    font-weight: bold;
+    line-height: normal;
+    font-family: 'Open Sans', helvetica;
+    text-transform: uppercase;
 }
 
 .modal-body {
-  padding-top: 30px;
+    padding: 20px 14px 7px 14px;
+    min-height: 120px;
 }
 
 #prompt-modal .modal-body {
@@ -1680,6 +1740,30 @@ tr td button i {
 
 .skinny-modal .modal-body {
   padding: 5px 10px 0 10px;
+}
+
+.modal-footer {
+    padding: .3em 1em .5em .4em;
+    border: none;
+
+    .btn.btn-primary {
+      text-transform: uppercase;
+      background-color: @default-succ;
+      border-color: @default-succ;
+      padding: 5px 15px;
+      margin: .5em .4em .5em 0;
+      cursor: pointer;
+
+      &:hover {
+        background-color: @default-succ-hov;
+        border-color: @default-succ-hov;
+      }
+
+      &:disabled {
+        background-color: @default-succ-disabled;
+        border-color: @default-succ-disabled;
+      }
+    }
 }
 
 /* form navigation */
@@ -1749,33 +1833,6 @@ tr td button i {
       transform:rotate(-45deg);
   }
 }
-
-/* Activity Stream Widget */
-
-  #stream-container {
-    display: none;
-    border-radius: 8px;
-    z-index: 20;  /* has to be greater than tree selector */
-
-    .nav-path {
-      margin-bottom: 15px;
-      margin-top: 5px;
-    }
-
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  #stream-content {
-    border: 1px solid @grey;
-    border-radius: 8px;
-    padding: 8px;
-
-    h5 {
-        margin-top: 0;
-        margin-bottom: 20px;
-    }
-  }
 
 /* job stdout */
 
@@ -1853,10 +1910,6 @@ tr td button i {
       padding-left: 0;
   }
 
-  .list-actions button, .list-actions .checkbox-inline {
-      margin-top: 10px;
-  }
-
   .label-text {
       text-align: left;
   }
@@ -1915,10 +1968,6 @@ tr td button i {
       margin-bottom: 5px;
   }
 
-  .list-actions button, .list-actions .checkbox-inline {
-      margin-top: 10px;
-  }
-
   .group-name {
       width: 80%;
   }
@@ -1941,14 +1990,23 @@ tr td button i {
       padding-right: 15px;
   }
 
+  .list-actions {
+      text-align: left;
+  }
+
 }
 
 .nvtooltip {
     border-radius: 4px;
+    padding: 3px 10px;
 }
 
 .nvtooltip td.value {
     padding-right: 0px;
+}
+
+.nvtooltip p {
+    padding: 3px 0px;
 }
 
 .nvd3 g.nv-groups path.nv-line {
@@ -1956,7 +2014,7 @@ tr td button i {
 }
 
 .stdout-panel-body {
-    background-color: #e9e9e9;
+    background-color: @default-list-header-bg;
 }
 
 .job-stdout-panel {
@@ -2005,11 +2063,215 @@ tr td button i {
     }
 }
 
-button.dropdown-toggle,
-.input-group-btn {
-    z-index: 1;
-}
-
 #login-modal-body {
     padding-bottom: 5px;
+}
+
+.tooltip.bottom .tooltip-arrow {
+    border-bottom-color: @default-interface-txt;
+}
+
+
+.tooltip.top .tooltip-arrow {
+    border-top-color: @default-interface-txt;
+}
+
+.tooltip.left .tooltip-arrow {
+    border-left-color: @default-interface-txt;
+}
+
+.tooltip.right .tooltip-arrow {
+    border-right-color: @default-interface-txt;
+}
+
+.tooltip.Tooltip.fade.bottom.in {
+    opacity: 1;
+    padding-top: 4px;
+}
+
+.tooltip.in {
+    opacity: 1;
+}
+
+.tooltip-inner {
+    background-color: @default-interface-txt;
+}
+
+.tooltip-inner--logOut {
+    margin-left: -15px !important;
+}
+
+.modal {
+    transition: all 0.3s ease-out !important;
+}
+
+.modal.fade .modal-dialog {
+  transform: translate(0, 0);
+  margin: 100px auto;
+}
+
+.modal-backdrop, .modal-backdrop.fade.in {
+    opacity: .25;
+}
+
+.form-control {
+    border-color: @d7grey;
+    background-color: @default-no-items-bord;
+    color: @default-data-txt;
+    transition: border-color 0.3s;
+    box-shadow: none;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.form-control + .select2 .select2-selection {
+    border-color: @d7grey !important;
+    background-color: #fcfcfc !important;
+    color: @default-data-txt !important;
+    transition: border-color 0.3s !important;
+    box-shadow: none !important;
+}
+
+.form-control:active, .form-control:focus {
+    box-shadow: none;
+    border-color: @default-link;
+}
+
+.form-control:active + .select2 .select2-selection, .form-control:focus + .select2 .select2-selection {
+    box-shadow: none !important;
+    border-color: @default-link !important;
+}
+
+.form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
+    box-shadow: none;
+}
+
+.form-control.ng-dirty.ng-invalid + .select2 .select2-selection, .form-control.ng-dirty.ng-invalid:focus + .select2 .select2-selection {
+    box-shadow: none !important;
+}
+
+.error {
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.error.ng-hide-add {
+    display: none;
+}
+
+.error.ng-hide {
+    opacity: 0;
+}
+
+/* Overwrite select2 base styles for single/multiple selects so that match up with other form elements.  Also overwrite disabled styles. */
+.select2-container--disabled,.select2-container--disabled  .select2-selection--single,.select2-container--disabled .select2-selection--multiple {
+    cursor: not-allowed !important;
+}
+
+.select2-container--disabled {
+    opacity: .35;
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: @field-secondary-bg;
+    border: 1px solid @d7grey;
+    border-radius: 4px;
+}
+
+.select2-container--default .select2-selection--multiple {
+    background-color: @field-secondary-bg;
+    border: 1px solid @d7grey;
+    border-radius: 4px;
+    cursor: text;
+}
+
+body.is-modalOpen {
+    overflow: hidden;
+}
+
+input[type=file]:focus, input[type=radio]:focus, input[type=checkbox]:focus {
+    outline: 0 !important;
+}
+
+.btn-success.disabled, .btn-success[disabled], fieldset[disabled] .btn-success, .btn-success.disabled:hover, .btn-success[disabled]:hover, fieldset[disabled] .btn-success:hover, .btn-success.disabled:focus, .btn-success[disabled]:focus, fieldset[disabled] .btn-success:focus, .btn-success.disabled:active, .btn-success[disabled]:active, fieldset[disabled] .btn-success:active, .btn-success.disabled.active, .btn-success[disabled].active, fieldset[disabled] .btn-success.active {
+    background-color: @d7grey;
+    color: @default-bg;
+    border: 0;
+}
+
+.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
+    border-color: @default-succ;
+}
+
+a {
+    color: @default-link;
+}
+
+a:hover {
+    color: @default-link-hov;
+}
+
+.form-control:active, .form-control:focus {
+    border-color: @default-link;
+}
+
+.nv-axislabel {
+  font-weight: bold !important;
+  fill: @db-graph-axis-label !important;
+  font-family: 'Open Sans' !important;
+}
+
+.nv-axis text {
+   fill: @db-graph-axis-label !important; //rgb(169, 178, 189);
+   font-family: 'Open Sans' !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    cursor: default;
+    float: left;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding-left: 0px;
+    border-left-width: 0px;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
+    padding-right: 10px;
+    border-right-width: 0px;
+    background-color: @default-link;
+    color: @default-bg;
+    border-radius: 5px;
+    line-height: 21px;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 8px !important;
+    padding: 0 6px;
+    color: @default-bg !important;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: @default-link;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background-color: @default-err;
+}
+
+.dropdown-menu>li>a {
+    padding: 3px 10px;
+}
+
+#scheduled-jobs-tab .List-header {
+    display: none;
+}
+
+.ui-widget {
+    font-family: 'Open Sans';
+}
+
+.modal-body .alert {
+    padding: 10px;
 }

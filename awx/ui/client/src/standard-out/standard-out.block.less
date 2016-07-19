@@ -1,0 +1,164 @@
+@import "../shared/branding/colors.default.less";
+@import "../shared/layouts/one-plus-one.less";
+
+/** @define StandardOut */
+
+@breakpoint-md: 1180px;
+
+standard-out-log {
+    flex: 5;
+    display: flex;
+}
+
+.StandardOut-preContent{
+    font-size: 12px;
+    padding: 0 20px 0 20px;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
+
+.StandardOut-container {
+    .OnePlusOne-container(100%, @breakpoint-md);
+
+    &.fullscreen {
+        .StandardOut-rightPanel {
+            max-width: 100%;
+        }
+    }
+}
+
+.StandardOut-leftPanel {
+    .OnePlusOne-panel--left(100%, @breakpoint-md);
+    max-width: 600px;
+    @media (max-width: @breakpoint-md - 1px) {
+        max-width: 100%;
+    }
+}
+
+.StandardOut-rightPanel {
+    .OnePlusOne-panel--right(100%, @breakpoint-md);
+    max-width: 100%;
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
+
+    .Panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .StandardOut-consoleOutput {
+        height: 493px;
+    }
+}
+
+.StandardOut-panelHeader {
+    .OnePlusOne-panelHeader
+}
+
+.StandardOut-consoleOutput {
+    margin-top: 25px;
+    background-color: @default-secondary-bg;
+    border-radius: 5px;
+    min-height: 300px;
+    max-height: 100vh;
+    height: ~"calc(100vh - 245px)";
+    width: 100%;
+
+    overflow: auto;
+    #pre-container {
+        overflow: visible !important;
+    }
+}
+
+.StandardOut-details {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding-top: 25px;
+}
+
+.StandardOut-detailsRow {
+    width: 100%;
+    display: flex;
+    margin: 0 -15px;
+}
+
+.StandardOut-detailsRow + .StandardOut-detailsRow {
+    margin-top: 20px;
+}
+
+.StandardOut-detailsRow--extraVars {
+    margin: 20px 0;
+    width: 100%;
+}
+
+.StandardOut-extraVarsContainer {
+    width: 100%;
+    padding-right: 15px;
+}
+
+.StandardOut-detailsLabel {
+    text-transform: uppercase;
+    color: @default-interface-txt;
+}
+
+.StandardOut-detailsContent {
+    width: 40%;
+    flex: 1 0 auto;
+    padding: 0px 29px;
+    text-transform: none;
+    word-wrap: break-word;
+}
+
+.StandardOut-statusText {
+    margin-left: 6px;
+}
+
+.StandardOut--capitalize {
+    text-transform: capitalize;
+}
+
+.StandardOut-preContainer {
+    height: 100%;
+}
+
+.StandardOut-panelHeaderText {
+    align-items: center;
+    flex: 1 0 auto;
+    display: flex;
+}
+
+.StandardOut-panelHeaderActions {
+    justify-content: flex-end;
+    display: flex;
+    margin-left: 10px;
+    font-size: 20px;
+}
+
+.StandardOut-actionButton {
+    font-size: 16px;
+    height: 30px;
+    min-width: 30px;
+    color: @list-action-icon;
+    background-color: inherit;
+    border: none;
+    border-radius: 50%;
+}
+
+.StandardOut-actionButton:hover {
+    background-color: @list-actn-bg-hov;
+    color: @list-actn-icn-hov;
+}
+
+.StandardOut-actionButton--active {
+    background-color: @list-actn-bg-hov;
+    color: @list-actn-icn-hov;
+
+    &:hover {
+        background-color: @default-link-hov;
+    }
+}
+
+.StandardOut-actionButton + a {
+    margin-left: 15px;
+}

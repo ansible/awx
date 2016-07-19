@@ -1,25 +1,35 @@
-<span ng-repeat="(name, options) in list.actions">
-    <!-- TODO: Unfortunately, the data-tip-watch attribute is not loaded for
-    some reason -->
-    <button
-        toolbar-button
-        mode="options.mode"
-        icon-name="{{name}}"
-        aw-tool-tip="{{options.awToolTip}}"
-        data-tip-watch="{{options.dataTipWatch}}"
-        data-placement="{{options.dataPlacement}}"
-        data-container="{{options.dataContainer}}"
-        class="options.class"
-        data-title="{{options.dataTitle}}"
-        icon-size="{{options.iconSize}}"
-        ng-disabled="{{options.ngDisabled}}"
-        ng-click="$eval(options.ngClick)"
-        ng-hide="isHiddenByOptions(options) ||
-                    hiddenOnCurrentPage(options.basePaths) ||
-                    hiddenInCurrentMode(options.mode)"
-        toolbar="true"
-        aw-feature="{{options.awFeature}}">
-    </button>
+<span ng-repeat="(name, options) in list.actions" class="List-action" ng-hide="isHiddenByOptions(options) ||
+            hiddenOnCurrentPage(options.basePaths) ||
+            hiddenInCurrentMode(options.mode)">
+    <div class="List-action--showTooltipOnDisabled" ng-if="options.showTipWhenDisabled" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" data-title="{{options.dataTitle}}" data-tooltip-inner-class="{{options.tooltipInnerClass}}">
+        <button
+            toolbar-button
+            mode="options.mode"
+            class="{{options.actionClass}}"
+            ng-disabled="{{options.ngDisabled}}"
+            ng-click="$eval(options.ngClick)"
+            toolbar="true"
+            aw-feature="{{options.awFeature}}">
+            <span ng-bind-html="options.buttonContent"></span>
+        </button>
+    </div>
+    <span ng-if="!options.showTipWhenDisabled">
+        <button
+            toolbar-button
+            mode="options.mode"
+            aw-tool-tip="{{options.awToolTip}}"
+            data-tip-watch="{{options.dataTipWatch}}"
+            data-placement="{{options.dataPlacement}}"
+            data-container="{{options.dataContainer}}"
+            class="{{options.actionClass}}"
+            data-title="{{options.dataTitle}}"
+            ng-disabled="{{options.ngDisabled}}"
+            ng-click="$eval(options.ngClick)"
+            toolbar="true"
+            aw-feature="{{options.awFeature}}">
+            <span ng-bind-html="options.buttonContent"></span>
+        </button>
+    </span>
 
 </span>
 <button

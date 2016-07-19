@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Hosts
@@ -15,12 +15,23 @@ export default
         .value('HostForm', {
 
             addTitle: 'Create Host',
-            editTitle: '{{ name }}',
+            editTitle: '{{ host.name }}',
             name: 'host',
             well: false,
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
-
+            iterator: 'host',
+            headerFields:{
+                enabled: {
+                    class: 'Form-header-field',
+                    ngClick: 'toggleHostEnabled(host)',
+                    type: 'toggle',
+                    editRequired: false,
+                    awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
+                    "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
+                    dataTitle: 'Host Enabled',
+                }
+            },
             fields: {
                 name: {
                     label: 'Host Name',
@@ -43,30 +54,17 @@ export default
                     addRequired: false,
                     editRequired: false
                 },
-                enabled: {
-                    label: 'Enabled?',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequired: false,
-                    "default": true,
-                    awPopOver: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
-                        "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
-                    dataTitle: 'Host Enabled',
-                    dataPlacement: 'right',
-                    dataContainer: 'body',
-                    ngDisabled: 'has_inventory_sources == true'
-                },
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
                     addRequired: false,
                     editRequird: false,
                     rows: 6,
-                    "class": "modal-input-xlarge",
+                    "class": "modal-input-xlarge Form-textArea Form-formGroup--fullWidth",
                     "default": "---",
                     awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
-                        "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                         '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
@@ -82,17 +80,14 @@ export default
                 }
             },
 
-            buttons: { //for now always generates <button> tags
-               /*
-                save: {
-                    ngClick: 'formSave()', //$scope.function to call on click, optional
-                    ngDisabled: true //Disable when $pristine or $invalid, optional
+            buttons: {
+                cancel: {
+                    ngClick: 'formCancel()',
                 },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
+                save: {
+                    ngClick: 'formSave()',
+                    ngDisabled: true
                 }
-                */
             },
 
             related: {}

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('ScanJobsListDefinition', [])
@@ -35,15 +35,8 @@ export default
                 ngClick: 'addScanJobTemplate()',
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
-                ngHide: 'portalMode===true'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                ngHide: 'portalMode===true',
-                awFeature: 'activity_streams'
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
@@ -58,9 +51,17 @@ export default
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                ngHref: '#/job_templates/{{ job_template.id }}/schedules',
+                ngClick: 'scheduleJob(job_template.id)',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
+            },
+            copy: {
+                label: 'Copy',
+                'ui-sref': 'jobTemplates.copy({id: job_template.id})',                "class": 'btn-danger btn-xs',
+                awToolTip: 'Copy template',
+                dataPlacement: 'top',
+                ngHide: 'job_template.summary_fields.can_copy===false'
+
             },
             edit: {
                 label: 'Edit',
@@ -75,15 +76,6 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top',
-            },
-            copy: {
-                label: 'Copy',
-                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
-                "class": 'btn-danger btn-xs',
-                awToolTip: 'Copy template',
-                dataPlacement: 'top',
-                ngHide: 'job_template.summary_fields.can_copy===false'
-
             }
         }
     });

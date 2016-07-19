@@ -41,10 +41,11 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
                 scope.promptHeader = params.hdr;
                 scope.promptBody = params.body;
                 scope.promptAction = params.action;
+                scope.promptActionText = (params.actionText === null || params.actionText === undefined || params.actionText === '') ? 'YES' : params.actionText;
 
                 local_backdrop = (params.backdrop === undefined) ? "static" : params.backdrop;
 
-                cls = (params['class'] === null || params['class'] === undefined) ? 'btn-danger' : params['class'];
+                cls = (params['class'] === null || params['class'] === undefined) ? 'Modal-errorButton' : params['class'];
 
                 $('#prompt_action_btn').removeClass(cls).addClass(cls);
 
@@ -118,7 +119,7 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
 
                 $('#prompt-modal').off('hidden.bs.modal');
                 $('#prompt-modal').modal({
-                    backdrop: 'local_backdrop',
+                    backdrop: 'static',
                     keyboard: true,
                     show: true
                 });

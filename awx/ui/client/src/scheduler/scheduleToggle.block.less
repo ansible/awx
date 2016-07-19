@@ -1,0 +1,54 @@
+/** @define ScheduleToggle */
+
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+
+.ScheduleToggle {
+    border-radius: 5px;
+    border: 1px solid @default-icon;
+    background-color: @default-icon;
+    width: 40px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.ScheduleToggle-switch {
+    color: @default-interface-txt;
+    background-color: @default-bg;
+    margin-left: 4px;
+    border-left: 1px solid @default-icon;
+    margin-right: 0px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 11px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.ScheduleToggle.is-on {
+    border-color: @default-link;
+    background-color: @default-bg;
+}
+
+.ScheduleToggle-switch.is-on {
+    margin-right: 5px;
+    margin-left: 0px;
+    background-color: @default-link;
+    color: @default-bg;
+    border-left: 0;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.ScheduleToggle-switch:hover {
+    background-color: @default-tertiary-bg;
+}
+
+.ScheduleToggle.is-on:hover {
+    border-color: @default-link-hov;
+}
+
+.ScheduleToggle-switch.is-on:hover {
+    background-color: @default-link-hov;
+}

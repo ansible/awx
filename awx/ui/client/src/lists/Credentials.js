@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 
 
@@ -15,17 +15,19 @@ export default
         iterator: 'credential',
         selectTitle: 'Add Credentials',
         editTitle: 'Credentials',
+        listTitle: 'Credentials',
         selectInstructions: "<p>Select existing credentials by clicking each credential or checking the related checkbox. When " +
             "finished, click the blue <em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking ",
         index: false,
         hover: true,
+        emptyListText: 'No Credentials Have Been Created',
 
         fields: {
             name: {
                 key: true,
                 label: 'Name',
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                modalColumnClass: 'col-md-8'
+                modalColumnClass: 'col-md-11'
             },
             description: {
                 label: 'Description',
@@ -38,7 +40,15 @@ export default
                 searchOptions: [], // will be set by Options call to credentials resource
                 excludeModal: true,
                 nosort: true,
-                columnClass: 'col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-md-2 hidden-sm hidden-xs'
+            },
+            owners: {
+                label: 'Owners',
+                type: 'owners',
+                searchable: false,
+                nosort: true,
+                excludeModal: true,
+                columnClass: 'col-md-2 hidden-sm hidden-xs'
             }
         },
 
@@ -46,17 +56,16 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCredential()',
-                awToolTip: 'Create a new credential'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new credential',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
+
             edit: {
                 ngClick: "editCredential(credential.id)",
                 icon: 'fa-edit',

@@ -13,7 +13,6 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
-
 MONGO_HOST = '127.0.0.1'
 MONGO_PORT = 27017
 MONGO_USERNAME = None
@@ -71,13 +70,18 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
+ANSIBLE_USE_VENV = True
+ANSIBLE_VENV_PATH = "/tower_devel/venv/ansible"
+TOWER_USE_VENV = True
+TOWER_VENV_PATH = "/tower_devel/venv/tower"
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
 # only the defaults.
 try:
     include(optional('local_*.py'), scope=locals())
-    include('postprocess.py', scope=locals())
+    if not is_testing(sys.argv):
+        include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

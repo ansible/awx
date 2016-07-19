@@ -1,56 +1,42 @@
 /** @define DashboardGraphs */
 
-@import "../../shared/branding/colors.less";
+@import "../../shared/branding/colors.default.less";
 
 .DashboardGraphs {
-    margin-top: 15px;
-    border: solid 1px #a9a9a9;
-    border-radius: 4px;
+    margin-top: 20px;
+    border: solid 1px @db-panel-border;
+    border-radius: 5px;
+    background-color: @db-panel-bg;
+    padding-top:20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-.DashboardGraphs-tabSection {
-    flex: 1;
+.DashboardGraphs-headerSection{
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
-.DashboardGraphs-tab {
+.DashboardGraphs-headerText {
     flex: 1;
-    padding: 10px;
-    border-right: solid 1px @disabled-item-border;
-    border-bottom: solid 1px @disabled-item-border;
-    text-align: center;
-    font-size: 20px;
-    color: @disabled-item-text;
-    background-color: @disabled-item-background;
-}
-
-.DashboardGraphs-tab--firstTab {
-    border-top-left-radius: 4px;
-}
-
-.DashboardGraphs-tab--lastTab {
-    border-top-right-radius: 4px;
-    border-right: 0;
-}
-
-.DashboardGraphs-tab:hover {
-    color: #000;
-    cursor: pointer;
-}
-
-.DashboardGraphs-tab.is-selected {
-    background-color: @enabled-item-background;
-    color: @enabled-item-text;
-    border-bottom: 0;
-}
-
-.DashboardGraphs-tab.is-selected:hover {
-    cursor: default;
+    margin: 0px;
+    font-size: 14px;
+    font-weight: bold;
+    color: @default-interface-txt;
+    white-space: nowrap;
+    margin-right: auto;
+    margin-bottom: 20px;
+    margin-top: 5px;
 }
 
 .DashboardGraphs-graphSection {
     display: block;
     flex: 1;
+    padding-top:20px;
+    margin-bottom: -20px;
 }
 
 .DashboardGraphs-graphContainer {
@@ -63,38 +49,153 @@
     display: block;
 }
 
+.DashboardGraphs-filterLabelIcon{
+    color: @db-graph-per-dd-icon;
+    font-size: 14px;
+    padding-top: 5px;
+}
+
+.DashboardGraphs-filterLabel{
+    color: @db-graph-per-dd-txt;
+    font-size: 12px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-top: 2px;
+    text-transform: uppercase;
+    padding-top:5px;
+}
+
 .DashboardGraphs-graph {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    margin-bottom: 19px;
-    padding: 20px;
 }
 
 .DashboardGraphs-graphToolbar {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 6px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-right: 14px;
 }
 
-.DashboardGraphs-filterDropdown {
+.DashboardGraphs-filterDropdownText,
+.DashboardGraphs-filterDropdownText:hover,
+.DashboardGraphs-filterDropdownText:focus,
+.DashboardGraphs-filterDropdownText:active {
+    color: @db-graph-per-dd-txt;
+}
+
+.DashboardGraphs-filterDropdownText {
     flex: initial;
+    background-color: @db-graph-per-dd-bg;
     font-size: 12px;
-    padding-right: 15px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-right: 10px;
+    padding-left: 10px;
+    height: 20px;
+    border: 1px solid @db-graph-per-dd-bord;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.DashboardGraphs-filterDropdownText:hover {
+    background-color: @db-graph-per-dd-bg-hov;
+}
+
+.DashboardGraphs-filterIcon{
+    color: @db-graph-per-dd-icon;
+    font-size: 14px;
+    width: 20px;
+    padding-left:10px;
+    padding-right: 10px;
 }
 
 .DashboardGraphs-filterDropdownItems {
-    position: fixed;
+    position: absolute;
     left: auto;
     top: auto;
     box-shadow: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-color: @d7grey;
 }
 
-.DashboardGraphs-filterDropdownItems--period {
-    margin-left: -42px;
+.DashboardGraphs-periodDropdown,
+.DashboardGraphs-jobTypeDropdown,
+.DashboardGraphs-statusDropdown {
+    padding-top:5px;
 }
 
-.DashboardGraphs-filterDropdownItems--jobType {
-    margin-left: -84px;
+.DashboardGraphs-filterDropdownItems {
+    min-width: 0;
+}
+
+.DashboardGraphs-statusFilters{
+    padding-top: 5px;
+
+}
+
+.DashboardGraphs-statusFilter{
+    color: @btn-txt;
+    background-color: @btn-bg;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding-right: 10px;
+    padding-left: 10px;
+    height: 20px;
+    border: 1px solid @btn-bord;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin-left: 10px;
+    line-height:1;
+}
+
+.DashboardGraphs-statusFilter:hover{
+    cursor: pointer;
+    background-color: @btn-bg-hov;
+}
+
+.DashboardGraphs-statusFilter.is-selected {
+    color: @btn-txt-sel;
+    background-color: @btn-bg-sel;
+    border-color: @btn-bord-sel;
+}
+
+.DashboardGraphs-statusFilterIcon{
+    padding-right: 5px;
+}
+
+.DashboardGraphs-filteringDropdowns {
+    display: inherit;
+}
+
+.DashboardGraphs-filterDropdownItems {
+    li > a {
+        color: @default-interface-txt;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    .DashboardGraphs-graphToolbar {
+        width: 100%;
+        margin-right: 0px;
+    }
+
+    .DashboardGraphs-filteringDropdowns {
+        float: left;
+        width: 100%;
+        margin-left: -10px;
+    }
+
+    .DashboardGraphs-filterLabel {
+        width: 50%;
+        float:left;
+    }
+
+    .DashboardGraphs-periodDropdown {
+        width: 50%;
+        float: left;
+    }
 }

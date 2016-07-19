@@ -35,7 +35,7 @@
  * the respoinse details and initiate action. For example:
  *
  * ```
- *     var url = GetBasePath('inventories') + $routeParams.id + '/';
+ *     var url = GetBasePath('inventories') + $stateParams.id + '/';
  *     Rest.setUrl(url);
  *     Rest.get()
  *          .success(function(data) {
@@ -62,7 +62,8 @@ export default
                 headers: {},
 
                 setUrl: function (url) {
-                    this.url = url;
+                    // Ensure that a trailing slash is present at the end of the url (before query params, etc)
+                    this.url = url.replace(/\/?(\?|#|$)/, '/$1');
                 },
                 checkExpired: function () {
                     return ($rootScope.sessionTimer) ? $rootScope.sessionTimer.isExpired() : false;

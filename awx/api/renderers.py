@@ -4,6 +4,7 @@
 # Django REST Framework
 from rest_framework import renderers
 
+
 class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     '''
     Customizations to the default browsable API renderer.
@@ -16,24 +17,39 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
             return renderers.JSONRenderer()
         return renderer
 
-    def get_raw_data_form(self, view, method, request):
+    def get_context(self, data, accepted_media_type, renderer_context):
+        # Store the associated response status to know how to populate the raw
+        # data form.
+        try:
+            setattr(renderer_context['view'], '_raw_data_response_status', renderer_context['response'].status_code)
+            return super(BrowsableAPIRenderer, self).get_context(data, accepted_media_type, renderer_context)
+        finally:
+            delattr(renderer_context['view'], '_raw_data_response_status')
+
+    def get_raw_data_form(self, data, view, method, request):
+        # Set a flag on the view to indiciate to the view/serializer that we're
+        # creating a raw data form for the browsable API.  Store the original
+        # request method to determine how to populate the raw data form.
         try:
             setattr(view, '_raw_data_form_marker', True)
-            return super(BrowsableAPIRenderer, self).get_raw_data_form(view, method, request)
+            setattr(view, '_raw_data_request_method', request.method)
+            return super(BrowsableAPIRenderer, self).get_raw_data_form(data, view, method, request)
         finally:
             delattr(view, '_raw_data_form_marker')
+            delattr(view, '_raw_data_request_method')
 
-    def get_rendered_html_form(self, view, method, request):
-        '''Never show auto-generated form (only raw form).'''
+    def get_rendered_html_form(self, data, view, method, request):
+        # Never show auto-generated form (only raw form).
         obj = getattr(view, 'object', None)
         if not self.show_form_for_method(view, method, request, obj):
             return
         if method in ('DELETE', 'OPTIONS'):
             return True  # Don't actually need to return a form
 
-    def get_context(self, data, accepted_media_type, renderer_context):
-        context = super(BrowsableAPIRenderer, self).get_context(data, accepted_media_type, renderer_context)
-        return context
+    def get_filter_form(self, data, view, request):
+        # Don't show filter form in browsable API.
+        return
+
 
 class PlainTextRenderer(renderers.BaseRenderer):
 
@@ -45,8 +61,11 @@ class PlainTextRenderer(renderers.BaseRenderer):
             data = unicode(data)
         return data.encode(self.charset)
 
+
 class DownloadTextRenderer(PlainTextRenderer):
+
     format = "txt_download"
+
 
 class AnsiTextRenderer(PlainTextRenderer):
 

@@ -1,0 +1,143 @@
+/*
+* Style conventions
+* .ModuleName-component-subComponent
+* Naming describes components of the view
+*/
+@import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "awx/ui/client/src/shared/layouts/one-plus-two.less";
+
+.License-container{
+	.OnePlusTwo-container;
+}
+
+.License-container--missing {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+.License-field--label{
+	.OnePlusTwo-left--detailsLabel;
+}
+.License-fileName{
+	padding-left: 20px;
+}
+.License-management .CodeMirror-scroll{
+	min-height: 140px;
+}
+.License-file textarea{
+	display: block;
+	width: 100%;
+}
+.License-submit--success.ng-hide-add, .License-submit--success.ng-hide-remove {
+  transition: all ease-in-out 0.5s;
+}
+.License-submit--success{
+	opacity: 1;
+  	transition: all ease-in-out 0.5s;
+}
+.License-submit--success.ng-hide{
+	opacity: 0;
+}
+
+.License-eulaNotice{
+	font-size: 12px;
+	width: 100%;
+	max-height: 129px;
+	padding: 15px;
+	padding-top: 10px;
+	margin-bottom: 10px;
+	border-radius: 4px;
+	border: 1px solid @login-notice-border;
+	background-color: @login-notice-bg;
+	color: @login-notice-text;
+	overflow-y: scroll;
+	overflow-x: visible;
+	white-space: pre-line;
+}
+
+.License-field label{
+	width: 155px;
+}
+.License-field--content{
+	.OnePlusTwo-left--detailsContent;
+	text-transform: capitalize;
+}
+.License-field--key {
+    text-transform: none;
+}
+.License-field{
+	.OnePlusTwo-left--detailsRow;
+}
+.License-field + .License-field {
+    margin-top: 20px;
+}
+.License-greenText{
+	color: @submit-button-bg;
+	padding-right: 10px;
+}
+.License-redText{
+	color: @default-err;
+	padding-right: 10px;
+}
+.License-fields{
+	.OnePlusTwo-left--details;
+}
+.License-details {
+	.OnePlusTwo-left--panel(650px);
+}
+.License-titleText {
+	.OnePlusTwo-panelHeader;
+}
+.License-management{
+	.OnePlusTwo-right--panel(650px);
+}
+.License-management--missingLicense{
+	height: auto;
+}
+.License-downloadLicenseButton{
+	margin-bottom: 10px;
+	color:@default-bg;
+}
+.License-downloadLicenseButton:hover{
+	background-color: @default-link-hov !important;
+	color:@default-bg !important;
+}
+.License-downloadLicenseButton:focus{
+	background-color: @default-link-hov !important;
+	color:@default-bg !important;
+}
+.License-submit--container{
+	height: 33px;
+}
+.License-submit--success{
+	line-height:33px;
+	margin: 0 10px 0 0;
+}
+.License-file--container {
+	input[type=file] {
+	display: none;
+	}
+}
+.License-upgradeText {
+	margin: 20px 0px;
+}
+.License-body {
+	margin-top: 25px;
+}
+.License-subTitleText {
+	text-transform: uppercase;
+	margin: 20px 0px 15px 0px;
+	color: @default-interface-txt;
+}
+.License-helperText {
+	color: @default-interface-txt;
+}
+.License-input--fake{
+	border-top-right-radius: 4px !important;
+	border-bottom-right-radius: 4px !important;
+}
+
+.License-detailsGroup {
+	margin-bottom: 20px;
+}

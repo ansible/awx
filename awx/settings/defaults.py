@@ -18,6 +18,15 @@ for setting in dir(global_settings):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+def is_testing(argv=None):
+    '''Return True if running django or py.test unit tests.'''
+    argv = sys.argv if argv is None else argv
+    if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
+        return True
+    elif len(argv) >= 2 and argv[1] == 'test':
+        return True
+    return False
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG
@@ -32,9 +41,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
-        # Test database cannot be :memory: for celery/inventory tests to work.
-        'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
         'ATOMIC_REQUESTS': True,
+        'TEST': {
+            # Test database cannot be :memory: for celery/inventory tests.
+            'NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
+        },
     }
 }
 
@@ -170,7 +181,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'south',
     'rest_framework',
     'django_extensions',
     'djcelery',
@@ -188,34 +198,34 @@ INSTALLED_APPS = (
 INTERNAL_IPS = ('127.0.0.1',)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'awx.api.pagination.PaginationSerializer',
-    'PAGINATE_BY': 25,
-    'PAGINATE_BY_PARAM': 'page_size',
+    'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
+    'PAGE_SIZE': 25,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'awx.api.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'awx.api.authentication.LoggedBasicAuthentication',
         #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'awx.api.permissions.ModelAccessPermission',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'awx.api.filters.ActiveOnlyBackend',
         'awx.api.filters.TypeFilterBackend',
         'awx.api.filters.FieldLookupBackend',
         'rest_framework.filters.SearchFilter',
         'awx.api.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
+        'awx.api.parsers.JSONParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'awx.api.renderers.BrowsableAPIRenderer',
     ),
+    'DEFAULT_METADATA_CLASS': 'awx.api.metadata.Metadata',
     'EXCEPTION_HANDLER': 'awx.api.views.api_exception_handler',
     'VIEW_NAME_FUNCTION': 'awx.api.generics.get_view_name',
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
+    'NON_FIELD_ERRORS_KEY': '__all__',
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -262,11 +272,11 @@ SERVER_EMAIL = 'root@localhost'
 
 # Default email address to use for various automated correspondence from
 # the site managers.
-DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+DEFAULT_FROM_EMAIL = 'tower@localhost'
 
 # Subject-line prefix for email messages send with django.core.mail.mail_admins
 # or ...mail_managers.  Make sure to include the trailing space.
-EMAIL_SUBJECT_PREFIX = '[AWX] '
+EMAIL_SUBJECT_PREFIX = '[Tower] '
 
 # The email backend to use. For possible shortcuts see django.core.mail.
 # The default is to use the SMTP backend.
@@ -307,30 +317,11 @@ DEBUG_TOOLBAR_CONFIG = {
     'ENABLE_STACKTRACES' : True,
 }
 
-# Use Django-devserver if installed.
-try:
-    import devserver
-    INSTALLED_APPS += (devserver.__name__,)
-except ImportError:
-    pass
-
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'
-DEVSERVER_MODULES = (
-    'devserver.modules.sql.SQLRealTimeModule',
-    'devserver.modules.sql.SQLSummaryModule',
-    'devserver.modules.profile.ProfileSummaryModule',
-    #'devserver.modules.ajax.AjaxDumpModule',
-    #'devserver.modules.profile.MemoryUseModule',
-    #'devserver.modules.cache.CacheSummaryModule',
-    #'devserver.modules.profile.LineProfilerModule',
-)
 
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
-
-# Skip migrations when running tests.
-SOUTH_TESTS_MIGRATE = False
 
 # Initialize Django-Celery.
 djcelery.setup_loader()
@@ -349,6 +340,18 @@ CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
         'schedule': timedelta(seconds=30)
+    },
+    'admin_checks': {
+        'task': 'awx.main.tasks.run_administrative_checks',
+        'schedule': timedelta(days=30)
+    },
+    'label_cleanup': {
+        'task': 'awx.main.tasks.run_label_cleanup',
+        'schedule': timedelta(days=7)
+    },
+    'authtoken_cleanup': {
+        'task': 'awx.main.tasks.cleanup_authtokens',
+        'schedule': timedelta(days=30)
     },
 }
 
@@ -537,6 +540,7 @@ EC2_REGION_NAMES = {
     'ap-southeast-1': 'Asia Pacific (Singapore)',
     'ap-southeast-2': 'Asia Pacific (Sydney)',
     'ap-northeast-1': 'Asia Pacific (Tokyo)',
+    'ap-northeast-2': 'Asia Pacific (Seoul)',
     'sa-east-1': 'South America (Sao Paulo)',
     'us-gov-west-1': 'US West (GovCloud)',
     'cn-north-1': 'China (Beijing)',
@@ -652,6 +656,16 @@ AZURE_HOST_FILTER = r'^.+$'
 AZURE_EXCLUDE_EMPTY_GROUPS = True
 AZURE_INSTANCE_ID_VAR = 'private_id'
 
+# --------------------------------------
+# -- Microsoft Azure Resource Manager --
+# --------------------------------------
+AZURE_RM_GROUP_FILTER = r'^.+$'
+AZURE_RM_HOST_FILTER = r'^.+$'
+AZURE_RM_ENABLED_VAR = 'powerstate'
+AZURE_RM_ENABLED_VALUE = 'running'
+AZURE_RM_INSTANCE_ID_VAR = 'id'
+AZURE_RM_EXCLUDE_EMPTY_GROUPS = True
+
 # ---------------------
 # ----- OpenStack -----
 # ---------------------
@@ -670,10 +684,7 @@ ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
 # Internal API URL for use by inventory scripts and callback plugin.
-if 'devserver' in INSTALLED_APPS:
-    INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
-else:
-    INTERNAL_API_URL = 'http://127.0.0.1:8000'
+INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
 # ZeroMQ callback settings.
 CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
@@ -688,6 +699,159 @@ FACT_CACHE_PORT = 6564
 
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+TOWER_ADMIN_ALERTS = True
+
+TOWER_URL_BASE = "https://towerhost"
+
+TOWER_SETTINGS_MANIFEST = {
+    "SCHEDULE_MAX_JOBS": {
+        "name": "Maximum Scheduled Jobs",
+        "description": "Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created",
+        "default": SCHEDULE_MAX_JOBS,
+        "type": "int",
+        "category": "jobs",
+    },
+    "STDOUT_MAX_BYTES_DISPLAY": {
+        "name": "Standard Output Maximum Display Size",
+        "description": "Maximum Size of Standard Output in bytes to display before requiring the output be downloaded",
+        "default": STDOUT_MAX_BYTES_DISPLAY,
+        "type": "int",
+        "category": "jobs",
+    },
+    "AUTH_TOKEN_EXPIRATION": {
+        "name": "Idle Time Force Log Out",
+        "description": "Number of seconds that a user is inactive before they will need to login again",
+        "type": "int",
+        "default": AUTH_TOKEN_EXPIRATION,
+        "category": "authentication",
+    },
+    "AUTH_TOKEN_PER_USER": {
+        "name": "Maximum number of simultaneous logins",
+        "description": "Maximum number of simultaneous logins a user may have. To disable enter -1",
+        "type": "int",
+        "default": AUTH_TOKEN_PER_USER,
+        "category": "authentication",
+    },
+    # "AUTH_BASIC_ENABLED": {
+    #     "name": "Enable HTTP Basic Auth",
+    #     "description": "Enable HTTP Basic Auth for the API Browser",
+    #     "default": AUTH_BASIC_ENABLED,
+    #     "type": "bool",
+    #     "category": "authentication",
+    # },
+    # "AUTH_LDAP_SERVER_URI": {
+    #     "name": "LDAP Server URI",
+    #     "description": "URI Location of the LDAP Server",
+    #     "default": AUTH_LDAP_SERVER_URI,
+    #     "type": "string",
+    #     "category": "authentication",
+    # },
+    # "RADIUS_SERVER": {
+    #     "name": "Radius Server Host",
+    #     "description": "Host to communicate with for Radius Authentication",
+    #     "default": RADIUS_SERVER,
+    #     "type": "string",
+    #     "category": "authentication",
+    # },
+    # "RADIUS_PORT": {
+    #     "name": "Radius Server Port",
+    #     "description": "Port on the Radius host for Radius Authentication",
+    #     "default": RADIUS_PORT,
+    #     "type": "string",
+    #     "category": "authentication",
+    # },
+    # "RADIUS_SECRET": {
+    #     "name": "Radius Server Secret",
+    #     "description": "Secret used when negotiating with the Radius server",
+    #     "default": RADIUS_SECRET,
+    #     "type": "string",
+    #     "category": "authentication",
+    # },
+    "AWX_PROOT_ENABLED": {
+        "name": "Enable PRoot for Job Execution",
+        "description": "Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information",
+        "default": AWX_PROOT_ENABLED,
+        "type": "bool",
+        "category": "jobs",
+    },
+    "AWX_PROOT_HIDE_PATHS": {
+        "name": "Paths to hide from PRoot jobs",
+        "description": "Extra paths to hide from PRoot isolated processes",
+        "default": AWX_PROOT_HIDE_PATHS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "AWX_PROOT_SHOW_PATHS": {
+        "name": "Paths to expose to PRoot jobs",
+        "description": "Explicit whitelist of paths to expose to PRoot jobs",
+        "default": AWX_PROOT_SHOW_PATHS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "AWX_PROOT_BASE_PATH": {
+        "name": "Base PRoot execution path",
+        "description": "The location that PRoot will create its temporary working directory",
+        "default": AWX_PROOT_BASE_PATH,
+        "type": "string",
+        "category": "jobs",
+    },
+    "AWX_ANSIBLE_CALLBACK_PLUGINS": {
+        "name": "Ansible Callback Plugins",
+        "description": "Colon Seperated Paths for extra callback plugins to be used when running jobs",
+        "default": AWX_ANSIBLE_CALLBACK_PLUGINS,
+        "type": "string",
+        "category": "jobs",
+    },
+    "PENDO_TRACKING_STATE": {
+        "name": "Analytics Tracking State",
+        "description": "Enable or Disable Analytics Tracking",
+        "default": PENDO_TRACKING_STATE,
+        "type": "string",
+        "category": "ui",
+    },
+    "AD_HOC_COMMANDS": {
+        "name": "Ansible Modules Allowed for Ad Hoc Jobs",
+        "description": "A colon-seperated whitelist of modules allowed to be used by ad-hoc jobs",
+        "default": AD_HOC_COMMANDS,
+        "type": "list",
+        "category": "jobs",
+    },
+    "ACTIVITY_STREAM_ENABLED": {
+        "name": "Enable Activity Stream",
+        "description": "Enable capturing activity for the Tower activity stream",
+        "default": ACTIVITY_STREAM_ENABLED,
+        "type": "bool",
+        "category": "system",
+    },
+    "ORG_ADMINS_CAN_SEE_ALL_USERS": {
+        "name": "All Users Visible to Organization Admins",
+        "description": "Controls whether any Organization Admin can view all users, even those not associated with their Organization",
+        "default": ORG_ADMINS_CAN_SEE_ALL_USERS,
+        "type": "bool",
+        "category": "system",
+    },
+    "TOWER_ADMIN_ALERTS": {
+        "name": "Enable Tower Administrator Alerts",
+        "description": "Allow Tower to email Admin users for system events that may require attention",
+        "default": TOWER_ADMIN_ALERTS,
+        "type": "bool",
+        "category": "system",
+    },
+    "TOWER_URL_BASE": {
+        "name": "Base URL of the Tower host",
+        "description": "This is used by services like Notifications to render a valid url to the Tower host",
+        "default": TOWER_URL_BASE,
+        "type": "string",
+        "category": "system",
+    },
+    "LICENSE": {
+        "name": "Tower License",
+        "description": "Controls what features and functionality is enabled in Tower.",
+        "default": "{}",
+        "type": "string",
+        "category": "system",
+    },
+}
 # Logging configuration.
 LOGGING = {
     'version': 1,
@@ -838,3 +1002,4 @@ LOGGING = {
         },
     }
 }
+

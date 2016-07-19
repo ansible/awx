@@ -16,6 +16,12 @@ from awx.main.models.ad_hoc_commands import * # noqa
 from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
+from awx.main.models.configuration import * # noqa
+from awx.main.models.rbac import * # noqa
+from awx.main.models.mixins import * # noqa
+from awx.main.models.notifications import * # noqa
+from awx.main.models.fact import * # noqa
+from awx.main.models.label import * # noqa
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
@@ -32,8 +38,42 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User # noqa
 from awx.main.access import * # noqa
+
+
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
+User.add_to_class('accessible_objects', user_accessible_objects)
+User.add_to_class('admin_role', user_admin_role)
+
+@property
+def user_get_organizations(user):
+    return Organization.objects.filter(member_role__members=user)
+
+@property
+def user_get_admin_of_organizations(user):
+    return Organization.objects.filter(admin_role__members=user)
+
+@property
+def user_get_auditor_of_organizations(user):
+    return Organization.objects.filter(auditor_role__members=user)
+
+User.add_to_class('organizations', user_get_organizations)
+User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
+User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
+
+@property
+def user_is_system_auditor(user):
+    return Role.singleton('system_auditor').members.filter(id=user.id).exists()
+
+@user_is_system_auditor.setter
+def user_is_system_auditor(user, tf):
+    if user.id:
+        if tf:
+            Role.singleton('system_auditor').members.add(user)
+        else:
+            Role.singleton('system_auditor').members.remove(user)
+
+User.add_to_class('is_system_auditor', user_is_system_auditor)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals # noqa
@@ -55,6 +95,11 @@ activity_stream_registrar.connect(Job)
 activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(JobHostSummary)
 # activity_stream_registrar.connect(JobEvent)
-#activity_stream_registrar.connect(Profile)
+# activity_stream_registrar.connect(Profile)
 activity_stream_registrar.connect(Schedule)
 activity_stream_registrar.connect(CustomInventoryScript)
+activity_stream_registrar.connect(TowerSettings)
+activity_stream_registrar.connect(NotificationTemplate)
+activity_stream_registrar.connect(Notification)
+activity_stream_registrar.connect(Label)
+activity_stream_registrar.connect(User)

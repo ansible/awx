@@ -1,0 +1,32 @@
+@import "awx/ui/client/src/shared/layouts/one-plus-one.less";
+
+.PortalMode-container{
+	.OnePlusOne-container;
+}
+
+.PortalMode-panel--left{
+	.OnePlusOne-panel--left;
+}
+.PortalMode-panel--right{
+	.OnePlusOne-panel--right;
+	.List-tableHeader:last-of-type{
+		text-align:left;
+	}
+}
+.PortalMode-panelHeader{
+	.OnePlusOne-panelHeader;
+}
+.PortalMode-filterHolder {
+	position: absolute;
+	right: 35px;
+	display: flex;
+	align-items: center;
+  	justify-content: center;
+
+    .btn.btn-xs {
+        padding: 1px 10px;
+    }
+}
+.PortalMode-refresh {
+	margin-left: 10px;
+}

@@ -40,7 +40,7 @@
                         var newOption = {};
 
                         newOption.type = "github";
-                        newOption.icon = "fa-github";
+                        newOption.icon = "fa-github ThirdPartySignOn-icon--gitHub";
                         newOption.link = option.login_url;
                         newOption.tooltip = "Sign in with GitHub";
 

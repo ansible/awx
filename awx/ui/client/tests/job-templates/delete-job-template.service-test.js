@@ -1,26 +1,44 @@
 import '../support/node';
 
-import jobTemplates from 'job-templates/main';
-import {describeModule} from '../support/describe-module';
+import jobTemplatesModule from 'job-templates/main';
+import RestStub from '../support/rest-stub';
 
-describeModule(jobTemplates.name)
-    .testService('deleteJobTemplate', function(test, restStub) {
+//import RestStub from '../support/rest-stub';
 
-        var service;
+describe('jobTemplates.service', function(){
+    var $httpBackend, jobTemplates, service, Rest, $q, $stateExtender;
 
-        test.withService(function(_service) {
-            service = _service;
-        });
+    before('instantiate RestStub', function(){
+    	Rest = new RestStub();
+    });
 
-        it('deletes the job template', function() {
-            var result = {};
+    beforeEach('instantiate the jobTemplates module', function(){
+    	angular.mock.module(jobTemplatesModule.name);
+    });
 
-            var actual = service();
+    beforeEach('mock dependencies', angular.mock.module(['$provide', function(_$provide_){
+        var $provide = _$provide_;
+    	$provide.value('GetBasePath', angular.noop);
+    	$provide.value('$stateExtender', {addState: angular.noop});
+    	$provide.value('Rest', Rest);
+    }]));
 
-            restStub.succeedOn('destroy', result);
-            restStub.flush();
+     beforeEach('put $q into the scope', window.inject(['$q', function($q){
+    	Rest.$q = $q;
+    }]))
 
-            expect(actual).to.eventually.equal(result);
+    beforeEach('inject real dependencies', inject(function($injector){
+     	$httpBackend = $injector.get('$httpBackend');
+     	service = $injector.get('deleteJobTemplate');
+    }));
 
+    describe('deleteJobTemplate', function(){
+       	it('deletes a job template', function() {
+       		var result = {};
+       		var actual = service.deleteJobTemplate(1);
+    
+        	$httpBackend.when('DELETE', 'url').respond(200)
+        	expect(actual).to.eventually.equal(result);
         });
     });
+});

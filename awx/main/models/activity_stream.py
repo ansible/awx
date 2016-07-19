@@ -16,6 +16,7 @@ class ActivityStream(models.Model):
 
     class Meta:
         app_label = 'main'
+        ordering = ('pk',)
 
     OPERATION_CHOICES = [
         ('create', _('Entity Created')),
@@ -53,6 +54,10 @@ class ActivityStream(models.Model):
     ad_hoc_command = models.ManyToManyField("AdHocCommand", blank=True)
     schedule = models.ManyToManyField("Schedule", blank=True)
     custom_inventory_script = models.ManyToManyField("CustomInventoryScript", blank=True)
+    notification_template = models.ManyToManyField("NotificationTemplate", blank=True)
+    notification = models.ManyToManyField("Notification", blank=True)
+    label = models.ManyToManyField("Label", blank=True)
+    role = models.ManyToManyField("Role", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))

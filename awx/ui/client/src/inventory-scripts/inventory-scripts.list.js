@@ -9,6 +9,7 @@
 export default function(){
     return {
         name:  'inventory_scripts' ,
+        listTitle: 'Inventory Scripts',
         iterator: 'inventory_script',
         index: false,
         hover: false,
@@ -39,24 +40,22 @@ export default function(){
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCustomInv()',
-                awToolTip: 'Create a new credential'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new custom inventory',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-2 col-sm-3 col-xs-3',
+
             edit: {
                 ngClick: "editCustomInv(inventory_script.id)",
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
-                awToolTip: 'Edit credential',
+                awToolTip: 'Edit inventory script',
                 dataPlacement: 'top'
             },
             "delete": {
@@ -64,7 +63,7 @@ export default function(){
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',
-                awToolTip: 'Delete credential',
+                awToolTip: 'Delete inventory script',
                 dataPlacement: 'top'
             }
         }

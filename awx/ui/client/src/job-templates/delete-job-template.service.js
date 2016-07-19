@@ -4,23 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
- var rest, getBasePath;
+export default ['Rest', 'GetBasePath', function(Rest, GetBasePath){
+    return {
+        deleteJobTemplate: function(id){
+            var url = GetBasePath('job_templates');
 
-export default
-    [   'Rest',
-        'GetBasePath',
-        function(_rest, _getBasePath) {
-            rest = _rest;
-            getBasePath = _getBasePath;
-            return deleteJobTemplate;
+            url = url + id;
+
+            Rest.setUrl(url);
+            return Rest.destroy();
         }
-    ];
-
-function deleteJobTemplate(id) {
-  var url = getBasePath('job_templates');
-
-    url = url + id;
-
-    rest.setUrl(url);
-    return rest.destroy();
-}
+    };
+}];

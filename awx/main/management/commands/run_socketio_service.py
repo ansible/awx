@@ -96,7 +96,7 @@ class SocketController(object):
             if socket_session and socket_session.is_valid():
                 try:
                     socket.send_packet(packet)
-                except Exception, e:
+                except Exception as e:
                     logger.error("Error sending client packet to %s: %s" % (str(session_id), str(packet)))
                     logger.error("Error was: " + str(e))
 
@@ -116,7 +116,7 @@ class SocketController(object):
                 if socket:
                     try:
                         socket.send_packet(packet)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error("Error sending client packet to %s: %s" % (str(socket_session.session_id), str(packet)))
                         logger.error("Error was: " + str(e))
 
@@ -129,18 +129,18 @@ socketController = SocketController(SocketSessionManager())
 #
 # Socket session is attached to self.session['socket_session']
 # self.session and self.socket.session point to the same dict
-# 
+#
 class TowerBaseNamespace(BaseNamespace):
 
     def get_allowed_methods(self):
         return ['recv_disconnect']
-    
+
     def get_initial_acl(self):
         request_token = self._get_request_token()
         if request_token:
-            # (1) This is the first time the socket has been seen (first 
+            # (1) This is the first time the socket has been seen (first
             # namespace joined).
-            # (2) This socket has already been seen (already joined and maybe 
+            # (2) This socket has already been seen (already joined and maybe
             # left a namespace)
             #
             # Note: Assume that the user token is valid if the session is found
@@ -168,7 +168,7 @@ class TowerBaseNamespace(BaseNamespace):
             if k == "Token":
                 token_actual = urllib.unquote_plus(v).decode().replace("\"","")
                 return token_actual
-        except Exception, e:
+        except Exception as e:
             logger.error("Exception validating user: " + str(e))
             return False
         return False

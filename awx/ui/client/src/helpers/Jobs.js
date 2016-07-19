@@ -14,7 +14,7 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
     angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-        'JobSubmissionHelper', 'LogViewerHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
+        'JobSubmissionHelper', 'StandardOutHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
 
     /**
      *  JobsControllerInit({ scope: $scope });
@@ -22,12 +22,11 @@ export default
      *  Initialize calling scope with all the bits required to support a jobs list
      *
      */
-    .factory('JobsControllerInit', ['$location', 'Find', 'DeleteJob', 'RelaunchJob', 'LogViewer', '$window',
-        function($location, Find, DeleteJob, RelaunchJob, LogViewer, $window) {
+    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob',
+        function($state, Find, DeleteJob, RelaunchJob) {
             return function(params) {
                 var scope = params.scope,
                     iterator = (params.iterator) ? params.iterator : scope.iterator;
-                    //base = $location.path().replace(/^\//, '').split('/')[0];
 
                 scope.deleteJob = function(id) {
                     DeleteJob({ scope: scope, id: id });
@@ -70,53 +69,33 @@ export default
                 };
 
                 scope.refreshJobs = function() {
-                    // if (base !== 'jobs') {
-                        scope.search(iterator);
-                    // }
-
+                    scope.search(iterator);
                 };
 
-                scope.viewJobLog = function(id) {
-                    var list, job;
-                    if (scope.completed_jobs) {
-                        list = scope.completed_jobs;
+                scope.viewJobDetails = function(job) {
+
+                    var goToJobDetails = function(state) {
+                        $state.go(state, {id: job.id}, {reload:true});
+                    };
+
+                    switch(job.type) {
+                        case 'job':
+                            goToJobDetails('jobDetail');
+                            break;
+                        case 'ad_hoc_command':
+                            goToJobDetails('adHocJobStdout');
+                            break;
+                        case 'system_job':
+                            goToJobDetails('managementJobStdout');
+                            break;
+                        case 'project_update':
+                            goToJobDetails('scmUpdateStdout');
+                            break;
+                        case 'inventory_update':
+                            goToJobDetails('inventorySyncStdout');
+                            break;
                     }
-                    else if (scope.running_jobs) {
-                        list = scope.running_jobs;
-                    }
-                    else if (scope.queued_jobs) {
-                        list = scope.queued_jobs;
-                    }
-                    else if (scope.jobs) {
-                        list = scope.jobs;
-                    }
-                    else if(scope.all_jobs){
-                        list = scope.all_jobs;
-                    }
-                    else if(scope.portal_jobs){
-                        list=scope.portal_jobs;
-                    }
-                    job = Find({ list: list, key: 'id', val: id });
-                    if (job.type === 'job') {
-                        if(scope.$parent.portalMode===true){
-                            $window.open('/#/jobs/' + job.id, '_blank');
-                        }
-                        else {
-                            $location.url('/jobs/' + job.id);
-                        }
-                    } else if (job.type === 'ad_hoc_command') {
-                        if(scope.$parent.portalMode===true){
-                            $window.open('/#/ad_hoc_commands/' + job.id, '_blank');
-                        }
-                        else {
-                            $location.url('/ad_hoc_commands/' + job.id);
-                        }
-                    } else {
-                        LogViewer({
-                            scope: scope,
-                            url: job.url
-                        });
-                    }
+
                 };
             };
         }
@@ -178,126 +157,7 @@ export default
         }
     ])
 
-    .factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
-        function (Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary) {
-            return function (params) {
-                // Display status info in a modal dialog- called from inventory edit page
-
-                var job_id = params.job_id,
-                    generator = GenerateForm,
-                    form = JobSummary,
-                    scope, ww, wh, x, y, maxrows, url, html;
-
-                html = '<div id=\"status-modal-dialog\" title=\"Job ' + job_id + '\">' +
-                    '<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n';
-
-                $('#inventory-modal-container').empty().append(html);
-
-                scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
-
-                // Set modal dimensions based on viewport width
-                ww = $(document).width();
-                wh = $('body').height();
-                if (ww > 1199) {
-                    // desktop
-                    x = 675;
-                    y = (750 > wh) ? wh - 20 : 750;
-                    maxrows = 20;
-                } else if (ww <= 1199 && ww >= 768) {
-                    x = 550;
-                    y = (620 > wh) ? wh - 15 : 620;
-                    maxrows = 15;
-                } else {
-                    x = (ww - 20);
-                    y = (500 > wh) ? wh : 500;
-                    maxrows = 10;
-                }
-
-                // Create the modal
-                $('#status-modal-dialog').dialog({
-                    buttons: {
-                        'OK': function () {
-                            $(this).dialog('close');
-                        }
-                    },
-                    modal: true,
-                    width: x,
-                    height: y,
-                    autoOpen: false,
-                    closeOnEscape: false,
-                    create: function () {
-                        // fix the close button
-                        $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
-                            .empty().attr({
-                                'class': 'close'
-                            }).text('x');
-                        // fix the OK button
-                        $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-buttonset button:first')
-                            .attr({
-                                'class': 'btn btn-primary'
-                            });
-                    },
-                    resizeStop: function () {
-                        // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
-                        var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]'),
-                            titleHeight = dialog.find('.ui-dialog-titlebar').outerHeight(),
-                            buttonHeight = dialog.find('.ui-dialog-buttonpane').outerHeight(),
-                            content = dialog.find('#status-modal-dialog');
-                        content.width(dialog.width() - 28);
-                        content.css({ height: (dialog.height() - titleHeight - buttonHeight - 10) });
-                    },
-                    close: function () {
-                        // Destroy on close
-                        $('.tooltip').each(function () {
-                            // Remove any lingering tooltip <div> elements
-                            $(this).remove();
-                        });
-                        $('.popover').each(function () {
-                            // remove lingering popover <div> elements
-                            $(this).remove();
-                        });
-                        $('#status-modal-dialog').dialog('destroy');
-                        $('#inventory-modal-container').empty();
-                    },
-                    open: function () {
-                        Wait('stop');
-                    }
-                });
-
-                function calcRows(content) {
-                    var n = content.match(/\n/g),
-                        rows = (n) ? n.length : 1;
-                    return (rows > maxrows) ? 20 : rows;
-                }
-
-                Wait('start');
-                url = GetBasePath('jobs') + job_id + '/';
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function (data) {
-                        var cDate;
-                        scope.id = data.id;
-                        scope.name = data.name;
-                        scope.status = data.status;
-                        scope.result_stdout = data.result_stdout;
-                        scope.result_traceback = data.result_traceback;
-                        scope.stdout_rows = calcRows(scope.result_stdout);
-                        scope.traceback_rows = calcRows(scope.result_traceback);
-                        cDate = new Date(data.created);
-                        scope.created = FormatDate(cDate);
-                        $('#status-modal-dialog').dialog('open');
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Attempt to load job failed. GET returned status: ' + status });
-                    });
-            };
-
-        }
-    ])
-
-
-    .factory('JobsListUpdate', ['Rest', function(Rest) {
+    .factory('JobsListUpdate', [function() {
         return function(params) {
             var scope = params.scope,
                 parent_scope = params.parent_scope,
@@ -329,20 +189,6 @@ export default
                     }
                     return true;
                 });
-                //Set the name link
-                if (item.type === "inventory_update") {
-                    Rest.setUrl(item.related.inventory_source);
-                    Rest.get()
-                        .success(function(data) {
-                            itm.nameHref = "/home/groups?id=" + data.group;
-                        });
-                }
-                else if (item.type === "project_update") {
-                    itm.nameHref = "/projects/" + item.project;
-                }
-                else if (item.type === "job") {
-                    itm.nameHref = "";
-                }
 
                 if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
                     itm.status_tip = itm.status_label + '. Click for details.';
@@ -369,35 +215,33 @@ export default
      *  Called from JobsList controller to load each section or list on the page
      *
      */
-    .factory('LoadJobsScope', ['$routeParams', '$location', '$compile', 'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit', 'JobsListUpdate', 'SearchWidget',
-        function($routeParams, $location, $compile, SearchInit, PaginateInit, GenerateList, JobsControllerInit, JobsListUpdate, SearchWidget) {
+    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile',
+    'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit',
+    'JobsListUpdate',
+        function($stateParams, $location, $compile, SearchInit, PaginateInit,
+            GenerateList, JobsControllerInit, JobsListUpdate) {
         return function(params) {
             var parent_scope = params.parent_scope,
                 scope = params.scope,
                 list = params.list,
                 id = params.id,
                 url = params.url,
-                pageSize = params.pageSize || 5,
+                pageSize = params.pageSize || 10,
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 search_params = params.searchParams,
-                spinner = (params.spinner === undefined) ? true : params.spinner,
-                e, html, key;
+                spinner = (params.spinner === undefined) ? true : params.spinner, key;
 
-            // Add the search widget. We want it arranged differently, so we're injecting and compiling it separately
-            html = SearchWidget({
-                iterator: list.iterator,
-                template: params.list,
-                includeSize: false
-            });
-            e = angular.element(document.getElementById(id + '-search-container')).append(html);
-            $compile(e)(scope);
+            var buildTooltips = function(data){
+                data.forEach((val) => {
+                    val.status_tip = 'Job ' + val.status + ". Click for details.";
+                });
+            };
 
             GenerateList.inject(list, {
                 mode: 'edit',
                 id: id,
-                breadCrumbs: false,
                 scope: scope,
-                showSearch: false
+                title: false
             });
 
             SearchInit({
@@ -422,16 +266,14 @@ export default
             scope.$on('PostRefresh', function(){
                 JobsControllerInit({ scope: scope, parent_scope: parent_scope });
                 JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
+                buildTooltips(scope.jobs);
                 parent_scope.$emit('listLoaded');
-                // setTimeout(function(){
-                //     scope.$apply();
-                // }, 300);
             });
 
             if (base === 'jobs' && list.name === 'all_jobs') {
-                if ($routeParams.id__int) {
+                if ($stateParams.id__int) {
                     scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $routeParams.id__int;
+                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
                     scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
                 }
             }
@@ -445,8 +287,10 @@ export default
         };
     }])
 
-    .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Prompt', 'Alert',
-    function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert){
+    .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait',
+    'ProcessErrors', 'Prompt', 'Alert', '$filter',
+    function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
+        $filter){
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -476,11 +320,11 @@ export default
             if (job.status === 'pending' || job.status === 'running' || job.status === 'waiting') {
                 url = job.related.cancel;
                 action_label = 'cancel';
-                hdr = 'Cancel Job';
+                hdr = 'Cancel';
             } else {
                 url = job.url;
                 action_label = 'delete';
-                hdr = 'Delete Job';
+                hdr = 'Delete';
             }
 
             action = function () {
@@ -497,9 +341,12 @@ export default
                                 scope.search(scope.iterator);
                             }
                         })
-                        .error(function() {
+                        .error(function(obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
+                            if (status === 403) {
+                                Alert('Error', obj.detail);
+                            }
                             // Ignore the error. The job most likely already finished.
                             // ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             //    ' failed. POST returned status: ' + status });
@@ -515,9 +362,12 @@ export default
                                 scope.search(scope.iterator);
                             }
                         })
-                        .error(function () {
+                        .error(function (obj, status) {
                             Wait('stop');
                             $('#prompt-modal').modal('hide');
+                            if (status === 403) {
+                                Alert('Error', obj.detail);
+                            }
                             // Ignore the error. The job most likely already finished.
                             //ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             //    ' failed. DELETE returned status: ' + status });
@@ -537,12 +387,13 @@ export default
                 scope.removeCancelJob();
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
-                var body;
-                body = (action_label === 'cancel' || job.status === 'new') ? "Submit the request to cancel" : "Delete";
+                var cancelBody = "<div class=\"Prompt-bodyQuery\">Submit the request to cancel?</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">Are you sure you want to delete the job below?</div><div class=\"Prompt-bodyTarget\">#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
                 Prompt({
                     hdr: hdr,
-                    body: "<div class=\"alert alert-info\">" + body + " job #" + id + " " + job.name  + "?</div>",
-                    action: action
+                    body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
+                    action: action,
+                    actionText: (action_label === 'cancel' || job.status === 'new') ? "YES" : "DELETE"
                 });
             });
 
@@ -595,11 +446,11 @@ export default
         };
     }])
 
-    .factory('RelaunchPlaybook', ['PlaybookRun', function(PlaybookRun) {
+    .factory('RelaunchPlaybook', ['InitiatePlaybookRun', function(InitiatePlaybookRun) {
         return function(params) {
             var scope = params.scope,
                 id = params.id;
-            PlaybookRun({ scope: scope, id: id });
+            InitiatePlaybookRun({ scope: scope, id: id, relaunch: true });
         };
     }])
 

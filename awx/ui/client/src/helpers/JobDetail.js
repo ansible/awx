@@ -40,9 +40,9 @@ export default
     angular.module('JobDetailHelper', ['Utilities', 'RestServices', 'ModalDialog'])
 
     .factory('DigestEvent', ['$rootScope', '$log', 'UpdatePlayStatus', 'UpdateHostStatus', 'AddHostResult',
-        'GetElapsed', 'UpdateTaskStatus', 'DrawGraph', 'LoadHostSummary', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
+        'GetElapsed', 'UpdateTaskStatus', 'JobIsFinished', 'AddNewTask', 'AddNewPlay',
     function($rootScope, $log, UpdatePlayStatus, UpdateHostStatus, AddHostResult, GetElapsed,
-        UpdateTaskStatus, DrawGraph, LoadHostSummary, JobIsFinished, AddNewTask, AddNewPlay) {
+        UpdateTaskStatus, JobIsFinished, AddNewTask, AddNewPlay) {
         return function(params) {
 
             var scope = params.scope,
@@ -185,7 +185,7 @@ export default
         };
     }])
 
-    .factory('GetElapsed', [ function() {
+    .factory('GetElapsed', [function() {
         return function(params) {
             var start = params.start,
                 end = params.end,
@@ -235,7 +235,7 @@ export default
                 }
                 if (newActivePlay) {
                     scope.activePlay = newActivePlay;
-                    scope.jobData.plays[scope.activePlay].playActiveClass = 'active';
+                    scope.jobData.plays[scope.activePlay].playActiveClass = 'JobDetail-tableRow--selected';
                 }
             }
         };
@@ -265,7 +265,7 @@ export default
                 }
                 if (newActiveTask) {
                     scope.activeTask = newActiveTask;
-                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'active';
+                    scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].taskActiveClass = 'JobDetail-tableRow--selected';
                 }
             }
         };
@@ -299,7 +299,7 @@ export default
         };
     }])
 
-    .factory('AddNewTask', ['DrawGraph', 'UpdatePlayStatus', 'SetActivePlay', 'SetActiveTask', function(DrawGraph, UpdatePlayStatus, SetActivePlay, SetActiveTask) {
+    .factory('AddNewTask', ['UpdatePlayStatus', 'SetActivePlay', 'SetActiveTask', function(UpdatePlayStatus, SetActivePlay, SetActiveTask) {
         return function(params) {
             var scope = params.scope,
                 event = params.event,
@@ -351,27 +351,28 @@ export default
         };
     }])
 
-    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', function(GetElapsed, Empty, JobIsFinished) {
+    .factory('UpdateJobStatus', ['GetElapsed', 'Empty', 'JobIsFinished', 'longDateFilter', function(GetElapsed, Empty, JobIsFinished, longDateFilter) {
         return function(params) {
             var scope = params.scope,
                 failed = params.failed,
                 modified = params.modified,
-                started =  params.started;
+                started =  params.started,
+                finished = params.finished;
 
             if (failed && scope.job_status.status !== 'failed' && scope.job_status.status !== 'error' &&
                 scope.job_status.status !== 'canceled') {
                 scope.job_status.status = 'failed';
             }
             if (JobIsFinished(scope) && !Empty(modified)) {
-                scope.job_status.finished = modified;
+                scope.job_status.finished = longDateFilter(modified);
             }
             if (!Empty(started) && Empty(scope.job_status.started)) {
-                scope.job_status.started = started;
+                scope.job_status.started = longDateFilter(modified);
             }
             if (!Empty(scope.job_status.finished) && !Empty(scope.job_status.started)) {
                 scope.job_status.elapsed = GetElapsed({
-                    start: scope.job_status.started,
-                    end: scope.job_status.finished
+                    start: started,
+                    end: finished
                 });
             }
         };
@@ -485,17 +486,7 @@ export default
                 created = params.created,
                 msg = params.message,
                 item = params.item,
-                counter = params.counter,
-                h, host;
-
-            /*
-            scope.host_summary.ok += (status === 'successful') ? 1 : 0;
-            scope.host_summary.changed += (status === 'changed') ? 1 : 0;
-            scope.host_summary.unreachable += (status === 'unreachable') ? 1 : 0;
-            scope.host_summary.failed += (status === 'failed') ? 1 : 0;
-            scope.host_summary.total  = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                scope.host_summary.failed;
-            */
+                counter = params.counter;
 
             if (scope.jobData.hostSummaries[host_id] !== undefined) {
                 scope.jobData.hostSummaries[host_id].ok += (status === 'successful') ? 1 : 0;
@@ -517,29 +508,6 @@ export default
                     status: (status === 'failed' || status === 'unreachable') ? 'failed' : 'successful'
                 };
             }
-
-            scope.host_summary.ok = 0;
-            scope.host_summary.changed = 0;
-            scope.host_summary.unreachable = 0;
-            scope.host_summary.failed = 0;
-            for (h in scope.jobData.hostSummaries) {
-                host = scope.jobData.hostSummaries[h];
-                if (host.ok > 0 && host.failed === 0 && host.unreachable === 0 && host.changed === 0) {
-                    scope.host_summary.ok++;
-                }
-                if (host.changed > 0 && host.failed === 0 && host.unreachable === 0) {
-                    scope.host_summary.changed++;
-                }
-                if (host.failed > 0) {
-                    scope.host_summary.failed++;
-                }
-                if (host.unreachable > 0) {
-                    scope.host_summary.unreachable++;
-                }
-            }
-            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed + scope.host_summary.unreachable +
-                scope.host_summary.failed;
-
             UpdateTaskStatus({
                 scope: scope,
                 task_id: task_id,
@@ -700,12 +668,12 @@ export default
                     task.missingPct = task.missingPct - diff;
                 }
             }
-            task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block', 'width': task.successfulPct + "%" } : { 'display': 'none' };
-            task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block', 'width': task.changedPct + "%" } : { 'display': 'none' };
-            task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block', 'width': task.skippedPct + "%" } : { 'display': 'none' };
-            task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block', 'width': task.failedPct + "%" } : { 'display': 'none' };
-            task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block', 'width': task.unreachablePct + "%" } : { 'display': 'none' };
-            task.missingStyle = (task.missingPct > 0) ? { 'display': 'inline-block', 'width': task.missingPct + "%" } : { 'display': 'none' };
+            task.successfulStyle = (task.successfulPct > 0) ? { 'display': 'inline-block' }: { 'display': 'none' };
+            task.changedStyle = (task.changedPct > 0) ? { 'display': 'inline-block'} : { 'display': 'none' };
+            task.skippedStyle = (task.skippedPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.failedStyle = (task.failedPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.unreachableStyle = (task.unreachablePct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
+            task.missingStyle = (task.missingPct > 0) ? { 'display': 'inline-block' } : { 'display': 'none' };
         };
     }])
 
@@ -719,7 +687,7 @@ export default
             scope.plays = [];
 
             url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order=id';
-            url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
+            url += (scope.search_play_name) ? '&play__icontains=' + encodeURIComponent(scope.search_play_name) : '';
             url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
             scope.playsLoading = true;
             Rest.setUrl(url);
@@ -793,7 +761,7 @@ export default
             scope.selectedPlay = id;
             scope.plays.forEach(function(play, idx) {
                 if (play.id === scope.selectedPlay) {
-                    scope.plays[idx].playActiveClass = 'active';
+                    scope.plays[idx].playActiveClass = 'JobDetail-tableRow--selected';
                 }
                 else {
                     scope.plays[idx].playActiveClass = '';
@@ -816,13 +784,11 @@ export default
                 url, play;
 
             scope.tasks = [];
-
             if (scope.selectedPlay) {
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
-                url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
+                url += (scope.search_task_name) ? '&task__icontains=' + encodeURIComponent(scope.search_task_name) : '';
                 url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
                 url += '&page_size=' + scope.tasksMaxRows + '&order=id';
-
                 scope.plays.every(function(p, idx) {
                     if (p.id === scope.selectedPlay) {
                         play = scope.plays[idx];
@@ -931,397 +897,127 @@ export default
     }])
 
     // Call when the selected task needs to change
-    .factory('SelectTask', ['LoadHosts', function(LoadHosts) {
+    .factory('SelectTask', ['JobDetailService', function(JobDetailService) {
         return function(params) {
             var scope = params.scope,
-                id = params.id,
-                callback = params.callback;
+                id = params.id;
 
             scope.selectedTask = id;
             scope.tasks.forEach(function(task, idx) {
                 if (task.id === scope.selectedTask) {
-                    scope.tasks[idx].taskActiveClass = 'active';
+                    scope.tasks[idx].taskActiveClass = 'JobDetail-tableRow--selected';
                 }
                 else {
                     scope.tasks[idx].taskActiveClass = '';
                 }
             });
-
-            LoadHosts({
-                scope: scope,
-                callback: callback,
-                clear: true
-            });
-        };
-    }])
-
-    // Refresh the list of hosts
-    .factory('LoadHosts', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
-        return function(params) {
-            var scope = params.scope,
-                callback = params.callback,
-                url;
-
-            scope.hostResults = [];
-
-            if (scope.selectedTask) {
-                // If we have a selected task, then get the list of hosts
-                url = scope.job.related.job_events + '?parent=' + scope.selectedTask + '&';
-                url += (scope.search_host_name) ? 'host__name__icontains=' + scope.search_host_name + '&' : '';
-                url += (scope.search_host_status === 'failed') ? 'failed=true&' : '';
-                url += 'event__startswith=runner&page_size=' + scope.hostResultsMaxRows + '&order=host_name,counter';
-                scope.hostResultsLoading = true;
-                Rest.setUrl(url);
-                Rest.get()
-                    .success(function(data) {
-                        scope.next_host_results = data.next;
-                        scope.hostResults = [];
-                        data.results.forEach(function(event) {
-                            var status, status_text, item, msg;
-                            if (event.event === "runner_on_skipped") {
-                                status = 'skipped';
-                            }
-                            else if (event.event === "runner_on_unreachable") {
-                                status = 'unreachable';
-                            }
-                            else {
-                                status = (event.failed) ? 'failed' : (event.changed) ? 'changed' : 'successful';
-                            }
-                            switch(status) {
-                                case "successful":
-                                    status_text = 'OK';
-                                    break;
-                                case "changed":
-                                    status_text = "Changed";
-                                    break;
-                                case "failed":
-                                    status_text = "Failed";
-                                    break;
-                                case "unreachable":
-                                    status_text = "Unreachable";
-                                    break;
-                                case "skipped":
-                                    status_text = "Skipped";
-                            }
-
-                            if (event.event_data && event.event_data.res) {
-                                item = event.event_data.res.item;
-                                if (typeof item === "object") {
-                                    item = JSON.stringify(item);
-                                    item = item.replace(/\"/g,'').replace(/:/g,': ').replace(/,/g,', ');
-                                }
-                            }
-
-                            msg = '';
-                            if (event.event_data && event.event_data.res) {
-                                if (typeof event.event_data.res === 'object') {
-                                    msg = event.event_data.res.msg;
-                                } else {
-                                    msg = event.event_data.res;
-                                }
-                            }
-
-                            if (event.event !== "runner_on_no_hosts" && (!event.event_data || (!event.event_data.event_loop || event.event_data.event_loop === null))) {
-                                scope.hostResults.push({
-                                    id: event.id,
-                                    status: status,
-                                    status_text: status_text,
-                                    host_id: event.host,
-                                    task_id: event.parent,
-                                    name: event.event_data.host,
-                                    created: event.created,
-                                    msg: msg,
-                                    item: item
-                                });
-                            }
-                        });
-
-                        scope.hostResultsLoading = false;
-
-                        if (callback) {
-                            scope.$emit(callback);
-                        }
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + '. GET returned: ' + status });
-                    });
-            }
-            else {
-                if (callback) {
-                    scope.$emit(callback);
+            if (scope.selectedTask !== null){
+                params = {
+                    parent: scope.selectedTask,
+                    event__startswith: 'runner',
+                    page_size: scope.hostResultsMaxRows,
+                    order: 'host_name,counter',
+                };
+                if (scope.search_host_status === 'failed'){
+                    params.failed = true;
                 }
-                //$('#hosts-table-detail').mCustomScrollbar("update");
-            }
-        };
-    }])
-
-    // Refresh the list of hosts in the hosts summary section
-    .factory('ReloadHostSummaryList', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
-        return function(params) {
-            var scope = params.scope,
-                callback = params.callback,
-                url;
-
-            url = scope.job.related.job_host_summaries + '?';
-            url += (scope.search_host_summary_name) ? 'host_name__icontains=' + scope.search_host_summary_name + '&': '';
-            url += (scope.search_host_summary_status === 'failed') ? 'failed=true&' : '';
-            url += '&page_size=' + scope.hostSummariesMaxRows + '&order=host_name';
-
-            scope.hosts = [];
-            scope.hostSummariesLoading = true;
-
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    scope.next_host_summaries = data.next;
-                    scope.hosts = [];
-                    data.results.forEach(function(event) {
-                        var name;
-                        if (event.host_name) {
-                            name = event.host_name;
-                        }
-                        else {
-                            name = "<deleted host>";
-                        }
-                        scope.hosts.push({
-                            id: name,
-                            name: event.host_name,
-                            ok: event.ok,
-                            changed: event.changed,
-                            unreachable: event.dark,
-                            failed: event.failures,
-                            status: (event.failed) ? 'failed' : 'successful'
-                        });
-                    });
-
-                    scope.hostSummariesLoading = false;
-
-                    if (callback) {
-                        scope.$emit(callback);
-                    }
-                })
-                .error(function(data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
+                JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+                    scope.hostResults = JobDetailService.processHostEvents(res.results);
+                    scope.hostResultsLoading = false;
                 });
+            }
+            else{
+                scope.hostResults = [];
+                scope.hostResultsLoading = false;
+            }
         };
     }])
-
-    .factory('LoadHostSummary', [ function() {
-        return function(params) {
-            var scope = params.scope,
-                data = params.data,
-                host;
-            scope.host_summary.ok = 0;
-            for (host in data.ok) {
-                if (!data.changed[host] && !data.dark[host] && !data.failures[host]) {
-                    scope.host_summary.ok += 1;
-                }
-            }
-            scope.host_summary.changed = 0;
-            for (host in data.changed) {
-                if (!data.dark[host] && !data.failures[host]) {
-                    scope.host_summary.changed += 1;
-                }
-            }
-            scope.host_summary.unreachable = 0;
-            for (host in data.dark) {
-                scope.host_summary.unreachable += 1;
-            }
-            scope.host_summary.failed = 0;
-            for (host in data.failures) {
-                scope.host_summary.failed += 1;
-            }
-            scope.host_summary.total = scope.host_summary.ok + scope.host_summary.changed +
-                scope.host_summary.unreachable + scope.host_summary.failed;
-        };
-    }])
-
 
     .factory('DrawGraph', ['DonutChart', function(DonutChart) {
         return function(params) {
-            var scope = params.scope,
-                resize = params.resize,
-                width, height, svg_height, svg_width, svg_radius, graph_data = [];
-
+            var count = params.count,
+                graph_data = [];
             // Ready the data
-            if (scope.host_summary.ok) {
+            if (count.ok.length > 0) {
                 graph_data.push({
                     label: 'OK',
-                    value: scope.host_summary.ok,
-                    color: '#60D66F'
+                    value: count.ok.length,
+                    color: '#5CB85C'
                 });
             }
-            if (scope.host_summary.changed) {
+            if (count.changed.length > 0) {
                 graph_data.push({
-                    label: 'Changed',
-                    value: scope.host_summary.changed,
+                    label: 'CHANGED',
+                    value: count.changed.length,
                     color: '#FF9900'
                 });
             }
-            if (scope.host_summary.unreachable) {
+            if (count.unreachable.length > 0) {
                 graph_data.push({
-                    label: 'Unreachable',
-                    value: scope.host_summary.unreachable,
+                    label: 'UNREACHABLE',
+                    value: count.unreachable.length,
                     color: '#FF0000'
                 });
             }
-            if (scope.host_summary.failed) {
+            if (count.failures.length > 0) {
                 graph_data.push({
-                    label: 'Failed',
-                    value: scope.host_summary.failed,
-                    color: '#ff5850'
+                    label: 'FAILED',
+                    value: count.failures.length,
+                    color: '#D9534F'
                 });
             }
-            scope.graph_data = graph_data;
-            var total_count = 0, gd_obj;
-            for (gd_obj in graph_data) {
-                total_count += graph_data[gd_obj].value;
-            }
-            scope.total_count_for_graph = total_count;
-            // Adjust the size
-            width = $('#job-summary-container .job_well').width();
-            height = $('#job-summary-container .job_well').height() - $('#summary-well-top-section').height() - $('#graph-section .header').outerHeight() - 80;
-            svg_radius = Math.min(width, height);
-            svg_width = width;
-            svg_height = height;
-            if (svg_height > 0 && svg_width > 0) {
-                if (!resize && $('#graph-section svg').length > 0) {
-                    // Donut3D.transition("completedHostsDonut", graph_data, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
-                    DonutChart({
-                        target: '#graph-section',
-                        height: height,
-                        width: width,
-                        data: graph_data,
-                        radius: svg_radius
-                    });
-                }
-                else {
-                    if ($('#graph-section svg').length > 0) {
-                        $('#graph-section svg').remove();
-                    }
-                    // svg = d3.select("#graph-section").append("svg").attr("width", svg_width).attr("height", svg_height);
-                    // svg.append("g").attr("id","completedHostsDonut");
-                    // Donut3D.draw("completedHostsDonut", graph_data, Math.floor(svg_width / 2), Math.floor(svg_height / 2) - 35, Math.floor(svg_radius * 0.50), Math.floor(svg_radius * 0.25), 18, 0.4);
-                    DonutChart({
-                        target: '#graph-section',
-                        height: height,
-                        width: width,
-                        data: graph_data,
-                        radius: svg_radius
-                    });
-                    $('#graph-section .header .legend').show();
-                }
-            }
+            DonutChart({
+                data: graph_data
+            });
         };
     }])
 
     .factory('DonutChart', [function() {
         return function(params) {
-            var target = params.target,
-                height = Math.max(params.height, 250),
-                width = Math.max(params.width, 250),
-                dataset = params.data,
-                outerRadius = Math.min(width, height) / 2,
-                innerRadius = (outerRadius/3),
-                svg, arc, pie, legend,
-                tooltip, path,
-                legendRectSize = 18,
-                legendSpacing = 4;
+            var dataset = params.data,
+                element = $("#graph-section"),
+                colors, total,job_detail_chart;
 
-            svg = d3.select(target)
-                .append('svg')
-                .data([dataset])
-                .attr('width', width)
-                .attr('height', height)
-                .append('g')
-                .attr('transform', 'translate(' + (width / 2) +
-                ',' + (height / 2) + ')');
-
-            arc = d3.svg.arc()
-                .innerRadius(outerRadius - innerRadius)
-                .outerRadius(outerRadius);
-
-            pie = d3.layout.pie()
-                .value(function(d) { return d.value; })
-                .sort(function() {return null; });
-
-            tooltip = d3.select(target)
-                .append('div')
-                .attr('class', 'donut-tooltip');
-
-            tooltip.append('div')
-                .attr('class', 'donut-tooltip-inner');
-
-            path = svg.selectAll('path')
-                .data(pie(dataset))
-                .enter()
-                .append('path')
-                .attr('d', arc)
-                .attr('fill', function(d) {
-                  return d.data.color;
-                });
-
-            path.on('mouseenter', function(d) {
-                var total = d3.sum(dataset.map(function(d) {
-                  return d.value;
-                }));
-
-                var label;
-                if (d.data.value === 1) {
-                    label = " host ";
-                } else {
-                    label = " hosts ";
-                }
-                var percent = Math.round(1000 * d.data.value / total) / 10;
-                tooltip.select('.donut-tooltip-inner').html(d.data.value + label + " (" +
-                    percent + "%) " + d.data.label + ".");
-                //.attr('style', 'color:white;font-family:');
-                tooltip.style('display', 'block');
-              });
-
-            path.on('mouseleave', function() {
-                tooltip.style('display', 'none');
-              });
-
-            path.on('mousemove', function() {
-                // d3.mouse() gives the coordinates of hte mouse, then add
-                // some offset to provide breathing room for hte tooltip
-                // based on the dimensions of the donut
-                tooltip.style('top', (d3.mouse(this)[1] + (height/5) + 'px'))
-                .style('left', (d3.mouse(this)[0] + (width/3) + 'px'));
+            colors = _.map(dataset, function(d){
+                return d.color;
             });
-
-          legend = svg.selectAll('.legend')
-              .data(pie(dataset))
-              .enter()
-              .append('g')
-              .attr('class', 'legend')
-              .attr('transform', function(d, i) {
-                  var height = legendRectSize + legendSpacing;
-                  var offset =  height * dataset.length / 2;
-                  var horz = -2 * legendRectSize;
-                  var vert = i * height - offset;
-                  return 'translate(' + horz + ',' + vert + ')';
-              });
-
-            legend.append('rect')
-              .attr('width', legendRectSize)
-              .attr('height', legendRectSize)
-              .attr('fill', function(d) {
-                return d.data.color;
-              })
-              .attr('stroke', function(d) {
-                return d.data.color;
-              });
-
-            legend.append('text')
-              .attr('x', legendRectSize + legendSpacing)
-              .attr('y', legendRectSize - legendSpacing)
-              .text(function(d) {
-                  return d.data.label;
-              });
+            total = d3.sum(dataset.map(function(d) {
+                  return d.value;
+            }));
+            job_detail_chart = nv.models.pieChart()
+                .margin({bottom: 15})
+                .x(function(d) {
+                    return d.label +': '+ Math.floor((d.value/total)*100) + "%";
+                })
+                .y(function(d) { return d.value; })
+                .showLabels(false)
+                .showLegend(true)
+                .growOnHover(false)
+                .labelThreshold(0.01)
+                .tooltipContent(function(x, y) {
+                    return '<p>'+x+'</p>'+ '<p>' +  Math.floor(y.replace(',','')) + ' HOSTS ' +  '</p>';
+                })
+                .color(colors);
+            job_detail_chart.legend.rightAlign(false);
+            job_detail_chart.legend.margin({top: 5, right: 450, left:0, bottom: 0});
+            d3.select(element.find('svg')[0])
+                .datum(dataset)
+                .transition().duration(350)
+                .call(job_detail_chart)
+                .style({
+                    "font-family": 'Open Sans',
+                    "font-style": "normal",
+                    "font-weight":400,
+                    "src": "url(/static/assets/OpenSans-Regular.ttf)",
+                    "width": 600,
+                    "height": 300,
+                    "color": '#848992'
+                });
+            d3.select(element.find(".nv-noData")[0])
+                .style({
+                    "text-anchor": 'start'
+                });
+            return job_detail_chart;
         };
     }])
 
@@ -1332,7 +1028,8 @@ export default
                 idx = 0,
                 result = [],
                 newKeys = [],
-                plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
+                //plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
+                plays = scope.jobData.plays,
                 filteredListX = [],
                 filteredListA = [],
                 filteredListB = [],
@@ -1421,7 +1118,8 @@ export default
 
             if (scope.activePlay && scope.jobData.plays[scope.activePlay]) {
 
-                tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
+                //tasks = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks));
+                tasks = scope.jobData.plays[scope.activePlay].tasks;
 
                 // Only draw tasks that are in the 'active' list
                 for (key in tasks) {
@@ -1495,7 +1193,8 @@ export default
             if (scope.activePlay && scope.activeTask && scope.jobData.plays[scope.activePlay] &&
                 scope.jobData.plays[scope.activePlay].tasks[scope.activeTask]) {
 
-                hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
+                //hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
+                hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults;
 
                 if (scope.search_host_name) {
                     for (key in hostResults) {
@@ -1556,88 +1255,20 @@ export default
         };
     }])
 
-    .factory('DrawHostSummaries', [ function() {
-        return function(params) {
-            var scope = params.scope,
-                result = [],
-                filteredListA = [],
-                filteredListB = [],
-                idx = 0,
-                hostSummaries,
-                key,
-                keys = Object.keys(scope.jobData.hostSummaries);
-            if (keys.length > 0) {
-                hostSummaries = JSON.parse(JSON.stringify(scope.jobData.hostSummaries));
-                if (scope.search_host_summary_name) {
-                    for (key in hostSummaries) {
-                        if (hostSummaries[key].name.indexOf(scope.search_host_summary_name) > 0) {
-                            filteredListA[key] = hostSummaries[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListA = hostSummaries;
-                }
-
-                if (scope.search_host_summary_status === 'failed') {
-                    for (key in filteredListA) {
-                        if (filteredListA[key].status === 'failed' || filteredListA[key].status === 'unreachable') {
-                            filteredListB[key] = filteredListA[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListB = filteredListA;
-                }
-
-                keys = Object.keys(filteredListB);
-
-                keys.sort(function(a,b) {
-                    if (filteredListB[a].name > filteredListB[b].name) {
-                        return 1;
-                    }
-                    if (filteredListB[a].name < filteredListB[b].name) {
-                        return -1;
-                    }
-                    // a must be equal to b
-                    return 0;
-                });
-
-                while (idx < keys.length && result.length < scope.hostSummariesMaxRows) {
-                    result.push(filteredListB[keys[idx]]);
-                    idx++;
-                }
-            }
-            setTimeout( function() {
-                scope.$apply( function() {
-                    scope.hosts = result;
-                });
-            });
-        };
-    }])
-
-    .factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults', 'DrawHostSummaries', 'DrawGraph',
-        function(DrawPlays, DrawTasks, DrawHostResults, DrawHostSummaries, DrawGraph) {
+    .factory('UpdateDOM', ['DrawPlays', 'DrawTasks', 'DrawHostResults',
+        function(DrawPlays, DrawTasks, DrawHostResults) {
         return function(params) {
             var scope = params.scope;
-
             if (!scope.pauseLiveEvents) {
                 DrawPlays({ scope: scope });
                 DrawTasks({ scope: scope });
                 DrawHostResults({ scope: scope });
             }
 
-            DrawHostSummaries({ scope: scope });
-
             setTimeout(function() {
                 scope.playsLoading = false;
                 scope.tasksLoading = false;
                 scope.hostResultsLoading = false;
-                scope.LoadHostSummaries = false;
             },100);
-
-            if (scope.host_summary.total > 0) {
-                DrawGraph({ scope: scope, resize: true });
-            }
         };
     }]);

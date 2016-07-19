@@ -15,7 +15,7 @@ from django.core.management.base import NoArgsCommand
 # AWX
 from awx.main.models import * # noqa
 from awx.main.queue import FifoQueue
-from awx.main.tasks import handle_work_error
+from awx.main.tasks import handle_work_error, handle_work_success
 from awx.main.utils import get_system_task_capacity
 
 # Celery
@@ -108,6 +108,8 @@ class SimpleDAG(object):
             return "inventory_update"
         elif type(obj) == ProjectUpdate:
             return "project_update"
+        elif type(obj) == SystemJob:
+            return "system_job"
         return "unknown"
 
     def get_dependencies(self, obj):
@@ -205,7 +207,15 @@ def rebuild_graph(message):
     # Create and process dependencies for new tasks
     for task in new_tasks:
         logger.debug("Checking dependencies for: %s" % str(task))
-        task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks) # TODO: other 'new' tasks? Need to investigate this scenario
+        try:
+            task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks)
+        except Exception, e:
+            logger.error("Failed processing dependencies for {}: {}".format(task, e))
+            task.status = 'failed'
+            task.job_explanation += 'Task failed to generate dependencies: {}'.format(e)
+            task.save()
+            task.socketio_emit_status("failed")
+            continue
         logger.debug("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:
             # We recalculate the created time for the moment to ensure the
@@ -265,14 +275,15 @@ def process_graph(graph, task_capacity):
                               [{'type': graph.get_node_type(n['node_object']),
                                 'id': n['node_object'].id} for n in node_dependencies]
             error_handler = handle_work_error.s(subtasks=dependent_nodes)
-            start_status = node_obj.start(error_callback=error_handler)
+            success_handler = handle_work_success.s(task_actual={'type': graph.get_node_type(node_obj),
+                                                                 'id': node_obj.id})
+            start_status = node_obj.start(error_callback=error_handler, success_callback=success_handler)
             if not start_status:
                 node_obj.status = 'failed'
                 if node_obj.job_explanation:
                     node_obj.job_explanation += ' '
                 node_obj.job_explanation += 'Task failed pre-start check.'
                 node_obj.save()
-                # TODO: Run error handler
                 continue
             remaining_volume -= impact
             running_impact += impact

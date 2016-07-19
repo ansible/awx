@@ -1,11 +1,13 @@
--r requirements.txt
-ansible
-# Based on django-jenkins==0.16.3, with a fix for properly importing coverage
-git+https://github.com/jlaska/django-jenkins.git@release_0.16.4#egg=django-jenkins
+ansible==1.9.4
 coverage
-pyflakes
+pyflakes==1.0.0 # Pinned until PR merges https://gitlab.com/pycqa/flake8/merge_requests/56
 pep8
 pylint
 flake8
 distribute==0.7.3
 unittest2
+pytest
+pytest-cov
+pytest-django
+pytest-pythonpath
+pytest-mock

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobHostDefinition', [])
@@ -112,17 +112,18 @@ export default
                 dataPlacement: 'left',
                 dataContainer: "body",
                 mode: 'all',
-                'class': 'btn-xs btn-help',
+                actionClass: 'btn-xs btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
                 id: 'jobhost-help-button'
             },
             refresh: {
                 mode: 'all',
-                'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                ngShow: "host_id == null" //don't show when viewing from inventory->hosts
+                ngShow: "host_id == null", //don't show when viewing from inventory->hosts
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             }
         }
 

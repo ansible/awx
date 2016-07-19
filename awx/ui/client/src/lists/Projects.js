@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('ProjectsListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'project',
         selectTitle: 'Add Project',
         editTitle: 'Projects',
+        listTitle: 'Projects',
         selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>',
         index: false,
@@ -20,15 +21,16 @@ export default
 
         fields: {
             status: {
-                label: 'Status',
+                label: '',
                 iconOnly: true,
                 ngClick: 'showSCMStatus(project.id)',
                 awToolTip: '{{ project.statusTip }}',
                 dataTipWatch: 'project.statusTip',
-                dataPlacement: 'top',
+                dataPlacement: 'right',
                 icon: "icon-job-{{ project.statusIcon }}",
-                columnClass: "col-lg-1 col-md-1 col-sm-2 col-xs-2",
+                columnClass: "List-staticColumn--smallStatus",
                 nosort: true,
+                searchLabel: 'Status',
                 searchType: 'select',
                 searchOptions: [],  //set in the controller
                 excludeModal: true
@@ -36,23 +38,23 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: "col-lg-5 col-md-4 col-sm-6 col-xs-6",
+                columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
                 modalColumnClass: 'col-md-8'
-            },
-            last_updated: {
-                label: 'Last Updated',
-                filter: "longDate",
-                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                excludeModal: true,
-                searchable: false,
-                nosort: true
             },
             scm_type: {
                 label: 'Type',
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to projects resource
                 excludeModal: true,
-                columnClass: 'col-lg-2 col-md-2 hidden-sm hidden-xs'
+                columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs'
+            },
+            last_updated: {
+                label: 'Last Updated',
+                filter: "longDate",
+                columnClass: "col-lg-3 col-md-3 hidden-sm hidden-xs",
+                excludeModal: true,
+                searchable: false,
+                nosort: true
             }
         },
 
@@ -60,25 +62,23 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
-                awToolTip: 'Create a new project'
+                awToolTip: 'Create a new project',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             },
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                ngShow: "socketStatus == 'error'"
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                ngShow: "socketStatus == 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: 'REFRESH'
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-4',
+            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-5',
 
             scm_update: {
                 ngClick: 'SCMUpdate(project.id, $event)',

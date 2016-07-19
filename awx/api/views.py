@@ -11,7 +11,9 @@ import time
 import socket
 import sys
 import errno
+import logging
 from base64 import b64encode
+from collections import OrderedDict
 
 # Django
 from django.conf import settings
@@ -21,26 +23,28 @@ from django.core.exceptions import FieldError
 from django.db.models import Q, Count
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from django.utils.datastructures import SortedDict
+from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
+from django.contrib.contenttypes.models import ContentType
+
 
 # Django REST Framework
 from rest_framework.exceptions import PermissionDenied, ParseError
-from rest_framework.parsers import YAMLParser
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
 
-# MongoEngine
-import mongoengine
+# Django REST Framework YAML
+from rest_framework_yaml.parsers import YAMLParser
+from rest_framework_yaml.renderers import YAMLRenderer
 
 # QSStats
 import qsstats
@@ -53,12 +57,11 @@ from social.backends.utils import load_backends
 
 # AWX
 from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
-from awx.main.tasks import mongodb_control
+from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.utils.decorators import paginated
-from awx.api.filters import MongoFilterBackend
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.api.license import feature_enabled, feature_exists, LicenseForbids
@@ -67,10 +70,13 @@ from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
-from awx.fact.models import * # noqa
+from awx.api.metadata import RoleMetadata
 from awx.main.utils import emit_websocket_notification
+from awx.main.conf import tower_settings
 
-def api_exception_handler(exc):
+logger = logging.getLogger('awx.api.views')
+
+def api_exception_handler(exc, context):
     '''
     Override default API exception handler to catch IntegrityError exceptions.
     '''
@@ -78,8 +84,7 @@ def api_exception_handler(exc):
         exc = ParseError(exc.args[0])
     if isinstance(exc, FieldError):
         exc = ParseError(exc.args[0])
-    return exception_handler(exc)
-
+    return exception_handler(exc, context)
 
 class ApiRootView(APIView):
 
@@ -109,10 +114,12 @@ class ApiV1RootView(APIView):
     def get(self, request, format=None):
         ''' list top level resources '''
 
-        data = SortedDict()
+        data = OrderedDict()
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
+        # TODO: Uncomment after 3.0 when we bring database settings endpoints back
+        # data['settings'] = reverse('api:settings_list')
         data['me'] = reverse('api:user_me_list')
         data['dashboard'] = reverse('api:dashboard_view')
         data['organizations'] = reverse('api:organization_list')
@@ -127,10 +134,15 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
+        data['job_events'] = reverse('api:job_event_list')
         data['ad_hoc_commands'] = reverse('api:ad_hoc_command_list')
         data['system_job_templates'] = reverse('api:system_job_template_list')
         data['system_jobs'] = reverse('api:system_job_list')
         data['schedules'] = reverse('api:schedule_list')
+        data['roles'] = reverse('api:role_list')
+        data['notification_templates'] = reverse('api:notification_template_list')
+        data['notifications'] = reverse('api:notification_list')
+        data['labels'] = reverse('api:label_list')
         data['unified_job_templates'] = reverse('api:unified_job_template_list')
         data['unified_jobs'] = reverse('api:unified_job_list')
         data['activity_stream'] = reverse('api:activity_stream_list')
@@ -189,9 +201,11 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_file(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
+        if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
+            license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
 
-        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+        pendo_state = tower_settings.PENDO_TRACKING_STATE if tower_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
             time_zone=settings.TIME_ZONE,
@@ -211,7 +225,7 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
+        if request.user.is_superuser or Organization.accessible_objects(request.user, 'admin_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -222,20 +236,20 @@ class ApiV1ConfigView(APIView):
     def post(self, request):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
-        if not type(request.DATA) == dict:
+        if not isinstance(request.data, dict):
             return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
-        if "eula_accepted" not in request.DATA:
+        if "eula_accepted" not in request.data:
             return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            eula_accepted = to_python_boolean(request.DATA["eula_accepted"])
+            eula_accepted = to_python_boolean(request.data["eula_accepted"])
         except ValueError:
             return Response({"error": "'eula_accepted' value is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not eula_accepted:
             return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
-        request.DATA.pop("eula_accepted")
+        request.data.pop("eula_accepted")
         try:
-            data_actual = json.dumps(request.DATA)
+            data_actual = json.dumps(request.data)
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
@@ -246,34 +260,12 @@ class ApiV1ConfigView(APIView):
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Sanity check: If this license includes system tracking, make
-        # sure that we have a valid MongoDB to point to, and complain if
-        # we do not.
-        if ('features' in license_data and 'system_tracking' in license_data['features'] and
-           license_data['features']['system_tracking'] and settings.MONGO_HOST == NotImplemented):
-            return Response({
-                'error': 'This license supports system tracking, which '
-                         'requires MongoDB to be installed. Since you are '
-                         'running in an HA environment, you will need to '
-                         'provide a MongoDB instance. Please re-run the '
-                         'installer prior to installing this license.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
         # If the license is valid, write it to disk.
         if license_data['valid_key']:
-            fh = open(TASK_FILE, "w")
-            fh.write(data_actual)
-            fh.close()
-
-            # Spawn a task to ensure that MongoDB is started (or stopped)
-            # as appropriate, based on whether the license uses it.
-            if license_data['features']['system_tracking']:
-                mongodb_control.delay('start')
-            else:
-                mongodb_control.delay('stop')
-
-            # Done; return the response.
+            tower_settings.LICENSE = data_actual
+            tower_settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data)
+
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
@@ -285,14 +277,15 @@ class ApiV1ConfigView(APIView):
         for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
             try:
                 os.remove(fname)
-            except OSError, e:
+            except OSError as e:
                 if e.errno != errno.ENOENT:
                     has_error = e.errno
                     break
 
+        TowerSettings.objects.filter(key="LICENSE").delete()
+
         # Only stop mongod if license removal succeeded
         if has_error is None:
-            mongodb_control.delay('stop')
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
@@ -304,9 +297,8 @@ class DashboardView(APIView):
 
     def get(self, request, format=None):
         ''' Show Dashboard Details '''
-        data = SortedDict()
-        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view'),
-                           'inventory_graph': reverse('api:dashboard_inventory_graph_view')}
+        data = OrderedDict()
+        data['related'] = {'jobs_graph': reverse('api:dashboard_jobs_graph_view')}
         user_inventory = get_user_queryset(request.user, Inventory)
         inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
@@ -409,8 +401,8 @@ class DashboardJobsGraphView(APIView):
     new_in_200 = True
 
     def get(self, request, format=None):
-        period = request.QUERY_PARAMS.get('period', 'month')
-        job_type = request.QUERY_PARAMS.get('job_type', 'all')
+        period = request.query_params.get('period', 'month')
+        job_type = request.query_params.get('job_type', 'all')
 
         user_unified_jobs = get_user_queryset(request.user, UnifiedJob)
 
@@ -452,49 +444,6 @@ class DashboardJobsGraphView(APIView):
                                                      element[1]])
         return Response(dashboard_data)
 
-class DashboardInventoryGraphView(APIView):
-
-    view_name = "Dashboard Inventory Graphs"
-    new_in_200 = True
-
-    def get(self, request, format=None):
-        period = request.QUERY_PARAMS.get('period', 'month')
-
-        end_date = now()
-        if period == 'month':
-            start_date = end_date - dateutil.relativedelta.relativedelta(months=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'week':
-            start_date = end_date - dateutil.relativedelta.relativedelta(weeks=1)
-            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(days=1)
-        elif period == 'day':
-            start_date = end_date - dateutil.relativedelta.relativedelta(days=1)
-            start_date = start_date.replace(minute=0, second=0, microsecond=0)
-            delta = dateutil.relativedelta.relativedelta(hours=1)
-        else:
-            raise ParseError(u'Unknown period "%s"' % unicode(period))
-
-        host_stats = []
-        date = start_date
-        while date < end_date:
-            next_date = date + delta
-            # Find all hosts that existed at end of intevral that are still
-            # active or were deleted after the end of interval.  Slow but
-            # accurate; haven't yet found a better way to do it.
-            hosts_qs = Host.objects.filter(created__lt=next_date)
-            hosts_qs = hosts_qs.filter(Q(active=True) | Q(active=False, modified__gte=next_date))
-            hostnames = set()
-            for name, active in hosts_qs.values_list('name', 'active').iterator():
-                if not active:
-                    name = re.sub(r'^_deleted_.*?_', '', name)
-                hostnames.add(name)
-            host_stats.append((time.mktime(date.timetuple()), len(hostnames)))
-            date = next_date
-
-        return Response({'hosts': host_stats})
-
 
 class ScheduleList(ListAPIView):
 
@@ -525,7 +474,7 @@ class AuthView(APIView):
     new_in_240 = True
 
     def get(self, request):
-        data = SortedDict()
+        data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
         auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
         # Return auth backends in consistent order: Google, GitHub, SAML.
@@ -564,43 +513,148 @@ class AuthTokenView(APIView):
     serializer_class = AuthTokenSerializer
     model = AuthToken
 
+    def get_serializer(self, *args, **kwargs):
+        serializer = self.serializer_class(*args, **kwargs)
+        # Override when called from browsable API to generate raw data form;
+        # update serializer "validated" data to be displayed by the raw data
+        # form.
+        if hasattr(self, '_raw_data_form_marker'):
+            # Always remove read only fields from serializer.
+            for name, field in serializer.fields.items():
+                if getattr(field, 'read_only', None):
+                    del serializer.fields[name]
+            serializer._data = self.update_raw_data(serializer.data)
+        return serializer
+
     def post(self, request):
-        serializer = self.serializer_class(data=request.DATA)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             request_hash = AuthToken.get_request_hash(self.request)
             try:
-                token = AuthToken.objects.filter(user=serializer.object['user'],
+                token = AuthToken.objects.filter(user=serializer.validated_data['user'],
                                                  request_hash=request_hash,
                                                  expires__gt=now(),
                                                  reason='')[0]
                 token.refresh()
+                if 'username' in request.data:
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
             except IndexError:
-                token = AuthToken.objects.create(user=serializer.object['user'],
+                token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
-                # Get user un-expired tokens that are not invalidated that are 
+                if 'username' in request.data:
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
+                # Get user un-expired tokens that are not invalidated that are
                 # over the configured limit.
                 # Mark them as invalid and inform the user
-                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.object['user'])
+                invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
                 for t in invalid_tokens:
                     # TODO: send socket notification
                     emit_websocket_notification('/socket.io/control',
                                                 'limit_reached',
-                                                dict(reason=unicode(AuthToken.reason_long('limit_reached'))),
+                                                dict(reason=force_text(AuthToken.reason_long('limit_reached'))),
                                                 token_key=t.key)
                     t.invalidate(reason='limit_reached')
 
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(tower_settings.AUTH_TOKEN_EXPIRATION)
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
+        if 'username' in request.data:
+            logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class OrganizationList(ListCreateAPIView):
+class OrganizationCountsMixin(object):
+
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationCountsMixin, self).get_serializer_context(*args, **kwargs)
+
+        if self.request is None:
+            return full_context
+
+        db_results = {}
+        org_qs = self.model.accessible_objects(self.request.user, 'read_role')
+        org_id_list = org_qs.values('id')
+        if len(org_id_list) == 0:
+            if self.request.method == 'POST':
+                full_context['related_field_counts'] = {}
+            return full_context
+
+        inv_qs = Inventory.accessible_objects(self.request.user, 'read_role')
+        project_qs = Project.accessible_objects(self.request.user, 'read_role')
+
+        # Produce counts of Foreign Key relationships
+        db_results['inventories'] = inv_qs\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        db_results['teams'] = Team.accessible_objects(
+            self.request.user, 'read_role').values('organization').annotate(
+            Count('organization')).order_by('organization')
+
+        JT_reference = 'project__organization'
+        db_results['job_templates'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').exclude(job_type='scan').values(JT_reference).annotate(
+            Count(JT_reference)).order_by(JT_reference)
+
+        JT_scan_reference = 'inventory__organization'
+        db_results['job_templates_scan'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').filter(job_type='scan').values(JT_scan_reference).annotate(
+            Count(JT_scan_reference)).order_by(JT_scan_reference)
+
+        db_results['projects'] = project_qs\
+            .values('organization').annotate(Count('organization')).order_by('organization')
+
+        # Other members and admins of organization are always viewable
+        db_results['users'] = org_qs.annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('id', 'users', 'admins')
+
+        count_context = {}
+        for org in org_id_list:
+            org_id = org['id']
+            count_context[org_id] = {
+                'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
+                'admins': 0, 'projects': 0}
+
+        for res in db_results:
+            if res == 'job_templates':
+                org_reference = JT_reference
+            elif res == 'job_templates_scan':
+                org_reference = JT_scan_reference
+            elif res == 'users':
+                org_reference = 'id'
+            else:
+                org_reference = 'organization'
+            for entry in db_results[res]:
+                org_id = entry[org_reference]
+                if org_id in count_context:
+                    if res == 'users':
+                        count_context[org_id]['admins'] = entry['admins']
+                        count_context[org_id]['users'] = entry['users']
+                        continue
+                    count_context[org_id][res] = entry['%s__count' % org_reference]
+
+        # Combine the counts for job templates with scan job templates
+        for org in org_id_list:
+            org_id = org['id']
+            if 'job_templates_scan' in count_context[org_id]:
+                count_context[org_id]['job_templates'] += count_context[org_id].pop('job_templates_scan')
+
+        full_context['related_field_counts'] = count_context
+
+        return full_context
+
+class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
+
+    def get_queryset(self):
+        qs = Organization.accessible_objects(self.request.user, 'read_role')
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
+        return qs
 
     def create(self, request, *args, **kwargs):
         """Create a new organzation.
@@ -613,7 +667,7 @@ class OrganizationList(ListCreateAPIView):
         # by the license, then we are only willing to create this organization
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
-                self.model.objects.filter(active=True).count() > 0):
+                self.model.objects.exists()):
             raise LicenseForbids('Your Tower license only permits a single '
                                  'organization to exist.')
 
@@ -625,6 +679,40 @@ class OrganizationDetail(RetrieveUpdateDestroyAPIView):
     model = Organization
     serializer_class = OrganizationSerializer
 
+    def get_serializer_context(self, *args, **kwargs):
+        full_context = super(OrganizationDetail, self).get_serializer_context(*args, **kwargs)
+
+        if not hasattr(self, 'kwargs'):
+            return full_context
+        org_id = int(self.kwargs['pk'])
+
+        org_counts = {}
+        access_kwargs = {'accessor': self.request.user, 'role_field': 'read_role'}
+        direct_counts = Organization.objects.filter(id=org_id).annotate(
+            users=Count('member_role__members', distinct=True),
+            admins=Count('admin_role__members', distinct=True)
+        ).values('users', 'admins')
+
+        if not direct_counts:
+            return full_context
+
+        org_counts = direct_counts[0]
+        org_counts['inventories'] = Inventory.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['teams'] = Team.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['projects'] = Project.accessible_objects(**access_kwargs).filter(
+            organization__id=org_id).count()
+        org_counts['job_templates'] = JobTemplate.accessible_objects(**access_kwargs).exclude(
+            job_type='scan').filter(project__organization__id=org_id).count()
+        org_counts['job_templates'] += JobTemplate.accessible_objects(**access_kwargs).filter(
+            job_type='scan').filter(inventory__organization__id=org_id).count()
+
+        full_context['related_field_counts'] = {}
+        full_context['related_field_counts'][org_id] = org_counts
+
+        return full_context
+
 class OrganizationInventoriesList(SubListAPIView):
 
     model = Inventory
@@ -632,19 +720,36 @@ class OrganizationInventoriesList(SubListAPIView):
     parent_model = Organization
     relationship = 'inventories'
 
-class OrganizationUsersList(SubListCreateAttachDetachAPIView):
+
+class BaseUsersList(SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        ret = super(BaseUsersList, self).post( request, *args, **kwargs)
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
+        return ret
+
+class OrganizationUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'users'
+    relationship = 'member_role.members'
 
-class OrganizationAdminsList(SubListCreateAttachDetachAPIView):
+class OrganizationAdminsList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Organization
-    relationship = 'admins'
+    relationship = 'admin_role.members'
 
 class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
 
@@ -652,6 +757,7 @@ class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
+    parent_key = 'organization'
 
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 
@@ -677,58 +783,135 @@ class OrganizationActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
+
+class OrganizationNotificationTemplatesList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_templates'
+    parent_key = 'organization'
+
+class OrganizationNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_templates_any'
+
+class OrganizationNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_templates_error'
+
+class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Organization
+    relationship = 'notification_templates_success'
+
+class OrganizationAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Organization
+    new_in_300 = True
+
+class OrganizationObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Organization
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class TeamList(ListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer
 
+    def get_queryset(self):
+        qs = Team.accessible_objects(self.request.user, 'read_role').order_by()
+        qs = qs.select_related('admin_role', 'read_role', 'member_role', 'organization')
+        return qs
+
 class TeamDetail(RetrieveUpdateDestroyAPIView):
 
     model = Team
     serializer_class = TeamSerializer
 
-class TeamUsersList(SubListCreateAttachDetachAPIView):
+class TeamUsersList(BaseUsersList):
 
     model = User
     serializer_class = UserSerializer
     parent_model = Team
-    relationship = 'users'
+    relationship = 'member_role.members'
 
-class TeamPermissionsList(SubListCreateAttachDetachAPIView):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class TeamRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    metadata_class = RoleMetadata
     parent_model = Team
-    relationship = 'permissions'
-    parent_key = 'team'
+    relationship='member_role.children'
 
     def get_queryset(self):
-        # FIXME: Default get_queryset should handle this.
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        base = Permission.objects.filter(team = team)
-        #if Team.can_user_administrate(self.request.user, team, None):
-        if self.request.user.can_access(Team, 'change', team, None):
-            return base
-        elif team.users.filter(pk=self.request.user.pk).count() > 0:
-            return base
-        raise PermissionDenied()
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Team, 'read', team):
+            raise PermissionDenied()
+        return Role.filter_visible_roles(self.request.user, team.member_role.children.all().exclude(pk=team.read_role.pk))
 
-class TeamProjectsList(SubListCreateAttachDetachAPIView):
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg="Role 'id' field is missing.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        role = Role.objects.get(pk=sub_id)
+        content_type = ContentType.objects.get_for_model(Organization)
+        if role.content_type == content_type:
+            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        return super(TeamRolesList, self).post(request, *args, **kwargs)
+
+class TeamObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Team
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+class TeamProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = Team
-    relationship = 'projects'
 
-class TeamCredentialsList(SubListCreateAttachDetachAPIView):
-
-    model = Credential
-    serializer_class = CredentialSerializer
-    parent_model = Team
-    relationship = 'credentials'
-    parent_key = 'team'
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+        model_ct = ContentType.objects.get_for_model(self.model)
+        parent_ct = ContentType.objects.get_for_model(self.parent_model)
+        proj_roles = Role.objects.filter(
+            Q(ancestors__content_type=parent_ct) & Q(ancestors__object_id=team.pk),
+            content_type=model_ct
+        )
+        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in proj_roles])
 
 class TeamActivityStreamList(SubListAPIView):
 
@@ -746,28 +929,44 @@ class TeamActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(TeamActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
+
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(team=parent) |
-                         Q(project__in=parent.projects.all()) |
-                         Q(credential__in=parent.credentials.all()) |
-                         Q(permission__in=parent.permissions.all()))
+                         Q(project__in=Project.accessible_objects(parent, 'read_role')) |
+                         Q(credential__in=Credential.accessible_objects(parent, 'read_role')))
 
+class TeamAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Team
+    new_in_300 = True
 
 class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
 
+    def get_queryset(self):
+        projects_qs = Project.accessible_objects(self.request.user, 'read_role')
+        projects_qs = projects_qs.select_related(
+            'organization',
+            'admin_role',
+            'use_role',
+            'update_role',
+            'read_role',
+        )
+        return projects_qs
+
     def get(self, request, *args, **kwargs):
         # Not optimal, but make sure the project status and last_updated fields
         # are up to date here...
-        projects_qs = Project.objects.filter(active=True)
-        projects_qs = projects_qs.select_related('current_update', 'last_updated')
+        projects_qs = Project.objects
+        projects_qs = projects_qs.select_related('current_job', 'last_job')
         for project in projects_qs:
             project._set_status_and_last_job_run()
         return super(ProjectList, self).get(request, *args, **kwargs)
@@ -781,7 +980,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(Project, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete project")
+            raise PermissionDenied("Cannot delete project.")
         for pu in obj.project_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(ProjectDetail, self).destroy(request, *args, **kwargs)
@@ -791,19 +990,19 @@ class ProjectPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectOrganizationsList(SubListCreateAttachDetachAPIView):
-
-    model = Organization
-    serializer_class = OrganizationSerializer
-    parent_model = Project
-    relationship = 'organizations'
-
-class ProjectTeamsList(SubListCreateAttachDetachAPIView):
+class ProjectTeamsList(ListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    parent_model = Project
-    relationship = 'teams'
+
+    def get_queryset(self):
+        p = get_object_or_404(Project, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Project, 'read', p):
+            raise PermissionDenied()
+        project_ct = ContentType.objects.get_for_model(Project)
+        team_ct = ContentType.objects.get_for_model(self.model)
+        all_roles = Role.objects.filter(Q(descendents__content_type=project_ct) & Q(descendents__object_id=p.pk), content_type=team_ct)
+        return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
 
 class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
@@ -832,7 +1031,7 @@ class ProjectActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ProjectActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -842,8 +1041,28 @@ class ProjectActivityStreamList(SubListAPIView):
             return qs
         elif parent.credential is None:
             return qs.filter(project=parent)
-        return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
+        return qs.filter(Q(project=parent) | Q(credential=parent.credential))
 
+class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_templates_any'
+
+class ProjectNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_templates_error'
+
+class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = Project
+    relationship = 'notification_templates_success'
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -857,6 +1076,7 @@ class ProjectUpdateView(RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectUpdateViewSerializer
+    permission_classes = (ProjectUpdatePermission,)
     new_in_13 = True
 
     def post(self, request, *args, **kwargs):
@@ -894,11 +1114,50 @@ class ProjectUpdateCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class ProjectUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = ProjectUpdate
+    relationship = 'notifications'
+
+class ProjectAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Project
+    new_in_300 = True
+
+class ProjectObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Project
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        ret = super(UserList, self).post( request, *args, **kwargs)
+        try:
+            if request.data.get('is_system_auditor', False):
+                # This is a faux-field that just maps to checking the system
+                # auditor role member list.. unfortunately this means we can't
+                # set it on creation, and thus needs to be set here.
+                user = User.objects.get(id=ret.data['id'])
+                user.is_system_auditor = request.data['is_system_auditor']
+                ret.data['is_system_auditor'] = request.data['is_system_auditor']
+        except AttributeError as exc:
+            print(exc)
+            pass
+        return ret
 
 class UserMeList(ListAPIView):
 
@@ -909,55 +1168,91 @@ class UserMeList(ListAPIView):
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
 
-class UserTeamsList(SubListAPIView):
+class UserTeamsList(ListAPIView):
 
-    model = Team
+    model = User
     serializer_class = TeamSerializer
-    parent_model = User
-    relationship = 'teams'
 
-class UserPermissionsList(SubListCreateAttachDetachAPIView):
+    def get_queryset(self):
+        u = get_object_or_404(User, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(User, 'read', u):
+            raise PermissionDenied()
+        return Team.accessible_objects(self.request.user, 'read_role').filter(member_role__members=u)
 
-    model = Permission
-    serializer_class = PermissionSerializer
+class UserRolesList(SubListCreateAttachDetachAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    metadata_class = RoleMetadata
     parent_model = User
-    relationship = 'permissions'
-    parent_key = 'user'
+    relationship='roles'
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        u = get_object_or_404(User, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(User, 'read', u):
+            raise PermissionDenied()
+        content_type = ContentType.objects.get_for_model(User)
+
+        return Role.filter_visible_roles(self.request.user, u.roles.all()) \
+                   .exclude(content_type=content_type, object_id=u.id)
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit role creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg="Role 'id' field is missing.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        if sub_id == self.request.user.admin_role.pk:
+            raise PermissionDenied('You may not remove your own admin_role.')
+
+        return super(UserRolesList, self).post(request, *args, **kwargs)
+
+    def check_parent_access(self, parent=None):
+        # We hide roles that shouldn't be seen in our queryset
+        return True
 
 class UserProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
     parent_model = User
-    relationship = 'projects'
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
-        return qs.filter(teams__in=parent.teams.distinct())
+        my_qs = Project.accessible_objects(self.request.user, 'read_role')
+        user_qs = Project.accessible_objects(parent, 'read_role')
+        return my_qs & user_qs
 
-class UserCredentialsList(SubListCreateAttachDetachAPIView):
-
-    model = Credential
-    serializer_class = CredentialSerializer
-    parent_model = User
-    relationship = 'credentials'
-    parent_key = 'user'
-
-class UserOrganizationsList(SubListAPIView):
+class UserOrganizationsList(OrganizationCountsMixin, SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'organizations'
 
-class UserAdminOfOrganizationsList(SubListAPIView):
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, 'read_role')
+        user_qs = Organization.objects.filter(member_role__members=parent)
+        return my_qs & user_qs
+
+class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        my_qs = Organization.accessible_objects(self.request.user, 'read_role')
+        user_qs = Organization.objects.filter(admin_role__members=parent)
+        return my_qs & user_qs
 
 class UserActivityStreamList(SubListAPIView):
 
@@ -975,7 +1270,7 @@ class UserActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(UserActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -992,33 +1287,126 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = self.get_object()
-        can_change = request.user.can_access(User, 'change', obj, request.DATA)
-        can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
+        can_change = request.user.can_access(User, 'change', obj, request.data)
+        can_admin = request.user.can_access(User, 'admin', obj, request.data)
+
+        su_only_edit_fields = ('is_superuser', 'is_system_auditor')
+        admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active')
+
+        fields_to_check = ()
+        if not request.user.is_superuser:
+            fields_to_check += su_only_edit_fields
+
         if can_change and not can_admin:
-            admin_only_edit_fields = ('last_name', 'first_name', 'username',
-                                      'is_active', 'is_superuser')
-            changed = {}
-            for field in admin_only_edit_fields:
-                left = getattr(obj, field, None)
-                right = request.DATA.get(field, None)
-                if left is not None and right is not None and left != right:
-                    changed[field] = (left, right)
-            if changed:
-                raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
+            fields_to_check += admin_only_edit_fields
+
+        bad_changes = {}
+        for field in fields_to_check:
+            left = getattr(obj, field, None)
+            right = request.data.get(field, None)
+            if left is not None and right is not None and left != right:
+                bad_changes[field] = (left, right)
+        if bad_changes:
+            raise PermissionDenied('Cannot change %s.' % ', '.join(bad_changes.keys()))
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied('Cannot delete user')
-        for own_credential in Credential.objects.filter(user=obj):
-            own_credential.mark_inactive()
+            raise PermissionDenied('Cannot delete user.')
         return super(UserDetail, self).destroy(request, *args, **kwargs)
+
+class UserAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = User
+    new_in_300 = True
+
 
 class CredentialList(ListCreateAPIView):
 
     model = Credential
-    serializer_class = CredentialSerializer
+    serializer_class = CredentialSerializerCreate
+
+
+class CredentialOwnerUsersList(SubListAPIView):
+
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Credential
+    relationship = 'admin_role.members'
+    new_in_300 = True
+
+
+class CredentialOwnerTeamsList(SubListAPIView):
+
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        credential = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        if not self.request.user.can_access(Credential, 'read', credential):
+            raise PermissionDenied()
+
+        content_type = ContentType.objects.get_for_model(self.model)
+        teams = [c.content_object.pk for c in credential.admin_role.parents.filter(content_type=content_type)]
+
+        return self.model.objects.filter(pk__in=teams)
+
+
+class UserCredentialsList(SubListCreateAPIView):
+
+    model = Credential
+    serializer_class = UserCredentialSerializerCreate
+    parent_model = User
+    parent_key = 'user'
+
+    def get_queryset(self):
+        user = self.get_parent_object()
+        self.check_parent_access(user)
+
+        visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
+        user_creds = Credential.accessible_objects(user, 'read_role')
+        return user_creds & visible_creds
+
+
+class TeamCredentialsList(SubListCreateAPIView):
+
+    model = Credential
+    serializer_class = TeamCredentialSerializerCreate
+    parent_model = Team
+    parent_key = 'team'
+
+    def get_queryset(self):
+        team = self.get_parent_object()
+        self.check_parent_access(team)
+
+        visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
+        team_creds = Credential.objects.filter(admin_role__parents=team.member_role)
+        return team_creds & visible_creds
+
+
+class OrganizationCredentialList(SubListCreateAPIView):
+
+    model = Credential
+    serializer_class = OrganizationCredentialSerializerCreate
+    parent_model = Organization
+    parent_key = 'organization'
+
+    def get_queryset(self):
+        organization = self.get_parent_object()
+        self.check_parent_access(organization)
+
+        user_visible = Credential.accessible_objects(self.request.user, 'read_role').all()
+        org_set = Credential.accessible_objects(organization.admin_role, 'read_role').all()
+
+        if self.request.user.is_superuser or self.request.user.is_system_auditor:
+            return org_set
+
+        return org_set & user_visible
+
 
 class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1041,12 +1429,25 @@ class CredentialActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(CredentialActivityStreamList, self).get(request, *args, **kwargs)
 
-class PermissionDetail(RetrieveUpdateDestroyAPIView):
+class CredentialAccessList(ResourceAccessList):
 
-    model = Permission
-    serializer_class = PermissionSerializer
+    model = User # needs to be User for AccessLists's
+    resource_model = Credential
+    new_in_300 = True
+
+class CredentialObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Credential
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class InventoryScriptList(ListCreateAPIView):
 
@@ -1059,19 +1460,36 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = CustomInventoryScriptSerializer
 
     def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(self.model, 'delete', obj)
+        instance = self.get_object()
+        can_delete = request.user.can_access(self.model, 'delete', instance)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory script")
-        for inv_src in InventorySource.objects.filter(source_script=obj):
+            raise PermissionDenied("Cannot delete inventory script.")
+        for inv_src in InventorySource.objects.filter(source_script=instance):
             inv_src.source_script = None
             inv_src.save()
         return super(InventoryScriptDetail, self).destroy(request, *args, **kwargs)
+
+class InventoryScriptObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = CustomInventoryScript
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+
+    def get_queryset(self):
+        qs = Inventory.accessible_objects(self.request.user, 'read_role')
+        qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
+        return qs
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
@@ -1099,13 +1517,45 @@ class InventoryActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventoryActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+class InventoryAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = Inventory
+    new_in_300 = True
+
+class InventoryObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Inventory
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
+class InventoryJobTemplateList(SubListAPIView):
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+    parent_model = Inventory
+    relationship = 'jobtemplates'
+    new_in_300 = True
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(inventory=parent)
 
 class InventoryScanJobTemplateList(SubListAPIView):
 
@@ -1120,33 +1570,6 @@ class InventoryScanJobTemplateList(SubListAPIView):
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(job_type=PERM_INVENTORY_SCAN, inventory=parent)
-
-class InventorySingleFactView(MongoAPIView):
-
-    model = Fact
-    parent_model = Inventory
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        inventory_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([h.name for h in inventory_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
-
 
 class HostList(ListCreateAPIView):
 
@@ -1174,6 +1597,19 @@ class HostGroupsList(SubListCreateAttachDetachAPIView):
     parent_model = Host
     relationship = 'groups'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(HostGroupsList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent host inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(HostGroupsList, self).create(request, *args, **kwargs)
+
 class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
 
@@ -1185,7 +1621,7 @@ class HostAllGroupsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = parent.all_groups.distinct()
         return qs & sublist_qs
 
@@ -1213,7 +1649,7 @@ class HostActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(HostActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1221,102 +1657,59 @@ class HostActivityStreamList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
-class HostFactVersionsList(MongoListAPIView):
-
-    serializer_class = FactVersionSerializer
-    parent_model = Host
-    new_in_220 = True
-    filter_backends = (MongoFilterBackend,)
-
-    def get_queryset(self):
-        from_spec = self.request.QUERY_PARAMS.get('from', None)
-        to_spec = self.request.QUERY_PARAMS.get('to', None)
-        module_spec = self.request.QUERY_PARAMS.get('module', None)
-
+class SystemTrackingEnforcementMixin(APIView):
+    '''
+    Use check_permissions instead of initial() because it's in the OPTION's path as well
+    '''
+    def check_permissions(self, request):
         if not feature_enabled("system_tracking"):
             raise LicenseForbids("Your license does not permit use "
                                  "of system tracking.")
+        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
 
-        host = self.get_parent_object()
-        self.check_parent_access(host)
+class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
 
-        try:
-            fact_host = FactHost.objects.get(hostname=host.name, inventory_id=host.inventory.pk)
-        except FactHost.DoesNotExist:
-            return None
-        except mongoengine.ConnectionError:
-            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
+    model = Fact
+    serializer_class = FactVersionSerializer
+    parent_model = Host
+    new_in_220 = True
 
-        kv = {
-            'host': fact_host.id,
-        }
-        if module_spec is not None:
-            kv['module'] = module_spec
-        if from_spec is not None:
-            from_actual = dateutil.parser.parse(from_spec)
-            kv['timestamp__gt'] = from_actual
-        if to_spec is not None:
-            to_actual = dateutil.parser.parse(to_spec)
-            kv['timestamp__lte'] = to_actual
+    def get_queryset(self):
+        from_spec = self.request.query_params.get('from', None)
+        to_spec = self.request.query_params.get('to', None)
+        module_spec = self.request.query_params.get('module', None)
 
-        return FactVersion.objects.filter(**kv).order_by("-timestamp")
+        if from_spec:
+            from_spec = dateutil.parser.parse(from_spec)
+        if to_spec:
+            to_spec = dateutil.parser.parse(to_spec)
+
+        host_obj = self.get_parent_object()
+
+        return Fact.get_timeline(host_obj.id, module=module_spec, ts_from=from_spec, ts_to=to_spec)
 
     def list(self, *args, **kwargs):
         queryset = self.get_queryset() or []
-        try:
-            serializer = FactVersionSerializer(queryset, many=True, context=dict(host_obj=self.get_parent_object()))
-        except mongoengine.ConnectionError:
-            return Response(dict(error="System Tracking Database is disabled"), status=status.HTTP_400_BAD_REQUEST)
-        return Response(dict(results=serializer.data))
+        return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
-class HostSingleFactView(MongoAPIView):
+class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
     model = Fact
-    parent_model = Host
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        host_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([host_obj.name], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
-
-class HostFactCompareView(MongoAPIView):
-
     new_in_220 = True
     parent_model = Host
     serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
 
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        datetime_spec = request.QUERY_PARAMS.get('datetime', None)
-        module_spec = request.QUERY_PARAMS.get('module', "ansible")
+    def retrieve(self, request, *args, **kwargs):
+        datetime_spec = request.query_params.get('datetime', None)
+        module_spec = request.query_params.get('module', "ansible")
         datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
 
         host_obj = self.get_parent_object()
-        fact_entry = Fact.get_host_version(host_obj.name, host_obj.inventory.pk, datetime_actual, module_spec)
-        host_data = FactSerializer(fact_entry).data if fact_entry is not None else {}
 
-        return Response(host_data)
+        fact_entry = Fact.get_host_fact(host_obj.id, module_spec, datetime_actual)
+        if not fact_entry:
+            return Response({'detail': 'Fact not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(self.serializer_class(instance=fact_entry).data)
 
 class GroupList(ListCreateAPIView):
 
@@ -1330,39 +1723,25 @@ class GroupChildrenList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'children'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupChildrenList, self).update_raw_data(data)
+
+    def create(self, request, *args, **kwargs):
+        # Inject parent group inventory ID into new group data.
+        data = request.data
+        # HACK: Make request data mutable.
+        if getattr(data, '_mutable', None) is False:
+            data._mutable = True
+        data['inventory'] = self.get_parent_object().inventory_id
+        return super(GroupChildrenList, self).create(request, *args, **kwargs)
+
     def unattach(self, request, *args, **kwargs):
-        sub_id = request.DATA.get('id', None)
+        sub_id = request.data.get('id', None)
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
-        parent.mark_inactive()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
-        '''
-        Special case for disassociating a child group from the parent. If the
-        child group has no more parents, then automatically mark it inactive.
-        '''
-        sub_id = request.DATA.get('id', None)
-        if not sub_id:
-            data = dict(msg='"id" is required to disassociate')
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
-        parent = self.get_parent_object()
-        # TODO: flake8 warns, pending removal if unneeded
-        # parent_key = getattr(self, 'parent_key', None)
-        relationship = getattr(parent, self.relationship)
-        sub = get_object_or_400(self.model, pk=sub_id)
-
-        if not request.user.can_access(self.parent_model, 'unattach', parent,
-                                       sub, self.relationship):
-            raise PermissionDenied()
-
-        if sub.parents.filter(active=True).exclude(pk=parent.pk).count() == 0:
-            sub.mark_inactive()
-        else:
-            relationship.remove(sub)
-
+        parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GroupPotentialChildrenList(SubListAPIView):
@@ -1390,14 +1769,20 @@ class GroupHostsList(SubListCreateAttachDetachAPIView):
     parent_model = Group
     relationship = 'hosts'
 
+    def update_raw_data(self, data):
+        data.pop('inventory', None)
+        return super(GroupHostsList, self).update_raw_data(data)
+
     def create(self, request, *args, **kwargs):
         parent_group = Group.objects.get(id=self.kwargs['pk'])
-        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.DATA['name'])
-        if existing_hosts.count() > 0 and ('variables' not in request.DATA or
-                                           request.DATA['variables'] == '' or
-                                           request.DATA['variables'] == '{}' or
-                                           request.DATA['variables'] == '---'):
-            request.DATA['id'] = existing_hosts[0].id
+        # Inject parent group inventory ID into new host data.
+        request.data['inventory'] = parent_group.inventory_id
+        existing_hosts = Host.objects.filter(inventory=parent_group.inventory, name=request.data['name'])
+        if existing_hosts.count() > 0 and ('variables' not in request.data or
+                                           request.data['variables'] == '' or
+                                           request.data['variables'] == '{}' or
+                                           request.data['variables'] == '---'):
+            request.data['id'] = existing_hosts[0].id
             return self.attach(request, *args, **kwargs)
         return super(GroupHostsList, self).create(request, *args, **kwargs)
 
@@ -1412,7 +1797,7 @@ class GroupAllHostsList(SubListAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
 
@@ -1440,7 +1825,7 @@ class GroupActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(GroupActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1455,43 +1840,10 @@ class GroupDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        # FIXME: Why isn't the active check being caught earlier by RBAC?
-        if not getattr(obj, 'active', True):
-            raise Http404()
-        if not getattr(obj, 'is_active', True):
-            raise Http404()
         if not request.user.can_access(self.model, 'delete', obj):
             raise PermissionDenied()
-        if hasattr(obj, 'mark_inactive'):
-            obj.mark_inactive_recursive()
+        obj.delete_recursive()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class GroupSingleFactView(MongoAPIView):
-
-    model = Fact
-    parent_model = Group
-    new_in_220 = True
-    serializer_class = FactSerializer
-    filter_backends = (MongoFilterBackend,)
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does the license allow system tracking?
-        if not feature_enabled('system_tracking'):
-            raise LicenseForbids('Your license does not permit use '
-                                 'of system tracking.')
-
-        fact_key = request.QUERY_PARAMS.get("fact_key", None)
-        fact_value = request.QUERY_PARAMS.get("fact_value", None)
-        datetime_spec = request.QUERY_PARAMS.get("timestamp", None)
-        module_spec = request.QUERY_PARAMS.get("module", None)
-
-        if fact_key is None or fact_value is None or module_spec is None:
-            return Response({"error": "Missing fields"}, status=status.HTTP_400_BAD_REQUEST)
-        datetime_actual = dateutil.parser.parse(datetime_spec) if datetime_spec is not None else now()
-        group_obj = self.get_parent_object()
-        fact_data = Fact.get_single_facts([h.name for h in group_obj.hosts.all()], fact_key, fact_value, datetime_actual, module_spec)
-        return Response(dict(results=FactSerializer(fact_data).data if fact_data is not None else []))
 
 class InventoryGroupsList(SubListCreateAttachDetachAPIView):
 
@@ -1512,7 +1864,7 @@ class InventoryRootGroupsList(SubListCreateAttachDetachAPIView):
     def get_queryset(self):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
-        qs = self.request.user.get_queryset(self.model)
+        qs = self.request.user.get_queryset(self.model).distinct() # need distinct for '&' operator
         return qs & parent.root_groups
 
 class BaseVariableData(RetrieveUpdateAPIView):
@@ -1545,33 +1897,32 @@ class InventoryScriptView(RetrieveAPIView):
     filter_backends = ()
 
     def retrieve(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        hostname = request.QUERY_PARAMS.get('host', '')
-        hostvars = bool(request.QUERY_PARAMS.get('hostvars', ''))
-        show_all = bool(request.QUERY_PARAMS.get('all', ''))
+        obj = self.get_object()
+        hostname = request.query_params.get('host', '')
+        hostvars = bool(request.query_params.get('hostvars', ''))
+        show_all = bool(request.query_params.get('all', ''))
         if show_all:
-            hosts_q = dict(active=True)
+            hosts_q = dict()
         else:
-            hosts_q = dict(active=True, enabled=True)
+            hosts_q = dict(enabled=True)
         if hostname:
-            host = get_object_or_404(self.object.hosts, name=hostname, **hosts_q)
+            host = get_object_or_404(obj.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
         else:
-            data = SortedDict()
-            if self.object.variables_dict:
-                all_group = data.setdefault('all', SortedDict())
-                all_group['vars'] = self.object.variables_dict
+            data = OrderedDict()
+            if obj.variables_dict:
+                all_group = data.setdefault('all', OrderedDict())
+                all_group['vars'] = obj.variables_dict
 
             # Add hosts without a group to the all group.
-            groupless_hosts_qs = self.object.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
+            groupless_hosts_qs = obj.hosts.filter(groups__isnull=True, **hosts_q).order_by('name')
             groupless_hosts = list(groupless_hosts_qs.values_list('name', flat=True))
             if groupless_hosts:
-                all_group = data.setdefault('all', SortedDict())
+                all_group = data.setdefault('all', OrderedDict())
                 all_group['hosts'] = groupless_hosts
 
             # Build in-memory mapping of groups and their hosts.
-            group_hosts_kw = dict(group__inventory_id=self.object.id, group__active=True,
-                                  host__inventory_id=self.object.id, host__active=True)
+            group_hosts_kw = dict(group__inventory_id=obj.id, host__inventory_id=obj.id)
             if 'enabled' in hosts_q:
                 group_hosts_kw['host__enabled'] = hosts_q['enabled']
             group_hosts_qs = Group.hosts.through.objects.filter(**group_hosts_kw)
@@ -1584,8 +1935,8 @@ class InventoryScriptView(RetrieveAPIView):
 
             # Build in-memory mapping of groups and their children.
             group_parents_qs = Group.parents.through.objects.filter(
-                from_group__inventory_id=self.object.id, from_group__active=True,
-                to_group__inventory_id=self.object.id, to_group__active=True,
+                from_group__inventory_id=obj.id,
+                to_group__inventory_id=obj.id,
             )
             group_parents_qs = group_parents_qs.order_by('from_group__name')
             group_parents_qs = group_parents_qs.values_list('from_group_id', 'from_group__name', 'to_group_id')
@@ -1595,28 +1946,27 @@ class InventoryScriptView(RetrieveAPIView):
                 group_children.append(from_group_name)
 
             # Now use in-memory maps to build up group info.
-            for group in self.object.groups.filter(active=True):
-                group_info = SortedDict()
+            for group in obj.groups.all():
+                group_info = OrderedDict()
                 group_info['hosts'] = group_hosts_map.get(group.id, [])
                 group_info['children'] = group_children_map.get(group.id, [])
                 group_info['vars'] = group.variables_dict
                 data[group.name] = group_info
 
             if hostvars:
-                data.setdefault('_meta', SortedDict())
-                data['_meta'].setdefault('hostvars', SortedDict())
-                for host in self.object.hosts.filter(**hosts_q):
+                data.setdefault('_meta', OrderedDict())
+                data['_meta'].setdefault('hostvars', OrderedDict())
+                for host in obj.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
 
             # workaround for Ansible inventory bug (github #3687), localhost
             # must be explicitly listed in the all group for dynamic inventory
             # scripts to pick it up.
             localhost_names = ('localhost', '127.0.0.1', '::1')
-            localhosts_qs = self.object.hosts.filter(name__in=localhost_names,
-                                                     **hosts_q)
+            localhosts_qs = obj.hosts.filter(name__in=localhost_names, **hosts_q)
             localhosts = list(localhosts_qs.values_list('name', flat=True))
             if localhosts:
-                all_group = data.setdefault('all', SortedDict())
+                all_group = data.setdefault('all', OrderedDict())
                 all_group_hosts = all_group.get('hosts', [])
                 all_group_hosts.extend(localhosts)
                 all_group['hosts'] = sorted(set(all_group_hosts))
@@ -1642,9 +1992,9 @@ class InventoryTreeView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
-        group_children_map = inventory.get_group_children_map(active=True)
-        root_group_pks = inventory.root_groups.filter(active=True).order_by('name').values_list('pk', flat=True)
-        groups_qs = inventory.groups.filter(active=True)
+        group_children_map = inventory.get_group_children_map()
+        root_group_pks = inventory.root_groups.order_by('name').values_list('pk', flat=True)
+        groups_qs = inventory.groups
         groups_qs = groups_qs.select_related('inventory')
         groups_qs = groups_qs.prefetch_related('inventory_source')
         all_group_data = GroupSerializer(groups_qs, many=True).data
@@ -1654,13 +2004,6 @@ class InventoryTreeView(RetrieveAPIView):
             self._populate_group_children(group_data, all_group_data_map,
                                           group_children_map)
         return Response(tree_data)
-
-    def get_description_context(self):
-        d = super(InventoryTreeView, self).get_description_context()
-        d.update({
-            'serializer_fields': GroupTreeSerializer().metadata(),
-        })
-        return d
 
 class InventoryInventorySourcesList(SubListAPIView):
 
@@ -1694,7 +2037,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(InventorySource, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory source")
+            raise PermissionDenied("Cannot delete inventory source.")
         for pu in obj.inventory_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
@@ -1726,7 +2069,30 @@ class InventorySourceActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
+
+class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = InventorySource
+    relationship = 'notification_templates_any'
+
+    def post(self, request, *args, **kwargs):
+        parent = self.get_parent_object()
+        if parent.source not in CLOUD_INVENTORY_SOURCES:
+            return Response(dict(msg="Notification Templates can only be assigned when source is one of {}."
+                                 .format(CLOUD_INVENTORY_SOURCES, parent.source)),
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
+
+class InventorySourceNotificationTemplatesErrorList(InventorySourceNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_error'
+
+class InventorySourceNotificationTemplatesSuccessList(InventorySourceNotificationTemplatesAnyList):
+
+    relationship = 'notification_templates_success'
 
 class InventorySourceHostsList(SubListAPIView):
 
@@ -1792,27 +2158,31 @@ class InventoryUpdateCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class InventoryUpdateNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = InventoryUpdate
+    relationship = 'notifications'
+
 class JobTemplateList(ListCreateAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
 
+    def post(self, request, *args, **kwargs):
+        ret = super(JobTemplateList, self).post(request, *args, **kwargs)
+        if ret.status_code == 201:
+            job_template = JobTemplate.objects.get(id=ret.data['id'])
+            job_template.admin_role.members.add(request.user)
+        return ret
+
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(JobTemplate, 'delete', obj)
-        if not can_delete:
-            raise PermissionDenied("Cannot delete job template")
-        for pu in obj.jobs.filter(status__in=['new', 'pending', 'waiting', 'running']):
-            pu.cancel()
-        return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
-
 
 class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
@@ -1821,28 +2191,55 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
     is_job_start = True
     always_allow_superuser = False
 
+    def update_raw_data(self, data):
+        obj = self.get_object()
+        extra_vars = data.pop('extra_vars', None) or {}
+        if obj:
+            for p in obj.passwords_needed_to_start:
+                data[p] = u''
+            for v in obj.variables_needed_to_start:
+                extra_vars.setdefault(v, u'')
+            if extra_vars:
+                data['extra_vars'] = extra_vars
+            ask_for_vars_dict = obj._ask_for_vars_dict()
+            ask_for_vars_dict.pop('extra_vars')
+            for field in ask_for_vars_dict:
+                if not ask_for_vars_dict[field]:
+                    data.pop(field, None)
+                elif field == 'inventory' or field == 'credential':
+                    data[field] = getattrd(obj, "%s.%s" % (field, 'id'), None)
+                else:
+                    data[field] = getattr(obj, field)
+        return data
+
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        if 'credential' not in request.DATA and 'credential_id' in request.DATA:
-            request.DATA['credential'] = request.DATA['credential_id']
+        if 'credential' not in request.data and 'credential_id' in request.data:
+            request.data['credential'] = request.data['credential_id']
+        if 'inventory' not in request.data and 'inventory_id' in request.data:
+            request.data['inventory'] = request.data['inventory_id']
 
         passwords = {}
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA, 'passwords': passwords})
+        serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # At this point, a credential is gauranteed to exist at serializer.object.credential
-        if not request.user.can_access(Credential, 'read', serializer.object.credential):
-            raise PermissionDenied()
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
-        kv = {
-            'credential': serializer.object.credential.pk,
-        }
-        if 'extra_vars' in request.DATA:
-            kv['extra_vars'] = request.DATA['extra_vars']
+        if 'credential' in prompted_fields and prompted_fields['credential'] != getattrd(obj, 'credential.pk', None):
+            new_credential = get_object_or_400(Credential, pk=get_pk_from_dict(prompted_fields, 'credential'))
+            if request.user not in new_credential.use_role:
+                raise PermissionDenied()
+
+        if 'inventory' in prompted_fields and prompted_fields['inventory'] != getattrd(obj, 'inventory.pk', None):
+            new_inventory = get_object_or_400(Inventory, pk=get_pk_from_dict(prompted_fields, 'inventory'))
+            if request.user not in new_inventory.use_role:
+                raise PermissionDenied()
+
+        kv = prompted_fields
         kv.update(passwords)
 
         new_job = obj.create_unified_job(**kv)
@@ -1852,8 +2249,11 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             new_job.delete()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = dict(job=new_job.id)
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            data = OrderedDict()
+            data['ignored_fields'] = ignored_fields
+            data.update(JobSerializer(new_job).to_representation(new_job))
+            data['job'] = new_job.id
+            return Response(data, status=status.HTTP_201_CREATED)
 
 class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
@@ -1870,12 +2270,13 @@ class JobTemplateSurveySpec(GenericAPIView):
 
     model = JobTemplate
     parent_model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not obj.survey_enabled:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not feature_enabled('surveys'):
+            raise LicenseForbids('Your license does not allow '
+                                 'adding surveys.')
         return Response(obj.survey_spec)
 
     def post(self, request, *args, **kwargs):
@@ -1890,32 +2291,36 @@ class JobTemplateSurveySpec(GenericAPIView):
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
-            obj.survey_spec = json.dumps(request.DATA)
+            obj.survey_spec = json.dumps(request.data)
         except ValueError:
-            # TODO: Log
-            return Response(dict(error="Invalid JSON when parsing survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="Invalid JSON when parsing survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
-            return Response(dict(error="'name' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'name' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "description" not in obj.survey_spec:
-            return Response(dict(error="'description' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'description' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
         if "spec" not in obj.survey_spec:
-            return Response(dict(error="'spec' missing from survey spec"), status=status.HTTP_400_BAD_REQUEST)
-        if type(obj.survey_spec["spec"]) != list:
-            return Response(dict(error="'spec' must be a list of items"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'spec' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(obj.survey_spec["spec"], list):
+            return Response(dict(error="'spec' must be a list of items."), status=status.HTTP_400_BAD_REQUEST)
         if len(obj.survey_spec["spec"]) < 1:
-            return Response(dict(error="'spec' doesn't contain any items"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error="'spec' doesn't contain any items."), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
+        variable_set = set()
         for survey_item in obj.survey_spec["spec"]:
-            if type(survey_item) != dict:
-                return Response(dict(error="survey element %s is not a json object" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if not isinstance(survey_item, dict):
+                return Response(dict(error="Survey question %s is not a json object." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
-                return Response(dict(error="'type' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'type' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "question_name" not in survey_item:
-                return Response(dict(error="'question_name' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'question_name' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "variable" not in survey_item:
-                return Response(dict(error="'variable' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'variable' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+            if survey_item['variable'] in variable_set:
+                return Response(dict(error="'variable' '%s' duplicated in survey question %s." % (survey_item['variable'], str(idx))), status=status.HTTP_400_BAD_REQUEST)
+            else:
+                variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
-                return Response(dict(error="'required' missing from survey element %s" % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error="'required' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
         obj.save()
         return Response()
@@ -1944,13 +2349,54 @@ class JobTemplateActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
+
+class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_templates_any'
+
+class JobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_templates_error'
+
+class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = JobTemplate
+    relationship = 'notification_templates_success'
+
+class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    parent_model = JobTemplate
+    relationship = 'labels'
+
+    def post(self, request, *args, **kwargs):
+        # If a label already exists in the database, attach it instead of erroring out
+        # that it already exists
+        if 'id' not in request.data and 'name' in request.data and 'organization' in request.data:
+            existing = Label.objects.filter(name=request.data['name'], organization_id=request.data['organization'])
+            if existing.exists():
+                existing = existing[0]
+                request.data['id'] = existing.id
+                del request.data['name']
+                del request.data['organization']
+        return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
     permission_classes = (JobTemplateCallbackPermission,)
+    serializer_class = EmptySerializer
+    parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [FormParser]
 
     @csrf_exempt
     @transaction.non_atomic_requests
@@ -1987,25 +2433,25 @@ class JobTemplateCallback(GenericAPIView):
             return set()
         # Find the host objects to search for a match.
         obj = self.get_object()
-        qs = obj.inventory.hosts.filter(active=True)
+        hosts = obj.inventory.hosts.all()
         # First try for an exact match on the name.
         try:
-            return set([qs.get(name__in=remote_hosts)])
+            return set([hosts.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
         matches = set()
-        for host in qs:
+        for host in hosts:
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
                 matches.add(host)
-            # FIXME: Not entirely sure if this statement will ever be needed?
             if host.name != ansible_ssh_host and host.name in remote_hosts:
                 matches.add(host)
         if len(matches) == 1:
             return matches
+
         # Try to resolve forward addresses for each host to find matches.
-        for host in qs:
+        for host in hosts:
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host:
@@ -2038,7 +2484,7 @@ class JobTemplateCallback(GenericAPIView):
     def post(self, request, *args, **kwargs):
         extra_vars = None
         if request.content_type == "application/json":
-            extra_vars = request.DATA.get("extra_vars", None)
+            extra_vars = request.data.get("extra_vars", None)
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
         # Attempt to find matching hosts based on remote address.
@@ -2047,7 +2493,7 @@ class JobTemplateCallback(GenericAPIView):
         # match again.
         inventory_sources_already_updated = []
         if len(matching_hosts) != 1:
-            inventory_sources = job_template.inventory.inventory_sources.filter(active=True, update_on_launch=True)
+            inventory_sources = job_template.inventory.inventory_sources.filter( update_on_launch=True)
             inventory_update_pks = set()
             for inventory_source in inventory_sources:
                 if inventory_source.needs_update_on_launch:
@@ -2068,24 +2514,21 @@ class JobTemplateCallback(GenericAPIView):
         # Check matching hosts.
         if not matching_hosts:
             data = dict(msg='No matching host could be found!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         elif len(matching_hosts) > 1:
             data = dict(msg='Multiple hosts matched the request!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
             data = dict(msg='Cannot start automatically, user input required!')
-            # FIXME: Log!
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        limit = ':&'.join(filter(None, [job_template.limit, host.name]))
+        limit = host.name
 
-        # NOTE: We limit this to one job waiting due to this: https://trello.com/c/yK36dGWp
+        # NOTE: We limit this to one job waiting per host per callblack to keep them from stacking crazily
         if Job.objects.filter(status__in=['pending', 'waiting', 'running'], job_template=job_template,
                               limit=limit).count() > 0:
-            data = dict(msg='Host callback job already pending')
+            data = dict(msg='Host callback job already pending.')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Everything is fine; actually create the job.
@@ -2103,7 +2546,7 @@ class JobTemplateCallback(GenericAPIView):
 
         # Return the location of the new job.
         headers = {'Location': job.get_absolute_url()}
-        return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+        return Response(status=status.HTTP_201_CREATED, headers=headers)
 
 
 class JobTemplateJobsList(SubListCreateAPIView):
@@ -2114,14 +2557,32 @@ class JobTemplateJobsList(SubListCreateAPIView):
     relationship = 'jobs'
     parent_key = 'job_template'
 
+class JobTemplateAccessList(ResourceAccessList):
+
+    model = User # needs to be User for AccessLists's
+    resource_model = JobTemplate
+    new_in_300 = True
+
+class JobTemplateObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = JobTemplate
+    new_in_300 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
+
 class SystemJobTemplateList(ListAPIView):
 
     model = SystemJobTemplate
     serializer_class = SystemJobTemplateSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not request.user.is_superuser and not request.user.is_system_auditor:
+            raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 class SystemJobTemplateDetail(RetrieveAPIView):
@@ -2132,7 +2593,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -2142,10 +2603,10 @@ class SystemJobTemplateLaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        new_job = obj.create_unified_job(**request.DATA)
-        new_job.signal_start(**request.DATA)
+        new_job = obj.create_unified_job(**request.data)
+        new_job.signal_start(**request.data)
         data = dict(system_job=new_job.id)
-        return Response(data, status=status.HTTP_202_ACCEPTED)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
@@ -2165,6 +2626,27 @@ class SystemJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'system_job_template'
 
+class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notification_templates_any'
+
+class SystemJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notification_templates_error'
+
+class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = SystemJobTemplate
+    relationship = 'notification_templates_success'
+
 class JobList(ListCreateAPIView):
 
     model = Job
@@ -2182,6 +2664,14 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
 
+class JobLabelList(SubListAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    parent_model = Job
+    relationship = 'labels'
+    parent_key = 'job'
+
 class JobActivityStreamList(SubListAPIView):
 
     model = ActivityStream
@@ -2198,12 +2688,12 @@ class JobActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(JobActivityStreamList, self).get(request, *args, **kwargs)
 
 class JobStart(GenericAPIView):
 
     model = Job
-    # FIXME: Add serializer class to define fields in OPTIONS request!
+    serializer_class = EmptySerializer
     is_job_start = True
 
     def get(self, request, *args, **kwargs):
@@ -2221,7 +2711,7 @@ class JobStart(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
         if obj.can_start:
-            result = obj.signal_start(**request.DATA)
+            result = obj.signal_start(**request.data)
             if not result:
                 data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2260,15 +2750,15 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        # Note: is_valid() may modify request.DATA
+        # Note: is_valid() may modify request.data
         # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
-        serializer = self.serializer_class(data=request.DATA, context={'obj': obj, 'data': request.DATA})
+        serializer = self.serializer_class(data=request.data, context={'obj': obj, 'data': request.data})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         obj.launch_type = 'relaunch'
         new_job = obj.copy()
-        result = new_job.signal_start(**request.DATA)
+        result = new_job.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2278,6 +2768,13 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url()}
             return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+class JobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = Job
+    relationship = 'notifications'
 
 class BaseJobHostSummariesList(SubListAPIView):
 
@@ -2355,13 +2852,11 @@ class JobJobEventsList(BaseJobEventsList):
     # Post allowed for job event callback only.
     def post(self, request, *args, **kwargs):
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.DATA.copy()
+        data = request.data.copy()
         data['job'] = parent_obj.pk
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            self.pre_save(serializer.object)
-            self.object = serializer.save(force_insert=True)
-            self.post_save(self.object, created=True)
+            self.instance = serializer.save()
             headers = {'Location': serializer.data['url']}
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
@@ -2378,7 +2873,7 @@ class JobJobPlaysList(BaseJobEventsList):
         all_plays = []
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         # Put together a queryset for relevant job events.
@@ -2390,16 +2885,16 @@ class JobJobPlaysList(BaseJobEventsList):
         # doing this here for the moment until/unless we need to implement more
         # complex filtering (since we aren't under a serializer)
 
-        if "id__in" in request.QUERY_PARAMS:
-            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
-        elif "id__gt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
-        elif "id__lt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
-        if "failed" in request.QUERY_PARAMS:
-            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
-        if "play__icontains" in request.QUERY_PARAMS:
-            qs = qs.filter(play__icontains=request.QUERY_PARAMS['play__icontains'])
+        if "id__in" in request.query_params:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.query_params["id__in"].split(",")])
+        elif "id__gt" in request.query_params:
+            qs = qs.filter(id__gt=request.query_params['id__gt'])
+        elif "id__lt" in request.query_params:
+            qs = qs.filter(id__lt=request.query_params['id__lt'])
+        if "failed" in request.query_params:
+            qs = qs.filter(failed=(request.query_params['failed'].lower() == 'true'))
+        if "play__icontains" in request.query_params:
+            qs = qs.filter(play__icontains=request.query_params['play__icontains'])
 
         count = qs.count()
 
@@ -2460,15 +2955,15 @@ class JobJobTasksList(BaseJobEventsList):
         # If there's no event ID specified, this will return a 404.
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'job not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
-        if 'event_id' not in request.QUERY_PARAMS:
-            return ({'detail': '"event_id" not provided'}, -1, status.HTTP_400_BAD_REQUEST)
+        if 'event_id' not in request.query_params:
+            return ({"detail": "'event_id' not provided."}, -1, status.HTTP_400_BAD_REQUEST)
 
-        parent_task = job.job_events.filter(pk=int(request.QUERY_PARAMS.get('event_id', -1)))
+        parent_task = job.job_events.filter(pk=int(request.query_params.get('event_id', -1)))
         if not parent_task.exists():
-            return ({'detail': 'parent event not found'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': 'Parent event not found.'}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
         # Some events correspond to a playbook or task starting up,
@@ -2505,16 +3000,16 @@ class JobJobTasksList(BaseJobEventsList):
         # doing this here for the moment until/unless we need to implement more
         # complex filtering (since we aren't under a serializer)
 
-        if "id__in" in request.QUERY_PARAMS:
-            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.QUERY_PARAMS["id__in"].split(",")])
-        elif "id__gt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__gt=request.QUERY_PARAMS['id__gt'])
-        elif "id__lt" in request.QUERY_PARAMS:
-            qs = qs.filter(id__lt=request.QUERY_PARAMS['id__lt'])
-        if "failed" in request.QUERY_PARAMS:
-            qs = qs.filter(failed=(request.QUERY_PARAMS['failed'].lower() == 'true'))
-        if "task__icontains" in request.QUERY_PARAMS:
-            qs = qs.filter(task__icontains=request.QUERY_PARAMS['task__icontains'])
+        if "id__in" in request.query_params:
+            qs = qs.filter(id__in=[int(filter_id) for filter_id in request.query_params["id__in"].split(",")])
+        elif "id__gt" in request.query_params:
+            qs = qs.filter(id__gt=request.query_params['id__gt'])
+        elif "id__lt" in request.query_params:
+            qs = qs.filter(id__lt=request.query_params['id__lt'])
+        if "failed" in request.query_params:
+            qs = qs.filter(failed=(request.query_params['failed'].lower() == 'true'))
+        if "task__icontains" in request.query_params:
+            qs = qs.filter(task__icontains=request.query_params['task__icontains'])
 
         if ordering is not None:
             qs = qs.order_by(ordering)
@@ -2589,10 +3084,19 @@ class AdHocCommandList(ListCreateAPIView):
     def dispatch(self, *args, **kwargs):
         return super(AdHocCommandList, self).dispatch(*args, **kwargs)
 
+    def update_raw_data(self, data):
+        # Hide inventory and limit fields from raw data, since they will be set
+        # automatically by sub list create view.
+        parent_model = getattr(self, 'parent_model', None)
+        if parent_model in (Host, Group):
+            data.pop('inventory', None)
+            data.pop('limit', None)
+        return super(AdHocCommandList, self).update_raw_data(data)
+
     def create(self, request, *args, **kwargs):
         # Inject inventory ID and limit if parent objects is a host/group.
         if hasattr(self, 'get_parent_object') and not getattr(self, 'parent_key', None):
-            data = request.DATA
+            data = request.data
             # HACK: Make request data mutable.
             if getattr(data, '_mutable', None) is False:
                 data._mutable = True
@@ -2602,11 +3106,11 @@ class AdHocCommandList(ListCreateAPIView):
                 data['limit'] = parent_obj.name
 
         # Check for passwords needed before creating ad hoc command.
-        credential_pk = get_pk_from_dict(request.DATA, 'credential')
+        credential_pk = get_pk_from_dict(request.data, 'credential')
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
             needed = credential.passwords_needed
-            provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+            provided = dict([(field, request.data.get(field, '')) for field in needed])
             if not all(provided.values()):
                 data = dict(passwords_needed_to_start=needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2617,7 +3121,7 @@ class AdHocCommandList(ListCreateAPIView):
 
         # Start ad hoc command running when created.
         ad_hoc_command = get_object_or_400(self.model, pk=response.data['id'])
-        result = ad_hoc_command.signal_start(**request.DATA)
+        result = ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2700,21 +3204,21 @@ class AdHocCommandRelaunch(GenericAPIView):
                 data[field[:-3]] = getattr(obj, field)
             else:
                 data[field] = getattr(obj, field)
-        serializer = self.get_serializer(data=data)
+        serializer = AdHocCommandSerializer(data=data, context=self.get_serializer_context())
         if not serializer.is_valid():
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Check for passwords needed before copying ad hoc command.
         needed = obj.passwords_needed_to_start
-        provided = dict([(field, request.DATA.get(field, '')) for field in needed])
+        provided = dict([(field, request.data.get(field, '')) for field in needed])
         if not all(provided.values()):
             data = dict(passwords_needed_to_start=needed)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Copy and start the new ad hoc command.
         new_ad_hoc_command = obj.copy()
-        result = new_ad_hoc_command.signal_start(**request.DATA)
+        result = new_ad_hoc_command.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -2771,13 +3275,11 @@ class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
         if request.user:
             raise PermissionDenied()
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.DATA.copy()
-        data['ad_hoc_command'] = parent_obj.pk
+        data = request.data.copy()
+        data['ad_hoc_command'] = parent_obj
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            self.pre_save(serializer.object)
-            self.object = serializer.save(force_insert=True)
-            self.post_save(self.object, created=True)
+            self.instance = serializer.save()
             headers = {'Location': serializer.data['url']}
             return Response(serializer.data, status=status.HTTP_201_CREATED,
                             headers=headers)
@@ -2800,7 +3302,7 @@ class AdHocCommandActivityStreamList(SubListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class SystemJobList(ListCreateAPIView):
@@ -2809,8 +3311,8 @@ class SystemJobList(ListCreateAPIView):
     serializer_class = SystemJobListSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not request.user.is_superuser and not request.user.is_system_auditor:
+            raise PermissionDenied("Superuser privileges needed.")
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
@@ -2833,6 +3335,12 @@ class SystemJobCancel(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class SystemJobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = SystemJob
+    relationship = 'notifications'
 
 class UnifiedJobTemplateList(ListAPIView):
 
@@ -2859,19 +3367,20 @@ class UnifiedJobStdout(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
-        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size, settings.STDOUT_MAX_BYTES_DISPLAY)
+        if request.accepted_renderer.format != 'txt_download' and obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
+                                                                                                                                     tower_settings.STDOUT_MAX_BYTES_DISPLAY)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
                 return Response(response_message)
-        
+
         if request.accepted_renderer.format in ('html', 'api', 'json'):
-            content_format = request.QUERY_PARAMS.get('content_format', 'html')
-            content_encoding = request.QUERY_PARAMS.get('content_encoding', None)
-            start_line = request.QUERY_PARAMS.get('start_line', 0)
-            end_line = request.QUERY_PARAMS.get('end_line', None)
-            dark_val = request.QUERY_PARAMS.get('dark', '')
+            content_format = request.query_params.get('content_format', 'html')
+            content_encoding = request.query_params.get('content_encoding', None)
+            start_line = request.query_params.get('start_line', 0)
+            end_line = request.query_params.get('end_line', None)
+            dark_val = request.query_params.get('dark', '')
             dark = bool(dark_val and dark_val[0].lower() in ('1', 't', 'y'))
             content_only = bool(request.accepted_renderer.format in ('api', 'json'))
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
@@ -2902,7 +3411,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
                 response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
                 return response
-            except Exception, e:
+            except Exception as e:
                 return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         elif request.accepted_renderer.format == 'txt':
             return Response(unified_job.result_stdout)
@@ -2926,6 +3435,79 @@ class AdHocCommandStdout(UnifiedJobStdout):
     model = AdHocCommand
     new_in_220 = True
 
+class NotificationTemplateList(ListCreateAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    new_in_300 = True
+
+class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    new_in_300 = True
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'delete', obj):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if obj.notifications.filter(status='pending').exists():
+            return Response({"error": "Delete not allowed while there are pending notifications"},
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(NotificationTemplateDetail, self).delete(request, *args, **kwargs)
+
+class NotificationTemplateTest(GenericAPIView):
+
+    view_name = 'NotificationTemplate Test'
+    model = NotificationTemplate
+    serializer_class = EmptySerializer
+    new_in_300 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, tower_settings.TOWER_URL_BASE),
+                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, tower_settings.TOWER_URL_BASE)})
+        if not notification:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            send_notifications.delay([notification.id])
+            headers = {'Location': notification.get_absolute_url()}
+            return Response({"notification": notification.id},
+                            headers=headers,
+                            status=status.HTTP_202_ACCEPTED)
+
+class NotificationTemplateNotificationList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = NotificationTemplate
+    relationship = 'notifications'
+    parent_key = 'notification_template'
+
+class NotificationList(ListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    new_in_300 = True
+
+class NotificationDetail(RetrieveAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    new_in_300 = True
+
+class LabelList(ListCreateAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    new_in_300 = True
+
+class LabelDetail(RetrieveUpdateAPIView):
+
+    model = Label
+    serializer_class = LabelSerializer
+    new_in_300 = True
+
 class ActivityStreamList(SimpleListAPIView):
 
     model = ActivityStream
@@ -2940,7 +3522,7 @@ class ActivityStreamList(SimpleListAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class ActivityStreamDetail(RetrieveAPIView):
@@ -2957,7 +3539,184 @@ class ActivityStreamDetail(RetrieveAPIView):
                                  'the activity stream.')
 
         # Okay, let it through.
-        return super(type(self), self).get(request, *args, **kwargs)
+        return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
+
+class SettingsList(ListCreateAPIView):
+
+    model = TowerSettings
+    serializer_class = TowerSettingsSerializer
+    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    new_in_300 = True
+    filter_backends = ()
+
+    def get_queryset(self):
+        class SettingsIntermediary(object):
+            def __init__(self, key, description, category, value,
+                         value_type, user=None):
+                self.key = key
+                self.description = description
+                self.category = category
+                self.value = value
+                self.value_type = value_type
+                self.user = user
+
+        if not self.request.user.is_superuser:
+            # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
+            #       we'll need to extend this more in the future when we have user settings
+            return []
+        all_defined_settings = {}
+        for s in TowerSettings.objects.all():
+            all_defined_settings[s.key] = SettingsIntermediary(s.key,
+                                                               s.description,
+                                                               s.category,
+                                                               s.value_converted,
+                                                               s.value_type,
+                                                               s.user)
+        manifest_settings = settings.TOWER_SETTINGS_MANIFEST
+        settings_actual = []
+        for settings_key in manifest_settings:
+            if settings_key in all_defined_settings:
+                settings_actual.append(all_defined_settings[settings_key])
+            else:
+                m_entry = manifest_settings[settings_key]
+                settings_actual.append(SettingsIntermediary(settings_key,
+                                                            m_entry['description'],
+                                                            m_entry['category'],
+                                                            m_entry['default'],
+                                                            m_entry['type']))
+        return settings_actual
+
+    def delete(self, request, *args, **kwargs):
+        if not request.user.can_access(self.model, 'delete', None):
+            raise PermissionDenied()
+        TowerSettings.objects.all().delete()
+        return Response()
+
+class SettingsReset(APIView):
+
+    view_name = "Reset a settings value"
+    new_in_300 = True
+
+    def post(self, request):
+        # NOTE: Extend more with user settings
+        if not request.user.can_access(TowerSettings, 'delete', None):
+            raise PermissionDenied()
+        settings_key = request.data.get('key', None)
+        if settings_key is not None:
+            TowerSettings.objects.filter(key=settings_key).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RoleList(ListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        return Role.visible_roles(self.request.user)
+
+
+class RoleDetail(RetrieveAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+
+class RoleUsersList(SubListCreateAttachDetachAPIView):
+
+    model = User
+    serializer_class = UserSerializer
+    parent_model = Role
+    relationship = 'members'
+    new_in_300 = True
+
+    def get_queryset(self):
+        role = self.get_parent_object()
+        self.check_parent_access(role)
+        return role.members.all()
+
+    def post(self, request, *args, **kwargs):
+        # Forbid implicit user creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg="User 'id' field is missing.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        return super(RoleUsersList, self).post(request, *args, **kwargs)
+
+
+class RoleTeamsList(SubListAPIView):
+
+    model = Team
+    serializer_class = TeamSerializer
+    parent_model = Role
+    relationship = 'member_role.parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        role = self.get_parent_object()
+        self.check_parent_access(role)
+        return Team.objects.filter(member_role__children=role)
+
+    def post(self, request, pk, *args, **kwargs):
+        # Forbid implicit team creation here
+        sub_id = request.data.get('id', None)
+        if not sub_id:
+            data = dict(msg="Team 'id' field is missing.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        content_type = ContentType.objects.get_for_model(Organization)
+        if role.content_type == content_type:
+            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        team = Team.objects.get(pk=sub_id)
+        action = 'attach'
+        if request.data.get('disassociate', None):
+            action = 'unattach'
+        if not request.user.can_access(self.parent_model, action, role, team,
+                                       self.relationship, request.data,
+                                       skip_sub_obj_read_check=False):
+            raise PermissionDenied()
+        if request.data.get('disassociate', None):
+            team.member_role.children.remove(role)
+        else:
+            team.member_role.children.add(role)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RoleParentsList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'parents'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return Role.filter_visible_roles(self.request.user, role.parents.all())
+
+
+class RoleChildrenList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = Role
+    relationship = 'children'
+    permission_classes = (IsAuthenticated,)
+    new_in_300 = True
+
+    def get_queryset(self):
+        role = Role.objects.get(pk=self.kwargs['pk'])
+        return Role.filter_visible_roles(self.request.user, role.children.all())
+
 
 
 # Create view functions for all of the class-based views to simplify inclusion

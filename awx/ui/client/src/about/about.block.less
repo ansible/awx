@@ -1,14 +1,47 @@
 /** @define About */
-.About {
-    height: 309px !important;
-}
+@import "awx/ui/client/src/shared/branding/colors.default.less";
 
-.About-cowsay {
-    margin-top: 30px;
+.About-cowsay--container{
+	width: 340px;
+	margin: 0 auto;
 }
-
-.About-redhat {
-    max-width: 100%;
-    margin-top: -61px;
-    margin-bottom: -33px;
+.About-cowsay--code{
+	background-color: @default-bg;
+	padding-left: 30px;
+	border-style: none;
+	max-width: 340px;
+	padding-left: 30px;
+}
+.About .modal-header{
+	border: none;
+	padding-bottom: 0px;
+}
+.About .modal-dialog{
+	max-width: 500px;
+}
+.About .modal-body{
+	padding-top: 0px;
+}
+.About-brand--redhat{
+    float: left;
+    width: 112px;
+}
+.About-brand--ansible{
+	max-width: 120px;
+	margin: 0 auto;
+}
+.About-close{
+	position: absolute;
+	top: 15px;
+	right: 15px;
+    z-index: 10;
+}
+.About p{
+	color: @default-interface-txt;
+    margin: 0;
+    font-size: 12px;
+    padding-top: 10px;
+}
+.About-modal--footer {
+    clear: both;
 }

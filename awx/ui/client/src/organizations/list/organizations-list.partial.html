@@ -1,0 +1,67 @@
+<div class="tab-pane" id="organizations">
+    <div ui-view></div>
+    <div ng-cloak id="htmlTemplate" class="Panel">
+        <div class="List-header">
+            <div class="List-title">
+                <div class="List-titleText">
+                    organizations
+                </div>
+                <span class="badge List-titleBadge">
+                    {{ orgCount }}
+                </span>
+            </div>
+            <div class="List-actions">
+                <button class="btn List-buttonSubmit"
+                    aw-tool-tip="Create a new organization"
+                    ng-click="addOrganization()">
+                    + ADD
+                </button>
+            </div>
+        </div>
+        <div class="List-well">
+            <div class="OrgCards-search" ng-hide="organizationLoading == false && organization_active_search == false && organization_total_rows < 1">
+            </div>
+            <div class="List-noItems" ng-show="organizationLoading == false && organization_active_search == false && organization_total_rows < 1">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="OrgCards" id="OrgCards">
+                <div class="OrgCards-card"
+                    ng-class="{'OrgCards-card--selected': activeCard === card.id || card.isActiveCard }"
+                    ng-repeat="card in orgCards track by card.id">
+                    <div class="OrgCards-header">
+                        <h3 class="OrgCards-label">{{ card.name }}</h3>
+                        <div class="OrgCards-actionItems">
+                            <button class="OrgCards-actionItem
+                                List-actionButton"
+                                ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
+                                ng-click="editOrganization(card.id)">
+                                <i class="OrgCards-actionItemIcon fa fa-pencil">
+                                </i>
+                            </button>
+                            <button class="OrgCards-actionItem List-actionButton
+                                List-actionButton--delete"
+                                ng-click="deleteOrganization(card.id, card.name)">
+                                <i class="OrgCards-actionItemIcon
+                                    fa fa-trash-o">
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="OrgCards-description">{{ card.description || "Place organization description here" }}</p>
+                    <div class="OrgCards-links">
+                        <div class="OrgCards-link" ng-repeat="link in card.links">
+                            <span class="badge List-titleBadge
+                                OrgCards-linkBadge"
+                                ng-class="{'List-titleBadge--selected': (activeCard === card.id || card.isActiveCard) && activeMode === link.activeMode }">
+                                {{ link.count }}
+                            </span>
+                            <a class="OrgCards-linkName"
+                                ng-href="{{ link.href }}">
+                                {{ link.name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id='organizations-list'></div>
+        </div>
+    </div>
+</div>

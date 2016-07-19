@@ -9,7 +9,6 @@ import shlex
 import yaml
 
 # Django
-from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -26,11 +25,11 @@ from awx.main.utils import encrypt_field
 
 __all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
-           'CommonModelNameNotUnique',
+           'CommonModelNameNotUnique', 'NotificationFieldsModel',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_SCAN',
            'PERM_INVENTORY_CHECK', 'PERM_JOBTEMPLATE_CREATE', 'JOB_TYPE_CHOICES',
-           'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES',
+           'AD_HOC_JOB_TYPE_CHOICES', 'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES',
            'VERBOSITY_CHOICES']
 
 PERM_INVENTORY_ADMIN  = 'admin'
@@ -47,6 +46,11 @@ JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_SCAN, _('Scan')),
 ]
 
+AD_HOC_JOB_TYPE_CHOICES = [
+    (PERM_INVENTORY_DEPLOY, _('Run')),
+    (PERM_INVENTORY_CHECK, _('Check')),
+]
+
 PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_READ, _('Read Inventory')),
     (PERM_INVENTORY_WRITE, _('Edit Inventory')),
@@ -57,16 +61,16 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_JOBTEMPLATE_CREATE, _('Create a Job Template')),
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'openstack', 'custom']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax', 'vmware', 'gce', 'azure', 'azure_rm', 'openstack', 'custom', 'satellite6', 'cloudforms']
 
-VERBOSITY_CHOICES = getattr(settings, 'VERBOSITY_CHOICES', [
+VERBOSITY_CHOICES = [
     (0, '0 (Normal)'),
     (1, '1 (Verbose)'),
     (2, '2 (More Verbose)'),
     (3, '3 (Debug)'),
     (4, '4 (Connection Debug)'),
     (5, '5 (WinRM Debug)'),
-])
+]
 
 
 class VarsDictProperty(object):
@@ -133,7 +137,7 @@ class BaseModel(models.Model):
         errors = {}
         try:
             super(BaseModel, self).clean_fields(exclude)
-        except ValidationError, e:
+        except ValidationError as e:
             errors = e.update_error_dict(errors)
         for f in self._meta.fields:
             if f.name in exclude:
@@ -141,7 +145,7 @@ class BaseModel(models.Model):
             if hasattr(self, 'clean_%s' % f.name):
                 try:
                     setattr(self, f.name, getattr(self, 'clean_%s' % f.name)())
-                except ValidationError, e:
+                except ValidationError as e:
                     errors[f.name] = e.messages
         if errors:
             raise ValidationError(errors)
@@ -157,16 +161,6 @@ class BaseModel(models.Model):
             self.save(update_fields=update_fields)
         return update_fields
 
-    def save(self, *args, **kwargs):
-        # For compatibility with Django 1.4.x, attempt to handle any calls to
-        # save that pass update_fields.
-        try:
-            super(BaseModel, self).save(*args, **kwargs)
-        except TypeError:
-            if 'update_fields' not in kwargs:
-                raise
-            kwargs.pop('update_fields')
-            super(BaseModel, self).save(*args, **kwargs)
 
 class CreatedModifiedModel(BaseModel):
     '''
@@ -213,15 +207,6 @@ class PasswordFieldsModel(BaseModel):
 
     def _password_field_allows_ask(self, field):
         return False # Override in subclasses if needed.
-
-    def mark_inactive(self, save=True):
-        '''
-        When marking a password model inactive we'll clear sensitive fields
-        '''
-        for sensitive_field in self.PASSWORD_FIELDS:
-            setattr(self, sensitive_field, "")
-        self.save()
-        super(PasswordFieldsModel, self).mark_inactive(save=save)
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -284,28 +269,8 @@ class PrimordialModel(CreatedModifiedModel):
         editable=False,
         on_delete=models.SET_NULL,
     )
-    active = models.BooleanField(
-        default=True,
-        editable=False,
-    )
 
     tags = TaggableManager(blank=True)
-
-    def mark_inactive(self, save=True, update_fields=None, skip_active_check=False):
-        '''Use instead of delete to rename and mark inactive.'''
-        update_fields = update_fields or []
-        if skip_active_check or self.active:
-            dtnow = now()
-            if 'name' in self._meta.get_all_field_names():
-                self.name   = "_deleted_%s_%s" % (dtnow.isoformat(), self.name)
-                if 'name' not in update_fields:
-                    update_fields.append('name')
-            self.active = False
-            if 'active' not in update_fields:
-                update_fields.append('active')
-            if save:
-                self.save(update_fields=update_fields)
-        return update_fields
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
@@ -347,4 +312,27 @@ class CommonModelNameNotUnique(PrimordialModel):
     name = models.CharField(
         max_length=512,
         unique=False,
+    )
+
+class NotificationFieldsModel(BaseModel):
+
+    class Meta:
+        abstract = True
+
+    notification_templates_error = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_errors'
+    )
+
+    notification_templates_success = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_success'
+    )
+
+    notification_templates_any = models.ManyToManyField(
+        "NotificationTemplate",
+        blank=True,
+        related_name='%(class)s_notification_templates_for_any'
     )

@@ -1,57 +1,308 @@
+@import "../shared/branding/colors.default.less";
+
 /** @define MainMenu */
 
 .MainMenu {
-  @menu-breakpoint: 871px;
-
-  display: flex;
-
-  background-color: white;
-  margin: 0;
-
-  @media screen and (max-width: @menu-breakpoint) {
-    position: relative;
-    transition: height 0.5s ease-out;
-    justify-content: flex-start;
-    flex-direction: column;
-    height: 58px;
-    overflow: hidden;
-
-    &.Menu--open {
-        height: 523px !important;
-        // border-bottom: solid thin black;
-    }
-
-    &--portal.Menu--open {
-        height: 290px !important;
-    }
-
-  }
-
-  @media screen and (min-width: (@menu-breakpoint + 1px)) {
-      padding: 0 20px;
-      padding-right: 23px;
-  }
-
-  &-menuContainer {
-      display: flex;
-  }
-
-  &-toggle {
+    padding: 0;
     display: flex;
-    @media screen and (min-width: (@menu-breakpoint + 1px)) {
-      display: none;
-    }
-    margin-left: auto;
-  }
-
-  &--fixedTop {
-      width: 100%;
-      z-index: 1040;
-      position: fixed;
-      right: 0;
-      left: 0;
-      top: 0;
-  }
-
+    background-color: @menu-bg;
+    border-bottom: 1px solid @menu-btm;
+    width: 100%;
+    z-index: 1040;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 0;
+    height: 60px;
+    align-items: stretch;
 }
 
+.MainMenu--licenseMissing{
+    justify-content: space-between;
+}
+
+.MainMenu-logo,
+.MainMenu-item {
+    color: @menu-link;
+    background-color: @menu-link-bg;
+}
+
+.MainMenu-logoImage {
+    max-width: 147px;
+    max-height: 50px;
+    height: 30px;
+    width: 93px;
+    margin: 20px;
+}
+
+.MainMenu-logoImage--licenseMissing:hover{
+    cursor:default;
+    background-color: @default-bg!important;
+}
+
+.MainMenu-item {
+    padding: 0 20px;
+}
+
+.MainMenu-itemText,
+.MainMenu-itemImage {
+    flex: initial;
+}
+
+.MainMenu-itemImage {
+    color: @menu-link-icon;
+}
+
+.MainMenu-socket {
+    background-color: @default-bg;
+    order: 0;
+    flex: initial;
+    padding-top: 0px;
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    border-left: 1px solid @menu-link-sides;
+    cursor: default;
+}
+
+.MainMenu-socketImage {
+    font-size: 18px;
+    text-shadow:
+    -1px -1px 0 @default-bg,
+    1px -1px 0 @default-bg,
+    -1px 1px 0 @default-bg,
+    1px 1px 0 @default-bg;
+    z-index: 1042;
+}
+
+.MainMenu-item,
+.MainMenu-item:hover,
+.MainMenu-item:focus,
+.MainMenu-item:active {
+    color: @default-interface-txt;
+}
+
+@menu-breakpoint: 900px;
+
+@media screen and (min-width: (@menu-breakpoint + 1px)) {
+    .MainMenu-mobileItems,
+    .MainMenu-toggle {
+        display: none;
+    }
+
+    .MainMenu-logo {
+        flex: initial;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        border: 0;
+        border-bottom: 0;
+        border-right: 1px solid @menu-link-sides;
+    }
+
+    .MainMenu-item {
+        flex: initial;
+        padding-top: 0px;
+        border: 0;
+        border-bottom: 0px solid @menu-link-btm-hov;
+        display: flex;
+        align-items: center;
+    }
+
+    // Set up elements based on if their layout in the menu bar
+    .MainMenu-item--left {
+        border-right: 1px solid @menu-link-sides;
+    }
+
+    .MainMenu-item--left:hover,
+    .MainMenu-item--left.is-currentRoute {
+        margin-left: -1px;
+        padding-left: 21px;
+        padding-right: 21px;
+        border-right: 0px;
+    }
+
+    .MainMenu-item--lastLeft {
+        margin-right: auto;
+    }
+
+    .MainMenu-item--right {
+        border-left: 1px solid @menu-link-sides;
+        order: 1;
+    }
+
+    .MainMenu-item--right:hover,
+    .MainMenu-item--right.is-currentRoute {
+        border-left: 0px;
+        padding-left: 21px;
+        padding-right: 21px;
+        margin-right: -1px;
+    }
+
+    .MainMenu-item:hover,
+    .MainMenu-item.is-currentRoute {
+        padding-top: 5px;
+        border-bottom: 5px solid @menu-link-btm-hov;
+    }
+
+    .MainMenu-itemText--username {
+        padding-left: 13px;
+        margin-top: -4px;
+        max-width: 85px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .MainMenu-itemImage {
+        font-size: 20px;
+    }
+
+    .MainMenu-itemImage--settings {
+        margin-top: -1px;
+    }
+
+    .MainMenu-itemImage--user {
+        font-size: 21px;
+        margin-right: -5px;
+        margin-top: -1px;
+    }
+
+    .MainMenu-itemImage--docs {
+        font-size: 21px;
+        margin-top: -2px;
+    }
+
+    .MainMenu-item.is-currentRoute {
+        background-color: @menu-link-bg-hov;
+    }
+}
+
+@media screen and (max-width: @menu-breakpoint) {
+    .MainMenu-logo {
+        height: 60px;
+    }
+
+    .MainMenu-logoImage {
+        margin-top: 15px;
+    }
+
+    .MainMenu-item--notMobile {
+        display: none;
+    }
+
+    .MainMenu-item--licenseMissing{
+        justify-content: space-between!important;
+        display:flex!important;
+        align-items: center!important;
+        flex: initial!important;
+        padding-top:0px;
+    }
+
+    .MainMenu-item--licenseMissing:hover{
+        padding-top:20px;
+        border-bottom: 5px solid @menu-link-btm-hov;
+    }
+
+    .MainMenu-itemImage--licenseMissing{
+        font-size: 20px!important;
+    }
+
+    .MainMenu {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .MainMenu-logo {
+        flex: 1;
+        border-bottom: 1px solid @menu-link-btm;
+        order: 0;
+    }
+
+    .MainMenu-mobileItems {
+        display: flex;
+        order: 2;
+        flex-direction: row;
+        flex-wrap: wrap;
+        font-size: 15px;
+        width: 100%;
+        visibility: visible;
+        opacity: 1;
+        height: 416px;
+    }
+
+    .MainMenu-mobileItems.is-hiddenOnMobile,
+    .MainMenu-mobileItems.is-loggedOut {
+        visibility: hidden;
+        opacity: 0;
+        height: 0;
+    }
+
+    .MainMenu-item {
+        flex: 0 0 100%;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        order: 1;
+        border-bottom: 1px solid @menu-link-btm;
+    }
+
+    .MainMenu-item.is-currentRoute {
+        font-weight: bold;
+        background-color: @menu-link-bg;
+    }
+
+    .MainMenu-item:hover {
+        background-color: @menu-link-bg-hov;
+    }
+
+    .MainMenu-toggle {
+        color: @menu-link-icon;
+        background-color: @menu-link-bg;
+        order: 0;
+        flex: initial;
+        padding-top: 3px;
+        padding-left: 15px;
+        padding-right: 15px;
+        font-size: 34px;
+        display: flex;
+        align-items: center;
+        border: 0;
+        border-left: 1px solid @menu-link-btm;
+        border-bottom: 1px solid @menu-link-btm;
+    }
+
+    .MainMenu-socket {
+        border-bottom: 1px solid @menu-link-btm;
+    }
+
+    .MainMenu-toggleImage {
+        width: 36px;
+    }
+}
+
+.MainMenu-toggle:focus,
+.MainMenu-item:focus,
+.MainMenu-logo:focus,
+.MainMenu-toggle:hover,
+.MainMenu-item:hover,
+.MainMenu-logo:hover,
+.MainMenu-item.is-currentRoute {
+    background-color: @default-tertiary-bg;
+}
+
+// item on
+.MainMenu-logo,
+.MainMenu-item,
+.MainMenu-socket,
+.MainMenu-toggle {
+    opacity: 1;
+}
+
+.MainMenu-logo.is-loggedOut,
+.MainMenu-item.is-loggedOut,
+.MainMenu-socket.is-loggedOut,
+.MainMenu-toggle.is-loggedOut {
+    opacity: 0;
+}

@@ -11,39 +11,15 @@
 */
 
 export default
-    angular.module('JobTemplateFormDefinition', ['SchedulesListDefinition', 'CompletedJobsDefinition'])
+    angular.module('JobTemplateFormDefinition', [ 'CompletedJobsDefinition'])
 
         .value ('JobTemplateFormObject', {
 
-            addTitle: 'Create Job Templates',
+            addTitle: 'New Job Template',
             editTitle: '{{ name }}',
             name: 'job_templates',
-            twoColumns: true,
-            well: true,
             base: 'job_templates',
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpenFirst: true,   //Always open first panel
-
-            actions: {
-                // submit: {
-                //     ngClick: 'launch()',
-                //     awToolTip: 'Start a job using this template',
-                //     dataPlacement: 'top',
-                //     mode: 'edit'
-                // },
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
+            tabs: true,
 
             fields: {
                 name: {
@@ -70,11 +46,17 @@ export default
                     editRequired: true,
                     column: 1,
                     awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
-                        " syntax, test environment setup and report problems.</p>",
+                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
+                        " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature.</p>",
                     dataTitle: 'Job Type',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_job_type_on_launch',
+                        ngShow: "!job_type.value || job_type.value !== 'scan'",
+                        text: 'Prompt on launch'
+                    }
                 },
                 inventory: {
                     label: 'Inventory',
@@ -82,20 +64,37 @@ export default
                     sourceModel: 'inventory',
                     sourceField: 'name',
                     ngClick: 'lookUpInventory()',
-                    awRequiredWhen: {variable: "inventoryrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: '!ask_inventory_on_launch',
+                        alwaysShowAsterisk: true
+                    },
+                    requiredErrorMsg: "Please select an Inventory or check the Prompt on launch option.",
                     column: 1,
                     awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
                     dataTitle: 'Inventory',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_inventory_on_launch',
+                        ngShow: "!job_type.value || job_type.value !== 'scan'",
+                        text: 'Prompt on launch'
+                    }
                 },
                 project: {
                     label: 'Project',
+                    labelAction: {
+                        label: 'RESET',
+                        ngClick: 'resetProjectToDefault()',
+                        'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
+                    },
                     type: 'lookup',
                     sourceModel: 'project',
                     sourceField: 'name',
                     ngClick: 'lookUpProject()',
-                    awRequiredWhen: {variable: "projectrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: "projectrequired",
+                        init: "true"
+                    },
                     column: 1,
                     awPopOver: "<p>Select the project containing the playbook you want this job to execute.</p>",
                     dataTitle: 'Project',
@@ -106,19 +105,18 @@ export default
                     label: 'Playbook',
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
+                    ngDisabled: "job_type.value === 'scan' && project_name === 'Default'",
                     id: 'playbook-select',
-                    awRequiredWhen: {variable: "playbookrequired", init: "true" },
+                    awRequiredWhen: {
+                        reqExpression: "playbookrequired",
+                        init: "true"
+                    },
                     column: 1,
                     awPopOver: "<p>Select the playbook to be executed by this job.</p>",
                     dataTitle: 'Playbook',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                },
-                default_scan: {
-                  type: 'custom',
-                  column: 1,
-                  ngShow: 'job_type.value === "scan" && project_name !== "Default"',
-                  control: '<a href="" ng-click="toggleScanInfo()">Reset to default project and playbook</a>'
+                    includePlaybookNotFoundError: true
                 },
                 credential: {
                     label: 'Machine Credential',
@@ -126,14 +124,21 @@ export default
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
-                    addRequired: false,
-                    editRequired: false,
+                    awRequiredWhen: {
+                        reqExpression: '!ask_credential_on_launch',
+                        alwaysShowAsterisk: true
+                    },
+                    requiredErrorMsg: "Please select a Machine Credential or check the Prompt on launch option.",
                     column: 1,
                     awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
                      " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>",
                     dataTitle: 'Credential',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_credential_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 cloud_credential: {
                     label: 'Cloud Credential',
@@ -147,6 +152,20 @@ export default
                     awPopOver: "<p>Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
                         "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.</p>",
                     dataTitle: 'Cloud Credential',
+                    dataPlacement: 'right',
+                    dataContainer: "body"
+                },
+                network_credential: {
+                    label: 'Network Credential',
+                    type: 'lookup',
+                    sourceModel: 'network_credential',
+                    sourceField: 'name',
+                    ngClick: 'lookUpNetworkcredential()',
+                    addRequired: false,
+                    editRequired: false,
+                    column: 1,
+                    awPopOver: "<p>Network credentials are used by Ansible networking modules to connect to and manage networking devices.</p>",
+                    dataTitle: 'Network Credential',
                     dataPlacement: 'right',
                     dataContainer: "body"
                 },
@@ -180,7 +199,11 @@ export default
                         "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>",
                     dataTitle: 'Limit',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_limit_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
                 verbosity: {
                     label: 'Verbosity',
@@ -198,10 +221,10 @@ export default
                 job_tags: {
                     label: 'Job Tags',
                     type: 'textarea',
-                    rows: 1,
+                    rows: 5,
                     addRequired: false,
                     editRequired: false,
-                    'class': 'span12',
+                    'elementClass': 'Form-textInput',
                     column: 2,
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
@@ -211,86 +234,42 @@ export default
                         "in the Job Tags field:</p>\n<blockquote>configuration,packages</blockquote>\n",
                     dataTitle: "Job Tags",
                     dataPlacement: "right",
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_tags_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 },
-                variables: {
-                    label: 'Extra Variables',
-                    type: 'textarea',
-                    rows: 6,
-                    "class": 'span12',
-                    addRequired: false,
-                    editRequired: false,
-                    "default": "---",
-                    column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                        "for ansible-playbook. Provide key/value pairs using either YAML or JSON.</p>" +
-                        "JSON:<br />\n" +
-                        "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
-                        "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
-                    dataTitle: 'Extra Variables',
-                    dataPlacement: 'right',
-                    dataContainer: "body"
-                },
-                ask_variables_on_launch: {
-                    label: 'Prompt for Extra Variables',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    trueValue: 'true',
-                    falseValue: 'false',
-                    column: 2,
-                    awPopOver: "<p>If checked, user will be prompted at job launch with a dialog allowing override of the extra variables setting.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Prompt for Extra Variables',
-                    dataContainer: "body"
-                },
-                survey_enabled: {
-                    label: 'Enable Survey',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    awFeature: 'surveys',
-                    ngChange: "surveyEnabled()",
-                    ngHide: "job_type.value === 'scan'",
-                    column: 2,
-                    awPopOver: "<p>If checked, user will be prompted at job launch with a series of questions related to the job.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Enable Survey',
-                    dataContainer: "body"
-                },
-                create_survey: {
-                    type: 'custom',
-                    column: 2,
-                    ngHide: "job_type.value === 'scan'" ,
-                    control: '<button type="button" class="btn btn-sm btn-primary" id="job_templates_create_survey_btn" ng-show="survey_enabled" ng-click="addSurvey()"><i class="fa fa-pencil"></i>   Create Survey</button>'+
-                            '<button style="display:none;" type="button" class="btn btn-sm btn-primary" id="job_templates_edit_survey_btn" ng-show="survey_enabled" ng-click="editSurvey()"><i class="fa fa-pencil"></i>   Edit Survey</button>'+
-                            '<button style="display:none;margin-left:5px" type="button" class="btn btn-sm btn-primary" id="job_templates_delete_survey_btn" ng-show="survey_enabled" ng-click="deleteSurvey()"><i class="fa fa-trash-o"></i>   Delete Survey</button>'+
-                            '<div class="error ng-hide" id="job-template-survey-error" ng-show="invalid_survey">A survey is enabled but it does not exist. Create a survey or uncheck the Enable Survey box to disable the survey. </div>'
-                },
-                become_enabled: {
-                  label: 'Enable Privilege Escalation',
-                  type: 'checkbox',
-                  addRequired: false,
-                  editRequird: false,
-                  column: 2,
-                  awPopOver: "<p>If enabled,  run this playbook as an administrator. This is the equivalent of passing the<code> --become</code> option to the <code> ansible-playbook</code> command. </p>",
-                  dataPlacement: 'right',
-                  dataTitle: 'Become Privilege Escalation',
-                  dataContainer: "body"
-                },
-                allow_callbacks: {
-                    label: 'Allow Provisioning Callbacks',
-                    type: 'checkbox',
-                    addRequired: false,
-                    editRequird: false,
-                    ngChange: "toggleCallback('host_config_key')",
-                    column: 2,
-                    awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
-                        "using this job template.</p>",
-                    dataPlacement: 'right',
-                    dataTitle: 'Allow Provisioning Callbacks',
-                    dataContainer: "body"
+                checkbox_group: {
+                    label: 'Options',
+                    type: 'checkbox_group',
+                    fields: [{
+                        name: 'become_enabled',
+                        label: 'Enable Privilege Escalation',
+                        type: 'checkbox',
+                        addRequired: false,
+                        editRequird: false,
+                        column: 2,
+                        awPopOver: "<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>",
+                        dataPlacement: 'right',
+                        dataTitle: 'Become Privilege Escalation',
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
+                    }, {
+                        name: 'allow_callbacks',
+                        label: 'Allow Provisioning Callbacks',
+                        type: 'checkbox',
+                        addRequired: false,
+                        editRequird: false,
+                        ngChange: "toggleCallback('host_config_key')",
+                        column: 2,
+                        awPopOver: "<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
+                            "using this job template.</p>",
+                        dataPlacement: 'right',
+                        dataTitle: 'Allow Provisioning Callbacks',
+                        dataContainer: "body",
+                        labelClass: 'stack-inline'
+                    }]
                 },
                 callback_url: {
                     label: 'Provisioning Callback URL',
@@ -318,99 +297,116 @@ export default
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
                     dataContainer: "body"
+                },
+                labels: {
+                    label: 'Labels',
+                    type: 'select',
+                    class: 'Form-formGroup--fullWidth',
+                    ngOptions: 'label.label for label in labelOptions track by label.value',
+                    multiSelect: true,
+                    addRequired: false,
+                    editRequired: false,
+                    dataTitle: 'Labels',
+                    dataPlacement: 'right',
+                    awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
+                    dataContainer: 'body'
+                },
+                variables: {
+                    label: 'Extra Variables',
+                    type: 'textarea',
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    rows: 6,
+                    addRequired: false,
+                    editRequired: false,
+                    "default": "---",
+                    column: 2,
+                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
+                        "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
+                        "JSON:<br />\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "YAML:<br />\n" +
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
+                    dataTitle: 'Extra Variables',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_variables_on_launch',
+                        text: 'Prompt on launch'
+                    }
                 }
             },
 
             buttons: { //for now always generates <button> tags
+                add_survey: {
+                    ngClick: 'addSurvey()',
+                    ngShow: 'job_type.value !== "scan" && !survey_exists',
+                    awFeature: 'surveys',
+                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
+                    dataPlacement: 'top'
+                },
+                edit_survey: {
+                    ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
+                    ngShow: 'job_type.value !== "scan" && survey_exists'
+                },
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "job_templates_form.$invalid || can_edit!==true"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-                },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true          //Disabled when $pristine
                 }
             },
 
             related: {
-                schedules: {
+                "completed_jobs": {
+                    include: "CompletedJobsList"
+                },
+                permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
+                    basePath: 'job_templates/:id/access_list/',
                     type: 'collection',
-                    title: 'Schedules',
-                    iterator: 'schedule',
+                    title: 'Permissions',
+                    iterator: 'permission',
                     index: false,
                     open: false,
-
+                    searchType: 'select',
                     actions: {
                         add: {
-                            mode: 'all',
-                            ngClick: 'addSchedule()',
-                            awToolTip: 'Add a new schedule'
-                        },
-                        refresh: {
-                            mode: 'all',
-                            awToolTip: "Refresh the page",
-                            ngClick: "refreshSchedules()"
-                        },
-                        stream: {
-                            ngClick: "showActivity()",
-                            awToolTip: "View Activity Stream",
-                            mode: 'edit',
-                            awFeature: 'activity_streams'
+                            ngClick: "addPermission",
+                            label: 'Add',
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
+
                     fields: {
-                        name: {
+                        username: {
                             key: true,
-                            label: 'Name',
-                            ngClick: "editSchedule(schedule.id)",
-                            columnClass: "col-md-3 col-sm-3 col-xs-3"
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
-                        dtstart: {
-                            label: 'First Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 hidden-xs"
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         },
-                        next_run: {
-                            label: 'Next Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 col-xs-3"
-                        },
-                        dtend: {
-                            label: 'Final Run',
-                            filter: "longDate",
-                            searchable: false,
-                            columnClass: "col-md-2 col-sm-3 hidden-xs"
-                        }
-                    },
-                    fieldActions: {
-                        "play": {
-                            mode: "all",
-                            ngClick: "toggleSchedule($event, schedule.id)",
-                            awToolTip: "{{ schedule.play_tip }}",
-                            dataTipWatch: "schedule.play_tip",
-                            iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
-                            dataPlacement: "top"
-                        },
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "editSchedule(schedule.id)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit schedule',
-                            dataPlacement: 'top'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "deleteSchedule(schedule.id)",
-                            icon: 'icon-trash',
-                            awToolTip: 'Delete schedule',
-                            dataPlacement: 'top'
+                        team_roles: {
+                            label: 'Team Roles',
+                            type: 'team_roles',
+                            noSort: true,
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
                         }
                     }
                 },
-                "completed_jobs": {
-                    include: "CompletedJobsList"
+                "notifications": {
+                    include: "NotificationsList"
                 }
             },
 
@@ -420,22 +416,26 @@ export default
                         iterator: 'completed_job',
                         url: urls.jobs + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
                     },
-                    schedules: {
-                        iterator: 'schedule',
-                        url: urls.schedules
+                    permissions: {
+                        iterator: 'permission',
+                        url: urls.access_list
+                    },
+                    notifications: {
+                        iterator: 'notification',
+                        url: '/api/v1/notification_templates/'
                     }
                 };
             }
         })
 
-        .factory('JobTemplateForm', ['JobTemplateFormObject', 'SchedulesList', 'CompletedJobsList',
-        function(JobTemplateFormObject, SchedulesList, CompletedJobsList) {
+        .factory('JobTemplateForm', ['JobTemplateFormObject', 'NotificationsList', 'CompletedJobsList',
+        function(JobTemplateFormObject, NotificationsList, CompletedJobsList) {
             return function() {
                 var itm;
 
                 for (itm in JobTemplateFormObject.related) {
-                    if (JobTemplateFormObject.related[itm].include === "SchedulesList") {
-                        JobTemplateFormObject.related[itm] = SchedulesList;
+                    if (JobTemplateFormObject.related[itm].include === "NotificationsList") {
+                        JobTemplateFormObject.related[itm] = NotificationsList;
                         JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                     }
                     if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {

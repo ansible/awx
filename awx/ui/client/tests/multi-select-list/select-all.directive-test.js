@@ -1,18 +1,16 @@
-import '../support/node';
+/*import '../support/node';
 
 import {describeModule} from '../support/describe-module';
 import mod from 'shared/multi-select-list/main';
 
-var mockController = {
-    selectAll: sinon.spy(),
-    deselectAll: sinon.spy(),
-    selectAllExtended: sinon.spy(),
-    deselectAllExtended: sinon.spy()
-};
-
 describeModule(mod.name)
     .testDirective('selectAll', function(directive) {
-
+        var mockController = {
+            selectAll: sinon.spy(),
+            deselectAll: sinon.spy(),
+            selectAllExtended: sinon.spy(),
+            deselectAllExtended: sinon.spy()
+        };
         var $scope;
 
         directive.use('<fake-parent><select-all selections-empty="isEmpty" extended-items-length="numItems"></select-all></fake-parent>');
@@ -94,4 +92,4 @@ describeModule(mod.name)
 
 
     });
-});
+});*/

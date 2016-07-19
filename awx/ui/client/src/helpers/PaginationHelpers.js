@@ -32,14 +32,14 @@ export default
                 // Which page are we on?
                 if (Empty(next) && previous) {
                     // no next page, but there is a previous page
-                    scope[iterator + '_page'] = parseInt(previous.match(/page=\d+/)[0].replace(/page=/, '')) + 1;
+                    scope[iterator + '_page'] = /page=\d+/.test(previous) ? parseInt(previous.match(/page=(\d+)/)[1]) + 1 : 2;
                 } else if (next && Empty(previous)) {
                     // next page available, but no previous page
                     scope[iterator + '_page'] = 1;
                     $('#'+iterator+'-pagination #pagination-links li:eq(1)').attr('class', 'disabled');
                 } else if (next && previous) {
                     // we're in between next and previous
-                    scope[iterator + '_page'] = parseInt(previous.match(/page=\d+/)[0].replace(/page=/, '')) + 1;
+                    scope[iterator + '_page'] = /page=\d+/.test(previous) ? parseInt(previous.match(/page=(\d+)/)[1]) + 1 : 2;
                 }
 
                 // Calc the range of up to 10 pages to show
@@ -80,8 +80,13 @@ export default
                         return;
                     }
                     new_url += connect + 'page=' + page;
-                    new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
-                        '&page_size=' + scope[iterator + '_page_size'] : 'page_size=' + scope[iterator + 'PageSize'];
+                    if (scope[iterator + 'SearchFilters']){
+                         new_url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
+                    if (scope[iterator + 'SearchParams']){
+                        new_url += '&' + scope[iterator + 'SearchParams'];
+                    }
+                    new_url += '&page_size=' + scope[iterator + '_page_size'];
                     Wait('start');
                     RefreshRelated({ scope: scope, set: set, iterator: iterator, url: new_url });
                 };
@@ -144,9 +149,15 @@ export default
                         return;
                     }
                     new_url += connect + 'page=' + page;
-                    new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] +
-                        '&page_size=' + scope[iterator + '_page_size'] : '&page_size=' + scope[iterator + 'PageSize'];
+                    if (scope[iterator + 'SearchFilters']){
+                         new_url += _.reduce(scope[iterator+'SearchFilters'], (result, filter) => result + '&' + filter.url, '');
+                    }
+                    if (scope[iterator + 'SearchParams']){
+                        new_url += '&' + scope[iterator + 'SearchParams'];
+                    }
+                    new_url += '&page_size=' + scope[iterator + '_page_size'];
                     Wait('start');
+                    scope.getNewPage = true;
                     Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });
                 };
 

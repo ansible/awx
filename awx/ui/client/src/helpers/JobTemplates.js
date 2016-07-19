@@ -18,9 +18,9 @@ angular.module('JobTemplatesHelper', ['Utilities'])
  *
  */
 
-.factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$routeParams', 'LoadBreadCrumbs', 'ProcessErrors', 'ParseTypeChange',
+.factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$stateParams', 'ProcessErrors', 'ParseTypeChange',
          'ParseVariableString', 'Empty', 'LookUpInit', 'InventoryList', 'CredentialList','ProjectList', 'RelatedSearchInit', 'RelatedPaginateInit', 'Wait',
-         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $routeParams, LoadBreadCrumbs, ProcessErrors,ParseTypeChange,
+         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors,ParseTypeChange,
                   ParseVariableString, Empty, LookUpInit, InventoryList, CredentialList, ProjectList, RelatedSearchInit, RelatedPaginateInit, Wait) {
                       return function(params) {
 
@@ -31,10 +31,12 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $routeParams.template_id,
+                          id = $stateParams.id,
                           relatedSets = {};
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
+
+                          CredentialList = _.cloneDeep(CredentialList);
 
                           // The form uses awPopOverWatch directive to 'watch' scope.callback_help for changes. Each time the
                           // popover is activated, a function checks the value of scope.callback_help before constructing the content.
@@ -76,10 +78,11 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               Rest.setUrl(defaultUrl + id);
                               Rest.get()
                               .success(function (data) {
+                                  scope.job_template_obj = data;
+                                  scope.name = data.name;
                                   var fld, i;
-                                  LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
                                   for (fld in form.fields) {
-                                      if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
+                                      if (fld !== 'variables' && fld !== 'survey' && data[fld] !== null && data[fld] !== undefined) {
                                           if (form.fields[fld].type === 'select') {
                                               if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
                                                   for (i = 0; i < scope[fld + '_options'].length; i++) {
@@ -92,20 +95,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                               }
                                           } else {
                                               scope[fld] = data[fld];
-                                              if(fld ==='survey_enabled'){
-                                                  // $scope.$emit('EnableSurvey', fld);
-                                                  $('#job_templates_survey_enabled_chbox').attr('checked', scope[fld]);
-                                                  if(Empty(data.summary_fields.survey)) {
-                                                      $('#job_templates_delete_survey_btn').hide();
-                                                      $('#job_templates_edit_survey_btn').hide();
-                                                      $('#job_templates_create_survey_btn').show();
-                                                  }
-                                                  else{
-                                                      $('#job_templates_delete_survey_btn').show();
-                                                      $('#job_templates_edit_survey_btn').show();
-                                                      $('#job_templates_create_survey_btn').hide();
-                                                      scope.survey_exists = true;
-                                                  }
+                                              if(!Empty(data.summary_fields.survey)) {
+                                                  scope.survey_exists = true;
                                               }
                                           }
                                           master[fld] = scope[fld];
@@ -121,12 +112,34 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                           master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                                       }
+                                      if (form.fields[fld].type === 'checkbox_group') {
+                                          for(var j=0; j<form.fields[fld].fields.length; j++) {
+                                              scope[form.fields[fld].fields[j].name] = data[form.fields[fld].fields[j].name];
+                                          }
+                                      }
                                   }
                                   Wait('stop');
                                   scope.url = data.url;
 
-                                  scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? 'true' : 'false';
+                                  scope.survey_enabled = data.survey_enabled;
+
+                                  scope.ask_variables_on_launch = (data.ask_variables_on_launch) ? true : false;
                                   master.ask_variables_on_launch = scope.ask_variables_on_launch;
+
+                                  scope.ask_limit_on_launch = (data.ask_limit_on_launch) ? true : false;
+                                  master.ask_limit_on_launch = scope.ask_limit_on_launch;
+
+                                  scope.ask_tags_on_launch = (data.ask_tags_on_launch) ? true : false;
+                                  master.ask_tags_on_launch = scope.ask_tags_on_launch;
+
+                                  scope.ask_job_type_on_launch = (data.ask_job_type_on_launch) ? true : false;
+                                  master.ask_job_type_on_launch = scope.ask_job_type_on_launch;
+
+                                  scope.ask_inventory_on_launch = (data.ask_inventory_on_launch) ? true : false;
+                                  master.ask_inventory_on_launch = scope.ask_inventory_on_launch;
+
+                                  scope.ask_credential_on_launch = (data.ask_credential_on_launch) ? true : false;
+                                  master.ask_credential_on_launch = scope.ask_credential_on_launch;
 
                                   relatedSets = form.relatedSets(data.related);
 
@@ -137,7 +150,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   scope.setCallbackHelp();
 
                                   scope.callback_url = scope.callback_server_path + ((data.related.callback) ? data.related.callback :
-                                                                                     GetBasePath('job_templates') + id + '/callback/');
+                                  GetBasePath('job_templates') + id + '/callback/');
                                   master.callback_url = scope.callback_url;
 
                                   scope.can_edit = data.summary_fields.can_edit;
@@ -151,6 +164,10 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       input_type: "radio"
                                   });
 
+                                  CredentialList.basePath = GetBasePath('credentials') + '?kind=ssh';
+                                  // remove "type" field from search options
+                                  CredentialList.fields.kind.noSearch = true;
+
                                   LookUpInit({
                                       url: GetBasePath('credentials') + '?kind=ssh',
                                       scope: scope,
@@ -159,6 +176,25 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       list: CredentialList,
                                       field: 'credential',
                                       hdr: 'Select Machine Credential',
+                                      input_type: "radio"
+                                  });
+
+                                  var NetworkCredentialList = {};
+                                  // Clone the CredentialList object for use with network_credential. Cloning
+                                  // and changing properties to avoid collision.
+                                  jQuery.extend(true, NetworkCredentialList, CredentialList);
+                                  NetworkCredentialList.name = 'networkcredentials';
+                                  NetworkCredentialList.iterator = 'networkcredential';
+                                  NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
+
+                                  LookUpInit({
+                                      url: GetBasePath('credentials') + '?kind=net',
+                                      scope: scope,
+                                      form: form,
+                                      current_item: data.network_credential,
+                                      list: NetworkCredentialList,
+                                      field: 'network_credential',
+                                      hdr: 'Select Network Credential',
                                       input_type: "radio"
                                   });
 
@@ -172,8 +208,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   });
 
 
-                                  if(scope.project === "" && scope.playbook === ""){
-                                    scope.toggleScanInfo();
+                                  if (scope.project === "" && scope.playbook === "") {
+                                      scope.resetProjectToDefault();
                                   }
 
                                   RelatedSearchInit({
@@ -192,7 +228,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {
                                       hdr: 'Error!',
-                                      msg: 'Failed to retrieve job template: ' + $routeParams.template_id + '. GET status: ' + status
+                                      msg: 'Failed to retrieve job template: ' + $stateParams.id + '. GET status: ' + status
                                   });
                               });
                           };

@@ -16,7 +16,9 @@
 
 export default
     ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
-    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store) {
+    '$injector',
+    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store,
+    $injector) {
         return {
             setToken: function (token, expires) {
                 // set the session cookie
@@ -61,10 +63,13 @@ export default
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
 
-                var x, scope = angular.element(document.getElementById('main-view')).scope();
-                scope.$destroy();
-                //$rootScope.$destroy();
+                var x,
+                ConfigService = $injector.get('ConfigService'),
+                scope = angular.element(document.getElementById('main-view')).scope();
 
+                if(scope){
+                    scope.$destroy();
+                }
 
                 if($cookieStore.get('lastPath')==='/portal'){
                     $cookieStore.put( 'lastPath', '/portal');
@@ -80,10 +85,15 @@ export default
                     $rootScope.lastPath = '/home';
                 }
                 x = Store('sessionTime');
-                x[$rootScope.current_user.id].loggedIn = false;
+                if ($rootScope.current_user) {
+                    x[$rootScope.current_user.id].loggedIn = false;
+                }
                 Store('sessionTime', x);
 
-                $rootScope.lastUser = $cookieStore.get('current_user').id;
+                if ($cookieStore.get('current_user')) {
+                    $rootScope.lastUser = $cookieStore.get('current_user').id;
+                }
+                ConfigService.delete();
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('token');
@@ -94,32 +104,14 @@ export default
                 $rootScope.license_tested = undefined;
                 $rootScope.userLoggedIn = false;
                 $rootScope.sessionExpired = false;
+                $rootScope.licenseMissing = true;
                 $rootScope.token = null;
                 $rootScope.token_expires = null;
                 $rootScope.login_username = null;
                 $rootScope.login_password = null;
-                $rootScope.sessionTimer.clearTimers();
-            },
-
-            getLicense: function () {
-                //check in here first to see if license is already obtained, if we do have it, then rootScope.license
-                return $http({
-                    method: 'GET',
-                    url: GetBasePath('config'),
-                    headers: {
-                        'Authorization': 'Token ' + this.getToken()
-                    }
-                });
-            },
-
-            setLicense: function (data) {
-                var license = data.license_info;
-                license.analytics_status = data.analytics_status;
-                license.version = data.version;
-                license.ansible_version = data.ansible_version; 
-                license.tested = false;
-                Store('license', license);
-                $rootScope.features = Store('license').features;
+                if ($rootScope.sessionTimer) {
+                    $rootScope.sessionTimer.clearTimers();
+                }
             },
 
             licenseTested: function () {

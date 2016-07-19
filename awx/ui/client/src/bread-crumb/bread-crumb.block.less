@@ -1,0 +1,87 @@
+@import "../shared/branding/colors.default.less";
+
+/** @define BreadCrumb */
+
+.BreadCrumb {
+    padding: 0;
+    display: flex;
+    background-color: @bc-bg;
+    width: 100%;
+    z-index: 1039;
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 60px;
+    height: 40px;
+    border-bottom: 1px solid @bc-border;
+}
+.BreadCrumb.is-loggedOut {
+    opacity: 0;
+}
+.BreadCrumb-menuLinkHolder {
+    display: flex;
+    margin-left: auto;
+}
+.BreadCrumb-menuLink {
+    width: 58px;
+    color: @bc-link-icon;
+    flex: initial;
+    display: flex;
+    align-items: center;
+    padding: 0 19px;
+    cursor: pointer;
+}
+.BreadCrumb-menuLink:hover {
+    color: @bc-link-icon-focus;
+}
+.BreadCrumb-menuLinkImage {
+    font-size: 18px;
+    color: @bc-link-icon;
+    flex: initial;
+
+    &:hover {
+        color: @default-link-hov;
+    }
+}
+.BreadCrumb-menuLink.BreadCrumb-menuLinkActive {
+    color: @bc-link-icon-focus;
+
+    .BreadCrumb-menuLinkImage {
+        color: @bc-link-icon-focus;
+
+        &:hover {
+            color: @default-link-hov
+        }
+    }
+}
+.BreadCrumb-list {
+      padding: 0px 20px;
+      list-style: none;
+      background-color: @default-bg;
+      border-radius: 4px;
+      line-height: 40px;
+}
+
+.BreadCrumb-item {
+    display: inline-block;
+    color: @default-interface-txt;
+    text-transform: uppercase;
+}
+
+.BreadCrumb-item + .BreadCrumb-item:before {
+    content: "/";
+    padding: 0 5px;
+    color: @default-icon;
+}
+
+@breadcrumb-breakpoint: 900px;
+
+@media screen and (max-width: @breadcrumb-breakpoint) {
+    .BreadCrumb-menuLinkImage {
+        font-size: 24px;
+    }
+    .BreadCrumb-menuLink {
+        width: 67px;
+        padding: 0 21px;
+    }
+}

@@ -1,0 +1,176 @@
+/** @define DashboardList */
+
+@import "../../shared/branding/colors.default.less";
+
+.DashboardList {
+    flex: 1;
+}
+.DashboardList--noJobTemplates {
+    color: @list-empty-txt;
+}
+
+.DashboardList-header {
+    display: flex;
+    border-bottom: 1px solid @list-header-bord;
+    height: 50px;
+}
+
+.DashboardList-headerText {
+    flex: 1;
+    margin: 0px;
+    font-size: 14px;
+    font-weight: bold;
+    color: @list-header-txt;
+    height: 50px;
+    line-height: 50px;
+    white-space: nowrap;
+    padding-left: 20px;
+}
+
+.DashboardList-tableHeaderIcon {
+    color: @list-header-icon;
+}
+
+.DashboardList-viewAll {
+    color: @btn-txt;
+    background-color: @btn-bg;
+    font-size: 12px;
+    border: 1px solid @default-icon-hov;
+    border-radius: 5px;
+    margin-right: 15px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    transition: background-color 0.2s;
+}
+
+.DashboardList-viewAll:hover {
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
+}
+
+.DashboardList-viewAll:focus {
+    color: @btn-txt;
+}
+
+.DashboardList-container {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+}
+
+.DashboardList-tableHeader--name {
+    border-top-left-radius: 5px;
+    padding-left: 15px;
+}
+
+.DashboardList-tableHeader--activity {
+    width: 205px;
+    padding-left:20px
+}
+
+.DashboardList-tableHeader--time {
+    width: 190px;
+    padding-left:20px;
+    padding-right: 15px;
+    border-top-right-radius: 5px;
+    text-align: right;
+}
+
+.DashboardList-tableHeader--actions {
+    border-top-right-radius: 5px;
+    width: 90px;
+    padding-right: 15px;
+    text-align: right;
+}
+
+.DashboardList-status{
+    padding-right: 5px;
+}
+
+.DashboardList-status--success{
+    color: @default-succ;
+}
+
+.DashboardList-status--failed{
+    color: @default-err;
+}
+
+.DashboardList-nameCell {
+    padding-left: 15px;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.DashboardList-nameContainer {
+    color: @default-link;
+}
+
+.DashboardList-activityCell {
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.DashboardList-timeCell {
+    white-space: nowrap;
+    padding-right: 15px;
+    padding-left: 20px;
+    text-align: right;
+}
+
+.DashboardList-nameContainer:hover {
+    color: @default-link-hov;
+    cursor: pointer;
+}
+
+.DashboardList-actionButtonCell {
+    padding-top:10px;
+    padding-right: 15px;
+    display:flex;
+    justify-content: flex-end;
+}
+
+.DashboardList-tableRow--evenRow > .DashboardList-actionButtonCell > .DashboardList-actionButton {
+    background-color: @list-actn-alt-bg;
+    border: 1px solid @list-actn-alt-bord;
+}
+
+.DashboardList-actionButton--launch {
+    margin-right: 10px;
+}
+
+.DashboardList-actionButton--edit:hover {
+    background-color: @default-link;
+    color: @default-bg;
+    border: 1px solid @default-link;
+}
+
+.DashboardList-noJobs {
+    color: @list-empty-txt;
+}
+
+@media only screen and (max-width: 360px) {
+    .DashboardList-headerText {
+        white-space: normal;
+        line-height: 22px;
+        padding-top: 10px;
+    }
+
+    .DashboardList-timeCell {
+        white-space: normal;
+    }
+}
+
+@media only screen and (max-width: 540px) {
+    .DashboardList-container {
+        th {
+            width: 25%;
+            white-space: nowrap;
+        }
+    }
+}

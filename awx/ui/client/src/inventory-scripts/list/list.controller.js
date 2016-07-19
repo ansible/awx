@@ -6,12 +6,12 @@
 
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
-        'GetBasePath' , 'SearchInit' , 'PaginateInit',
-        'Rest' , 'ProcessErrors', 'Prompt', 'transitionTo', 'Stream',
+        'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' , 'ProcessErrors',
+        'Prompt', '$state', '$filter',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, transitionTo, Stream
+            Rest, ProcessErrors, Prompt, $state, $filter
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
@@ -29,6 +29,11 @@ export default
                 list: list,
                 url: defaultUrl
             });
+
+            if ($rootScope.addedItem) {
+                scope.addedItem = $rootScope.addedItem;
+                delete $rootScope.addedItem;
+            }
             PaginateInit({
                 scope: scope,
                 list: list,
@@ -38,13 +43,10 @@ export default
             scope.search(list.iterator);
 
             scope.editCustomInv = function(){
-                transitionTo('inventoryScriptsEdit', {
+                $state.transitionTo('inventoryScripts.edit',{
+                    inventory_script_id: this.inventory_script.id,
                     inventory_script: this.inventory_script
                 });
-            };
-
-            scope.showActivity = function () {
-                Stream({ scope: scope });
             };
 
             scope.deleteCustomInv =  function(id, name){
@@ -56,7 +58,11 @@ export default
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
-                            scope.search(list.iterator);
+                            if (parseInt($state.params.inventory_script_id) === id) {
+                                $state.go("^", null, {reload: true});
+                            } else {
+                                scope.search(list.iterator);
+                            }
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -64,16 +70,17 @@ export default
                         });
                 };
 
-                var bodyHtml = "<div class=\"alert alert-info\">Are you sure you want to delete " + name + "?</div>";
+                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the inventory script below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
                 Prompt({
                     hdr: 'Delete',
                     body: bodyHtml,
-                    action: action
+                    action: action,
+                    actionText: 'DELETE'
                 });
             };
 
             scope.addCustomInv = function(){
-                transitionTo('inventoryScriptsAdd');
+                $state.transitionTo('inventoryScripts.add');
             };
 
         }

@@ -19,7 +19,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission']
+           'TaskPermission', 'ProjectUpdatePermission']
 
 class ModelAccessPermission(permissions.BasePermission):
     '''
@@ -61,7 +61,7 @@ class ModelAccessPermission(permissions.BasePermission):
         else:
             if obj:
                 return True
-            return check_user_access(request.user, view.model, 'add', request.DATA)
+            return check_user_access(request.user, view.model, 'add', request.data)
 
     def check_put_permissions(self, request, view, obj=None):
         if not obj:
@@ -70,10 +70,10 @@ class ModelAccessPermission(permissions.BasePermission):
             return True
         if getattr(view, 'is_variable_data', False):
             return check_user_access(request.user, view.model, 'change', obj,
-                                     dict(variables=request.DATA))
+                                     dict(variables=request.data))
         else:
             return check_user_access(request.user, view.model, 'change', obj,
-                                     request.DATA)
+                                     request.data)
 
     def check_patch_permissions(self, request, view, obj=None):
         return self.check_put_permissions(request, view, obj)
@@ -103,11 +103,7 @@ class ModelAccessPermission(permissions.BasePermission):
         if not request.user or request.user.is_anonymous():
             return False
 
-        # Don't allow inactive users (and respond with a 403).
-        if not request.user.is_active:
-            raise PermissionDenied('your account is inactive')
-
-        # Always allow superusers (as long as they are active).
+        # Always allow superusers
         if getattr(view, 'always_allow_superuser', True) and request.user.is_superuser:
             return True
 
@@ -127,11 +123,11 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def has_permission(self, request, view, obj=None):
         logger.debug('has_permission(user=%s method=%s data=%r, %s, %r)',
-                     request.user, request.method, request.DATA,
+                     request.user, request.method, request.data,
                      view.__class__.__name__, obj)
         try:
             response = self.check_permissions(request, view, obj)
-        except Exception, e:
+        except Exception as e:
             logger.debug('has_permission raised %r', e, exc_info=True)
             raise
         else:
@@ -156,12 +152,10 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
         # Require method to be POST, host_config_key to be specified and match
         # the requested job template, and require the job template to be
         # active in order to proceed.
-        host_config_key = request.DATA.get('host_config_key', '')
+        host_config_key = request.data.get('host_config_key', '')
         if request.method.lower() != 'post':
             raise PermissionDenied()
         elif not host_config_key:
-            raise PermissionDenied()
-        elif obj and not obj.active:
             raise PermissionDenied()
         elif obj and obj.host_config_key != host_config_key:
             raise PermissionDenied()
@@ -182,7 +176,7 @@ class TaskPermission(ModelAccessPermission):
         # Verify that the ID present in the auth token is for a valid, active
         # unified job.
         try:
-            unified_job = UnifiedJob.objects.get(active=True, status='running',
+            unified_job = UnifiedJob.objects.get(status='running',
                                                  pk=int(request.auth.split('-')[0]))
         except (UnifiedJob.DoesNotExist, TypeError):
             return False
@@ -196,3 +190,15 @@ class TaskPermission(ModelAccessPermission):
             return bool(not obj or obj.pk == unified_job.pk)
         else:
             return False
+
+class ProjectUpdatePermission(ModelAccessPermission):
+    '''
+    Permission check used by ProjectUpdateView to determine who can update projects
+    '''
+    def check_get_permissions(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'read', project)
+
+    def check_post_permissions(self, request, view, obj=None):
+        project = get_object_or_400(view.model, pk=view.kwargs['pk'])
+        return check_user_access(request.user, view.model, 'start', project)

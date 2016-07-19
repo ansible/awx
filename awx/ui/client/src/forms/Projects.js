@@ -14,28 +14,15 @@ export default
 angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .value('ProjectsFormObject', {
 
-        addTitle: 'Create Project',
+        addTitle: 'New Project',
         editTitle: '{{ name }}',
         name: 'project',
         forceListeners: true,
-        well: true,
-        collapse: true,
-        collapseTitle: "Properties",
-        collapseMode: 'edit',
-        collapseOpen: true,
-
-        actions: {
-            stream: {
-                'class': "btn-primary btn-xs activity-btn",
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                awFeature: 'activity_streams',
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                iconSize: 'large'
-            }
+        tabs: true,
+        subFormTitles: {
+            sourceSubForm: 'Source Details',
         },
+
 
         fields: {
             name: {
@@ -56,18 +43,11 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                addRequired: true,
-                editRequired: false,
-                excludeMode: 'edit',
                 ngClick: 'lookUpOrganization()',
                 awRequiredWhen: {
-                    variable: "organizationrequired",
+                    reqExpression: "organizationrequired",
                     init: "true"
                 },
-                awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
-                    'the project is created you can add additional organizations.</p><p>Only super users and organization administrators are allowed ' +
-                    'to make changes to projects. Associating one or more organizations to a project determins which organizations admins have ' +
-                    'access to modify the project.',
                 dataTitle: 'Organization',
                 dataContainer: 'body',
                 dataPlacement: 'right'
@@ -75,14 +55,15 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_type: {
                 label: 'SCM Type',
                 type: 'select',
+                class: 'Form-dropDown--scmType',
                 ngOptions: 'type.label for type in scm_type_options track by type.value',
                 ngChange: 'scmChange()',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                hasSubForm: true,
             },
             missing_path_alert: {
                 type: 'alertblock',
-                "class": 'alert-info',
                 ngShow: "showMissingPlaybooksAlert && scm_type.value == 'manual'",
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no available playbook directories in {{ base_dir }}.  ' +
                     'Either that directory is empty, or all of the contents are already assigned to other projects.  ' +
@@ -92,8 +73,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             },
             base_dir: {
                 label: 'Project Base Path',
-                type: 'textarea',
-                //"class": 'col-lg-6',
+                type: 'text',
+                class: 'Form-textUneditable',
                 showonly: true,
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
@@ -109,7 +90,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 id: 'local-path-select',
                 ngOptions: 'path.label for path in project_local_paths',
                 awRequiredWhen: {
-                    variable: "pathRequired",
+                    reqExpression: "pathRequired",
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
@@ -125,40 +106,24 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 awRequiredWhen: {
-                    variable: "scmRequired",
+                    reqExpression: "scmRequired",
                     init: false
                 },
-                helpCollapse: [{
-                    hdr: 'GIT URLs',
-                    content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
-                        '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
-                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
-                        'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH. GIT read only protocol (git://) does not use username or password information.',
-                    show: "scm_type.value == 'git'"
-                }, {
-                    hdr: 'SVN URLs',
-                    content: '<p>Example URLs for Subversion SCM include:</p>' +
-                        '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
-                        '<li>svn+ssh://servername.example.com/path</li></ul>',
-                    show: "scm_type.value == 'svn'"
-                }, {
-                    hdr: 'Mercurial URLs',
-                    content: '<p>Example URLs for Mercurial SCM include:</p>' +
-                        '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
-                        '<li>ssh://server.example.com/path</li></ul>' +
-                        '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
-                        'Do not put the username and key in the URL. ' +
-                        'If using Bitbucket and SSH, do not supply your Bitbucket username.',
-                    show: "scm_type.value == 'hg'"
-                }]
+                subForm: 'sourceSubForm',
+                hideSubForm: "scm_type.value === 'manual'",
+                awPopOverWatch: "urlPopover",
+                awPopOver: "set in controllers/projects",
+                dataTitle: 'SCM URL',
+                dataContainer: 'body',
+                dataPlacement: 'right'
             },
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                subForm: 'sourceSubForm'
             },
             credential: {
                 label: 'SCM Credential',
@@ -168,12 +133,14 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                subForm: 'sourceSubForm'
             },
             checkbox_group: {
                 label: 'SCM Update Options',
                 type: 'checkbox_group',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
+                subForm: 'sourceSubForm',
                 fields: [{
                     name: 'scm_clean',
                     label: 'Clean',
@@ -184,7 +151,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Clean',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }, {
                     name: 'scm_delete_on_update',
                     label: 'Delete on Update',
@@ -196,7 +163,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Delete',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }, {
                     name: 'scm_update_on_launch',
                     label: 'Update on Launch',
@@ -207,7 +174,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Update',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options'
+                    labelClass: 'checkbox-options stack-inline'
                 }]
             },
             scm_update_cache_timeout: {
@@ -216,7 +183,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "scm_update_on_launch",
+                ngShow: "scm_update_on_launch && projectSelected && scm_type.value !== 'manual'",
                 spinner: true,
                 "default": '0',
                 addRequired: false,
@@ -231,161 +198,85 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
         },
 
         buttons: {
+            cancel: {
+                ngClick: 'formCancel()'
+            },
             save: {
                 ngClick: 'formSave()',
-                ngDisabled: true
-            },
-            reset: {
-                ngClick: 'formReset()',
                 ngDisabled: true
             }
         },
 
         related: {
-            organizations: {
+            permissions: {
+                awToolTip: 'Please save before assigning permissions',
+                dataPlacement: 'top',
+                basePath: 'projects/:id/access_list/',
                 type: 'collection',
-                title: 'Organizations',
-                iterator: 'organization',
+                title: 'Permissions',
+                iterator: 'permission',
                 index: false,
                 open: false,
-
+                searchType: 'select',
                 actions: {
                     add: {
-                        ngClick: "add('organizations')",
-                        icon: 'icon-plus',
+                        ngClick: "addPermission",
                         label: 'Add',
-                        awToolTip: 'Add an organization'
+                        awToolTip: 'Add a permission',
+                        actionClass: 'btn List-buttonSubmit',
+                        buttonContent: '&#43; ADD'
                     }
                 },
 
                 fields: {
-                    name: {
+                    username: {
                         key: true,
-                        label: 'Name'
+                        label: 'User',
+                        linkBase: 'users',
+                        class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
-                    description: {
-                        label: 'Description'
-                    }
-                },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "edit('organizations', organization.id, organization.name)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit the organization',
-                        'class': 'btn btn-default'
+                    role: {
+                        label: 'Role',
+                        type: 'role',
+                        noSort: true,
+                        class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                        noSearch: true
                     },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "delete('organizations', organization.id, organization.name, 'organizations')",
-                        icon: 'icon-trash',
-                        "class": 'btn-danger',
-                        awToolTip: 'Delete the organization'
+                    team_roles: {
+                        label: 'Team Roles',
+                        type: 'team_roles',
+                        noSort: true,
+                        class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                        noSearch: true
                     }
                 }
             },
-
-            schedules: {
-                type: 'collection',
-                title: 'Schedules',
-                iterator: 'schedule',
-                index: false,
-                open: false,
-
-                actions: {
-                    add: {
-                        mode: 'all',
-                        ngClick: 'addSchedule()',
-                        awToolTip: 'Add a new schedule'
-                    },
-                    refresh: {
-                        mode: 'all',
-                        awToolTip: "Refresh the page",
-                        ngClick: "refreshSchedules()"
-                    },
-                    stream: {
-                        ngClick: "showActivity()",
-                        awToolTip: "View Activity Stream",
-                        mode: 'edit',
-                        awFeature: 'activity_streams'
-                    }
-                },
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name',
-                        ngClick: "editSchedule(schedule.id)",
-                        columnClass: "col-md-3 col-sm-3 col-xs-3"
-                    },
-                    dtstart: {
-                        label: 'First Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 hidden-xs"
-                    },
-                    next_run: {
-                        label: 'Next Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 col-xs-3"
-                    },
-                    dtend: {
-                        label: 'Final Run',
-                        filter: "longDate",
-                        searchable: false,
-                        columnClass: "col-md-2 col-sm-3 hidden-xs"
-                    }
-                },
-                fieldActions: {
-                    "play": {
-                        mode: "all",
-                        ngClick: "toggleSchedule($event, schedule.id)",
-                        awToolTip: "{{ schedule.play_tip }}",
-                        dataTipWatch: "schedule.play_tip",
-                        iconClass: "{{ 'fa icon-schedule-enabled-' + schedule.enabled }}",
-                        dataPlacement: "top"
-                    },
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "editSchedule(schedule.id)",
-                        icon: 'icon-edit',
-                        awToolTip: 'Edit schedule',
-                        dataPlacement: 'top'
-                    },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "deleteSchedule(schedule.id)",
-                        icon: 'icon-trash',
-                        awToolTip: 'Delete schedule',
-                        dataPlacement: 'top'
-                    }
-                }
+            notifications: {
+                include: "NotificationsList",
             }
-
         },
 
         relatedSets: function(urls) {
             return {
-                organizations: {
-                    iterator: 'organization',
-                    url: urls.organizations
+                permissions: {
+                    iterator: 'permission',
+                    url: urls.access_list
                 },
-                schedules: {
-                    iterator: 'schedule',
-                    url: urls.schedules
+                notifications: {
+                    iterator: 'notification',
+                    url: '/api/v1/notification_templates/'
                 }
             };
         }
 
     })
 
-    .factory('ProjectsForm', ['ProjectsFormObject', 'SchedulesList', function(ProjectsFormObject, ScheduleList) {
+    .factory('ProjectsForm', ['ProjectsFormObject', 'NotificationsList', function(ProjectsFormObject, NotificationsList) {
         return function() {
             var itm;
             for (itm in ProjectsFormObject.related) {
-                if (ProjectsFormObject.related[itm].include === "SchedulesList") {
-                    ProjectsFormObject.related[itm] = ScheduleList;
+                if (ProjectsFormObject.related[itm].include === "NotificationsList") {
+                    ProjectsFormObject.related[itm] = NotificationsList;
                     ProjectsFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                 }
             }

@@ -166,9 +166,6 @@
     .unreachable-hosts-color {
         color: @unreachable-hosts-color;
     }
-    .missing-hosts {
-        color: transparent;
-    }
 
     .job_well {
         padding: 8px;
@@ -197,9 +194,6 @@
         margin-bottom: 0;
     }
 
-    #job-detail-tables {
-        margin-top: 20px;
-    }
 
     #job_options {
         height: 100px;
@@ -208,7 +202,6 @@
     }
 
     #job_plays, #job_tasks {
-        height: 150px;
         overflow-y: auto;
         overflow-x: none;
     }
@@ -221,10 +214,7 @@
     }
 
     #job-detail-container {
-        position: relative;
-        padding-left: 15px;
-        padding-right: 7px;
-        width: 58.33333333%;
+
         .well {
             overflow: hidden;
         }
@@ -286,14 +276,13 @@
         overflow-x: hidden;
         overflow-y: auto;
         background-color: @white;
+        min-height: 40px;
+
         .row {
             border-top: 1px solid @grey;
         }
         .row:first-child {
             border: none;
-        }
-        .active {
-            background-color: @active-color;
         }
         .loading-info {
             padding-top: 5px;
@@ -329,13 +318,9 @@
         text-overflow: ellipsis;
     }
 
-    #tasks-table-detail {
-        height: 150px;
-    }
-
     #play-section {
         .table-detail {
-            height: 150px;
+            min-height: 40px;
         }
     }
 
@@ -438,7 +423,6 @@
             table-layout: fixed;
         }
         #hosts-table-detail {
-            height: 150px;
             background-color: @white;
         }
         #hosts-table-detail table {
@@ -520,7 +504,7 @@
     }
 
     #graph-section svg{
-        margin-top: 15px;
+        margin: 0 auto;
     }
 
     path.slice{
@@ -549,7 +533,7 @@
         word-break: break-all;
         word-wrap: break-word;
         padding: 9.5px;
-        ont-family: Fixed, monospace;
+        font-family: Fixed, monospace;
         max-height: 200px;
     }
 

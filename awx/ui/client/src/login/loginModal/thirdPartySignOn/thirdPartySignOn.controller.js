@@ -26,7 +26,7 @@ export default ['$window', '$scope', 'thirdPartySignOnService',
             if (data && data.error) {
                 $scope.$parent.thirdPartyAttemptFailed = data.error;
             }
-        })
+        });
 
         $scope.goTo = function(link) {
             // this is used because $location only lets you navigate inside

@@ -129,21 +129,18 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 icon = "fa-trash-o";
                 break;
             case 'group_update':
-                icon = 'fa-exchange';
+                icon = 'fa-refresh';
                 break;
             case 'scm_update':
                 icon = 'fa-cloud-download';
                 break;
-            case 'cancel':
-                icon = 'fa-minus-circle';
-                break;
             case 'run':
             case 'rerun':
             case 'submit':
-                icon = 'fa-rocket';
+                icon = 'icon-launch';
                 break;
             case 'launch':
-                icon = 'fa-rocket';
+                icon = 'icon-launch';
                 break;
             case 'stream':
                 icon = 'fa-clock-o';
@@ -157,7 +154,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'close':
                 icon = 'fa-arrow-left';
                 break;
-            case 'save':
             case 'form_submit':
                 icon = 'fa-check-square-o';
                 break;
@@ -176,17 +172,20 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             case 'schedule':
                 icon = "fa-calendar";
                 break;
-            case 'stdout':
-                icon = "fa-external-link";
-                break;
             case 'question_cancel':
                 icon = 'fa-times';
                 break;
             case 'job_details':
                 icon = 'fa-list-ul';
                 break;
+            case 'test':
+                icon = 'fa-bell-o';
+                break;
             case 'copy':
                 icon = "fa-copy";
+                break;
+            case 'cancel':
+                icon = "fa-minus-circle";
                 break;
             }
             icon += (size) ? " " + size : "";
@@ -272,29 +271,31 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 .factory('BadgeCount', [
     function () {
         return function (params) {
-
             // Adds a badge count with optional tooltip
 
             var list = params.list,
                 fld = params.fld,
                 field = list.fields[fld],
-                html;
-
-            html = "<td class=\"" + fld + "-column";
-            html += (field.columnClass) ? " " + field.columnClass : "";
-            html += (field.columnNgClass) ? "\" ng-class=\"" + field.columnNgClass : "";
-            html += "\">\n";
-            html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
-            html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
-            html += ">";
-            html += "<span class=\"badge";
-            html += (field['class']) ? " " + field['class'] : "";
-            html += "\">";
-            html += "{{ " + list.iterator + '.' + fld + " }}";
-            html += "</span>";
-            html += (field.badgeLabel) ? " " + field.badgeLabel : "";
-            html += "</a>\n";
-            html += "</td>\n";
+                html = '';
+                html = "<td class=\"" + fld + "-column";
+                html += (field.columnClass) ? " " + field.columnClass : "";
+                html += "\">\n";
+                if (!field.noLink){
+                    html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+                    html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+                    html += ">";
+                }
+                html += "<span class=\"badge List-titleBadge\"";
+                html += " aw-tool-tip=\"" + field.awToolTip + "\"";
+                html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+                html += (field['class']) ? " " + field['class'] : "";
+                html += (field.ngHide) ? "\" ng-hide=\"" + field.ngHide : "";
+                html += "\">";
+                html += "{{ " + list.iterator + '.' + fld + " }}";
+                html += "</span>";
+                html += (field.badgeLabel) ? " " + field.badgeLabel : "";
+                html += "</a>\n";
+                html += "</td>\n";
             return html;
         };
     }
@@ -348,77 +349,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += "\n";
             }
             return html;
-        };
-    }
-])
-
-.factory('Breadcrumbs', ['$rootScope', 'Attr',
-    function ($rootScope, Attr) {
-        return function (params) {
-
-            // Generate breadcrumbs using the list-generator.js method.
-
-            var list = params.list || {},
-                mode = params.mode,
-                title = params.title,
-                html = '', itm, navigation;
-
-            html += "<ul class=\"ansible-breadcrumb\" id=\"breadcrumb-list\">\n";
-            html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title }}</a></li>\n";
-
-            if (list.navigationLinks) {
-                navigation = list.navigationLinks;
-                if (navigation.ngHide) {
-                    html += "<li class=\"active\" ng-show=\"" + navigation.ngHide + "\">";
-                    html += list.editTitle;
-                    html += "</li>\n";
-                    html += "<li class=\"active\" ng-hide=\"" + navigation.ngHide + "\"> </li>\n";
-                } else {
-                    html += "<li class=\"active\"> </li>\n";
-                    html += "</ul>\n";
-                }
-                html += "<div class=\"dropdown\" ";
-                html += (navigation.ngHide) ? Attr(navigation, 'ngHide') : '';
-                html += ">\n";
-                for (itm in navigation) {
-                    if (typeof navigation[itm] === 'object' && navigation[itm].active) {
-                        html += "<a href=\"\" class=\"toggle\" ";
-                        html += "data-toggle=\"dropdown\" ";
-                        html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
-                        break;
-                    }
-                }
-                html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
-                for (itm in navigation) {
-                    if (typeof navigation[itm] === 'object') {
-                        html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
-                            navigation[itm].href + "\" ";
-                        // html += (navigation[itm].active) ? "class=\"active\" " : "";
-                        html += ">";
-                        html += "<i class=\"fa fa-check\" style=\"visibility: ";
-                        html += (navigation[itm].active) ? "visible" : "hidden";
-                        html += "\"></i> ";
-                        html += navigation[itm].label;
-                        html += "</a></li>\n";
-                    }
-                }
-                html += "</ul>\n";
-                html += "</div><!-- dropdown -->\n";
-            } else {
-                html += "<li class=\"active\"><a href=\"\">";
-                // Support usage without a mode by just passing a title option
-                if (title) {
-                    html += title;
-                } else if (mode === 'select') {
-                    html += list.selectTitle;
-                } else {
-                    html += list.editTitle;
-                }
-                html += "</a></li>\n</ul>\n";
-            }
-
-            return html;
-
         };
     }
 ])
@@ -523,18 +453,66 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 options = params.options,
                 base = params.base,
                 field = list.fields[fld],
-                html = '';
+                html = '',
+                classList;
 
             if (field.type !== undefined && field.type === 'DropDown') {
                 html = DropDown(params);
-            } else if (field.type === 'badgeCount') {
+            } else if (field.type === 'role') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <role-list class=\"RoleList\">
+    </role-list>
+</td>
+                `;
+            } else if (field.type === 'team_roles') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <role-list class=\"RoleList\" team-role-list="true">
+    </role-list>
+</td>
+                `;
+            } else if (field.type === 'labels') {
+                var showDelete = field.showDelete === undefined ? true : field.showDelete;
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                    html += `
+<td ${classList}>
+    <labels-list class=\"LabelList\" show-delete="${showDelete}">
+    </labels-list>
+</td>
+                    `;
+            } else if (field.type === 'owners') {
+                classList = (field.columnClass) ?
+                    Attr(field, 'columnClass') : "";
+                html += `
+<td ${classList}>
+    <owner-list></owner-list>
+</td>
+                `;
+            }else if (field.type === 'badgeCount') {
                 html = BadgeCount(params);
             } else if (field.type === 'badgeOnly') {
                 html = Badge(field);
             } else if (field.type === 'template') {
                 html = Template(field);
+            } else if (field.type === 'toggle') {
+                html += "<td class=\"List-tableCell " + fld + "-column";
+                html += (field['class']) ? " " + field['class'] : "";
+                html += " " + field.columnClass;
+                html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".";
+                html += (field.flag) ? field.flag : "enabled";
+                html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + list.iterator + "." ;
+                html += (field.flag) ? field.flag : 'enabled';
+                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + list.iterator + "." ;
+                html += (field.flag) ? field.flag : "enabled";
+                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
             } else {
-                html += "<td class=\"" + fld + "-column";
+                html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
                 if (options.mode === 'lookup' && field.modalColumnClass) {
                     html += " " + field.modalColumnClass;
@@ -593,7 +571,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                                 list: list,
                                 field: field,
                                 fld: fld,
-                                base: base
+                                base: field.linkBase || base
                             }) + ' ';
                         });
                     }
@@ -605,7 +583,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                             list: list,
                             field: field,
                             fld: fld,
-                            base: base
+                            base: field.linkBase || base
                         });
                     }
                 }
@@ -706,7 +684,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         var iterator = params.iterator,
             form = params.template,
             size = params.size,
+            mini = params.mini,
             includeSize = (params.includeSize === undefined) ? true : params.includeSize,
+            ngShow = (params.ngShow) ? params.ngShow : false,
             i, html = '',
             modifier,
             searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1,
@@ -737,9 +717,14 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             modifier = (i === 1) ? '' : i;
 
             if (includeSize) {
-                html += "<div class=\"";
-                html += (size) ? size : "col-lg-4 col-md-6 col-sm-8 col-xs-9";
+                html += "<div class=\"List-searchWidget ";
+                html += (mini) ? "List-searchWidget--compact " : "";
+                html += (size) ? size : "col-lg-4 col-md-8 col-sm-12 col-xs-12";
                 html += "\" id=\"search-widget-container" + modifier + "\">\n";
+            }
+
+            if(ngShow) {
+                html += "<div ng-show=\"" + ngShow + "\">";
             }
 
             html += "<div class=\"input-group input-group-sm";
@@ -747,10 +732,10 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "<div class=\"input-group-btn dropdown\">\n";
             html += "<button type=\"button\" ";
             html += "id=\"search_field_ddown\" ";
-            html += "class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\"";
+            html += "class=\"btn dropdown-toggle List-searchDropdown\" data-toggle=\"dropdown\"";
             html += ">\n";
             html += "<span ng-bind=\"" + iterator + "SearchFieldLabel" + modifier + "\"></span>\n";
-            html += "<span class=\"caret\"></span>\n";
+            html += "<span class=\"caret List-searchDropdownCarat\"></span>\n";
             html += "</button>\n";
             html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown" + modifier + "\">\n";
             html += addSearchFields(i);
@@ -762,10 +747,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts track by c.value" + modifier + "\" class=\"form-control search-select";
             html += "\"></select>\n";
 
-
             html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow" + modifier + " || " +
                 iterator + "InputHide" + modifier + "\" " +
-                "class=\"form-control\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
+                "class=\"form-control List-searchInput\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
                 "aw-placeholder=\"" + iterator + "SearchPlaceholder" + modifier + "\" type=\"text\" ng-disabled=\"" + iterator +
                 "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + "\" ng-keypress=\"startSearch($event,'" +
                 iterator + "')\">\n";
@@ -778,19 +762,23 @@ angular.module('GeneratorHelpers', [systemStatus.name])
 
             html += "</div><!-- input-group -->\n";
 
-            html += "<a class=\"search-reset-start\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
+            html += "<a class=\"search-reset-start List-searchInputIcon\" id=\"search-reset-button\" ng-click=\"resetSearch('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-times\"></i></a>\n";
 
-            html += "<a class=\"search-reset-start\" id=\"search-submit-button\" ng-click=\"search('" + iterator + "')\"" +
+            html += "<a class=\"List-searchInputIcon\" id=\"search-submit-button\" ng-click=\"search('" + iterator + "')\"" +
                 "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
                 "!" + iterator + "ShowStartBtn" + modifier + " || " +
                 iterator + "HideAllStartBtn" + modifier + "\"" +
                 "><i class=\"fa fa-search\"></i></a>\n";
 
             html += "<div id=\"search-widget-spacer\" ng-show=\"" + iterator + "SelectShow" + modifier + "\"></div>\n";
+
+            if(ngShow) {
+                html += "</div>";
+            }
 
             if (includeSize) {
                 html += "</div>\n";
@@ -807,38 +795,76 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         return function (params) {
             var iterator = params.iterator,
                 set = params.set,
+                hideOnSuperuser = (params.hideOnSuperuser) ? true : false,
                 html = '';
             html += "<!-- Paginate Widget -->\n";
-            html += "<div id=\"" + iterator + "-pagination\" class=\"row page-row\">\n";
-            html += "<div class=\"col-lg-8 col-md-8\">\n";
-            html += "<ul id=\"pagination-links\" class=\"pagination\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">\n";
-            html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
+            html += `
+<div id=\"${iterator}-pagination\" class=\"List-pagination page-row\"
+    ng-hide=\"is_superuser && ${hideOnSuperuser}\ || ${set}.length < 1">
+            `;
+            html += "<div class=\"List-paginationPagerHolder\">";
+            html += "<div class=\"List-paginationPager\" ng-hide=\"" + iterator + "HidePaginator || " + iterator + "_num_pages <= 1\">";
+            html += "<ul id=\"pagination-links\" class=\"pagination\">\n";
+            html += "<li class=\"List-paginationPager--item\" ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href id=\"first-page-set\" ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
 
-            html += "<li><a href " +
+            html += "<li class=\"List-paginationPager--item\"><a href " +
                 "id=\"previous-page\" ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-left\"></i></a></li>\n";
 
             // html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
             //     "<a href id=\"{{ 'link-to-page-' + page }}\" ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
-            html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
-                "<a href id=\"{{ 'page-' + page }}\" ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
+            html += "<li class=\"List-paginationPager--item\" ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" +
+                "<a href id=\"{{ 'page-' + page }}\" ng-click=\"getPage(page,'" + set + "','" + iterator + "')\" ng-class=\"{\'List-paginationPager--active\': pageIsActive(page,'" + iterator + "')}\">{{ page }}</a></li>\n";
 
-            html += "<li ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href id=\"next-page\"  ng-click=\"" +
+            html += "<li class=\"List-paginationPager--item\" ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href id=\"next-page\"  ng-click=\"" +
                 "getPage(" + iterator + "_page + 1,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-right\"></i></a></li>\n";
 
-            html += "<li ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href id=\"last-page-set\"  ng-click=\"" +
+            html += "<li class=\"List-paginationPager--item\" ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href id=\"last-page-set\"  ng-click=\"" +
                 "getPage(" + iterator + "_num_pages,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-double-right\"></i></a></li>\n";
             html += "</ul>\n";
-            html += "</div>\n";
-            html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
-            html += "<div id=\"pagination-labels\" class=\"page-label\">\n";
-            html += "Page <span id=\"current-page\">{{ " + iterator + "_page }}</span> of <span id=\"total-pages\">{{ " + iterator + "_num_pages }}</span> (<span id=\"total-items\">{{ " + iterator + "_total_rows | number:0 }}</span> items)";
-            html += "</div>\n";
+            html += "<span class=\"List-paginationPager--pageof\">Page <span id=\"current-page\">{{ " + iterator + "_page }}</span> of <span id=\"total-pages\">{{ " + iterator + "_num_pages }}</span></span>";
+            html += "</div>";
+            html += "</div>";
+            html += "<div id=\"pagination-labels\" class=\"page-label\" ng-hide=\"(" + iterator + "_total_rows | number:0) < 1\">\n";
+            html += "<span id=\"total-items\">ITEMS&nbsp;";
+            html += "<span>{{ (" + iterator + "_total_rows | number:0) < 1 ? 0 : (" + iterator + "_page-1)*" + iterator + "_page_size+1}}</span>";
+            html += "<span>&ndash;{{ (" + iterator + "_total_rows | number:0) < (" + iterator + "_page)*" + iterator + "_page_size ? (" + iterator + "_total_rows | number:0) : (" + iterator + "_page)*" + iterator + "_page_size}}</span>";
+            html += "<span>&nbsp;OF&nbsp;</span>";
+            html += "<span>{{ " + iterator + "_total_rows | number:0 }}</span>";
+            html += "</span>";
             html += "</div>\n";
             html += "</div>\n";
 
             return html;
         };
     }
-]);
+])
+.factory('ActionButton', function () {
+    return function (options) {
+
+        var html = '';
+
+        html += '<button ';
+        html += (options.mode) ? "mode=\"" + options.mode + "\" " : "";
+        html += (options.awToolTip) ? "aw-tool-tip=\"" + options.awToolTip + "\" " : "";
+        html += (options.dataTipWatch) ? "data-tip-watch=\"" + options.dataTipWatch + "\" " : "";
+        html += (options.dataPlacement) ? "data-placement=\"" + options.dataPlacement + "\" " : "";
+        html += (options.dataContainer) ? "data-container=\"" + options.dataContainer + "\" " : "";
+        html += (options.actionClass) ? "class=\"" + options.actionClass + "\" " : "";
+        html += (options.dataTitle) ? "data-title=\"" + options.dataTitle + "\" " : "";
+        html += (options.ngDisabled) ? "ng-disabled=\"" + options.ngDisabled + "\" " : "";
+        html += (options.ngClick) ? "ng-click=\"$eval(" + options.ngClick + ")\" " : "";
+        html += (options.ngShow) ? "ng-show=\"" + options.ngShow + "\" " : "";
+        html += (options.ngHide) ? "ng-hide=\"" + options.ngHide + "\" " : "";
+        html += (options.awFeature) ? "aw-feature=\"" + options.awFeature + "\" " : "";
+        html += '>';
+        html += '<span>';
+        html += (options.buttonContent) ? options.buttonContent : "";
+        html += '</span>';
+        html += '</button>';
+
+        return html;
+
+    };
+});

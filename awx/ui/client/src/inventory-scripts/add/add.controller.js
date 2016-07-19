@@ -5,20 +5,22 @@
  *************************************************/
 
 export default
-    [   '$compile','SchedulerInit', 'Rest', 'Wait',
+    [   '$rootScope', 'pagination', '$compile','SchedulerInit', 'Rest', 'Wait',
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', '$scope', 'transitionTo',
+        'LookUpInit', 'OrganizationList', '$scope', '$state',
         function(
-            $compile, SchedulerInit, Rest, Wait,
+            $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, $scope, transitionTo
+            LookUpInit, OrganizationList, $scope, $state
         ) {
             var scope = $scope,
                 generator = GenerateForm,
                 form = inventoryScriptsFormObject,
                 url = GetBasePath('inventory_scripts');
+
+            $scope.canEdit = true;
 
             generator.inject(form, {
                 mode: 'add' ,
@@ -47,10 +49,9 @@ export default
                     organization: scope.organization,
                     script: scope.script
                 })
-                .success(function () {
-                    transitionTo('inventoryScriptsList');
+                .success(function (data) {
+                    $state.go('inventoryScripts.edit', {inventory_script_id: data.id}, {reload: true});
                     Wait('stop');
-
                 })
                 .error(function (data, status) {
                     ProcessErrors(scope, data, status, form, { hdr: 'Error!',
@@ -58,9 +59,8 @@ export default
                 });
             };
 
-            // Cancel
-            scope.formReset = function () {
-                generator.reset();
+            scope.formCancel = function () {
+                $state.transitionTo('inventoryScripts');
             };
 
         }

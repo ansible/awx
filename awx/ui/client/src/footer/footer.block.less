@@ -1,0 +1,53 @@
+/** @define DashboardCounts */
+@import "../../shared/branding/colors.default.less";
+
+.Footer {
+    height: 40px;
+    background-color: @default-secondary-bg;
+    color: @default-interface-txt;
+    width: 100%;
+    z-index: 1040;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
+
+.Footer-logo {
+    float: left;
+    height: 40px;
+    width: 250px;
+}
+
+.Footer-logoImage {
+    height: 40px;
+    width: 250px;
+}
+
+.Footer-copyright{
+    float: right;
+    font-size: 12px;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+
+.Footer-link:hover{
+    color: @default-bg;
+}
+
+.Footer-link{
+    color: @default-interface-txt;
+}
+
+.Footer-copyright.is-loggedOut,
+.Footer-logo.is-loggedOut {
+    opacity: 0;
+}
+
+@menu-breakpoint: 553px;
+
+@media screen and (max-width: (@menu-breakpoint)) {
+    .Footer-copyright{
+        display: none;
+    }
+}

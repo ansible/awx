@@ -11,6 +11,7 @@ import shutil
 import sys
 import tempfile
 import time
+import urllib
 from multiprocessing import Process
 from subprocess import Popen
 import re
@@ -25,6 +26,7 @@ from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test.utils import override_settings
+from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
@@ -33,6 +35,7 @@ from awx.main.management.commands.run_task_system import run_taskmanager
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings
+from awx.main.tests.URI import URI # noqa
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -67,10 +70,10 @@ class QueueTestMixin(object):
         if getattr(self, 'redis_process', None):
             self.redis_process.kill()
             self.redis_process = None
-            
+
 
 # The observed effect of not calling terminate_queue() if you call start_queue() are
-# an hang on test cleanup database delete. Thus, to ensure terminate_queue() is called 
+# an hang on test cleanup database delete. Thus, to ensure terminate_queue() is called
 # whenever start_queue() is called just inherit  from this class when you want to use the queue.
 class QueueStartStopTestMixin(QueueTestMixin):
     def setUp(self):
@@ -127,11 +130,12 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         settings.CELERY_UNIT_TEST = True
         settings.SYSTEM_UUID='00000000-0000-0000-0000-000000000000'
         settings.BROKER_URL='redis://localhost:16379/'
-        
+
         # Create unique random consumer and queue ports for zeromq callback.
         if settings.CALLBACK_CONSUMER_PORT:
             callback_port = random.randint(55700, 55799)
             settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
+            os.environ['CALLBACK_CONSUMER_PORT'] = settings.CALLBACK_CONSUMER_PORT
             callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
             self._temp_paths.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
@@ -178,7 +182,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         return __name__ + '-generated-' + string + rnd_str
 
     def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features=None):
-        writer = LicenseWriter( 
+        writer = LicenseWriter(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
@@ -193,7 +197,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         os.environ['AWX_LICENSE_FILE'] = license_path
 
     def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
-        writer = LicenseWriter( 
+        writer = LicenseWriter(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
@@ -205,7 +209,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         writer.write_file(license_path)
         self._temp_paths.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
-        
+
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
         if not grace_period:
@@ -349,6 +353,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             'host_config_key': settings.SYSTEM_UUID,
             'created_by': created_by,
             'playbook': playbook,
+            'ask_credential_on_launch': True,
         }
         opts.update(kwargs)
         return JobTemplate.objects.create(**opts)
@@ -380,7 +385,11 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
             'vault_password': '',
         }
         opts.update(kwargs)
-        return Credential.objects.create(**opts)
+        user = opts['user']
+        del opts['user']
+        cred = Credential.objects.create(**opts)
+        cred.admin_role.members.add(user)
+        return cred
 
     def setup_instances(self):
         instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
@@ -419,14 +428,12 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
 
     def get_invalid_credentials(self):
         return ('random', 'combination')
-        
+
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None,
                       data_type=None, accept=None, remote_addr=None,
                       return_response_object=False, client_kwargs=None):
         assert method is not None
         method_name = method.lower()
-        #if method_name not in ('options', 'head', 'get', 'delete'):
-        #    assert data is not None
         client_kwargs = client_kwargs or {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
@@ -457,21 +464,23 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         client = Client(**client_kwargs)
         method = getattr(client, method_name)
         response = None
-        if data is not None:
+        if method_name not in ('options', 'head', 'get', 'delete'):
             data_type = data_type or 'json'
             if data_type == 'json':
                 response = method(url, json.dumps(data), 'application/json')
             elif data_type == 'yaml':
                 response = method(url, yaml.safe_dump(data), 'application/yaml')
+            elif data_type == 'form':
+                response = method(url, urllib.urlencode(data), 'application/x-www-form-urlencoded')
             else:
                 self.fail('Unsupported data_type %s' % data_type)
         else:
             response = method(url)
 
         self.assertFalse(response.status_code == 500 and expect != 500,
-                         'Failed (500): %s' % response.content)
+                         'Failed (500): %s' % force_text(response.content))
         if expect is not None:
-            assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
+            assert response.status_code == expect, u"expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, force_text(response.content))
         if method_name == 'head':
             self.assertFalse(response.content)
         if return_response_object:
@@ -479,16 +488,16 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         if response.status_code not in [204, 405] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             if response['Content-Type'].startswith('application/json'):
-                obj = json.loads(response.content)
+                obj = json.loads(force_text(response.content))
             elif response['Content-Type'].startswith('application/yaml'):
-                obj = yaml.safe_load(response.content)
+                obj = yaml.safe_load(force_text(response.content))
             elif response['Content-Type'].startswith('text/plain'):
                 obj = {
-                    'content': response.content
+                    'content': force_text(response.content)
                 }
             elif response['Content-Type'].startswith('text/html'):
                 obj = {
-                    'content': response.content
+                    'content': force_text(response.content)
                 }
             else:
                 self.fail('Unsupport response content type %s' % response['Content-Type'])
@@ -514,7 +523,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
                                   method='head', accept=accept,
                                   remote_addr=remote_addr)
- 
+
     def get(self, url, expect=200, auth=None, accept=None, remote_addr=None, client_kwargs={}):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
                                   method='get', accept=accept,
@@ -655,7 +664,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         else:
             msg += 'Found %d occurances of "%s" instead of %d in: "%s"' % (count_actual, substr, count, string)
             self.assertEqual(count_actual, count, msg)
-        
+
     def check_job_result(self, job, expected='successful', expect_stdout=True,
                          expect_traceback=False):
         msg = u'job status is %s, expected %s' % (job.status, expected)
@@ -724,48 +733,3 @@ class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
     '''
     Base class for celery task tests.
     '''
-
-# Helps with test cases.
-# Save all components of a uri (i.e. scheme, username, password, etc.) so that
-# when we construct a uri string and decompose it, we can verify the decomposition
-class URI(object):
-    DEFAULTS = {
-        'scheme' : 'http',
-        'username' : 'MYUSERNAME',
-        'password' : 'MYPASSWORD',
-        'host' : 'host.com',
-    }
-
-    def __init__(self, description='N/A', scheme=DEFAULTS['scheme'], username=DEFAULTS['username'], password=DEFAULTS['password'], host=DEFAULTS['host']):
-        self.description = description
-        self.scheme = scheme
-        self.username = username
-        self.password = password
-        self.host = host
-
-    def get_uri(self):
-        uri = "%s://" % self.scheme
-        if self.username:
-            uri += "%s" % self.username
-        if self.password:
-            uri += ":%s" % self.password
-        if (self.username or self.password) and self.host is not None:
-            uri += "@%s" % self.host
-        elif self.host is not None:
-            uri += "%s" % self.host
-        return uri
-
-    def get_secret_count(self):
-        secret_count = 0
-        if self.username:
-            secret_count += 1
-        if self.password:
-            secret_count += 1
-        return secret_count
-
-    def __string__(self):
-        return self.get_uri()
-
-    def __repr__(self):
-        return self.get_uri()
-

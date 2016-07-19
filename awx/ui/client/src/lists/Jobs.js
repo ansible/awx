@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobsListDefinition', [])
@@ -20,7 +20,7 @@ export default
         fields: {
             id: {
                 label: 'ID',
-                ngClick:"viewJobLog(job.id)",
+                ngClick:"viewJobDetails(job)",
                 key: true,
                 desc: true,
                 searchType: 'int',
@@ -29,14 +29,15 @@ export default
                 awTipPlacement: "top",
             },
             status: {
-                label: 'Status',
+                label: '',
+                searchLabel: 'Status',
                 columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(job.id)",
+                ngClick:"viewJobDetails(job)",
                 searchable: true,
                 nosort: true,
                 searchType: 'select',
@@ -66,7 +67,7 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngClick: "viewJobLog(job.id, job.nameHref)",
+                ngClick: "viewJobDetails(job)",
                 defaultSearchField: true
             }
         },
@@ -95,13 +96,6 @@ export default
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top',
                 ngShow: "job.status != 'running'"
-            },
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "job.type == 'job'"
             }
         }
     });

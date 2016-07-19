@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Users
@@ -14,28 +14,11 @@ export default
     angular.module('UserFormDefinition', [])
         .value('UserForm', {
 
-            addTitle: 'Create User',
+            addTitle: 'New User',
             editTitle: '{{ username }}',
             name: 'user',
-            well: true,
             forceListeners: true,
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
+            tabs: true,
 
             fields: {
                 first_name: {
@@ -59,26 +42,28 @@ export default
                     editRequired: true,
                     autocomplete: false
                 },
+                username: {
+                    label: 'Username',
+                    type: 'text',
+                    awRequiredWhen: {
+                        reqExpression: "not_ldap_user",
+                        init: true
+                    },
+                    autocomplete: false
+                },
                 organization: {
                     label: 'Organization',
                     type: 'lookup',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    ngClick: 'lookUpOrganization()',
+                    addRequired: true,
+                    editRequired: false,
                     excludeMode: 'edit',
+                    ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "orgrequired",
+                        reqExpression: "orgrequired",
                         init: true
                     }
-                },
-                username: {
-                    label: 'Username',
-                    type: 'text',
-                    awRequiredWhen: {
-                        variable: "not_ldap_user",
-                        init: true
-                    },
-                    autocomplete: false
                 },
                 password: {
                     label: 'Password',
@@ -102,164 +87,31 @@ export default
                     associated: 'password',
                     autocomplete: false
                 },
-                is_superuser: {
-                    label: 'Superuser (User has full system administration privileges.)',
-                    type: 'checkbox',
-                    trueValue: 'true',
-                    falseValue: 'false',
-                    "default": 'false',
-                    ngShow: "current_user['is_superuser'] == true"
+                user_type: {
+                    label: 'User Type',
+                    type: 'select',
+                    ngOptions: 'item as item.label for item in user_type_options track by item.type',
+                    disableChooseOption: true,
+                    ngModel: 'user_type',
+                    ngShow: 'current_user["is_superuser"]',
                 },
-                ldap_user: {
-                    label: 'Created by LDAP',
-                    type: 'checkbox',
-                    readonly: true,
-                    awFeature: 'ldap'
-                }
             },
 
             buttons: {
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
-                },
-                reset: {
-                    ngClick: 'formReset()',
                     ngDisabled: true
                 }
             },
 
             related: {
-
-                credentials: {
-                    type: 'collection',
-                    title: 'Credentials',
-                    iterator: 'credential',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('credentials')",
-                            icon: 'icon-plus',
-                            label: 'Add',
-                            awToolTip: 'Add a credential for this user'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('credentials', credential.id, credential.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the credential',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('credentials', credential.id, credential.name, 'credentials')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the credential'
-                        }
-                    }
-                },
-
-                permissions: {
-                    type: 'collection',
-                    title: 'Permissions',
-                    iterator: 'permission',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('permissions')",
-                            icon: 'icon-plus',
-                            label: 'Add',
-                            awToolTip: 'Add a permission for this user',
-                            ngShow: 'PermissionAddAllowed'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name',
-                            ngClick: "edit('permissions', permission.id, permission.name)"
-                        },
-                        inventory: {
-                            label: 'Inventory',
-                            sourceModel: 'inventory',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.inventory.name'
-                        },
-                        project: {
-                            label: 'Project',
-                            sourceModel: 'project',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.project.name'
-                        },
-                        permission_type: {
-                            label: 'Permission',
-                            ngBind: 'getPermissionText()',
-                            searchType: 'select'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('permissions', permission.id, permission.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the permission',
-                            'class': 'btn btn-default'
-                        },
-
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('permissions', permission.id, permission.name, 'permissions')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the permission',
-                            ngShow: 'PermissionAddAllowed'
-                        }
-                    }
-
-                },
-
-                admin_of_organizations: { // Assumes a plural name (e.g. things)
-                    type: 'collection',
-                    title: 'Admin of Organizations',
-                    iterator: 'adminof', // Singular form of name (e.g.  thing)
-                    open: false, // Open accordion on load?
-                    index: false,
-                    base: '/organizations',
-
-                    actions: {},
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    }
-                },
-
                 organizations: {
+                    basePath: 'users/:id/organizations',
+                    awToolTip: 'Please save before assigning to organizations',
+                    dataPlacement: 'top',
                     type: 'collection',
                     title: 'Organizations',
                     iterator: 'organization',
@@ -276,16 +128,18 @@ export default
                         description: {
                             label: 'Description'
                         }
-                    }
+                    },
+                    hideOnSuperuser: true
                 },
-
                 teams: {
+                    basePath: 'users/:id/teams',
+                    awToolTip: 'Please save before assigning to teams',
+                    dataPlacement: 'top',
                     type: 'collection',
                     title: 'Teams',
                     iterator: 'team',
                     open: false,
                     index: false,
-
                     actions: {},
 
                     fields: {
@@ -296,8 +150,47 @@ export default
                         description: {
                             label: 'Description'
                         }
-                    }
+                    },
+                    hideOnSuperuser: true
+                },
+                roles: {
+                    awToolTip: 'Please save before assigning to organizations',
+                    dataPlacement: 'top',
+                    hideSearchAndActions: true,
+                    type: 'collection',
+                    title: 'Granted permissions',
+                    iterator: 'permission',
+                    open: false,
+                    index: false,
+                    emptyListText: 'No permissions have been granted',
+                    fields: {
+                        name: {
+                            label: 'Name',
+                            ngBind: 'permission.summary_fields.resource_name',
+                            linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
+                            noSort: true
+                        },
+                        type: {
+                            label: 'Type',
+                            ngBind: 'permission.summary_fields.resource_type_display_name',
+                            noSort: true
+                        },
+                        role: {
+                            label: 'Role',
+                            ngBind: 'permission.name',
+                            noSort: true
+                        },
+                    },
+                    fieldActions: {
+                        "delete": {
+                            label: 'Remove',
+                            ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
+                            iconClass: 'fa fa-times',
+                            awToolTip: 'Dissasociate permission from user'
+                        }
+                    },
+                    hideOnSuperuser: true
                 }
             }
 
-        }); //UserForm
+        });

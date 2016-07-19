@@ -8,8 +8,7 @@ import threading
 import json
 
 # Django
-from django.conf import settings
-from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
+from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
 # Django-CRUM
@@ -22,14 +21,14 @@ from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
+from awx.main.conf import tower_settings
 
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
 
-# Update has_active_failures for inventory/groups when a Host/Group is deleted
-# or marked inactive, when a Host-Group or Group-Group relationship is updated,
-# or when a Job is deleted or marked inactive.
+# Update has_active_failures for inventory/groups when a Host/Group is deleted,
+# when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
 
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
@@ -69,7 +68,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     else:
         sender_name = unicode(sender._meta.verbose_name)
     if kwargs['signal'] == post_save:
-        if sender == Job and instance.active:
+        if sender == Job:
             return
         sender_action = 'saved'
     elif kwargs['signal'] == post_delete:
@@ -92,7 +91,6 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         return
     instance = kwargs['instance']
     if ('created' in kwargs and kwargs['created']) or \
-       (hasattr(instance, '_saved_active_state') and instance._saved_active_state != instance.active) or \
        kwargs['signal'] == post_delete:
         pass
     else:
@@ -108,34 +106,119 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         if inventory is not None:
             update_inventory_computed_fields.delay(inventory.id, True)
 
-def store_initial_active_state(sender, **kwargs):
-    instance = kwargs['instance']
-    if instance.id is not None:
-        instance._saved_active_state = sender.objects.get(id=instance.id).active
-    else:
-        instance._saved_active_state = True
+def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
+    'When a role parent is added or removed, update our role hierarchy list'
+    if action == 'post_add':
+        if reverse:
+            model.rebuild_role_ancestor_list(list(pk_set), [])
+        else:
+            model.rebuild_role_ancestor_list([instance.id], [])
 
-pre_save.connect(store_initial_active_state, sender=Host)
+    if action in ['post_remove', 'post_clear']:
+        if reverse:
+            model.rebuild_role_ancestor_list([], list(pk_set))
+        else:
+            model.rebuild_role_ancestor_list([], [instance.id])
+
+def sync_superuser_status_to_rbac(instance, **kwargs):
+    'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
+    if instance.is_superuser:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
+    else:
+        Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
+def create_user_role(instance, **kwargs):
+    try:
+        Role.objects.get(
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.id,
+            role_field='admin_role'
+        )
+    except Role.DoesNotExist:
+        role = Role.objects.create(
+            role_field='admin_role',
+            content_object = instance,
+        )
+        role.members.add(instance)
+
+def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
+    content_type = ContentType.objects.get_for_model(Organization)
+
+    if reverse:
+        return
+    else:
+        if instance.content_type == content_type and \
+           instance.content_object.member_role.id == instance.id:
+            items = model.objects.filter(pk__in=pk_set).all()
+            for user in items:
+                if action == 'post_add':
+                    instance.content_object.admin_role.children.add(user.admin_role)
+                if action == 'pre_remove':
+                    instance.content_object.admin_role.children.remove(user.admin_role)
+
+def rbac_activity_stream(instance, sender, **kwargs):
+    user_type = ContentType.objects.get_for_model(User)
+    # Only if we are associating/disassociating
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
+        # Only if this isn't for the User.admin_role
+        if hasattr(instance, 'content_type'):
+            if instance.content_type in [None, user_type]:
+                return
+            elif sender.__name__ == 'Role_parents':
+                role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+                # don't record implicit creation / parents
+                if role is not None and role.content_type is not None:
+                    parent = role.content_type.name + "." + role.role_field
+                    # Get the list of implicit parents that were defined at the class level.
+                    # We have to take this list from the class property to avoid including parents
+                    # that may have been added since the creation of the ImplicitRoleField
+                    implicit_parents = getattr(instance.content_object.__class__, instance.role_field).field.parent_role
+                    if type(implicit_parents) != list:
+                        implicit_parents = [implicit_parents]
+                    # Ignore any singleton parents we find. If the parent for the role
+                    # matches any of the implicit parents we find, skip recording the activity stream.
+                    for ip in implicit_parents:
+                        if '.' not in ip and 'singleton:' not in ip:
+                            ip = instance.content_type.name + "." + ip
+                        if parent == ip:
+                            return
+            else:
+                role = instance
+            instance = instance.content_object
+        else:
+            role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
+
+        activity_stream_associate(sender, instance, role=role, **kwargs)
+
+def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
+    for l in instance.labels.all():
+        if l.is_candidate_for_detach():
+            l.delete()
+
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-pre_save.connect(store_initial_active_state, sender=Group)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
 m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
-pre_save.connect(store_initial_active_state, sender=InventorySource)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-pre_save.connect(store_initial_active_state, sender=Job)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
+m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
+m2m_changed.connect(org_admin_edit_members, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.members.through)
+m2m_changed.connect(rbac_activity_stream, Role.parents.through)
+post_save.connect(sync_superuser_status_to_rbac, sender=User)
+post_save.connect(create_user_role, sender=User)
+pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJob)
+pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobTemplate)
 
-# Migrate hosts, groups to parent group(s) whenever a group is deleted or
-# marked as inactive.
+# Migrate hosts, groups to parent group(s) whenever a group is deleted
 
 @receiver(pre_delete, sender=Group)
 def save_related_pks_before_group_delete(sender, **kwargs):
@@ -155,83 +238,33 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
     parents_pks = getattr(instance, '_saved_parents_pks', [])
     hosts_pks = getattr(instance, '_saved_hosts_pks', [])
     children_pks = getattr(instance, '_saved_children_pks', [])
+    is_updating  = getattr(_inventory_updates, 'is_updating', False)
+
     with ignore_inventory_group_removal():
         with ignore_inventory_computed_fields():
             if parents_pks:
-                for parent_group in Group.objects.filter(pk__in=parents_pks, active=True):
-                    for child_host in Host.objects.filter(pk__in=hosts_pks, active=True):
+                for parent_group in Group.objects.filter(pk__in=parents_pks):
+                    for child_host in Host.objects.filter(pk__in=hosts_pks):
                         logger.debug('adding host %s to parent %s after group deletion',
                                      child_host, parent_group)
                         parent_group.hosts.add(child_host)
-                    for child_group in Group.objects.filter(pk__in=children_pks, active=True):
+                    for child_group in Group.objects.filter(pk__in=children_pks):
                         logger.debug('adding group %s to parent %s after group deletion',
                                      child_group, parent_group)
                         parent_group.children.add(child_group)
                 inventory_pk = getattr(instance, '_saved_inventory_pk', None)
-                if inventory_pk:
+                if inventory_pk and not is_updating:
                     try:
-                        inventory = Inventory.objects.get(pk=inventory_pk, active=True)
+                        inventory = Inventory.objects.get(pk=inventory_pk)
                         inventory.update_computed_fields()
                     except Inventory.DoesNotExist:
                         pass
 
-@receiver(pre_save, sender=Group)
-def save_related_pks_before_group_marked_inactive(sender, **kwargs):
-    if getattr(_inventory_updates, 'is_removing', False):
-        return
-    instance = kwargs['instance']
-    if not instance.pk or instance.active:
-        return
-    instance._saved_inventory_pk = instance.inventory.pk
-    instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
-    instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
-    instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
-    instance._saved_inventory_source_pk = instance.inventory_source.pk
 
-@receiver(post_save, sender=Group)
-def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
-    if getattr(_inventory_updates, 'is_removing', False):
-        return
-    instance = kwargs['instance']
-    if instance.active:
-        return
-    parents_pks = getattr(instance, '_saved_parents_pks', [])
-    hosts_pks = getattr(instance, '_saved_hosts_pks', [])
-    children_pks = getattr(instance, '_saved_children_pks', [])
-    with ignore_inventory_group_removal():
-        with ignore_inventory_computed_fields():
-            if parents_pks:
-                for parent_group in Group.objects.filter(pk__in=parents_pks, active=True):
-                    for child_host in Host.objects.filter(pk__in=hosts_pks, active=True):
-                        logger.debug('moving host %s to parent %s after marking group %s inactive',
-                                     child_host, parent_group, instance)
-                        parent_group.hosts.add(child_host)
-                    for child_group in Group.objects.filter(pk__in=children_pks, active=True):
-                        logger.debug('moving group %s to parent %s after marking group %s inactive',
-                                     child_group, parent_group, instance)
-                        parent_group.children.add(child_group)
-                    parent_group.children.remove(instance)
-            inventory_source_pk = getattr(instance, '_saved_inventory_source_pk', None)
-            if inventory_source_pk:
-                try:
-                    inventory_source = InventorySource.objects.get(pk=inventory_source_pk, active=True)
-                    inventory_source.mark_inactive()
-                except InventorySource.DoesNotExist:
-                    pass
-            inventory_pk = getattr(instance, '_saved_inventory_pk', None)
-        if not getattr(_inventory_updates, 'is_updating', False):
-            if inventory_pk:
-                try:
-                    inventory = Inventory.objects.get(pk=inventory_pk, active=True)
-                    inventory.update_computed_fields()
-                except Inventory.DoesNotExist:
-                    pass
-
-# Update host pointers to last_job and last_job_host_summary when a job is
-# marked inactive or deleted.
+# Update host pointers to last_job and last_job_host_summary when a job is deleted
 
 def _update_host_last_jhs(host):
-    jhs_qs = JobHostSummary.objects.filter(job__active=True, host__pk=host.pk)
+    jhs_qs = JobHostSummary.objects.filter(host__pk=host.pk)
     try:
         jhs = jhs_qs.order_by('-job__pk')[0]
     except IndexError:
@@ -247,19 +280,10 @@ def _update_host_last_jhs(host):
     if update_fields:
         host.save(update_fields=update_fields)
 
-@receiver(post_save, sender=Job)
-def update_host_last_job_when_job_marked_inactive(sender, **kwargs):
-    instance = kwargs['instance']
-    if instance.active:
-        return
-    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
-    for host in hosts_qs:
-        _update_host_last_jhs(host)
-
 @receiver(pre_delete, sender=Job)
 def save_host_pks_before_job_delete(sender, **kwargs):
     instance = kwargs['instance']
-    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
+    hosts_qs = Host.objects.filter( last_job__pk=instance.pk)
     instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
 
 @receiver(post_delete, sender=Job)
@@ -273,7 +297,7 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
-        self.enabled = getattr(settings, 'ACTIVITY_STREAM_ENABLED', True)
+        self.enabled = getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True)
 
     def __nonzero__(self):
         return bool(self.enabled)
@@ -299,13 +323,16 @@ model_serializer_mapping = {
     Host: HostSerializer,
     Group: GroupSerializer,
     InventorySource: InventorySourceSerializer,
+    CustomInventoryScript: CustomInventoryScriptSerializer,
     Credential: CredentialSerializer,
     Team: TeamSerializer,
     Project: ProjectSerializer,
-    Permission: PermissionSerializer,
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
+    TowerSettings: TowerSettingsSerializer,
+    NotificationTemplate: NotificationTemplateSerializer,
+    Notification: NotificationSerializer,
 }
 
 def activity_stream_create(sender, instance, created, **kwargs):
@@ -313,14 +340,22 @@ def activity_stream_create(sender, instance, created, **kwargs):
         # Skip recording any inventory source directly associated with a group.
         if isinstance(instance, InventorySource) and instance.group:
             return
-        # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
+        changes = model_to_dict(instance, model_serializer_mapping)
+        # Special case where Job survey password variables need to be hidden
+        if type(instance) == Job:
+            if 'extra_vars' in changes:
+                changes['extra_vars'] = instance.display_extra_vars()
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
+            changes=json.dumps(changes))
         activity_entry.save()
-        getattr(activity_entry, object1).add(instance)
+        #TODO: Weird situation where cascade SETNULL doesn't work
+        #      it might actually be a good idea to remove all of these FK references since
+        #      we don't really use them anyway.
+        if type(instance) is not TowerSettings:
+            getattr(activity_entry, object1).add(instance)
 
 def activity_stream_update(sender, instance, **kwargs):
     if instance.id is None:
@@ -330,11 +365,6 @@ def activity_stream_update(sender, instance, **kwargs):
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
-        return
-
-    # Handle the AWX mark-inactive for delete event
-    if hasattr(instance, 'active') and not instance.active:
-        activity_stream_delete(sender, instance, **kwargs)
         return
 
     new = instance
@@ -347,19 +377,16 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-    getattr(activity_entry, object1).add(instance)
+    if type(instance) is not TowerSettings:
+        getattr(activity_entry, object1).add(instance)
 
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    try:
-        old = sender.objects.get(id=instance.id)
-    except sender.DoesNotExist:
-        return
     # Skip recording any inventory source directly associated with a group.
     if isinstance(instance, InventorySource) and instance.group:
         return
-    changes = model_instance_diff(old, instance)
+    changes = model_to_dict(instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
         operation='delete',
@@ -370,7 +397,7 @@ def activity_stream_delete(sender, instance, **kwargs):
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
-    if 'pre_add' in kwargs['action'] or 'pre_remove' in kwargs['action']:
+    if kwargs['action'] in ['pre_add', 'pre_remove']:
         if kwargs['action'] == 'pre_add':
             action = 'associate'
         elif kwargs['action'] == 'pre_remove':
@@ -380,15 +407,33 @@ def activity_stream_associate(sender, instance, **kwargs):
         obj1 = instance
         object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
+
         for entity_acted in kwargs['pk_set']:
             obj2 = kwargs['model']
             obj2_id = entity_acted
-            obj2_actual = obj2.objects.get(id=obj2_id)
-            object2 = camelcase_to_underscore(obj2.__name__)
-            # Skip recording any inventory source changes here.
+            obj2_actual = obj2.objects.filter(id=obj2_id)
+            if not obj2_actual.exists():
+                continue
+            obj2_actual = obj2_actual[0]
+            if isinstance(obj2_actual, Role) and obj2_actual.content_object is not None:
+                obj2_actual = obj2_actual.content_object
+                object2 = camelcase_to_underscore(obj2_actual.__class__.__name__)
+            else:
+                object2 = camelcase_to_underscore(obj2.__name__)
+            # Skip recording any inventory source, or system job template changes here.
             if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
                 continue
+            if isinstance(obj1, SystemJobTemplate) or isinstance(obj2_actual, SystemJobTemplate):
+                continue
+            if isinstance(obj1, SystemJob) or isinstance(obj2_actual, SystemJob):
+                continue
             activity_entry = ActivityStream(
+                changes=json.dumps(dict(object1=object1,
+                                        object1_pk=obj1.pk,
+                                        object2=object2,
+                                        object2_pk=obj2_id,
+                                        action=action,
+                                        relationship=obj_rel)),
                 operation=action,
                 object1=object1,
                 object2=object2,
@@ -396,6 +441,23 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry.save()
             getattr(activity_entry, object1).add(obj1)
             getattr(activity_entry, object2).add(obj2_actual)
+
+            # Record the role for RBAC changes
+            if 'role' in kwargs:
+                role = kwargs['role']
+                if role.content_object is not None:
+                    obj_rel = '.'.join([role.content_object.__module__,
+                                        role.content_object.__class__.__name__,
+                                        role.role_field])
+
+                # If the m2m is from the User side we need to
+                # set the content_object of the Role for our entry.
+                if type(instance) == User and role.content_object is not None:
+                    getattr(activity_entry, role.content_type.name.replace(' ', '_')).add(role.content_object)
+
+                activity_entry.role.add(role)
+                activity_entry.object_relationship_type = obj_rel
+                activity_entry.save()
 
 
 @receiver(current_user_getter)

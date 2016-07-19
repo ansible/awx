@@ -12,7 +12,7 @@ fields to create a new {{ model_verbose_name }} associated with this
 
 {% block post_create %}{% endblock %}
 
-{% if view.attach %}
+{% if has_attach|default:False %}
 {% if parent_key %}
 # Remove {{ parent_model_verbose_name|title }} {{ model_verbose_name_plural|title }}:
 
@@ -34,7 +34,7 @@ existing {{ model_verbose_name }} with this {{ parent_model_verbose_name }}.
 
 Make a POST request to this resource with `id` and `disassociate` fields to
 remove the {{ model_verbose_name }} from this {{ parent_model_verbose_name }}
-without deleting the {{ model_verbose_name }}.
+{% if model_verbose_name != "label" %} without deleting the {{ model_verbose_name }}{% endif %}.
 {% endif %}
 {% endif %}
 

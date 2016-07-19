@@ -5,6 +5,7 @@
 # Tower
 awx/settings/local_settings.py*
 awx/*.sqlite3
+awx/*.sqlite3_*
 awx/job_status
 awx/projects
 awx/job_output
@@ -22,6 +23,10 @@ celerybeat-schedule
 awx/ui/static
 awx/ui/build_test
 
+# Tower setup playbook testing
+setup/test/roles/postgresql
+**/provision_docker
+
 # Python & setuptools
 __pycache__
 /build
@@ -30,7 +35,7 @@ __pycache__
 /tar-build
 /setup-bundle-build
 /dist
-*.egg-info
+/*.egg-info
 *.py[c,o]
 
 # JavaScript
@@ -39,6 +44,8 @@ __pycache__
 /bower.json
 /package.json
 /testem.yml
+/coverage
+/.istanbul.yml
 node_modules/**
 /tmp
 npm-debug.log
@@ -47,6 +54,7 @@ npm-debug.log
 /DEBUG
 
 # Testing
+.cache
 .coverage
 .tox
 coverage.xml
@@ -54,12 +62,13 @@ htmlcov
 pep8.txt
 scratch
 testem.log
+awx/awx_test.sqlite3-journal
 
 # Mac OS X
 *.DS_Store
 
 # Editors
-*.swp
+*.sw[poj]
 *~
 
 # Vagrant
@@ -80,13 +89,23 @@ setup/setup.log
 setup/inventory
 tower-backup-*
 
+# Ansible
+**/*.retry
+
 # Other
 .tower_cycle
 env/*
 nohup.out
 reports
+*.bak
+*.bak[0-9]
+*.dot
+*.log
+*.log.[0-9]
+*.results
+local/
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
 awx/lib/site-packages
-
+venv/*

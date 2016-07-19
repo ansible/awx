@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name helpers.function:Credentials
@@ -39,7 +39,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.project_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -62,18 +61,19 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
+                 scope.domain_required = false;
                  scope.subscription_required = false;
                  scope.key_description = "Paste the contents of the SSH private key file.";
-                 scope.key_hint= "drag and drop an SSH private key file on the field below";
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
                  scope.projectLabel = '';
+                 scope.domainLabel = '';
                  scope.project_required = false;
                  scope.passwordLabel = 'Password (API Key)';
                  scope.projectPopOver = "<p>The project value</p>";
                  scope.hostPopOver = "<p>The host value</p>";
-
+                 scope.ssh_key_data_api_error = '';
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -86,6 +86,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'ssh':
                              scope.usernameLabel = 'Username'; //formally 'SSH Username'
+                             scope.becomeUsernameLabel = 'Privilege Escalation Username';
+                             scope.becomePasswordLabel = 'Privilege Escalation Password';
                          break;
                          case 'scm':
                              scope.sshKeyDataLabel = 'SCM Private Key';
@@ -98,7 +100,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.key_required = true;
                              scope.project_required = true;
                              scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
-                             scope.key_hint= "drag and drop a private key file on the field below";
                              scope.projectLabel = "Project";
                              scope.project_required = false;
                              scope.projectPopOver = "<p>The Project ID is the " +
@@ -107,12 +108,16 @@ angular.module('CredentialsHelper', ['Utilities'])
                              "as: </p><p>adjective-noun-000</p>";
                          break;
                          case 'azure':
-                             scope.usernameLabel = "Subscription ID";
                              scope.sshKeyDataLabel = 'Management Certificate';
                              scope.subscription_required = true;
                              scope.key_required = true;
                              scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
-                             scope.key_hint= "drag and drop a management certificate file on the field below";
+                         break;
+                         case 'azure_rm':
+                             scope.usernameLabel = "Username";
+                             scope.subscription_required = true;
+                             scope.passwordLabel = 'Password';
+                             scope.azure_rm_required = true;
                          break;
                          case 'vmware':
                              scope.username_required = true;
@@ -120,19 +125,45 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.password_required = true;
                              scope.hostLabel = "vCenter Host";
                              scope.passwordLabel = 'Password';
+                             scope.hostPopOver = "Enter the hostname or IP address which corresponds to your VMware vCenter.";
                          break;
                          case 'openstack':
                              scope.hostLabel = "Host (Authentication URL)";
-                             scope.projectLabel = "Project (Tenet Name/ID)";
+                             scope.projectLabel = "Project (Tenant Name)";
+                             scope.domainLabel = "Domain Name";
                              scope.password_required = true;
                              scope.project_required = true;
                              scope.host_required = true;
                              scope.username_required = true;
-                             scope.projectPopOver = "<p>This is the tenant name " +
-                                 "or tenant id. This value is usually the same " +
+                             scope.projectPopOver = "<p>This is the tenant name. " +
+                                 " This value is usually the same " +
                                  " as the username.</p>";
                              scope.hostPopOver = "<p>The host to authenticate with." +
                                  "<br />For example, https://openstack.business.com/v2.0/";
+                         break;
+                         case 'satellite6':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.host_required = true;
+                            scope.hostLabel = "Satellite 6 Host";
+                            scope.hostPopOver = "Enter the hostname or IP address name which <br />" +
+                                "corresponds to your Red Hat Satellite 6 server.";
+                         break;
+                         case 'cloudforms':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.host_required = true;
+                            scope.hostLabel = "CloudForms Host";
+                            scope.hostPopOver = "Enter the hostname or IP address for the virtual <br />" +
+                                " machine which is hosting the CloudForm appliance.";
+                         break;
+                         case 'net':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = 'Password';
+                            scope.sshKeyDataLabel = 'SSH Key';
                          break;
                      }
                  }
@@ -150,6 +181,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      scope.ssh_key_unlock_confirm = null;
                      scope.become_username = null;
                      scope.become_password = null;
+                     scope.authorize = false;
+                     scope.authorize_password = null;
                  }
 
                  // Collapse or open help widget based on whether scm value is selected
@@ -190,8 +223,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
-         function ($location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
+.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
+         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -201,20 +234,14 @@ angular.module('CredentialsHelper', ['Utilities'])
                  for (fld in form.fields) {
                      if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
                          fld !== 'ssh_password') {
-                         if (scope[fld] === null) {
+                         if (fld === "organization" && !scope[fld]) {
+                             data.user = $rootScope.current_user.id;
+                         } else if (scope[fld] === null) {
                              data[fld] = "";
                          } else {
                              data[fld] = scope[fld];
                          }
                      }
-                 }
-
-                 if (!Empty(scope.team)) {
-                     data.team = scope.team;
-                     data.user = "";
-                 } else {
-                     data.user = scope.user;
-                     data.team = "";
                  }
 
                  data.kind = scope.kind.value;
@@ -241,59 +268,67 @@ angular.module('CredentialsHelper', ['Utilities'])
                      data.project = scope.project;
                      break;
                      case 'azure':
-                         data.username = scope.subscription_id;
+                         data.username = scope.subscription;
                  }
 
-                 if (Empty(data.team) && Empty(data.user)) {
-                     Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' +
-                           'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');
-                 } else {
-                     Wait('start');
-                     if (mode === 'add') {
-                         url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' :
-                             GetBasePath('users') + data.user + '/credentials/';
-                         Rest.setUrl(url);
-                         Rest.post(data)
-                         .success(function () {
-                             Wait('stop');
-                             var base = $location.path().replace(/^\//, '').split('/')[0];
-                                 if (base === 'credentials') {
-                                 ReturnToCaller();
-                             }
-                             else {
-                                 ReturnToCaller(1);
-                             }
-                         })
-                         .error(function (data, status) {
-                             Wait('stop');
+                 Wait('start');
+                 if (mode === 'add') {
+                     url = GetBasePath("credentials");
+                     Rest.setUrl(url);
+                     Rest.post(data)
+                     .success(function (data) {
+                         scope.addedItem = data.id;
+
+                         Refresh({
+                             scope: scope,
+                             set: 'credentials',
+                             iterator: 'credential',
+                             url: url
+                         });
+
+                         Wait('stop');
+                         var base = $location.path().replace(/^\//, '').split('/')[0];
+                             if (base === 'credentials') {
+                             ReturnToCaller();
+                         }
+                         else {
+                             ReturnToCaller(1);
+                         }
+                         $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
+
+                     })
+                     .error(function (data, status) {
+                         Wait('stop');
+                         // TODO: hopefully this conditional error handling will to away in a future version of tower.  The reason why we cannot
+                         // simply pass this error to ProcessErrors is because it will actually match the form element 'ssh_key_unlock' and show
+                         // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
+                         // error is never shown.  In the future, the API will hopefully either behave or respond differently.
+                         if(status && status === 400 && data && data.ssh_key_unlock && (scope.kind.value === 'gce' || scope.kind.value === 'azure')) {
+                             scope.ssh_key_data_api_error = "Encrypted credentials are not supported.";
+                         }
+                         else {
                              ProcessErrors(scope, data, status, form, {
                                  hdr: 'Error!',
                                  msg: 'Failed to create new Credential. POST status: ' + status
                              });
+                         }
+                     });
+                 } else {
+                     url = GetBasePath('credentials') + scope.id + '/';
+                     Rest.setUrl(url);
+                     Rest.put(data)
+                     .success(function () {
+                         Wait('stop');
+                         $state.go($state.current, {}, {reload: true});
+                     })
+                     .error(function (data, status) {
+                         Wait('stop');
+                         ProcessErrors(scope, data, status, form, {
+                             hdr: 'Error!',
+                             msg: 'Failed to update Credential. PUT status: ' + status
                          });
-                     } else {
-                         url = GetBasePath('credentials') + scope.id + '/';
-                         Rest.setUrl(url);
-                         Rest.put(data)
-                         .success(function () {
-                             Wait('stop');
-                             var base = $location.path().replace(/^\//, '').split('/')[0];
-                                 if (base === 'credentials') {
-                                 ReturnToCaller();
-                             }
-                             else {
-                                 ReturnToCaller(1);
-                             }
-                         })
-                         .error(function (data, status) {
-                             Wait('stop');
-                             ProcessErrors(scope, data, status, form, {
-                                 hdr: 'Error!',
-                                 msg: 'Failed to update Credential. PUT status: ' + status
-                             });
-                         });
-                     }
-                 }
+                     });
+                }
              };
          }
 ]);

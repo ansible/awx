@@ -1,0 +1,369 @@
+/*************************************************
+ * Copyright (c) 2016 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  color: #161B1F;
+  background-color: #F6F6F6;
+  padding-top: 50px;
+  min-height: 100%;
+  position: relative;
+}
+body a {
+  color: #337AB7;
+}
+body a:hover {
+  color: #286090;
+}
+body code {
+  color: #D9534F;
+  background-color: #FFF5F5;
+}
+body pre code {
+  color: inherit;
+  background-color: transparent;
+}
+
+body .navbar {
+  background-color: #FFFFFF;
+  border-color: #E8E8E8;
+}
+body .navbar > .container .navbar-brand,
+body .navbar > .container-fluid .navbar-brand,
+.navbar {
+  color: #707070;
+  padding: 0;
+  margin-left: 0px;
+  font-size: 14px;
+}
+body .navbar .navbar-brand:focus,
+body .navbar .navbar-brand:hover {
+  color: #707070;
+}
+body .navbar .navbar-brand img {
+  display: inline-block;
+  width: 93px;
+  height: 30px;
+  margin-right:14px;
+}
+body .navbar .navbar-brand > span {
+  display: inline-block;
+  line-height: 50px;
+  vertical-align: middle;
+  margin-left: -10px;
+}
+body .navbar .navbar-title {
+  float: left;
+  height: 50px;
+  color: #707070;
+  padding: 0;
+  font-size: 14px;
+  display: none;
+}
+body .navbar .navbar-title > span {
+  display: inline-block;
+  line-height: 50px;
+  vertical-align: middle;
+}
+body.show-title .navbar .navbar-title {
+  display: inline-block;
+}
+body .navbar .navbar-nav > li > a {
+  color: #707070;
+  display: flex;
+  justify-content: center;
+}
+body .navbar .navbar-nav > li > a:focus,
+body .navbar .navbar-nav > li > a:hover {
+  color: #707070;
+}
+body .navbar .navbar-nav > li > a > span.glyphicon {
+  font-size: 20px;
+  padding-right: 5px;
+  padding-left: 5px;
+  color: #848992;
+}
+
+body .page-header {
+  margin-top: 20px;
+}
+body .page-header h1 {
+  font-size: 30px;
+  line-height: 33px;
+}
+body .page-header .toggle-description span.glyphicon {
+  font-size: 14px;
+  vertical-align: top;
+  padding: 2px;
+  color: #A9A9A9;
+}
+body .page-header .toggle-description:hover span.glyphicon {
+  color: #171717;
+}
+body .description .hide-description span.glyphicon {
+  color: #E1E1E1;
+  font-size: 20px;
+}
+body .description .hide-description:hover span.glyphicon {
+  color: #848992;
+}
+body ul.breadcrumb,
+body .description,
+body .request-info .prettyprint,
+body .response-info .prettyprint,
+body .well {
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  padding: 10px;
+  border: 1px solid #E8E8E8;
+  margin-top: 20px;
+  box-shadow: none;
+}
+body .description {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 0;
+  display: none;
+}
+body .request-info .prettyprint {
+  margin-top: 0;
+}
+body .resource-description,
+body .response-info {
+  margin-bottom: 0;
+}
+body pre,
+body .prettyprint .pln,
+body .request-info .prettyprint .lit {
+  color: #161B1F;
+}
+body .prettyprint .lit {
+  color: #337AB7;
+}
+body .prettyprint .str {
+  color: #D9534F;
+}
+
+body .well.tab-content {
+  padding: 20px;
+}
+body .tab-content > .tab-pane {
+  display: block;
+}
+body .well.tab-content .form-actions {
+  float: right;
+}
+body .form-group {
+  margin-bottom: 10px;
+}
+body .form-actions button {
+  margin-left: 5px;
+}
+body .form-horizontal .control-label {
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #707070;
+}
+body textarea.form-control {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  padding: 6px;
+}
+body .form-control,
+body .description pre {
+  border-color: #E1E1E1;
+  background-color: #F6F6F6;
+  color: #161B1F;
+}
+
+body .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #707070;
+}
+body .tooltip.top .tooltip-arrow {
+  border-top-color: #707070;
+}
+body .tooltip.left .tooltip-arrow {
+  border-left-color: #707070;
+}
+body .tooltip.right .tooltip-arrow {
+  border-right-color: #707070;
+}
+body .tooltip.in {
+  opacity: 1;
+}
+body .tooltip-inner {
+  background-color: #707070;
+}
+
+body .btn {
+  transition: background-color 0.2s;
+}
+.btn-primary {
+  background-color: #FFFFFF;
+  color: #707070;
+  border: 1px solid #E8E8E8;
+}
+.btn-primary:hover,
+.btn-primary.focus,
+.btn-primary:focus,
+.btn-primary.active,
+.btn-primary:active,
+.btn-primary.active.focus,
+.btn-primary.active:focus,
+.btn-primary.active:hover,
+.btn-primary:active.focus,
+.btn-primary:active:focus,
+.btn-primary:active:hover,
+.open>.dropdown-toggle.btn-primary.focus,
+.open>.dropdown-toggle.btn-primary:focus,
+.open>.dropdown-toggle.btn-primary:hover,
+.open>.dropdown-toggle.btn-primary {
+  background-color: #FAFAFA;
+  color: #707070;
+  border: 1px solid #E8E8E8;
+}
+
+body .tab-content .btn-primary {
+  background-color: #5cb85c;
+  color: #FFFFFF;
+  border: 1px solid #5cb85c;
+}
+body .tab-content .btn-primary:hover,
+body .tab-content .btn-primary.focus,
+body .tab-content .btn-primary:focus,
+body .tab-content .btn-primary.active,
+body .tab-content .btn-primary:active,
+body .tab-content .btn-primary.active.focus,
+body .tab-content .btn-primary.active:focus,
+body .tab-content .btn-primary.active:hover,
+body .tab-content .btn-primary:active.focus,
+body .tab-content .btn-primary:active:focus,
+body .tab-content .btn-primary:active:hover {
+  background-color: #449d44;
+  color: #FFFFFF;
+  border: 1px solid #449d44;
+}
+
+.btn-danger {
+  background-color: #D9534F;
+  border-color: #D9534F;
+}
+.btn-danger:hover,
+.btn-danger:hover,
+.btn-danger.focus,
+.btn-danger:focus,
+.btn-danger.active,
+.btn-danger:active,
+.btn-danger.active.focus,
+.btn-danger.active:focus,
+.btn-danger.active:hover,
+.btn-danger:active.focus,
+.btn-danger:active:focus,
+.btn-danger:active:hover {
+  background-color: #c9302c;
+  border-color: #c9302c;
+}
+
+body .wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -40px;
+}
+body #push {
+  height: 40px;
+}
+body #footer {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 0;
+  height: 40px;
+  color: #707070;
+}
+body #footer .footer-logo {
+  text-align: left;
+}
+body #footer .footer-logo a {
+  display: inline-block;
+}
+body #footer .footer-logo img {
+  height: 40px;
+  width: 250px;
+}
+body #footer .footer-copyright {
+  text-align: right;
+  font-size: 12px;
+  padding-right: 35px;
+  padding-top: 10px;
+}
+body #footer .footer-copyright a {
+  color: #707070;
+}
+
+@media screen and (min-width: 768px) {
+  body .navbar-right {
+    margin-right: 0;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  body .navbar .container .navbar-header,
+  body .navbar .container-fluid .navbar-header {
+    margin-left: -20px;
+  }
+  body.show-title .navbar .navbar-title {
+    display: none;
+}
+  body .navbar .navbar-toggle {
+    background-color: #FFFFFF;
+    border-color: #E8E8E8;
+  }
+  body .navbar .navbar-toggle:active,
+  body .navbar .navbar-toggle:hover {
+    background-color: #FAFAFA;
+    border-color: #E8E8E8;
+  }
+  body .navbar .navbar-toggle .icon-bar {
+    background-color: #848992;
+  }
+  body .navbar .tooltip {
+    visibility: hidden;
+  }
+  body .navbar .navbar-nav > li > a {
+    display: block;
+    padding-top: 8px;
+    padding-bottom: 12px;
+  }
+  body .navbar .navbar-nav > li > a > span.glyphicon {
+    top: 4px;
+  }
+  body .page-header h1 {
+    font-size: 24px;
+  }
+  body .wrapper {
+    margin: 0 auto -65px;
+  }
+  body #push {
+    height: 65px;
+  }
+  body #footer {
+    height: 65px;
+  }
+  body #footer .footer-logo {
+    text-align: center;
+  }
+  body #footer .footer-copyright {
+    text-align: center;
+    padding-right: 15px;
+    padding-top: 0;
+    white-space: nowrap;
+  }
+}

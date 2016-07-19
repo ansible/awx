@@ -59,7 +59,9 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 callback = params.callback,
                 beforeDestroy = params.beforeDestroy,
                 closeOnEscape = (params.closeOnEscape === undefined) ? false : params.closeOnEscape,
-                resizable = (params.resizable === undefined) ? true : params.resizable,
+                resizable = (params.resizable === undefined) ? false : params.resizable,
+                draggable = (params.draggable === undefined) ? true : params.draggable,
+                dialogClass = params.dialogClass,
                 forms = _.chain([params.form]).flatten().compact().value(),
                 buttons,
                 id = params.id,
@@ -104,9 +106,11 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 title: title,
                 closeOnEscape: closeOnEscape,
                 resizable: resizable,
+                draggable: draggable,
+                dialogClass: dialogClass,
                 create: function () {
                     // Fix the close button
-                    $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
+                    $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).html('<i class="fa fa-times-circle"></i>');
 
                     setTimeout(function() {
                         // Make buttons bootstrapy

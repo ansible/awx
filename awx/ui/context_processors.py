@@ -15,4 +15,6 @@ def settings(request):
 def version(request):
     return {
         'version': get_awx_version(),
+        'tower_version': get_awx_version(),
+        'short_tower_version': get_awx_version().split('-')[0],
     }

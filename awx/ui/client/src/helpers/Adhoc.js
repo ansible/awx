@@ -53,14 +53,11 @@ export default
     *
     */
     // Submit request to run an adhoc comamand
-    .factory('AdhocRun', ['$location','$routeParams', 'LaunchJob',
+    .factory('AdhocRun', ['$location','$stateParams', 'LaunchJob',
         'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors',
-        'Wait', 'Empty', 'PromptForCredential', 'PromptForVars',
-        'PromptForSurvey' , 'CreateLaunchDialog',
-    function ($location, $routeParams, LaunchJob, PromptForPasswords,
-        Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty,
-        PromptForCredential, PromptForVars, PromptForSurvey,
-        CreateLaunchDialog) {
+        'Wait', 'Empty', 'CreateLaunchDialog',
+    function ($location, $stateParams, LaunchJob, PromptForPasswords,
+        Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, CreateLaunchDialog) {
         return function (params) {
             var id = params.project_id,
                 scope = params.scope.$new(),

@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Organizations
@@ -12,29 +12,12 @@
 
 export default
     angular.module('OrganizationFormDefinition', [])
-        .value('OrganizationForm', {
+        .value('OrganizationFormObject', {
 
-            addTitle: 'Create Organization', //Title in add mode
+            addTitle: 'New Organization', //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
-            well: true,
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
+            tabs: true,
 
             fields: {
                 name: {
@@ -53,110 +36,89 @@ export default
             },
 
             buttons: { //for now always generates <button> tags
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true //Disable when $pristine or $invalid, optional
-                },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
                 }
             },
 
             related: {
-
-                users: {
+                permissions: {
+                    basePath: 'organizations/:id/access_list/',
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Users',
-                    iterator: 'user',
+                    title: 'Permissions',
+                    iterator: 'permission',
                     index: false,
                     open: false,
-
+                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "add('users')",
+                            ngClick: "addPermission",
                             label: 'Add',
-                            icon: 'icon-plus',
-                            awToolTip: 'Add a new user'
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
                     fields: {
                         username: {
                             key: true,
-                            label: 'Username'
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
-                        first_name: {
-                            label: 'First Name'
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         },
-                        last_name: {
-                            label: 'Last Name'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('users', user.id, user.username)",
-                            icon: 'icon-edit',
-                            'class': 'btn-default',
-                            awToolTip: 'Edit user'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('users', user.id, user.username, 'users')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Remove user'
+                        team_roles: {
+                            label: 'Team Roles',
+                            type: 'team_roles',
+                            noSort: true,
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
                         }
                     }
                 },
+                "notifications": {
+                    include: "NotificationsList"
 
-                admins: { // Assumes a plural name (e.g. things)
-                    type: 'collection',
-                    title: 'Administrators',
-                    iterator: 'admin', // Singular form of name (e.g.  thing)
-                    index: false,
-                    open: false, // Open accordion on load?
-                    base: '/users',
-                    actions: { // Actions displayed top right of list
-                        add: {
-                            ngClick: "add('admins')",
-                            icon: 'icon-plus',
-                            label: 'Add',
-                            awToolTip: 'Add new administrator'
-                        }
-                    },
-                    fields: {
-                        username: {
-                            key: true,
-                            label: 'Username'
-                        },
-                        first_name: {
-                            label: 'First Name'
-                        },
-                        last_name: {
-                            label: 'Last Name'
-                        }
-                    },
-                    fieldActions: { // Actions available on each row
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('users', admin.id, admin.username)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit administrator',
-                            'class': 'btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('admins', admin.id, admin.username, 'administrators')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Remove administrator'
-                        }
-                    }
                 }
 
+            },
+            relatedSets: function(urls) {
+                return {
+                    permissions: {
+                        iterator: 'permission',
+                        url: urls.access_list
+                    },
+                    notifications: {
+                        iterator: 'notification',
+                        url: '/api/v1/notification_templates/'
+                    }
+                };
             }
+        })
 
-        }); //OrganizationForm
+        .factory('OrganizationForm', ['OrganizationFormObject', 'NotificationsList',
+            function(OrganizationFormObject, NotificationsList) {
+            return function() {
+                var itm;
+                for (itm in OrganizationFormObject.related) {
+                    if (OrganizationFormObject.related[itm].include === "NotificationsList") {
+                        OrganizationFormObject.related[itm] = NotificationsList;
+                        OrganizationFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+                    }
+                }
+                return OrganizationFormObject;
+            };
+        }]);

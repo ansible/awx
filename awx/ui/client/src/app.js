@@ -1,18 +1,17 @@
 /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
+ * Copyright (c) 2016 Ansible, Inc.
  *
  * All Rights Reserved
  *************************************************/
 
-
-
 var urlPrefix;
+var $basePath;
 
 if ($basePath) {
     urlPrefix = $basePath;
 } else {
     // required to make tests work
-    var $basePath = '/static/';
+    $basePath = '/static/';
     urlPrefix = $basePath;
 }
 
@@ -22,52 +21,58 @@ import './lists';
 import './widgets';
 import './help';
 import './filters';
-import {Home, HomeGroups, HomeHosts} from './controllers/Home';
+import {Home} from './controllers/Home';
 import {SocketsController} from './controllers/Sockets';
 import {CredentialsAdd, CredentialsEdit, CredentialsList} from './controllers/Credentials';
 import {JobsListController} from './controllers/Jobs';
-import {PortalController} from './controllers/Portal';
+import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
+import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
+import organizations from './organizations/main';
 import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
-import routeExtensions from './shared/route-extensions/main';
-import breadcrumbs from './shared/breadcrumbs/main';
-
+import jobDetail from './job-detail/main';
+import jobSubmission from './job-submission/main';
+import notifications from './notifications/main';
+import access from './access/main';
 
 // modules
+import about from './about/main';
+import license from './license/main';
 import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
+import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import templateUrl from './shared/template-url/main';
-import adhoc from './adhoc/main';
 import login from './login/main';
-import {JobDetailController} from './controllers/JobDetail';
-import {JobStdoutController} from './controllers/JobStdout';
-import {JobTemplatesList, JobTemplatesAdd, JobTemplatesEdit} from './controllers/JobTemplates';
-import {LicenseController} from './controllers/License';
-import {ScheduleEditController} from './controllers/Schedules';
+import activityStream from './activity-stream/main';
+import standardOut from './standard-out/main';
+import JobTemplates from './job-templates/main';
+import search from './search/main';
+import credentials from './credentials/main';
 import {ProjectsList, ProjectsAdd, ProjectsEdit} from './controllers/Projects';
-import {OrganizationsList, OrganizationsAdd, OrganizationsEdit} from './controllers/Organizations';
-import {InventoriesList, InventoriesAdd, InventoriesEdit, InventoriesManage} from './controllers/Inventories';
-import {AdminsList} from './controllers/Admins';
+import OrganizationsList from './organizations/list/organizations-list.controller';
+import OrganizationsAdd from './organizations/add/organizations-add.controller';
 import {UsersList, UsersAdd, UsersEdit} from './controllers/Users';
 import {TeamsList, TeamsAdd, TeamsEdit} from './controllers/Teams';
 
 import RestServices from './rest/main';
+import './lookup/main';
 import './shared/api-loader';
 import './shared/form-generator';
 import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import './shared/InventoryTree';
 import './shared/Socket';
-import './job-templates/main';
 import './shared/features/main';
-import pendolytics from './login/authenticationServices/pendo/ng-pendo';
+import config from './shared/config/main';
+import './login/authenticationServices/pendo/ng-pendo';
+import footer from './footer/main';
+import scheduler from './scheduler/main';
 
 /*#if DEBUG#*/
 import {__deferLoadIfEnabled} from './debug';
@@ -75,28 +80,42 @@ __deferLoadIfEnabled();
 /*#endif#*/
 
 var tower = angular.module('Tower', [
-    'pendolytics',
-    'ngRoute',
+    //'ngAnimate',
+    'lrInfiniteScroll',
     'ngSanitize',
     'ngCookies',
+    about.name,
+    license.name,
     RestServices.name,
-    routeExtensions.name,
     browserData.name,
-    breadcrumbs.name,
     systemTracking.name,
+    inventories.name,
     inventoryScripts.name,
+    organizations.name,
     permissions.name,
     managementJobs.name,
     setupMenu.name,
     mainMenu.name,
+    breadCrumb.name,
     dashboard.name,
     moment.name,
     templateUrl.name,
-    adhoc.name,
     login.name,
+    activityStream.name,
+    footer.name,
+    jobDetail.name,
+    jobSubmission.name,
+    notifications.name,
+    standardOut.name,
+    access.name,
+    JobTemplates.name,
+    portalMode.name,
+    search.name,
+    config.name,
+    credentials.name,
+    'ngToast',
     'templates',
     'Utilities',
-    'LicenseHelper',
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'FormGenerator',
@@ -110,7 +129,6 @@ var tower = angular.module('Tower', [
     'SearchHelper',
     'PaginationHelpers',
     'RefreshHelper',
-    'AdminListDefinition',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
@@ -150,15 +168,11 @@ var tower = angular.module('Tower', [
     'md5Helper',
     'SelectionHelper',
     'HostGroupsFormDefinition',
-    'PortalJobsWidget',
     'StreamWidget',
     'JobsHelper',
     'InventoryGroupsHelpDefinition',
-    'InventoryTree',
     'CredentialsHelper',
     'StreamListDefinition',
-    'HomeGroupListDefinition',
-    'HomeHostListDefinition',
     'ActivityDetailDefinition',
     'VariablesHelper',
     'SchedulesListDefinition',
@@ -168,19 +182,23 @@ var tower = angular.module('Tower', [
     'SchedulesHelper',
     'JobsListDefinition',
     'LogViewerStatusDefinition',
-    'LogViewerHelper',
+    'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'EventViewerHelper',
-    'HostEventsViewerHelper',
     'JobDetailHelper',
     'SocketIO',
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'SocketHelper',
-    'AboutAnsibleHelpModal',
     'PortalJobsListDefinition',
     'features',
-    'longDateFilter'
+    'longDateFilter',
+    'pendolytics',
+    'ui.router',
+    'ncy-angular-breadcrumb',
+    scheduler.name,
+    'ApiModelHelper',
+    'ActivityStreamHelper',
+    'dndLists'
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -190,633 +208,297 @@ var tower = angular.module('Tower', [
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
-    .config(['$routeProvider',
-        function ($routeProvider) {
-            $routeProvider.
+    .config(['ngToastProvider', function(ngToastProvider) {
+        ngToastProvider.configure({
+            animation: 'slide',
+            dismissOnTimeout: true,
+            timeout: 4000
+        });
+    }])
+    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
+    '$urlMatcherFactoryProvider',
+        function ($stateProvider, $urlRouterProvider, $breadcrumbProvider,
+        $urlMatcherFactoryProvider) {
+            $urlMatcherFactoryProvider.strictMode(false);
+            $breadcrumbProvider.setOptions({
+                templateUrl: urlPrefix + 'partials/breadcrumb.html'
+            });
 
-            when('/jobs', {
-                name: 'jobs',
-                templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: JobsListController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
+            // route to the details pane of /job/:id/host-event/:eventId if no other child specified
+            $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
 
-            when('/portal', {
-                name: 'portal',
-                templateUrl: urlPrefix + 'partials/portal.html',
-                controller: PortalController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
+            // $urlRouterProvider.otherwise("/home");
+            $urlRouterProvider.otherwise(function($injector){
+                  var $state = $injector.get("$state");
+                  $state.go('dashboard');
+            });
 
-            when('/jobs/:id', {
-                name: 'jobDetail',
-                templateUrl: urlPrefix + 'partials/job_detail.html',
-                controller: JobDetailController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "job_events"
-                            });
-                            $rootScope.event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
-                    }]
-                }
-            }).
-
-            when('/jobs/:id/stdout', {
-                name: 'jobsStdout',
-                templateUrl: urlPrefix + 'partials/job_stdout.html',
-                controller: JobStdoutController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.event_socket) {
-                            $rootScope.event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "job_events"
-                            });
-                            $rootScope.event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
-                    }]
-                }
-            }).
-
-            when('/ad_hoc_commands/:id', {
-                name: 'adHocJobStdout',
-                templateUrl: urlPrefix + 'partials/job_stdout_adhoc.html',
-                controller: JobStdoutController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }],
-                    adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-                        if (!$rootScope.adhoc_event_socket) {
-                            $rootScope.adhoc_event_socket = Socket({
-                                scope: $rootScope,
-                                endpoint: "ad_hoc_command_events"
-                            });
-                            $rootScope.adhoc_event_socket.init();
-                            return true;
-                        } else {
-                            return true;
-                        }
-                    }]
-                }
-            }).
-
-            when('/job_templates', {
-                name: 'jobTemplates',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/job_templates/add', {
-                name: 'jobTemplateAdd',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/job_templates/:template_id', {
-                name: 'jobTemplateEdit',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/job_templates/:id/schedules', {
-                name: 'jobTemplateSchedules',
-                templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects', {
-                name: 'projects',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects/add', {
-                name: 'projectAdd',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects/:id', {
-                name: 'projectEdit',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects/:id/schedules', {
-                name: 'projectSchedules',
-                templateUrl: urlPrefix + 'partials/schedule_detail.html',
-                controller: ScheduleEditController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects/:project_id/organizations', {
-                name: 'projectOrganizations',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/projects/:project_id/organizations/add', {
-                name: 'projectOrganizationAdd',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories', {
-                name: 'inventories',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/add', {
-                name: 'inventoryAdd',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/:inventory_id', {
-                name: 'inventoryEdit',
-                templateUrl: urlPrefix + 'partials/inventories.html',
-                controller: InventoriesEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/:inventory_id/job_templates/add', {
-                name: 'inventoryJobTemplateAdd',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/:inventory_id/job_templates/', {
-                redirectTo: '/inventories/:inventory_id'
-            }).
-
-            when('/inventories/:inventory_id/job_templates/:template_id', {
-                name: 'inventoryJobTemplateEdit',
-                templateUrl: urlPrefix + 'partials/job_templates.html',
-                controller: JobTemplatesEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/inventories/:inventory_id/manage', {
-                name: 'inventoryManage',
-                templateUrl: urlPrefix + 'partials/inventory-manage.html',
-                controller: InventoriesManage,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations', {
-                name: 'organizations',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/add', {
-                name: 'organizationAdd',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/:organization_id', {
-                name: 'organizationEdit',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: OrganizationsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/:organization_id/admins', {
-                name: 'organizationAdmins',
-                templateUrl: urlPrefix + 'partials/organizations.html',
-                controller: AdminsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/:organization_id/users', {
-                name: 'organizationUsers',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/:organization_id/users/add', {
-                name: 'organizationUserAdd',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/organizations/:organization_id/users/:user_id', {
-                name: 'organizationUserEdit',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams', {
-                name: 'teams',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/add', {
-                name: 'teamsAdd',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id', {
-                name: 'teamEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/users', {
-                name: 'teamUsers',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/users/:user_id', {
-                name: 'teamUserEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/projects', {
-                name: 'teamProjects',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/projects/add', {
-                name: 'teamProjectAdd',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/projects/:project_id', {
-                name: 'teamProjectEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/credentials', {
-                name: 'teamCredentials',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/credentials/add', {
-                name: 'teamCredentialAdd',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:team_id/credentials/:credential_id', {
-                name: 'teamCredentialEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/credentials', {
-                name: 'credentials',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/credentials/add', {
-                name: 'credentialAdd',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/credentials/:credential_id', {
-                name: 'credentialEdit',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users', {
-                name: 'users',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/add', {
-                name: 'userAdd',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/:user_id', {
-                name: 'userEdit',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/:user_id/credentials', {
-                name: 'userCredentials',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/users/:user_id/credentials/add', {
-                name: 'userCredentialAdd',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/teams/:user_id/credentials/:credential_id', {
-                name: 'teamUserCredentialEdit',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
-                }
-            }).
-
-            when('/home', {
-                name: 'dashboard',
+            $stateProvider.
+            state('dashboard', {
+                url: '/home',
                 templateUrl: urlPrefix + 'partials/home.html',
                 controller: Home,
+                params: {licenseMissing: null},
+                data: {
+                    activityStream: true,
+                    refreshButton: true
+                },
+                ncyBreadcrumb: {
+                    label: "DASHBOARD"
+                },
                 resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', 'FeaturesService', function($q, jobStatusGraphData, FeaturesService) {
-                        return $q.all({
-                            jobStatus: jobStatusGraphData.get("month", "all"),
-                            features: FeaturesService.get()
+                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
+                    function($q, jobStatusGraphData, $rootScope) {
+                        return $rootScope.featuresConfigured.promise.then(function () {
+                            return $q.all({
+                                jobStatus: jobStatusGraphData.get("month", "all"),
+                            });
                         });
                     }]
                 }
             }).
 
-            when('/home/groups', {
-                name: 'dashboardGroups',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeGroups,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
+            state('jobs', {
+                url: '/jobs',
+                templateUrl: urlPrefix + 'partials/jobs.html',
+                controller: JobsListController,
+                ncyBreadcrumb: {
+                    label: "JOBS"
                 }
             }).
 
-            when('/home/hosts', {
-                name: 'dashboardHosts',
-                templateUrl: urlPrefix + 'partials/subhome.html',
-                controller: HomeHosts,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
+            state('projects', {
+                url: '/projects?{status}',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'project'
+                },
+                ncyBreadcrumb: {
+                    label: "PROJECTS"
                 }
             }).
 
-            when('/license', {
-                name: 'license',
-                templateUrl: urlPrefix + 'partials/license.html',
-                controller: LicenseController,
-                resolve: {
-                    features: ['FeaturesService', function(FeaturesService) {
-                        return FeaturesService.get();
-                    }]
+            state('projects.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsAdd,
+                ncyBreadcrumb: {
+                    parent: "projects",
+                    label: "CREATE PROJECT"
                 }
             }).
 
-            when('/sockets', {
-                name: 'sockets',
+            state('projects.edit', {
+                url: '/:id',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: ProjectsEdit,
+                data: {
+                    activityStreamId: 'id'
+                },
+                ncyBreadcrumb: {
+                    parent: 'projects',
+                    label: '{{name}}'
+                }
+            }).
+
+            state('projectOrganizations', {
+                url: '/projects/:project_id/organizations',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: OrganizationsList
+            }).
+
+            state('projectOrganizationAdd', {
+                url: '/projects/:project_id/organizations/add',
+                templateUrl: urlPrefix + 'partials/projects.html',
+                controller: OrganizationsAdd
+            }).
+
+            state('teams', {
+                url: '/teams',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'team'
+                },
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'TEAMS'
+                }
+            }).
+
+            state('teams.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsAdd,
+                ncyBreadcrumb: {
+                    parent: "teams",
+                    label: "CREATE TEAM"
+                }
+            }).
+
+            state('teams.edit', {
+                url: '/:team_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: TeamsEdit,
+                data: {
+                    activityStreamId: 'team_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "teams",
+                    label: "{{team_obj.name}}"
+                }
+            }).
+
+            state('teamUsers', {
+                url: '/teams/:team_id/users',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: UsersList
+            }).
+
+            state('teamUserEdit', {
+                url: '/teams/:team_id/users/:user_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: UsersEdit
+            }).
+
+            state('teamProjects', {
+                url: '/teams/:team_id/projects',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsList
+            }).
+
+            state('teamProjectAdd', {
+                url: '/teams/:team_id/projects/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsAdd
+            }).
+
+            state('teamProjectEdit', {
+                url: '/teams/:team_id/projects/:project_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: ProjectsEdit
+            }).
+
+            state('teamCredentials', {
+                url: '/teams/:team_id/credentials',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsList
+            }).
+
+            state('teamCredentialAdd', {
+                url: '/teams/:team_id/credentials/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsAdd
+            }).
+
+            state('teamCredentialEdit', {
+                url: '/teams/:team_id/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsEdit
+            }).
+
+            state('credentials', {
+                url: '/credentials',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'credential'
+                },
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'CREDENTIALS'
+                }
+            }).
+
+            state('credentials.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsAdd,
+                ncyBreadcrumb: {
+                    parent: "credentials",
+                    label: "CREATE CREDENTIAL"
+                }
+            }).
+
+            state('credentials.edit', {
+                url: '/:credential_id',
+                templateUrl: urlPrefix + 'partials/credentials.html',
+                controller: CredentialsEdit,
+                data: {
+                    activityStreamId: 'credential_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "credentials",
+                    label: "{{credential_obj.name}}"
+                }
+            }).
+
+            state('users', {
+                url: '/users',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersList,
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'user'
+                },
+                ncyBreadcrumb: {
+                    parent: 'setup',
+                    label: 'USERS'
+                }
+            }).
+
+            state('users.add', {
+                url: '/add',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersAdd,
+                ncyBreadcrumb: {
+                    parent: "users",
+                    label: "CREATE USER"
+                }
+            }).
+
+            state('users.edit', {
+                url: '/:user_id',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: UsersEdit,
+                data: {
+                    activityStreamId: 'user_id'
+                },
+                ncyBreadcrumb: {
+                    parent: "users",
+                    label: "{{user_obj.username}}"
+                }
+            }).
+
+            state('userCredentials', {
+                url: '/users/:user_id/credentials',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: CredentialsList
+            }).
+
+            state('userCredentialAdd', {
+                url: '/users/:user_id/credentials/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsAdd
+            }).
+
+            state('teamUserCredentialEdit', {
+                url: '/teams/:user_id/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsEdit
+            }).
+
+            state('sockets', {
+                url: '/sockets',
                 templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController
-            }).
-
-            otherwise({
-                redirectTo: '/home'
+                controller: SocketsController,
+                ncyBreadcrumb: {
+                    label: 'SOCKETS'
+                }
             });
         }
     ])
@@ -834,13 +516,127 @@ var tower = angular.module('Tower', [
         }]);
     }])
 
-    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log', 'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer', 'ClearScope', 'HideStream', 'Socket',
-        'LoadConfig', 'Store', 'ShowSocketHelp', 'AboutAnsibleHelp', 'pendoService',
-        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense, $location, Authorization, LoadBasePaths, Timer, ClearScope, HideStream, Socket,
-        LoadConfig, Store, ShowSocketHelp, AboutAnsibleHelp, pendoService) {
-
-
+    .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log',
+        'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
+        'ClearScope', 'Socket', 'LoadConfig', 'Store',
+        'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
+        'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+        'FeaturesService', '$filter',
+        function ($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
+            $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
+            LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
+            $filter) {
             var sock;
+            $rootScope.addPermission = function (scope) {
+                $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
+            };
+            $rootScope.addPermissionWithoutTeamTab = function (scope) {
+                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
+            };
+
+            $rootScope.deletePermission = function (user, accessListEntry) {
+                let entry = accessListEntry;
+
+                let action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+
+                    let url;
+                    if (entry.team_id) {
+                        url = GetBasePath("teams") + entry.team_id + "/roles/";
+                    } else {
+                        url = GetBasePath("users") + user.id + "/roles/";
+                    }
+
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": entry.id})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "permission");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                if (accessListEntry.team_id) {
+                    Prompt({
+                        hdr: `Team access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
+                            action: action,
+                        actionText: 'REMOVE TEAM ACCESS'
+                    });
+                } else {
+                    Prompt({
+                        hdr: `User access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
+                            action: action,
+                        actionText: 'REMOVE'
+                    });
+                }
+            };
+
+            $rootScope.deletePermissionFromUser = function (userId, userName, roleName, roleType, url) {
+                var action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": userId})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "permission");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with ${userName}.
+                        </div>
+                    `,
+                    action: action,
+                    actionText: 'REMOVE'
+                });
+            };
+
+            $rootScope.deletePermissionFromTeam = function (teamId, teamName, roleName, roleType, url) {
+                var action = function () {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({"disassociate": true, "id": teamId})
+                        .success(function () {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "role");
+                        })
+                        .error(function (data, status) {
+                            ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
+                                msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+                };
+
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
+                        <div class="Prompt-bodyQuery">
+                            Confirm  the removal of the ${roleType}
+                                <span class="Prompt-emphasis"> ${roleName} </span>
+                            role associated with the ${teamName} team.
+                        </div>
+                    `,
+                    action: action,
+                    actionText: 'REMOVE'
+                });
+            };
 
             function activateTab() {
                 // Make the correct tab active
@@ -878,9 +674,23 @@ var tower = angular.module('Tower', [
                 $rootScope.removeConfigReady();
             }
             $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
+                var list, id;
+                // initially set row edit indicator for crud pages
+                if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
+                    list = $location.$$path.split("/")[3];
+                    id = $location.$$path.split("/")[4];
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
+                    $rootScope.initialIndicatorLoad = true;
+                } else if ($location.$$path.split("/")[2]) {
+                    list = $location.$$path.split("/")[1];
+                    id = $location.$$path.split("/")[2];
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
+                }
+
                 LoadBasePaths();
 
-                $rootScope.breadcrumbs = [];
                 $rootScope.crumbCache = [];
 
                 if ($rootScope.removeOpenSocket) {
@@ -899,29 +709,28 @@ var tower = angular.module('Tower', [
                                 ' status changed to ' + data.status +
                                 ' send to ' + $location.$$url);
 
-                            var urlToCheck = $location.$$url;
-                            if (urlToCheck.indexOf("?") !== -1) {
-                                urlToCheck = urlToCheck.substr(0, urlToCheck.indexOf("?"));
-                            }
-
                             // this acts as a router...it emits the proper
                             // value based on what URL the user is currently
                             // accessing.
-                            if (urlToCheck === '/jobs') {
+                            if ($state.is('jobs')) {
                                 $rootScope.$emit('JobStatusChange-jobs', data);
-                            } else if (/\/jobs\/(\d)+\/stdout/.test(urlToCheck) ||
-                                /\/ad_hoc_commands\/(\d)+/.test(urlToCheck)) {
+                            } else if ($state.includes('jobDetail') ||
+                                $state.is('adHocJobStdout') ||
+                                $state.is('inventorySyncStdout') ||
+                                $state.is('managementJobStdout') ||
+                                $state.is('scmUpdateStdout')){
+
                                 $log.debug("sending status to standard out");
                                 $rootScope.$emit('JobStatusChange-jobStdout', data);
-                            } else if (/\/jobs\/(\d)+/.test(urlToCheck)) {
+                            } if ($state.includes('jobDetail')) {
                                 $rootScope.$emit('JobStatusChange-jobDetails', data);
-                            } else if (urlToCheck === '/home') {
+                            } else if ($state.is('dashboard')) {
                                 $rootScope.$emit('JobStatusChange-home', data);
-                            } else if (urlToCheck === '/portal') {
+                            } else if ($state.is('portalMode')) {
                                 $rootScope.$emit('JobStatusChange-portal', data);
-                            } else if (urlToCheck === '/projects') {
+                            } else if ($state.is('projects')) {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if (/\/inventories\/(\d)+\/manage/.test(urlToCheck)) {
+                            } else if ($state.is('inventoryManage')) {
                                 $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         });
@@ -948,7 +757,7 @@ var tower = angular.module('Tower', [
                         control_socket.on("limit_reached", function(data) {
                             $log.debug(data.reason);
                             $rootScope.sessionTimer.expireSession('session_limit');
-                            $location.url('/login');
+                            $state.go('signOut');
                         });
                     }
                     openSocket();
@@ -961,23 +770,31 @@ var tower = angular.module('Tower', [
                     },2000);
                 });
 
-                $rootScope.$on("$routeChangeStart", function (event, next, prev) {
+
+                $rootScope.$on("$stateChangeStart", function (event, next, nextParams, prev) {
+
+                    $rootScope.$broadcast("closePermissionsModal");
+                    $rootScope.$broadcast("closeUsersModal");
                     // this line removes the query params attached to a route
                     if(prev && prev.$$route &&
                         prev.$$route.name === 'systemTracking'){
                             $location.replace($location.search('').$$url);
                     }
 
-                    // Before navigating away from current tab, make sure the primary view is visible
-                    if ($('#stream-container').is(':visible')) {
-                        HideStream();
-                    }
-
                     // remove any lingering intervals
-                    if ($rootScope.jobDetailInterval) {
+                    // except on jobDetails.* states
+                    var jobDetailStates = [
+                        'jobDetail',
+                        'jobDetail.host-summary',
+                        'jobDetail.host-event.details',
+                        'jobDetail.host-event.json',
+                        'jobDetail.host-events',
+                        'jobDetail.host-event.stdout'
+                    ];
+                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
                         window.clearInterval($rootScope.jobDetailInterval);
                     }
-                    if ($rootScope.jobStdOutInterval) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 
@@ -1006,37 +823,86 @@ var tower = angular.module('Tower', [
                         if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
-                        if (next && next.$$route && (!/^\/(login|logout)/.test(next.$$route.originalPath))) {
+                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
                             // if not headed to /login or /logout, then check the license
-                            CheckLicense.test();
+                            CheckLicense.test(event);
                         }
                     }
                     activateTab();
                 });
 
+                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
+
+                    if(fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')){
+                        $rootScope.licenseMissing = toParams.licenseMissing;
+                    }
+                    var list, id;
+                    // broadcast event change if editing crud object
+                    if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
+                        list = $location.$$path.split("/")[3];
+                        id = $location.$$path.split("/")[4];
+
+                        if (!$rootScope.initialIndicatorLoad) {
+                            delete $rootScope.listBeingEdited;
+                            delete $rootScope.rowBeingEdited;
+                        } else {
+                            delete $rootScope.initialIndicatorLoad;
+                        }
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($location.$$path.split("/")[2]) {
+                        list = $location.$$path.split("/")[1];
+                        id = $location.$$path.split("/")[2];
+
+                        delete $rootScope.listBeingEdited;
+                        delete $rootScope.rowBeingEdited;
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($rootScope.addedAnItem) {
+                        delete $rootScope.addedAnItem;
+                        $rootScope.$broadcast("RemoveIndicator");
+                    } else {
+                        $rootScope.$broadcast("RemoveIndicator");
+                    }
+                });
+
                 if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
                     // User not authenticated, redirect to login page
-                    $rootScope.sessionExpired = false;
-                    $cookieStore.put('sessionExpired', false);
                     $location.path('/login');
                 } else {
+                    var lastUser = $cookieStore.get('current_user'),
+                        timestammp = Store('sessionTime');
+                    if(lastUser && lastUser.id && timestammp && timestammp[lastUser.id]){
+                        var stime = timestammp[lastUser.id].time,
+                            now = new Date().getTime();
+                        if ((stime - now) <= 0) {
+                            $location.path('/login');
+                        }
+                    }
                     // If browser refresh, set the user_is_superuser value
                     $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
-                    // when the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
+                    $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
+                    // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                     if(!_.contains($location.$$url, '/login')){
-                        Timer.init().then(function(timer){
-                            $rootScope.sessionTimer = timer;
-                            $rootScope.$emit('OpenSocket');
-                            pendoService.issuePendoIdentity();
+                        ConfigService.getConfig().then(function(){
+                            Timer.init().then(function(timer){
+                                $rootScope.sessionTimer = timer;
+                                $rootScope.$emit('OpenSocket');
+                                pendoService.issuePendoIdentity();
+                                CheckLicense.test();
+                                FeaturesService.get();
+                                if($location.$$path === "/home" && $state.current && $state.current.name === ""){
+                                    $state.go('dashboard');
+                                }
+                                else if($location.$$path === "/portal" && $state.current && $state.current.name === ""){
+                                    $state.go('portalMode');
+                                }
+                            });
                         });
                     }
                 }
 
                 activateTab();
-
-                $rootScope.viewAboutTower = function(){
-                    AboutAnsibleHelp();
-                };
 
                 $rootScope.viewCurrentUser = function () {
                     $location.path('/users/' + $rootScope.current_user.id);
@@ -1063,10 +929,14 @@ var tower = angular.module('Tower', [
 
 
             if (!$AnsibleConfig) {
-                // create a promise that will resolve when $AnsibleConfig is loaded
+                // create a promise that will resolve state $AnsibleConfig is loaded
                 $rootScope.loginConfig = $q.defer();
             }
-
+            if (!$rootScope.featuresConfigured) {
+                // create a promise that will resolve when features are loaded
+                $rootScope.featuresConfigured = $q.defer();
+            }
+            $rootScope.licenseMissing = true;
             //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
             // this, set the last path to /portal for instances where portal is visited for the first time.
             $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;

@@ -1,60 +1,42 @@
-<section class="SystemTrackingContainer" ng-if="noModuleData">
-    <breadcrumbs>
-      <breadcrumb path="/inventories" title="Inventories"></breadcrumb>
-      <breadcrumb path="/inventories/{{inventory.id}}/manage" title="{{inventory.name}}"></breadcrumb>
-      <breadcrumb path="/inventories/{{inventory.id}}/system-tracking/{{hostIds}}" title="System Tracking" current="true"></breadcrumb>
-    </breadcrumbs>
-
+<section class="SystemTrackingContainer Panel" ng-if="noModuleData">
     <section class="FactDataError SystemTrackingContainer-main">
         <p class="FactDataError-note--full">
-            To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates."
+            To set up scan jobs, create a <a ui-sref="inventoryJobTemplateAdd({inventory_id: inventory.id})">job template</a> of type 'scan' that targets the "<a ui-sref="inventories.edit({inventory_id: inventory.id})">{{inventory.name}}</a>" inventory.
         </p>
     </section>
 </section>
-<section class="SystemTrackingContainer" ng-hide="noModuleData">
-    <breadcrumbs>
-      <breadcrumb path="/inventories" title="Inventories"></breadcrumb>
-      <breadcrumb path="/inventories/{{inventory.id}}/manage" title="{{inventory.name}}"></breadcrumb>
-      <breadcrumb path="/inventories/{{inventory.id}}/system-tracking/{{hostIds}}" title="System Tracking" current="true"></breadcrumb>
-    </breadcrumbs>
-
-    <div class="FactModulePickers">
-        <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--left">
-            <span class="FactModulePickers-label">{{ factModulePickersLabelLeft }}</span>
-            <date-picker
-                date="leftDate"
-                input-class='{ "u-input-info-alert": leftDateWarning }'>
-            </date-picker>
-            <span
-                class="FactModulePickers-warning"
-                ng-class='{ "u-hiddenVisually": !leftDateWarning, "u-info-alert": leftDateWarning }'>
-                There were no fact scans on this date, using a prior scan instead.
-            </span>
-        </div>
-        <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right" ng-show="compareMode == 'single-host'">
-            <span class="FactModulePickers-label">{{ factModulePickersLabelRight }}</span>
-            <date-picker
-                date="rightDate"
-                min-date="leftDate"
-                input-class='{ "u-input-info-alert": rightDateWarning }'>
-            </date-picker>
-            <span
-                class="FactModulePickers-warning"
-                ng-class='{ "u-hiddenVisually": !rightDateWarning, "u-info-alert": rightDateWarning }'>
-                There were no fact scans on this date, using a prior scan instead.
-            </span>
+<section class="SystemTrackingContainer Panel" ng-hide="noModuleData">
+    <div class="row">
+        <div class="Form-title ng-binding col-md-3">SYSTEM TRACKING <div class="List-titleLockup"></div>{{inventory.name}}</div>
+        <div class="FactModulePickers row col-md-8 col-md-offset-1">
+            <div class="row">
+                <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--left col-md-6">
+                    <span class="FactModulePickers-label col-md-6">{{ factModulePickersLabelLeft }}</span>
+                    <date-picker date="leftDate" input-class='{ "u-input-info-alert": leftDateWarning }' class="col-md-5">
+                    </date-picker>
+                    <span class="FactModulePickers-warning" ng-class='{ "u-hiddenVisually": !leftDateWarning, "u-info-alert": leftDateWarning }'>
+                            There were no fact scans on this date, using a prior scan instead.
+                        </span>
+                </div>
+                <div class="FactModulePickers-dateContainer FactModulePickers-dateContainer--right col-md-6" ng-show="compareMode == 'single-host'">
+                    <span class="FactModulePickers-label col-md-6">{{ factModulePickersLabelRight }}</span>
+                    <date-picker date="rightDate" min-date="leftDate" input-class='{ "u-input-info-alert": rightDateWarning }' class="col-md-5">
+                    </date-picker>
+                    <span class="FactModulePickers-warning" ng-class='{ "u-hiddenVisually": !rightDateWarning, "u-info-alert": rightDateWarning }'>
+                                There were no fact scans on this date, using a prior scan instead.
+                            </span>
+                </div>
+            </div>
         </div>
     </div>
+    </div>
 
-    <nav class="btn-group FactModuleFilter">
-        <button
-            ng-class="{  'btn': true,
+    <nav class="FactModuleFilter">
+        <button ng-class="{  'btn': true,
                          'btn-default': true,
                          'FactModuleFilter-module': true,
                          'is-active': module.isActive,
-                      }"
-            ng-click="setActiveModule(module.name)"
-            ng-repeat="module in modules | orderBy: 'sortKey' track by $index">
+                      }" ng-click="setActiveModule(module.name)" ng-repeat="module in modules | orderBy: 'sortKey' track by $index">
             {{module.displayName}}
         </button>
     </nav>
@@ -75,19 +57,10 @@
             The two fact scans were identical for this module.
         </p>
         <p class="FactDataError-note" ng-switch-default>
-            We were not able to find any facts collected for this inventory or module.  To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Jobs Templates."
+            We were not able to find any facts collected for this inventory or module. To setup or run scan jobs, edit the "<a link-to="inventoryEdit" model="{ inventory_id: inventory }">{{inventory.name}}</a>" inventory and select "Scan Job Templates."
         </p>
     </section>
-    <fact-data-table
-        ng-if="!error"
-        left-hostname="leftHostname"
-        right-hostname="rightHostname"
-        left-scan-date="leftScanDate"
-        right-scan-date="rightScanDate"
-        left-data-no-scans="leftDataNoScans"
-        right-data-no-scans="rightDataNoScans"
-        is-nested-display="isNestedDisplay"
-        single-result-view="singleFactOnly"
-        fact-data="factData">
+    <fact-data-table ng-if="!error" left-hostname="leftHostname" right-hostname="rightHostname" left-scan-date="leftScanDate" right-scan-date="rightScanDate" left-data-no-scans="leftDataNoScans" right-data-no-scans="rightDataNoScans" is-nested-display="isNestedDisplay"
+        single-result-view="singleFactOnly" fact-data="factData">
     </fact-data-table>
 </section>

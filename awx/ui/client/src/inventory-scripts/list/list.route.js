@@ -7,13 +7,16 @@
 import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default {
-    name: 'inventoryScriptsList',
+    name: 'inventoryScripts',
     route: '/inventory_scripts',
     templateUrl: templateUrl('inventory-scripts/list/list'),
     controller: 'inventoryScriptsListController',
-    resolve: {
-        features: ['FeaturesService', function(FeaturesService) {
-            return FeaturesService.get();
-        }]
+    data: {
+        activityStream: true,
+        activityStreamTarget: 'inventory_script'
+    },
+    ncyBreadcrumb: {
+        parent: 'setup',
+        label: 'INVENTORY SCRIPTS'
     }
 };

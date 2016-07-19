@@ -7,13 +7,25 @@
  *
  */
 
-html, body { height: 100%; }
+@import "src/shared/branding/colors.less";
+@import "src/shared/branding/colors.default.less";
+
+html { height: 100%; }
 
 body {
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
-    color: @black;
-    padding-top: 58px;
+    color: @default-data-txt;
+    padding-top: 100px;
+    min-height: 100%;
+    padding-bottom: 50px;
+    position: relative;
+    background-color: @default-secondary-bg;
+}
+
+.container-fluid {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 #main-menu-container {
@@ -49,7 +61,7 @@ body {
 }
 
 #content-container {
-    margin-top: 40px;
+    padding-bottom: 40px;
 }
 
 .group-breadcrumbs {
@@ -72,6 +84,18 @@ body {
     height: 15px;
 }
 
+.Panel {
+    background-color: @panel-bg;
+    border-radius: 5px;
+    padding: 20px;
+    border: 1px solid @panel-border;
+    margin-top: 20px;
+}
+
+.btn{
+    text-transform: uppercase;
+}
+
 @media (max-width: 1075px) {
 
     #main-menu-container {
@@ -84,7 +108,7 @@ body {
         position: relative;
         top: 1px;
         left: 10px;
-        color: @black;
+        color: @default-data-txt;
         text-transform:capitalize;
     }
     #account-menu {

@@ -48,8 +48,29 @@ import zmq
 
 import psutil
 
+# Only use statsd if there's a statsd host in the environment
+# otherwise just do a noop.
+# NOTE: I've disabled this for the time being until we sort through the venv dependency around this
+# if os.environ.get('GRAPHITE_PORT_8125_UDP_ADDR'):
+#     from statsd import StatsClient
+#     statsd = StatsClient(host=os.environ['GRAPHITE_PORT_8125_UDP_ADDR'],
+#                          port=8125,
+#                          prefix='tower.job.event_callback',
+#                          maxudpsize=512)
+# else:
+#     from statsd import StatsClient
+#     class NoStatsClient(StatsClient):
+#         def __init__(self, *args, **kwargs):
+#             pass
+#         def _prepare(self, stat, value, rate):
+#             pass
+#         def _send_stat(self, stat, value, rate):
+#             pass
+#         def _send(self, *args, **kwargs):
+#             pass
+#     statsd = NoStatsClient()
 
-CENSOR_FIELD_WHITELIST=[
+CENSOR_FIELD_WHITELIST = [
     'msg',
     'failed',
     'changed',
@@ -59,7 +80,6 @@ CENSOR_FIELD_WHITELIST=[
     'delta',
     'cmd',
     '_ansible_no_log',
-    'cmd',
     'rc',
     'failed_when_result',
     'skipped',
@@ -91,7 +111,6 @@ def censor(obj, no_log=False):
                 obj['results'][i] = censor(obj['results'][i], obj.get('_ansible_no_log', no_log))
         elif obj.get('_ansible_no_log', False):
             obj['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-
     return obj
 
 
@@ -175,6 +194,7 @@ class BaseCallbackModule(object):
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
+
                 self.socket.send_json(msg)
                 self.socket.recv()
                 return
@@ -533,8 +553,6 @@ class AdHocCommandCallbackModule(BaseCallbackModule):
     def runner_on_skipped(self, host, item=None):
         super(AdHocCommandCallbackModule, self).runner_on_skipped(host, item)
         self.skipped_hosts.add(host)
-
-
 
 if os.getenv('JOB_ID', ''):
     CallbackModule = JobCallbackModule

@@ -12,14 +12,21 @@
 
 
 export default
-    ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'permissionsList', 'generateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels', 'permissionsSearchSelect',
-        function ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, permissionsList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait, fieldChoices, fieldLabels, permissionsSearchSelect) {
+    ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest',
+    'Alert', 'permissionsList', 'generateList', 'Prompt', 'SearchInit',
+    'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'CheckAccess', 'Wait', 'fieldChoices', 'fieldLabels',
+    'permissionsSearchSelect', '$filter',
+        function ($scope, $rootScope, $location, $log, $stateParams, Rest,
+        Alert, permissionsList, GenerateList, Prompt, SearchInit, PaginateInit,
+        ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, CheckAccess,
+        Wait, fieldChoices, fieldLabels, permissionsSearchSelect, $filter) {
 
             ClearScope();
 
             var list = permissionsList,
                 base = $location.path().replace(/^\//, '').split('/')[0],
-                base_id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
+                base_id = ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id,
                 defaultUrl = GetBasePath(base),
                 generator = GenerateList;
 
@@ -53,10 +60,10 @@ export default
                     permissionsSearchSelect({
                         choices: choices
                     });
-                generator.inject(list, { mode: 'edit', scope: $scope, breadCrumbs: true });
+                generator.inject(list, { mode: 'edit', scope: $scope });
             });
 
-            defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
+            defaultUrl += ($stateParams.user_id !== undefined) ? $stateParams.user_id : $stateParams.team_id;
             defaultUrl += '/permissions/';
 
             $scope.selected = [];
@@ -86,8 +93,6 @@ export default
                 url: defaultUrl
             });
             $scope.search(list.iterator);
-
-            LoadBreadCrumbs();
 
             $scope.addPermission = function () {
                 if ($scope.PermissionAddAllowed) {
@@ -129,8 +134,9 @@ export default
                 if ($scope.PermissionAddAllowed) {
                     Prompt({
                         hdr: 'Delete',
-                        body: 'Are you sure you want to delete ' + name + '?',
-                        action: action
+                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the permission below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                        action: action,
+                        actionText: 'DELETE'
                     });
                 }
             };

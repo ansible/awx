@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Inventories
@@ -14,27 +14,10 @@ export default
     angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
         .value('InventoryFormObject', {
 
-            addTitle: 'Create Inventory',
+            addTitle: 'New Inventory',
             editTitle: '{{ inventory_name }}',
             name: 'inventory',
-            well: true,
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
+            tabs: true,
 
             fields: {
                 inventory_name: {
@@ -59,21 +42,21 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "organizationrequired",
+                        reqExpression: "organizationrequired",
                         init: "true"
                     }
                 },
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
-                    'class': 'span12',
+                    class: 'Form-formGroup--fullWidth',
                     addRequired: false,
                     editRequird: false,
                     rows: 6,
                     "default": "---",
                     awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
-                        "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                        "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                         '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
@@ -85,86 +68,56 @@ export default
             },
 
             buttons: {
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
-                },
-                reset: {
-                    ngClick: 'formReset()',
                     ngDisabled: true
                 }
             },
 
             related: {
-                scan_job_templates: {
+                permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
+                    basePath: 'projects/:id/access_list/',
                     type: 'collection',
-                    title: 'Scan Job Templates',
-                    iterator: 'scan_job_template',
+                    title: 'Permissions',
+                    iterator: 'permission',
                     index: false,
                     open: false,
-
+                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addScanJob()",
-                            icon: 'icon-plus',
+                            ngClick: "addPermission",
                             label: 'Add',
-                            awToolTip: 'Add a scan job template'
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
                     fields: {
-                      smart_status: {
-                          label: 'Status',
-                          // columnClass: 'col-md-2 col-sm-2 col-xs-2',
-                          searchable: false,
-                          nosort: true,
-                          ngInclude: "'/static/partials/scan-job-template-smart-status.html'",
-                          type: 'template'
-                        },
-                        name: {
+                        username: {
                             key: true,
-                            label: 'Name',
-                            linkTo: '/#/inventories/{{inventory_id}}/job_templates/{{scan_job_template.id}}'
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        submit: {
-                          label: 'Launch',
-                          ngClick: "launchScanJob()",
-                          awToolTip: 'Launch the scan job template',
-                          'class': 'btn btn-default'
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            noSearch: true
                         },
-                        schedule: {
-                            label: 'Schedule',
-                            ngClick: 'scheduleScanJob()',
-                            awToolTip: 'Schedule future job template runs',
-                            dataPlacement: 'top',
-                        },
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "editScanJob()",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the scan job template',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "deleteScanJob()",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the scan job template'
-                        },
-                        copy: {
-                            label: 'Copy',
-                            ngClick: "copyScanJobTemplate()",
-                            "class": 'btn-danger btn-xs',
-                            awToolTip: 'Copy template',
-                            dataPlacement: 'top',
-                            ngHide: 'job_template.summary_fields.can_copy === false'
+                        team_roles: {
+                            label: 'Team Roles',
+                            type: 'team_roles',
+                            noSort: true,
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            noSearch: true
                         }
                     }
                 }
@@ -172,9 +125,9 @@ export default
 
             relatedSets: function(urls) {
                 return {
-                    scan_job_templates: {
-                        iterator: 'scan_job_template',
-                        url: urls.scan_job_templates
+                    permissions: {
+                        iterator: 'permission',
+                        url: urls.access_list
                     }
                 };
             }

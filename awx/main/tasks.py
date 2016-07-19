@@ -3,6 +3,7 @@
 
 # Python
 import codecs
+from collections import OrderedDict
 import ConfigParser
 import cStringIO
 import json
@@ -13,7 +14,6 @@ import pipes
 import re
 import shutil
 import stat
-import subprocess
 import tempfile
 import thread
 import time
@@ -33,24 +33,31 @@ import pexpect
 
 # Celery
 from celery import Task, task
+from celery.signals import celeryd_init
 
 # Django
 from django.conf import settings
 from django.db import transaction, DatabaseError
-from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
+from django.utils.encoding import smart_str
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.models import UnifiedJob
+from awx.main.models.label import Label
 from awx.main.queue import FifoQueue
+from awx.main.conf import tower_settings
+from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            ignore_inventory_computed_fields, emit_websocket_notification,
+                            emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
-from awx.fact.utils.connection import test_mongo_connection
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'update_inventory_computed_fields']
+           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
+           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -62,16 +69,70 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 
 logger = logging.getLogger('awx.main.tasks')
 
+@celeryd_init.connect
+def celery_startup(conf=None, **kwargs):
+    # Re-init all schedules
+    # NOTE: Rework this during the Rampart work
+    logger.info("Syncing Tower Schedules")
+    for sch in Schedule.objects.all():
+        try:
+            sch.update_computed_fields()
+            sch.save()
+        except Exception as e:
+            logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
+
 @task()
-def bulk_inventory_element_delete(inventory, hosts=[], groups=[]):
-    from awx.main.signals import disable_activity_stream
-    with ignore_inventory_computed_fields():
-        with disable_activity_stream():
-            for group in groups:
-                Group.objects.get(id=group).mark_inactive(skip_active_check=True)
-            for host in hosts:
-                Host.objects.get(id=host).mark_inactive(skip_active_check=True)
-    update_inventory_computed_fields(inventory)
+def send_notifications(notification_list, job_id=None):
+    if not isinstance(notification_list, list):
+        raise TypeError("notification_list should be of type list")
+    if job_id is not None:
+        job_actual = UnifiedJob.objects.get(id=job_id)
+    for notification_id in notification_list:
+        notification = Notification.objects.get(id=notification_id)
+        try:
+            sent = notification.notification_template.send(notification.subject, notification.body)
+            notification.status = "successful"
+            notification.notifications_sent = sent
+        except Exception as e:
+            logger.error("Send Notification Failed {}".format(e))
+            notification.status = "failed"
+            notification.error = smart_str(e)
+        finally:
+            notification.save()
+        if job_id is not None:
+            job_actual.notifications.add(notification)
+
+@task(bind=True)
+def run_administrative_checks(self):
+    if not tower_settings.TOWER_ADMIN_ALERTS:
+        return
+    reader = TaskSerializer()
+    validation_info = reader.from_database()
+    if validation_info.get('instance_count', 0) < 1:
+        return
+    used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
+    tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+    if (used_percentage * 100) > 90:
+        send_mail("Ansible Tower host usage over 90%",
+                  "Ansible Tower host usage over 90%",
+                  tower_admin_emails,
+                  fail_silently=True)
+    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+        send_mail("Ansible Tower license will expire soon",
+                  "Ansible Tower license will expire soon",
+                  tower_admin_emails,
+                  fail_silently=True)
+
+@task(bind=True)
+def run_label_cleanup(self):
+    qs = Label.get_orphaned_labels()
+    labels_count = qs.count()
+    qs.delete()
+    return labels_count
+
+@task(bind=True)
+def cleanup_authtokens(self):
+    AuthToken.objects.filter(expires__lt=now()).delete()
 
 @task(bind=True)
 def tower_periodic_scheduler(self):
@@ -82,8 +143,8 @@ def tower_periodic_scheduler(self):
         try:
             last_run = dateutil.parser.parse(fd.read())
             return last_run
-        except Exception:
-            #TODO: LOG
+        except Exception as exc:
+            logger.error("get_last_run failed: {}".format(exc))
             return None
 
     def write_last_run(last_run):
@@ -132,30 +193,44 @@ def notify_task_runner(metadata_dict):
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
 
-
-@task()
-def mongodb_control(cmd):
-    # Sanity check: Do not send arbitrary commands.
-    if cmd not in ('start', 'stop'):
-        raise ValueError('Only "start" and "stop" are allowed.')
-
-    # Either start or stop mongo, as requested.
-    p = subprocess.Popen('sudo service mongod %s' % cmd, shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    p.wait()
-
-    # Check to make sure the stop actually succeeded
-    p = subprocess.Popen('pidof mongod', shell=True)
-    shutdown_failed = p.wait() == 0
-
-    # If there was an error, log it.
-    if err:
-        logger.error(err)
-
-    if cmd == 'stop' and shutdown_failed:
-        p = subprocess.Popen('sudo mongod --shutdown -f /etc/mongod.conf', shell=True)
-        p.wait()
+@task(bind=True)
+def handle_work_success(self, result, task_actual):
+    if task_actual['type'] == 'project_update':
+        instance = ProjectUpdate.objects.get(id=task_actual['id'])
+        instance_name = instance.name
+        notification_templates = instance.project.notification_templates
+        friendly_name = "Project Update"
+    elif task_actual['type'] == 'inventory_update':
+        instance = InventoryUpdate.objects.get(id=task_actual['id'])
+        instance_name = instance.name
+        notification_templates = instance.inventory_source.notification_templates
+        friendly_name = "Inventory Update"
+    elif task_actual['type'] == 'job':
+        instance = Job.objects.get(id=task_actual['id'])
+        instance_name = instance.job_template.name
+        notification_templates = instance.job_template.notification_templates
+        friendly_name = "Job"
+    elif task_actual['type'] == 'ad_hoc_command':
+        instance = AdHocCommand.objects.get(id=task_actual['id'])
+        instance_name = instance.module_name
+        notification_templates = instance.notification_templates
+        friendly_name = "AdHoc Command"
+    elif task_actual['type'] == 'system_job':
+        instance = SystemJob.objects.get(id=task_actual['id'])
+        instance_name = instance.system_job_template.name
+        notification_templates = instance.system_job_template.notification_templates
+        friendly_name = "System Job"
+    else:
+        return
+    notification_body = instance.notification_data()
+    notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
+                                                                               task_actual['id'],
+                                                                               smart_str(instance_name),
+                                                                               notification_body['url'])
+    notification_body['friendly_name'] = friendly_name
+    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                              for n in set(notification_templates.get('success', []) + notification_templates.get('any', []))],
+                             job_id=task_actual['id'])
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
@@ -171,23 +246,38 @@ def handle_work_error(self, task_id, subtasks=None):
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
+                notification_templates = instance.project.notification_templates
+                friendly_name = "Project Update"
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.name
+                notification_templates = instance.inventory_source.notification_templates
+                friendly_name = "Inventory Update"
             elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
+                notification_templates = instance.job_template.notification_templates
+                friendly_name = "Job"
             elif each_task['type'] == 'ad_hoc_command':
                 instance = AdHocCommand.objects.get(id=each_task['id'])
                 instance_name = instance.module_name
+                notification_templates = instance.notification_templates
+                friendly_name = "AdHoc Command"
+            elif each_task['type'] == 'system_job':
+                instance = SystemJob.objects.get(id=each_task['id'])
+                instance_name = instance.system_job_template.name
+                notification_templates = instance.system_job_template.notification_templates
+                friendly_name = "System Job"
             else:
                 # Unknown task type
-                break
+                logger.warn("Unknown task type: {}".format(each_task['type']))
+                continue
             if first_task is None:
                 first_task = instance
                 first_task_id = instance.id
                 first_task_type = each_task['type']
                 first_task_name = instance_name
+                first_task_friendly_name = friendly_name
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
@@ -195,6 +285,16 @@ def handle_work_error(self, task_id, subtasks=None):
                     (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
+        notification_body = first_task.notification_data()
+        notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
+                                                                                first_task_id,
+                                                                                smart_str(first_task_name),
+                                                                                notification_body['url'])
+        notification_body['friendly_name'] = first_task_friendly_name
+        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                  for n in set(notification_templates.get('error', []) + notification_templates.get('any', []))],
+                                 job_id=first_task_id)
+
 
 @task()
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -288,7 +388,7 @@ class BaseTask(Task):
         '''
         Create a temporary files containing the private data.
         Returns a dictionary with keys from build_private_data
-        (i.e. 'credential', 'cloud_credential') and values the file path.
+        (i.e. 'credential', 'cloud_credential', 'network_credential') and values the file path.
         '''
         private_data = self.build_private_data(instance, **kwargs)
         private_data_files = {}
@@ -302,12 +402,15 @@ class BaseTask(Task):
                 if 'OPENSSH PRIVATE KEY' in data and not openssh_keys_supported:
                     raise RuntimeError(OPENSSH_KEY_ERROR)
             for name, data in private_data.iteritems():
+                # OpenSSH formatted keys must have a trailing newline to be
+                # accepted by ssh-add.
+                if 'OPENSSH PRIVATE KEY' in data and not data.endswith('\n'):
+                    data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
-                    os.mkfifo(path, 0600)
-                    thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
+                    self.open_fifo_write(path, data)
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -316,6 +419,14 @@ class BaseTask(Task):
                     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
                 private_data_files[name] = path
         return private_data_files
+
+    def open_fifo_write(self, path, data):
+        '''open_fifo_write opens the fifo named pipe in a new thread.
+        This blocks until the the calls to ssh-agent/ssh-add have read the
+        credential information from the pipe.
+        '''
+        os.mkfifo(path, 0600)
+        thread.start_new_thread(lambda p, d: open(p, 'w').write(d), (path, data))
 
     def build_passwords(self, instance, **kwargs):
         '''
@@ -326,6 +437,24 @@ class BaseTask(Task):
             'no': 'no',
             '': '',
         }
+
+    def add_ansible_venv(self, env):
+        if settings.ANSIBLE_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.ANSIBLE_VENV_PATH
+            env['PATH'] = os.path.join(settings.ANSIBLE_VENV_PATH, "bin") + ":" + env['PATH']
+            venv_libdir = os.path.join(settings.ANSIBLE_VENV_PATH, "lib")
+            env.pop('PYTHONPATH', None)  # default to none if no python_ver matches
+            for python_ver in ["python2.7", "python2.6"]:
+                if os.path.isdir(os.path.join(venv_libdir, python_ver)):
+                    env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
+                    break
+        return env
+
+    def add_tower_venv(self, env):
+        if settings.TOWER_USE_VENV:
+            env['VIRTUAL_ENV'] = settings.TOWER_VENV_PATH
+            env['PATH'] = os.path.join(settings.TOWER_VENV_PATH, "bin") + ":" + env['PATH']
+        return env
 
     def build_env(self, instance, **kwargs):
         '''
@@ -342,13 +471,10 @@ class BaseTask(Task):
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         # Update PYTHONPATH to use local site-packages.
-        python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
-        local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
-        if local_site_packages not in python_paths:
-            python_paths.insert(0, local_site_packages)
-        env['PYTHONPATH'] = os.pathsep.join(python_paths)
-        if self.should_use_proot:
-            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
+        # NOTE:
+        # Derived class should call add_ansible_venv() or add_tower_venv()
+        if self.should_use_proot(instance, **kwargs):
+            env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -417,7 +543,7 @@ class BaseTask(Task):
         prompts, and values are password lookup keys (keys that are returned
         from build_passwords).
         '''
-        return SortedDict()
+        return OrderedDict()
 
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
                     output_replacements=None):
@@ -461,7 +587,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if settings.AWX_PROOT_ENABLED:
+                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
@@ -473,7 +599,8 @@ class BaseTask(Task):
                                 else:
                                     child_procs = main_proc.get_children(recursive=True)
                                 for child_proc in child_procs:
-                                    os.kill(child_proc.pid, signal.SIGTERM)
+                                    os.kill(child_proc.pid, signal.SIGKILL)
+                                os.kill(main_proc.pid, signal.SIGKILL)
                             except TypeError:
                                 os.kill(child.pid, signal.SIGKILL)
                     else:
@@ -602,12 +729,12 @@ class RunJob(BaseTask):
         Returns a dict of the form
         dict['credential'] = <credential_decrypted_ssh_key_data>
         dict['cloud_credential'] = <cloud_credential_decrypted_ssh_key_data>
+        dict['network_credential'] = <network_credential_decrypted_ssh_key_data>
         '''
-        job_credentials = ['credential', 'cloud_credential']
+        job_credentials = ['credential', 'cloud_credential', 'network_credential']
         private_data = {}
         # If we were sent SSH credentials, decrypt them and send them
         # back (they will be written to a temporary file).
-
         for cred_name in job_credentials:
             credential = getattr(job, cred_name, None)
             if credential:
@@ -620,6 +747,8 @@ class RunJob(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             openstack_data = {
                 'clouds': {
                     'devstack': {
@@ -654,11 +783,12 @@ class RunJob(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         plugin_dirs = [plugin_dir]
-        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.append(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        if hasattr(tower_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
+        env = self.add_ansible_venv(env)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
@@ -693,6 +823,7 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'rax':
             env['RAX_USERNAME'] = cloud_cred.username
             env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
+            env['CLOUD_VERIFY_SSL'] = str(False)
         elif cloud_cred and cloud_cred.kind == 'gce':
             env['GCE_EMAIL'] = cloud_cred.username
             env['GCE_PROJECT'] = cloud_cred.project
@@ -700,12 +831,32 @@ class RunJob(BaseTask):
         elif cloud_cred and cloud_cred.kind == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.username
             env['AZURE_CERT_PATH'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+        elif cloud_cred and cloud_cred.kind == 'azure_rm':
+            if len(cloud_cred.client) and len(cloud_cred.tenant):
+                env['AZURE_CLIENT_ID'] = cloud_cred.client
+                env['AZURE_SECRET'] = decrypt_field(cloud_cred, 'secret')
+                env['AZURE_TENANT'] = cloud_cred.tenant
+                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+            else:
+                env['AZURE_SUBSCRIPTION_ID'] = cloud_cred.subscription
+                env['AZURE_AD_USER'] = cloud_cred.username
+                env['AZURE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
         elif cloud_cred and cloud_cred.kind == 'vmware':
             env['VMWARE_USER'] = cloud_cred.username
             env['VMWARE_PASSWORD'] = decrypt_field(cloud_cred, 'password')
             env['VMWARE_HOST'] = cloud_cred.host
         elif cloud_cred and cloud_cred.kind == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = kwargs.get('private_data_files', {}).get('cloud_credential', '')
+
+        network_cred = job.network_credential
+        if network_cred:
+            env['ANSIBLE_NET_USERNAME'] = network_cred.username
+            env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
+
+            authorize = network_cred.authorize
+            env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
+            if authorize:
+                env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] = decrypt_field(network_cred, 'authorize_password')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
@@ -787,18 +938,21 @@ class RunJob(BaseTask):
             'tower_job_id': job.pk,
             'tower_job_launch_type': job.launch_type,
         }
-        if job.job_template and job.job_template.active:
+        if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
                 'tower_job_template_name': job.job_template.name,
             })
-        if job.created_by and job.created_by.is_active:
+        if job.created_by:
             extra_vars.update({
                 'tower_user_id': job.created_by.pk,
                 'tower_user_name': job.created_by.username,
             })
         if job.extra_vars_dict:
-            extra_vars.update(job.extra_vars_dict)
+            if kwargs.get('display', False) and job.job_template and job.job_template.survey_enabled:
+                extra_vars.update(json.loads(job.display_extra_vars()))
+            else:
+                extra_vars.update(job.extra_vars_dict)
         args.extend(['-e', json.dumps(extra_vars)])
 
         # Add path to playbook (relative to project.local_path).
@@ -807,6 +961,9 @@ class RunJob(BaseTask):
         else:
             args.append(job.playbook)
         return args
+
+    def build_safe_args(self, job, **kwargs):
+        return self.build_args(job, display=True, **kwargs)
 
     def build_cwd(self, job, **kwargs):
         if job.project is None and job.job_type == PERM_INVENTORY_SCAN:
@@ -834,7 +991,7 @@ class RunJob(BaseTask):
         d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
@@ -844,18 +1001,18 @@ class RunJob(BaseTask):
         '''
         If using an SSH key, return the path for use by ssh-agent.
         '''
-        return kwargs.get('private_data_files', {}).get('credential', '')
+        private_data_files = kwargs.get('private_data_files', {})
+        if 'credential' in private_data_files:
+            return private_data_files.get('credential')
+        elif 'network_credential' in private_data_files:
+            return private_data_files.get('network_credential')
+        return ''
 
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
-
-    def pre_run_hook(self, job, **kwargs):
-        if job.job_type == PERM_INVENTORY_SCAN:
-            if not test_mongo_connection():
-                raise RuntimeError("Fact Scan Database is offline")
+        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, job, **kwargs):
         '''
@@ -879,7 +1036,6 @@ class RunProjectUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
-
 
     def build_private_data(self, project_update, **kwargs):
         '''
@@ -910,6 +1066,7 @@ class RunProjectUpdate(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
+        env = self.add_ansible_venv(env)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
@@ -1063,6 +1220,8 @@ class RunInventoryUpdate(BaseTask):
                                   username=credential.username,
                                   password=decrypt_field(credential, "password"),
                                   project_name=credential.project)
+            if credential.domain not in (None, ''):
+                openstack_auth['domain_name'] = credential.domain
             private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
@@ -1132,6 +1291,46 @@ class RunInventoryUpdate(BaseTask):
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
+        elif inventory_update.source == 'satellite6':
+            section = 'foreman'
+            cp.add_section(section)
+
+            foreman_opts = dict(inventory_update.source_vars_dict.items())
+            foreman_opts.setdefault('ssl_verify', 'False')
+            for k, v in foreman_opts.items():
+                cp.set(section, k, unicode(v))
+
+            credential = inventory_update.credential
+            if credential:
+                cp.set(section, 'url', credential.host)
+                cp.set(section, 'user', credential.username)
+                cp.set(section, 'password', decrypt_field(credential, 'password'))
+
+            section = 'ansible'
+            cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
+
+            section = 'cache'
+            cp.set(section, 'path', '/tmp')
+            cp.set(section, 'max_age', '0')
+
+        elif inventory_update.source == 'cloudforms':
+            section = 'cloudforms'
+            cp.add_section(section)
+
+            credential = inventory_update.credential
+            if credential:
+                cp.set(section, 'hostname', credential.host)
+                cp.set(section, 'username', credential.username)
+                cp.set(section, 'password', decrypt_field(credential, 'password'))
+
+        elif inventory_update.source == 'azure_rm':
+            section = 'azure'
+            cp.add_section(section)
+            cp.set(section, 'include_powerstate', 'yes')
+            cp.set(section, 'group_by_resource_group', 'yes')
+            cp.set(section, 'group_by_location', 'yes')
+            cp.set(section, 'group_by_tag', 'yes')
+
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -1152,9 +1351,9 @@ class RunInventoryUpdate(BaseTask):
         # passwords dictionary.
         credential = inventory_update.credential
         if credential:
-            for subkey in ('username', 'host', 'project'):
+            for subkey in ('username', 'host', 'project', 'client', 'tenant', 'subscription'):
                 passwords['source_%s' % subkey] = getattr(credential, subkey)
-            for passkey in ('password', 'ssh_key_data', 'security_token'):
+            for passkey in ('password', 'ssh_key_data', 'security_token', 'secret'):
                 k = 'source_%s' % passkey
                 passwords[k] = decrypt_field(credential, passkey)
         return passwords
@@ -1168,7 +1367,7 @@ class RunInventoryUpdate(BaseTask):
         """
         env = super(RunInventoryUpdate, self).build_env(inventory_update,
                                                         **kwargs)
-
+        env = self.add_tower_venv(env)
         # Pass inventory source ID to inventory script.
         env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         env['INVENTORY_UPDATE_ID'] = str(inventory_update.pk)
@@ -1194,6 +1393,7 @@ class RunInventoryUpdate(BaseTask):
             env['RAX_CREDS_FILE'] = cloud_credential
             env['RAX_REGION'] = inventory_update.source_regions or 'all'
             env['RAX_CACHE_MAX_AGE'] = "0"
+            env['CLOUD_VERIFY_SSL'] = str(False)
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
@@ -1205,12 +1405,28 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
             env['AZURE_CERT_PATH'] = cloud_credential
+        elif inventory_update.source == 'azure_rm':
+            if len(passwords.get('source_client', '')) and \
+               len(passwords.get('source_tenant', '')):
+                env['AZURE_CLIENT_ID'] = passwords.get('source_client', '')
+                env['AZURE_SECRET'] = passwords.get('source_secret', '')
+                env['AZURE_TENANT'] = passwords.get('source_tenant', '')
+                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
+            else:
+                env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_subscription', '')
+                env['AZURE_AD_USER'] = passwords.get('source_username', '')
+                env['AZURE_PASSWORD'] = passwords.get('source_password', '')
         elif inventory_update.source == 'gce':
             env['GCE_EMAIL'] = passwords.get('source_username', '')
             env['GCE_PROJECT'] = passwords.get('source_project', '')
             env['GCE_PEM_FILE_PATH'] = cloud_credential
+            env['GCE_ZONE'] = inventory_update.source_regions
         elif inventory_update.source == 'openstack':
             env['OS_CLIENT_CONFIG_FILE'] = cloud_credential
+        elif inventory_update.source == 'satellite6':
+            env['FOREMAN_INI_PATH'] = cloud_credential
+        elif inventory_update.source == 'cloudforms':
+            env['CLOUDFORMS_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
@@ -1288,7 +1504,7 @@ class RunInventoryUpdate(BaseTask):
             runpath = tempfile.mkdtemp(prefix='ansible_tower_launch_')
             handle, path = tempfile.mkstemp(dir=runpath)
             f = os.fdopen(handle, 'w')
-            if inventory_update.source_script is None or not inventory_update.source_script.active:
+            if inventory_update.source_script is None:
                 raise RuntimeError('Inventory Script does not exist')
             f.write(inventory_update.source_script.script.encode('utf-8'))
             f.close()
@@ -1355,6 +1571,7 @@ class RunAdHocCommand(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         env = super(RunAdHocCommand, self).build_env(ad_hoc_command, **kwargs)
+        env = self.add_ansible_venv(env)
         # Set environment variables needed for inventory and ad hoc event
         # callbacks to work.
         env['AD_HOC_COMMAND_ID'] = str(ad_hoc_command.pk)
@@ -1365,6 +1582,7 @@ class RunAdHocCommand(BaseTask):
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -1432,6 +1650,9 @@ class RunAdHocCommand(BaseTask):
         if ad_hoc_command.verbosity:
             args.append('-%s' % ('v' * min(5, ad_hoc_command.verbosity)))
 
+        if ad_hoc_command.extra_vars_dict:
+            args.extend(['-e', json.dumps(ad_hoc_command.extra_vars_dict)])
+
         args.extend(['-m', ad_hoc_command.module_name])
         args.extend(['-a', ad_hoc_command.module_args])
 
@@ -1461,7 +1682,7 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'                
+        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d
@@ -1476,7 +1697,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, ad_hoc_command, **kwargs):
         '''
@@ -1503,16 +1724,15 @@ class RunSystemJob(BaseTask):
                     args.extend(['--older_than', str(json_vars['older_than'])])
                 if 'granularity' in json_vars:
                     args.extend(['--granularity', str(json_vars['granularity'])])
-            #     Keeping this around in case we want to break this out
-            #     if 'jobs' in json_vars and json_vars['jobs']:
-            #         args.extend(['--jobs'])
-            #     if 'project_updates' in json_vars and json_vars['project_updates']:
-            #         args.extend(['--project-updates'])
-            #     if 'inventory_updates' in json_vars and json_vars['inventory_updates']:
-            #         args.extend(['--inventory-updates'])
-        except Exception, e:
+        except Exception as e:
             logger.error("Failed to parse system job: " + str(e))
         return args
+
+    def build_env(self, instance, **kwargs):
+        env = super(RunSystemJob, self).build_env(instance,
+                                                  **kwargs)
+        env = self.add_tower_venv(env)
+        return env
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR

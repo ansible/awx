@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc overview
  * @name forms
@@ -41,6 +41,7 @@ export default
                 changes: {
                     label: 'Changes',
                     type: 'textarea',
+                    class: 'Form-textAreaLabel',
                     ngHide: "!changes || changes =='' || changes == 'null'",
                     readonly: true
                 }

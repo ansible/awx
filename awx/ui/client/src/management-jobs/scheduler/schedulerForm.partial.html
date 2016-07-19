@@ -1,0 +1,616 @@
+<div id="htmlTemplate" class=" SchedulerFormPanel Panel" ng-hide="hideForm">
+    <div class="Form-header">
+        <div class="Form-title" ng-show="!isEdit">{{ schedulerName || "Add Schedule"}}</div>
+        <div class="Form-title" ng-show="isEdit">{{ schedulerName || "Edit Schedule"}}</div>
+        <div class="Form-header--fields"></div>
+        <div class="Form-exitHolder">
+            <button class="Form-exit" ng-click="formCancel()">
+                <i class="fa fa-times-circle"></i>
+            </button>
+        </div>
+    </div>
+    <div id="SchedulerFormTarget">
+        <form class="form Form"
+            role="form"
+            name="scheduler_form"
+            novalidate>
+
+            <div class="form-group SchedulerForm-formGroup">
+                <label class="Form-inputLabel">
+                    <span class="red-text">*</span>
+                    Name
+                </label>
+                <input
+                    type="text"
+                    class="form-control input-sm
+                        Form-textInput"
+                    ng-class="{'RepeatFrequencyOptions-nameBorderErrorFix': scheduler_form.$dirty && scheduler_form.schedulerName.$error.required}"
+                    name="schedulerName"
+                    id="schedulerName"
+                    ng-model="schedulerName" required
+                    placeholder="Schedule name">
+                <div class="error"
+                    ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
+                    A schedule name is required.
+                </div>
+            </div>
+            <div class="form-group SchedulerForm-formGroup">
+                <label class="Form-inputLabel">
+                    <span class="red-text">*</span>
+                    Start Date
+                    <span class="fmt-help">
+                        (mm/dd/yyyy)
+                    </span>
+                </label>
+                <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                    <scheduler-date-picker date="schedulerStartDt">
+                    </scheduler-date-picker>
+                </div>
+                <div class="error"
+                    ng-show="scheduler_form_schedulerStartDt_error"
+                    ng-bind="scheduler_form_schedulerStartDt_error">
+                </div>
+            </div>
+            <div class="form-group SchedulerForm-formGroup">
+                <label class="Form-inputLabel">
+                    <span class="red-text">*</span>
+                    Start Time
+                    <span class="fmt-help"
+                        ng-show="schedulerShowTimeZone">
+                        (HH24:MM:SS)
+                    </span>
+                    <span class="fmt-help"
+                        ng-show="!schedulerShowTimeZone">
+                        (HH24:MM:SS UTC)
+                    </span>
+                </label>
+                <div class="input-group SchedulerTime">
+                    <input name="schedulerStartHour"
+                        id="schedulerStartHour"
+                        sch-spinner="scheduler_form"
+                        class="scheduler-time-spinner
+                            ScheduleTime-input SpinnerInput"
+                        aw-spinner="schedulerStartHour"
+                        ng-model="schedulerStartHour"
+                        placeholder="HH24"
+                        aw-min="0" min="0" aw-max="23"
+                        max="23" data-zero-pad="2" required
+                        ng-change="scheduleTimeChange()" >
+                    <span
+                        class="SchedulerTime-separator">
+                        :
+                    </span>
+                    <input name="schedulerStartMinute"
+                        id="schedulerStartMinute"
+                        sch-spinner="scheduler_form"
+                        class="scheduler-time-spinner
+                            SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartMinute"
+                        ng-model="schedulerStartMinute"
+                        placeholder="MM"
+                        min="0" max="59" data-zero-pad="2"
+                        required
+                        ng-change="scheduleTimeChange()" >
+                    <span
+                        class="SchedulerTime-separator">
+                        :
+                    </span>
+                    <input name="schedulerStartSecond"
+                        id="schedulerStartSecond"
+                        sch-spinner="scheduler_form"
+                        class="scheduler-time-spinner
+                            SchedulerTime-input SpinnerInput"
+                        aw-spinner="schedulerStartSecond"
+                        ng-model="schedulerStartSecond"
+                        placeholder="SS"
+                        min="0" max="59" data-zero-pad="2"
+                        required
+                        ng-change="scheduleTimeChange()" >
+                    <!-- <div class="form-group
+                        SchedulerTime-utc"
+                        ng-show="schedulerShowUTCStartTime">
+                        <label
+                            class="SchedulerTime-utcLabel">
+                            UTC Start Time
+                        </label>
+                        <div id="schedulerUTCTime"
+                            class="SchedulerTime-utcTime">
+                            {{ schedulerUTCTime.split("UTC")[0] }}
+                        </div>
+                    </div> -->
+                </div>
+                <div class="error"
+                    ng-show="scheduler_startTime_error">
+                    The time must be in HH24:MM:SS format.
+                </div>
+            </div>
+            <div class="form-group SchedulerForm-formGroup"
+                ng-show="schedulerShowTimeZone">
+                <label class="Form-inputLabel">
+                    <span class="red-text">*</span>
+                    Local Time Zone
+                </label>
+                <select
+                    class="MakeSelect2"
+                    name="schedulerTimeZone"
+                    id="schedulerTimeZone"
+                    ng-model="schedulerTimeZone"
+                    ng-options="z.name for z in timeZones"
+                    required class="form-control input-sm"
+                    ng-change="scheduleTimeChange()" >
+                </select>
+            </div>
+            <div class="form-group SchedulerForm-formGroup">
+                <label class="Form-inputLabel">
+                    <span class="red-text">*</span>
+                    Repeat frequency
+                </label>
+                <select name="schedulerFrequency"
+                    id="schedulerFrequency"
+                    class="MakeSelect2"
+                    ng-model="schedulerFrequency"
+                    ng-options="f.name for f in frequencyOptions"
+                    required class="form-control input-sm"
+                    ng-change="scheduleRepeatChange()">
+                </select>
+                <div class="error"
+                    ng-show="sheduler_frequency_error">
+                </div>
+            </div>
+            <div class="form-group SchedulerForm-formGroup" ng-if="cleanupJob  && !isFactCleanup">
+                <label class="Form-inputLabel"><span class="red-text">*</span> Days of data to keep</label>
+                <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep">
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
+            </div>
+            <div class="RepeatFrequencyOptions-label"
+                ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
+                Frequency Details</div>
+            <div class="RepeatFrequencyOptions Form"
+                ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
+                <div class="form-group
+                    RepeatFrequencyOptions-everyGroup
+                    RepeatFrequencyOptions-formGroup"
+                    ng-show="schedulerShowInterval">
+                    <label class="Form-inputLabel
+                        RepeatFrequencyOptions-everyLabel">
+                        <span class="red-text">*</span>
+                        Every
+                    </label>
+                    <input name="schedulerInterval"
+                        id="schedulerInterval"
+                        sch-spinner="scheduler_form"
+                        class="scheduler-spinner
+                            SpinnerInput"
+                        aw-spinner="schedulerInterval"
+                        ng-model="schedulerInterval"
+                        min="1"
+                        max="999"
+                        ng-change="resetError('scheduler_interval_error')"
+                    >
+                    <label class="inline-label
+                        RepeatFrequencyOptions-inlineLabel"
+                        ng-bind="schedulerIntervalLabel">
+                    </label>
+                    <div
+                        class="error
+                            RepeatFrequencyOptions-error"
+                        ng-show="$parent.scheduler_interval_error">
+                        Please provide a value between 1 and 999.
+                    </div>
+                </div>
+                <div class="form-group RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerFrequency && schedulerFrequency.value == 'monthly'">
+                    <div class="radio
+                        RepeatFrequencyOptions-radioLabel">
+                        <label class="Form-inputLabel">
+                            <span class="red-text">*</span>
+                            <input type="radio" value="day"
+                                ng-model="$parent.monthlyRepeatOption"
+                                ng-change="monthlyRepeatChange()"
+                                name="monthlyRepeatOption"
+                                id="monthlyRepeatOption">
+                            on day
+                        </label>
+                    </div>
+                    <input
+                        name="monthDay"
+                        id="monthDay"
+                        sch-spinner="scheduler_form"
+                        class="scheduler-spinner SpinnerInput"
+                        aw-spinner="$parent.monthDay"
+                        ng-model="$parent.monthDay"
+                        min="1" max="31"
+                        ng-change="resetError('scheduler_monthDay_error')" >
+                    <div class="error"
+                        ng-show="$parent.scheduler_monthDay_error">
+                        The day must be between 1 and 31.
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerFrequency && schedulerFrequency.value == 'monthly'">
+                    <div class="radio
+                        RepeatFrequencyOptions-radioLabel">
+                        <label class="Form-inputLabel">
+                            <span class="red-text">*</span>
+                            <input type="radio"
+                                value="other"
+                                ng-model="$parent.monthlyRepeatOption"
+                                ng-change="monthlyRepeatChange()"
+                                name="monthlyRepeatOption"
+                                id="monthlyRepeatOption">
+                            on the
+                        </label>
+                    </div>
+                    <div class="RepeatFrequencyOptions-inputGroup
+                        RepeatFrequencyOptions-inputGroup--halves">
+                        <select name="monthlyOccurrence"
+                            id="monthlyOccurrence"
+                            ng-model="$parent.monthlyOccurrence"
+                            ng-options="o.name for o in occurrences"
+                            ng-disabled="monthlyRepeatOption != 'other'"
+                            class=" MakeSelect2 form-control
+                                input-sm
+                                RepeatFrequencyOptions-spacedSelect
+                                RepeatFrequencyOptions-monthlyOccurence"
+                        >
+                        </select>
+                        <select name="monthlyWeekDay"
+                            id="monthlyWeekDay"
+                            ng-model="$parent.monthlyWeekDay"
+                            ng-options="w.name for w in weekdays"
+                            ng-disabled="monthlyRepeatOption != 'other'"
+                            class="MakeSelect2 form-control input-sm" >
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerFrequency && schedulerFrequency.value == 'yearly'">
+                    <div class="radio
+                        RepeatFrequencyOptions-radioLabel">
+                        <span class="red-text">*</span>
+                        <label class="Form-inputLabel">
+                            <input type="radio"
+                                value="month"
+                                ng-model="$parent.yearlyRepeatOption"
+                                ng-change="yearlyRepeatChange()"
+                                name="yearlyRepeatOption"
+                                id="yearlyRepeatOption">
+                            on
+                        </label>
+                    </div>
+                    <div class="RepeatFrequencyOptions-inputGroup
+                        RepeatFrequencyOptions-inputGroup--halvesWithNumber">
+                        <select name="yearlyMonth"
+                            id="yearlyMonth"
+                            ng-model="$parent.yearlyMonth"
+                            ng-options="m.name for m in months"
+                            ng-disabled="yearlyRepeatOption != 'month'"
+                            class="MakeSelect2 form-control input-sm
+                                RepeatFrequencyOptions-spacedSelect"
+                        >
+                        </select>
+                        <input name="yearlyMonthDay"
+                            id="yearlyMonthDay"
+                            sch-spinner="scheduler_form"
+                            class="scheduler-spinner
+                                SpinnerInput"
+                            aw-spinner="$parent.yearlyMonthDay"
+                            ng-model="$parent.yearlyMonthDay"
+                            min="1" max="31"
+                            ng-change="resetError('scheduler_yearlyMonthDay_error')"
+                        >
+                    </div>
+                    <div class="error"
+                        ng-show="$parent.scheduler_yearlyMonthDay_error">
+                        The day must be between 1 and 31.
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerFrequency && schedulerFrequency.value == 'yearly'">
+                    <div class="radio
+                        RepeatFrequencyOptions-radioLabel">
+                        <label class="Form-inputLabel">
+                            <span class="red-text">*</span>
+                            <input type="radio"
+                                value="other"
+                                ng-model="$parent.yearlyRepeatOption"
+                                ng-change="yearlyRepeatChange()"
+                                name="yearlyRepeatOption"
+                                id="yearlyRepeatOption">
+                            on the
+                        </label>
+                    </div>
+                    <div
+                        class="RepeatFrequencyOptions-inputGroup
+                            RepeatFrequencyOptions-inputGroup--thirds"
+                    >
+                        <select name="yearlyOccurrence"
+                            id="yearlyOccurrence"
+                            ng-model="$parent.yearlyOccurrence"
+                            ng-options="o.name for o in occurrences"
+                            ng-disabled="yearlyRepeatOption != 'other'"
+                            class="MakeSelect2
+                                form-control input-sm
+                                RepeatFrequencyOptions-spacedSelect
+                                RepeatFrequencyOptions-yearlyOccurence
+                                RepeatFrequencyOptions-thirdSelect"
+                        >
+                        </select>
+                        <select name="yearlyWeekDay"
+                            id="yearlyWeekDay"
+                            ng-model="$parent.yearlyWeekDay"
+                            ng-options="w.name for w in weekdays"
+                            ng-disabled="yearlyRepeatOption != 'other'"
+                            class="MakeSelect2
+                                form-control input-sm
+                                RepeatFrequencyOptions-spacedSelect
+                                RepeatFrequencyOptions-thirdSelect"
+                        >
+                        </select>
+                        <select name="yearlyOtherMonth"
+                            id="yearlyOtherMonth"
+                            ng-model="$parent.yearlyOtherMonth"
+                            ng-options="m.name for m in months"
+                            ng-disabled="yearlyRepeatOption != 'other'"
+                            class="MakeSelect2
+                                form-control input-sm
+                                RepeatFrequencyOptions-thirdSelect">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-week
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerFrequency && schedulerFrequency.value == 'weekly'">
+                    <label class="Form-inputLabel">
+                        <span class="red-text">*</span>
+                        On Days
+                    </label>
+                    <div class="input-group
+                        RepeatFrequencyOptions-weekButtonContainer">
+                        <div class="btn-group
+                            RepeatFrequencyOptions-weekButtonGroup"
+                            data-toggle="buttons-checkbox"
+                            id="weekdaySelect">
+                            <button type="button"
+                                ng-class="weekDaySUClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="SU"
+                                ng-click="$parent.setWeekday($event,'su')">
+                                Sun
+                            </button>
+                            <button type="button"
+                                ng-class="weekDayMOClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="MO"
+                                ng-click="$parent.setWeekday($event,'mo')">
+                                Mon
+                            </button>
+                            <button type="button"
+                                ng-class="weekDayTUClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="TU"
+                                ng-click="$parent.setWeekday($event,'tu')">
+                                Tue
+                            </button>
+                            <button type="button"
+                                ng-class="weekDayWEClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="WE"
+                                ng-click="$parent.setWeekday($event,'we')">
+                                Wed
+                            </button>
+                            <button type="button"
+                                ng-class="weekDayTHClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="TH"
+                                ng-click="$parent.setWeekday($event,'th')">
+                                Thu
+                            </button>
+                            <button type="button"
+                                ng-class="weekDayFRClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="FR"
+                                ng-click="$parent.setWeekday($event,'fr')">
+                                Fri
+                            </button>
+                            <button type="button"
+                                ng-class="weekDaySAClass"
+                                class="btn btn-default
+                                    RepeatFrequencyOptions-weekButton"
+                                data-value="SA"
+                                ng-click="$parent.setWeekday($event,'sa')">
+                                Sat
+                            </button>
+                        </div>
+                    </div>
+                    <div class="error"
+                        ng-show="$parent.scheduler_weekDays_error">
+                        Please select one or more days.
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerShowInterval">
+                    <label class="Form-inputLabel">
+                        <span class="red-text">*</span>
+                        End
+                    </label>
+                    <div>
+                        <select id="schedulerEnd"
+                            name="schedulerEnd"
+                            ng-model="$parent.schedulerEnd"
+                            ng-options="e.name for e in endOptions"
+                            required
+                            class="MakeSelect2
+                                form-control input-sm">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group
+                    RepeatFrequencyOptions-everyGroup
+                    RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerEnd && schedulerEnd.value == 'after'">
+                    <label class="Form-inputLabel">
+                        <span class="red-text">*</span>
+                        Occurrence(s)
+                    </label>
+                        <input
+                            ng-name="schedulerOccurrenceCount"
+                            ng-id="schedulerOccurrenceCount"
+                            sch-spinner="scheduler_form"
+                            class="scheduler-spinner
+                                SpinnerInput"
+                            aw-spinner="$parent.schedulerOccurrenceCount"
+                            ng-model="$parent.schedulerOccurrenceCount"
+                            min="1" max="999"
+                            on-change="resetError('scheduler_occurrenceCount_error')"
+                        >
+                    <div class="error
+                        RepeatFrequencyOptions-error"
+                        ng-show="$parent.scheduler_occurrenceCount_error">
+                        Please provide a value between 1 and 999.
+                    </div>
+                </div>
+                <div class="form-group RepeatFrequencyOptions-formGroup"
+                    ng-if="schedulerEnd && schedulerEnd.value == 'on'">
+                    <label class="Form-inputLabel">
+                        <span class="red-text">*</span>
+                        End Date
+                        <span class="fmt-help">
+                            (mm/dd/yyyy)
+                        </span>
+                    </label>
+                    <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
+                        <scheduler-date-picker date="$parent.schedulerEndDt">
+                        </scheduler-date-picker>
+                    </div>
+                    <div class="error"
+                        ng-show="$parent.scheduler_endDt_error">
+                        Please provide a valid date.
+                    </div>
+                </div>
+            </div>
+            <div class="RepeatFrequencyOptions-subFormBorderFixer"
+                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
+            </div>
+        <!-- start management job fields -->
+            <div class="factDetailsNote" ng-if="isFactCleanup">
+            <span class="factDetailsHeader">Note:</span> For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.
+            Caution: Setting both numerical variables to "0" will delete all facts.</div>
+
+            <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
+                <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a time period after which to remove old facts</label>
+                <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
+                    <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" aw-min=0 aw-max=9999 integer></input>
+                    <div class="error" ng-show="scheduler_form.keep_amount.$dirty && scheduler_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.number || scheduler_form.keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                    <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2"></select>
+                </div>
+            </div>
+
+            <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
+                <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a frequency for snapshot retention</label>
+                <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
+                    <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
+                    ng-required="true" aw-min=0 aw-max=9999 >
+                    <div class="error" ng-show="scheduler_form.granularity_keep_amount.$dirty && scheduler_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.number || scheduler_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
+                    <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
+                    <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2"></select>
+                </div>
+            </div>
+        <!-- end management job fields     -->
+        </form>
+        <div class="SchedulerFormDetail-container
+            SchedulerFormDetail-container--error"
+            ng-show="!schedulerIsValid && scheduler_form.$dirty">
+            <p class="SchedulerFormDetail-errorText">
+                The scheduler options are invalid or incomplete.
+            </p>
+        </div>
+        <div class="SchedulerFormDetail-container"
+            ng-show="schedulerIsValid">
+            <label class="SchedulerFormDetail-label">
+                Schedule Description
+            </label>
+            <div class="SchedulerFormDetail-nlp" ng-hide="rrule_nlp_description == 'Natural language description not available' ">
+                {{ rrule_nlp_description }}
+            </div>
+            <div class="SchedulerFormDetail-occurrenceHeader">
+                <label class="SchedulerFormDetail-label
+                    SchedulerFormDetail-labelOccurrence">
+                    Occurrences
+                    <span
+                        class="SchedulerFormDetail-labelDetail">
+                        (Limited to first 10)
+                    </span>
+                </label>
+                <div id="date-choice"
+                    class="SchedulerFormDetail-dateFormats">
+                    <label
+                        class="SchedulerFormDetail-dateFormatsLabel">
+                        Date format
+                    </label>
+                    <label class="radio-inline
+                        SchedulerFormDetail-radioLabel">
+                        <input type="radio"
+                            class="SchedulerFormDetail-radioButton"
+                            ng-model="dateChoice"
+                            id="date-choice-local"
+                            value="local" >
+                        Local time
+                    </label>
+                    <label class="radio-inline
+                        SchedulerFormDetail-radioLabel">
+                        <input type="radio"
+                            class="SchedulerFormDetail-radioButton"
+                            ng-model="dateChoice"
+                            id="date-choice-utc"
+                            value="utc" >
+                        UTC
+                    </label>
+                </div>
+            </div>
+            <ul class="occurrence-list mono-space
+                SchedulerFormDetail-occurrenceList"
+                ng-show="dateChoice == 'utc'">
+                <li ng-repeat="occurrence in occurrence_list">
+                    {{ occurrence.utc }}
+                </li>
+            </ul>
+            <ul class="occurrence-list mono-space
+                SchedulerFormDetail-occurrenceList"
+                ng-show="dateChoice == 'local'">
+                <li ng-repeat="occurrence in occurrence_list">
+                    {{ occurrence.local }}
+                </li>
+            </ul>
+        </div>
+
+        <div class="buttons Form-buttons">
+            <button type="button"
+                class="btn btn-sm Form-cancelButton"
+                id="project_cancel_btn"
+                ng-click="formCancel()">Cancel</button>
+            <button type="button"
+                class="btn btn-sm Form-saveButton"
+                id="project_save_btn"
+                ng-click="saveSchedule()"
+                ng-disabled="!schedulerIsValid"> Save</button>
+        </div>
+    </div>
+</div>

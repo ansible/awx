@@ -1,5 +1,5 @@
 recursive-include awx *.py
-recursive-include awx/static *.ico
+recursive-include awx/static *
 recursive-include awx/templates *.html
 recursive-include awx/api/templates *.md *.html
 recursive-include awx/ui/templates *.html
@@ -17,7 +17,7 @@ recursive-exclude awx/settings local_settings.py*
 include tools/scripts/request_tower_configuration.sh
 include tools/scripts/request_tower_configuration.ps1
 include tools/scripts/ansible-tower-service
-include tools/munin_monitors/*
+include tools/scripts/tower-python
 include tools/sosreport/*
 include COPYING
 include Makefile

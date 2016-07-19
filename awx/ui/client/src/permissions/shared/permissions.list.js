@@ -48,12 +48,6 @@
                 ngClick: 'addPermission()',
                 awToolTip: 'Add a new permission',
                 ngShow: 'PermissionAddAllowed'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                mode: 'edit',
-                awFeature: 'activity_streams'
             }
         },
 

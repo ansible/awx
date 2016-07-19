@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:Credentials
@@ -17,16 +17,13 @@ export default
             addTitle: 'Create Credential', //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'credential',
-            well: true,
             forceListeners: true,
+            subFormTitles: {
+                credentialSubForm: 'Type Details',
+            },
 
             actions: {
-                stream: {
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    mode: 'edit',
-                    awFeature: 'activity_streams'
-                }
+
             },
 
             fields: {
@@ -43,47 +40,19 @@ export default
                     addRequired: false,
                     editRequired: false
                 },
-                owner: {
-                    label: "Does this credential belong to a team or user?",
-                    type: 'radio_group',
-                    ngChange: "ownerChange()",
-                    options: [{
-                        label: 'User',
-                        value: 'user',
-                        selected: true
-                    }, {
-                        label: 'Team',
-                        value: 'team'
-                    }],
-                    awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " +
-                        "to the credential. Choosing a team shares the credential with all team members.</p>",
-                    dataTitle: 'Owner',
-                    dataPlacement: 'right',
-                    dataContainer: "body"
-                },
-                user: {
-                    label: 'User that owns this credential',
+                organization: {
+                    addRequired: false,
+                    editRequired: false,
+                    ngShow: 'canShareCredential',
+                    label: 'Organization',
                     type: 'lookup',
-                    sourceModel: 'user',
-                    sourceField: 'username',
-                    ngClick: 'lookUpUser()',
-                    ngShow: "owner == 'user'",
-                    awRequiredWhen: {
-                        variable: "user_required",
-                        init: "false"
-                    }
-                },
-                team: {
-                    label: 'Team that owns this credential',
-                    type: 'lookup',
-                    sourceModel: 'team',
+                    sourceModel: 'organization',
                     sourceField: 'name',
-                    ngClick: 'lookUpTeam()',
-                    ngShow: "owner == 'team'",
-                    awRequiredWhen: {
-                        variable: "team_required",
-                        init: "false"
-                    }
+                    ngClick: 'lookUpOrganization()',
+                    awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>",
+                    dataTitle: 'Organization ',
+                    dataPlacement: 'bottom',
+                    dataContainer: "body"
                 },
                 kind: {
                     label: 'Type',
@@ -98,60 +67,50 @@ export default
                             '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
                             'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
                             'remote hosts.</dd>' +
+                            '<dt>Network</dt>\n' +
+                            '<dd>Authentication for network device access. This can include SSH keys, usernames, passwords, ' +
+                            'and authorize information. Network credentials are used when submitting jobs to run playbooks against ' +
+                            'network devices.</dd>' +
                             '<dt>Source Control</dt>\n' +
                             '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
                             'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                            'used on the Projects tab.</dd>\n' +
+                            'used by Projects.</dd>\n' +
                             '<dt>Others (Cloud Providers)</dt>\n' +
-                            '<dd>Access keys for authenticating to the specific ' +
-                            'cloud provider, usually used for inventory sync ' +
-                            'and deployment.</dd>\n' +
+                            '<dd>Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
+                            'provider. These are used for dynamic inventory sources and for cloud provisioning and deployment ' +
+                            'in playbook runs.</dd>\n' +
                             '</dl>\n',
                     dataTitle: 'Type',
                     dataPlacement: 'right',
-                    dataContainer: "body"
-                    // helpCollapse: [{
-                    //     hdr: 'Select a Credential Type',
-                    //     content: '<dl>\n' +
-                    //         '<dt>Machine</dt>\n' +
-                    //         '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
-                    //         'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
-                    //         'remote hosts.</dd>' +
-                    //         '<dt>Source Control</dt>\n' +
-                    //         '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
-                    //         'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                    //         'used on the Projects tab.</dd>\n' +
-                    //         '<dt>Others (Cloud Providers)</dt>\n' +
-                    //         '<dd>Access keys for authenticating to the specific ' +
-                    //         'cloud provider, usually used for inventory sync ' +
-                    //         'and deployment.</dd>\n' +
-                    //         '</dl>\n'
-                    // }]
+                    dataContainer: "body",
+                    hasSubForm: true
                 },
                 access_key: {
                     label: 'Access Key',
                     type: 'text',
                     ngShow: "kind.value == 'aws'",
                     awRequiredWhen: {
-                        variable: "aws_required",
+                        reqExpression: "aws_required",
                         init: false
                     },
                     autocomplete: false,
-                    apiField: 'username'
+                    apiField: 'username',
+                    subForm: 'credentialSubForm',
                 },
                 secret_key: {
                     label: 'Secret Key',
                     type: 'sensitive',
                     ngShow: "kind.value == 'aws'",
+                    ngDisabled: "secret_key_ask",
                     awRequiredWhen: {
-                        variable: "aws_required",
+                        reqExpression: "aws_required",
                         init: false
                     },
                     autocomplete: false,
-                    ask: false,
                     clear: false,
                     hasShowInputButton: true,
-                    apiField: 'passwowrd'
+                    apiField: 'password',
+                    subForm: 'credentialSubForm'
                 },
                 security_token: {
                     label: 'STS Token',
@@ -163,12 +122,13 @@ export default
                     hasShowInputButton: true,
                     dataTitle: 'STS Token',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "host": {
                     labelBind: 'hostLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack'",
+                    ngShow: "kind.value == 'vmware' || kind.value == 'openstack' || kind.value === 'satellite6' || kind.value === 'cloudforms'",
                     awPopOverWatch: "hostPopOver",
                     awPopOver: "set in helpers/credentials",
                     dataTitle: 'Host',
@@ -176,41 +136,17 @@ export default
                     dataContainer: "body",
                     autocomplete: false,
                     awRequiredWhen: {
-                        variable: 'host_required',
-                        init: false
-                    }
-                },
-                "username": {
-                    labelBind: 'usernameLabel',
-                    type: 'text',
-                    ngShow: "kind.value && kind.value !== 'aws' && " +
-                            "kind.value !== 'gce' && kind.value!=='azure'",
-                    awRequiredWhen: {
-                        variable: 'username_required',
+                        reqExpression: 'host_required',
                         init: false
                     },
-                    autocomplete: false
+                    subForm: 'credentialSubForm'
                 },
-                "email_address": {
-                    labelBind: 'usernameLabel',
-                    type: 'email',
-                    ngShow: "kind.value === 'gce'",
-                    awRequiredWhen: {
-                        variable: 'email_required',
-                        init: false
-                    },
-                    autocomplete: false,
-                    awPopOver: '<p>The email address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
-                    dataTitle: 'Email',
-                    dataPlacement: 'right',
-                    dataContainer: "body"
-                },
-                "subscription_id": {
-                    labelBind: "usernameLabel",
+                "subscription": {
+                    label: "Subscription ID",
                     type: 'text',
-                    ngShow: "kind.value == 'azure'",
+                    ngShow: "kind.value == 'azure' || kind.value == 'azure_rm'",
                     awRequiredWhen: {
-                        variable: 'subscription_required',
+                        reqExpression: 'subscription_required',
                         init: false
                     },
                     addRequired: false,
@@ -219,67 +155,99 @@ export default
                     awPopOver: '<p>Subscription ID is an Azure construct, which is mapped to a username.</p>',
                     dataTitle: 'Subscription ID',
                     dataPlacement: 'right',
-                    dataContainer: "body"
-
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
+                },
+                "username": {
+                    labelBind: 'usernameLabel',
+                    type: 'text',
+                    ngShow: "kind.value && kind.value !== 'aws' && " +
+                            "kind.value !== 'gce' && kind.value!=='azure'",
+                    awRequiredWhen: {
+                        reqExpression: 'username_required',
+                        init: false
+                    },
+                    autocomplete: false,
+                    subForm: "credentialSubForm"
+                },
+                "email_address": {
+                    labelBind: 'usernameLabel',
+                    type: 'email',
+                    ngShow: "kind.value === 'gce'",
+                    awRequiredWhen: {
+                        reqExpression: 'email_required',
+                        init: false
+                    },
+                    autocomplete: false,
+                    awPopOver: '<p>The email address assigned to the Google Compute Engine <b><i>service account.</b></i></p>',
+                    dataTitle: 'Email',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "api_key": {
                     label: 'API Key',
                     type: 'sensitive',
                     ngShow: "kind.value == 'rax'",
                     awRequiredWhen: {
-                        variable: "rackspace_required",
+                        reqExpression: "rackspace_required",
                         init: false
                     },
                     autocomplete: false,
-                    ask: false,
                     hasShowInputButton: true,
                     clear: false,
+                    subForm: 'credentialSubForm'
                 },
                 "password": {
                     labelBind: 'passwordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'",
-                    addRequired: false,
-                    editRequired: false,
-                    ask: false,
+                    ngShow: "kind.value == 'scm' || kind.value == 'vmware' || kind.value == 'openstack'|| kind.value == 'satellite6'|| kind.value == 'cloudforms'|| kind.value == 'net' || kind.value == 'azure_rm'",
                     clear: false,
                     autocomplete: false,
                     hasShowInputButton: true,
                     awRequiredWhen: {
-                        variable: "password_required",
+                        reqExpression: "password_required",
                         init: false
-                    }
+                    },
+                    subForm: "credentialSubForm"
                 },
                 "ssh_password": {
-                    label: 'Password', // formally 'SSH Password'
+                    label: 'Password',
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
+                    ngDisabled: "ssh_password_ask",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'ssh_password_ask',
+                        text: 'Ask at runtime?',
+                        ngChange: 'ask(\'ssh_password\', \'undefined\')'
+                    },
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 },
                 "ssh_key_data": {
                     labelBind: 'sshKeyDataLabel',
                     type: 'textarea',
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm' || " +
-                            "kind.value == 'gce' || kind.value == 'azure'",
+                            "kind.value == 'gce' || kind.value == 'azure' || kind.value == 'net'",
                     awRequiredWhen: {
-                        variable: 'key_required',
+                        reqExpression: 'key_required',
                         init: true
                     },
-                    hintText: "{{ key_hint }}",
+                    class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+                    elementClass: 'Form-monospace',
                     addRequired: false,
                     editRequired: false,
                     awDropFile: true,
-                    'class': 'ssh-key-field',
                     rows: 10,
                     awPopOver: "SSH key description",
                     awPopOverWatch:   "key_description",
-                    dataTitle: 'Help',
+                    dataTitle: 'Private Key',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: "credentialSubForm"
                 },
                 "ssh_key_unlock": {
                     label: 'Private Key Passphrase',
@@ -287,10 +255,16 @@ export default
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: "keyEntered === false",
-                    ask: true,
+                    ngDisabled: "keyEntered === false || ssh_key_unlock_ask",
+                    subCheckbox: {
+                        variable: 'ssh_key_unlock_ask',
+                        ngShow: "kind.value == 'ssh'",
+                        text: 'Ask at runtime?',
+                        ngChange: 'ask(\'ssh_key_unlock\', \'undefined\')',
+                        ngDisabled: "keyEntered === false"
+                    },
                     hasShowInputButton: true,
-                    askShow: "kind.value == 'ssh'",  // Only allow ask for machine credentials
+                    subForm: 'credentialSubForm'
                 },
                 "become_method": {
                     label: "Privilege Escalation",
@@ -303,25 +277,68 @@ export default
                     "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
                     "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    subForm: 'credentialSubForm'
                 },
                 "become_username": {
-                    label: 'Privilege Escalation Username',
+                    labelBind: 'becomeUsernameLabel',
                     type: 'text',
-                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
+                    ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
                     addRequired: false,
                     editRequired: false,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 },
                 "become_password": {
-                    label: 'Privilege Escalation Password',
+                    labelBind: 'becomePasswordLabel',
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' && (become_method && become_method.value)",
+                    ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
+                    ngDisabled: "become_password_ask",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'become_password_ask',
+                        text: 'Ask at runtime?',
+                        ngChange: 'ask(\'become_password\', \'undefined\')'
+                    },
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
+                },
+                client:{
+                    type: 'text',
+                    label: 'Client ID',
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                secret:{
+                    type: 'sensitive',
+                    hasShowInputButton: true,
+                    autocomplete: false,
+                    label: 'Client Secret',
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                tenant: {
+                    type: 'text',
+                    label: 'Tenant ID',
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'azure_rm'"
+                },
+                authorize: {
+                    label: 'Authorize',
+                    type: 'checkbox',
+                    ngChange: "toggleCallback('host_config_key')",
+                    subForm: 'credentialSubForm',
+                    ngShow: "kind.value === 'net'"
+                },
+                authorize_password: {
+                    label: 'Authorize Password',
+                    type: 'sensitive',
+                    hasShowInputButton: true,
+                    autocomplete: false,
+                    subForm: 'credentialSubForm',
+                    ngShow: "authorize && authorize !== 'false'",
                 },
                 "project": {
                     labelBind: 'projectLabel',
@@ -329,40 +346,114 @@ export default
                     ngShow: "kind.value == 'gce' || kind.value == 'openstack'",
                     awPopOverWatch: "projectPopOver",
                     awPopOver: "set in helpers/credentials",
-                    dataTitle: 'Project ID',
+                    dataTitle: 'Project Name',
                     dataPlacement: 'right',
                     dataContainer: "body",
                     addRequired: false,
                     editRequired: false,
                     awRequiredWhen: {
-                        variable: 'project_required',
+                        reqExpression: 'project_required',
                         init: false
-                    }
+                    },
+                    subForm: 'credentialSubForm'
+                },
+                "domain": {
+                    labelBind: 'domainLabel',
+                    type: 'text',
+                    ngShow: "kind.value == 'openstack'",
+                    awPopOver: "<p>OpenStack domains define administrative " +
+                    "boundaries. It is only needed for Keystone v3 authentication URLs. " +
+                    "Common scenarios include:<ul><li><b>v2 URLs</b> - leave blank</li>" +
+                    "<li><b>v3 default</b> - set to 'default'</br></li>" +
+                    "<li><b>v3 multi-domain</b> - your domain name</p></li></ul></p>",
+                    dataTitle: 'Domain Name',
+                    dataPlacement: 'right',
+                    dataContainer: "body",
+                    addRequired: false,
+                    editRequired: false,
+                    subForm: 'credentialSubForm'
                 },
                 "vault_password": {
                     label: "Vault Password",
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
+                    ngDisabled: "vault_password_ask",
                     addRequired: false,
                     editRequired: false,
-                    ask: true,
+                    subCheckbox: {
+                        variable: 'vault_password_ask',
+                        text: 'Ask at runtime?',
+                        ngChange: 'ask(\'vault_password\', \'undefined\')'
+                    },
                     hasShowInputButton: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    subForm: 'credentialSubForm'
                 }
             },
 
             buttons: {
+                cancel: {
+                    ngClick: 'formCancel()',
+                },
                 save: {
                     label: 'Save',
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true //Disable when $pristine or $invalid, optional
-                },
-                reset: {
-                    ngClick: 'formReset()',
-                    ngDisabled: true //Disabled when $pristine
                 }
             },
 
-            related: {}
+            related: {
+                permissions: {
+                    awToolTip: 'Please save before assigning permissions',
+                    dataPlacement: 'top',
+                    basePath: 'credentials/:id/access_list/',
+                    type: 'collection',
+                    title: 'Permissions',
+                    iterator: 'permission',
+                    index: false,
+                    open: false,
+                    searchType: 'select',
+                    actions: {
+                        add: {
+                            ngClick: "addPermission",
+                            label: 'Add',
+                            awToolTip: 'Add a permission',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
+                        }
+                    },
 
+                    fields: {
+                        username: {
+                            key: true,
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
+                        },
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
+                        },
+                        team_roles: {
+                            label: 'Team Roles',
+                            type: 'team_roles',
+                            noSort: true,
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
+                            searchable: false
+                        }
+                    }
+                }
+            },
+
+            relatedSets: function(urls) {
+                return {
+                    permissions: {
+                        iterator: 'permission',
+                        url: urls.access_list
+                    }
+                };
+            }
         });

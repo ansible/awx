@@ -1,0 +1,254 @@
+@import "../shared/branding/colors.default.less";
+
+.TagSearch {
+    margin-bottom: 10px;
+    min-height: 45px;
+}
+
+.TagSearch-clickToClose {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1040;
+}
+
+.TagSearch-bar {
+    display: flex;
+    padding: 0;
+    font-size: 12px;
+    height: 35px;
+    align-items: stretch;
+    margin-bottom: 10px;
+}
+
+.TagSearch-bar i {
+    font-size: 16px;
+    color: @default-icon;
+}
+
+.TagSearch-typeDropdown {
+    color: @default-interface-txt;
+    flex: initial;
+    border: 1px solid @d7grey;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    padding: 0px 10px;
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    cursor: pointer;
+    text-transform: uppercase;
+    position: relative;
+}
+
+.TagSearch-typeDropdown.is-single {
+    cursor: default;
+    padding-right: 12px;
+}
+
+.TagSearch-typeDropdown.is-open {
+    border-bottom-left-radius: 0;
+}
+
+.TagSearch-typeDropdownName {
+    display: block;
+    overflow: hidden;
+}
+
+.TagSearch-selectDownIcon {
+    margin-left: 10px;
+}
+
+.TagSearch-dropdownContainer {
+    position: absolute;
+    left: -1px;
+    top: 34px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid @d7grey;
+    background: white;
+    padding: 5px 0;
+    border-top: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    z-index: 50000;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 2px 2px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+.TagSearch-dropdownContainer--searchTypes {
+    min-width: ~"calc(100% + 1px)";
+}
+
+.TagSearch-dropdownContainer--typeOptions {
+    right: -1px;
+    left: -1px;
+}
+
+.TagSearch-dropdownItem {
+   padding: 5px 10px;
+   cursor: pointer;
+   text-transform: capitalize;
+}
+
+.TagSearch-dropdownItem:hover {
+    background-color: @default-no-items-bord;
+}
+
+.TagSearch-dropdownItem.is-selected {
+   background-color: @default-white-button-bord;
+}
+
+.TagSearch-searchTermContainer {
+    flex: initial;
+    width: ~"calc(100% - 50px)";
+    border: 1px solid @d7grey;
+    border-left: 0px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    display: flex;
+    background-color: @default-bg;
+    position: relative;
+}
+
+.TagSearch-searchTermContainer.is-open {
+    border-bottom-right-radius: 0;
+}
+
+.TagSearch-searchTermContainer input {
+    flex: 1 0 auto;
+    margin: 0 10px;
+    border: none;
+    font-size: 14px;
+}
+
+.TagSearch-searchTermContainer input:focus,
+.TagSearch-searchTermContainer input:active {
+    outline: 0;
+}
+
+.TagSearch-searchTermSelect {
+    padding: 0px 10px !important;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.TagSearch-searchTermSelectPlaceholder {
+    color: @default-icon !important;
+    text-transform: uppercase;
+    font-size: 14px;
+    flex: 1 0 auto;
+}
+
+.TagSearch-searchTermContainer input:placeholder-shown {
+    color: @default-icon !important;
+    text-transform: uppercase;
+}
+
+.TagSearch-searchTermSelect {
+    padding: 10px;
+    background-color: @default-bg;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    cursor: pointer;
+}
+
+.TagSearch-searchButton {
+    flex: initial;
+    margin-left: auto;
+    padding: 8px 10px;
+    border-left: 1px solid @d7grey;
+    background-color: @default-bg;
+    cursor: pointer;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.TagSearch-searchButton:hover {
+    background-color: @default-tertiary-bg;
+}
+
+.TagSearch-flexContainer {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.TagSearch-tagContainer {
+    display: flex;
+    max-width: 100%;
+    margin-bottom: 10px;
+}
+
+.TagSearch-tag {
+    border-radius: 5px;
+    padding: 2px 10px;
+    margin: 4px 0px;
+    font-size: 12px;
+    color: @default-interface-txt;
+    background-color: @default-bg;
+    margin-right: 5px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.TagSearch-tag--deletable {
+    margin-right: 0px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-right: 0;
+    max-wdith: ~"calc(100% - 23px)";
+    background-color: @default-link;
+    color: @default-bg;
+    margin-right: 5px;
+}
+
+.TagSearch-deleteContainer {
+    background-color: @default-link!important;
+    color: white;
+    background-color: @default-bg;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    padding: 0 5px;
+    margin: 4px 0px;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+}
+
+.TagSearch-tagDelete {
+    font-size: 13px;
+}
+
+.TagSearch-name {
+    flex: initial;
+    max-width: 100%;
+}
+
+.TagSearch-tag--deletable > .TagSearch-name {
+    max-width: ~"calc(100% - 23px)";
+}
+
+.TagSearch-deleteContainer:hover, {
+    border-color: @default-err;
+    background-color: @default-err!important;
+}
+
+.TagSearch-deleteContainer:hover > .TagSearch-tagDelete {
+    color: @default-bg;
+}
+
+// TODO: Actually Remove the old list search widgets from the partials
+.List-searchWidget {
+    display: none !important;
+}
+
+.List-searchRow {
+    display: none !important;
+}

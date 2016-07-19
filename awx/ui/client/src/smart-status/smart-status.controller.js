@@ -7,37 +7,41 @@
 export default ['$scope', '$filter',
     function ($scope, $filter) {
 
-        var recentJobs = $scope.jobs;
-
         function isFailureState(status) {
             return status === 'failed' || status === 'error' || status === 'canceled';
         }
 
-        var sparkData =
+        function init(){
+            var recentJobs = $scope.jobs;
+            var sparkData =
             _.sortBy(recentJobs.map(function(job) {
 
                 var data = {};
 
                 if (job.status === 'successful') {
                     data.value = 1;
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--success icon-job-successful\"></i>  " + job.status.toUpperCase();
                 } else if (isFailureState(job.status)) {
                     data.value = -1;
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--failed icon-job-successful\"></i>  " + job.status.toUpperCase();
                 } else {
                     data.value = 0;
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--running icon-job-successful\"></i>  " + job.status.toUpperCase();
                 }
 
                 data.jobId = job.id;
-                data.smartStatus = job.status;
                 data.sortDate = job.finished || "running" + data.jobId;
-                data.finished = $filter('longDate')(job.finished) || "running";
+                data.finished = $filter('longDate')(job.finished) || job.status+"";
+                data.status_tip = "JOB ID: " + data.jobId + "<br>STATUS: " + data.smartStatus + "<br>FINISHED: " + data.finished;
 
                 return data;
             }), "sortDate").reverse();
 
-        $scope.sparkArray = _.pluck(sparkData, 'value');
-        $scope.jobIds = _.pluck(sparkData, 'jobId');
-        $scope.smartStatus = _.pluck(sparkData, 'smartStatus');
-        $scope.finished = _.pluck(sparkData, 'finished');
+            $scope.sparkArray = sparkData;
+        }
+        $scope.$watchCollection('jobs', function(){
+            init();
+        });
 
 }];
 

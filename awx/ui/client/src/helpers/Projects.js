@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
    /**
  * @ngdoc function
  * @name helpers.function:Projects
@@ -41,6 +41,7 @@ export default
                         break;
                     case 'failed':
                     case 'missing':
+                    case 'canceled':
                         result = 'error';
                 }
                 return result;
@@ -69,8 +70,11 @@ export default
                         result = 'Success! Click for details';
                         break;
                     case 'failed':
-                    case 'missing':
                         result = 'Failed. Click for details';
+                        break;
+                    case 'missing':
+                        result = 'Missing. Click for details';
+                        break;
                 }
                 return result;
             };

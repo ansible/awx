@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('JobTemplatesListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'job_template',
         selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
+        listTitle: 'Job Templates',
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
             "button to create a new job template.",
         index: false,
@@ -22,19 +23,28 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                // columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
+                columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9'
             },
             description: {
                 label: 'Description',
-                // columnClass: 'col-lg-4 col-md-3 hidden-sm hidden-xs'
+                columnClass: 'col-lg-2 hidden-md hidden-sm hidden-xs'
             },
             smart_status: {
-              label: 'Status',
-              columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-4',
+              label: 'Activity',
+              columnClass: 'List-tableCell col-lg-2 col-md-2 hidden-sm hidden-xs',
               searchable: false,
               nosort: true,
               ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
+            },
+            labels: {
+                label: 'Labels',
+                type: 'labels',
+                nosort: true,
+                columnClass: 'List-tableCell col-lg-4 col-md-4 hidden-sm hidden-xs',
+                searchType: 'related',
+                sourceModel: 'labels',
+                sourceField: 'name'
             }
         },
 
@@ -44,19 +54,15 @@ export default
                 ngClick: 'addJobTemplate()',
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
-                ngHide: 'portalMode===true'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                awFeature: 'activity_streams',
-                mode: 'edit',
-                ngHide: 'portalMode===true'
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-3 col-sm-3 col-xs-3',
+
             submit: {
                 label: 'Launch',
                 mode: 'all',
@@ -67,9 +73,17 @@ export default
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                ngHref: '#/job_templates/{{ job_template.id }}/schedules',
+                ngClick: 'scheduleJob(job_template.id)',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
+            },
+            copy: {
+                label: 'Copy',
+                'ui-sref': 'jobTemplates.copy({id: job_template.id})',
+                "class": 'btn-danger btn-xs',
+                awToolTip: 'Copy template',
+                dataPlacement: 'top',
+                ngHide: 'job_template.summary_fields.can_copy===false'
             },
             edit: {
                 label: 'Edit',
@@ -84,14 +98,6 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top',
-            },
-            copy: {
-                label: 'Copy',
-                ngClick: "copyJobTemplate(job_template.id, job_template.name)",
-                "class": 'btn-danger btn-xs',
-                awToolTip: 'Copy template',
-                dataPlacement: 'top',
-                ngHide: 'job_template.summary_fields.can_copy===false'
             }
         }
     });

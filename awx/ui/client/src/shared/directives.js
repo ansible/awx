@@ -328,9 +328,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
     })
 
     //
-    // awRequiredWhen: { variable: "<variable to watch for true|false>", init:"true|false" }
+    // awRequiredWhen: { reqExpression: "<expression to watch for true|false>", init: "true|false" }
     //
-    // Make a field required conditionally using a scope variable. If the scope variable is true, the
+    // Make a field required conditionally using an expression. If the expression evaluates to true, the
     // field will be required. Otherwise, the required attribute will be removed.
     //
     .directive('awRequiredWhen', function() {
@@ -338,47 +338,38 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
 
-                function checkIt () {
+                function updateRequired () {
+                    var isRequired = scope.$eval(attrs.awRequiredWhen);
+
                     var viewValue = elm.val(), label, validity = true;
-                    if ( scope[attrs.awRequiredWhen] && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
+                    label = $(elm).closest('.form-group').find('label').first();
+
+                    if ( isRequired && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
                         $(elm).attr('required','required');
-                        if ($(elm).hasClass('lookup')) {
-                            $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
-                        }
-                        else {
-                            $(elm).parent().parent().find('label').first().addClass('prepend-asterisk');
-                        }
+                        $(label).removeClass('prepend-asterisk').addClass('prepend-asterisk');
                     }
-                    else if (!scope[attrs.awRequiredWhen]) {
+                    else if (!isRequired) {
                         elm.removeAttr('required');
-                        if ($(elm).hasClass('lookup')) {
-                            label = $(elm).parent().parent().parent().find('label').first();
-                            label.removeClass('prepend-asterisk');
-                        }
-                        else {
-                            $(elm).parent().parent().find('label').first().removeClass('prepend-asterisk');
+                        if(!attrs.awrequiredAlwaysShowAsterisk) {
+                            $(label).removeClass('prepend-asterisk');
                         }
                     }
-                    if (scope[attrs.awRequiredWhen] && (viewValue === undefined || viewValue === null || viewValue === '')) {
+                    if (isRequired && (viewValue === undefined || viewValue === null || viewValue === '')) {
                         validity = false;
                     }
                     ctrl.$setValidity('required', validity);
                 }
 
+                scope.$watchGroup([attrs.awRequiredWhen, $(elm).attr('name')], function() {
+                    // watch for the aw-required-when expression to change value
+                    updateRequired();
+                });
+
                 if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
+                    // We already set a watcher on the attribute above so no need to call updateRequired() in here
                     scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
-                    checkIt();
                 }
 
-                scope.$watch(attrs.awRequiredWhen, function() {
-                    // watch for the aw-required-when expression to change value
-                    checkIt();
-                });
-
-                scope.$watch($(elm).attr('name'), function() {
-                    // watch for the field to change value
-                    checkIt();
-                });
             }
         };
     })
@@ -494,6 +485,14 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
                 }
 
+                var template, custom_class;
+                if (attrs.tooltipInnerClass || attrs.tooltipinnerclass) {
+                    custom_class = attrs.tooltipInnerClass || attrs.tooltipinnerclass;
+                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner ' + custom_class + '"></div></div>';
+                } else {
+                    template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
+                }
+
                 $(element).on('hidden.bs.tooltip', function( ) {
                     // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
                     // after a tooltip fades away. If not, they lay overtop of other elements and
@@ -509,8 +508,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     html: true,
                     title: attrs.awToolTip,
                     container: 'body',
-                    trigger: 'hover focus',
-                    template: '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>'
+                    trigger: 'hover',
+                    template: template
                 });
 
                 if (attrs.tipWatch) {
@@ -725,6 +724,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     max: elm.attr('max'),
                     numberFormat: "d",
                     disabled: (elm.attr('readonly')) ? true : false,
+                    icons: {
+                        down: "Form-numberInputButton fa fa-angle-down",
+                        up: "Form-numberInputButton fa fa-angle-up"
+                    },
                     spin: function(e, u) {
                         ctrl.$setViewValue(u.value);
                         ctrl.$setValidity('required',true);
@@ -745,6 +748,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     opts.disabled = true;
                 }
                 $(elm).spinner(opts);
+                $('.ui-icon').text('');
+                $(".ui-icon").removeClass('ui-icon ui-icon-triangle-1-n ui-icon-triangle-1-s');
                 $(elm).on("click", function () {
                     $(elm).select();
                 });

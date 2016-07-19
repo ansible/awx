@@ -11,7 +11,7 @@ import urlparse
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, smart_text
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -20,8 +20,16 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
+from awx.main.models.notifications import NotificationTemplate
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
+from awx.main.fields import ImplicitRoleField
+from awx.main.conf import tower_settings
+from awx.main.models.rbac import (
+    ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR,
+)
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -49,7 +57,7 @@ class ProjectOptions(models.Model):
             paths = [x.decode('utf-8') for x in os.listdir(settings.PROJECTS_ROOT)
                      if (os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x)) and
                          not x.startswith('.') and not x.startswith('_'))]
-            qs = Project.objects.filter(active=True)
+            qs = Project.objects
             used_paths = qs.values_list('local_path', flat=True)
             return [x for x in paths if x not in used_paths]
         else:
@@ -107,11 +115,11 @@ class ProjectOptions(models.Model):
         try:
             scm_url = update_scm_url(self.scm_type, scm_url,
                                      check_special_cases=False)
-        except ValueError, e:
-            raise ValidationError((e.args or ('Invalid SCM URL',))[0])
+        except ValueError as e:
+            raise ValidationError((e.args or ('Invalid SCM URL.',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
-            raise ValidationError('SCM URL is required')
+            raise ValidationError('SCM URL is required.')
         return unicode(self.scm_url or '')
 
     def clean_credential(self):
@@ -120,7 +128,7 @@ class ProjectOptions(models.Model):
         cred = self.credential
         if cred:
             if cred.kind != 'scm':
-                raise ValidationError('Credential kind must be "scm"')
+                raise ValidationError("Credential kind must be 'scm'.")
             try:
                 scm_url = update_scm_url(self.scm_type, self.scm_url,
                                          check_special_cases=False)
@@ -134,8 +142,8 @@ class ProjectOptions(models.Model):
                 try:
                     update_scm_url(self.scm_type, self.scm_url, scm_username,
                                    scm_password)
-                except ValueError, e:
-                    raise ValidationError((e.args or ('Invalid credential',))[0])
+                except ValueError as e:
+                    raise ValidationError((e.args or ('Invalid credential.',))[0])
             except ValueError:
                 pass
         return cred
@@ -181,11 +189,11 @@ class ProjectOptions(models.Model):
                     # Filter files in a tasks subdirectory.
                     if 'tasks' in playbook.split(os.sep):
                         continue
-                    results.append(playbook)
+                    results.append(smart_text(playbook))
         return sorted(results, key=lambda x: smart_str(x).lower())
 
 
-class Project(UnifiedJobTemplate, ProjectOptions):
+class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
@@ -194,6 +202,13 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         app_label = 'main'
         ordering = ('id',)
 
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='projects',
+    )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
         editable=False,
@@ -205,6 +220,26 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         default=0,
         blank=True,
     )
+
+    admin_role = ImplicitRoleField(parent_role=[
+        'organization.admin_role',
+        'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ])
+
+    use_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
+
+    update_role = ImplicitRoleField(
+        parent_role='admin_role',
+    )
+
+    read_role = ImplicitRoleField(parent_role=[
+        'organization.auditor_role',
+        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'use_role',
+        'update_role',
+    ])
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -221,6 +256,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
+        skip_update = bool(kwargs.pop('skip_update', False))
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = self.__class__.objects.get(pk=self.pk)
@@ -244,7 +280,7 @@ class Project(UnifiedJobTemplate, ProjectOptions):
             if update_fields:
                 self.save(update_fields=update_fields)
         # If we just created a new project with SCM, start the initial update.
-        if new_instance and self.scm_type:
+        if new_instance and self.scm_type and not skip_update:
             self.update()
 
     def _get_current_status(self):
@@ -299,15 +335,39 @@ class Project(UnifiedJobTemplate, ProjectOptions):
         if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) > now():
             return True
         return False
-    
+
     @property
     def needs_update_on_launch(self):
-        if self.active and self.scm_type and self.scm_update_on_launch:
+        if self.scm_type and self.scm_update_on_launch:
             if not self.last_job_run:
                 return True
             if (self.last_job_run + datetime.timedelta(seconds=self.scm_update_cache_timeout)) <= now():
                 return True
         return False
+
+    @property
+    def notification_templates(self):
+        base_notification_templates = NotificationTemplate.objects
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors=self))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success=self))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(unifiedjobtemplate_notification_templates_for_any=self))
+        # Get Organization NotificationTemplates
+        if self.organization is not None:
+            error_notification_templates = set(error_notification_templates +
+                                               list(base_notification_templates
+                                                    .filter(organization_notification_templates_for_errors=self.organization)))
+            success_notification_templates = set(success_notification_templates +
+                                                 list(base_notification_templates
+                                                      .filter(organization_notification_templates_for_success=self.organization)))
+            any_notification_templates = set(any_notification_templates +
+                                             list(base_notification_templates
+                                                  .filter(organization_notification_templates_for_any=self.organization)))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
@@ -369,6 +429,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

@@ -6,6 +6,7 @@ import logging
 
 # Django
 from django.dispatch import receiver
+from django.contrib.auth.models import User
 from django.conf import settings as django_settings
 
 # django-auth-ldap
@@ -104,6 +105,18 @@ class RADIUSBackend(BaseRADIUSBackend):
             return None
         return super(RADIUSBackend, self).get_user(user_id)
 
+    def get_django_user(self, username, password=None):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = User(username=username)
+
+        if password is not None:
+            user.set_unusable_password()
+            user.save()
+
+        return user
+
 
 class TowerSAMLIdentityProvider(BaseSAMLIdentityProvider):
     '''
@@ -163,7 +176,7 @@ class SAMLAuth(BaseSAMLAuth):
         return super(SAMLAuth, self).get_user(user_id)
 
 
-def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
+def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=True):
     '''
     Hepler function to update m2m relationship based on LDAP group membership.
     '''
@@ -188,7 +201,7 @@ def _update_m2m_from_groups(user, ldap_user, rel, opts, remove=False):
         rel.remove(user)
 
 
-@receiver(populate_user)
+@receiver(populate_user, dispatch_uid='populate-ldap-user')
 def on_populate_user(sender, **kwargs):
     '''
     Handle signal from LDAP backend to populate the user object.  Update user
@@ -207,14 +220,14 @@ def on_populate_user(sender, **kwargs):
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
         org, created = Organization.objects.get_or_create(name=org_name)
-        remove = bool(org_opts.get('remove', False))
+        remove = bool(org_opts.get('remove', True))
         admins_opts = org_opts.get('admins', None)
         remove_admins = bool(org_opts.get('remove_admins', remove))
-        _update_m2m_from_groups(user, ldap_user, org.admins, admins_opts,
+        _update_m2m_from_groups(user, ldap_user, org.admin_role.members, admins_opts,
                                 remove_admins)
         users_opts = org_opts.get('users', None)
         remove_users = bool(org_opts.get('remove_users', remove))
-        _update_m2m_from_groups(user, ldap_user, org.users, users_opts,
+        _update_m2m_from_groups(user, ldap_user, org.member_role.members, users_opts,
                                 remove_users)
 
     # Update team membership based on group memberships.
@@ -225,8 +238,8 @@ def on_populate_user(sender, **kwargs):
         org, created = Organization.objects.get_or_create(name=team_opts['organization'])
         team, created = Team.objects.get_or_create(name=team_name, organization=org)
         users_opts = team_opts.get('users', None)
-        remove = bool(team_opts.get('remove', False))
-        _update_m2m_from_groups(user, ldap_user, team.users, users_opts,
+        remove = bool(team_opts.get('remove', True))
+        _update_m2m_from_groups(user, ldap_user, team.member_role.members, users_opts,
                                 remove)
 
     # Update user profile to store LDAP DN.

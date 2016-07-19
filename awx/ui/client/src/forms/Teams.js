@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
   /**
  * @ngdoc function
  * @name forms.function:Teams
@@ -14,27 +14,10 @@ export default
     angular.module('TeamFormDefinition', [])
         .value('TeamForm', {
 
-            addTitle: 'Create Team', //Legend in add mode
+            addTitle: 'New Team', //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
-            well: true,
-            collapse: true,
-            collapseTitle: "Properties",
-            collapseMode: 'edit',
-            collapseOpen: true,
-
-            actions: {
-                stream: {
-                    'class': "btn-primary btn-xs activity-btn",
-                    ngClick: "showActivity()",
-                    awToolTip: "View Activity Stream",
-                    awFeature: 'activity_streams',
-                    dataPlacement: "top",
-                    icon: "icon-comments-alt",
-                    mode: 'edit',
-                    iconSize: 'large'
-                }
-            },
+            tabs: true,
 
             fields: {
                 name: {
@@ -55,224 +38,104 @@ export default
                     type: 'lookup',
                     sourceModel: 'organization',
                     sourceField: 'name',
+                    addRequired: true,
+                    editRequire: false,
                     ngClick: 'lookUpOrganization()',
                     awRequiredWhen: {
-                        variable: "teamrequired",
-                        init: "true"
+                        reqExpression: "orgrequired",
+                        init: true
                     }
                 }
             },
 
             buttons: {
+                cancel: {
+                    ngClick: 'formCancel()'
+                },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
-                },
-                reset: {
-                    ngClick: 'formReset()',
                     ngDisabled: true
                 }
             },
 
             related: {
-
-                credentials: {
-                    type: 'collection',
-                    title: 'Credentials',
-                    iterator: 'credential',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('credentials')",
-                            icon: 'icon-plus',
-                            label: 'Add',
-                            add: 'Add a new credential'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('credentials', credential.id, credential.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Modify the credential',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('credentials', credential.id, credential.name, 'credentials')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Remove the credential'
-                        }
-                    }
-                },
-
-                permissions: {
-                    type: 'collection',
-                    title: 'Permissions',
-                    iterator: 'permission',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('permissions')",
-                            icon: 'icon-plus',
-                            label: 'Add',
-                            awToolTip: 'Add a permission for this user',
-                            ngShow: 'PermissionAddAllowed'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name',
-                            ngClick: "edit('permissions', permission.id, permission.name)"
-                        },
-                        inventory: {
-                            label: 'Inventory',
-                            sourceModel: 'inventory',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.inventory.name'
-                        },
-                        project: {
-                            label: 'Project',
-                            sourceModel: 'project',
-                            sourceField: 'name',
-                            ngBind: 'permission.summary_fields.project.name'
-                        },
-                        permission_type: {
-                            label: 'Permission',
-                            ngBind: 'getPermissionText()',
-                            searchType: 'select'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('permissions', permission.id, permission.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit the permission',
-                            'class': 'btn btn-default'
-                        },
-
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('permissions', permission.id, permission.name, 'permissions')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Delete the permission',
-                            ngShow: 'PermissionAddAllowed'
-                        }
-                    }
-
-                },
-
-                projects: {
-                    type: 'collection',
-                    title: 'Projects',
-                    iterator: 'project',
-                    open: false,
-                    index: false,
-
-                    actions: {
-                        add: {
-                            ngClick: "add('projects')",
-                            icon: 'icon-plus',
-                            label: 'Add'
-                        }
-                    },
-
-                    fields: {
-                        name: {
-                            key: true,
-                            label: 'Name'
-                        },
-                        description: {
-                            label: 'Description'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('projects', project.id, project.name)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Modify the project',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('projects', project.id, project.name, 'projects')",
-                            icon: 'icon-trash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Remove the project'
-                        }
-                    }
-                },
-
-                users: {
+                access_list: {
+                    dataPlacement: 'top',
+                    awToolTip: 'Please save before adding users',
+                    basePath: 'teams/:id/access_list/',
                     type: 'collection',
                     title: 'Users',
-                    iterator: 'user',
-                    open: false,
+                    iterator: 'permission',
                     index: false,
-
+                    open: false,
+                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "add('users')",
-                            icon: 'icon-plus',
+                            ngClick: "addPermissionWithoutTeamTab",
                             label: 'Add',
-                            awToolTip: 'Add a user'
+                            awToolTip: 'Add user to team',
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ADD'
                         }
                     },
 
                     fields: {
                         username: {
                             key: true,
-                            label: 'Username'
+                            label: 'User',
+                            linkBase: 'users',
+                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
-                        first_name: {
-                            label: 'First Name'
-                        },
-                        last_name: {
-                            label: 'Last Name'
-                        }
-                    },
-
-                    fieldActions: {
-                        edit: {
-                            label: 'Edit',
-                            ngClick: "edit('users', user.id, user.username)",
-                            icon: 'icon-edit',
-                            awToolTip: 'Edit user',
-                            'class': 'btn btn-default'
-                        },
-                        "delete": {
-                            label: 'Delete',
-                            ngClick: "delete('users', user.id, user.username, 'users')",
-                            icon: 'icon-terash',
-                            "class": 'btn-danger',
-                            awToolTip: 'Remove user'
+                        role: {
+                            label: 'Role',
+                            type: 'role',
+                            noSort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
+                            searchable: false
                         }
                     }
+                },
+                roles: {
+                    hideSearchAndActions: true,
+                    dataPlacement: 'top',
+                    awToolTip: 'Please save before assigning permissions',
+                    basePath: 'teams/:id/roles/',
+                    type: 'collection',
+                    title: 'Granted Permissions',
+                    iterator: 'role',
+                    open: false,
+                    index: false,
+                    actions: {},
+                    emptyListText: 'No permissions have been granted',
+                    fields: {
+                        name: {
+                            label: 'Name',
+                            ngBind: 'role.summary_fields.resource_name',
+                            linkTo: '{{convertApiUrl(role.related[role.summary_fields.resource_type])}}',
+                            noSort: true
+                        },
+                        type: {
+                            label: 'Type',
+                            ngBind: 'role.summary_fields.resource_type_display_name',
+                            noSort: true
+                        },
+                        role: {
+                            label: 'Role',
+                            ngBind: 'role.name',
+                            noSort: true
+                        }
+                    },
+                    fieldActions: {
+                        "delete": {
+                            label: 'Remove',
+                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, role.name, role.summary_fields.resource_name, role.related.teams)',
+                            'class': "List-actionButton--delete",
+                            iconClass: 'fa fa-times',
+                            awToolTip: 'Dissasociate permission from team',
+                            dataPlacement: 'top'
+                        }
+                    },
+                    hideOnSuperuser: true
                 }
-
-            }
-
+            },
         }); //InventoryForm

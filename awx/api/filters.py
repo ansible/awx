@@ -8,9 +8,10 @@ import re
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
-from django.db.models.related import RelatedObject
 from django.db.models.fields import FieldDoesNotExist
+from django.db.models.fields.related import ForeignObjectRel
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import force_text
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError
@@ -25,19 +26,6 @@ class MongoFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         return queryset
 
-class ActiveOnlyBackend(BaseFilterBackend):
-    '''
-    Filter to show only objects where is_active/active is True.
-    '''
-
-    def filter_queryset(self, request, queryset, view):
-        for field in queryset.model._meta.fields:
-            if field.name == 'is_active':
-                queryset = queryset.filter(is_active=True)
-            elif field.name == 'active':
-                queryset = queryset.filter(active=True)
-        return queryset
-
 class TypeFilterBackend(BaseFilterBackend):
     '''
     Filter on type field now returned with all objects.
@@ -46,7 +34,7 @@ class TypeFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         try:
             types = None
-            for key, value in request.QUERY_PARAMS.items():
+            for key, value in request.query_params.items():
                 if key == 'type':
                     if ',' in value:
                         types = value.split(',')
@@ -70,7 +58,7 @@ class TypeFilterBackend(BaseFilterBackend):
                 else:
                     queryset = queryset.none()
             return queryset
-        except FieldError, e:
+        except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
 
@@ -107,23 +95,21 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
+            new_parts.append(name)
+
             if name == 'pk':
                 field = model._meta.pk
             else:
                 field = model._meta.get_field_by_name(name)[0]
-            if n < (len(parts) - 2):
-                if getattr(field, 'rel', None):
-                    model = field.rel.to
-                else:
-                    model = field.model
-            new_parts.append(name)
+            model = getattr(field, 'related_model', None) or field.model
+
         if parts:
             new_parts.append(parts[-1])
         new_lookup = '__'.join(new_parts)
         return field, new_lookup
 
     def to_python_related(self, value):
-        value = unicode(value)
+        value = force_text(value)
         if value.lower() in ('none', 'null'):
             return None
         else:
@@ -134,7 +120,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
-        elif isinstance(field, RelatedObject):
+        elif isinstance(field, ForeignObjectRel):
             return self.to_python_related(value)
         else:
             return field.to_python(value)
@@ -145,13 +131,15 @@ class FieldLookupBackend(BaseFilterBackend):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
+            if not value:
+                raise ValueError('cannot provide empty value for __in')
             for item in value.split(','):
                 items.append(self.value_to_python_for_field(field, item))
             value = items
         elif new_lookup.endswith('__regex') or new_lookup.endswith('__iregex'):
             try:
                 re.compile(value)
-            except re.error, e:
+            except re.error as e:
                 raise ValueError(e.args[0])
         else:
             value = self.value_to_python_for_field(field, value)
@@ -159,20 +147,20 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         try:
-            # Apply filters specified via QUERY_PARAMS. Each entry in the lists
+            # Apply filters specified via query_params. Each entry in the lists
             # below is (negate, field, value).
             and_filters = []
             or_filters = []
             chain_filters = []
-            for key, values in request.QUERY_PARAMS.lists():
+            for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
-                
+
                 # HACK: Make job event filtering by host name mostly work even
                 # when not capturing job event hosts M2M.
                 if queryset.model._meta.object_name == 'JobEvent' and key.startswith('hosts__name'):
                     key = key.replace('hosts__name', 'or__host__name')
-                    or_filters.append((False, 'host__name__isnull', True))                 
+                    or_filters.append((False, 'host__name__isnull', True))
 
                 # Custom __int filter suffix (internal use only).
                 q_int = False
@@ -231,11 +219,11 @@ class FieldLookupBackend(BaseFilterBackend):
                     else:
                         q = Q(**{k:v})
                     queryset = queryset.filter(q)
-                queryset = queryset.filter(*args)
-            return queryset.distinct()
-        except (FieldError, FieldDoesNotExist, ValueError), e:
+                queryset = queryset.filter(*args).distinct()
+            return queryset
+        except (FieldError, FieldDoesNotExist, ValueError) as e:
             raise ParseError(e.args[0])
-        except ValidationError, e:
+        except ValidationError as e:
             raise ParseError(e.messages)
 
 class OrderByBackend(BaseFilterBackend):
@@ -246,7 +234,7 @@ class OrderByBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         try:
             order_by = None
-            for key, value in request.QUERY_PARAMS.items():
+            for key, value in request.query_params.items():
                 if key in ('order', 'order_by'):
                     order_by = value
                     if ',' in value:
@@ -273,6 +261,6 @@ class OrderByBackend(BaseFilterBackend):
                             new_order_by.append(field)
                 queryset = queryset.order_by(*new_order_by)
             return queryset
-        except FieldError, e:
+        except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)

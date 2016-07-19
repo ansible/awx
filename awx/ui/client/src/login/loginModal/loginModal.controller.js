@@ -43,8 +43,8 @@
  * - Start the expiration timer by calling the init() method of [js/shared/Timer.js](/static/docs/api/shared.function:Timer)
  * - Get user informaton by calling Authorization.getUser() - sends a GET request to /api/v1/me
  * - Store user information in the session cookie by calling Authorization.setUser().
- * - Get the Tower license by calling Authorization.getLicense() - sends a GET request to /api/vi/config
- * - Stores the license object in local storage by calling Authorization.setLicense(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false.
+ * - Get the Tower license by calling ConfigService.getConfig() - sends a GET request to /api/vi/config
+ * - Stores the license object in memory by calling CheckLicense.test(). This adds the Tower version and a tested flag to the license object. The tested flag is initially set to false. Additionally, the pendoService and FeaturesService are called to initiate the other startup services of Tower
  *
  * Note that there is a session timer kept on the server side as well as the client side. Each time an API request is made, Tower (in app.js) calls
  * Timer.isExpired(). This verifies the UI does not think the session is expired, and if not, moves the expiration time into the future. The number of
@@ -54,18 +54,14 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-    'Timer', 'Empty', 'ClearScope', '$scope', 'pendoService',
-    function ($log, $cookieStore, $compile, $window, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
-    Timer, Empty, ClearScope, scope, pendoService) {
-
-    var setLoginFocus, lastPath, lastUser, sessionExpired, loginAgain;
-
-    setLoginFocus = function () {
-        // Need to clear out any open dialog windows that might be open when this modal opens.
-        ClearScope();
-        $('#login-username').focus();
-    };
+export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
+    '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
+    'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
+    'CheckLicense', 'FeaturesService',
+    function ($log, $cookieStore, $compile, $window, $rootScope, $location,
+        Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
+        scope, pendoService, ConfigService, CheckLicense, FeaturesService) {
+    var lastPath, lastUser, sessionExpired, loginAgain;
 
     loginAgain = function() {
         setTimeout(function() {
@@ -76,6 +72,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
     scope.login_username = '';
     scope.login_password = '';
+
 
     lastPath = function () {
         return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
@@ -93,67 +90,36 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
     $log.debug('User session expired: ' + sessionExpired);
     $log.debug('Last URL: ' + lastPath());
 
-    // Hide any lingering modal dialogs
-    $('.modal[aria-hidden=false]').each(function () {
-        if ($(this).attr('id') !== 'login-modal') {
-            $(this).modal('hide');
-        }
-    });
-
-    // Just in case, make sure the wait widget is not active
-    // and scroll the window to the top
-    Wait('stop');
-    window.scrollTo(0,0);
-
-    // Set focus to username field
-    $('#login-modal').on('shown.bs.modal', function () {
-        setLoginFocus();
-    });
-
-
     $rootScope.loginConfig.promise.then(function () {
-        scope.customLogo = ($AnsibleConfig.custom_logo) ? "custom_console_logo.png" : "tower_console_logo.png";
+        if ($AnsibleConfig.custom_logo) {
+            scope.customLogo = "custom_console_logo.png";
+            scope.customLogoPresent = true;
+        } else {
+            scope.customLogo = "tower-logo-login.svg";
+            scope.customLogoPresent = false;
+        }
 
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
         scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
     });
 
-    // Reset the login form
-    //scope.loginForm.login_username.$setPristine();
-    //scope.loginForm.login_password.$setPristine();
-    //$rootScope.userLoggedIn = false; //hide the logout link. if you got here, you're logged out.
-    //$cookieStore.put('userLoggedIn', false); //gets set back to true by Authorization.setToken().
-
-    $('#login-password').bind('keypress', function (e) {
-        var code = (e.keyCode ? e.keyCode : e.which);
-        if (code === 13) {
-            $('#login-button').click();
-        }
-    });
-
-    scope.reset = function () {
-        $('#login-form input').each(function () {
-            $(this).val('');
-        });
-    };
-
     if (scope.removeAuthorizationGetLicense) {
         scope.removeAuthorizationGetLicense();
     }
     scope.removeAuthorizationGetLicense = scope.$on('AuthorizationGetLicense', function() {
-        Authorization.getLicense()
-            .success(function (data) {
-                Authorization.setLicense(data);
+        ConfigService.getConfig().then(function(){
+                CheckLicense.test();
                 pendoService.issuePendoIdentity();
+                FeaturesService.get();
                 Wait("stop");
                 if (lastPath() && lastUser()) {
                     // Go back to most recent navigation path
                     $location.path(lastPath());
                 } else {
-                    $location.url('/home?login=true');
+                    $location.url('/home');
                 }
             })
-            .error(function () {
+            .catch(function () {
                 Wait('stop');
                 Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', loginAgain);
             });
@@ -171,6 +137,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     $rootScope.sessionTimer = timer;
                     $rootScope.$emit('OpenSocket');
                     $rootScope.user_is_superuser = data.results[0].is_superuser;
+                    $rootScope.user_is_system_auditor = data.results[0].is_system_auditor;
                     scope.$emit('AuthorizationGetLicense');
                 });
             })
@@ -187,6 +154,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
         if (Empty(username) || Empty(password)) {
             scope.reset();
             scope.attemptFailed = true;
+            $('#login-username').focus();
         } else {
             Wait('start');
             Authorization.retrieveToken(username, password)
@@ -206,6 +174,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope', '$l
                     } else {
                         scope.reset();
                         scope.attemptFailed = true;
+                        $('#login-username').focus();
                     }
                 });
         }

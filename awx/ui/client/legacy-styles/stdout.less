@@ -5,6 +5,8 @@
  *
  */
 
+ @import "awx/ui/client/src/shared/branding/colors.default.less";
+
  #jobs-stdout {
     margin-bottom: 20px;
 
@@ -32,6 +34,7 @@
     #pre-container {
         overflow-x: scroll;
         overflow-y: auto;
+        padding: 10px;
     }
 
  }
@@ -42,22 +45,25 @@
 .ansi3 { font-weight: italic; }
 .ansi4 { text-decoration: underline; }
 .ansi9 { text-decoration: line-through; }
-.ansi30 { color: #000316; }
-.ansi31 { color: @red; }
-.ansi32 { color: @green; }
-.ansi33 { color: @changed; }
-.ansi34 { color: #0000AA; }
-.ansi35 { color: #E850A8; }
-.ansi36 { color: @skipped; }
-.ansi37 { color: #F5F1DE; }
-.ansi40 { background-color: #000316; }
-.ansi41 { background-color: @red; }
-.ansi42 { background-color: @green; }
-.ansi43 { background-color: @changed; }
-.ansi44 { background-color: #0000AA; }
-.ansi45 { background-color: #E850A8; }
-.ansi46 { background-color: @skipped; }
-.ansi47 { background-color: #F5F1DE; }
+.ansi30 { color: @default-stdout-txt; }
+.ansi31 { color: @default-err; }
+.ansi1.ansi31 {
+    color: @default-unreachable;
+}
+.ansi32 { color: @default-succ; }
+.ansi33 { color: @default-warning; }
+.ansi34 { color: @default-link; }
+.ansi35 { color: @default-magenta; }
+.ansi36 { color: @default-cyan; }
+.ansi37 { color: @default-bg; }
+.ansi40 { background-color: @default-stdout-txt; }
+.ansi41 { background-color: @default-err; }
+.ansi42 { background-color: @default-succ; }
+.ansi43 { background-color: @default-warning; }
+.ansi44 { background-color: @default-link; }
+.ansi45 { background-color: @default-magenta; }
+.ansi46 { background-color: @default-cyan; }
+.ansi47 { background-color: @default-bg; }
 
 #pre-container-content > span {
     display: inline-block;

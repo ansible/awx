@@ -1,0 +1,104 @@
+<div class="tab-pane" id="jobs-stdout">
+    <div ng-cloak id="htmlTemplate">
+    <div class="StandardOut-container" ng-class="{'fullscreen': stdoutFullScreen}">
+        <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">
+                        RESULTS
+                    </div>
+                    <div class="StandardOut-actions">
+                        <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title=""><i class="icon-launch"></i> </button>
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                    </div>
+                </div>
+                <div class="StandardOut-details">
+
+                    <div class="StandardOut-detailsRow" ng-show="project_name">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">NAME</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a ui-sref="projects.edit({id: job.project})">
+                                {{ project_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STATUS</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <i class="fa icon-job-{{ job.status }}"></i>
+                            <span class="StandardOut-statusText StandardOut--capitalize">{{ job.status }}</span>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.started">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STARTED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.started | longDate }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">FINISHED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.finished | longDate }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">ELAPSED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.elapsed }} seconds
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.launch_type">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">LAUNCH TYPE</div>
+                        <div class="StandardOut-detailsContent StandardOut--capitalize">
+                            {{ job.launch_type }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="project_name">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">PROJECT</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a ui-sref="projects.edit({id: job.project})">
+                                {{ project_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="credential_name">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">CREDENTIAL</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a ui-sref="credentials.edit({credential_id: credential})">
+                                {{ credential_name }}
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="StandardOut-rightPanel">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
+                    <div class="StandardOut-panelHeaderActions">
+                        <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
+                            <i class="fa fa-arrows-alt"></i>
+                        </button>
+                        <a href="/api/v1/project_updates/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
+                                <i class="fa fa-download"></i>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

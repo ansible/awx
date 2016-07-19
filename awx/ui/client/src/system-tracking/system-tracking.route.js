@@ -8,18 +8,23 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 
 export default {
     name: 'systemTracking',
-    route: '/inventories/:inventory/system-tracking/:hosts',
+    route: '/inventories/:inventoryId/system-tracking/:hostIds',
     controller: 'systemTracking',
     templateUrl: templateUrl('system-tracking/system-tracking'),
+    params: {hosts: null, inventory: null},
     reloadOnSearch: false,
+    ncyBreadcrumb: {
+        label: "SYSTEM TRACKING"
+    },
     resolve: {
             moduleOptions:
                 [   'getModuleOptions',
                     'lodashAsPromised',
                     'ProcessErrors',
-                    '$route',
-                    function(getModuleOptions, _, ProcessErrors, $route) {
-                    var hostIds = $route.current.params.hosts.split(',');
+                    '$stateParams',
+                    function(getModuleOptions, _, ProcessErrors, $stateParams) {
+
+                    var hostIds = $stateParams.hostIds.split(',');
 
                     var data =
                         getModuleOptions(hostIds[0])
@@ -37,17 +42,18 @@ export default {
                     }
                 ],
             inventory:
-            [   '$route',
+            [   '$stateParams',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 'ProcessErrors',
-                function($route, $q, rest, getBasePath, ProcessErrors) {
-                    if ($route.current.hasModelKey('inventory')) {
-                        return $q.when($route.current.params.model.inventory);
+                function($stateParams, $q, rest, getBasePath, ProcessErrors) {
+
+                    if ($stateParams.inventory) {
+                        return $q.when($stateParams.inventory);
                     }
 
-                    var inventoryId = $route.current.params.inventory;
+                    var inventoryId = $stateParams.inventoryId;
 
                     var url = getBasePath('inventory') + inventoryId + '/';
                     rest.setUrl(url);
@@ -64,17 +70,17 @@ export default {
                 }
             ],
             hosts:
-            [   '$route',
+            [   '$stateParams',
                 '$q',
                 'Rest',
                 'GetBasePath',
                 'ProcessErrors',
-                function($route, $q, rest, getBasePath, ProcessErrors) {
-                    if ($route.current.hasModelKey('hosts')) {
-                        return $q.when($route.current.params.model.hosts);
+                function($stateParams, $q, rest, getBasePath, ProcessErrors) {
+                    if ($stateParams.hosts) {
+                        return $q.when($stateParams.hosts);
                     }
 
-                    var hostIds = $route.current.params.hosts.split(',');
+                    var hostIds = $stateParams.hostIds.split(',');
 
                     var hosts =
                         hostIds.map(function(hostId) {

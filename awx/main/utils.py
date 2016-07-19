@@ -20,6 +20,7 @@ import tempfile
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
 from django.core.urlresolvers import reverse
+from django.apps import apps
 
 # PyCrypto
 from Crypto.Cipher import AES
@@ -30,7 +31,8 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
            'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
-           '_inventory_updates', 'get_pk_from_dict']
+           '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
+           'get_current_apps', 'set_current_apps']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -42,9 +44,9 @@ def get_object_or_400(klass, *args, **kwargs):
     queryset = _get_queryset(klass)
     try:
         return queryset.get(*args, **kwargs)
-    except queryset.model.DoesNotExist, e:
+    except queryset.model.DoesNotExist as e:
         raise ParseError(*e.args)
-    except queryset.model.MultipleObjectsReturned, e:
+    except queryset.model.MultipleObjectsReturned as e:
         raise ParseError(*e.args)
 
 
@@ -57,9 +59,9 @@ def get_object_or_403(klass, *args, **kwargs):
     queryset = _get_queryset(klass)
     try:
         return queryset.get(*args, **kwargs)
-    except queryset.model.DoesNotExist, e:
+    except queryset.model.DoesNotExist as e:
         raise PermissionDenied(*e.args)
-    except queryset.model.MultipleObjectsReturned, e:
+    except queryset.model.MultipleObjectsReturned as e:
         raise PermissionDenied(*e.args)
 
 def to_python_boolean(value, allow_none=False):
@@ -139,12 +141,13 @@ def get_encryption_key(instance, field_name):
     h.update(field_name)
     return h.digest()[:16]
 
-
-def encrypt_field(instance, field_name, ask=False):
+def encrypt_field(instance, field_name, ask=False, subfield=None):
     '''
     Return content of the given instance and field name encrypted.
     '''
     value = getattr(instance, field_name)
+    if isinstance(value, dict) and subfield is not None:
+        value = value[subfield]
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
     value = smart_str(value)
@@ -157,11 +160,13 @@ def encrypt_field(instance, field_name, ask=False):
     return '$encrypted$%s$%s' % ('AES', b64data)
 
 
-def decrypt_field(instance, field_name):
+def decrypt_field(instance, field_name, subfield=None):
     '''
     Return content of the given instance and field name decrypted.
     '''
     value = getattr(instance, field_name)
+    if isinstance(value, dict) and subfield is not None:
+        value = value[subfield]
     if not value or not value.startswith('$encrypted$'):
         return value
     algo, b64data = value[len('$encrypted$'):].split('$', 1)
@@ -281,6 +286,22 @@ def update_scm_url(scm_type, url, username=True, password=True,
     return new_url
 
 
+
+def get_allowed_fields(obj, serializer_mapping):
+    from django.contrib.auth.models import User
+
+    if serializer_mapping is not None and obj.__class__ in serializer_mapping:
+        serializer_actual = serializer_mapping[obj.__class__]()
+        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
+    else:
+        allowed_fields = [x.name for x in obj._meta.fields]
+
+    if isinstance(obj, User):
+        field_blacklist = ['last_login']
+        allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
+
+    return allowed_fields
+
 def model_instance_diff(old, new, serializer_mapping=None):
     """
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
@@ -298,11 +319,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
 
     diff = {}
 
-    if serializer_mapping is not None and new.__class__ in serializer_mapping:
-        serializer_actual = serializer_mapping[new.__class__]()
-        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
-    else:
-        allowed_fields = [x.name for x in new._meta.fields]
+    allowed_fields = get_allowed_fields(new, serializer_mapping)
 
     for field in allowed_fields:
         old_value = getattr(old, field, None)
@@ -331,11 +348,9 @@ def model_to_dict(obj, serializer_mapping=None):
     """
     from awx.main.models.credential import Credential
     attr_d = {}
-    if serializer_mapping is not None and obj.__class__ in serializer_mapping:
-        serializer_actual = serializer_mapping[obj.__class__]()
-        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
-    else:
-        allowed_fields = [x.name for x in obj._meta.fields]
+
+    allowed_fields = get_allowed_fields(obj, serializer_mapping)
+
     for field in obj._meta.fields:
         if field.name not in allowed_fields:
             continue
@@ -354,8 +369,7 @@ def get_type_for_model(model):
     '''
     Return type name for a given model class.
     '''
-    from rest_framework.compat import get_concrete_model
-    opts = get_concrete_model(model)._meta
+    opts = model._meta.concrete_model._meta
     return camelcase_to_underscore(opts.object_name)
 
 
@@ -448,8 +462,8 @@ def build_proot_temp_dir():
     '''
     Create a temporary directory for proot to use.
     '''
-    from django.conf import settings
-    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
+    from awx.main.conf import tower_settings
+    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=tower_settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
@@ -462,13 +476,14 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/log/supervisor
      - /tmp (except for own tmp files)
     '''
+    from awx.main.conf import tower_settings
     from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-v',
                 str(getattr(settings, 'AWX_PROOT_VERBOSITY', '0')), '-r', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
                   settings.JOBOUTPUT_ROOT]
-    hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
+    hide_paths.extend(getattr(tower_settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
             continue
@@ -484,7 +499,11 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
         show_paths = [cwd]
-    show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    if settings.ANSIBLE_USE_VENV:
+        show_paths.append(settings.ANSIBLE_VENV_PATH)
+    if settings.TOWER_USE_VENV:
+        show_paths.append(settings.TOWER_VENV_PATH)
+    show_paths.extend(getattr(tower_settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue
@@ -522,3 +541,28 @@ def timedelta_total_seconds(timedelta):
         (timedelta.seconds + timedelta.days * 24 * 3600) * 10 ** 6) / 10 ** 6
 
 
+class NoDefaultProvided(object):
+    pass
+
+def getattrd(obj, name, default=NoDefaultProvided):
+    """
+    Same as getattr(), but allows dot notation lookup
+    Discussed in:
+    http://stackoverflow.com/questions/11975781
+    """
+
+    try:
+        return reduce(getattr, name.split("."), obj)
+    except AttributeError:
+        if default != NoDefaultProvided:
+            return default
+        raise
+
+current_apps = apps
+def set_current_apps(apps):
+    global current_apps
+    current_apps = apps
+
+def get_current_apps():
+    global current_apps
+    return current_apps

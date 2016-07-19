@@ -21,9 +21,6 @@ SQL_DEBUG = DEBUG
 # Clear database settings to force production environment to define them.
 DATABASES = {}
 
-# Enable South to look for migrations in .pyc files.
-SOUTH_USE_PYC = True
-
 # Clear the secret key to force production environment to define it.
 SECRET_KEY = None
 
@@ -43,6 +40,14 @@ JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
 
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = '/var/lib/awx/.tower_cycle'
+
+# Ansible base virtualenv paths and enablement
+ANSIBLE_USE_VENV = True
+ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
+
+# Tower base virtualenv paths and enablement
+TOWER_USE_VENV = True
+TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
 LOGGING['handlers']['tower_warnings'] = {
     'level': 'WARNING',
@@ -122,7 +127,7 @@ except IOError:
         try:
             e = None
             open(settings_file)
-        except IOError, e:
+        except IOError as e:
             pass
         if e and e.errno == errno.EACCES:
             SECRET_KEY = 'permission-denied'

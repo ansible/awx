@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('InventoriesListDefinition', [])
@@ -13,6 +13,7 @@ export default
         iterator: 'inventory',
         selectTitle: 'Add Inventories',
         editTitle: 'Inventories',
+        listTitle: 'Inventories',
         selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
             "button to create a new inventory.",
         index: false,
@@ -20,8 +21,8 @@ export default
 
         fields: {
             status: {
-                label: 'Status',
-                columnClass: 'col-md-2 col-sm-2 col-xs-2',
+                label: '',
+                columnClass: 'List-staticColumn--mediumStatus',
                 searchable: false,
                 nosort: true,
                 ngClick: "null",
@@ -30,13 +31,12 @@ export default
                 icons: [{
                     icon: "{{ 'icon-cloud-' + inventory.syncStatus }}",
                     awToolTip: "{{ inventory.syncTip }}",
-                    awTipPlacement: "top",
+                    awTipPlacement: "right",
                     ngClick: "showGroupSummary($event, inventory.id)",
                     ngClass: "inventory.launch_class"
                 },{
                     icon: "{{ 'icon-job-' + inventory.hostsStatus }}",
-                    awToolTip: "{{ inventory.hostsTip }}",
-                    awTipPlacement: "top",
+                    awToolTip: false,
                     ngClick: "showHostSummary($event, inventory.id)",
                     ngClass: ""
                 }]
@@ -44,8 +44,8 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-md-4 col-sm-6 col-xs-6',
-                modalColumnClass: 'col-md-8',
+                columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
+                modalColumnClass: 'col-md-11',
                 linkTo: '/#/inventories/{{inventory.id}}/manage'
             },
             organization: {
@@ -55,7 +55,7 @@ export default
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true,
-                columnClass: 'col-md-4 hidden-sm hidden-xs'
+                columnClass: 'col-md-5 col-sm-3 hidden-xs'
             },
             has_inventory_sources: {
                 label: 'Cloud sourced?',
@@ -73,8 +73,14 @@ export default
             },
             inventory_sources_with_failures: {
                 label: 'Sync failures?',
-                searchType: 'gtzero',
-                searchValue: 'true',
+                searchType: 'select',
+                searchOptions: [{
+                    label: 'Yes',
+                    value: 'inventory_sources_with_failures__gt=0'
+                }, {
+                    label: 'No',
+                    value: 'inventory_sources_with_failures__lte=0'
+                }],
                 searchOnly: true
             }
         },
@@ -83,21 +89,19 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addInventory()',
-                awToolTip: 'Create a new inventory'
-            },
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
+                awToolTip: 'Create a new inventory',
+                actionClass: 'btn List-buttonSubmit',
+                buttonContent: '&#43; ADD'
             }
         },
 
         fieldActions: {
+
+            columnClass: 'col-md-2 col-sm-4 col-xs-4',
+
             edit: {
                 label: 'Edit',
-                ngClick: 'editInventory(inventory.id)', //'editInventoryProperties(inventory.id)',
+                ngClick: 'editInventory(inventory.id)',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
             },

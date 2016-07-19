@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 export default
     angular.module('PortalJobTemplatesListDefinition', [])
@@ -11,20 +11,18 @@ export default
 
         name: 'job_templates',
         iterator: 'job_template',
-        // selectTitle: 'Add Job Template',
         editTitle: 'Job Templates',
-        // selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
-        //     "button to create a new job template.",
+        listTitle: 'Job Templates',
         index: false,
         hover: true,
         well: true,
-
+        emptyListText: 'There are no job templates to display at this time',
         fields: {
             name: {
                 key: true,
-                noLink: true,
                 label: 'Name',
-                columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8'
+                columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8',
+                linkTo: '/#/job_templates/{{job_template.id}}'
             },
             description: {
                 label: 'Description',

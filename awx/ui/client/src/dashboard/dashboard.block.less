@@ -1,18 +1,17 @@
 /** @define Dashboard */
+@import "../shared/branding/colors.default.less";
 
 .Dashboard {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     width: 100%;
+    margin-top: 20px;
 }
 
 .Dashboard-counts {
     flex: initial;
     width: 100%;
-    border: 1px solid #a9a9a9;
-    border-radius: 4px;
-    padding: 9px;
 }
 
 .Dashboard-graphs {
@@ -21,16 +20,16 @@
 }
 
 .Dashboard-list {
-    border: 1px solid #a9a9a9;
-    border-radius: 4px;
-    margin-top: 15px;
+    border: 1px solid @default-border;
+    border-radius: 5px;
+    margin-top: 20px;
     width: 50%;
-    padding: 15px;
-    max-width: ~"calc(50% - 7px)";
+    background-color: @default-bg;
+    max-width: ~"calc(50% - 10px)";
     position: relative;
 }
 
-@media only screen and (max-width: 710px) {
+@media only screen and (max-width: 865px) {
     .Dashboard-counts {
         border: 0;
         padding: 0;

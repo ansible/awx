@@ -1,0 +1,125 @@
+<div class="tab-pane" id="jobs-stdout">
+    <div ng-cloak id="htmlTemplate">
+    <div class="StandardOut-container" ng-class="{'fullscreen': stdoutFullScreen}">
+        <div class="StandardOut-leftPanel" ng-show="!stdoutFullScreen">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">
+                        RESULTS
+                    </div>
+                    <div class="StandardOut-actions">
+                        <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="Relaunch using the same parameters" data-original-title="" title=""><i class="icon-launch"></i> </button>
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="Cancel" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="Delete" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                    </div>
+                </div>
+                <div class="StandardOut-details">
+
+                    <div class="StandardOut-detailsRow" ng-show="job.module_name">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Name</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ job.module_name }}</div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STATUS</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <i class="fa icon-job-{{ job.status }}"></i>
+                            <span class="StandardOut-statusText StandardOut--capitalize">{{ job.status }}</span>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.started">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">STARTED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.started | longDate }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">FINISHED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.finished | longDate }}
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.finished">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">ELAPSED</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            {{ job.elapsed }} seconds
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="job.module_args">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Module Args</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ job.module_args }}</div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Inventory</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a href="{{ inventory_url }}"
+                                aw-tool-tip="The inventory this command ran on."
+                                data-placement="top">{{ inventory_name }}</a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="credential_name">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Credential</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a href="{{ credential_url }}"
+                                aw-tool-tip="The credential used to run this command."
+                                data-placement="top">{{ credential_name }}</a>
+                        </div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="created_by">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Launched By</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                            <a href="/#/users/{{ created_by.id }}"
+                                aw-tool-tip="The user who ran this command."
+                                data-placement="top">{{ created_by.username }}</a>
+                        </div>
+                    </div>
+
+                    <!-- since zero is a falsy value, you need ng-show such that
+                    the number is >= 0 -->
+                    <div class="StandardOut-detailsRow" ng-show="forks >= 0">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Forks</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ forks }}</div>
+                    </div>
+
+                    <div class="StandardOut-detailsRow" ng-show="limit">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Limit</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ limit }}</div>
+                    </div>
+
+                    <!-- since zero is a falsy value, you need ng-show such that
+                    the number is >= 0 -->
+                    <div class="StandardOut-detailsRow" ng-show="verbosity >= 0">
+                        <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4">Verbosity</div>
+                        <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">{{ verbosity }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="StandardOut-rightPanel">
+            <div class="Panel">
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
+                    <div class="StandardOut-panelHeaderActions">
+                        <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
+                            <i class="fa fa-arrows-alt"></i>
+                        </button>
+                        <a href="/api/v1/ad_hoc_commands/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
+                                <i class="fa fa-download"></i>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

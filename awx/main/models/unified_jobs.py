@@ -8,15 +8,16 @@ import logging
 import re
 import os
 import os.path
+from collections import OrderedDict
 from StringIO import StringIO
 
 # Django
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.utils.encoding import smart_text
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -38,9 +39,10 @@ __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 logger = logging.getLogger('awx.main.models.unified_jobs')
 
 CAN_CANCEL = ('new', 'pending', 'waiting', 'running')
+ACTIVE_STATES = CAN_CANCEL
 
 
-class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
+class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, NotificationFieldsModel):
     '''
     Concrete base class for unified job templates.
     '''
@@ -77,7 +79,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         ('updating', _('Updating')),            # Same as running.
     ]
 
-    ALL_STATUS_CHOICES = SortedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
+    ALL_STATUS_CHOICES = OrderedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
 
     class Meta:
         app_label = 'main'
@@ -139,6 +141,11 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         choices=ALL_STATUS_CHOICES,
         default='ok',
         editable=False,
+    )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='%(class)s_labels'
     )
 
     def get_absolute_url(self):
@@ -208,17 +215,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
             self.next_schedule = related_schedules[0]
             self.next_job_run = related_schedules[0].next_run
             self.save(update_fields=['next_schedule', 'next_job_run'])
-
-    def mark_inactive(self, save=True):
-        '''
-        When marking a unified job template inactive, also mark its schedules
-        inactive.
-        '''
-        for schedule in self.schedules.filter(active=True):
-            schedule.mark_inactive()
-            schedule.enabled = False
-            schedule.save()
-        super(UnifiedJobTemplate, self).mark_inactive(save=save)
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -297,16 +293,25 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
         '''
         return kwargs   # Override if needed in subclass.
 
+    @property
+    def notification_templates(self):
+        '''
+        Return notification_templates relevant to this Unified Job Template
+        '''
+        # NOTE: Derived classes should implement
+        return NotificationTemplate.objects.none()
+
     def create_unified_job(self, **kwargs):
         '''
         Create a new unified job based on this unified job template.
         '''
-        save_unified_job = kwargs.pop('save', True)
         unified_job_class = self._get_unified_job_class()
         parent_field_name = unified_job_class._get_parent_field_name()
         kwargs.pop('%s_id' % parent_field_name, None)
         create_kwargs = {}
-        create_kwargs[parent_field_name] = self
+        m2m_fields = {}
+        if self.pk:
+            create_kwargs[parent_field_name] = self
         for field_name in self._get_unified_job_field_names():
             # Foreign keys can be specified as field_name or field_name_id.
             id_field_name = '%s_id' % field_name
@@ -321,16 +326,27 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
                     value = value.id
                 create_kwargs[id_field_name] = value
             elif field_name in kwargs:
-                if field_name == 'extra_vars' and type(kwargs[field_name]) == dict:
+                if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
                     create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
+                # We can't get a hold of django.db.models.fields.related.ManyRelatedManager to compare
+                # so this is the next best thing.
+                elif kwargs[field_name].__class__.__name__ is 'ManyRelatedManager':
+                    m2m_fields[field_name] = kwargs[field_name]
                 else:
                     create_kwargs[field_name] = kwargs[field_name]
             elif hasattr(self, field_name):
-                create_kwargs[field_name] = getattr(self, field_name)
+                field_obj = self._meta.get_field_by_name(field_name)[0]
+                # Many to Many can be specified as field_name
+                if isinstance(field_obj, models.ManyToManyField):
+                    m2m_fields[field_name] = getattr(self, field_name)
+                else:
+                    create_kwargs[field_name] = getattr(self, field_name)
         new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
         unified_job = unified_job_class(**new_kwargs)
-        if save_unified_job:
-            unified_job.save()
+        unified_job.save()
+        for field_name, src_field_value in m2m_fields.iteritems():
+            dest_field = getattr(unified_job, field_name)
+            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
 
@@ -384,6 +400,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         'self',
         editable=False,
         related_name='%(class)s_blocked_jobs+',
+    )
+    notifications = models.ManyToManyField(
+        'Notification',
+        editable=False,
+        related_name='%(class)s_notifications',
     )
     cancel_flag = models.BooleanField(
         blank=True,
@@ -462,11 +483,24 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         default='',
         editable=False,
     )
+    labels = models.ManyToManyField(
+        "Label",
+        blank=True,
+        related_name='%(class)s_labels'
+    )
+
 
     def get_absolute_url(self):
         real_instance = self.get_real_instance()
         if real_instance != self:
             return real_instance.get_absolute_url()
+        else:
+            return ''
+
+    def get_ui_url(self):
+        real_instance = self.get_real_instance()
+        if real_instance != self:
+            return real_instance.get_ui_url()
         else:
             return ''
 
@@ -717,7 +751,17 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             tasks that might preclude creating one'''
         return []
 
-    def start(self, error_callback, **kwargs):
+    def notification_data(self):
+        return dict(id=self.id,
+                    name=self.name,
+                    url=self.get_ui_url(),
+                    created_by=smart_text(self.created_by),
+                    started=self.started.isoformat() if self.started is not None else None,
+                    finished=self.finished.isoformat() if self.finished is not None else None,
+                    status=self.status,
+                    traceback=self.result_traceback)
+
+    def start(self, error_callback, success_callback, **kwargs):
         '''
         Start the task running via Celery.
         '''
@@ -743,7 +787,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         #                   if field not in needed])
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
-        task_class().apply_async((self.pk,), opts, link_error=error_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
         return True
 
     def signal_start(self, **kwargs):
@@ -765,7 +809,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Sanity check: If we are running unit tests, then run synchronously.
         if getattr(settings, 'CELERY_UNIT_TEST', False):
-            return self.start(None, **kwargs)
+            return self.start(None, None, **kwargs)
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')

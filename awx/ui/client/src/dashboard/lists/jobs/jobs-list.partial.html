@@ -1,35 +1,48 @@
-<div class="DashboardJobs" ng-hide="noJobs">
-    <h3 class="DashboardJobs-header">
-        Recent Job Runs
-    </h3>
-    <div class="DashboardJobs-container">
-        <div class="DashboardJobs-item"
-            ng-class="{'DashboardJobs-item--snapRows': {{ snapRows }}}"
-            ng-repeat="job in jobs">
-            <a ng-href="{{ job.detailsUrl }}"
-                class="DashboardJobs-itemLink">
-                <i class="fa
-                    DashboardJobs-status"
-                    ng-class="{'DashboardJobs-status--success icon-job-successful': isSuccessful(job.status),
-                        'DashboardJobs-status--failed icon-job-failed': !isSuccessful(job.status)}">
-                </i>
-                <span class="DashboardJobs-nameContainer">
-                    {{job.name}}
-                </span>
-                <div class="DashboardJobs-time">
-                    {{ job.time }}
-                </div>
-            </a>
-        </div>
+<div class="DashboardList" ng-hide="noJobs">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENT JOB RUNS
+        </h3>
+        <a href="/#/jobs" class="DashboardList-viewAll">
+            VIEW ALL
+        </a>
     </div>
-    <a href="/#/jobs" class="DashboardJobs-seeMore">
-        See all job runs
-    </a>
+    <div class="DashboardList-container">
+        <table class="List-table">
+           <tr>
+              <th class="List-tableHeader DashboardList-tableHeader--name">Name</th>
+              <th class="List-tableHeader DashboardList-tableHeader--time">Time</th>
+           </tr>
+           <tr class="List-tableRow"
+                ng-class-odd="'List-tableRow--oddRow'"
+                ng-class-even="'List-tableRow--evenRow'"
+                ng-repeat = "job in jobs">
+                <td class="DashboardList-nameCell">
+                    <a href="{{ job.detailsUrl }}" ng-if="isSuccessful(job.status)" aw-tool-tip="Job successful. Click for details." aw-tip-placement="right">
+                        <i class="fa DashboardList-status DashboardList-status--success icon-job-successful"></i>
+                    </a>
+                    <a href="{{ job.detailsUrl }}" ng-if="!isSuccessful(job.status)" aw-tool-tip="Job failed. Click for details." aw-tip-placement="right">
+                        <i class="fa DashboardList-status DashboardList-status--failed icon-job-successful"></i>
+                    </a>
+                    <a href="{{ job.detailsUrl }}" class="DashboardList-nameContainer">
+                        {{ job.name }}
+                    </a>
+              </td>
+              <td class="DashboardList-timeCell">
+                  {{job.time}}
+              </td>
+           </tr>
+        </table>
+    </div>
 </div>
 
-<div class="DashboardJobs DashboardJobs--noJobs" ng-show="noJobs">
-    <h3 class="DashboardJobs-header">
-        Recent Job Runs
-    </h3>
-    <p>It doesn't seem like you have any recent job runs.</p>
+<div class="DashboardList" ng-show="noJobs">
+    <div class="DashboardList-header">
+        <h3 class="DashboardList-headerText">
+            RECENTLY RUN JOBS
+        </h3>
+    </div>
+    <div class="DashboardList-container">
+        <p class="DashboardList-noJobs">No jobs were recently run.</p>
+    </div>
 </div>

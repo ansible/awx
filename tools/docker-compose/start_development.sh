@@ -1,9 +1,9 @@
 #!/bin/bash
+set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=redis port=6379" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=mongo port=27017" all
 
 # In case Tower in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
 /etc/init.d/ssh start
@@ -19,20 +19,17 @@ else
     echo "Failed to find tower source tree, map your development tree volume"
 fi
 
-if [ -f "/.develop_run" ]; then
-    echo "Skipping 'make develop' step since it has already run - remove /.develop_run to force it"
-else
-    make develop
-    touch /.develop_run
-fi
+cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
 
 # Check if we need to build dependencies
-if [ -f "awx/lib/.deps_built" ]; then
-    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
-else
-    make requirements_dev
-    touch awx/lib/.deps_built
-fi
+#if [ -f "awx/lib/.deps_built" ]; then
+#    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
+#else
+make requirements_dev
+#    touch awx/lib/.deps_built
+#fi
+
+cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 
 # Tower bootstrapping
 make version_file

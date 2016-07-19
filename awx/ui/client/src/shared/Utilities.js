@@ -273,90 +273,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
     }
 ])
 
-
-.factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', 'Empty',
-    function ($rootScope, $routeParams, $location, Empty) {
-        return function (crumb) {
-
-            var title, found, j, i, paths, ppath, parent, child;
-
-            function toUppercase(a) {
-                return a.toUpperCase();
-            }
-
-            function singular(a) {
-                return (a === 'ies') ? 'y' : '';
-            }
-
-            //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example,
-            //we'll know the actual organization name it maps to.
-            if (!Empty(crumb)) {
-                found = false;
-                //crumb.title = crumb.title.charAt(0).toUpperCase() + crumb.title.slice(1);
-                for (i = 0; i < $rootScope.crumbCache.length; i++) {
-                    if ($rootScope.crumbCache[i].path === crumb.path) {
-                        found = true;
-                        $rootScope.crumbCache[i] = crumb;
-                        break;
-                    }
-                }
-                if (!found) {
-                    $rootScope.crumbCache.push(crumb);
-                }
-            }
-            paths = $location.path().replace(/^\//, '').split('/');
-            ppath = '';
-            $rootScope.breadcrumbs = [];
-            if (paths.length > 1) {
-                for (i = 0; i < paths.length - 1; i++) {
-                    if (i > 0 && paths[i].match(/\d+/)) {
-                        parent = paths[i - 1];
-                        child = parent.replace(/(ies$|s$)/, singular);
-                        child = child.charAt(0).toUpperCase() + child.slice(1);
-                        // find the correct title
-                        found = false;
-                        if ($rootScope.crumbCache) {
-                            for (j = 0; j < $rootScope.crumbCache.length; j++) {
-                                if ($rootScope.crumbCache[j].path === '/' + parent + '/' + paths[i]) {
-                                    child = $rootScope.crumbCache[j].title;
-                                    found = true;
-                                    break;
-                                }
-                            }
-
-                            if (found && $rootScope.crumbCache[j].altPath !== undefined) {
-                                // Use altPath to override default path construction
-                                $rootScope.breadcrumbs.push({
-                                    title: child,
-                                    path: $rootScope.crumbCache[j].altPath
-                                });
-                            } else {
-                                $rootScope.breadcrumbs.push({
-                                    title: child,
-                                    path: ppath + '/' + paths[i]
-                                });
-                            }
-
-                        }
-                    } else {
-                        //if (/_/.test(paths[i])) {
-                            // replace '_' with space and uppercase each word
-
-                        //}
-                        //title = paths[i].charAt(0).toUpperCase() + paths[i].slice(1);
-                        title = paths[i].replace(/(?:^|_)\S/g, toUppercase).replace(/_/g, ' ');
-                        $rootScope.breadcrumbs.push({
-                            title: title,
-                            path: ppath + '/' + paths[i]
-                        });
-                    }
-                    ppath += '/' + paths[i];
-                }
-            }
-        };
-    }
-])
-
 /**
  * @ngdoc method
  * @name shared.function:Utilities#HelpDialog
@@ -692,12 +608,16 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * ]
  * ```
  */
-.factory('CreateSelect2', [
-    function () {
+.factory('CreateSelect2', ['$filter',
+    function ($filter) {
         return function (params) {
 
             var element = params.element,
-            options = params.opts;
+            options = params.opts,
+            multiple = (params.multiple!==undefined) ? params.multiple : true,
+            placeholder = params.placeholder,
+            customDropdownAdapter = (params.customDropdownAdapter!==undefined) ? params.customDropdownAdapter : true,
+            addNew = params.addNew;
 
             $.fn.select2.amd.require([
                 'select2/utils',
@@ -705,22 +625,40 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 'select2/dropdown/search',
                 'select2/dropdown/attachContainer',
                 'select2/dropdown/closeOnSelect',
-                'select2/dropdown/minimumResultsForSearch'
-          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch) {
+                'select2/dropdown/minimumResultsForSearch',
+                'select2/data/tokenizer'
+          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer) {
 
               var CustomAdapter =
-                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch],
+                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer],
                            function(Adapter, Decorator) {
                                return Utils.Decorate(Adapter, Decorator);
                            }, Dropdown);
 
-                $(element).select2({
-                    multiple: 'true',
-                    theme: "bootstrap",
+                var config = {
+                    placeholder: placeholder,
+                    multiple: multiple,
+                    containerCssClass: 'Form-dropDown',
                     width: '100%',
                     minimumResultsForSearch: Infinity,
-                    dropdownAdapter: CustomAdapter
-                });
+                    escapeMarkup: function(m) {
+                        return $filter('sanitize')(m);
+                    }
+                };
+
+                // multiple-choice directive calls select2 but needs to do so without this custom adapter
+                // to allow the element to be draggable on survey preview.
+                if (customDropdownAdapter) {
+                    config.dropdownAdapter = CustomAdapter;
+                }
+
+                if (addNew) {
+                    config.tags = true;
+                    config.tokenSeparators = [];
+                }
+
+                $(element).select2(config);
+
                 if(options){
                     for (var d = 0; d < $(element + " option").length; d++) {
                         var item = $(element + " option")[d];
@@ -954,4 +892,22 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
         };
     }
-]);
+])
+.factory('ParamPass', function() {
+    var savedData;
+
+    function set(data) {
+        savedData = data;
+    }
+
+    function get() {
+				var returnData = savedData;
+				savedData = undefined;
+        return returnData;
+    }
+
+    return {
+        set: set,
+        get: get
+    };
+});

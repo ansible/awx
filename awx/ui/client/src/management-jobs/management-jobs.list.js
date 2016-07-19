@@ -10,6 +10,7 @@ export default function(){
         iterator: 'configure_job',
         index: false,
         hover: true,
+        listTitle: 'Management Jobs',
 
         fields: {
             name: {
@@ -22,13 +23,7 @@ export default function(){
             }
         },
         actions: {
-            stream: {
-                ngClick: "showActivity()",
-                awToolTip: "View Activity Stream",
-                icon: "icon-comments-alt",
-                mode: 'edit',
-                awFeature: 'activity_streams'
-            }
+
         },
         fieldActions: {
             submit: {

@@ -3,75 +3,79 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 
 
 
 export default
     angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
     .value( 'CompletedJobsList', {
-
+        // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
+        awToolTip: 'Please save and run a job to view',
+        dataPlacement: 'top',
         name: 'completed_jobs',
+        basePath: 'job_templates/:id/jobs/?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
         iterator: 'completed_job',
         editTitle: 'Completed Jobs',
         index: false,
         hover: true,
         well: false,
+        emptyListText: 'No completed jobs',
 
         fields: {
-            id: {
-                label: 'ID',
-                ngClick:"viewJobLog(completed_job.id)",
-                searchType: 'int',
-                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
-                awToolTip: "{{ completed_job.status_tip }}",
-                dataPlacement: 'top'
-            },
             status: {
-                label: 'Status',
-                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
+                label: '',
+                searchLabel: 'Status',
+                columnClass: 'List-staticColumn--smallStatus',
                 awToolTip: "{{ completed_job.status_tip }}",
-                awTipPlacement: "top",
+                awTipPlacement: "right",
                 dataTitle: "{{ completed_job.status_popover_title }}",
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobLog(completed_job.id)",
+                ngClick:"viewJobDetails(completed_job)",
                 searchable: true,
                 searchType: 'select',
                 nosort: true,
                 searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
+                    { label: "Success", value: "successful" },
+                    { label: "Error", value: "error" },
+                    { label: "Failed", value: "failed" },
+                    { label: "Canceled", value: "canceled" }
                 ]
             },
-            finished: {
-                label: 'Finished',
-                noLink: true,
-                searchable: false,
-                filter: "longDate",
-                columnClass: "col-lg-2 col-md-2 hidden-xs",
-                key: true,
-                desc: true
+            id: {
+                label: 'ID',
+                ngClick:"viewJobDetails(completed_job)",
+                searchType: 'int',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
+                awToolTip: "{{ completed_job.status_tip }}",
+                dataPlacement: 'top'
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
+                ngClick: "viewJobDetails(completed_job)",
+                defaultSearchField: true,
+                awToolTip: "{{ completed_job.name | sanitize }}",
+                dataPlacement: 'top'
             },
             type: {
                 label: 'Type',
                 ngBind: 'completed_job.type_label',
                 link: false,
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                columnShow: "showJobType",
                 searchable: true,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
             },
-            name: {
-                label: 'Name',
-                columnClass: 'col-md-3 col-sm-4 col-xs-4',
-                ngClick: "viewJobLog(completed_job.id, completed_job.nameHref)",
-                defaultSearchField: true,
-                awToolTip: "{{ completed_job.name | sanitize }}",
-                dataPlacement: 'top'
+            finished: {
+                label: 'Finished',
+                noLink: true,
+                searchable: false,
+                filter: "longDate",
+                columnClass: "col-lg-3 col-md-3 col-sm-3 hidden-xs",
+                key: true,
+                desc: true
             },
             failed: {
                 label: 'Job failed?',
@@ -86,6 +90,9 @@ export default
         actions: { },
 
         fieldActions: {
+
+            columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
+
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
@@ -99,19 +106,6 @@ export default
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top'
-            },
-            // job_details: {
-            //     mode: 'all',
-            //     ngClick: "viewJobLog(completed_job.id)",
-            //     awToolTip: 'View job details',
-            //     dataPlacement: 'top'
-            // },
-            stdout: {
-                mode: 'all',
-                href: '/#/jobs/{{ completed_job.id }}/stdout',
-                awToolTip: 'View standard output',
-                dataPlacement: 'top',
-                ngShow: "completed_job.type == 'job'"
             }
         }
     });
