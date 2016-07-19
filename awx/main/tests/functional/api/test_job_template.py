@@ -335,3 +335,15 @@ def test_jt_without_project(inventory):
     data["job_type"] = "scan"
     serializer = JobTemplateSerializer(data=data)
     assert serializer.is_valid()
+
+@pytest.mark.django_db
+def test_disallow_template_delete_on_running_job(job_template_factory, delete, admin_user):
+    objects = job_template_factory('jt',
+                                   credential='c',
+                                   job_type="run",
+                                   project='p',
+                                   inventory='i',
+                                   organization='o')
+    objects.job_template.create_unified_job()
+    delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
+    assert delete_response.status_code == 409

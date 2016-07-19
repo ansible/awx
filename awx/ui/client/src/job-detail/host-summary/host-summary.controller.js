@@ -104,7 +104,7 @@
                 Wait('start');
                 JobDetailService.getJobHostSummaries($stateParams.id, {
                     page_size: page_size,
-                    host_name__icontains: $scope.searchTerm,
+                    host_name__icontains: encodeURIComponent($scope.searchTerm),
                 }).success(function(res){
                     $scope.hosts = res.results;
                     $scope.next = res.next;

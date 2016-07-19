@@ -653,7 +653,7 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
 
     def get_queryset(self):
         qs = Organization.accessible_objects(self.request.user, 'read_role')
-        qs = qs.select_related('admin_role', 'auditor_role', 'member_role')
+        qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
         return qs
 
     def create(self, request, *args, **kwargs):
@@ -2183,14 +2183,6 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
-
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        can_delete = request.user.can_access(JobTemplate, 'delete', obj)
-        if not can_delete:
-            raise PermissionDenied("Cannot delete job template.")
-        return super(JobTemplateDetail, self).destroy(request, *args, **kwargs)
-
 
 class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 

@@ -66,6 +66,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             scope: jobs_scope,
             list: AllJobsList,
             id: 'active-jobs',
+            pageSize: 20,
             url: GetBasePath('unified_jobs') + '?status__in=pending,waiting,running,completed,failed,successful,error,canceled&order_by=-finished',
             searchParams: search_params,
             spinner: false
@@ -77,15 +78,14 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             parent_scope: $scope,
             scope: scheduled_scope,
             list: ScheduledJobsList,
+            pageSize: 20,
             id: 'scheduled-jobs-tab',
             searchSize: 'col-lg-4 col-md-4 col-sm-4 col-xs-12',
             url: GetBasePath('schedules') + '?next_run__isnull=false'
         });
 
         $scope.refreshJobs = function() {
-            jobs_scope.search('queued_job');
-            jobs_scope.search('running_job');
-            jobs_scope.search('completed_job');
+            jobs_scope.search('all_job');
             scheduled_scope.search('schedule');
         };
 
