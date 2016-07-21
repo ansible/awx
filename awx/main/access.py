@@ -1081,7 +1081,8 @@ class JobAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.inventory is not None and self.user in obj.inventory.organization.admin_role:
             return True
-        if obj.project is not None and self.user in obj.project.organization.admin_role:
+        if (obj.project is not None and obj.project.organization is not None and
+                self.user in obj.project.organization.admin_role):
             return True
         return False
 
