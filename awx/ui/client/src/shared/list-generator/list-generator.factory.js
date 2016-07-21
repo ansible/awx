@@ -466,7 +466,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                     innerTable += "ng-class-odd=\"'List-tableRow--oddRow'\" ";
                     innerTable += "ng-class-even=\"'List-tableRow--evenRow'\" ";
                     innerTable += "ng-repeat=\"" + list.iterator + " in " + list.name;
-                    innerTable += (list.trackBy) ? " track by " + list.trackBy : " track by $index";
+                    innerTable += (list.trackBy) ? " track by " + list.trackBy : "";
                     innerTable += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                     innerTable += (list.filterBy) ? " | filter: " + list.filterBy : "";
                     innerTable += "\">\n";
