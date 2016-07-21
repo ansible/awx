@@ -527,7 +527,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
             elif isinstance(obj, JobTemplate):
                 serializer_class = JobTemplateSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
@@ -590,7 +590,7 @@ class UnifiedJobSerializer(BaseSerializer):
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobSerializer, self).to_representation(obj)
@@ -637,7 +637,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobListSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobListSerializer, self).to_representation(obj)
