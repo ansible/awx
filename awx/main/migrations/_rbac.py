@@ -420,6 +420,11 @@ def migrate_job_templates(apps, schema_editor):
     jt_queryset = JobTemplate.objects.select_related('inventory', 'project', 'inventory__organization', 'execute_role')
 
     for jt in jt_queryset.iterator():
+        if jt.inventory is None:
+            # If inventory is None, then only system admins and org admins can
+            # do anything with the JT in 2.4
+            continue
+
         jt_permission_qs = Permission.objects.filter(
             inventory=jt.inventory,
             project=jt.project,
