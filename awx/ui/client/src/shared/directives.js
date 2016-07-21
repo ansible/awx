@@ -477,7 +477,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
         return {
             link: function(scope, element, attrs) {
                 var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
-                    placement;
+                    placement,
+                    stateChangeWatcher;
                 if (attrs.awTipPlacement) {
                     placement = attrs.awTipPlacement;
                 }
@@ -492,6 +493,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 } else {
                     template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
                 }
+
+                // This block helps clean up tooltips that may get orphaned by a click event
+                $(element).on('mouseenter', function() {
+                    if(stateChangeWatcher) {
+                        // Un-bind - we don't want a bunch of listeners firing
+                        stateChangeWatcher();
+                    }
+                    stateChangeWatcher = scope.$on('$stateChangeStart', function() {
+                        // Go ahead and force the tooltip setTimeout to expire (if it hasn't already fired)
+                        $(element).tooltip('hide');
+                        // Clean up any existing tooltips including this one
+                        $('.tooltip').each(function() {
+                            $(this).remove();
+                        });
+                    });
+                });
 
                 $(element).on('hidden.bs.tooltip', function( ) {
                     // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
