@@ -52,7 +52,7 @@ def migrate_facts(apps, schema_editor):
     migrated_count = 0
     not_migrated_count = 0
     transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
-    for factver in FactVersion.objects.all():
+    for factver in FactVersion.objects.all().no_cache():
         try:
             host = Host.objects.only('id').get(inventory__id=factver.host.inventory_id, name=factver.host.hostname)
             fact_obj = transform.replace_outgoing(factver.fact)
