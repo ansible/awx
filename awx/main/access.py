@@ -906,8 +906,7 @@ class JobTemplateAccess(BaseAccess):
         project = get_value(Project, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
             if inventory:
-                org = inventory.organization
-                accessible = self.user in org.admin_role
+                accessible = self.user in inventory.use_role
             else:
                 accessible = False
             if not project and accessible:
