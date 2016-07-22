@@ -33,7 +33,7 @@ def test_net_cred_parse(mocker, options):
         assert env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] == options['authorize_password']
 
 
-def test_net_cred_ssh_agent(mocker, options):
+def test_net_cred_ssh_agent(mocker, options, get_ssh_version):
     with mocker.patch('django.db.ConnectionRouter.db_for_write'):
         run_job = RunJob()
 
