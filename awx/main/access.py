@@ -906,8 +906,7 @@ class JobTemplateAccess(BaseAccess):
         project = get_value(Project, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
             if inventory:
-                org = inventory.organization
-                accessible = self.user in org.admin_role
+                accessible = self.user in inventory.use_role
             else:
                 accessible = False
             if not project and accessible:
@@ -979,7 +978,8 @@ class JobTemplateAccess(BaseAccess):
 
         for k, v in data.items():
             if hasattr(obj, k) and getattr(obj, k) != v:
-                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None):
+                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
+                        and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
                     return False
         return True
 
