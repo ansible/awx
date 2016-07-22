@@ -941,7 +941,34 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
-        }
+        },
+        'fact_receiver': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'system_tracking_migrations': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'rbac_migrations': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
     },
     'loggers': {
         'django': {
@@ -997,6 +1024,14 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'social': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
+        'system_tracking_migrations': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
+        'rbac_migrations': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
         },
