@@ -36,6 +36,8 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
 
+                          CredentialList = _.cloneDeep(CredentialList);
+
                           // The form uses awPopOverWatch directive to 'watch' scope.callback_help for changes. Each time the
                           // popover is activated, a function checks the value of scope.callback_help before constructing the content.
                           scope.setCallbackHelp = function() {

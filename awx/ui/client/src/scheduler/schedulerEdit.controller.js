@@ -1,4 +1,20 @@
-export default ['$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', function($compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange) {
+export default ['$filter', '$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange',
+function($filter, $compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange) {
+
+    $scope.processSchedulerEndDt = function(){
+        // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
+        var dt = new Date($scope.schedulerUTCTime);
+        // increment date by 1 day
+        dt.setDate(dt.getDate() + 1);
+        var month = $filter('schZeroPad')(dt.getMonth() + 1, 2),
+            day = $filter('schZeroPad')(dt.getDate(), 2);
+        $scope.$parent.schedulerEndDt = month + '/' + day + '/' + dt.getFullYear();
+    };
+    // initial end @ midnight values
+    $scope.schedulerEndHour = "00";
+    $scope.schedulerEndMinute = "00";
+    $scope.schedulerEndSecond = "00";
+
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
         $scope = angular.extend($scope, scope);

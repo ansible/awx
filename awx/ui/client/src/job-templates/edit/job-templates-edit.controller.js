@@ -47,6 +47,7 @@ export default
                 choicesCount = 0;
 
             // remove "type" field from search options
+            CredentialList = _.cloneDeep(CredentialList);
             CredentialList.fields.kind.noSearch = true;
 
             CallbackHelpInit({ scope: $scope });
@@ -471,7 +472,7 @@ export default
                             });
                     }
                     else {
-                        // job template doesn't exist 
+                        // job template doesn't exist
                         $scope.$emit("choicesReady");
                     }
 

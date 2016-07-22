@@ -13,6 +13,7 @@
             form = GroupForm();
 
         // remove "type" field from search options
+        CredentialList = _.cloneDeep(CredentialList);
         CredentialList.fields.kind.noSearch = true;
 
         $scope.formCancel = function(){

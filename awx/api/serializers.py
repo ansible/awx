@@ -918,6 +918,19 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def validate(self, attrs):
+        organization = None
+        if 'organization' in attrs:
+            organization = attrs['organization']
+        elif self.instance:
+            organization = self.instance.organization
+
+        view = self.context.get('view', None)
+        if not organization and not view.request.user.is_superuser:
+            # Only allow super users to create orgless projects
+            raise serializers.ValidationError('Organization is missing')
+        return super(ProjectSerializer, self).validate(attrs)
+
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 

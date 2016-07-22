@@ -389,6 +389,7 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
         master = {};
 
     // remove "type" field from search options
+    CredentialList = _.cloneDeep(CredentialList);
     CredentialList.fields.kind.noSearch = true;
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
@@ -568,6 +569,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         relatedSets = {};
 
     // remove "type" field from search options
+    CredentialList = _.cloneDeep(CredentialList);
     CredentialList.fields.kind.noSearch = true;
 
 

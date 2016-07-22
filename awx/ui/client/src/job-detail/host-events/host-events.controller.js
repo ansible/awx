@@ -25,8 +25,8 @@
 	 		host_name: $scope.hostName,
  		};
  		if ($scope.searchStr && $scope.searchStr !== ''){
- 	 		params.or__play__icontains = $scope.searchStr;
-	 		params.or__task__icontains = $scope.searchStr;
+ 	 		params.or__play__icontains = encodeURIComponent($scope.searchStr);
+	 		params.or__task__icontains = encodeURIComponent($scope.searchStr);
  		}
 
  		switch($scope.activeFilter){

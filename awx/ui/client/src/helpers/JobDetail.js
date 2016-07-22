@@ -687,7 +687,7 @@ export default
             scope.plays = [];
 
             url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order=id';
-            url += (scope.search_play_name) ? '&play__icontains=' + scope.search_play_name : '';
+            url += (scope.search_play_name) ? '&play__icontains=' + encodeURIComponent(scope.search_play_name) : '';
             url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
             scope.playsLoading = true;
             Rest.setUrl(url);
@@ -786,7 +786,7 @@ export default
             scope.tasks = [];
             if (scope.selectedPlay) {
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
-                url += (scope.search_task_name) ? '&task__icontains=' + scope.search_task_name : '';
+                url += (scope.search_task_name) ? '&task__icontains=' + encodeURIComponent(scope.search_task_name) : '';
                 url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
                 url += '&page_size=' + scope.tasksMaxRows + '&order=id';
                 scope.plays.every(function(p, idx) {
