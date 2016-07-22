@@ -873,7 +873,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if not self.cancel_flag:
                 self.cancel_flag = True
                 cancel_fields = ['cancel_flag']
-                if self.status in ('pending', 'waiting'):
+                if self.status in ('pending', 'waiting', 'new'):
                     self.status = 'canceled'
                     cancel_fields.append('status')
                 self.save(update_fields=cancel_fields)
