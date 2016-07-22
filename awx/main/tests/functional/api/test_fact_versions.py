@@ -37,7 +37,10 @@ def check_url(url1_full, fact_known, module):
     url2_params = [('module', module), ('datetime', timestamp_apiformat(fact_known.timestamp))]
 
     assert url1 == url2
-    assert urllib.urlencode(url1_params) == urllib.urlencode(url2_params)
+    # Sort before comparing because urlencode can't be trusted
+    url1_params_sorted = sorted(url1_params, key=lambda val: val[0])
+    url2_params_sorted = sorted(url2_params, key=lambda val: val[0])
+    assert urllib.urlencode(url1_params_sorted) == urllib.urlencode(url2_params_sorted)
 
 def check_response_facts(facts_known, response):
     for i, fact_known in enumerate(facts_known):
