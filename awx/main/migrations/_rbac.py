@@ -8,25 +8,8 @@ from collections import defaultdict
 from awx.main.utils import getattrd
 from awx.main.models.rbac import Role, batch_role_ancestor_rebuilding
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('rbac_migrations')
 
-def log_migration(wrapped):
-    '''setup the logging mechanism for each migration method
-    as it runs, Django resets this, so we use a decorator
-    to re-add the handler for each method.
-    '''
-    handler = logging.FileHandler("/tmp/tower_rbac_migrations.log", mode="a", encoding="UTF-8")
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-
-    def wrapper(*args, **kwargs):
-        logger.handlers = []
-        logger.addHandler(handler)
-        return wrapped(*args, **kwargs)
-    return wrapper
-
-@log_migration
 def create_roles(apps, schema_editor):
     '''
     Implicit role creation happens in our post_save hook for all of our
@@ -56,7 +39,6 @@ def create_roles(apps, schema_editor):
                 obj.save()
 
 
-@log_migration
 def migrate_users(apps, schema_editor):
     User = apps.get_model('auth', "User")
     Role = apps.get_model('main', "Role")
@@ -89,7 +71,6 @@ def migrate_users(apps, schema_editor):
             sa_role.members.add(user)
             logger.warning(smart_text(u"added superuser: {}".format(user.username)))
 
-@log_migration
 def migrate_organization(apps, schema_editor):
     Organization = apps.get_model('main', "Organization")
     for org in Organization.objects.iterator():
@@ -100,7 +81,6 @@ def migrate_organization(apps, schema_editor):
             org.member_role.members.add(user)
             logger.info(smart_text(u"added member: {}, {}".format(org.name, user.username)))
 
-@log_migration
 def migrate_team(apps, schema_editor):
     Team = apps.get_model('main', 'Team')
     for t in Team.objects.iterator():
@@ -172,7 +152,6 @@ def _discover_credentials(instances, cred, orgfunc):
 
                 _update_credential_parents(org, cred)
 
-@log_migration
 def migrate_credential(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
     JobTemplate = apps.get_model('main', 'JobTemplate')
@@ -210,7 +189,6 @@ def migrate_credential(apps, schema_editor):
             logger.warning(smart_text(u"orphaned credential found Credential(name={}, kind={}, host={}), superuser only".format(cred.name, cred.kind, cred.host, )))
 
 
-@log_migration
 def migrate_inventory(apps, schema_editor):
     Inventory = apps.get_model('main', 'Inventory')
     Permission = apps.get_model('main', 'Permission')
@@ -254,7 +232,6 @@ def migrate_inventory(apps, schema_editor):
                     execrole.members.add(perm.user)
                 logger.info(smart_text(u'added User({}) access to Inventory({})'.format(perm.user.username, inventory.name)))
 
-@log_migration
 def migrate_projects(apps, schema_editor):
     '''
     I can see projects when:
@@ -368,7 +345,6 @@ def migrate_projects(apps, schema_editor):
 
 
 
-@log_migration
 def migrate_job_templates(apps, schema_editor):
     '''
     NOTE: This must be run after orgs, inventory, projects, credential, and
@@ -499,7 +475,6 @@ def migrate_job_templates(apps, schema_editor):
 
 
 
-@log_migration
 def rebuild_role_hierarchy(apps, schema_editor):
         logger.info('Computing role roots..')
         start = time()
