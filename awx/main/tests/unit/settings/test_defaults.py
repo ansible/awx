@@ -4,7 +4,6 @@ from django.conf import settings
 from datetime import timedelta
 
 @pytest.mark.parametrize("job_name,function_path", [
-    ('label_cleanup', 'awx.main.tasks.run_label_cleanup'),
     ('admin_checks', 'awx.main.tasks.run_administrative_checks'),
     ('tower_scheduler', 'awx.main.tasks.tower_periodic_scheduler'),
 ])
