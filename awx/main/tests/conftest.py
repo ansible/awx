@@ -39,3 +39,7 @@ def job_with_secret_key_factory(job_template_factory):
 @pytest.fixture
 def job_with_secret_key_unit(job_with_secret_key_factory):
     return job_with_secret_key_factory(persisted=False)
+
+@pytest.fixture
+def get_ssh_version(mocker):
+    return mocker.patch('awx.main.tasks.get_ssh_version', return_value='OpenSSH_6.9p1, LibreSSL 2.1.8')
