@@ -28,8 +28,8 @@ django-taggit==0.17.6
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
 funcsigs==0.4
-gevent==1.1rc3
-gevent-websocket==0.9.3
+gevent==1.1
+gevent-websocket==0.9.5
 git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=django-jsonfield
 git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
 git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@5dfa1df79f81765d36c0de31dc1c2f390e42d428#egg=django-rest-framework-mongoengine
