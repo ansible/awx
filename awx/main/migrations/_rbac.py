@@ -159,7 +159,7 @@ def migrate_credential(apps, schema_editor):
     InventorySource = apps.get_model('main', 'InventorySource')
 
     for cred in Credential.objects.iterator():
-        results = [x for x in JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred)).all()] + \
+        results = [x for x in JobTemplate.objects.filter(Q(credential=cred) | Q(cloud_credential=cred), inventory__isnull=False).all()] + \
                   [x for x in InventorySource.objects.filter(credential=cred).all()]
         if cred.deprecated_team is not None and results:
             if len(results) == 1:
