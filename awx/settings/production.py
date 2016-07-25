@@ -55,7 +55,7 @@ LOGGING['handlers']['socketio_service']['filename'] = '/var/log/tower/socketio_s
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'
 LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver.log'
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
-LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log',
+LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
 
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.
