@@ -4,7 +4,6 @@
 #
 # vim: set fileencoding=utf-8 :
 #
-# Copyright (C) 2016 Guido Günther <agx@sigxcpu.org>
 #
 # This script is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

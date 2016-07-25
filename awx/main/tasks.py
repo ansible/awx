@@ -1299,9 +1299,11 @@ class RunInventoryUpdate(BaseTask):
                 cp.set(section, 'password', decrypt_field(credential, 'password'))
 
             section = 'ansible'
+            cp.add_section(section)
             cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
 
             section = 'cache'
+            cp.add_section(section)
             cp.set(section, 'path', '/tmp')
             cp.set(section, 'max_age', '0')
 

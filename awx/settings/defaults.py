@@ -673,6 +673,16 @@ OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 
 # ---------------------
+# ----- Foreman -----
+# ---------------------
+SATELLITE6_ENABLED_VAR = 'foreman.enabled'
+SATELLITE6_ENABLED_VALUE = 'true'
+SATELLITE6_GROUP_FILTER = r'^.+$'
+SATELLITE6_HOST_FILTER = r'^.+$'
+SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
+SATELLITE6_INSTANCE_ID_VAR = 'foreman.uuid'
+
+# ---------------------
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.
