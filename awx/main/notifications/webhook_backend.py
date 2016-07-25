@@ -32,7 +32,7 @@ class WebhookBackend(TowerBaseEmailBackend):
             self.headers['User-Agent'] = "Tower {}".format(get_awx_version())
         for m in messages:
             r = requests.post("{}".format(m.recipients()[0]),
-                              data=json.dumps(m.body),
+                              json=m.body,
                               headers=self.headers)
             if r.status_code >= 400:
                 logger.error(smart_text("Error sending notification webhook: {}".format(r.text)))
