@@ -1688,8 +1688,7 @@ class RoleAccess(BaseAccess):
             if not check_user_access(self.user, sub_obj.__class__, 'read', sub_obj):
                 return False
 
-        if obj.object_id and \
-           isinstance(obj.content_object, ResourceMixin) and \
+        if isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:
             return True
         return False
