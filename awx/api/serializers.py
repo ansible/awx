@@ -1825,7 +1825,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
     class Meta:
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
-                  'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
+                  'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'allow_simultaneous')
 
     def get_related(self, obj):
@@ -1907,17 +1907,12 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
 
     passwords_needed_to_start = serializers.ReadOnlyField()
-    ask_variables_on_launch = serializers.ReadOnlyField()
-    ask_limit_on_launch = serializers.ReadOnlyField()
-    ask_tags_on_launch = serializers.ReadOnlyField()
-    ask_job_type_on_launch = serializers.ReadOnlyField()
-    ask_inventory_on_launch = serializers.ReadOnlyField()
-    ask_credential_on_launch = serializers.ReadOnlyField()
 
     class Meta:
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
-                  'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
+                  'ask_limit_on_launch', 'ask_tags_on_launch',
+                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
                   'ask_inventory_on_launch', 'ask_credential_on_launch')
 
     def get_related(self, obj):
@@ -2282,14 +2277,15 @@ class JobLaunchSerializer(BaseSerializer):
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
                   'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_limit_on_launch',
+                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',
                   'job_template_data', 'defaults')
-        read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
-                            'ask_tags_on_launch', 'ask_job_type_on_launch',
-                            'ask_inventory_on_launch', 'ask_credential_on_launch')
+        read_only_fields = (
+            'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+            'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
+            'ask_inventory_on_launch', 'ask_credential_on_launch')
         extra_kwargs = {
             'credential': {'write_only': True,},
             'limit': {'write_only': True,},
