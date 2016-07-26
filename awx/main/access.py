@@ -720,18 +720,25 @@ class TeamAccess(BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
         of a resource role to the team."""
-        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
-            role_access = RoleAccess(self.user)
-            return role_access.can_attach(sub_obj, obj, 'member_role.parents',
-                                          *args, **kwargs)
+        if isinstance(sub_obj, Role):
+            if sub_obj.content_object is None:
+                raise PermissionDenied("The {} role cannot be assigned to a team".format(sub_obj.name))
+            elif isinstance(sub_obj.content_object, User):
+                raise PermissionDenied("The admin_role for a User cannot be assigned to a team")
+
+            if isinstance(sub_obj.content_object, ResourceMixin):
+                role_access = RoleAccess(self.user)
+                return role_access.can_attach(sub_obj, obj, 'member_role.parents',
+                                              *args, **kwargs)
         return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
                                                   *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
-            role_access = RoleAccess(self.user)
-            return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
-                                            *args, **kwargs)
+        if isinstance(sub_obj, Role):
+            if isinstance(sub_obj.content_object, ResourceMixin):
+                role_access = RoleAccess(self.user)
+                return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
+                                                *args, **kwargs)
         return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
                                                     *args, **kwargs)
 
