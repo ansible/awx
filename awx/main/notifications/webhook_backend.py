@@ -3,7 +3,6 @@
 
 import logging
 import requests
-import json
 
 from django.utils.encoding import smart_text
 
