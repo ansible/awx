@@ -13,7 +13,8 @@
                 DashboardList-status"
                 ng-class="{'SmartStatus--success icon-job-successful': job.value === 1,
                     'SmartStatus--failed icon-job-successful': job.value === -1,
-                    'SmartStatus--running icon-job-successful': job.value === 0}">
+                    'SmartStatus--running icon-job-successful': job.value === 0,
+                    'SmartStatus-vertCenter': singleJobStatus}">
                 </i>
         </a>
     </div>
