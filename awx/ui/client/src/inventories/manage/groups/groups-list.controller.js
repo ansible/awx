@@ -151,6 +151,7 @@
                     {status_tooltip: group_status.tooltip},
                     {launch_tooltip: group_status.launch_tip},
                     {launch_class: group_status.launch_class},
+                    {group_schedule_tooltip: group_status.schedule_tip},
                     {hosts_status_tip: hosts_status.tooltip},
                     {hosts_status_class: hosts_status.class},
                     {source: group.summary_fields.inventory_source ? group.summary_fields.inventory_source.source : null},
