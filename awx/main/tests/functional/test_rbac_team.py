@@ -10,17 +10,17 @@ def test_team_attach_unattach(team, user):
     access = TeamAccess(u)
 
     team.member_role.members.add(u)
-    assert not access.can_attach(team, u.admin_role, 'member_role.children', None)
-    assert not access.can_unattach(team, u.admin_role, 'member_role.children')
+    assert not access.can_attach(team, team.member_role, 'member_role.children', None)
+    assert not access.can_unattach(team, team.member_role, 'member_role.children')
 
     team.admin_role.members.add(u)
-    assert access.can_attach(team, u.admin_role, 'member_role.children', None)
-    assert access.can_unattach(team, u.admin_role, 'member_role.children')
+    assert access.can_attach(team, team.member_role, 'member_role.children', None)
+    assert access.can_unattach(team, team.member_role, 'member_role.children')
 
     u2 = user('non-member', False)
     access = TeamAccess(u2)
-    assert not access.can_attach(team, u2.admin_role, 'member_role.children', None)
-    assert not access.can_unattach(team, u2.admin_role, 'member_role.chidlren')
+    assert not access.can_attach(team, team.member_role, 'member_role.children', None)
+    assert not access.can_unattach(team, team.member_role, 'member_role.chidlren')
 
 @pytest.mark.django_db
 def test_team_access_superuser(team, user):

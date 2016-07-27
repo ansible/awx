@@ -12,7 +12,7 @@ def mock_feature_enabled(feature, bypass_database=None):
 
 @pytest.fixture
 def role():
-    return Role.objects.create()
+    return Role.objects.create(role_field='admin_role')
 
 
 #
@@ -210,33 +210,33 @@ def test_get_teams_roles_list(get, team, organization, admin):
 
 
 @pytest.mark.django_db
-def test_add_role_to_teams(team, role, post, admin):
-    assert team.member_role.children.filter(id=role.id).count() == 0
+def test_add_role_to_teams(team, post, admin):
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 0
     url = reverse('api:team_roles_list', args=(team.id,))
 
-    response = post(url, {'id': role.id}, admin)
+    response = post(url, {'id': team.member_role.id}, admin)
     assert response.status_code == 204
-    assert team.member_role.children.filter(id=role.id).count() == 1
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 1
 
-    response = post(url, {'id': role.id}, admin)
+    response = post(url, {'id': team.member_role.id}, admin)
     assert response.status_code == 204
-    assert team.member_role.children.filter(id=role.id).count() == 1
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 1
 
     response = post(url, {}, admin)
     assert response.status_code == 400
-    assert team.member_role.children.filter(id=role.id).count() == 1
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 1
 
 @pytest.mark.django_db
-def test_remove_role_from_teams(team, role, post, admin):
-    assert team.member_role.children.filter(id=role.id).count() == 0
+def test_remove_role_from_teams(team, post, admin):
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 0
     url = reverse('api:team_roles_list', args=(team.id,))
-    response = post(url, {'id': role.id}, admin)
+    response = post(url, {'id': team.member_role.id}, admin)
     assert response.status_code == 204
-    assert team.member_role.children.filter(id=role.id).count() == 1
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 1
 
-    response = post(url, {'disassociate': role.id, 'id': role.id}, admin)
+    response = post(url, {'disassociate': team.member_role.id, 'id': team.member_role.id}, admin)
     assert response.status_code == 204
-    assert team.member_role.children.filter(id=role.id).count() == 0
+    assert team.member_role.children.filter(id=team.member_role.id).count() == 0
 
 
 
