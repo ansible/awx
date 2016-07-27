@@ -872,7 +872,7 @@ var tower = angular.module('Tower', [
                 } else {
                     var lastUser = $cookieStore.get('current_user'),
                         timestammp = Store('sessionTime');
-                    if(lastUser && lastUser.id && timestammp && timestammp[lastUser.id]){
+                    if(lastUser && lastUser.id && timestammp && timestammp[lastUser.id] && timestammp[lastUser.id].loggedIn){
                         var stime = timestammp[lastUser.id].time,
                             now = new Date().getTime();
                         if ((stime - now) <= 0) {
