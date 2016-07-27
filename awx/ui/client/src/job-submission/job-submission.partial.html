@@ -148,7 +148,15 @@
                             <span class="Form-inputLabel">Job Tags</span>
                         </label>
                         <div>
-                            <textarea rows="1" ng-model="other_prompt_data.job_tags" name="tags" class="form-control Form-textArea Form-textInput"></textarea>
+                            <textarea rows="5" ng-model="other_prompt_data.job_tags" name="tags" class="form-control Form-textArea Form-textInput"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group Form-formGroup Form-formGroup--singleColumn" ng-if="ask_skip_tags_on_launch">
+                        <label for="skip_tags">
+                            <span class="Form-inputLabel">Skip Tags</span>
+                        </label>
+                        <div>
+                            <textarea rows="5" ng-model="other_prompt_data.skip_tags" name="skip_tags" class="form-control Form-textArea Form-textInput"></textarea>
                         </div>
                     </div>
                 </form>
