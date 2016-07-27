@@ -526,6 +526,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = InventorySourceSerializer
             elif isinstance(obj, JobTemplate):
                 serializer_class = JobTemplateSerializer
+            elif isinstance(obj, SystemJobTemplate):
+                serializer_class = SystemJobTemplateSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             return serializer.to_representation(obj)
