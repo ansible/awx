@@ -2674,6 +2674,8 @@ class ActivityStreamSerializer(BaseSerializer):
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
+                        if fk == 'group':
+                            thisItemDict['inventory_id'] = getattr(thisItem, 'inventory_id', None)
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
                 pass
