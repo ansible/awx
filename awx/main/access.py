@@ -1292,9 +1292,11 @@ class UnifiedJobTemplateAccess(BaseAccess):
         project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
+        system_job_template_qs = self.user.get_queryset(SystemJobTemplate)
         qs = qs.filter(Q(Project___in=project_qs) |
                        Q(InventorySource___in=inventory_source_qs) |
-                       Q(JobTemplate___in=job_template_qs))
+                       Q(JobTemplate___in=job_template_qs) |
+                       Q(systemjobtemplate__in=system_job_template_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
