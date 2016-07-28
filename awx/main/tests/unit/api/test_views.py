@@ -74,13 +74,13 @@ class TestJobTemplateLabelList:
 
 @pytest.mark.parametrize("url", ["/team/1/roles", "/role/1/teams"])
 def test_team_roles_list_post_org_roles(url):
-    with mock.patch('awx.api.views.Role.objects.get') as role_get, \
+    with mock.patch('awx.api.views.get_object_or_400') as mock_get_obj, \
             mock.patch('awx.api.views.ContentType.objects.get_for_model') as ct_get:
 
         role_mock = mock.MagicMock(spec=Role)
         content_type_mock = mock.MagicMock(spec=ContentType)
         role_mock.content_type = content_type_mock
-        role_get.return_value = role_mock
+        mock_get_obj.return_value = role_mock
         ct_get.return_value = content_type_mock
 
         factory = APIRequestFactory()

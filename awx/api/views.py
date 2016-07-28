@@ -879,7 +879,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        role = Role.objects.get(pk=sub_id)
+        role = get_object_or_400(Role, pk=sub_id)
         content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == content_type:
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
@@ -3678,7 +3678,7 @@ class RoleTeamsList(SubListAPIView):
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = Team.objects.get(pk=sub_id)
+        team = get_object_or_400(Team, pk=sub_id)
         action = 'attach'
         if request.data.get('disassociate', None):
             action = 'unattach'
