@@ -12,6 +12,8 @@ export default ['$scope', '$filter',
         }
 
         function init(){
+            var singleJobStatus = true;
+            var firstJobStatus;
             var recentJobs = $scope.jobs;
             var sparkData =
             _.sortBy(recentJobs.map(function(job) {
@@ -34,8 +36,26 @@ export default ['$scope', '$filter',
                 data.finished = $filter('longDate')(job.finished) || job.status+"";
                 data.status_tip = "JOB ID: " + data.jobId + "<br>STATUS: " + data.smartStatus + "<br>FINISHED: " + data.finished;
 
+                // If we've already determined that there are both failed and successful jobs OR if the current job in the loop is
+                // pending/waiting/running then we don't worry about checking for a single job status
+                if(singleJobStatus && (isFailureState(job.status) || job.status === "successful")) {
+                    if(firstJobStatus) {
+                        // We've already been through at least once and have a first job status
+                        if(!(isFailureState(firstJobStatus) && isFailureState(job.status) || firstJobStatus === job.status)) {
+                            // We have a different status in the array
+                            singleJobStatus = false;
+                        }
+                    }
+                    else {
+                        // We haven't set a first job status yet so go ahead set it
+                        firstJobStatus = job.status;
+                    }
+                }
+
                 return data;
             }), "sortDate").reverse();
+
+            $scope.singleJobStatus = singleJobStatus;
 
             $scope.sparkArray = sparkData;
         }
