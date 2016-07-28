@@ -74,6 +74,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.limit = data.limit;
                 $scope.verbosity = data.verbosity;
                 $scope.job_tags = data.job_tags;
+                $scope.job.module_name = data.module_name;
                 if (data.extra_vars) {
                     $scope.variables = ParseVariableString(data.extra_vars);
                 }
