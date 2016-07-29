@@ -9,25 +9,8 @@ from awx.fact.utils.dbtransform import KeyTransform
 from mongoengine.connection import ConnectionError
 from pymongo.errors import OperationFailure
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('system_tracking_migrations')
 
-def log_migration(wrapped):
-    '''setup the logging mechanism for each migration method
-    as it runs, Django resets this, so we use a decorator
-    to re-add the handler for each method.
-    '''
-    handler = logging.FileHandler("/tmp/tower_system_tracking_migrations.log", mode="a", encoding="UTF-8")
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-
-    def wrapper(*args, **kwargs):
-        logger.handlers = []
-        logger.addHandler(handler)
-        return wrapped(*args, **kwargs)
-    return wrapper
-
-@log_migration
 def migrate_facts(apps, schema_editor):
     Fact = apps.get_model('main', "Fact")
     Host = apps.get_model('main', "Host")
@@ -52,7 +35,7 @@ def migrate_facts(apps, schema_editor):
     migrated_count = 0
     not_migrated_count = 0
     transform = KeyTransform([('.', '\uff0E'), ('$', '\uff04')])
-    for factver in FactVersion.objects.all():
+    for factver in FactVersion.objects.all().no_cache():
         try:
             host = Host.objects.only('id').get(inventory__id=factver.host.inventory_id, name=factver.host.hostname)
             fact_obj = transform.replace_outgoing(factver.fact)

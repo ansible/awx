@@ -1,8 +1,7 @@
 #!/usr/bin/python
+# vim: set fileencoding=utf-8 :
 #
 # NOTE FOR TOWER: change foreman_ to sattelite_ for the group prefix
-#
-# vim: set fileencoding=utf-8 :
 #
 # Copyright (C) 2016 Guido Günther <agx@sigxcpu.org>
 #

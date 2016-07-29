@@ -3,11 +3,6 @@
 # All Rights Reserved
 import os
 import sys
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # noqa
-
-import django
-django.setup() # noqa
-
 
 # Python
 from collections import defaultdict
@@ -15,7 +10,7 @@ from optparse import make_option, OptionParser
 
 
 # Django
-
+import django
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -23,7 +18,8 @@ from django.db import transaction
 # awx
 from awx.main.models import * # noqa
 
-
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # noqa
+django.setup() # noqa
 
 
 option_list = [

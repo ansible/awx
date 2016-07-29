@@ -245,16 +245,18 @@ class UserAccess(BaseAccess):
 
 
     def can_add(self, data):
-        if data is not None and 'is_superuser' in data:
-            if to_python_boolean(data['is_superuser'], allow_none=True) and not self.user.is_superuser:
+        if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
+            if (to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) or
+                    to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True)) and not self.user.is_superuser:
                 return False
         if self.user.is_superuser:
             return True
         return Organization.accessible_objects(self.user, 'admin_role').exists()
 
     def can_change(self, obj, data):
-        if data is not None and 'is_superuser' in data:
-            if to_python_boolean(data['is_superuser'], allow_none=True) and not self.user.is_superuser:
+        if data is not None and ('is_superuser' in data or 'is_system_auditor' in data):
+            if (to_python_boolean(data.get('is_superuser', 'false'), allow_none=True) or
+                    to_python_boolean(data.get('is_system_auditor', 'false'), allow_none=True)) and not self.user.is_superuser:
                 return False
         # A user can be changed if they are themselves, or by org admins or
         # superusers.  Change permission implies changing only certain fields
@@ -720,18 +722,25 @@ class TeamAccess(BaseAccess):
     def can_attach(self, obj, sub_obj, relationship, *args, **kwargs):
         """Reverse obj and sub_obj, defer to RoleAccess if this is an assignment
         of a resource role to the team."""
-        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
-            role_access = RoleAccess(self.user)
-            return role_access.can_attach(sub_obj, obj, 'member_role.parents',
-                                          *args, **kwargs)
+        if isinstance(sub_obj, Role):
+            if sub_obj.content_object is None:
+                raise PermissionDenied("The {} role cannot be assigned to a team".format(sub_obj.name))
+            elif isinstance(sub_obj.content_object, User):
+                raise PermissionDenied("The admin_role for a User cannot be assigned to a team")
+
+            if isinstance(sub_obj.content_object, ResourceMixin):
+                role_access = RoleAccess(self.user)
+                return role_access.can_attach(sub_obj, obj, 'member_role.parents',
+                                              *args, **kwargs)
         return super(TeamAccess, self).can_attach(obj, sub_obj, relationship,
                                                   *args, **kwargs)
 
     def can_unattach(self, obj, sub_obj, relationship, *args, **kwargs):
-        if isinstance(sub_obj, Role) and isinstance(sub_obj.content_object, ResourceMixin):
-            role_access = RoleAccess(self.user)
-            return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
-                                            *args, **kwargs)
+        if isinstance(sub_obj, Role):
+            if isinstance(sub_obj.content_object, ResourceMixin):
+                role_access = RoleAccess(self.user)
+                return role_access.can_unattach(sub_obj, obj, 'member_role.parents',
+                                                *args, **kwargs)
         return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
                                                     *args, **kwargs)
 
@@ -906,8 +915,7 @@ class JobTemplateAccess(BaseAccess):
         project = get_value(Project, 'project')
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
             if inventory:
-                org = inventory.organization
-                accessible = self.user in org.admin_role
+                accessible = self.user in inventory.use_role
             else:
                 accessible = False
             if not project and accessible:
@@ -979,7 +987,8 @@ class JobTemplateAccess(BaseAccess):
 
         for k, v in data.items():
             if hasattr(obj, k) and getattr(obj, k) != v:
-                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None):
+                if k not in field_whitelist and v != getattr(obj, '%s_id' % k, None) \
+                        and not (hasattr(obj, '%s_id' % k) and getattr(obj, '%s_id' % k) is None and v == ''): # Equate '' to None in the case of foreign keys
                     return False
         return True
 
@@ -1681,8 +1690,7 @@ class RoleAccess(BaseAccess):
             if not check_user_access(self.user, sub_obj.__class__, 'read', sub_obj):
                 return False
 
-        if obj.object_id and \
-           isinstance(obj.content_object, ResourceMixin) and \
+        if isinstance(obj.content_object, ResourceMixin) and \
            self.user in obj.content_object.admin_role:
             return True
         return False

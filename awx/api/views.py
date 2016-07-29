@@ -1573,6 +1573,7 @@ class InventoryScanJobTemplateList(SubListAPIView):
 
 class HostList(ListCreateAPIView):
 
+    always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
 
