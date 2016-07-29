@@ -1208,7 +1208,12 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied('You may not remove your own admin_role.')
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        role = get_object_or_400(Role, pk=sub_id)
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -3648,6 +3653,15 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg="User 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        role = self.get_parent_object()
+        if role == self.request.user.admin_role:
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
+
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
