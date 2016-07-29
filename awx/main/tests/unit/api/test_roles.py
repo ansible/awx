@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from awx.api.views import (
     RoleUsersList,
     UserRolesList,
+    TeamRolesList,
 )
 
 from awx.main.models import (
@@ -23,7 +24,7 @@ from awx.main.models import (
     (1, "may not perform"),
 ])
 def test_user_roles_list_user_admin_role(pk, err):
-    with mock.patch('awx.api.views.Role.objects.get') as role_get, \
+    with mock.patch('awx.api.views.get_object_or_400') as role_get, \
             mock.patch('awx.api.views.ContentType.objects.get_for_model') as ct_get:
 
         role_mock = mock.MagicMock(spec=Role, id=1, pk=1)
@@ -75,3 +76,25 @@ def test_role_users_list_other_user_admin_role(admin_role, err):
 
             assert response.status_code == 403
             assert err in response.content
+
+def test_team_roles_list_post_org_roles():
+    with mock.patch('awx.api.views.get_object_or_400') as role_get, \
+            mock.patch('awx.api.views.ContentType.objects.get_for_model') as ct_get:
+
+        role_mock = mock.MagicMock(spec=Role)
+        content_type_mock = mock.MagicMock(spec=ContentType)
+        role_mock.content_type = content_type_mock
+        role_get.return_value = role_mock
+        ct_get.return_value = content_type_mock
+
+        factory = APIRequestFactory()
+        view = TeamRolesList.as_view()
+
+        request = factory.post("/team/1/roles", {'id':1}, format="json")
+        force_authenticate(request, User(username="root", is_superuser=True))
+
+        response = view(request)
+        response.render()
+
+        assert response.status_code == 400
+        assert 'cannot assign' in response.content
