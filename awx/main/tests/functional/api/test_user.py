@@ -66,13 +66,3 @@ def test_create_delete_create_user(post, delete, admin):
     }, admin)
     print(response.data)
     assert response.status_code == 201
-
-@pytest.mark.django_db
-def test_add_user_admin_role_member(post, user):
-    admin = user('admin', is_superuser=True)
-    normal = user('normal')
-
-    url = reverse('api:user_roles_list', args=(admin.pk,))
-    response = post(url, {'id':normal.admin_role.pk}, admin)
-    assert response.status_code == 403
-    assert 'not change the membership' in response.rendered_content

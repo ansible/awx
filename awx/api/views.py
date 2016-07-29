@@ -1210,7 +1210,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         if sub_id == self.request.user.admin_role.pk:
             raise PermissionDenied('You may not perform any action with your own admin_role.')
 
-        role = get_object_or_404(Role, pk=sub_id)
+        role = Role.objects.get(pk=sub_id)
         user_content_type = ContentType.objects.get_for_model(User)
         if role.content_type == user_content_type:
             raise PermissionDenied('You may not change the membership of a users admin_role')
