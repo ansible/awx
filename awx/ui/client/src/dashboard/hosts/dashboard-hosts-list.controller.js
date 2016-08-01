@@ -6,8 +6,8 @@
 
 export default
 	['$scope', '$state', '$stateParams', 'PageRangeSetup', 'GetBasePath', 'DashboardHostsList',
-	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts', '$rootScope',
-	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts, $rootScope){
+	'generateList', 'PaginateInit', 'SetStatus', 'DashboardHostService', 'hosts', '$rootScope', 'SearchInit',
+	function($scope, $state, $stateParams, PageRangeSetup, GetBasePath, DashboardHostsList, GenerateList, PaginateInit, SetStatus, DashboardHostService, hosts, $rootScope, SearchInit){
 		var setJobStatus = function(){
 			_.forEach($scope.hosts, function(value){
 				SetStatus({
@@ -59,6 +59,12 @@ export default
 			$scope.hosts = hosts.results;
 			setJobStatus();
 			generator.inject(list, {mode: 'edit', scope: $scope});
+			SearchInit({
+		        scope: $scope,
+		        set: 'hosts',
+		        list: list,
+		        url: defaultUrl
+		    });
 			PaginateInit({
 				scope: $scope,
 				list: list,
@@ -77,6 +83,7 @@ export default
 	            $scope.rowBeingEdited = $state.params.id;
 	            $scope.listBeingEdited = "hosts";
 	        }
+			$scope.search(list.iterator);
 		};
 		init();
 	}];

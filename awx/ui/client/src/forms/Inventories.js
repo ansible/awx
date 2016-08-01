@@ -81,7 +81,7 @@ export default
                 permissions: {
                     awToolTip: 'Please save before assigning permissions',
                     dataPlacement: 'top',
-                    basePath: 'projects/:id/access_list/',
+                    basePath: 'inventories/:id/access_list/',
                     type: 'collection',
                     title: 'Permissions',
                     iterator: 'permission',

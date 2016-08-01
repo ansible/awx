@@ -134,6 +134,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             });
             $(document).bind('keydown', function (e) {
                 if (e.keyCode === 27 || e.keyCode === 13) {
+                    e.preventDefault();
                     $('#alert-modal2').modal('hide');
                 }
             });
@@ -161,6 +162,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             });
             $(document).bind('keydown', function (e) {
                 if (e.keyCode === 27 || e.keyCode === 13) {
+                    e.preventDefault();
                     $('#alert-modal').modal('hide');
                 }
             });

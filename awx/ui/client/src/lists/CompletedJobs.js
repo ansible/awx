@@ -35,6 +35,7 @@ export default
                 ngClick:"viewJobDetails(completed_job)",
                 searchable: true,
                 searchType: 'select',
+                defaultSearchField: true,
                 nosort: true,
                 searchOptions: [
                     { label: "Success", value: "successful" },
@@ -54,8 +55,8 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
+                searchable: false,
                 ngClick: "viewJobDetails(completed_job)",
-                defaultSearchField: true,
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
             },
@@ -64,7 +65,7 @@ export default
                 ngBind: 'completed_job.type_label',
                 link: false,
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                searchable: true,
+                searchable: false,
                 searchType: 'select',
                 searchOptions: []    // populated via GetChoices() in controller
             },

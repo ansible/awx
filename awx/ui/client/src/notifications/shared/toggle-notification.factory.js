@@ -36,6 +36,8 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
                 disassociate: 1
             };
         }
+        // Show the working spinner
+        Wait('start');
         Rest.setUrl(url);
         Rest.post(params)
             .success( function(data) {
@@ -43,9 +45,8 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
                     scope.$emit(callback, data.id);
                     notifier[column] = !notifier[column];
                 }
-                else {
-                    Wait('stop');
-                }
+                // Hide the working spinner
+                Wait('stop');
             })
             .error( function(data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!',

@@ -44,9 +44,11 @@
     color: @list-header-txt;
     font-size: 14px;
     font-weight: bold;
-    white-space: nowrap;
     padding-bottom: 25px;
     min-height: 45px;
+    word-break: break-all;
+    max-width: 90%;
+    word-wrap: break-word;
 }
 
 .Form-secondaryTitle{
@@ -55,7 +57,10 @@
     min-height: 40px;
 }
 
-.Form-title--is_superuser, .Form-title--is_system_auditor, .Form-title--is_ldap_user{
+.Form-title--is_superuser,
+.Form-title--is_system_auditor,
+.Form-title--is_ldap_user,
+.Form-title--is_external_account{
     height:15px;
     color: @default-interface-txt;
     background-color: @default-list-header-bg;
@@ -351,6 +356,11 @@
 
 .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b{
     border-color: transparent transparent @field-dropdown-icon transparent!important;
+}
+
+.select2-container--default.select2-container--open.select2-container--below .select2-selection--single {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 .select2-dropdown{

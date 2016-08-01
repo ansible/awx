@@ -30,7 +30,7 @@
 angular.module('AngularCodeMirrorModule', [])
 
     .factory('AngularCodeMirror', [ function() {
-        return function() {
+        return function(readOnly) {
             var fn = function() {
 
                 this.myCodeMirror = null;
@@ -43,7 +43,6 @@ angular.module('AngularCodeMirrorModule', [])
                         model = params.model,
                         mode = params.mode,
                         onReady = params.onReady,
-                        onChange = params.onChange,
                         height = 0;
 
                     self.element = $(element);
@@ -69,6 +68,15 @@ angular.module('AngularCodeMirrorModule', [])
 
                     // Initialize CodeMirror
                     self.modes[mode].value = scope[model];
+                    
+                    // if readOnly is passed to AngularCodeMirror, set the
+                    // options for all modes to be readOnly
+                    if (readOnly) {
+                        Object.keys(self.modes).forEach(function(val) {
+                            self.modes[val].readOnly = true;
+                        });
+                    }
+                    
                     self.myCodeMirror = CodeMirror(document.getElementById('cm-' + model + '-container'), self.modes[mode]);
 
                     // Adjust the height
@@ -85,14 +93,7 @@ angular.module('AngularCodeMirrorModule', [])
 
                     // Update the model on change
                     self.myCodeMirror.on('change', function() {
-                        setTimeout(function() {
-                            scope.$apply(function(){
-                                scope[model] = self.myCodeMirror.getValue();
-                                if (onChange) {
-                                    onChange();
-                                }
-                            });
-                        }, 500);
+                        setTimeout(function() { scope.$apply(function(){ scope[model] = self.myCodeMirror.getValue(); }); }, 500);
                     });
                 };
                

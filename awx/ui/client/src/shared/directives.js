@@ -390,46 +390,57 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 
     // lookup   Validate lookup value against API
     //
-    .directive('awlookup', ['Rest', function(Rest) {
+    .directive('awlookup', ['Rest', '$timeout', function(Rest, $timeout) {
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
+
+                var restTimeout;
+
                 ctrl.$parsers.unshift( function(viewValue) {
                     if (viewValue !== '' && viewValue !== null) {
                         var url = elm.attr('data-url');
                         url = url.replace(/\:value/, encodeURI(viewValue));
                         scope[elm.attr('data-source')] = null;
-                        Rest.setUrl(url);
-                        Rest.get().then( function(data) {
-                            var results = data.data.results;
-                            if (results.length > 0) {
-                                scope[elm.attr('data-source')] = results[0].id;
+                        if(restTimeout) {
+                            $timeout.cancel(restTimeout);
+                        }
+                        restTimeout = $timeout( function(){
+                            Rest.setUrl(url);
+                            Rest.get().then( function(data) {
+                                var results = data.data.results;
+                                if (results.length > 0) {
+                                    scope[elm.attr('data-source')] = results[0].id;
 
-                                // For user lookups the API endpoint doesn't
-                                // have a `name` property, so this is `undefined`
-                                // which causes the input to clear after typing
-                                // a valid value O_o
-                                //
-                                // Only assign if there is a value, so that we avoid
-                                // this situation.
-                                //
-                                // TODO: Evaluate if assigning name on the scope is
-                                // even necessary at all.
-                                //
-                                if (!_.isEmpty(results[0].name)) {
-                                    scope[elm.attr('name')] = results[0].name;
+                                    // For user lookups the API endpoint doesn't
+                                    // have a `name` property, so this is `undefined`
+                                    // which causes the input to clear after typing
+                                    // a valid value O_o
+                                    //
+                                    // Only assign if there is a value, so that we avoid
+                                    // this situation.
+                                    //
+                                    // TODO: Evaluate if assigning name on the scope is
+                                    // even necessary at all.
+                                    //
+                                    if (!_.isEmpty(results[0].name)) {
+                                        scope[elm.attr('name')] = results[0].name;
+                                    }
+
+                                    ctrl.$setValidity('required', true);
+                                    ctrl.$setValidity('awlookup', true);
+                                    return viewValue;
                                 }
-
                                 ctrl.$setValidity('required', true);
-                                ctrl.$setValidity('awlookup', true);
-                                return viewValue;
-                            }
-                            ctrl.$setValidity('required', true);
-                            ctrl.$setValidity('awlookup', false);
-                            return undefined;
-                        });
+                                ctrl.$setValidity('awlookup', false);
+                                return undefined;
+                            });
+                        }, 750);
                     }
                     else {
+                        if(restTimeout) {
+                            $timeout.cancel(restTimeout);
+                        }
                         ctrl.$setValidity('awlookup', true);
                         scope[elm.attr('data-source')] = null;
                     }
@@ -477,7 +488,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
         return {
             link: function(scope, element, attrs) {
                 var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : {show: 500, hide: 100},
-                    placement;
+                    placement,
+                    stateChangeWatcher;
                 if (attrs.awTipPlacement) {
                     placement = attrs.awTipPlacement;
                 }
@@ -492,6 +504,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 } else {
                     template = '<div class="tooltip Tooltip" role="tooltip"><div class="tooltip-arrow Tooltip-arrow"></div><div class="tooltip-inner Tooltip-inner"></div></div>';
                 }
+
+                // This block helps clean up tooltips that may get orphaned by a click event
+                $(element).on('mouseenter', function() {
+                    if(stateChangeWatcher) {
+                        // Un-bind - we don't want a bunch of listeners firing
+                        stateChangeWatcher();
+                    }
+                    stateChangeWatcher = scope.$on('$stateChangeStart', function() {
+                        // Go ahead and force the tooltip setTimeout to expire (if it hasn't already fired)
+                        $(element).tooltip('hide');
+                        // Clean up any existing tooltips including this one
+                        $('.tooltip').each(function() {
+                            $(this).remove();
+                        });
+                    });
+                });
 
                 $(element).on('hidden.bs.tooltip', function( ) {
                     // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
