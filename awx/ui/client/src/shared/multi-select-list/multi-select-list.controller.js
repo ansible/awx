@@ -63,9 +63,16 @@ export default ['$scope',
          * {@link multiSelectList.controller:multiSelectList#decorateItem `decorateItem`}
          */
         this.registerItem = function(item) {
-            var decoratedItem = this.decorateItem(item);
-            $scope.items = $scope.items.concat(decoratedItem);
-            return decoratedItem;
+            var foundItem = _.find($scope.items, function(existingItem) { return existingItem.id === item.id; });
+
+            if(foundItem) {
+                return foundItem;
+            }
+            else {
+                var decoratedItem = this.decorateItem(item);
+                $scope.items = $scope.items.concat(decoratedItem);
+                return decoratedItem;
+            }
         };
 
         /**
@@ -99,6 +106,7 @@ export default ['$scope',
         this.decorateItem = function(item) {
             return {
                 isSelected: false,
+                id: item.id,
                 value: item
             };
         };
@@ -129,11 +137,11 @@ export default ['$scope',
          * Triggers {@link multiSelectList.selectionChanged `multiSelectList.selectionChanged`}
          */
         this.deselectAll = function() {
-          $scope.items.forEach(function(item) {
-            item.isSelected = false;
-          });
-          $scope.selection.isExtended = false;
-          rebuildSelections();
+            $scope.items.forEach(function(item) {
+              item.isSelected = false;
+            });
+            $scope.selection.isExtended = false;
+            rebuildSelections();
         };
 
 

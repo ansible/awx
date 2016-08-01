@@ -19,6 +19,7 @@ export default
         hover: true,
         'class': 'table-no-border',
         multiSelect: true,
+        trackBy: 'group.id',
 
         fields: {
             sync_status: {
