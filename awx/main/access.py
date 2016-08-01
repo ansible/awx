@@ -427,8 +427,8 @@ class HostAccess(BaseAccess):
         return obj and self.user in obj.inventory.read_role
 
     def can_add(self, data):
-        if not data or 'inventory' not in data:
-            return False
+        if not data:  # So the browseable API will work
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
 
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
