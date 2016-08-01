@@ -428,8 +428,8 @@ class HostAccess(BaseAccess):
         return obj and self.user in obj.inventory.read_role
 
     def can_add(self, data):
-        if not data or 'inventory' not in data:
-            return False
+        if not data:  # So the browseable API will work
+            return Inventory.accessible_objects(self.user, 'admin_role').exists()
 
         # Checks for admin or change permission on inventory.
         inventory_pk = get_pk_from_dict(data, 'inventory')
@@ -1089,7 +1089,8 @@ class JobAccess(BaseAccess):
     def can_delete(self, obj):
         if obj.inventory is not None and self.user in obj.inventory.organization.admin_role:
             return True
-        if obj.project is not None and self.user in obj.project.organization.admin_role:
+        if (obj.project is not None and obj.project.organization is not None and
+                self.user in obj.project.organization.admin_role):
             return True
         return False
 
@@ -1299,9 +1300,11 @@ class UnifiedJobTemplateAccess(BaseAccess):
         project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
+        system_job_template_qs = self.user.get_queryset(SystemJobTemplate)
         qs = qs.filter(Q(Project___in=project_qs) |
                        Q(InventorySource___in=inventory_source_qs) |
-                       Q(JobTemplate___in=job_template_qs))
+                       Q(JobTemplate___in=job_template_qs) |
+                       Q(systemjobtemplate__in=system_job_template_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
@@ -1569,21 +1572,22 @@ class ActivityStreamAccess(BaseAccess):
 
         inventory_set = Inventory.accessible_objects(self.user, 'read_role')
         credential_set = Credential.accessible_objects(self.user, 'read_role')
-        organization_set = Organization.accessible_objects(self.user, 'read_role')
-        admin_of_orgs = Organization.accessible_objects(self.user, 'admin_role')
-        group_set = Group.objects.filter(inventory__in=inventory_set)
+        auditing_orgs = (
+            Organization.accessible_objects(self.user, 'admin_role') |
+            Organization.accessible_objects(self.user, 'auditor_role')
+        ).distinct().values_list('id', flat=True)
         project_set = Project.accessible_objects(self.user, 'read_role')
         jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
         team_set = Team.accessible_objects(self.user, 'read_role')
 
         return qs.filter(
             Q(ad_hoc_command__inventory__in=inventory_set) |
-            Q(user__in=organization_set.values('member_role__members')) |
+            Q(user__in=auditing_orgs.values('member_role__members')) |
             Q(user=self.user) |
-            Q(organization__in=organization_set) |
+            Q(organization__in=auditing_orgs) |
             Q(inventory__in=inventory_set) |
             Q(host__inventory__in=inventory_set) |
-            Q(group__in=group_set) |
+            Q(group__inventory__in=inventory_set) |
             Q(inventory_source__inventory__in=inventory_set) |
             Q(inventory_update__inventory_source__inventory__in=inventory_set) |
             Q(credential__in=credential_set) |
@@ -1592,10 +1596,10 @@ class ActivityStreamAccess(BaseAccess):
             Q(project_update__project__in=project_set) |
             Q(job_template__in=jt_set) |
             Q(job__job_template__in=jt_set) |
-            Q(notification_template__organization__in=admin_of_orgs) |
-            Q(notification__notification_template__organization__in=admin_of_orgs) |
-            Q(label__organization__in=organization_set) |
-            Q(role__in=Role.visible_roles(self.user))
+            Q(notification_template__organization__in=auditing_orgs) |
+            Q(notification__notification_template__organization__in=auditing_orgs) |
+            Q(label__organization__in=auditing_orgs) |
+            Q(role__in=Role.visible_roles(self.user) if auditing_orgs else [])
         ).distinct()
 
     def can_add(self, data):

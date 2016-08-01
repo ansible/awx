@@ -201,7 +201,7 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser or request.user.is_system_auditor)
         if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
             license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
 
@@ -225,7 +225,10 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, 'admin_role').exists():
+        if request.user.is_superuser \
+                or request.user.is_system_auditor \
+                or Organization.accessible_objects(request.user, 'admin_role').exists() \
+                or Organization.accessible_objects(request.user, 'auditor_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -876,7 +879,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        role = Role.objects.get(pk=sub_id)
+        role = get_object_or_400(Role, pk=sub_id)
         content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == content_type:
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
@@ -1205,7 +1208,12 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied('You may not remove your own admin_role.')
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        role = get_object_or_400(Role, pk=sub_id)
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -3646,6 +3654,15 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg="User 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        role = self.get_parent_object()
+        if role == self.request.user.admin_role:
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
+
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
@@ -3676,7 +3693,7 @@ class RoleTeamsList(SubListAPIView):
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = Team.objects.get(pk=sub_id)
+        team = get_object_or_400(Team, pk=sub_id)
         action = 'attach'
         if request.data.get('disassociate', None):
             action = 'unattach'
