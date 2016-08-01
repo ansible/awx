@@ -3631,7 +3631,6 @@ class RoleDetail(RetrieveAPIView):
 
     model = Role
     serializer_class = RoleSerializer
-    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
 

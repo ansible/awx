@@ -1671,14 +1671,8 @@ class RoleAccess(BaseAccess):
         if self.user.is_superuser or self.user.is_system_auditor:
             return True
 
-        if obj.object_id:
-            sister_roles = Role.objects.filter(
-                content_type = obj.content_type,
-                object_id = obj.object_id
-            )
-        else:
-            sister_roles = obj
-        return self.user.roles.filter(descendents__in=sister_roles).exists()
+        return Role.filter_visible_roles(
+            self.user, Role.objects.filter(pk=obj.id)).exists()
 
     def can_add(self, obj, data):
         # Unsupported for now
