@@ -4,9 +4,6 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.utils.timezone import now
 
-from awx.api.license import feature_enabled
-
-
 def create_system_job_templates(apps, schema_editor):
     '''
     Create default system job templates if not present. Create default schedules
@@ -80,7 +77,7 @@ def create_system_job_templates(apps, schema_editor):
             polymorphic_ctype=sjt_ct,
         ),
     )
-    if created and feature_enabled('system_tracking', bypass_database=True):
+    if created:
         sched = Schedule(
             name='Cleanup Fact Schedule',
             rrule='DTSTART:%s RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1' % now_str,

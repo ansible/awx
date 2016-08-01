@@ -49,56 +49,13 @@ ANSIBLE_VENV_PATH = "/var/lib/awx/venv/ansible"
 TOWER_USE_VENV = True
 TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
-LOGGING['handlers']['tower_warnings'] = {
-    'level': 'WARNING',
-    'class':'logging.handlers.RotatingFileHandler',
-    'filters': ['require_debug_false'],
-    'filename': '/var/log/tower/tower.log',
-    'maxBytes': 1024 * 1024 * 5, # 5 MB
-    'backupCount': 5,
-    'formatter':'simple',
-}
-
-
-LOGGING['handlers']['callback_receiver'] = {
-    'level': 'WARNING',
-    'class':'logging.handlers.RotatingFileHandler',
-    'filters': ['require_debug_false'],
-    'filename': '/var/log/tower/callback_receiver.log',
-    'maxBytes': 1024 * 1024 * 5, # 5 MB
-    'backupCount': 5,
-    'formatter':'simple',
-}
-
-LOGGING['handlers']['socketio_service'] = {
-    'level': 'WARNING',
-    'class':'logging.handlers.RotatingFileHandler',
-    'filters': ['require_debug_false'],
-    'filename': '/var/log/tower/socketio_service.log',
-    'maxBytes': 1024 * 1024 * 5, # 5 MB
-    'backupCount': 5,
-    'formatter':'simple',
-}
-
-LOGGING['handlers']['task_system'] = {
-    'level': 'INFO',
-    'class':'logging.handlers.RotatingFileHandler',
-    'filters': ['require_debug_false'],
-    'filename': '/var/log/tower/task_system.log',
-    'maxBytes': 1024 * 1024 * 5, # 5 MB
-    'backupCount': 5,
-    'formatter':'simple',
-}
-
-LOGGING['handlers']['fact_receiver'] = {
-    'level': 'WARNING',
-    'class':'logging.handlers.RotatingFileHandler',
-    'filters': ['require_debug_false'],
-    'filename': '/var/log/tower/fact_receiver.log',
-    'maxBytes': 1024 * 1024 * 5, # 5 MB
-    'backupCount': 5,
-    'formatter':'simple',
-}
+LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'
+LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'
+LOGGING['handlers']['socketio_service']['filename'] = '/var/log/tower/socketio_service.log'
+LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'
+LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver.log'
+LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
+LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
 
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.

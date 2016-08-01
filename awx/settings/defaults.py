@@ -345,10 +345,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.run_administrative_checks',
         'schedule': timedelta(days=30)
     },
-    'label_cleanup': {
-        'task': 'awx.main.tasks.run_label_cleanup',
-        'schedule': timedelta(days=7)
-    },
     'authtoken_cleanup': {
         'task': 'awx.main.tasks.cleanup_authtokens',
         'schedule': timedelta(days=30)
@@ -677,6 +673,16 @@ OPENSTACK_EXCLUDE_EMPTY_GROUPS = True
 OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 
 # ---------------------
+# ----- Foreman -----
+# ---------------------
+SATELLITE6_ENABLED_VAR = 'foreman.enabled'
+SATELLITE6_ENABLED_VALUE = 'true'
+SATELLITE6_GROUP_FILTER = r'^.+$'
+SATELLITE6_HOST_FILTER = r'^.+$'
+SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
+SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
+
+# ---------------------
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.
@@ -941,7 +947,34 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
-        }
+        },
+        'fact_receiver': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'system_tracking_migrations': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'tower_system_tracking_migrations.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
+        'rbac_migrations': {
+            'level': 'WARNING',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filters': ['require_debug_false'],
+            'filename': os.path.join(LOG_ROOT, 'tower_rbac_migrations.log'),
+            'maxBytes': 1024 * 1024 * 5, # 5 MB
+            'backupCount': 5,
+            'formatter':'simple',
+        },
     },
     'loggers': {
         'django': {
@@ -997,6 +1030,14 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'social': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
+        'system_tracking_migrations': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'DEBUG',
+        },
+        'rbac_migrations': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
         },
