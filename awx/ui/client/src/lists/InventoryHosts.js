@@ -20,6 +20,7 @@ export default
         hasChildren: true,
         'class': 'table-no-border',
         multiSelect: true,
+        trackBy: 'host.id',
 
         fields: {
             active_failures: {

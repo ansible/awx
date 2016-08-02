@@ -135,9 +135,9 @@ describeModule(mod.name)
             context('selectionChanged event', function() {
 
                 it('triggers with selections set to all the items', function() {
-                    var item1 = controller.registerItem({ name: 'blah' });
-                    var item2 = controller.registerItem({ name: 'diddy' });
-                    var item3 = controller.registerItem({ name: 'doo' });
+                    var item1 = controller.registerItem({ isSelected: false, id: 1, name: 'blah' });
+                    var item2 = controller.registerItem({ isSelected: false, id: 2, name: 'diddy' });
+                    var item3 = controller.registerItem({ isSelected: false, id: 3, name: 'doo' });
                     var spy = sinon.spy();
 
                     $scope.$on('multiSelectList.selectionChanged', spy);
@@ -167,9 +167,9 @@ describeModule(mod.name)
 
             it('tracks extended selection state', function() {
                 var spy = sinon.spy();
-                var item1 = controller.registerItem({ name: 'blah' });
-                var item2 = controller.registerItem({ name: 'diddy' });
-                var item3 = controller.registerItem({ name: 'doo' });
+                var item1 = controller.registerItem({ isSelected: false, id: 1, name: 'blah' });
+                var item2 = controller.registerItem({ isSelected: false, id: 2, name: 'diddy' });
+                var item3 = controller.registerItem({ isSelected: false, id: 3, name: 'doo' });
                 var allItems = _.pluck([item1, item2, item3], 'value');
 
                 controller.selectAll();
@@ -196,4 +196,3 @@ describeModule(mod.name)
             });
         });
     });
-
