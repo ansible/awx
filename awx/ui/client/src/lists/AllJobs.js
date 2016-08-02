@@ -48,6 +48,7 @@ export default
                 columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(all_job)",
                 defaultSearchField: true,
+                searchDefault: true,
             },
             type: {
                 label: 'Type',

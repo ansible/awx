@@ -34,6 +34,10 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
             type = 'text';
         }
 
+        if (field.searchDefault) {
+            obj.default = true;
+        }
+
         obj.id = id;
         obj.value = value;
         obj.label = label;
@@ -76,10 +80,13 @@ export default ['Rest', '$q', 'GetBasePath', 'Wait', 'ProcessErrors', '$log', fu
         passThrough = partitionedOptions[1];
 
         var joinOptions = function() {
-            return _.sortBy(_
+            var options = _.sortBy(_
                 .flatten([needsRequest, passThrough]), function(opt) {
                     return opt.id;
                 });
+
+            // put default first
+            return _.flatten(_.partition(options, opt => opt.default));
         };
 
         if (needsRequest.length) {
