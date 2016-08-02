@@ -19,17 +19,14 @@ export default function(){
         fields: {
             status: {
                 label: '',
-                columnClass: 'List-staticColumn--smallStatus',
+                iconOnly: true,
                 searchable: false,
                 nosort: true,
-                ngClick: "null",
-                iconOnly: true,
-                excludeModal: true,
-                icons: [{
-                    icon: "{{ 'icon-job-' + notification_template.status }}",
-                    ngClick: "showSummary($event, notification_template.id)",
-                    ngClass: ""
-                }]
+                icon: 'icon-job-{{ notification_template.status }}',
+                awPopOver: '{{ notification_template.template_status_html }}',
+                dataTitle: "Recent Notifications",
+                dataPlacement: 'right',
+                columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus'
             },
             name: {
                 key: true,

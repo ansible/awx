@@ -31,6 +31,7 @@ export default function(){
                 awTipPlacement: 'right',
                 dataPlacement: 'right',
                 awPopOver: '{{ host.job_status_html }}',
+                dataTitle: '{{host.job_status_title}}',
                 ngClick:'viewHost(host.id)',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus'
             },
