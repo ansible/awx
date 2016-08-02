@@ -1728,7 +1728,9 @@ class CredentialSerializerCreate(CredentialSerializer):
         if user:
             credential.admin_role.members.add(user)
         if team:
-            credential.admin_role.parents.add(team.member_role)
+            credential.admin_role.parents.add(team.admin_role)
+            credential.use_role.parents.add(team.member_role)
+
         return credential
 
 
