@@ -154,6 +154,11 @@
                         <div class="JobDetail-resultRowText">{{ job.job_tags }}</div>
                     </div>
 
+                    <div class="form-group JobDetail-resultRow toggle-show"  ng-show="job.skip_tags">
+                        <label class="JobDetail-resultRowLabel col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Skip Tags</label>
+                        <div class="JobDetail-resultRowText">{{ job.skip_tags }}</div>
+                    </div>
+
                     <div class="form-group JobDetail-resultRow JobDetail-resultRow--variables toggle-show" ng-show="variables">
                         <label class="JobDetail-resultRowLabel JobDetail-extraVarsLabel col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label">Extra Variables</label>
                             <textarea rows="6" ng-model="variables" name="variables" class="JobDetail-extraVars" id="pre-formatted-variables"></textarea>

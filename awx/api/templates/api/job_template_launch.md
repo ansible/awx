@@ -8,6 +8,8 @@ The response will include the following fields:
   configured to prompt for variables upon launch (boolean, read-only)
 * `ask_tags_on_launch`: Flag indicating whether the job_template is
   configured to prompt for tags upon launch (boolean, read-only)
+* `ask_skip_tags_on_launch`: Flag indicating whether the job_template is
+  configured to prompt for skip_tags upon launch (boolean, read-only)
 * `ask_job_type_on_launch`: Flag indicating whether the job_template is
   configured to prompt for job_type upon launch (boolean, read-only)
 * `ask_limit_on_launch`: Flag indicating whether the job_template is
