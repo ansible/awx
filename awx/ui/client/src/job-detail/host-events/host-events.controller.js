@@ -38,11 +38,13 @@
  				break;
  			case 'ok':
  				params.event = 'runner_on_ok';
+                params.changed = 'false';
  				break;
  			case 'failed':
- 				params.failed = true;
+ 				params.event = 'runner_on_failed';
  				break;
  			case 'changed':
+                params.event = 'runner_on_ok';
  				params.changed = true;
  				break;
  			default:
