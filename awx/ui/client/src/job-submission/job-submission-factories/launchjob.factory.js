@@ -42,11 +42,11 @@ export default
 
                     }
 
-                    if(scope.ask_tags_on_launch && scope.other_prompt_data && scope.other_prompt_data.job_tags){
+                    if(scope.ask_tags_on_launch && scope.other_prompt_data && typeof scope.other_prompt_data.job_tags === 'string'){
                         job_launch_data.job_tags = scope.other_prompt_data.job_tags;
                     }
 
-                    if(scope.ask_skip_tags_on_launch && scope.other_prompt_data && scope.other_prompt_data.skip_tags){
+                    if(scope.ask_skip_tags_on_launch && scope.other_prompt_data && typeof scope.other_prompt_data.skip_tags === 'string'){
                         job_launch_data.skip_tags = scope.other_prompt_data.skip_tags;
                     }
 
