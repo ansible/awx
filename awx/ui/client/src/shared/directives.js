@@ -576,6 +576,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 template = '<div id="' + element[0].id + '_popover_container" class="popover" role="tooltip"><div class="arrow"></div><h3 id="' + element[0].id + '_popover_title" class="popover-title"></h3><div id="' + element[0].id + '_popover_content" class="popover-content"></div></div>';
             }
 
+            scope.triggerPopover = function(e){
+                showPopover(e);
+            };
+
             if (attrs.awPopOverWatch) {
                 $(element).popover({
                     placement: placement,

@@ -371,7 +371,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         } else if (field.link || (field.key && (field.link === undefined || field.link))) {
             html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
         } else {
-            html += "<a href=\"\">";
+            html += "<a href=\"\"";
         }
         if (field.awDroppable) {
             html += Attr(field, 'awDroppable');
@@ -394,7 +394,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
         if (field.awPopOver) {
             html += "aw-pop-over=\"" + field.awPopOver + "\" ";
             html += (field.dataPlacement) ? "data-placement=\"" + field.dataPlacement + "\" " : "";
-            html += (field.dataTitle) ? "data-title=\"" + field.dataTitle + "\" " : "";
+            html += (field.dataTitle) ? "over-title=\"" + field.dataTitle + "\" " : "";
         }
         html += (field.ngClass) ? Attr(field, 'ngClass') : '';
         html += (field.ngEllipsis) ? "data-ng-bind=\"" + list.iterator + "." + fld + "\" data-ellipsis " : "";
