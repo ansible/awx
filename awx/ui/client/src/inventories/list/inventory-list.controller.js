@@ -50,16 +50,9 @@ function InventoriesList($scope, $rootScope, $location, $log,
             "aw-pop-over": html,
             "data-popover-title": title,
             "data-placement": "right" });
+        elem.removeAttr('ng-click');
         $compile(elem)($scope);
-        elem.on('shown.bs.popover', function() {
-            $('.popover').each(function() {
-                $compile($(this))($scope);  //make nested directives work!
-            });
-            $('.popover-content, .popover-title').click(function() {
-                elem.popover('hide');
-            });
-        });
-        elem.popover('show');
+        $scope.triggerPopover(event);
     }
 
     view.inject(InventoryList, { mode: mode, scope: $scope });
@@ -250,44 +243,62 @@ function InventoriesList($scope, $rootScope, $location, $log,
     });
 
     $scope.showGroupSummary = function(event, id) {
-        var inventory;
-        if (!Empty(id)) {
-            inventory = Find({ list: $scope.inventories, key: 'id', val: id });
-            if (inventory.syncStatus !== 'na') {
-                Wait('start');
-                Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
-                Rest.get()
-                    .success(function(data) {
-                        $scope.$emit('GroupSummaryReady', event, inventory, data);
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + inventory.related.inventory_sources + ' failed. GET returned status: ' + status
+        try{
+            var elem = $(event.target).parent();
+            // if the popover is visible already, then exit the function here
+            if(elem.data()['bs.popover'].tip().hasClass('in')){
+                return;
+            }
+        }
+        catch(err){
+            var inventory;
+            if (!Empty(id)) {
+                inventory = Find({ list: $scope.inventories, key: 'id', val: id });
+                if (inventory.syncStatus !== 'na') {
+                    Wait('start');
+                    Rest.setUrl(inventory.related.inventory_sources + '?or__source=ec2&or__source=rax&order_by=-last_job_run&page_size=5');
+                    Rest.get()
+                        .success(function(data) {
+                            $scope.$emit('GroupSummaryReady', event, inventory, data);
+                        })
+                        .error(function(data, status) {
+                            ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Call to ' + inventory.related.inventory_sources + ' failed. GET returned status: ' + status
+                            });
                         });
-                    });
+                }
             }
         }
     };
 
     $scope.showHostSummary = function(event, id) {
-        var url, inventory;
-        if (!Empty(id)) {
-            inventory = Find({ list: $scope.inventories, key: 'id', val: id });
-            if (inventory.total_hosts > 0) {
-                Wait('start');
-                url = GetBasePath('jobs') + "?type=job&inventory=" + id + "&failed=";
-                url += (inventory.has_active_failures) ? 'true' : "false";
-                url += "&order_by=-finished&page_size=5";
-                Rest.setUrl(url);
-                Rest.get()
-                    .success( function(data) {
-                        $scope.$emit('HostSummaryReady', event, data);
-                    })
-                    .error( function(data, status) {
-                        ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to ' + url + ' failed. GET returned: ' + status
+        try{
+            var elem = $(event.target).parent();
+            // if the popover is visible already, then exit the function here
+            if(elem.data()['bs.popover'].tip().hasClass('in')){
+                return;
+            }
+        }
+        catch(err){
+            var url, inventory;
+            if (!Empty(id)) {
+                inventory = Find({ list: $scope.inventories, key: 'id', val: id });
+                if (inventory.total_hosts > 0) {
+                    Wait('start');
+                    url = GetBasePath('jobs') + "?type=job&inventory=" + id + "&failed=";
+                    url += (inventory.has_active_failures) ? 'true' : "false";
+                    url += "&order_by=-finished&page_size=5";
+                    Rest.setUrl(url);
+                    Rest.get()
+                        .success( function(data) {
+                            $scope.$emit('HostSummaryReady', event, data);
+                        })
+                        .error( function(data, status) {
+                            ProcessErrors( $scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Call to ' + url + ' failed. GET returned: ' + status
+                            });
                         });
-                    });
+                }
             }
         }
     };
