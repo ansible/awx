@@ -118,8 +118,7 @@ class ApiV1RootView(APIView):
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
-        # TODO: Uncomment after 3.0 when we bring database settings endpoints back
-        # data['settings'] = reverse('api:settings_list')
+        data['settings'] = reverse('api:settings_list')
         data['me'] = reverse('api:user_me_list')
         data['dashboard'] = reverse('api:dashboard_view')
         data['organizations'] = reverse('api:organization_list')
