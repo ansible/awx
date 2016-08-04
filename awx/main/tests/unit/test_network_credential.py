@@ -1,26 +1,42 @@
-import pytest
-
 from awx.main.models.credential import Credential
 from awx.main.models.jobs import Job
 from awx.main.models.inventory import Inventory
 from awx.main.tasks import RunJob
 
 
-@pytest.fixture
-def options():
-    return {
-        'username':'test',
-        'password':'test',
-        'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
-        'authorize': True,
-        'authorize_password': 'passwd',
-    }
-
-
-def test_net_cred_parse(mocker, options):
+def test_aws_cred_parse(mocker):
     with mocker.patch('django.db.ConnectionRouter.db_for_write'):
         job = Job(id=1)
         job.inventory = mocker.MagicMock(spec=Inventory, id=2)
+
+        options = {
+            'kind': 'aws',
+            'username': 'aws_user',
+            'password': 'aws_passwd',
+            'security_token': 'token',
+        }
+        job.cloud_credential = Credential(**options)
+
+        run_job = RunJob()
+        mocker.patch.object(run_job, 'should_use_proot', return_value=False)
+
+        env = run_job.build_env(job, private_data_dir='/tmp')
+        assert env['AWS_ACCESS_KEY'] == options['username']
+        assert env['AWS_SECRET_KEY'] == options['password']
+        assert env['AWS_SECURITY_TOKEN'] == options['security_token']
+
+
+def test_net_cred_parse(mocker):
+    with mocker.patch('django.db.ConnectionRouter.db_for_write'):
+        job = Job(id=1)
+        job.inventory = mocker.MagicMock(spec=Inventory, id=2)
+
+        options = {
+            'username':'test',
+            'password':'test',
+            'authorize': True,
+            'authorize_password': 'passwd',
+        }
         job.network_credential = Credential(**options)
 
         run_job = RunJob()
@@ -33,10 +49,17 @@ def test_net_cred_parse(mocker, options):
         assert env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] == options['authorize_password']
 
 
-def test_net_cred_ssh_agent(mocker, options, get_ssh_version):
+def test_net_cred_ssh_agent(mocker, get_ssh_version):
     with mocker.patch('django.db.ConnectionRouter.db_for_write'):
         run_job = RunJob()
 
+        options = {
+            'username':'test',
+            'password':'test',
+            'ssh_key_data': """-----BEGIN PRIVATE KEY-----\nstuff==\n-----END PRIVATE KEY-----""",
+            'authorize': True,
+            'authorize_password': 'passwd',
+        }
         mock_job_attrs = {'forks': False, 'id': 1, 'cancel_flag': False, 'status': 'running', 'job_type': 'normal',
                           'credential': None, 'cloud_credential': None, 'network_credential': Credential(**options),
                           'become_enabled': False, 'become_method': None, 'become_username': None,

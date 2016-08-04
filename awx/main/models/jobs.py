@@ -1206,6 +1206,30 @@ class JobEvent(CreatedModifiedModel):
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
 
+    @property
+    def STARTING_EVENTS():
+        return ('playbook_on_task_start', 'playbook_on_setup')
+
+    @classmethod
+    def get_startevent_queryset(cls, parent_task, ordering=None):
+        '''
+        We need to pull information about each start event.
+
+        This is super tricky, because this table has a one-to-many
+        relationship with itself (parent-child), and we're getting
+        information for an arbitrary number of children. This means we
+        need stats on grandchildren, sorted by child.
+        '''
+        qs = (JobEvent.objects.filter(parent__parent=parent_task,
+                                      parent__event__in=STARTING_EVENTS)
+                              .values('parent__id', 'event', 'changed')
+                              .annotate(num=Count('event'))
+                              .order_by('parent__id'))
+        if ordering is not None:
+            qs = qs.order_by(ordering)
+        return qs
+
+
 class SystemJobOptions(BaseModel):
     '''
     Common fields for SystemJobTemplate and SystemJob.
