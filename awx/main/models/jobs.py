@@ -513,6 +513,11 @@ class Job(UnifiedJob, JobOptions):
         editable=False,
         through='JobHostSummary',
     )
+    survey_passwords = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -721,16 +726,12 @@ class Job(UnifiedJob, JobOptions):
         '''
         Hides fields marked as passwords in survey.
         '''
-        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
-            try:
-                extra_vars = json.loads(self.extra_vars)
-                for key in self.job_template.survey_password_variables():
-                    if key in extra_vars:
-                        extra_vars[key] = REPLACE_STR
-                return json.dumps(extra_vars)
-            except ValueError:
-                pass
-        return self.extra_vars
+        if self.survey_passwords:
+            extra_vars = json.loads(self.extra_vars)
+            extra_vars.update(self.survey_passwords)
+            return json.dumps(extra_vars)
+        else:
+            return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.
