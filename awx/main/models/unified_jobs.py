@@ -32,7 +32,7 @@ from djcelery.models import TaskMeta
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
-from awx.main.redact import UriCleaner
+from awx.main.redact import UriCleaner, REPLACE_STR
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -344,7 +344,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
         unified_job = unified_job_class(**new_kwargs)
         # For JobTemplate-based jobs with surveys, save list for perma-redaction
-        if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
+        if (hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False) and
+                not getattr(unified_job, 'survey_passwords', False)):
             password_list = self.survey_password_variables()
             hide_password_dict = {}
             for password in password_list:

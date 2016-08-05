@@ -26,7 +26,7 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner, REPLACE_STR
+from awx.main.redact import PlainTextCleaner
 from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -248,7 +248,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels',]
+                'labels', 'survey_passwords']
 
     def resource_validation_data(self):
         '''
