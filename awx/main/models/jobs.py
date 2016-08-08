@@ -11,7 +11,7 @@ from urlparse import urljoin
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -1206,12 +1206,9 @@ class JobEvent(CreatedModifiedModel):
             job.inventory.update_computed_fields()
             emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
 
-    @property
-    def STARTING_EVENTS():
-        return ('playbook_on_task_start', 'playbook_on_setup')
 
     @classmethod
-    def get_startevent_queryset(cls, parent_task, ordering=None):
+    def start_event_queryset(cls, parent_task, starting_events, ordering=None):
         '''
         We need to pull information about each start event.
 
@@ -1221,7 +1218,7 @@ class JobEvent(CreatedModifiedModel):
         need stats on grandchildren, sorted by child.
         '''
         qs = (JobEvent.objects.filter(parent__parent=parent_task,
-                                      parent__event__in=STARTING_EVENTS)
+                                      parent__event__in=starting_events)
                               .values('parent__id', 'event', 'changed')
                               .annotate(num=Count('event'))
                               .order_by('parent__id'))
