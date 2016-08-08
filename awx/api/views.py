@@ -3300,6 +3300,14 @@ class AdHocCommandActivityStreamList(SubListAPIView):
         return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
 
 
+class AdHocCommandNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = AdHocCommand
+    relationship = 'notifications'
+
+
 class SystemJobList(ListCreateAPIView):
 
     model = SystemJob

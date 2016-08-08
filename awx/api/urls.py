@@ -228,6 +228,7 @@ ad_hoc_command_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/relaunch/$',                  'ad_hoc_command_relaunch'),
     url(r'^(?P<pk>[0-9]+)/events/$',                    'ad_hoc_command_ad_hoc_command_events_list'),
     url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'ad_hoc_command_activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/notifications/$',             'ad_hoc_command_notifications_list'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'ad_hoc_command_stdout'),
 )
 
