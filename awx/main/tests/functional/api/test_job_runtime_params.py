@@ -117,6 +117,20 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
+def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
+    job_template = job_template_prompts(True)
+
+    mock_job = mocker.MagicMock(spec=Job, id=968)
+
+    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+        with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
+            post(reverse('api:job_template_launch', args=[job_template.pk]),
+                 {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
+
+    mock_job.signal_start.assert_called_once_with(job_tags='', skip_tags='')
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
 def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, post, rando, mocker):
     job_template = job_template_prompts_null
 
