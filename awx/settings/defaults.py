@@ -351,6 +351,21 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
+# Use Redis as cache backend (except when testing).
+if is_testing():
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'redis_cache.RedisCache',
+            'LOCATION': BROKER_URL,
+        },
+    }
+
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social.apps.django_app.default.models.DjangoStorage'
