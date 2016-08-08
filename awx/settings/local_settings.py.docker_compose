@@ -75,7 +75,7 @@ if is_testing(sys.argv):
             },
         }
     }
-    
+
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.

@@ -373,7 +373,7 @@ CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
                                                               'routing_key': 'scheduler.job.launch'},
                   'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
                                                                 'routing_key': 'scheduler.job.complete'},})
-                  
+
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
@@ -970,4 +970,3 @@ LOGGING = {
         },
     }
 }
-
