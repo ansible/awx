@@ -1,8 +1,10 @@
 def survey_password_variables(survey_spec):
     vars = []
     # Get variables that are type password
+    if 'spec' not in survey_spec:
+        return vars
     for survey_element in survey_spec['spec']:
-        if survey_element['type'] == 'password':
+        if 'type' in survey_element and survey_element['type'] == 'password':
             vars.append(survey_element['variable'])
     return vars
 
