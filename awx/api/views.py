@@ -2971,7 +2971,11 @@ class JobJobTasksList(BaseJobEventsList):
             return ({'detail': 'Parent event not found.'}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
-        queryset = JobEvent.start_event_queryset(parent_task)
+        # Some events correspond to a playbook or task starting up,
+        # and these are what we're interested in here.
+        STARTING_EVENTS = ('playbook_on_task_start', 'playbook_on_setup')
+
+        queryset = JobEvent.start_event_queryset(parent_task, STARTING_EVENTS)
 
         # The data above will come back in a list, but we are going to
         # want to access it based on the parent id, so map it into a
