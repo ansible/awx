@@ -683,6 +683,16 @@ SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
 
 # ---------------------
+# ----- CloudForms -----
+# ---------------------
+CLOUDFORMS_ENABLED_VAR = 'power_state'
+CLOUDFORMS_ENABLED_VALUE = 'on'
+CLOUDFORMS_GROUP_FILTER = r'^.+$'
+CLOUDFORMS_HOST_FILTER = r'^.+$'
+CLOUDFORMS_EXCLUDE_EMPTY_GROUPS = True
+CLOUDFORMS_INSTANCE_ID_VAR = 'id'
+
+# ---------------------
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.

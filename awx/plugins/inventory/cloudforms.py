@@ -18,10 +18,11 @@ import json
 # http://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 requests.packages.urllib3.disable_warnings()
 
+
 class CloudFormsInventory(object):
 
     def _empty_inventory(self):
-        return {"_meta" : {"hostvars" : {}}}
+        return {"_meta": {"hostvars": {}}}
 
     def __init__(self):
         ''' Main execution path '''
@@ -43,7 +44,7 @@ class CloudFormsInventory(object):
 
         # This doesn't exist yet and needs to be added
         if self.args.host:
-            data2 = { }
+            data2 = {}
             print json.dumps(data2, indent=2)
 
     def parse_cli_args(self):
@@ -51,9 +52,9 @@ class CloudFormsInventory(object):
 
         parser = argparse.ArgumentParser(description='Produce an Ansible Inventory file based on CloudForms')
         parser.add_argument('--list', action='store_true', default=False,
-                           help='List instances (default: False)')
+                            help='List instances (default: False)')
         parser.add_argument('--host', action='store',
-                           help='Get all the variables about a specific instance')
+                            help='Get all the variables about a specific instance')
         self.args = parser.parse_args()
 
     def read_settings(self):
@@ -97,30 +98,47 @@ class CloudFormsInventory(object):
 
     def get_hosts(self):
         ''' Gets host from CloudForms '''
-        r = requests.get("https://" + self.cloudforms_hostname + "/api/vms?expand=resources&attributes=name,power_state", auth=(self.cloudforms_username,self.cloudforms_password), verify=False)
-
+        r = requests.get("https://{0}/api/vms?expand=resources&attributes=all".format(self.cloudforms_hostname),
+                         auth=(self.cloudforms_username, self.cloudforms_password), verify=False)
         obj = r.json()
 
-        #Remove objects that don't matter
-        del obj["count"]
-        del obj["subcount"]
-        del obj["name"]
+        # Create groups+hosts based on host data
+        for resource in obj.get('resources', []):
 
-        #Create a new list to grab VMs with power_state on to add to a new list
-        #I'm sure there is a cleaner way to do this
-        newlist = []
-        getnext = False
-        for x in obj.items():
-            for y in x[1]:
-                for z in y.items():
-                    if getnext == True:
-                        newlist.append(z[1])
-                        getnext = False
-                    if ( z[0] == "power_state" and z[1] == "on" ):
-                        getnext = True
-        newdict = {'hosts': newlist}
-        newdict2 = {'Dynamic_CloudForms': newdict}
-        print json.dumps(newdict2, indent=2)
+            # Maintain backwards compat by creating `Dynamic_CloudForms` group
+            if 'Dynamic_CloudForms' not in self.inventory:
+                self.inventory['Dynamic_CloudForms'] = []
+            self.inventory['Dynamic_CloudForms'].append(resource['name'])
+
+            # Add host to desired groups
+            for key in ('vendor', 'type', 'location'):
+                if key in resource:
+                    # Create top-level group
+                    if key not in self.inventory:
+                        self.inventory[key] = dict(children=[], vars={}, hosts=[])
+                    # if resource['name'] not in self.inventory[key]['hosts']:
+                    #     self.inventory[key]['hosts'].append(resource['name'])
+
+                    # Create sub-group
+                    if resource[key] not in self.inventory:
+                        self.inventory[resource[key]] = dict(children=[], vars={}, hosts=[])
+                    # self.inventory[resource[key]]['hosts'].append(resource['name'])
+
+                    # Add sub-group, as a child of top-level
+                    if resource[key] not in self.inventory[key]['children']:
+                        self.inventory[key]['children'].append(resource[key])
+
+                    # Add host to sub-group
+                    if resource['name'] not in self.inventory[resource[key]]:
+                        self.inventory[resource[key]]['hosts'].append(resource['name'])
+
+            # Delete 'actions' key
+            del resource['actions']
+
+            # Add _meta hostvars
+            self.inventory['_meta']['hostvars'][resource['name']] = resource
+
+        print json.dumps(self.inventory, indent=2)
 
 # Run the script
 CloudFormsInventory()
