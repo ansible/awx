@@ -2081,6 +2081,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         res.update(dict(
             events  = reverse('api:ad_hoc_command_ad_hoc_command_events_list', args=(obj.pk,)),
             activity_stream = reverse('api:ad_hoc_command_activity_stream_list', args=(obj.pk,)),
+            notifications = reverse('api:ad_hoc_command_notifications_list', args=(obj.pk,)),
         ))
         res['cancel'] = reverse('api:ad_hoc_command_cancel', args=(obj.pk,))
         res['relaunch'] = reverse('api:ad_hoc_command_relaunch', args=(obj.pk,))
