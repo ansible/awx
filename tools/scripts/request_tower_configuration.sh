@@ -14,7 +14,7 @@ attempt=0
 while [[ $attempt -lt $retry_attempts ]]
 do
   status_code=`curl -s -i --data "host_config_key=$2" http://$1/api/v1/job_templates/$3/callback/ | head -n 1 | awk '{print $2}'`
-  if [[ $status_code == 202 ]]
+  if [[ $status_code == 202 || $status_code == 201 ]]
     then
     exit 0
   fi
