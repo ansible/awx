@@ -1,4 +1,5 @@
 import pytest
+import json
 
 
 def test_missing_project_error(job_template_factory):
@@ -33,6 +34,16 @@ def test_inventory_credential_contradictions(job_template_factory):
     validation_errors, resources_needed_to_start = obj.resource_validation_data()
     assert 'inventory' in validation_errors
     assert 'credential' in validation_errors
+
+def test_survey_answers_as_string(job_template_factory):
+    objects = job_template_factory(
+        'job-template-with-survey',
+        survey=['var1'],
+        persisted=False)
+    jt = objects.job_template
+    user_extra_vars = json.dumps({'var1': 'asdf'})
+    accepted, ignored = jt._accept_or_ignore_job_kwargs(extra_vars=user_extra_vars)
+    assert 'var1' in accepted['extra_vars']
 
 @pytest.mark.survey
 def test_survey_password_list(job_with_secret_key_unit):
