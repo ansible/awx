@@ -1287,7 +1287,8 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         request = self.context.get('request', None)
         if request.user not in obj.admin_role and \
            not request.user.is_superuser and \
-           not request.user.is_system_auditor:
+           not request.user.is_system_auditor and \
+           not (obj.organization is not None and request.user in obj.organization.auditor_role):
             ret['script'] = None
         return ret
 
