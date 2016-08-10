@@ -6,6 +6,7 @@ import hmac
 import json
 import yaml
 import logging
+import time
 from urlparse import urljoin
 
 # Django
@@ -680,9 +681,17 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
-    def notification_data(self):
+    def notification_data(self, block=5):
         data = super(Job, self).notification_data()
         all_hosts = {}
+        # NOTE: Probably related to job event slowness, remove at some point -matburt
+        if block:
+            summaries = self.job_host_summaries.all()
+            while block > 0 and not len(summaries):
+                time.sleep(1)
+                block -= 1
+        else:
+            summaries = self.job_host_summaries.all()
         for h in self.job_host_summaries.all():
             all_hosts[h.host_name] = dict(failed=h.failed,
                                           changed=h.changed,

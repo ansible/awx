@@ -214,15 +214,18 @@ def handle_work_success(self, result, task_actual):
         friendly_name = "System Job"
     else:
         return
-    notification_body = instance.notification_data()
-    notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
-                                                                               task_actual['id'],
-                                                                               smart_str(instance_name),
-                                                                               notification_body['url'])
-    notification_body['friendly_name'] = friendly_name
-    send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                              for n in set(notification_templates.get('success', []) + notification_templates.get('any', []))],
-                             job_id=task_actual['id'])
+
+    all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
+    if len(all_notification_templates):
+        notification_body = instance.notification_data()
+        notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
+                                                                                   task_actual['id'],
+                                                                                   smart_str(instance_name),
+                                                                                   notification_body['url'])
+        notification_body['friendly_name'] = friendly_name
+        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                  for n in all_notification_templates],
+                                 job_id=task_actual['id'])
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
@@ -277,15 +280,18 @@ def handle_work_error(self, task_id, subtasks=None):
                     (first_task_type, first_task_name, first_task_id)
                 instance.save()
                 instance.socketio_emit_status("failed")
-        notification_body = first_task.notification_data()
-        notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
-                                                                                first_task_id,
-                                                                                smart_str(first_task_name),
-                                                                                notification_body['url'])
-        notification_body['friendly_name'] = first_task_friendly_name
-        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in set(notification_templates.get('error', []) + notification_templates.get('any', []))],
-                                 job_id=first_task_id)
+
+        all_notification_templates = set(notification_templates.get('error', []) + notification_templates.get('any', []))
+        if len(all_notification_templates):
+            notification_body = first_task.notification_data()
+            notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
+                                                                                    first_task_id,
+                                                                                    smart_str(first_task_name),
+                                                                                    notification_body['url'])
+            notification_body['friendly_name'] = first_task_friendly_name
+            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                      for n in all_notification_templates],
+                                     job_id=first_task_id)
 
 
 @task()
