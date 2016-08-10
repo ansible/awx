@@ -376,12 +376,13 @@ class Role(models.Model):
 
     @staticmethod
     @check_singleton
-    def visible_roles(user):
+    def visible_roles(user, include_super=True):
         sql_params = {
             'ancestors_table': Role.ancestors.through._meta.db_table,
             'parents_table': Role.parents.through._meta.db_table,
             'roles_table': Role._meta.db_table,
-            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True))
+            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True)),
+            'mandatories': ','.join(('\'system_administrator\'', '\'system_auditor\'')),
         }
 
         qs = Role.objects.extra(
@@ -394,6 +395,17 @@ class Role(models.Model):
                     )
                     ''' % sql_params]
         )
+        if include_super:
+            super_qs = Role.objects.extra(
+                where = ['''
+                        %(roles_table)s.id IN (
+                            SELECT DISTINCT visible_roles_t3.id
+                            FROM %(roles_table)s as visible_roles_t3
+                            WHERE visible_roles_t3.singleton_name IN (%(mandatories)s)
+                        )
+                        ''' % sql_params]
+            )
+            qs = qs | super_qs
         return qs
 
     @staticmethod
