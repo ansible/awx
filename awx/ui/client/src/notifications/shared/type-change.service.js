@@ -28,7 +28,7 @@ function () {
                     obj.passwordLabel = ' Password';
                     obj.email_required = true;
                     obj.port_required = true;
-                    obj.password_required = true;
+                    obj.password_required = false;
                     break;
                 case 'slack':
                     obj.tokenLabel =' Token';

@@ -59,10 +59,6 @@ export default function() {
             username: {
                 label: 'Username',
                 type: 'text',
-                awRequiredWhen: {
-                    reqExpression: "email_required",
-                    init: "false"
-                },
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm'
             },
