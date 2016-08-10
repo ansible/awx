@@ -77,15 +77,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         $scope.search(list.iterator);
     });
 
-    // Load the list of options for Kind
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'kind',
-        variable: 'credential_kind_options',
-        callback: 'choicesReadyCredential'
-    });
-
     $scope.addCredential = function () {
         $state.transitionTo('credentials.add');
     };
