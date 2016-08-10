@@ -446,11 +446,21 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
                         survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-                        for key in kwargs[field]:
+                        extra_vars = kwargs[field]
+                        if isinstance(extra_vars, basestring):
+                            try:
+                                extra_vars = json.loads(extra_vars)
+                            except (ValueError, TypeError):
+                                try:
+                                    extra_vars = yaml.safe_load(extra_vars)
+                                    assert isinstance(extra_vars, dict)
+                                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                                    extra_vars = {}
+                        for key in extra_vars:
                             if key in survey_vars:
-                                prompted_fields[field][key] = kwargs[field][key]
+                                prompted_fields[field][key] = extra_vars[key]
                             else:
-                                ignored_fields[field][key] = kwargs[field][key]
+                                ignored_fields[field][key] = extra_vars[key]
                     else:
                         ignored_fields[field] = kwargs[field]
 
