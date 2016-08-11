@@ -105,6 +105,9 @@ class ProjectOptions(models.Model):
         on_delete=models.SET_NULL,
     )
 
+    def get_can_edit(self, user):
+        return user in self.admin_role
+
     def clean_scm_type(self):
         return self.scm_type or ''
 

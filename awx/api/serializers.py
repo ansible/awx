@@ -330,6 +330,12 @@ class BaseSerializer(serializers.ModelSerializer):
                 }
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
+        if hasattr(obj, 'get_can_edit'):
+            request = self.context.get('request', None)
+            if request and request.user is not None:
+                summary_fields['can_edit'] = obj.get_can_edit(request.user)
+        elif hasattr(obj, 'can_edit'):
+            summary_fields['can_edit'] = obj.can_edit
         return summary_fields
 
     def get_created(self, obj):

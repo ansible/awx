@@ -1521,6 +1521,24 @@ class InventoryList(ListCreateAPIView):
         qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
         return qs
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        readable_ids = [obj.id for obj in page]
+        editable_ids = Inventory.accessible_objects(request.user, 'admin_role').filter(pk__in=readable_ids).values_list('pk', flat=True)
+        for obj in page:
+            if obj.pk in editable_ids:
+                obj.can_edit = True
+            else:
+                obj.can_edit = False
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
     model = Inventory
