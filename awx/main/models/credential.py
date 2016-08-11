@@ -87,11 +87,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         on_delete=models.CASCADE,
         related_name='credentials',
     )
-    teams = models.ManyToManyField(
-        'Team',
-        blank=True,
-        related_name='credentials',
-    )
     kind = models.CharField(
         max_length=32,
         choices=KIND_CHOICES,
@@ -231,7 +226,6 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     read_role = ImplicitRoleField(parent_role=[
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'organization.auditor_role',
-        'teams.auditor_role',
         'use_role',
         'admin_role',
     ])

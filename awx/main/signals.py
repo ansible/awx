@@ -9,7 +9,6 @@ import json
 
 # Django
 from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
-from django.db.models import Q
 from django.dispatch import receiver
 
 # Django-CRUM
@@ -121,39 +120,6 @@ def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwarg
         else:
             model.rebuild_role_ancestor_list([], [instance.id])
 
-def link_credentials_to_teams(reverse, model, instance, pk_set, action, **kwargs):
-    'When a team is granted access to a credential, add the team to the credential teams m2m'
-
-    # If reverse is true, then we got here by something like
-    #    team.member_role.children.add(credential.(use|admin)_role)
-    # else
-    #    credential.(use|admin)_role.parents.add(team.member_role)
-
-    if action in ['post_add', 'post_remove']:
-        if reverse:
-            teams = [co for co in [instance.content_object] if isinstance(co, Team)]
-            credentials = [role.content_object for role in Role.objects.filter(id__in=pk_set).all()
-                           if isinstance(role.content_object, Credential) and role.role_field != 'read_role'] # exclude read role to prevent signal looping
-        else:
-            credentials = [co for co in [instance.content_object] if isinstance(co, Credential) and instance.role_field != 'read_role']
-            teams = [role.content_object for role in Role.objects.filter(id__in=pk_set).all()
-                     if isinstance(role.content_object, Team)]
-
-        if not teams or not credentials:
-            return
-
-        if action == 'post_add':
-            for credential in credentials:
-                for team in teams:
-                    credential.teams.add(team)
-
-        if action == 'post_remove':
-            for credential in credentials:
-                for team in teams:
-                    if not Team.objects.filter(Q(member_role__children=credential.use_role) | Q(member_role__children=credential.admin_role), id=team.id).exists():
-                        credential.teams.remove(team)
-                credential.save()
-
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
     if instance.is_superuser:
@@ -243,7 +209,6 @@ post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
-m2m_changed.connect(link_credentials_to_teams, Role.parents.through)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
 m2m_changed.connect(org_admin_edit_members, Role.members.through)
 m2m_changed.connect(rbac_activity_stream, Role.members.through)

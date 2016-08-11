@@ -113,23 +113,6 @@ def test_create_team_credential_by_team_member_xfail(post, team, alice, team_mem
     assert response.status_code == 403
 
 
-@pytest.mark.django_db
-def test_team_credential_visibility_by_org_admins(team, credential, organization, user):
-    org_auditor = user('org_auditor')
-    organization.auditor_role.members.add(org_auditor)
-    assert org_auditor not in credential.read_role
-
-    team.member_role.children.add(credential.use_role)
-    assert org_auditor in credential.read_role
-    team.member_role.children.remove(credential.use_role)
-    assert org_auditor not in credential.read_role
-
-    credential.use_role.parents.add(team.member_role)
-    assert org_auditor in credential.read_role
-    credential.use_role.parents.remove(team.member_role)
-    assert org_auditor not in credential.read_role
-
-
 
 #
 # organization credentials
