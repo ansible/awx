@@ -72,8 +72,8 @@ from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
-from awx.main.utils import emit_websocket_notification
 from awx.main.conf import tower_settings
+from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.api.views')
 
@@ -544,11 +544,7 @@ class AuthTokenView(APIView):
                 # Mark them as invalid and inform the user
                 invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
                 for t in invalid_tokens:
-                    # TODO: send socket notification
-                    emit_websocket_notification('/socket.io/control',
-                                                'limit_reached',
-                                                dict(reason=force_text(AuthToken.reason_long('limit_reached'))),
-                                                token_key=t.key)
+                    emit_channel_notification('control-limit_reached', dict(reason=force_text(AuthToken.reason_long('limit_reached')), token_key=t.key))
                     t.invalidate(reason='limit_reached')
 
             # Note: This header is normally added in the middleware whenever an
@@ -3183,21 +3179,8 @@ class JobJobTasksList(BaseJobEventsList):
             return ({'detail': 'Parent event not found.'}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
-        # Some events correspond to a playbook or task starting up,
-        # and these are what we're interested in here.
         STARTING_EVENTS = ('playbook_on_task_start', 'playbook_on_setup')
-
-        # We need to pull information about each start event.
-        #
-        # This is super tricky, because this table has a one-to-many
-        # relationship with itself (parent-child), and we're getting
-        # information for an arbitrary number of children. This means we
-        # need stats on grandchildren, sorted by child.
-        queryset = (JobEvent.objects.filter(parent__parent=parent_task,
-                                            parent__event__in=STARTING_EVENTS)
-                                    .values('parent__id', 'event', 'changed')
-                                    .annotate(num=Count('event'))
-                                    .order_by('parent__id'))
+        queryset = JobEvent.get_startevent_queryset(parent_task, STARTING_EVENTS)
 
         # The data above will come back in a list, but we are going to
         # want to access it based on the parent id, so map it into a

@@ -18,10 +18,12 @@ from crum.signals import current_user_getter
 # AWX
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
+from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
 from awx.main.conf import tower_settings
+
+from awx.main.consumers import emit_channel_notification
 
 __all__ = []
 
@@ -33,13 +35,14 @@ logger = logging.getLogger('awx.main.signals')
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
+    print("before created job_event_detail")
     if created:
         event_serialized = JobEventSerializer(instance).data
         event_serialized['id'] = instance.id
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
-        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.job.id), event_serialized)
+        emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
     instance = kwargs['instance']
@@ -50,7 +53,7 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
-        emit_websocket_notification('/socket.io/ad_hoc_command_events', 'ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+        emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
     logger.debug("In update inventory computed fields")

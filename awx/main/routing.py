@@ -2,5 +2,6 @@ from channels.routing import route
 
 
 channel_routing = [
-    route("websocket.connect", "awx.main.consumers.job_event_connect", path=r'^/job_event/(?P<id>[a-zA-Z0-9_]+)/$'),
+    route("websocket.disconnect", "awx.main.consumers.ws_disconnect", path=r'^/websocket/$'),
+    route("websocket.receive", "awx.main.consumers.ws_receive", path=r'^/websocket/$'),
 ]

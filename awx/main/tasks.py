@@ -51,13 +51,13 @@ from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
 from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
-           'handle_work_success', 'update_inventory_computed_fields', 
-           'send_notifications', 'run_administrative_checks', 
+           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error',
+           'handle_work_success', 'update_inventory_computed_fields',
+           'send_notifications', 'run_administrative_checks',
            'run_workflow_job']
 
 HIDDEN_PASSWORD = '**********'
@@ -176,8 +176,8 @@ def tower_periodic_scheduler(self):
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['status', 'job_explanation'])
-            new_unified_job.socketio_emit_status("failed")
-        emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
+            new_unified_job.websocket_emit_status("failed")
+        emit_channel_notification('schedules-changed', dict(id=schedule.id))
 
 @task(queue='default')
 def notify_task_runner(metadata_dict):
@@ -234,10 +234,16 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
                     (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
-                instance.socketio_emit_status("failed")
-
-        if first_instance:
-            _send_notification_templates(first_instance, 'failed')
+                instance.websocket_emit_status("failed")
+        notification_body = first_task.notification_data()
+        notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
+                                                                                first_task_id,
+                                                                                smart_str(first_task_name),
+                                                                                notification_body['url'])
+        notification_body['friendly_name'] = first_task_friendly_name
+        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                  for n in set(notification_templates.get('error', []) + notification_templates.get('any', []))],
+                                 job_id=first_task_id)
 
 @task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -578,7 +584,7 @@ class BaseTask(Task):
         '''
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
 
-        instance.socketio_emit_status("running")
+        instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
         try:
@@ -647,7 +653,7 @@ class BaseTask(Task):
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
-        instance.socketio_emit_status(status)
+        instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
@@ -1665,7 +1671,7 @@ class RunSystemJob(BaseTask):
         return settings.BASE_DIR
 
 class RunWorkflowJob(BaseTask):
-    
+
     name = 'awx.main.tasks.run_workflow_job'
     model = WorkflowJob
 

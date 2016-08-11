@@ -318,7 +318,7 @@ def rebuild_graph(message):
     logger.debug("Active celery tasks: " + str(active_tasks))
     for task in list(running_tasks):
         if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-            # NOTE: Pull status again and make sure it didn't finish in 
+            # NOTE: Pull status again and make sure it didn't finish in
             #       the meantime?
             task.status = 'failed'
             task.job_explanation += ' '.join((
@@ -326,7 +326,7 @@ def rebuild_graph(message):
                 'Celery, so it has been marked as failed.',
             ))
             task.save()
-            task.socketio_emit_status("failed")
+            task.websocket_emit_status("failed")
             running_tasks.pop(running_tasks.index(task))
             logger.error("Task %s appears orphaned... marking as failed" % task)
 
@@ -340,7 +340,7 @@ def rebuild_graph(message):
             task.status = 'failed'
             task.job_explanation += 'Task failed to generate dependencies: {}'.format(e)
             task.save()
-            task.socketio_emit_status("failed")
+            task.websocket_emit_status("failed")
             continue
         logger.debug("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:

@@ -408,7 +408,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
                 return True
         return False
 
-    def socketio_emit_data(self):
+    def websocket_emit_data(self):
         return dict(project_id=self.project.id)
 
     @property
