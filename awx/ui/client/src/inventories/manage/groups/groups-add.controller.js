@@ -100,6 +100,7 @@
             // equal to case 'ec2' || 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack'
             else{
                 var credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+                $scope.cloudCredentialRequired = source !== '' && source !== 'custom' && source !== 'ec2' ? true : false;
                 CredentialList.basePath = credentialBasePath;
                 LookUpInit({
                     scope: $scope,
@@ -122,7 +123,7 @@
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source === 'azure_rm' ? $scope.azure_regions : $scope[source + '_regions'];
-            $scope.cloudCredentialRequired = source !== '' && source !== 'custom' ? true : false;
+            $scope.cloudCredentialRequired = source !== '' && source !== 'custom' && source !== 'ec2' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;
