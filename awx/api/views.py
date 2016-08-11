@@ -1392,8 +1392,8 @@ class TeamCredentialsList(SubListCreateAPIView):
         self.check_parent_access(team)
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
-        team_creds = Credential.objects.filter(admin_role__parents=team.member_role)
-        return team_creds & visible_creds
+        team_creds = Credential.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
+        return (team_creds & visible_creds).distinct()
 
 
 class OrganizationCredentialList(SubListCreateAPIView):
