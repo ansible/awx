@@ -122,7 +122,7 @@ def rebuild_graph():
     logger.debug("Active celery tasks: " + str(active_tasks))
     for task in list(running_celery_tasks):
         if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-            # NOTE: Pull status again and make sure it didn't finish in 
+            # NOTE: Pull status again and make sure it didn't finish in
             #       the meantime?
             task.status = 'failed'
             task.job_explanation += ' '.join((
@@ -204,7 +204,7 @@ def process_graph(graph, task_capacity):
 
             node_type = graph.get_node_type(node_obj)
             if node_type == 'job':
-                # clear dependencies because a job can block (not necessarily 
+                # clear dependencies because a job can block (not necessarily
                 # depend) on other jobs that share the same job template
                 node_dependencies = []
 
@@ -217,7 +217,7 @@ def process_graph(graph, task_capacity):
                 node_obj.start()
                 spawn_workflow_graph_jobs([node_obj])
                 return process_graph(graph, task_capacity)
-            
+
             dependent_nodes = [{'type': graph.get_node_type(node_obj), 'id': node_obj.id}] + \
                               [{'type': graph.get_node_type(n['node_object']),
                                 'id': n['node_object'].id} for n in node_dependencies]

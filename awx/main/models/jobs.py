@@ -1409,4 +1409,3 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
-

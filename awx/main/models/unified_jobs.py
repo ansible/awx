@@ -932,4 +932,3 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
-
