@@ -46,6 +46,7 @@ def test_survey_answers_as_string(job_template_factory):
     assert 'var1' in accepted['extra_vars']
 
 @pytest.mark.survey
-def test_survey_password_list(job_with_secret_key_unit):
-    """Verify that survey_password_variables method gives a list of survey passwords"""
-    assert job_with_secret_key_unit.job_template.survey_password_variables() == ['secret_key', 'SSN']
+def test_job_template_survey_password_redaction(job_template_with_survey_passwords_unit):
+    """Tests the JobTemplate model's funciton to redact passwords from
+    extra_vars - used when creating a new job"""
+    assert job_template_with_survey_passwords_unit.survey_password_variables() == ['secret_key', 'SSN']

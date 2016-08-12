@@ -27,7 +27,7 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner, REPLACE_STR
+from awx.main.redact import PlainTextCleaner
 from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -249,7 +249,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels',]
+                'labels', 'survey_passwords']
 
     def resource_validation_data(self):
         '''
@@ -524,6 +524,11 @@ class Job(UnifiedJob, JobOptions):
         editable=False,
         through='JobHostSummary',
     )
+    survey_passwords = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -740,16 +745,12 @@ class Job(UnifiedJob, JobOptions):
         '''
         Hides fields marked as passwords in survey.
         '''
-        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
-            try:
-                extra_vars = json.loads(self.extra_vars)
-                for key in self.job_template.survey_password_variables():
-                    if key in extra_vars:
-                        extra_vars[key] = REPLACE_STR
-                return json.dumps(extra_vars)
-            except ValueError:
-                pass
-        return self.extra_vars
+        if self.survey_passwords:
+            extra_vars = json.loads(self.extra_vars)
+            extra_vars.update(self.survey_passwords)
+            return json.dumps(extra_vars)
+        else:
+            return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.

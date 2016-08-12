@@ -1981,7 +1981,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return ret
         if 'job_template' in ret and not obj.job_template:
             ret['job_template'] = None
-        if obj.job_template and obj.job_template.survey_enabled and 'extra_vars' in ret:
+        if 'extra_vars' in ret:
             ret['extra_vars'] = obj.display_extra_vars()
         return ret
 
