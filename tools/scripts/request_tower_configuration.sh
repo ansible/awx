@@ -18,8 +18,7 @@ do
     then
     echo "${status_code} received, encountered problem, halting."
     exit 1
-  elif [[ $status_code -gt 200 ]]
-    then
+  else
     exit 0
   fi
   attempt=$(( attempt + 1 ))
