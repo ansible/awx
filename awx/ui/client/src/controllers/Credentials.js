@@ -46,13 +46,13 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         Wait('stop');
         $('#prompt-modal').modal('hide');
 
-        list.fields.kind.searchOptions = $scope.credential_kind_options;
+        list.fields.kind.searchOptions = $scope.credential_kind_options_list;
 
         // Translate the kind value
         for (i = 0; i < $scope.credentials.length; i++) {
-            for (j = 0; j < $scope.credential_kind_options.length; j++) {
-                if ($scope.credential_kind_options[j].value === $scope.credentials[i].kind) {
-                    $scope.credentials[i].kind = $scope.credential_kind_options[j].label;
+            for (j = 0; j < $scope.credential_kind_options_list.length; j++) {
+                if ($scope.credential_kind_options_list[j].value === $scope.credentials[i].kind) {
+                    $scope.credentials[i].kind = $scope.credential_kind_options_list[j].label;
                     break;
                 }
             }
@@ -75,6 +75,15 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             url: defaultUrl
         });
         $scope.search(list.iterator);
+    });
+
+    // Load the list of options for Kind
+    GetChoices({
+        scope: $scope,
+        url: defaultUrl,
+        field: 'kind',
+        variable: 'credential_kind_options_list',
+        callback: 'choicesReadyCredential'
     });
 
     $scope.addCredential = function () {
