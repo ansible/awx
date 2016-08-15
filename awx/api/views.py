@@ -2599,6 +2599,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
     serializer_class = EmptySerializer
+    is_job_start = True
 
     def get(self, request, *args, **kwargs):
         return Response({})
