@@ -40,7 +40,9 @@ class PaginatedDecoratorTests(TestCase):
         # Ensure the response looks like what it should.
         r = json.loads(response.rendered_content)
         self.assertEqual(r['count'], 26)
-        self.assertEqual(r['next'], '/dummy/?page=2&page_size=5')
+        self.assertIn(r['next'],
+                      (u'/dummy/?page=2&page_size=5',
+                       u'/dummy/?page_size=5&page=2'))
         self.assertEqual(r['previous'], None)
         self.assertEqual(r['results'], ['a', 'b', 'c', 'd', 'e'])
 
@@ -55,8 +57,12 @@ class PaginatedDecoratorTests(TestCase):
         # Ensure the response looks like what it should.
         r = json.loads(response.rendered_content)
         self.assertEqual(r['count'], 26)
-        self.assertEqual(r['next'], '/dummy/?page=4&page_size=5')
-        self.assertEqual(r['previous'], '/dummy/?page=2&page_size=5')
+        self.assertIn(r['next'],
+                      (u'/dummy/?page=4&page_size=5',
+                       u'/dummy/?page_size=5&page=4'))
+        self.assertIn(r['previous'],
+                      (u'/dummy/?page=2&page_size=5',
+                       u'/dummy/?page_size=5&page=2'))
         self.assertEqual(r['results'], ['a', 'b', 'c', 'd', 'e'])
 
     def test_last_page(self):
@@ -71,5 +77,7 @@ class PaginatedDecoratorTests(TestCase):
         r = json.loads(response.rendered_content)
         self.assertEqual(r['count'], 26)
         self.assertEqual(r['next'], None)
-        self.assertEqual(r['previous'], '/dummy/?page=5&page_size=5')
+        self.assertIn(r['previous'],
+                      (u'/dummy/?page=5&page_size=5',
+                       u'/dummy/?page_size=5&page=5'))
         self.assertEqual(r['results'], ['a', 'b', 'c', 'd', 'e'])
