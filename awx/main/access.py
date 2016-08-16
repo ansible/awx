@@ -655,7 +655,7 @@ class CredentialAccess(BaseAccess):
             return False
 
         # Cannot change the organization for a credential after it's been created
-        if 'organization' in data:
+        if data and 'organization' in data:
             organization_pk = get_pk_from_dict(data, 'organization')
             if (organization_pk and (not obj.organization or organization_pk != obj.organization.id)) \
                     or (not organization_pk and obj.organization):
