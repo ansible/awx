@@ -31,6 +31,7 @@ setup/test/roles/postgresql
 __pycache__
 /build
 /deb-build
+/reprepro
 /rpm-build
 /tar-build
 /setup-bundle-build

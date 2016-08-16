@@ -81,7 +81,7 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
-DEBUILD_OPTS = --source-option="-I"
+DEBUILD_OPTS = 
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
 REPREPRO_BIN ?= reprepro
@@ -788,7 +788,9 @@ debian: deb-build/$(DEB_TAR_NAME)
 endif
 
 deb-build/$(DEB_NVR).dsc: deb-build/$(DEB_TAR_NAME)
-	cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -S
+	cd deb-build/$(DEB_TAR_NAME) && \
+		cp debian/control.$(DEB_DIST) debian/control && \
+		$(DEBUILD) -S
 
 deb-src: deb-build/$(DEB_NVR).dsc
 	@echo "#############################################"
