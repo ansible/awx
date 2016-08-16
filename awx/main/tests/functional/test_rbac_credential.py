@@ -225,7 +225,6 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
     orgs[0].admin_role.members.add(a)
     orgs[1].admin_role.members.add(a)
 
-    access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
 
     for jt in jts:
