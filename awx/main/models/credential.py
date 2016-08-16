@@ -215,11 +215,11 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     admin_role = ImplicitRoleField(
         parent_role=[
             'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+            'organization.admin_role',
         ],
     )
     use_role = ImplicitRoleField(
         parent_role=[
-            'organization.admin_role',
             'admin_role',
         ]
     )
