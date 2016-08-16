@@ -312,6 +312,37 @@ def test_list_created_org_credentials(post, get, organization, org_admin, org_me
     assert response.data['count'] == 0
 
 
+@pytest.mark.django_db
+def test_cant_change_organization(patch, credential, organization, org_admin):
+    credential.organization = organization
+    credential.save()
+
+    response = patch(reverse('api:credential_detail', args=(organization.id,)), {
+        'name': 'Some new name',
+    }, org_admin)
+    assert response.status_code == 200
+
+    response = patch(reverse('api:credential_detail', args=(organization.id,)), {
+        'name': 'Some new name2',
+        'organization': organization.id, # fine for it to be the same
+    }, org_admin)
+    assert response.status_code == 200
+
+    response = patch(reverse('api:credential_detail', args=(organization.id,)), {
+        'name': 'Some new name3',
+        'organization': None
+    }, org_admin)
+    assert response.status_code == 403
+
+@pytest.mark.django_db
+def test_cant_add_organization(patch, credential, organization, org_admin):
+    assert credential.organization is None
+    response = patch(reverse('api:credential_detail', args=(organization.id,)), {
+        'name': 'Some new name',
+        'organization': organization.id
+    }, org_admin)
+    assert response.status_code == 403
+
 
 #
 # Openstack Credentials
