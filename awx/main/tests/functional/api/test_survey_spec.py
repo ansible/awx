@@ -193,7 +193,8 @@ def test_launch_with_non_empty_survey_spec_no_license(job_template_factory, post
 
 @pytest.mark.django_db
 @pytest.mark.survey
-def test_redact_survey_passwords_in_activity_stream(job_with_secret_key):
+def test_redact_survey_passwords_in_activity_stream(job_template_with_survey_passwords):
+    job_template_with_survey_passwords.create_unified_job()
     AS_record = ActivityStream.objects.filter(object1='job').all()[0]
     changes_dict = json.loads(AS_record.changes)
     extra_vars = json.loads(changes_dict['extra_vars'])

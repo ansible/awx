@@ -206,8 +206,8 @@ def notification(notification_template):
                                        subject='email subject')
 
 @pytest.fixture
-def job_with_secret_key(job_with_secret_key_factory):
-    return job_with_secret_key_factory(persisted=True)
+def job_template_with_survey_passwords(job_template_with_survey_passwords_factory):
+    return job_template_with_survey_passwords_factory(persisted=True)
 
 @pytest.fixture
 def admin(user):

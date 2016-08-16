@@ -2,6 +2,7 @@ import pytest
 import json
 
 from awx.main.tasks import RunJob
+from awx.main.models import Job
 
 
 @pytest.fixture
@@ -14,9 +15,19 @@ def job(mocker):
         'launch_type': 'manual'})
 
 @pytest.mark.survey
-def test_job_redacted_extra_vars(job_with_secret_key_unit):
-    """Verify that this method redacts vars marked as passwords in a survey"""
-    assert json.loads(job_with_secret_key_unit.display_extra_vars()) == {
+def test_job_survey_password_redaction():
+    """Tests the Job model's funciton to redact passwords from
+    extra_vars - used when displaying job information"""
+    job = Job(
+        name="test-job-with-passwords",
+        extra_vars=json.dumps({
+            'submitter_email': 'foobar@redhat.com',
+            'secret_key': '6kQngg3h8lgiSTvIEb21',
+            'SSN': '123-45-6789'}),
+        survey_passwords={
+            'secret_key': '$encrypted$',
+            'SSN': '$encrypted$'})
+    assert json.loads(job.display_extra_vars()) == {
         'submitter_email': 'foobar@redhat.com',
         'secret_key': '$encrypted$',
         'SSN': '$encrypted$'}
