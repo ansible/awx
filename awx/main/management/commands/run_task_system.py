@@ -110,6 +110,8 @@ class SimpleDAG(object):
             return "project_update"
         elif type(obj) == SystemJob:
             return "system_job"
+        elif type(obj) == WorkflowJob:
+            return "workflow_job"
         return "unknown"
 
     def get_dependencies(self, obj):
@@ -149,6 +151,7 @@ def get_tasks():
                              ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_system_jobs = [sj for sj in
                          SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
+
     all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
                          graph_project_updates + graph_system_jobs,
                          key=lambda task: task.created)

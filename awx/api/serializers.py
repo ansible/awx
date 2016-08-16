@@ -528,6 +528,8 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = JobTemplateSerializer
             elif isinstance(obj, SystemJobTemplate):
                 serializer_class = SystemJobTemplateSerializer
+            elif isinstance(obj, WorkflowJobTemplateSerializer):
+                serializer_class = WorkflowJobTemplateSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             return serializer.to_representation(obj)
@@ -2167,6 +2169,95 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
     class Meta:
         fields = ('can_cancel',)
+
+
+
+
+# TODO:
+class WorkflowJobSerializer(UnifiedJobSerializer):
+
+    class Meta:
+        model = WorkflowJob
+        fields = ('*', 'workflow_job_template', 'extra_vars')
+
+    def get_related(self, obj):
+        res = super(WorkflowJobSerializer, self).get_related(obj)
+        if obj.system_job_template:
+            res['workflow_job_template'] = reverse('api:workflow_job_template_detail',
+                                                 args=(obj.workflow_job_template.pk,))
+            # TODO:
+            #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
+        if obj.can_cancel or True:
+            res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
+        return res
+
+
+# TODO:
+class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
+    pass
+
+# TODO:
+class WorkflowJobTemplateListSerializer(UnifiedJobTemplateSerializer):
+
+    class Meta:
+        model = WorkflowJobTemplate
+        fields = ('*',)
+
+    def get_related(self, obj):
+        res = super(WorkflowJobTemplateListSerializer, self).get_related(obj)
+        res.update(dict(
+            jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
+            #schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
+            launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
+            workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
+            # TODO: Implement notifications
+            #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
+            #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
+            #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
+
+        ))
+        return res
+
+class WorkflowJobTemplateSerializer(WorkflowJobTemplateListSerializer):
+    pass
+
+class WorkflowNodeSerializer(BaseSerializer):
+    #workflow_job_template = UnifiedJobTemplateSerializer()
+
+    class Meta:
+        model = WorkflowNode
+        fields = ('id', 'url', 'related', 'workflow_job_template', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
+
+    def get_related(self, obj):
+        res = super(WorkflowNodeSerializer, self).get_related(obj)
+        res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
+        if obj.unified_job_template:
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        res['success_nodes'] = reverse('api:workflow_node_success_nodes_list', args=(obj.pk,))
+        res['failure_nodes'] = reverse('api:workflow_node_failure_nodes_list', args=(obj.pk,))
+        res['always_nodes'] = reverse('api:workflow_node_always_nodes_list', args=(obj.pk,))
+
+        return res
+
+class WorkflowNodeDetailSerializer(WorkflowNodeSerializer):
+
+    '''
+    Influence the api browser sample data to not include workflow_job_template
+    when editing a WorkflowNode.
+
+    Note: I was not able to accomplish this trough the use of extra_kwargs.
+    Maybe something to do with workflow_job_template being a relational field?
+    '''
+    def build_relational_field(self, field_name, relation_info):
+        field_class, field_kwargs = super(WorkflowNodeDetailSerializer, self).build_relational_field(field_name, relation_info)
+        if self.instance and field_name == 'workflow_job_template':
+            field_kwargs['read_only'] = True
+            field_kwargs.pop('queryset', None)
+        return field_class, field_kwargs
+
+
+class WorkflowNodeListSerializer(WorkflowNodeSerializer):
+    pass
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
     pass

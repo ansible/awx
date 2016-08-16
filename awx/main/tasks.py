@@ -55,8 +55,10 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
-           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
+           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
+           'handle_work_success', 'update_inventory_computed_fields', 
+           'send_notifications', 'run_administrative_checks', 
+           'run_workflow_job']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -1657,4 +1659,49 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+
+class RunWorkflowJob(BaseTask):
+    
+    name = 'awx.main.tasks.run_workflow_job'
+    model = WorkflowJob
+
+    def run(self, pk, **kwargs):
+        '''
+        Run the job/task and capture its output.
+        '''
+        instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
+
+        instance.socketio_emit_status("running")
+        status, rc, tb = 'error', None, ''
+        output_replacements = []
+        try:
+            self.pre_run_hook(instance, **kwargs)
+            if instance.cancel_flag:
+                instance = self.update_model(instance.pk, status='canceled')
+            if instance.status != 'running':
+                if hasattr(settings, 'CELERY_UNIT_TEST'):
+                    return
+                else:
+                    # Stop the task chain and prevent starting the job if it has
+                    # already been canceled.
+                    instance = self.update_model(pk)
+                    status = instance.status
+                    raise RuntimeError('not starting %s task' % instance.status)
+            #status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
+            # TODO: Do the workflow logic here
+        except Exception:
+            if status != 'canceled':
+                tb = traceback.format_exc()
+        instance = self.update_model(pk, status=status, result_traceback=tb)
+        self.post_run_hook(instance, **kwargs)
+        instance.socketio_emit_status(status)
+        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
+            # Raising an exception will mark the job as 'failed' in celery
+            # and will stop a task chain from continuing to execute
+            if status == 'canceled':
+                raise Exception("Task %s(pk:%s) was canceled (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
+            else:
+                raise Exception("Task %s(pk:%s) encountered an error (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
+        if not hasattr(settings, 'CELERY_UNIT_TEST'):
+            self.signal_finished(pk)
 

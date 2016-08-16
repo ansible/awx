@@ -255,6 +255,23 @@ system_job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notifications/$',             'system_job_notifications_list'),
 )
 
+workflow_job_template_urls = patterns('awx.api.views',
+    url(r'^$',                                          'workflow_job_template_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'workflow_job_template_detail'),
+    url(r'^(?P<pk>[0-9]+)/jobs/$',                      'workflow_job_template_jobs_list'),
+    url(r'^(?P<pk>[0-9]+)/launch/$',                    'workflow_job_template_launch'),
+    url(r'^(?P<pk>[0-9]+)/workflow_nodes/$',            'workflow_job_template_workflow_nodes_list'),
+#    url(r'^(?P<pk>[0-9]+)/cancel/$',                    'workflow_job_template_cancel'),
+    #url(r'^(?P<pk>[0-9]+)/nodes/$',                     'workflow_job_template_node_list'),
+)
+workflow_job_urls = patterns('awx.api.views',
+    url(r'^$',                                          'workflow_job_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'workflow_job_detail'),
+#    url(r'^(?P<pk>[0-9]+)/cancel/$',                    'workflow_job_cancel'),
+    #url(r'^(?P<pk>[0-9]+)/notifications/$',             'workflow_job_notifications_list'),
+)
+
+
 notification_template_urls = patterns('awx.api.views',
     url(r'^$',                                          'notification_template_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'notification_template_detail'),
@@ -270,6 +287,14 @@ notification_urls = patterns('awx.api.views',
 label_urls = patterns('awx.api.views',
     url(r'^$',                                          'label_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'label_detail'),
+)
+
+workflow_node_urls = patterns('awx.api.views',
+    url(r'^$',                                          'workflow_node_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'workflow_node_detail'),
+    url(r'^(?P<pk>[0-9]+)/success_nodes/$',             'workflow_node_success_nodes_list'),
+    url(r'^(?P<pk>[0-9]+)/failure_nodes/$',             'workflow_node_failure_nodes_list'),
+    url(r'^(?P<pk>[0-9]+)/always_nodes/$',              'workflow_node_always_nodes_list'),
 )
 
 schedule_urls = patterns('awx.api.views',
@@ -321,7 +346,10 @@ v1_urls = patterns('awx.api.views',
     url(r'^system_jobs/',           include(system_job_urls)),
     url(r'^notification_templates/',             include(notification_template_urls)),
     url(r'^notifications/',         include(notification_urls)),
+    url(r'^workflow_job_templates/',include(workflow_job_template_urls)),
+    url(r'^workflow_jobs/'          ,include(workflow_job_urls)),
     url(r'^labels/',                include(label_urls)),
+    url(r'^workflow_nodes/',        include(workflow_node_urls)),
     url(r'^unified_job_templates/$','unified_job_template_list'),
     url(r'^unified_jobs/$',         'unified_job_list'),
     url(r'^activity_stream/',       include(activity_stream_urls)),

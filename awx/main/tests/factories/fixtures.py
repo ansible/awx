@@ -13,6 +13,7 @@ from awx.main.models import (
     Credential,
     Inventory,
     Label,
+    WorkflowJobTemplate,
 )
 
 # mk methods should create only a single object of a single type.
@@ -152,3 +153,28 @@ def mk_job_template(name, job_type='run',
     if persisted:
         jt.save()
     return jt
+
+def mk_workflow_job_template(name, extra_vars='', spec=None, persisted=True):
+    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars)
+
+    wfjt.survey_spec = spec
+    if wfjt.survey_spec is not None:
+        wfjt.survey_enabled = True
+
+    if persisted:
+        wfjt.save()
+    return wfjt
+
+def mk_workflow_node(workflow_job_template=None, unified_job_template=None, 
+                     success_nodes=None, failure_nodes=None, always_nodes=None,
+                     job=None, persisted=True):
+    workflow_node = WorkflowNode(workflow_job_template=workflow_job_template,
+                                 unified_job_template=job_template,
+                                 success_nodes=success_nodes,
+                                 failure_nodes=failure_nodes,
+                                 always_nodes=always_nodes,
+                                 job=job)
+    if persisted:
+        workflow_node.save()
+    return workflow_node
+

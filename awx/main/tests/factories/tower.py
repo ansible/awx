@@ -9,6 +9,7 @@ from awx.main.models import (
     Inventory,
     Job,
     Label,
+    WorkflowJobTemplate,
 )
 
 from .objects import (
@@ -28,6 +29,7 @@ from .fixtures import (
     mk_project,
     mk_label,
     mk_notification_template,
+    mk_workflow_job_template,
 )
 
 
@@ -343,3 +345,35 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
                    users=_Mapped(users),
                    superusers=_Mapped(superusers),
                    teams=teams)
+
+def create_workflow_job_template(name, persisted=True, **kwargs):
+    Objects = generate_objects(["workflow_job_template",
+                                "survey",], kwargs)
+
+    spec = None
+    jobs = None
+
+    extra_vars = kwargs.get('extra_vars', '')
+
+    if 'survey' in kwargs:
+        spec = create_survey_spec(kwargs['survey'])
+
+    wfjt = mk_workflow_job_template(name, spec=spec, extra_vars=extra_vars,
+                                    persisted=persisted)
+
+    if 'jobs' in kwargs:
+        for i in kwargs['jobs']:
+            if type(i) is Job:
+                jobs[i.pk] = i
+            else:
+                # Fill in default survey answers
+                job_extra_vars = {}
+                for question in spec['spec']:
+                    job_extra_vars[question['variable']] = question['default']
+                jobs[i] = mk_job(job_template=wfjt, extra_vars=job_extra_vars, 
+                                 persisted=persisted)
+
+    return Objects(workflow_job_template=wfjt,
+                   #jobs=jobs,
+                   survey=spec,)
+
