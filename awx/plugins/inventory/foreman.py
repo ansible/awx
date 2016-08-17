@@ -1,7 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-#
-# NOTE FOR TOWER: change foreman_ to sattelite_ for the group prefix
 #
 # Copyright (C) 2016 Guido Günther <agx@sigxcpu.org>
 #
@@ -41,6 +39,7 @@ class ForemanInventory(object):
         self.inventory = dict()  # A list of groups and the hosts in that group
         self.cache = dict()  # Details about hosts in the inventory
         self.params = dict() # Params of each host
+        self.facts = dict() # Facts of each host
         self.hostgroups = dict()  # host groups
 
         # Read settings and parse CLI arguments
@@ -55,6 +54,7 @@ class ForemanInventory(object):
         else:
             self.load_inventory_from_cache()
             self.load_params_from_cache()
+            self.load_facts_from_cache()
             self.load_cache_from_cache()
 
         data_to_print = ""
@@ -69,6 +69,9 @@ class ForemanInventory(object):
                     'foreman': self.cache[hostname],
                     'foreman_params': self.params[hostname],
                 }
+                if self.want_facts:
+                    self.inventory['_meta']['hostvars'][hostname]['foreman_facts'] = self.facts[hostname]
+
             data_to_print += self.json_format_dict(self.inventory, True)
 
         print(data_to_print)
@@ -81,7 +84,8 @@ class ForemanInventory(object):
             current_time = time()
             if (mod_time + self.cache_max_age) > current_time:
                 if (os.path.isfile(self.cache_path_inventory) and
-                    os.path.isfile(self.cache_path_params)):
+                    os.path.isfile(self.cache_path_params) and
+                    os.path.isfile(self.cache_path_facts)):
                     return True
         return False
 
@@ -114,6 +118,16 @@ class ForemanInventory(object):
 
         self.group_patterns = eval(group_patterns)
 
+        try:
+            self.group_prefix = config.get('ansible', 'group_prefix')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.group_prefix = "foreman_"
+
+        try:
+            self.want_facts = config.getboolean('ansible', 'want_facts')
+        except (ConfigParser.NoOptionError, ConfigParser.NoSectionError):
+            self.want_facts = True
+
         # Cache related
         try:
             cache_path = os.path.expanduser(config.get('cache', 'path'))
@@ -123,6 +137,7 @@ class ForemanInventory(object):
         self.cache_path_cache = cache_path + "/%s.cache" % script
         self.cache_path_inventory = cache_path + "/%s.index" % script
         self.cache_path_params = cache_path + "/%s.params" % script
+        self.cache_path_facts = cache_path + "/%s.facts" % script
         self.cache_max_age = config.getint('cache', 'max_age')
 
     def parse_cli_args(self):
@@ -135,7 +150,7 @@ class ForemanInventory(object):
                             help='Force refresh of cache by making API requests to foreman (default: False - use cache files)')
         self.args = parser.parse_args()
 
-    def _get_json(self, url):
+    def _get_json(self, url, ignore_errors=None):
         page = 1
         results = []
         while True:
@@ -143,10 +158,14 @@ class ForemanInventory(object):
                                auth=HTTPBasicAuth(self.foreman_user, self.foreman_pw),
                                verify=self.foreman_ssl_verify,
                                params={'page': page, 'per_page': 250})
+            if ignore_errors and ret.status_code in ignore_errors:
+                break
             ret.raise_for_status()
             json = ret.json()
             if not json.has_key('results'):
                 return json
+            if type(json['results']) == type({}):
+                return json['results']
             results = results + json['results']
             if len(results) >= json['total']:
                 break
@@ -162,37 +181,43 @@ class ForemanInventory(object):
             self.hostgroups[hid] = self._get_json(url)
         return self.hostgroups[hid]
 
-    def _get_params_by_id(self, hid):
-        url = "%s/api/v2/hosts/%s/parameters" % (self.foreman_url, hid)
+    def _get_all_params_by_id(self, hid):
+        url = "%s/api/v2/hosts/%s" % (self.foreman_url, hid)
+        ret = self._get_json(url, [404])
+        if ret == []: ret = {}
+        return ret.get('all_parameters', {})
+
+    def _get_facts_by_id(self, hid):
+        url = "%s/api/v2/hosts/%s/facts" % (self.foreman_url, hid)
         return self._get_json(url)
 
     def _resolve_params(self, host):
         """
-        Resolve all host group params of the host using the top level
-        hostgroup and the ancestry.
+        Fetch host params and convert to dict
         """
-        hostgroup_id = host['hostgroup_id']
-        paramgroups = []
         params = {}
 
-        if hostgroup_id:
-            hostgroup = self._get_hostgroup_by_id(hostgroup_id)
-            ancestry_path = hostgroup.get('ancestry', '')
-            ancestry = ancestry_path.split('/') if ancestry_path is not None else []
-
-            # Append top level hostgroup last to overwrite lower levels
-            # values
-            ancestry.append(hostgroup_id)
-            paramgroups = [self._get_hostgroup_by_id(hostgroup_id)['parameters']
-                           for hostgroup_id in ancestry]
-
-        paramgroups += [self._get_params_by_id(host['id'])]
-        for paramgroup in paramgroups:
-            for param in paramgroup:
-                name = param['name']
-                params[name] = param['value']
+        for param in self._get_all_params_by_id(host['id']):
+            name = param['name']
+            params[name] = param['value']
 
         return params
+
+    def _get_facts(self, host):
+        """
+        Fetch all host facts of the host
+        """
+        if not self.want_facts:
+            return {}
+
+        ret = self._get_facts_by_id(host['id'])
+        if len(ret.values()) == 0:
+            facts = {}
+        elif len(ret.values()) == 1:
+            facts = ret.values()[0]
+        else:
+            raise ValueError("More than one set of facts returned for '%s'" % host)
+        return facts
 
     def update_cache(self):
         """Make calls to foreman and save the output in a cache"""
@@ -203,11 +228,17 @@ class ForemanInventory(object):
         for host in self._get_hosts():
             dns_name = host['name']
 
-            # Create ansible groups for hostgroup, location and organization
-            for group in ['hostgroup', 'location', 'organization']:
+            # Create ansible groups for hostgroup, environment, location and organization
+            for group in ['hostgroup', 'environment', 'location', 'organization']:
                 val = host.get('%s_name' % group)
                 if val:
-                    safe_key = self.to_safe('satellite_%s_%s' % (group, val.lower()))
+                    safe_key = self.to_safe('%s%s_%s' % (self.group_prefix, group, val.lower()))
+                    self.push(self.inventory, safe_key, dns_name)
+
+            for group in ['lifecycle_environment', 'content_view']:
+                val = host.get('content_facet_attributes', {}).get('%s_name' % group)
+                if val:
+                    safe_key = self.to_safe('%s%s_%s' % (self.group_prefix, group, val.lower()))
                     self.push(self.inventory, safe_key, dns_name)
 
             params = self._resolve_params(host)
@@ -231,11 +262,13 @@ class ForemanInventory(object):
 
             self.cache[dns_name] = host
             self.params[dns_name] = params
+            self.facts[dns_name] = self._get_facts(host)
             self.push(self.inventory, 'all', dns_name)
 
         self.write_to_cache(self.cache, self.cache_path_cache)
         self.write_to_cache(self.inventory, self.cache_path_inventory)
         self.write_to_cache(self.params, self.cache_path_params)
+        self.write_to_cache(self.facts, self.cache_path_facts)
 
     def get_host_info(self):
         """ Get variables about a specific host """
@@ -274,6 +307,14 @@ class ForemanInventory(object):
         json_params = cache.read()
         self.params = json.loads(json_params)
 
+    def load_facts_from_cache(self):
+        """ Reads the index from the cache file sets self.index """
+        if not self.want_facts:
+            return
+        cache = open(self.cache_path_facts, 'r')
+        json_facts = cache.read()
+        self.facts = json.loads(json_facts)
+
     def load_cache_from_cache(self):
         """ Reads the cache from the cache file sets self.cache """
 
@@ -301,4 +342,7 @@ class ForemanInventory(object):
         else:
             return json.dumps(data)
 
-ForemanInventory()
+if __name__ == '__main__':
+  ForemanInventory()
+
+
