@@ -31,6 +31,7 @@ angular.module('SocketIO', ['Utilities'])
                 host = $location.host(),
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
+                io = require('socket.io-client'),
                 config, socketPort,
                 url;
 

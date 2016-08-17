@@ -27,7 +27,8 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
             };
 
             function link(scope, element) {
-                var job_type, job_status_chart = nv.models.lineChart();
+                var job_type,
+                    job_status_chart = nv.models.lineChart();
 
                 scope.period="month";
                 scope.jobType="all";

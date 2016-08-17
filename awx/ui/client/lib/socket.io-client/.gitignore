@@ -1,5 +1,0 @@
-s3
-test/node_modules
-support/test-runner/node_modules
-node_modules
-.DS_Store

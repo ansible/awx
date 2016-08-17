@@ -37,7 +37,8 @@
                 Rest.setUrl(this.url);
                 return Rest.get()
                     .success(this.success.bind(this))
-                    .error(this.error.bind(this));
+                    .error(this.error.bind(this))
+                    .finally(Wait('stop'));
             },
             // these methods generate a query string to pass to PaginateInit(), SearchInit()
             // always supply trailing slashes and ? prefix

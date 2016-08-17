@@ -22,13 +22,13 @@ export default ['$scope', '$filter',
 
                 if (job.status === 'successful') {
                     data.value = 1;
-                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--success icon-job-successful\"></i>  " + job.status.toUpperCase();
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--success\"></i>  " + job.status.toUpperCase();
                 } else if (isFailureState(job.status)) {
                     data.value = -1;
-                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--failed icon-job-successful\"></i>  " + job.status.toUpperCase();
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--failed\"></i>  " + job.status.toUpperCase();
                 } else {
                     data.value = 0;
-                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--running icon-job-successful\"></i>  " + job.status.toUpperCase();
+                    data.smartStatus = "<i class=\"fa DashboardList-status SmartStatus-tooltip--running\"></i>  " + job.status.toUpperCase();
                 }
 
                 data.jobId = job.id;

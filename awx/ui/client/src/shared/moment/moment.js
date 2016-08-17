@@ -1,4 +1,5 @@
-var originalMoment = window.moment;
+var originalMoment = require('moment');
+import {merge} from 'lodash';
 
 function moment() {
 
@@ -15,6 +16,6 @@ function moment() {
     return originalMoment.apply(this, arguments);
 }
 
-_.merge(moment, originalMoment);
+merge(moment, originalMoment);
 
 export default moment;

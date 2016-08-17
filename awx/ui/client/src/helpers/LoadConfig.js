@@ -37,8 +37,8 @@ angular.module('LoadConfigHelper', ['Utilities'])
                 .then(function(response) {
                     $log.info('loaded local_settings.json');
                     if(angular.isObject(response.data)){
-                        $AnsibleConfig = _.extend($AnsibleConfig, response.data);
-                        Store('AnsibleConfig', $AnsibleConfig);
+                        global.$AnsibleConfig = _.extend($AnsibleConfig, response.data);
+                        Store('AnsibleConfig', global.$AnsibleConfig);
                         if ($rootScope.loginConfig) {
                             $rootScope.loginConfig.resolve('config loaded');
                         }
@@ -68,8 +68,8 @@ angular.module('LoadConfigHelper', ['Utilities'])
         $http({ method:'GET', url: $basePath + 'config.js' })
             .then(function(response) {
                 $log.info('loaded config.js');
-                $AnsibleConfig = eval(response.data);
-                Store('AnsibleConfig', $AnsibleConfig);
+                global.$AnsibleConfig = eval(response.data);
+                Store('AnsibleConfig', global.$AnsibleConfig);
                 $rootScope.$emit('LoadConfig');
             })
             .catch(function(response) {

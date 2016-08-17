@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/nvd3/build/nv.d3.css"  type="text/css">
-  <link rel="stylesheet" href="{{ STATIC_URL }}lib/ngToast/dist/ngToast.min.css"  type="text/css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/ng-toast/dist/ngToast.min.css"  type="text/css">
 
   <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
@@ -23,9 +23,8 @@
   <script>
       var $basePath = "{{ STATIC_URL }}";
   </script>
-
-  <script src="{{ STATIC_URL }}tower.concat.js?v={{version}}"></script>
-
+  <script src="{{ STATIC_URL }}tower.vendor.js?v={{version}}"></script>
+  <script src="{{ STATIC_URL }}tower.js?v={{version}}"></script>
   <script>
     window.pendo_options = {
 
@@ -36,8 +35,6 @@
 
 </head>
 <body data-user-agent="{{userAgent}}">
-
-    <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu></main-menu>
   <bread-crumb ng-if="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-if="includesCurrentState('inventoryManage')"></div>
@@ -222,12 +219,5 @@
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
 </div>
 <tower-footer></tower-footer>
-  <script>
-        // HACK: Need this to support global-dependent
-        //  config-loading behavior
-        var $AnsibleConfig;
-
-        require('app');
-  </script>
 </body>
 </html>

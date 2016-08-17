@@ -5,11 +5,6 @@ OFFICIAL ?= no
 PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
 GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
-TESTEM ?= ./node_modules/.bin/testem
-BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
-MOCHA_BIN ?= ./node_modules/.bin/_mocha
-ISTANBUL_BIN ?= ./node_modules/.bin/istanbul
-BROWSER_SYNC_BIN ?= ./node_modules/.bin/browser-sync
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
@@ -18,8 +13,6 @@ GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 VENV_BASE ?= /tower_devel/venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
-
-CLIENT_TEST_DIR ?= build_test
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -177,13 +170,11 @@ endif
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
-	build-ui-for-browser-tests test-ui-debug jshint ngdocs \
-	websocket-proxy browser-sync browser-sync-reload brocolli-watcher \
-	devjs minjs testjs_ci \
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-bundle setup_bundle_tarball
+	clean-bundle setup_bundle_tarball \
+	ui-docker-machine ui-docker ui-release \
+	ui-test ui-test-ci ui-test-saucelabs
 
 # Remove setup build files
 clean-tar:
@@ -196,11 +187,6 @@ clean-rpm:
 # Remove debian build files
 clean-deb:
 	rm -rf deb-build reprepro
-
-# Remove grunt build files
-clean-grunt:
-	rm -f package.json Gruntfile.js Brocfile.js bower.json
-	rm -rf node_modules
 
 # Remove packer artifacts
 clean-packer:
@@ -218,19 +204,15 @@ clean-bundle:
 
 # remove ui build artifacts
 clean-ui:
-	rm -rf DEBUG
-
-clean-static:
 	rm -rf awx/ui/static/
-
-clean-build-test:
-	rm -rf awx/ui/build_test/
+	rm -rf awx/ui/node_modules/
+	rm -f awx/ui/.deps_built
 
 clean-tmp:
 	rm -rf tmp/
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
@@ -472,170 +454,27 @@ test_jenkins : test_coverage
 # UI TASKS
 # --------------------------------------
 
-# begin targets that pull ui files from packaging to the root of the app
-Gruntfile.js: packaging/node/Gruntfile.js
-	cp $< $@
+ui-deps-built: awx/ui/package.json
+	$(NPM_BIN) --prefix awx/ui install awx/ui
+	touch awx/ui/.deps_built
 
-Brocfile.js: packaging/node/Brocfile.js
-	cp $< $@
+ui-docker-machine: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run build-docker-machine
 
-bower.json: packaging/node/bower.json
-	cp $< $@
+ui-docker: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run build-docker-cid
 
-package.json: packaging/node/package.template
-	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
+ui-release: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run build-release
 
-testem.yml: packaging/node/testem.yml
-	cp $< $@
+ui-test: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run test
 
-.istanbul.yml: packaging/node/.istanbul.yml
-	cp $< $@
-# end targets that pull ui files from packaging to the root of the app
+ui-test-ci: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run test:ci
 
-# update package.json and install npm dependencies
-node_modules: package.json
-	$(NPM_BIN) install
-	touch $@
-
-# helper tasks to run broccoli build process at awx/ui/<destination_dir>,
-# to build the ui, use the build-ui target instead:
-#	UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-awx/ui/static: node_modules clean-ui clean-static Brocfile.js bower.json
-	$(BROCCOLI_BIN) build awx/ui/static -- $(UI_FLAGS)
-
-awx/ui/build_test: node_modules clean-ui clean-build-test Brocfile.js bower.json
-	$(BROCCOLI_BIN) build awx/ui/build_test -- $(UI_FLAGS)
-
-# build the ui to awx/ui/static:
-#	defaults to standard dev build (concatenated, non-minified, sourcemaps, no
-#		tests)
-#	PROD=true: standard prod build (concatenated, minified, no sourcemaps,
-#		compressed, no tests)
-#	EXTRA_UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-PROD ?= false
-
-# TODO: Remove after 2.4 (alias for devjs/minjs)
-devjs: build-ui
-minjs: build-ui
-ifeq ($(MAKECMDGOALS),minjs)
-   PROD = true
-endif
-
-ifeq ($(PROD),true)
-    UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps \
-    $(EXTRA_UI_FLAGS)
-else
-    UI_FLAGS=$(EXTRA_UI_FLAGS)
-endif
-
-build-ui: awx/ui/static
-
-# launch watcher to continuously build the ui to awx/ui/static and run tests
-#	after changes are made:
-#	WATCHER_FLAGS: options to be utilized by broccoli timepiece
-#	UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-# 	DOCKER_MACHINE_NAME=<name of docker-machine tower is running on>: when
-#		passed, not only will brocolli rebuild, but browser-sync will proxy
-#		proxy tower and refresh the ui when a change is made.
-DOCKER_MACHINE_NAME ?= none
-ifeq ($(DOCKER_MACHINE_NAME),none)
-   sync-ui: node_modules clean-tmp brocolli-watcher
-else
-   sync-ui: node_modules clean-tmp
-	   tmux new-session -d -s ui_sync 'exec make brocolli-watcher'
-	   tmux rename-window 'UI Sync'
-	   tmux select-window -t ui_sync:0
-	   tmux split-window -v 'exec make browser-sync'
-	   tmux split-window -h 'exec make websocket-proxy'
-	   tmux select-layout main-vertical
-	   tmux attach-session -t ui_sync
-endif
-
-websocket-proxy:
-	docker-machine ssh $(DOCKER_MACHINE_NAME) -L 8080:localhost:8080
-
-browser-sync:
-	$(BROWSER_SYNC_BIN) start --proxy $(shell docker-machine ip $(DOCKER_MACHINE_NAME)):8013 --ws
-
-browser-sync-reload:
-	$(BROWSER_SYNC_BIN) reload
-
-brocolli-watcher: Brocfile.js testem.yml
-	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
-
-# run ui unit-tests:
-#	defaults to a useful dev testing run.  Builds the ui to awx/ui/build_test
-#		and runs mocha (node.js) tests with istanbul coverage (and an html
-#		coverage report)
-#	UI_TESTS_TO_RUN=<file>-test.js: Set this to only run a specific test file
-#	CI=true: Builds the ui to awx/ui/build_test
-#		and runs mocha (node.js) tests with istanbul coverage (and a cobertura
-#		coverage report).  Also builds the ui to awx/ui/static and runs the
-#		testem (phantomjs) tests.  Outputs these to XUNIT format to be consumed
-#		and displayed in jenkins
-#	DEBUG=true: Builds the ui to awx/ui/static and runs testem tests in Chrome
-#		so you can breakpoint the tests and underlying code to figure out why
-#		tests are failing.
-#		TESTEM_DEBUG_BROWSER: the browser to run tests in, default to Chrome
-
-# TODO: deprecated past 2.4
-testjs_ci: test-ui # w var UI_TEST_MODE=CI
-
-UI_TEST_MODE ?= DEV
-ifeq ($(UI_TEST_MODE),CI)
-    # ci testing run
-    # this used to be testjs_ci, sort-of
-    REPORTER = xunit
-    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
-else
-ifeq ($(UI_TEST_MODE),DEV_DEBUG)
-    # debug (breakpoint) dev testing run
-    test-ui: build-ui-for-browser-tests test-ui-debug
-else
-    # default dev testing run
-    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
-endif
-endif
-
-# helper tasks to test ui, don't call directly
-build-ui-for-coverage: UI_FLAGS=--node-tests --no-concat --no-styles
-build-ui-for-coverage: awx/ui/build_test
-
-REPORTER ?= standard
-UI_TESTS_TO_RUN ?= all
-ifeq ($(REPORTER), xunit)
-   test-ui-for-coverage:
-	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cp coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
-else
-ifeq ($(UI_TESTS_TO_RUN), all)
-   test-ui-for-coverage:
-	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
-else
-test-ui-for-coverage:
-	 NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '$(UI_TESTS_TO_RUN)')
-endif
-endif
-
-build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests
-build-ui-for-browser-tests: awx/ui/static
-
-TESTEM_DEBUG_BROWSER ?= Chrome
-test-ui-debug:
-	PATH=./node_modules/.bin:$(PATH) $(TESTEM) --file testem.yml -l $(TESTEM_DEBUG_BROWSER)
-
-# lint .js files
-jshint: node_modules Gruntfile.js
-	$(GRUNT) $@
-
-# generate ui docs
-ngdocs: build-ui Gruntfile.js
-	$(GRUNT) $@
+ui-test-saucelabs: ui-deps-built
+	$(NPM_BIN) --prefix awx/ui run test:saucelabs
 
 # END UI TASKS
 # --------------------------------------
@@ -676,7 +515,7 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-dist/$(SDIST_TAR_FILE): minjs
+dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: dist/$(SDIST_TAR_FILE)

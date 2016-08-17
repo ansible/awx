@@ -5,7 +5,7 @@
  *************************************************/
 
 
-  /**
+/**
  *  @ngdoc function
  *  @name shared.function:Utilities
  *  @description
@@ -28,23 +28,23 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *  Place to remove things that might be lingering from a prior tab or view.
  *  This used to destroy the scope, but that causes issues in angular 1.2.x
  */
-.factory('ClearScope', [ '$rootScope', function ($rootScope) {
-    return function () {
+.factory('ClearScope', ['$rootScope', function($rootScope) {
+    return function() {
 
         $rootScope.flashMessage = null;
 
         $('#form-modal .modal-body').empty();
         $('#form-modal2 .modal-body').empty();
 
-        $('.tooltip').each(function () {
+        $('.tooltip').each(function() {
             $(this).remove();
         });
 
-        $('.popover').each(function () {
+        $('.popover').each(function() {
             $(this).remove();
         });
 
-        $('.ui-dialog-content').each(function(){
+        $('.ui-dialog-content').each(function() {
             $(this).dialog('close');
         });
 
@@ -68,8 +68,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *
  */
 .factory('Empty', [
-    function () {
-        return function (val) {
+    function() {
+        return function(val) {
             return (val === null || val === undefined || val === '') ? true : false;
         };
     }
@@ -81,8 +81,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * @methodOf shared.function:Utilities
  * @description
  */
-.factory('ToggleClass', function () {
-    return function (selector, cssClass) {
+.factory('ToggleClass', function() {
+    return function(selector, cssClass) {
         // Toggles the existance of a css class on a given element
         if ($(selector) && $(selector).hasClass(cssClass)) {
             $(selector).removeClass(cssClass);
@@ -102,9 +102,10 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
  * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
  */
-.factory('Alert', ['$rootScope', '$filter', function ($rootScope, $filter) {
-    return function (hdr, msg, cls, action, secondAlert, disableButtons, backdrop, customStyle) {
-        var scope = $rootScope.$new(), alertClass, local_backdrop;
+.factory('Alert', ['$rootScope', '$filter', function($rootScope, $filter) {
+    return function(hdr, msg, cls, action, secondAlert, disableButtons, backdrop, customStyle) {
+        var scope = $rootScope.$new(),
+            alertClass, local_backdrop;
         if (customStyle !== true) {
             msg = $filter('sanitize')(msg);
         }
@@ -124,16 +125,17 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             });
             scope.disableButtons2 = (disableButtons) ? true : false;
 
-            $('#alert-modal2').on('hidden.bs.modal', function () {
+            $('#alert-modal2').on('hidden.bs.modal', function() {
                 if (action) {
                     action();
                 }
             });
-            $('#alert-modal2').on('shown.bs.modal', function () {
+            $('#alert-modal2').on('shown.bs.modal', function() {
                 $('#alert2_ok_btn').focus();
             });
-            $(document).bind('keydown', function (e) {
+            $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27 || e.keyCode === 13) {
+                    e.preventDefault();
                     $('#alert-modal2').modal('hide');
                 }
             });
@@ -151,16 +153,17 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 backdrop: local_backdrop
             });
 
-            $('#alert-modal').on('hidden.bs.modal', function () {
+            $('#alert-modal').on('hidden.bs.modal', function() {
                 if (action) {
                     action();
                 }
             });
-            $('#alert-modal').on('shown.bs.modal', function () {
+            $('#alert-modal').on('shown.bs.modal', function() {
                 $('#alert_ok_btn').focus();
             });
-            $(document).bind('keydown', function (e) {
+            $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27 || e.keyCode === 13) {
+                    e.preventDefault();
                     $('#alert-modal').modal('hide');
                 }
             });
@@ -175,10 +178,10 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * @name shared.function:Utilities#ProcessErrors
  * @methodOf shared.function:Utilities
  * @description For handling errors that are returned from the API
-*/
+ */
 .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
-    function ($rootScope, $cookieStore, $log, $location, Alert, Wait) {
-        return function (scope, data, status, form, defaultMsg) {
+    function($rootScope, $cookieStore, $log, $location, Alert, Wait) {
+        return function(scope, data, status, form, defaultMsg) {
             var field, fieldErrors, msg, keys;
             Wait('stop');
             $log.debug('Debug status: ' + status);
@@ -210,11 +213,10 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             } else if (data && data.__all__) {
                 if (typeof data.__all__ === 'object' && Array.isArray(data.__all__)) {
                     Alert('Error!', data.__all__[0]);
-                }
-                else {
+                } else {
                     Alert('Error!', data.__all__);
                 }
-            } else if (form) {  //if no error code is detected it begins to loop through to see where the api threw an error
+            } else if (form) { //if no error code is detected it begins to loop through to see where the api threw an error
                 fieldErrors = false;
                 for (field in form.fields) {
                     if (data[field] && form.fields[field].tab) {
@@ -252,18 +254,16 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                 if ((!fieldErrors) && defaultMsg) {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
-            } else if (typeof data === 'object' && data !== null){
-                if(Object.keys(data).length > 0) {
+            } else if (typeof data === 'object' && data !== null) {
+                if (Object.keys(data).length > 0) {
                     keys = Object.keys(data);
                     if (Array.isArray(data[keys[0]])) {
                         msg = data[keys[0]][0];
-                    }
-                    else {
+                    } else {
                         msg = data[keys[0]];
                     }
                     Alert(defaultMsg.hdr, msg);
-                }
-                else {
+                } else {
                     Alert(defaultMsg.hdr, defaultMsg.msg);
                 }
             } else {
@@ -283,8 +283,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * discuss difference b/t this and other modal windows/dialogs
  */
 .factory('HelpDialog', ['$rootScope', '$compile', '$location', 'Store',
-    function ($rootScope, $compile, $location, Store) {
-        return function (params) {
+    function($rootScope, $compile, $location, Store) {
+        return function(params) {
 
             var defn = params.defn,
                 current_step = params.step,
@@ -293,7 +293,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
             function setButtonMargin() {
                 var width = ($('.ui-dialog[aria-describedby="help-modal-dialog"] .ui-dialog-buttonpane').innerWidth() / 2) - $('#help-next-button').outerWidth() - 93;
-                $('#help-next-button').css({'margin-right': width + 'px'});
+                $('#help-next-button').css({ 'margin-right': width + 'px' });
             }
 
             function showHelp(step) {
@@ -348,7 +348,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     if (defn.story.steps.length > 1) {
                         btns.push({
                             text: "Prev",
-                            click: function () {
+                            click: function() {
                                 if (current_step - 1 === 0) {
                                     $('#help-prev-button').prop('disabled', true);
                                 }
@@ -374,7 +374,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     }
                     btns.push({
                         text: "Close",
-                        click: function () {
+                        click: function() {
                             $('#help-modal-dialog').dialog('close');
                         }
                     });
@@ -399,14 +399,14 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                         show: 500,
                         hide: 500,
                         resizable: false,
-                        close: function () {
+                        close: function() {
                             $('.overlay').hide();
                             $('#help-modal-dialog').empty();
                         }
                     });
 
                     // Make the buttons look like TB and add FA icons
-                    $('.ui-dialog-buttonset button').each(function () {
+                    $('.ui-dialog-buttonset button').each(function() {
                         var c, h, i, l;
                         l = $(this).text();
                         if (l === 'Close') {
@@ -444,7 +444,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                         }).text('x');
 
                     // If user clicks the checkbox, update local storage
-                    $('#auto-off-checkbox').click(function () {
+                    $('#auto-off-checkbox').click(function() {
                         if ($('input[name="auto-off-checkbox"]:checked').length) {
                             Store('inventoryAutoHelp', 'off');
                         } else {
@@ -472,8 +472,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *
  */
 .factory('ReturnToCaller', ['$location', 'Empty',
-    function ($location, Empty) {
-        return function (idx) {
+    function($location, Empty) {
+        return function(idx) {
             var paths = $location.path().replace(/^\//, '').split('/'),
                 newpath = '',
                 i;
@@ -496,8 +496,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * the same format. Pass in date object or string. See: http://docs.angularjs.org/api/ng.filter:date
  */
 .factory('FormatDate', ['$filter',
-    function ($filter) {
-        return function (dt) {
+    function($filter) {
+        return function(dt) {
             return $filter('longDate')(dt);
         };
     }
@@ -514,8 +514,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *
  */
 .factory('Wait', ['$rootScope',
-    function ($rootScope) {
-        return function (directive) {
+    function($rootScope) {
+        return function(directive) {
             var docw, doch, spinnyw, spinnyh;
             if (directive === 'start' && !$rootScope.waiting) {
                 $rootScope.waiting = true;
@@ -532,7 +532,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     right: 15
                 }).fadeIn(400);
             } else if (directive === 'stop' && $rootScope.waiting) {
-                $('.spinny, .overlay').fadeOut(400, function () {
+                $('.spinny, .overlay').fadeOut(400, function() {
                     $rootScope.waiting = false;
                 });
             }
@@ -541,8 +541,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 ])
 
 .factory('HideElement', [
-    function () {
-        return function (selector, action) {
+    function() {
+        return function(selector, action) {
             // Fade-in a cloack or vail or a specific element
             var target = $(selector),
                 width = target.css('width'),
@@ -574,10 +574,10 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 ])
 
 .factory('ShowElement', [
-    function () {
-        return function () {
+    function() {
+        return function() {
             // And Fade-out the cloack revealing the element
-            $('#curtain-div').fadeOut(500, function () {
+            $('#curtain-div').fadeOut(500, function() {
                 $(this).remove();
             });
         };
@@ -609,140 +609,143 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * ```
  */
 .factory('CreateSelect2', ['$filter',
-    function ($filter) {
-        return function (params) {
+        function($filter) {
+            return function(params) {
 
-            var element = params.element,
-            options = params.opts,
-            multiple = (params.multiple!==undefined) ? params.multiple : true,
-            placeholder = params.placeholder,
-            customDropdownAdapter = (params.customDropdownAdapter!==undefined) ? params.customDropdownAdapter : true,
-            addNew = params.addNew;
+                var element = params.element,
+                    options = params.opts,
+                    multiple = (params.multiple !== undefined) ? params.multiple : true,
+                    placeholder = params.placeholder,
+                    customDropdownAdapter = (params.customDropdownAdapter !== undefined) ? params.customDropdownAdapter : true,
+                    addNew = params.addNew;
 
-            $.fn.select2.amd.require([
-                'select2/utils',
-                'select2/dropdown',
-                'select2/dropdown/search',
-                'select2/dropdown/attachContainer',
-                'select2/dropdown/closeOnSelect',
-                'select2/dropdown/minimumResultsForSearch',
-                'select2/data/tokenizer'
-          ], function (Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer) {
+                $.fn.select2.amd.require([
+                    'select2/utils',
+                    'select2/dropdown',
+                    'select2/dropdown/search',
+                    'select2/dropdown/attachContainer',
+                    'select2/dropdown/closeOnSelect',
+                    'select2/dropdown/minimumResultsForSearch',
+                    'select2/data/tokenizer'
+                ], function(Utils, Dropdown, Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer) {
 
-              var CustomAdapter =
-                  _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer],
-                           function(Adapter, Decorator) {
-                               return Utils.Decorate(Adapter, Decorator);
-                           }, Dropdown);
+                    var CustomAdapter =
+                        _.reduce([Search, AttachContainer, CloseOnSelect, MinimumResultsForSearch, Tokenizer],
+                            function(Adapter, Decorator) {
+                                return Utils.Decorate(Adapter, Decorator);
+                            }, Dropdown);
 
-                var config = {
-                    placeholder: placeholder,
-                    multiple: multiple,
-                    containerCssClass: 'Form-dropDown',
-                    width: '100%',
-                    minimumResultsForSearch: Infinity,
-                    escapeMarkup: function(m) {
-                        return $filter('sanitize')(m);
+                    var config = {
+                        placeholder: placeholder,
+                        multiple: multiple,
+                        containerCssClass: 'Form-dropDown',
+                        width: '100%',
+                        minimumResultsForSearch: Infinity,
+                        escapeMarkup: function(m) {
+                            return $filter('sanitize')(m);
+                        }
+                    };
+
+                    // multiple-choice directive calls select2 but needs to do so without this custom adapter
+                    // to allow the element to be draggable on survey preview.
+                    if (customDropdownAdapter) {
+                        config.dropdownAdapter = CustomAdapter;
                     }
-                };
 
-                // multiple-choice directive calls select2 but needs to do so without this custom adapter
-                // to allow the element to be draggable on survey preview.
-                if (customDropdownAdapter) {
-                    config.dropdownAdapter = CustomAdapter;
-                }
+                    if (addNew) {
+                        config.tags = true;
+                        config.tokenSeparators = [];
+                    }
 
-                if (addNew) {
-                    config.tags = true;
-                    config.tokenSeparators = [];
-                }
+                    $(element).select2(config);
 
-                $(element).select2(config);
-
-                if(options){
-                    for (var d = 0; d < $(element + " option").length; d++) {
-                        var item = $(element + " option")[d];
-                        for ( var f = 0; f < options.length; f++){
-                            if(item.value === options[f].id){
-                                // Append it to the select
-                                item.setAttribute('selected', 'selected');
+                    if (options) {
+                        for (var d = 0; d < $(element + " option").length; d++) {
+                            var item = $(element + " option")[d];
+                            for (var f = 0; f < options.length; f++) {
+                                if (item.value === options[f].id) {
+                                    // Append it to the select
+                                    item.setAttribute('selected', 'selected');
+                                }
                             }
                         }
+
+                        $(element).trigger('change');
                     }
 
-                    $(element).trigger('change');
-                }
-
-            });
-        };
- }])
-/**
- * @ngdoc method
- * @name shared.function:Utilities#GetChoices
- * @methodOf shared.function:Utilities
- * @description Make an Options call to the API and retrieve dropdown options
- * GetChoices({
- *     scope:       Parent $scope
- *     url:         API resource to access
- *     field:       API element in the response object that contains the option list.
- *     variable:    Scope variable that will receive the list.
- *     callback:    Optional. Will issue scope.$emit(callback) on completion.
- *     choice_name: Optional. Used when list is found in a variable other than 'choices'.
- * })
- */
-.factory('GetChoices', ['Rest', 'ProcessErrors',
-    function (Rest, ProcessErrors) {
-        return function (params) {
-            var scope = params.scope,
-                url = params.url,
-                field = params.field,
-                variable = params.variable,
-                callback = params.callback,
-                choice_name = params.choice_name;
-
-            if (scope[variable]) {
-                scope[variable].length = 0;
-            } else {
-                scope[variable] = [];
-            }
-
-            Rest.setUrl(url);
-            Rest.options()
-                .success(function (data) {
-                    var choices, defaultChoice;
-                    choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
-                    if (data && data.actions && data.actions.POST && data.actions.POST[field]) {
-                        defaultChoice = data.actions.POST[field].default;
-                    }
-                    if (choices) {
-                        // including 'name' property so list can be used by search
-                        choices.forEach(function(choice) {
-                            scope[variable].push({
-                                label: choice[1],
-                                value: choice[0],
-                                name: choice[1]
-                            });
-                        });
-                    }
-                    if (defaultChoice !== undefined) {
-                        var val;
-                        for (val in scope[variable]) {
-                            if (scope[variable][val].value === defaultChoice) {
-                                scope[variable][val].isDefault = true;
-                            }
-                        }
-                    }
-                    if (callback) {
-                        scope.$emit(callback);
-                    }
-                })
-                .error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
-        };
-    }
-])
+            };
+        }
+    ])
+    /**
+     * @ngdoc method
+     * @name shared.function:Utilities#GetChoices
+     * @methodOf shared.function:Utilities
+     * @description Make an Options call to the API and retrieve dropdown options
+     * GetChoices({
+     *     scope:       Parent $scope
+     *     url:         API resource to access
+     *     field:       API element in the response object that contains the option list.
+     *     variable:    Scope variable that will receive the list.
+     *     callback:    Optional. Will issue scope.$emit(callback) on completion.
+     *     choice_name: Optional. Used when list is found in a variable other than 'choices'.
+     * })
+     */
+    .factory('GetChoices', ['Rest', 'ProcessErrors',
+        function(Rest, ProcessErrors) {
+            return function(params) {
+                var scope = params.scope,
+                    url = params.url,
+                    field = params.field,
+                    variable = params.variable,
+                    callback = params.callback,
+                    choice_name = params.choice_name;
+
+                if (scope[variable]) {
+                    scope[variable].length = 0;
+                } else {
+                    scope[variable] = [];
+                }
+
+                Rest.setUrl(url);
+                Rest.options()
+                    .success(function(data) {
+                        var choices, defaultChoice;
+                        choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
+                        if (data && data.actions && data.actions.POST && data.actions.POST[field]) {
+                            defaultChoice = data.actions.POST[field].default;
+                        }
+                        if (choices) {
+                            // including 'name' property so list can be used by search
+                            choices.forEach(function(choice) {
+                                scope[variable].push({
+                                    label: choice[1],
+                                    value: choice[0],
+                                    name: choice[1]
+                                });
+                            });
+                        }
+                        if (defaultChoice !== undefined) {
+                            var val;
+                            for (val in scope[variable]) {
+                                if (scope[variable][val].value === defaultChoice) {
+                                    scope[variable][val].isDefault = true;
+                                }
+                            }
+                        }
+                        if (callback) {
+                            scope.$emit(callback);
+                        }
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors(scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Failed to get ' + url + '. GET status: ' + status
+                        });
+                    });
+            };
+        }
+    ])
 
 /**
  * @ngdoc method
@@ -754,8 +757,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *  Find({ list: [], key: "key", val: <key value> });
  */
 .factory('Find', [
-    function () {
-        return function (params) {
+    function() {
+        return function(params) {
             var list = params.list,
                 key = params.key,
                 val = params.val,
@@ -787,8 +790,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  *
  */
 .factory('DebugForm', [
-    function () {
-        return function (params) {
+    function() {
+        return function(params) {
             var form = params.form,
                 scope = params.scope,
                 fld;
@@ -827,8 +830,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * discuss use case
  */
 .factory('Store', ['Empty',
-    function (Empty) {
-        return function (key, value) {
+    function(Empty) {
+        return function(key, value) {
             if (!Empty(value)) {
                 // Store the value
                 localStorage[key] = JSON.stringify(value);
@@ -850,64 +853,64 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * discuss significance
  */
 .factory('ApplyEllipsis', [
-    function () {
-        return function (selector) {
-            // Add a hidden element to the DOM. We'll use this to calc the px length of
-            // our target text.
-            var tmp = $('#string-test');
-            if (!tmp.length) {
-                $('body').append('<div style="display:none;" id="string-test"></div>');
-                tmp = $('#string-test');
-            }
-            // Find and process the text.
-            $(selector).each(function () {
-                var setTitle = true,
-                    txt, w, pw, cw, df;
-                if ($(this).attr('title')) {
-                    txt = $(this).attr('title');
-                    setTitle = false;
-                } else {
-                    txt = $(this).text();
+        function() {
+            return function(selector) {
+                // Add a hidden element to the DOM. We'll use this to calc the px length of
+                // our target text.
+                var tmp = $('#string-test');
+                if (!tmp.length) {
+                    $('body').append('<div style="display:none;" id="string-test"></div>');
+                    tmp = $('#string-test');
                 }
-                tmp.text(txt);
-                w = tmp.width(); //text width
-                pw = $(this).parent().width(); //parent width
-                if (w > pw) {
-                    // text is wider than parent width
-                    if (setTitle) {
-                        // Save the original text in the title
-                        $(this).attr('title', txt);
+                // Find and process the text.
+                $(selector).each(function() {
+                    var setTitle = true,
+                        txt, w, pw, cw, df;
+                    if ($(this).attr('title')) {
+                        txt = $(this).attr('title');
+                        setTitle = false;
+                    } else {
+                        txt = $(this).text();
                     }
-                    cw = w / txt.length; // px width per character
-                    df = w - pw; // difference in px
-                    txt = txt.substr(0, txt.length - (Math.ceil(df / cw) + 3));
-                    $(this).text(txt + '...');
-                }
-                if (pw > w && !setTitle) {
-                    // the parent has expanded and we previously set the title text
-                    txt = $(this).attr('title');
-                    $(this).text(txt);
-                }
-            });
+                    tmp.text(txt);
+                    w = tmp.width(); //text width
+                    pw = $(this).parent().width(); //parent width
+                    if (w > pw) {
+                        // text is wider than parent width
+                        if (setTitle) {
+                            // Save the original text in the title
+                            $(this).attr('title', txt);
+                        }
+                        cw = w / txt.length; // px width per character
+                        df = w - pw; // difference in px
+                        txt = txt.substr(0, txt.length - (Math.ceil(df / cw) + 3));
+                        $(this).text(txt + '...');
+                    }
+                    if (pw > w && !setTitle) {
+                        // the parent has expanded and we previously set the title text
+                        txt = $(this).attr('title');
+                        $(this).text(txt);
+                    }
+                });
 
+            };
+        }
+    ])
+    .factory('ParamPass', function() {
+        var savedData;
+
+        function set(data) {
+            savedData = data;
+        }
+
+        function get() {
+            var returnData = savedData;
+            savedData = undefined;
+            return returnData;
+        }
+
+        return {
+            set: set,
+            get: get
         };
-    }
-])
-.factory('ParamPass', function() {
-    var savedData;
-
-    function set(data) {
-        savedData = data;
-    }
-
-    function get() {
-				var returnData = savedData;
-				savedData = undefined;
-        return returnData;
-    }
-
-    return {
-        set: set,
-        get: get
-    };
-});
+    });

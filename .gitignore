@@ -45,14 +45,14 @@ __pycache__
 /bower.json
 /package.json
 /testem.yml
-/coverage
+**/coverage
 /.istanbul.yml
-node_modules/**
+**/node_modules/**
 /tmp
 npm-debug.log
 
 # UI build debugging
-/DEBUG
+awx/ui/.deps_built
 
 # Testing
 .cache
