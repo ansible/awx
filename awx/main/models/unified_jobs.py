@@ -81,6 +81,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
 
     ALL_STATUS_CHOICES = OrderedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
 
+    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
+    _base_manager = models.Manager()
+
     class Meta:
         app_label = 'main'
         unique_together = [('polymorphic_ctype', 'name')]
@@ -374,6 +377,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     ]
 
     PASSWORD_FIELDS = ('start_args',)
+
+    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
+    _base_manager = models.Manager()
 
     class Meta:
         app_label = 'main'
