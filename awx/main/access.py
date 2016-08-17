@@ -654,23 +654,14 @@ class CredentialAccess(BaseAccess):
         if not obj:
             return False
 
-        # Check access to organizations
-        organization_pk = get_pk_from_dict(data, 'organization')
-        if data and 'organization' in data and organization_pk != getattr(obj, 'organization_id', None):
-            if organization_pk:
-                # admin permission to destination organization is mandatory
-                new_organization_obj = get_object_or_400(Organization, pk=organization_pk)
-                if self.user not in new_organization_obj.admin_role:
-                    return False
-            # admin permission to existing organization is also mandatory
-            if obj.organization:
-                if self.user not in obj.organization.admin_role:
-                    return False
+        # Cannot change the organization for a credential after it's been created
+        if data and 'organization' in data:
+            organization_pk = get_pk_from_dict(data, 'organization')
+            if (organization_pk and (not obj.organization or organization_pk != obj.organization.id)) \
+                    or (not organization_pk and obj.organization):
+                return False
 
-        if obj.organization:
-            if self.user in obj.organization.admin_role:
-                return True
-
+        print(self.user in obj.admin_role)
         return self.user in obj.admin_role
 
     def can_delete(self, obj):

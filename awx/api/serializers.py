@@ -1716,19 +1716,21 @@ class CredentialSerializerCreate(CredentialSerializer):
                     attrs.pop(field)
         if not owner_fields:
             raise serializers.ValidationError({"detail": "Missing 'user', 'team', or 'organization'."})
-        elif len(owner_fields) > 1:
-            raise serializers.ValidationError({"detail": "Expecting exactly one of 'user', 'team', or 'organization'."})
-
         return super(CredentialSerializerCreate, self).validate(attrs)
 
     def create(self, validated_data):
         user = validated_data.pop('user', None)
         team = validated_data.pop('team', None)
+        if team:
+            validated_data['organization'] = team.organization
         credential = super(CredentialSerializerCreate, self).create(validated_data)
         if user:
             credential.admin_role.members.add(user)
         if team:
-            credential.admin_role.parents.add(team.member_role)
+            if not credential.organization or team.organization.id != credential.organization.id:
+                raise serializers.ValidationError({"detail": "Credential organization must be set and match before assigning to a team"})
+            credential.admin_role.parents.add(team.admin_role)
+            credential.use_role.parents.add(team.member_role)
         return credential
 
 

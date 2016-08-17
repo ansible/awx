@@ -160,7 +160,7 @@ def organization(instance):
 
 @pytest.fixture
 def credential():
-    return Credential.objects.create(kind='aws', name='test-cred')
+    return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret')
 
 @pytest.fixture
 def machine_credential():
@@ -168,7 +168,7 @@ def machine_credential():
 
 @pytest.fixture
 def org_credential(organization):
-    return Credential.objects.create(kind='aws', name='test-cred', organization=organization)
+    return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret', organization=organization)
 
 @pytest.fixture
 def inventory(organization):
