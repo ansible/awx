@@ -1152,6 +1152,7 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+    permission_classes = (UserPermission,)
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
