@@ -37,6 +37,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
 from awx.main.conf import tower_settings
@@ -330,6 +331,12 @@ class BaseSerializer(serializers.ModelSerializer):
                 }
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
+        view = self.context.get('view', None)
+        if view and view.request and view.request.user:
+            user_capabilities = get_user_capabilities(view.request.user, obj)
+            if user_capabilities:
+                summary_fields['user_capabilities'] = user_capabilities
+
         return summary_fields
 
     def get_created(self, obj):

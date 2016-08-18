@@ -116,6 +116,18 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
+def get_user_capabilities(user, instance):
+    '''
+    Returns a dictionary of capabilities the user has on the particular
+    instance.  *NOTE* This is not a direct mapping of can_* methods into this
+    dictionary, it is intended to munge some queries in a way that is
+    convenient for the user interface to consume and hide or show various
+    actions in the interface.
+    '''
+    for access_class in access_registry.get(type(instance), []):
+        return access_class(user).get_user_capabilities(instance)
+    return None
+
 def check_superuser(func):
     '''
     check_superuser is a decorator that provides a simple short circuit
@@ -206,6 +218,28 @@ class BaseAccess(object):
                 raise LicenseForbids("Feature %s is not enabled in the active license." % feature)
             elif "features" not in validation_info:
                 raise LicenseForbids("Features not found in active license.")
+
+    def get_user_capabilities(self, obj):
+        user_capabilities = {}
+
+        if isinstance(obj, JobTemplate):
+            user_capabilities['copy'] = self.user.can_access(type(obj), 'add', { 'reference_obj': obj })
+        print(type(obj))
+
+        for method in ['change', 'delete', 'start']:
+            try:
+                if isinstance(obj, Group) and method is 'start' and obj.inventory_source:
+                    obj = obj.inventory_source
+
+                if method in ['change']: # 3 args
+                    user_capabilities[method] = self.user.can_access(type(obj), method, obj, {})
+                else: # 2 args
+                    user_capabilities[method] = self.user.can_access(type(obj), method, obj)
+            except Exception as exc:
+                user_capabilities[method] = False
+                print(exc)
+
+        return user_capabilities
 
 
 class UserAccess(BaseAccess):
