@@ -1526,8 +1526,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             collection = this.form.related[itm];
                             html += `<div id="${itm}_tab"`+
                                 `class="Form-tab"`+
-                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"` +
-                                `ng-class="{'is-selected': ${itm}Selected ` ;
+                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"`;
+                            if (collection.awToolTip){
+                                html += `aw-tool-tip="${collection.awToolTip}"` +
+                                `aw-tip-placement="${collection.dataPlacement}"` +
+                                `data-tip-watch="${collection.dataTipWatch}"`;
+                            }
+                            html += `ng-class="{'is-selected': ${itm}Selected ` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }
