@@ -21,6 +21,7 @@ module.exports = function(grunt) {
     // browser-sync + websocket proxy
 
     grunt.registerTask('dev', [
+        'clean:tmp',
         'clean:static',
         'concurrent:dev',
         'browserSync:http',
@@ -28,6 +29,8 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask('release', [
+        'clean:tmp',
+        'clean:static',
         'webpack:prod',
         'concurrent:prod',
     ]);

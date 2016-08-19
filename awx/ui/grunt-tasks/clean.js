@@ -1,4 +1,6 @@
 module.exports = {
+    options: { force: true },
     static: 'static/*',
-    coverage: 'coverage/*'
+    coverage: 'coverage/*',
+    tmp: '../../tmp'
 };

@@ -11,7 +11,10 @@ module.exports = {
                 'client/legacy-styles/*.less',
                 'client/src/**/*.less',
             ]
-        }]
+        }],
+        options: {
+            sourceMap: true
+        }
     },
 
     prod: {
@@ -23,7 +26,6 @@ module.exports = {
         },
         options: {
             compress: true,
-
         }
     }
 };
