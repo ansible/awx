@@ -1319,9 +1319,14 @@ class RunInventoryUpdate(BaseTask):
 
             credential = inventory_update.credential
             if credential:
-                cp.set(section, 'hostname', credential.host)
+                cp.set(section, 'url', credential.host)
                 cp.set(section, 'username', credential.username)
                 cp.set(section, 'password', decrypt_field(credential, 'password'))
+                cp.set(section, 'ssl_verify', "false")
+
+            section = 'cache'
+            cp.add_section(section)
+            cp.set(section, 'max_age', "0")
 
         elif inventory_update.source == 'azure_rm':
             section = 'azure'
