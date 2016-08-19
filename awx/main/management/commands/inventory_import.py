@@ -22,6 +22,7 @@ import yaml
 from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db import connection, transaction
+from django.utils.encoding import smart_text
 
 # AWX
 from awx.main.models import * # noqa
@@ -606,7 +607,7 @@ class Command(NoArgsCommand):
                     break
                 instance_id = from_dict.get(key, default)
                 from_dict = instance_id
-        return instance_id
+        return smart_text(instance_id)
 
     def _get_enabled(self, from_dict, default=None):
         '''
