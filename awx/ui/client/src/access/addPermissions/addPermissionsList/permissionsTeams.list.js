@@ -21,6 +21,13 @@
                 key: true,
                 label: 'name'
             },
+            organization: {
+                label: 'organization',
+                ngBind: 'team.summary_fields.organization.name',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                searchable: true
+            }
         }
 
     };

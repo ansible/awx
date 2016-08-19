@@ -6,6 +6,7 @@ import hmac
 import json
 import yaml
 import logging
+import time
 from urlparse import urljoin
 
 # Django
@@ -26,7 +27,7 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import NotificationTemplate
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
-from awx.main.redact import PlainTextCleaner, REPLACE_STR
+from awx.main.redact import PlainTextCleaner
 from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -199,6 +200,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         blank=True,
         default=False,
     )
+    ask_skip_tags_on_launch = models.BooleanField(
+        blank=True,
+        default=False,
+    )
     ask_job_type_on_launch = models.BooleanField(
         blank=True,
         default=False,
@@ -244,7 +249,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels',]
+                'labels', 'survey_passwords']
 
     def resource_validation_data(self):
         '''
@@ -418,7 +423,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             extra_vars=self.ask_variables_on_launch,
             limit=self.ask_limit_on_launch,
             job_tags=self.ask_tags_on_launch,
-            skip_tags=self.ask_tags_on_launch,
+            skip_tags=self.ask_skip_tags_on_launch,
             job_type=self.ask_job_type_on_launch,
             inventory=self.ask_inventory_on_launch,
             credential=self.ask_credential_on_launch
@@ -442,11 +447,21 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
                         survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-                        for key in kwargs[field]:
+                        extra_vars = kwargs[field]
+                        if isinstance(extra_vars, basestring):
+                            try:
+                                extra_vars = json.loads(extra_vars)
+                            except (ValueError, TypeError):
+                                try:
+                                    extra_vars = yaml.safe_load(extra_vars)
+                                    assert isinstance(extra_vars, dict)
+                                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                                    extra_vars = {}
+                        for key in extra_vars:
                             if key in survey_vars:
-                                prompted_fields[field][key] = kwargs[field][key]
+                                prompted_fields[field][key] = extra_vars[key]
                             else:
-                                ignored_fields[field][key] = kwargs[field][key]
+                                ignored_fields[field][key] = extra_vars[key]
                     else:
                         ignored_fields[field] = kwargs[field]
 
@@ -509,6 +524,11 @@ class Job(UnifiedJob, JobOptions):
         editable=False,
         through='JobHostSummary',
     )
+    survey_passwords = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -548,6 +568,12 @@ class Job(UnifiedJob, JobOptions):
     def ask_tags_on_launch(self):
         if self.job_template is not None:
             return self.job_template.ask_tags_on_launch
+        return False
+
+    @property
+    def ask_skip_tags_on_launch(self):
+        if self.job_template is not None:
+            return self.job_template.ask_skip_tags_on_launch
         return False
 
     @property
@@ -670,9 +696,17 @@ class Job(UnifiedJob, JobOptions):
                     dependencies.append(source.create_inventory_update(launch_type='dependency'))
         return dependencies
 
-    def notification_data(self):
+    def notification_data(self, block=5):
         data = super(Job, self).notification_data()
         all_hosts = {}
+        # NOTE: Probably related to job event slowness, remove at some point -matburt
+        if block:
+            summaries = self.job_host_summaries.all()
+            while block > 0 and not len(summaries):
+                time.sleep(1)
+                block -= 1
+        else:
+            summaries = self.job_host_summaries.all()
         for h in self.job_host_summaries.all():
             all_hosts[h.host_name] = dict(failed=h.failed,
                                           changed=h.changed,
@@ -711,16 +745,12 @@ class Job(UnifiedJob, JobOptions):
         '''
         Hides fields marked as passwords in survey.
         '''
-        if self.extra_vars and self.job_template and self.job_template.survey_enabled:
-            try:
-                extra_vars = json.loads(self.extra_vars)
-                for key in self.job_template.survey_password_variables():
-                    if key in extra_vars:
-                        extra_vars[key] = REPLACE_STR
-                return json.dumps(extra_vars)
-            except ValueError:
-                pass
-        return self.extra_vars
+        if self.survey_passwords:
+            extra_vars = json.loads(self.extra_vars)
+            extra_vars.update(self.survey_passwords)
+            return json.dumps(extra_vars)
+        else:
+            return self.extra_vars
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.

@@ -13,11 +13,6 @@ import GroupsListController from './groups/groups-list.controller';
 export default {
     name: 'inventoryManage',
     url: '/inventories/:inventory_id/manage?{group:int}{failed}',
-    data: {
-        activityStream: true,
-        activityStreamTarget: 'inventory',
-        activityStreamId: 'inventory_id'
-    },
     params:{
         group:{
             array: true

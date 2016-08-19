@@ -37,7 +37,7 @@
 <body data-user-agent="{{userAgent}}">
 
   <main-menu></main-menu>
-  <bread-crumb ng-if="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-if="includesCurrentState('inventoryManage')"></div>
+  <bread-crumb ng-show="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-show="includesCurrentState('inventoryManage')"></div>
   <toast></toast>
 
     <div class="container-fluid" id="content-container">

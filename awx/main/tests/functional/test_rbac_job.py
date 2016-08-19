@@ -93,6 +93,12 @@ def test_null_related_delete_denied(normal_job, rando):
     assert not access.can_delete(normal_job)
 
 @pytest.mark.django_db
+def test_delete_job_with_orphan_proj(normal_job, rando):
+    normal_job.project.organization = None
+    access = JobAccess(rando)
+    assert not access.can_delete(normal_job)
+
+@pytest.mark.django_db
 def test_inventory_org_admin_delete_allowed(normal_job, org_admin):
     normal_job.project = None # do this so we test job->inventory->org->admin connection
     access = JobAccess(org_admin)

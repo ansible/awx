@@ -8,5 +8,7 @@
         <span class="LabelList-name">{{ label.name }}</span>
     </div>
 </div>
-<div class="LabelList-seeMore" ng-show="count > 10 && seeMoreInactive"
+<div class="LabelList-seeMoreLess" ng-show="count > 10 && seeMoreInactive"
     ng-click="seeMore()">View More</div>
+<div class="LabelList-seeMoreLess" ng-show="count > 10 && !seeMoreInactive"
+    ng-click="seeLess()">View Less</div>

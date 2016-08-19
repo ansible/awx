@@ -404,7 +404,9 @@ export default
 
             related: {
                 permissions: {
-                    awToolTip: 'Please save before assigning permissions',
+                    disabled: 'disablePermissionAssignment',
+                    awToolTip: '{{permissionsTooltip}}',
+                    dataTipWatch: 'permissionsTooltip',
                     dataPlacement: 'top',
                     basePath: 'credentials/:id/access_list/',
                     type: 'collection',
@@ -452,7 +454,7 @@ export default
                 return {
                     permissions: {
                         iterator: 'permission',
-                        url: urls.access_list
+                        url: urls.access_list,
                     }
                 };
             }

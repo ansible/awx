@@ -32,7 +32,7 @@ from djcelery.models import TaskMeta
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
-from awx.main.redact import UriCleaner
+from awx.main.redact import UriCleaner, REPLACE_STR
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -80,6 +80,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     ]
 
     ALL_STATUS_CHOICES = OrderedDict(PROJECT_STATUS_CHOICES + INVENTORY_SOURCE_STATUS_CHOICES + JOB_TEMPLATE_STATUS_CHOICES + DEPRECATED_STATUS_CHOICES).items()
+
+    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
+    _base_manager = models.Manager()
 
     class Meta:
         app_label = 'main'
@@ -343,6 +346,14 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                     create_kwargs[field_name] = getattr(self, field_name)
         new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
         unified_job = unified_job_class(**new_kwargs)
+        # For JobTemplate-based jobs with surveys, save list for perma-redaction
+        if (hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False) and
+                not getattr(unified_job, 'survey_passwords', False)):
+            password_list = self.survey_password_variables()
+            hide_password_dict = {}
+            for password in password_list:
+                hide_password_dict[password] = REPLACE_STR
+            unified_job.survey_passwords = hide_password_dict
         unified_job.save()
         for field_name, src_field_value in m2m_fields.iteritems():
             dest_field = getattr(unified_job, field_name)
@@ -366,6 +377,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     ]
 
     PASSWORD_FIELDS = ('start_args',)
+
+    # NOTE: Working around a django-polymorphic issue: https://github.com/django-polymorphic/django-polymorphic/issues/229
+    _base_manager = models.Manager()
 
     class Meta:
         app_label = 'main'

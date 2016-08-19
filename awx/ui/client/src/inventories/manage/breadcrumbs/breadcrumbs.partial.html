@@ -19,18 +19,4 @@
 		<li class="BreadCrumb-item" ng-if="currentState !== 'inventoryManage'"></li>
         <div class="InventoryManageBreadCrumb-ncy" ng-if="!licenseMissing" ncy-breadcrumb></div>
 	</ol>
-    <div class="BreadCrumb-menuLink"
-        id="bread_crumb_activity_stream"
-        aw-tool-tip="View Activity Stream"
-        data-placement="left"
-        data-trigger="hover"
-        data-container="body"
-        ng-class="{'BreadCrumb-menuLinkActive' : activityStreamActive}"
-        ng-if="showActivityStreamButton"
-        ng-hide= "licenseMissing"
-        ng-click="openActivityStream()">
-        <i class="BreadCrumb-menuLinkImage icon-activity-stream"
-            alt="Activity Stream">
-        </i>
-    </div>
 </div>

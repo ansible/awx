@@ -228,15 +228,31 @@ export default
                     column: 2,
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
-                        "<p>For example, you might have a task consisting of a long list of actions. Tag values can be assigned to each action. " +
-                        "Suppose the actions have been assigned tag values of &quot;configuration&quot;, &quot;packages&quot; and &quot;install&quot;.</p>" +
-                        "<p>If you just want to run the &quot;configuration&quot; and &quot;packages&quot; actions, you would enter the following here " +
-                        "in the Job Tags field:</p>\n<blockquote>configuration,packages</blockquote>\n",
+                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>",
                     dataTitle: "Job Tags",
                     dataPlacement: "right",
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_tags_on_launch',
+                        text: 'Prompt on launch'
+                    }
+                },
+                skip_tags: {
+                    label: 'Skip Tags',
+                    type: 'textarea',
+                    rows: 5,
+                    addRequired: false,
+                    editRequired: false,
+                    'elementClass': 'Form-textInput',
+                    column: 2,
+                    awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
+                        "<p>Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.</p>" +
+                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>",
+                    dataTitle: "Skip Tags",
+                    dataPlacement: "right",
+                    dataContainer: "body",
+                    subCheckbox: {
+                        variable: 'ask_skip_tags_on_launch',
                         text: 'Prompt on launch'
                     }
                 },
@@ -281,7 +297,7 @@ export default
                     column: 2,
                     awPopOver: "callback_help",
                     awPopOverWatch: "callback_help",
-                    dataPlacement: 'right',
+                    dataPlacement: 'top',
                     dataTitle: 'Provisioning Callback URL',
                     dataContainer: "body"
                 },

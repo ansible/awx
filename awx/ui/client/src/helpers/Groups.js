@@ -165,6 +165,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                  has_inventory_sources = params.has_inventory_sources,
                  launch_class = '',
                  launch_tip = 'Start sync process',
+                 schedule_tip = 'Schedule future inventory syncs',
                  stat, stat_class, status_tip;
 
                  stat = status;
@@ -225,7 +226,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                      "tooltip": status_tip,
                      "status": stat,
                      "launch_class": launch_class,
-                     "launch_tip": launch_tip
+                     "launch_tip": launch_tip,
+                     "schedule_tip": schedule_tip
                  };
              };
          }

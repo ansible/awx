@@ -134,29 +134,6 @@ def test_org_credential_access_member(alice, org_credential, credential):
         'organization': None})
 
 @pytest.mark.django_db
-def test_credential_access_org_permissions(
-        org_admin, org_member, organization, org_credential, credential):
-    credential.admin_role.members.add(org_admin)
-    credential.admin_role.members.add(org_member)
-    org_credential.admin_role.members.add(org_member)
-
-    access = CredentialAccess(org_admin)
-    member_access = CredentialAccess(org_member)
-
-    # Org admin can move their own credential into their org
-    assert access.can_change(credential, {'organization': organization.pk})
-    # Org member can not
-    assert not member_access.can_change(credential, {
-        'organization': organization.pk})
-
-    # Org admin can remove a credential from their org
-    assert access.can_change(org_credential, {'organization': None})
-    # Org member can not
-    assert not member_access.can_change(org_credential, {'organization': None})
-    assert not member_access.can_change(org_credential, {
-        'user': org_member.pk, 'organization': None})
-
-@pytest.mark.django_db
 def test_cred_job_template_xfail(user, deploy_jobtemplate):
     ' Personal credential migration '
     a = user('admin', False)
@@ -248,7 +225,6 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
     orgs[0].admin_role.members.add(a)
     orgs[1].admin_role.members.add(a)
 
-    access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
 
     for jt in jts:
@@ -256,11 +232,6 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
     credential.refresh_from_db()
 
     assert jts[0].credential != jts[1].credential
-    assert access.can_change(jts[0].credential, {'organization': org.pk})
-    assert access.can_change(jts[1].credential, {'organization': org.pk})
-
-    orgs[0].admin_role.members.remove(a)
-    assert not access.can_change(jts[0].credential, {'organization': org.pk})
 
 @pytest.mark.django_db
 def test_cred_inventory_source(user, inventory, credential):

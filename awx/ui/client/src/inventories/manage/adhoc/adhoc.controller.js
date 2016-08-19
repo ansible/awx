@@ -242,7 +242,7 @@ function adhocController($q, $scope, $location, $stateParams,
                 Rest.post(data)
                     .success(function (data) {
                          Wait('stop');
-                         $location.path("/ad_hoc_commands/" + data.id);
+                         $state.go('adHocJobStdout', {id: data.id});
                     })
                     .error(function (data, status) {
                         ProcessErrors($scope, data, status, adhocForm, {

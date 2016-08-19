@@ -1487,6 +1487,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             "ng-show='is_system_auditor'>Auditor</span>";
                         html+= "<span class=\"Form-title--is_ldap_user\" "+
                             "ng-show='ldap_user'>LDAP</span>";
+                        html+= "<span class=\"Form-title--is_external_account\" "+
+                            "ng-show='external_account'>{{external_account}}</span>";
                     }
                     html += "</div>\n";
                     html += "<div class=\"Form-header--fields\">";
@@ -1524,8 +1526,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             collection = this.form.related[itm];
                             html += `<div id="${itm}_tab"`+
                                 `class="Form-tab"`+
-                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"` +
-                                `ng-class="{'is-selected': ${itm}Selected ` ;
+                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"`;
+                            if (collection.awToolTip){
+                                html += `aw-tool-tip="${collection.awToolTip}"` +
+                                `aw-tip-placement="${collection.dataPlacement}"` +
+                                `data-tip-watch="${collection.dataTipWatch}"`;
+                            }
+                            html += `ng-class="{'is-selected': ${itm}Selected ` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }

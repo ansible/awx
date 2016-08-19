@@ -47,6 +47,13 @@ export default
                         });
                     };
 
+                    scope.seeLess = function() {
+                        // Trim the labels array back down to 10 items
+                        scope.labels = scope.labels.slice(0, 10);
+                        // Re-set the seeMoreInteractive flag so that the "See More" will be displayed
+                        scope.seeMoreInactive = true;
+                    };
+
                     scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
                         var action = function () {
                             $('#prompt-modal').modal('hide');
@@ -56,13 +63,13 @@ export default
                             Rest.setUrl(url);
                             Rest.post({"disassociate": true, "id": labelId})
                                 .success(function () {
-                                    scope.search("job_template");
+                                    scope.search("job_template", scope.$parent.job_template_page);
                                     Wait('stop');
                                 })
                                 .error(function (data, status) {
                                     Wait('stop');
                                     ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Could not disacssociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                                        msg: 'Could not disassociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
                                 });
                         };
 
@@ -86,6 +93,7 @@ export default
                             scope.count = null;
                         }
                     });
+
                 }
             };
         }

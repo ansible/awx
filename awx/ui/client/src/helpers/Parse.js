@@ -34,7 +34,8 @@ export default
                     fld = (params.variable) ? params.variable : 'variables',
                     pfld = (params.parse_variable) ? params.parse_variable : 'parseType',
                     onReady = params.onReady,
-                    onChange = params.onChange;
+                    onChange = params.onChange,
+                    readOnly = params.readOnly;
 
                 function removeField(fld) {
                     //set our model to the last change in CodeMirror and then destroy CodeMirror

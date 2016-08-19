@@ -26,14 +26,14 @@ def survey_spec_factory():
     return create_survey_spec
 
 @pytest.fixture
-def job_with_secret_key_factory(job_template_factory):
+def job_template_with_survey_passwords_factory(job_template_factory):
     def rf(persisted):
         "Returns job with linked JT survey with password survey questions"
         objects = job_template_factory('jt', organization='org1', survey=[
             {'variable': 'submitter_email', 'type': 'text', 'default': 'foobar@redhat.com'},
             {'variable': 'secret_key', 'default': '6kQngg3h8lgiSTvIEb21', 'type': 'password'},
-            {'variable': 'SSN', 'type': 'password'}], jobs=[1], persisted=persisted)
-        return objects.jobs[1]
+            {'variable': 'SSN', 'type': 'password'}], persisted=persisted)
+        return objects.job_template
     return rf
 
 @pytest.fixture
@@ -43,3 +43,7 @@ def job_with_secret_key_unit(job_with_secret_key_factory):
 @pytest.fixture
 def get_ssh_version(mocker):
     return mocker.patch('awx.main.tasks.get_ssh_version', return_value='OpenSSH_6.9p1, LibreSSL 2.1.8')
+
+@pytest.fixture
+def job_template_with_survey_passwords_unit(job_template_with_survey_passwords_factory):
+    return job_template_with_survey_passwords_factory(persisted=False)
