@@ -192,8 +192,12 @@ class UsersTest(BaseTest):
         self.post(url, expect=403, data=new_user, auth=self.get_other_credentials())
         self.post(url, expect=201, data=new_user, auth=self.get_super_credentials())
         self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
-        self.post(url, expect=201, data=new_user2, auth=self.get_normal_credentials())
-        self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
+        # org admin cannot create orphaned users
+        self.post(url, expect=403, data=new_user2, auth=self.get_normal_credentials())
+        # org admin can create org users
+        org_url = reverse('api:organization_users_list', args=(self.organizations[0].pk,))
+        self.post(org_url, expect=201, data=new_user2, auth=self.get_normal_credentials())
+        self.post(org_url, expect=400, data=new_user2, auth=self.get_normal_credentials())
         # Normal user cannot add users after his org is marked inactive.
         self.organizations[0].delete()
         new_user3 = dict(username='blippy3')
@@ -367,23 +371,20 @@ class UsersTest(BaseTest):
         url = reverse('api:user_list')
         data  = dict(username='username',  password='password')
         data2 = dict(username='username2', password='password2')
-        data = self.post(url, expect=201, data=data, auth=self.get_normal_credentials())
 
+        # but a regular user cannot create users
+        self.post(url, expect=403, data=data2, auth=self.get_other_credentials())
+        # org admins cannot create orphaned users
+        self.post(url, expect=403, data=data2, auth=self.get_normal_credentials())
+
+        # a super user can create new users
+        self.post(url, expect=201, data=data, auth=self.get_super_credentials())
         # verify that the login works...
         self.get(url, expect=200, auth=('username', 'password'))
 
-        # but a regular user cannot
-        data = self.post(url, expect=403, data=data2, auth=self.get_other_credentials())
-
-        # a super user can also create new users
-        data = self.post(url, expect=201, data=data2, auth=self.get_super_credentials())
-
-        # verify that the login works
-        self.get(url, expect=200, auth=('username2', 'password2'))
-
         # verify that if you post a user with a pk, you do not alter that user's password info
         mod = dict(id=self.super_django_user.pk, username='change', password='change')
-        data = self.post(url, expect=201, data=mod, auth=self.get_super_credentials())
+        self.post(url, expect=201, data=mod, auth=self.get_super_credentials())
         orig = User.objects.get(pk=self.super_django_user.pk)
         self.assertTrue(orig.username != 'change')
 
