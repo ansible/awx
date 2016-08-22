@@ -1106,10 +1106,6 @@ class JobEvent(CreatedModifiedModel):
                     self.failed = True
                     if 'failed' not in update_fields:
                         update_fields.append('failed')
-                else:
-                    self.event = 'runner_on_skipped'
-                    if 'changed' in res:
-                        res['changed'] = False
             if isinstance(res, dict) and res.get('changed', False):
                 self.changed = True
                 if 'changed' not in update_fields:
