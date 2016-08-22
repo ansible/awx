@@ -1,3 +1,4 @@
+
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -3005,7 +3006,7 @@ class JobJobTasksList(BaseJobEventsList):
         # need stats on grandchildren, sorted by child.
         queryset = (JobEvent.objects.filter(parent__parent=parent_task,
                                             parent__event__in=STARTING_EVENTS)
-                                    .values('parent__id', 'event', 'changed', 'failed')
+                                    .values('parent__id', 'event', 'changed')
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
 
@@ -3066,13 +3067,10 @@ class JobJobTasksList(BaseJobEventsList):
             # make appropriate changes to the task data.
             for child_data in data.get(task_start_event.id, []):
                 if child_data['event'] == 'runner_on_failed':
+                    task_data['failed'] = True
                     task_data['host_count'] += child_data['num']
                     task_data['reported_hosts'] += child_data['num']
-                    if child_data['failed']:
-                        task_data['failed'] = True
-                        task_data['failed_count'] += child_data['num']
-                    else:
-                        task_data['skipped_count'] += child_data['num']
+                    task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_ok':
                     task_data['host_count'] += child_data['num']
                     task_data['reported_hosts'] += child_data['num']
