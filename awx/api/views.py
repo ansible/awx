@@ -2245,8 +2245,6 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         if 'credential' not in request.data and 'credential_id' in request.data:
             request.data['credential'] = request.data['credential_id']
@@ -2625,14 +2623,13 @@ class SystemJobTemplateLaunch(GenericAPIView):
 
     model = SystemJobTemplate
     serializer_class = EmptySerializer
+    is_job_start = True
 
     def get(self, request, *args, **kwargs):
         return Response({})
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         new_job = obj.create_unified_job(**request.data)
         new_job.signal_start(**request.data)
@@ -2739,8 +2736,6 @@ class JobStart(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
         if obj.can_start:
             result = obj.signal_start(**request.data)
             if not result:
@@ -2778,8 +2773,6 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         # Note: is_valid() may modify request.data
         # It will remove any key/value pair who's key is not in the 'passwords_needed_to_start' list
@@ -3225,8 +3218,6 @@ class AdHocCommandRelaunch(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if not request.user.can_access(self.model, 'start', obj):
-            raise PermissionDenied()
 
         # Re-validate ad hoc command against serializer to check if module is
         # still allowed.
