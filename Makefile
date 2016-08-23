@@ -172,7 +172,7 @@ endif
 
 .DEFAULT_GOAL := build
 
-.PHONY: clean clean-tmp rebase push requirements requirements_dev \
+.PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
 	requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
@@ -229,8 +229,11 @@ clean-build-test:
 clean-tmp:
 	rm -rf tmp/
 
+clean-venv:
+	rm -rf venv/
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle clean-venv
 	rm -rf awx/lib/site-packages
 	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
