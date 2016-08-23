@@ -325,9 +325,9 @@ class UsersTest(BaseTest):
         detail_url = reverse('api:user_detail', args=(self.other_django_user.pk,))
         data = self.get(detail_url, expect=200, auth=self.get_other_credentials())
 
-        # can't change first_name, last_name, etc
+        # can change first_name, last_name, etc
         data['last_name'] = "NewLastName"
-        self.put(detail_url, data, expect=403, auth=self.get_other_credentials())
+        self.put(detail_url, data, expect=200, auth=self.get_other_credentials())
 
         # can't change username
         data['username'] = 'newUsername'
