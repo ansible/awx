@@ -56,11 +56,12 @@ def test_credential_migration_team_member(credential, team, user, permissions):
 
     # Admin permissions post migration
     assert u in credential.use_role
+    assert u not in credential.admin_role
 
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
     u = user('user', False)
-    team.member_role.members.add(u)
+    team.admin_role.members.add(u)
     credential.deprecated_team = team
     credential.save()
 
@@ -68,7 +69,7 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
 
     # Usage permissions post migration
     rbac.migrate_credential(apps, None)
-    assert u in credential.use_role
+    assert u in credential.admin_role
 
 def test_credential_access_superuser():
     u = User(username='admin', is_superuser=True)
