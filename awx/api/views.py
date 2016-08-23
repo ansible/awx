@@ -1319,7 +1319,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         can_admin = request.user.can_access(User, 'admin', obj, request.data)
 
         su_only_edit_fields = ('is_superuser', 'is_system_auditor')
-        admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active')
+        admin_only_edit_fields = ('username', 'is_active')
 
         fields_to_check = ()
         if not request.user.is_superuser:
