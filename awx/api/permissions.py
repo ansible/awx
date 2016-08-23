@@ -19,7 +19,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission']
+           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission']
 
 class ModelAccessPermission(permissions.BasePermission):
     '''
@@ -202,3 +202,10 @@ class ProjectUpdatePermission(ModelAccessPermission):
     def check_post_permissions(self, request, view, obj=None):
         project = get_object_or_400(view.model, pk=view.kwargs['pk'])
         return check_user_access(request.user, view.model, 'start', project)
+
+
+class UserPermission(ModelAccessPermission):
+    def check_post_permissions(self, request, view, obj=None):
+        if request.user.is_superuser:
+            return True
+        raise PermissionDenied()
