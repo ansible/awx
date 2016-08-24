@@ -27,8 +27,8 @@
         root.returnExports = factory(root._, root.angular, root.$, root.$.ui, root.moment);
     }
 }(this, function(_, angular, $, ui, moment) {
-    return angular.module('AngularScheduler', ['moment'])
-    .filter('schedulerDate', function() {
+    return angular.module('AngularScheduler', [])
+    .filter('schedulerDate', ['moment', function(moment) {
         return function(input) {
             var date;
             if(input === null){
@@ -38,7 +38,7 @@
                 return date.format('l') + input.slice(input.indexOf(" "));
             }
         };
-    })
+    }])
 
     .constant('AngularScheduler.partials', '/lib/')
     .constant('AngularScheduler.useTimezone', false)
