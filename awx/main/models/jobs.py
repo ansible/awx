@@ -747,7 +747,9 @@ class Job(UnifiedJob, JobOptions):
         '''
         if self.survey_passwords:
             extra_vars = json.loads(self.extra_vars)
-            extra_vars.update(self.survey_passwords)
+            for key, value in self.survey_passwords.items():
+                if key in extra_vars:
+                    extra_vars[key] = value
             return json.dumps(extra_vars)
         else:
             return self.extra_vars

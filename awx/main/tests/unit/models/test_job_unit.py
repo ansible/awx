@@ -32,6 +32,21 @@ def test_job_survey_password_redaction():
         'secret_key': '$encrypted$',
         'SSN': '$encrypted$'}
 
+@pytest.mark.survey
+def test_survey_passwords_not_in_extra_vars():
+    """Tests that survey passwords not included in extra_vars are
+    not included when displaying job information"""
+    job = Job(
+        name="test-survey-not-in",
+        extra_vars=json.dumps({
+            'submitter_email': 'foobar@redhat.com'}),
+        survey_passwords={
+            'secret_key': '$encrypted$',
+            'SSN': '$encrypted$'})
+    assert json.loads(job.display_extra_vars()) == {
+        'submitter_email': 'foobar@redhat.com',
+    }
+
 def test_job_safe_args_redacted_passwords(job):
     """Verify that safe_args hides passwords in the job extra_vars"""
     kwargs = {'ansible_version': '2.1'}
