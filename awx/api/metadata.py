@@ -123,19 +123,20 @@ class Metadata(metadata.SimpleMetadata):
         actions = {}
         for method in {'GET', 'PUT', 'POST'} & set(view.allowed_methods):
             view.request = clone_request(request, method)
+            obj = None
             try:
                 # Test global permissions
                 if hasattr(view, 'check_permissions'):
                     view.check_permissions(view.request)
                 # Test object permissions
                 if method == 'PUT' and hasattr(view, 'get_object'):
-                    view.get_object()
+                    obj = view.get_object()
             except (exceptions.APIException, PermissionDenied, Http404):
                 continue
             else:
                 # If user has appropriate permissions for the view, include
                 # appropriate metadata about the fields that should be supplied.
-                serializer = view.get_serializer()
+                serializer = view.get_serializer(instance=obj)
                 actions[method] = self.get_serializer_info(serializer)
             finally:
                 view.request = request
