@@ -4,11 +4,14 @@ from channels import Group
 from channels.sessions import channel_session
 
 
-@channel_session
-def ws_disconnect(message):
+def discard_groups(message):
     for group in message.channel_session['groups']:
         print("removing from group: {}".format(group))
         Group(group).discard(message.reply_channel)
+
+@channel_session
+def ws_disconnect(message):
+    discard_groups(message)
 
 @channel_session
 def ws_receive(message):
@@ -16,6 +19,7 @@ def ws_receive(message):
     data = json.loads(raw_data)
 
     if 'groups' in data:
+        discard_groups(message)
         groups = data['groups']
         current_groups = message.channel_session.pop('groups') if 'groups' in message.channel_session else []
         for group_name,v in groups.items():
@@ -27,7 +31,7 @@ def ws_receive(message):
                     Group(name).add(message.reply_channel)
             else:
                 print("listening to group: {}".format(group_name))
-                current_groups.append(name)
+                current_groups.append(group_name)
                 Group(group_name).add(message.reply_channel)
         message.channel_session['groups'] = current_groups
 
