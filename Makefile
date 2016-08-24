@@ -10,7 +10,7 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
-VENV_BASE ?= /tower_devel/venv
+VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
@@ -246,7 +246,7 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 
@@ -258,7 +258,7 @@ virtualenv_tower:
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
 			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 

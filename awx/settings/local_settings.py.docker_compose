@@ -48,8 +48,23 @@ if is_testing(sys.argv):
     
     MONGO_DB = 'system_tracking_test'
 
+# Django Caching Configuration
+if is_testing():
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'memcached:11211',
+        },
+    }
+
 # Celery AMQP configuration.
-BROKER_URL = 'redis://redis/'
+BROKER_URL = 'qpid://qpid:5672'
 
 # Mongo host configuration
 MONGO_HOST = NotImplemented

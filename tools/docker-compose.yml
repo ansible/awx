@@ -2,13 +2,16 @@ version: '2'
 services:
   # Primary Tower Development Container
   tower:
-    build: ./docker-compose
+    build:
+      context: ..
+      dockerfile: tools/docker-compose/Dockerfile
     ports:
       - "8080:8080"
       - "8013:8013"
     links:
       - postgres
-      - redis
+      - memcached
+      - qpid
     #   - sync
     # volumes_from:
     #   - sync
@@ -19,9 +22,11 @@ services:
   postgres:
     image: postgres:9.4.1
 
-  # Redis Container
-  redis:
-    image: redis:3.0.1
+  memcached:
+    image: memcached:alpine
+
+  qpid:
+    image: fedora/qpid:latest
 
   # Source Code Synchronization Container
   # sync:

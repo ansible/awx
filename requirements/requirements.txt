@@ -21,7 +21,6 @@ django-extensions==1.5.9
 git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
-django-redis-cache==1.6.5
 djangorestframework==3.3.2
 djangorestframework-yaml==1.0.2
 django-split-settings==0.1.1
@@ -96,6 +95,7 @@ python-heatclient==0.8.1
 python-ironicclient==1.0.0
 python-keystoneclient==2.1.1
 python-ldap==2.4.20
+python-memcached==1.58
 python-neutronclient==4.0.0
 python-novaclient==3.2.0
 python-openid==2.2.5
@@ -108,11 +108,11 @@ python-troveclient==1.4.0
 pytz==2015.7
 PyYAML==3.11
 pyzmq==14.5.0
+qpid-python==0.32.1
 rackspace-auth-openstack==1.3
 rackspace-novaclient==1.5
 rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
-redis==2.10.3
 requests-oauthlib==0.5.0
 requests==2.9.1
 requestsexceptions==1.1.1
