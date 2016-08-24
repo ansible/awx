@@ -71,7 +71,6 @@ def test_create_user_credential_via_user_credentials_list_xfail(post, alice, bob
 def test_create_team_credential(post, get, team, organization, org_admin, team_member):
     response = post(reverse('api:credential_list'), {
         'team': team.id,
-        'organization': organization.id,
         'name': 'Some name',
         'username': 'someusername'
     }, org_admin)
@@ -80,6 +79,9 @@ def test_create_team_credential(post, get, team, organization, org_admin, team_m
     response = get(reverse('api:team_credentials_list', args=(team.pk,)), team_member)
     assert response.status_code == 200
     assert response.data['count'] == 1
+
+    # Assure that credential's organization is implictly set to team's org
+    assert response.data['results'][0]['summary_fields']['organization']['id'] == team.organization.id
 
 @pytest.mark.django_db
 def test_create_team_credential_via_team_credentials_list(post, get, team, org_admin, team_member):
