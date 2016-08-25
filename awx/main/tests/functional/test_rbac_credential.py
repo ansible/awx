@@ -83,9 +83,10 @@ def test_credential_migration_org_auditor(credential, team, org_auditor):
     assert org_auditor not in credential.read_role
 
     rbac.migrate_credential(apps, None)
+    rbac.infer_credential_org_from_team(apps, None)
 
     # Read permissions post migration
-    assert org_auditor in credential.use_role
+    assert org_auditor not in credential.use_role
     assert org_auditor in credential.read_role
 
 def test_credential_access_superuser():
