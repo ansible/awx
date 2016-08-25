@@ -489,4 +489,7 @@ def rebuild_role_hierarchy(apps, schema_editor):
         logger.info('Rebuild completed in %f seconds' % (stop - start))
         logger.info('Done.')
 
-
+def infer_credential_org_from_team(apps, schema_editor):
+    Credential = apps.get_model('main', "Credential")
+    for cred in Credential.objects.exclude(deprecated_team__isnull=True):
+        _update_credential_parents(cred.deprecated_team.organization, cred)
