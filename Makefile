@@ -9,6 +9,7 @@ NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
+COMPOSE_TAG ?= $(GIT_BRANCH)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
@@ -721,10 +722,10 @@ install:
 
 # Docker Compose Development environment
 docker-compose:
-	docker-compose -f tools/docker-compose.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
 
 docker-compose-test:
-	cd tools && docker-compose run --rm --service-ports tower /bin/bash
+	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
 
 MACHINE?=default
 docker-clean:
