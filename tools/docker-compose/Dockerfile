@@ -26,7 +26,7 @@ ADD tools/docker-compose/ansible_tower.egg-info /tmp/ansible_tower.egg-info
 RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_development.sh
 WORKDIR /tmp
 RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
-
+WORKDIR /
 EXPOSE 8013 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh

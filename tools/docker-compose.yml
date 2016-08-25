@@ -25,6 +25,7 @@ services:
 
   qpid:
     image: fedora/qpid:latest
+    entrypoint: qpidd --auth=no
 
   # Source Code Synchronization Container
   # sync:

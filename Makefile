@@ -9,7 +9,11 @@ NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
-COMPOSE_TAG ?= $(GIT_BRANCH)
+
+GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
+COMPOSE_TAG ?= devel
+# NOTE: This defaults the container image version to the branch that's active
+# COMPOSE_TAG ?= $(GIT_BRANCH)
 
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
@@ -720,12 +724,20 @@ install:
 	export SCL_PREFIX HTTPD_SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
+docker-auth:
+	docker login -e 1234@5678.com -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
+
 # Docker Compose Development environment
-docker-compose:
+docker-compose: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
 
-docker-compose-test:
+docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+
+docker-compose-build:
+	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
+	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
+	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
@@ -733,7 +745,7 @@ docker-clean:
 	eval $$(docker-machine env $(MACHINE))
 	docker stop $$(docker ps -a -q)
 	-docker rm $$(docker ps -f name=tools_tower -a -q)
-	-docker rmi tools_tower
+	-docker images | grep "tower_devel" | awk '{print $3}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
 
