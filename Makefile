@@ -298,7 +298,7 @@ requirements_jenkins:
 	else \
 		pip install -Ir requirements/requirements_jenkins..txt; \
 	fi && \
-	$(NPM_BIN) install csslint jshint
+	$(NPM_BIN) install csslint ui-test-ci
 
 requirements: requirements_ansible requirements_tower
 
@@ -477,6 +477,11 @@ ui-test: ui-deps-built
 
 ui-test-ci: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:ci
+
+testjs_ci: ui-test-ci
+
+jshint:
+	echo "Remove this Makefile target when 3.0.x development is finished"
 
 ui-test-saucelabs: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs
