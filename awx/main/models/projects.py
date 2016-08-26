@@ -105,9 +105,6 @@ class ProjectOptions(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    def get_can_edit(self, user):
-        return user in self.admin_role
-
     def clean_scm_type(self):
         return self.scm_type or ''
 
@@ -327,6 +324,9 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         if self.scm_delete_on_next_update:
             kwargs['scm_delete_on_update'] = True
         return kwargs
+
+    def get_can_edit(self, user):
+        return user in self.admin_role
 
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)

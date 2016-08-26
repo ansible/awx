@@ -219,19 +219,19 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids("Features not found in active license.")
 
-    def get_user_capabilities(self, obj):
+    def get_user_capabilities(self, obj, method_list=['edit', 'delete']):
         user_capabilities = {}
 
-        if hasattr(obj, 'get_can_edit'):
-            user_capabilities['change'] = obj.get_can_edit(self.user)
-        elif hasattr(obj, 'can_edit'):
-            user_capabilities['change'] = obj.can_edit
+        # if hasattr(obj, 'get_can_edit'):
+        #     user_capabilities['change'] = obj.get_can_edit(self.user)
+        # elif hasattr(obj, 'can_edit'):
+        #     user_capabilities['change'] = obj.can_edit
 
         if isinstance(obj, JobTemplate):
             user_capabilities['copy'] = self.user.can_access(type(obj), 'add', { 'reference_obj': obj })
         print(type(obj))
 
-        for method in ['change', 'delete', 'start']:
+        for method in method_list:
             try:
                 if isinstance(obj, Group) and method is 'start' and obj.inventory_source:
                     obj = obj.inventory_source
