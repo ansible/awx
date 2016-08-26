@@ -10,3 +10,4 @@ pytest-cov
 pytest-django
 pytest-pythonpath
 pytest-mock
+qpid-tools
