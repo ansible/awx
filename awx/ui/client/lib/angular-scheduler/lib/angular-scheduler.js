@@ -34,7 +34,7 @@
             if(input === null){
                 return "";
             }else {
-                date = moment(input);
+                date = moment(input.split(" ")[0]);
                 return date.format('l') + input.slice(input.indexOf(" "));
             }
         };
