@@ -298,7 +298,7 @@ requirements_jenkins:
 	else \
 		pip install -Ir requirements/requirements_jenkins..txt; \
 	fi && \
-	$(NPM_BIN) install csslint ui-test-ci
+	$(NPM_BIN) install csslint
 
 requirements: requirements_ansible requirements_tower
 
