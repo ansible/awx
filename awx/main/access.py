@@ -116,7 +116,7 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
-def get_user_capabilities(user, instance):
+def get_user_capabilities(user, instance, method_list):
     '''
     Returns a dictionary of capabilities the user has on the particular
     instance.  *NOTE* This is not a direct mapping of can_* methods into this
@@ -125,7 +125,7 @@ def get_user_capabilities(user, instance):
     actions in the interface.
     '''
     for access_class in access_registry.get(type(instance), []):
-        return access_class(user).get_user_capabilities(instance)
+        return access_class(user).get_user_capabilities(instance, method_list)
     return None
 
 def check_superuser(func):
@@ -227,21 +227,51 @@ class BaseAccess(object):
         # elif hasattr(obj, 'can_edit'):
         #     user_capabilities['change'] = obj.can_edit
 
-        if isinstance(obj, JobTemplate):
-            user_capabilities['copy'] = self.user.can_access(type(obj), 'add', { 'reference_obj': obj })
         print(type(obj))
 
-        for method in method_list:
-            try:
-                if isinstance(obj, Group) and method is 'start' and obj.inventory_source:
-                    obj = obj.inventory_source
+        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy']:
+            # Custom ordering of methods used so we can reuse earlier calcs
+            if display_method not in method_list:
+                continue
 
-                if method in ['change']: # 3 args
-                    user_capabilities[method] = self.user.can_access(type(obj), method, obj, {})
+            # Aliases for going form UI language to API language
+            if display_method == 'edit':
+                method = 'change'
+            elif display_method == 'copy':
+                method = 'add'
+            elif display_method == 'schedule' and 'edit' in user_capabilities:
+                user_capabilities['schedule'] = user_capabilities['edit']
+                continue
+            else:
+                method = display_method
+
+            # Build the fields used for the calculation
+            data = None
+            sub_obj = None
+            if method == 'add':
+                data = {}
+
+            try:
+                if isinstance(obj, (Group, Host)):
+                    if method == 'start':
+                        if obj.inventory_source:
+                            obj = obj.inventory_source
+                        else:
+                            user_capabilities[method] = False
+                            continue
+                    else:
+                        obj = obj.inventory
+                if isinstance(obj, JobTemplate):
+                    data = {'reference_obj': obj}
+
+                if data is not None: # 3 args
+                    user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
                 else: # 2 args
-                    user_capabilities[method] = self.user.can_access(type(obj), method, obj)
+                    user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
+
+
             except Exception as exc:
-                user_capabilities[method] = False
+                user_capabilities[display_method] = False
                 print(exc)
 
         return user_capabilities

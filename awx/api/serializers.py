@@ -1012,7 +1012,7 @@ class BaseSerializerWithVariables(BaseSerializer):
 
 
 class InventorySerializer(BaseSerializerWithVariables):
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['edit', 'delete', 'adhoc']
 
     class Meta:
         model = Inventory
@@ -1063,13 +1063,14 @@ class InventoryDetailSerializer(InventorySerializer):
 
 
 class InventoryScriptSerializer(InventorySerializer):
-    show_capabilities = ['edit', 'delete']
+    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         fields = ()
 
 
 class HostSerializer(BaseSerializerWithVariables):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Host
@@ -1180,6 +1181,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
+    show_capabilities = ['start', 'copy', 'schedule', 'edit', 'delete']
 
     class Meta:
         model = Group
@@ -1565,12 +1567,6 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
-                # Special implementation of unattach user capabilities to show/hide X in UI
-                role_dict['user_capabilities'] = {
-                    'unattach': requesting_user.can_access(
-                        type(role.content_object), 'unattach', role.content_object,
-                        role, 'roles', data)
-                }
             except:
                 pass
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
