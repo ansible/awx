@@ -25,5 +25,6 @@ class Migration(migrations.Migration):
             name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'admin_role'], to='main.Role', null=b'True'),
         ),
+        migrations.RunPython(rbac.infer_credential_org_from_team),
         migrations.RunPython(rbac.rebuild_role_hierarchy),
     ]
