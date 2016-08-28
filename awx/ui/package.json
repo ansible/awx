@@ -99,7 +99,8 @@
     "moment": "^2.10.2",
     "ng-toast": "leigh-johnson/ngToast#2.0.1",
     "nvd3": "leigh-johnson/nvd3#1.7.1",
-    "select2": "^4.0.2",
-    "socket.io-client": "^0.9.17"
+    "reconnectingwebsocket": "^1.0.0",
+    "rrule": "jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
+    "select2": "^4.0.2"
   }
 }

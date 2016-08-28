@@ -198,7 +198,7 @@ export default
                 "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
             function openSocket() {
-                $rootScope.event_socket.on("job_events-" + job_id, function(data) {
+                $rootScope.socket.on("job_events-" + job_id, function(data) {
                     // update elapsed time on each event received
                     scope.job_status.elapsed = GetElapsed({
                         start: scope.job.created,
@@ -213,9 +213,9 @@ export default
                 });
                 // Unbind $rootScope socket event binding(s) so that they don't get triggered
                 // in another instance of this controller
-                scope.$on('$destroy', function() {
-                    $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
-                });
+                // scope.$on('$destroy', function() {
+                //     $rootScope.socket.removeAllListeners("job_events-" + job_id);
+                // });
             }
             openSocket();
 

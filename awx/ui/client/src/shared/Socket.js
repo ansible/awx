@@ -22,16 +22,16 @@
  * @methodOf shared.function:Socket
  * @description
  */
+import ReconnectingWebSocket from 'reconnectingwebsocket'
 export default
 angular.module('SocketIO', ['Utilities'])
 
     .factory('Socket', ['$rootScope', '$location', '$log', 'Authorization', 'Store', function ($rootScope, $location, $log, Authorization, Store) {
         return function(params) {
             var scope = params.scope,
-                host = $location.host(),
+                host = window.location.host,
                 endpoint = params.endpoint,
                 protocol = $location.protocol(),
-                io = require('socket.io-client'),
                 config, socketPort,
                 url;
 
@@ -45,7 +45,9 @@ angular.module('SocketIO', ['Utilities'])
                 config = Store('AnsibleConfig');
                 socketPort = config.websocket_port;
             }
-            url = protocol + '://' + host + ':' + socketPort + '/socket.io/' + endpoint;
+
+            url = "ws://" + host + "/websocket/";
+            // url = protocol + '://' + host + ':' + socketPort + '/socket.io/' + endpoint;
             $log.debug('opening socket connection to: ' + url);
 
             function getSocketTip(status) {
@@ -75,86 +77,10 @@ angular.module('SocketIO', ['Utilities'])
                         // We have a valid session token, so attempt socket connection
                         $log.debug('Socket connecting to: ' + url);
                         self.scope.socket_url = url;
-                        self.socket = io.connect(url, {
-                            query: "Token="+token,
-                            headers:
-                            {
-                                'Authorization': 'Token ' + token,      // i don't think these are actually inserted into the header--jt
-                                'X-Auth-Token': 'Token ' + token
-                            },
-                            'connect timeout': 3000,
-                            'try multiple transports': false,
-                            'max reconnection attempts': 10,
-                            'reconnection limit': 2000,
-                            'force new connection': true
-                        });
-
-                        self.socket.on('connection', function() {
-                            $log.debug('Socket connecting...');
-                            self.scope.$apply(function () {
-                                self.scope.socketStatus = 'connecting';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('connect', function() {
-                            $log.debug('Socket connection established');
-                            self.scope.$apply(function () {
-                                self.scope.socketStatus = 'ok';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('connect_failed', function(reason) {
-                            var r = reason || 'connection refused by host',
-                                token_actual = Authorization.getToken();
-
-                            $log.debug('Socket connection failed: ' + r);
-
-                            if (token_actual === token) {
-                                self.socket.socket.disconnect();
-                            }
-
-                            self.scope.$apply(function () {
-                                self.scope.socketStatus = 'error';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-
-                        });
-                        self.socket.on('diconnect', function() {
-                            $log.debug('Socket disconnected');
-                            self.scope.$apply(function() {
-                                self.scope.socketStatus = 'error';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('error', function(reason) {
-                            var r = reason || 'connection refused by host';
-                            $log.debug('Socket error: ' + r);
-                            $log.error('Socket error: ' + r);
-                            self.scope.$apply(function() {
-                                self.scope.socketStatus = 'error';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('reconnecting', function() {
-                            $log.debug('Socket attempting reconnect...');
-                            self.scope.$apply(function() {
-                                self.scope.socketStatus = 'connecting';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('reconnect', function() {
-                            $log.debug('Socket reconnected');
-                            self.scope.$apply(function() {
-                                self.scope.socketStatus = 'ok';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
-                        });
-                        self.socket.on('reconnect_failed', function(reason) {
-                            $log.error('Socket reconnect failed: ' + reason);
-                            self.scope.$apply(function() {
-                                self.scope.socketStatus = 'error';
-                                self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                            });
+                        self.socket = new ReconnectingWebSocket(url, null, {
+                            debug: true,
+                            timeoutInterval: 3000,
+                            maxReconnectAttempts: 10
                         });
                     }
                     else {
@@ -167,21 +93,19 @@ angular.module('SocketIO', ['Utilities'])
                     // Check connection status
                     var self = this;
                     if(self){
-                      if(self.socket){
-                        if(self.socket.socket){
-                          if (self.socket.socket.connected) {
-                              self.scope.socketStatus = 'ok';
-                          }
-                          else if (self.socket.socket.connecting || self.socket.reconnecting) {
-                              self.scope.socketStatus = 'connecting';
-                          }
-                          else {
-                              self.scope.socketStatus = 'error';
-                          }
-                          self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                          return self.scope.socketStatus;
+                        if(self.socket){
+                            if (self.socket.readyState === 0 ) {
+                                self.scope.socketStatus = 'connecting';
+                            }
+                            else if (self.socket.readyState === 1){
+                                self.scope.socketStatus = 'ok';
+                            }
+                            else if (self.socket.readyState === 2 || self.socket.readyState === 3 ){
+                                self.scope.socketStatus = 'error';
+                            }
+                            self.scope.socketTip = getSocketTip(self.scope.socketStatus);
+                            return self.scope.socketStatus;
                         }
-                      }
                     }
 
                 },
@@ -189,7 +113,8 @@ angular.module('SocketIO', ['Utilities'])
                     var self = this;
                     if(self){
                       if(self.socket){
-                        self.socket.on(eventName, function () {
+                        self.socket.onmessage(eventName, function (e) {
+                            console.log('Received From Server: ' + e.data);
                             var args = arguments;
                             self.scope.$apply(function () {
                                 callback.apply(self.socket, args);
@@ -201,7 +126,7 @@ angular.module('SocketIO', ['Utilities'])
                 },
                 emit: function (eventName, data, callback) {
                     var self = this;
-                    self.socket.emit(eventName, data, function () {
+                    self.socket.send(eventName, data, function () {
                         var args = arguments;
                         self.scope.$apply(function () {
                             if (callback) {
@@ -217,7 +142,7 @@ angular.module('SocketIO', ['Utilities'])
                     var self = this;
                     if(self){
                       if(self.socket){
-                        self.socket.removeAllListeners(eventName);
+                        self.socket.removeEventListener(eventName);
                       }
                     }
                 },
