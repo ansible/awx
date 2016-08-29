@@ -198,7 +198,10 @@ export default
                 "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
             function openSocket() {
-                $rootScope.socket.on("job_events-" + job_id, function(data) {
+                if ($rootScope.removeJobEventChange) {
+                    $rootScope.removeJobEventChange();
+                }
+                $rootScope.removeJobEventChange = $rootScope.$on("job_events-" + job_id, function(e, data) {
                     // update elapsed time on each event received
                     scope.job_status.elapsed = GetElapsed({
                         start: scope.job.created,

@@ -716,6 +716,62 @@ var tower = angular.module('Tower', [
                 function openSocket() {
                     $rootScope.socket = Socket({ scope: $rootScope});
                     $rootScope.socket.init();
+                    // $rootScope.socket.on("status_changed", function(data) {
+                    //     $log.debug('Job ' + data.unified_job_id +
+                    //         ' status changed to ' + data.status +
+                    //         ' send to ' + $location.$$url);
+                    //
+                    //     // this acts as a router...it emits the proper
+                    //     // value based on what URL the user is currently
+                    //     // accessing.
+                    //     if ($state.is('jobs')) {
+                    //         $rootScope.$emit('JobStatusChange-jobs', data);
+                    //     } else if ($state.includes('jobDetail') ||
+                    //         $state.is('adHocJobStdout') ||
+                    //         $state.is('inventorySyncStdout') ||
+                    //         $state.is('managementJobStdout') ||
+                    //         $state.is('scmUpdateStdout')) {
+                    //
+                    //         $log.debug("sending status to standard out");
+                    //         $rootScope.$emit('JobStatusChange-jobStdout', data);
+                    //     }
+                    //     if ($state.includes('jobDetail')) {
+                    //         $rootScope.$emit('JobStatusChange-jobDetails', data);
+                    //     } else if ($state.is('dashboard')) {
+                    //         $rootScope.$emit('JobStatusChange-home', data);
+                    //     } else if ($state.is('portalMode')) {
+                    //         $rootScope.$emit('JobStatusChange-portal', data);
+                    //     } else if ($state.is('projects')) {
+                    //         $rootScope.$emit('JobStatusChange-projects', data);
+                    //     } else if ($state.is('inventoryManage')) {
+                    //         $rootScope.$emit('JobStatusChange-inventory', data);
+                    //     }
+                    // });
+                    // $rootScope.socket.on("summary_complete", function(data) {
+                    //     $log.debug('Job summary_complete ' + data.unified_job_id);
+                    //     $rootScope.$emit('JobSummaryComplete', data);
+                    // });
+
+                    // schedule_socket = Socket({
+                    //     scope: $rootScope,
+                    //     endpoint: "schedules"
+                    // });
+                    // schedule_socket.init();
+                    // $rootScope.socket.on("schedule_changed", function(data) {
+                    //     $log.debug('Schedule  ' + data.unified_job_id + ' status changed to ' + data.status);
+                    //     $rootScope.$emit('ScheduleStatusChange', data);
+                    // });
+
+                    // control_socket = Socket({
+                    //     scope: $rootScope,
+                    //     endpoint: "control"
+                    // });
+                    // control_socket.init();
+                    // $rootScope.socket.on("limit_reached", function(data) {
+                    //     $log.debug(data.reason);
+                    //     $rootScope.sessionTimer.expireSession('session_limit');
+                    //     $state.go('signOut');
+                    // });
                 }
                 openSocket();
 
@@ -737,27 +793,35 @@ var tower = angular.module('Tower', [
             $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
                 if(toState.name === 'dashboard'){
                     $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'jobDetail'){
-                    $rootScope.socket.emit(`{"groups":{"jobs": ["status_changed", "summary"]},{"job_events":[${toParams.id}]}}`);
+                    $rootScope.socket.emit(`{"groups":{"jobs": ["status_changed", "summary"] , "job_events":[${toParams.id}]}}`);
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'jobStdout'){
                     $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'jobs'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}, {"schedules": ["changed"]}}');
+                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"] , "schedules": ["changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'portalMode'){
                     $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'projects'){
                     $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'inventory'){
                     $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    console.log(toState.name);
                 }
                 else if(toState.name === 'adHocJobStdout'){
                     $rootScope.socket.emit(`{"groups":{"ad_hoc_command_events": [${toParams.id}]}}`);
+                    console.log(toState.name);
                 }
             });
 

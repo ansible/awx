@@ -16,7 +16,9 @@ def ws_disconnect(message):
 
 @channel_session
 def ws_receive(message):
+    print(message)
     raw_data = message.content['text']
+    print(raw_data)
     data = json.loads(raw_data)
 
     if 'groups' in data:
