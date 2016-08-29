@@ -222,6 +222,7 @@ class BaseAccess(object):
     def get_user_capabilities(self, obj, method_list=['edit', 'delete']):
         user_capabilities = {}
 
+        # TODO: pull data from the custom cache, which won't be exactly like this
         # if hasattr(obj, 'get_can_edit'):
         #     user_capabilities['change'] = obj.get_can_edit(self.user)
         # elif hasattr(obj, 'can_edit'):
@@ -242,31 +243,35 @@ class BaseAccess(object):
             elif display_method == 'schedule' and 'edit' in user_capabilities:
                 user_capabilities['schedule'] = user_capabilities['edit']
                 continue
+            elif display_method == 'delete' and not isinstance(obj, User):
+                user_capabilities['delete'] = user_capabilities['edit']
+                continue
             else:
                 method = display_method
 
-            # Build the fields used for the calculation
+            # Preprocessing before the access method is called
             data = None
             sub_obj = None
             if method == 'add':
                 data = {}
 
-            try:
-                if isinstance(obj, (Group, Host)):
-                    if method == 'start':
-                        if obj.inventory_source:
-                            obj = obj.inventory_source
-                        else:
-                            user_capabilities[method] = False
-                            continue
+            if isinstance(obj, (Group, Host)):
+                if method == 'start':
+                    if obj.inventory_source:
+                        obj = obj.inventory_source
                     else:
-                        obj = obj.inventory
-                if isinstance(obj, JobTemplate):
-                    data = {'reference_obj': obj}
+                        user_capabilities[method] = False
+                        continue
+                else:
+                    obj = obj.inventory
+            if isinstance(obj, JobTemplate):
+                data = {'reference_obj': obj}
 
-                if data is not None: # 3 args
+            try:
+
+                if method in ['change', 'start', 'delete']: # 3 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
-                else: # 2 args
+                elif method == 'add': # 2 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
 
 
