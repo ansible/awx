@@ -5,9 +5,10 @@ from channels.sessions import channel_session
 
 
 def discard_groups(message):
-    for group in message.channel_session['groups']:
-        print("removing from group: {}".format(group))
-        Group(group).discard(message.reply_channel)
+    if 'groups' in message.channel_session:
+        for group in message.channel_session['groups']:
+            print("removing from group: {}".format(group))
+            Group(group).discard(message.reply_channel)
 
 @channel_session
 def ws_disconnect(message):
