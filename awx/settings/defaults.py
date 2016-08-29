@@ -1015,6 +1015,11 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
+        'qpid.messaging': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'propagate': False,
+            'level': 'WARNING',
+        },
         'py.warnings': {
             'handlers': ['console'],
         },

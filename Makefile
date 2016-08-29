@@ -10,7 +10,12 @@ NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
-VENV_BASE ?= /tower_devel/venv
+GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
+COMPOSE_TAG ?= devel
+# NOTE: This defaults the container image version to the branch that's active
+# COMPOSE_TAG ?= $(GIT_BRANCH)
+
+VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
@@ -246,7 +251,7 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 
@@ -258,7 +263,7 @@ virtualenv_tower:
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
 			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 
@@ -293,7 +298,7 @@ requirements_jenkins:
 	else \
 		pip install -Ir requirements/requirements_jenkins..txt; \
 	fi && \
-	$(NPM_BIN) install csslint jshint
+	$(NPM_BIN) install csslint
 
 requirements: requirements_ansible requirements_tower
 
@@ -430,13 +435,22 @@ check: flake8 pep8 # pyflakes pylint
 TEST_DIRS=awx/main/tests
 # Run all API unit tests.
 test:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test $(TEST_DIRS)
 
 test_unit:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
 # Output test coverage as HTML (into htmlcov directory).
@@ -472,6 +486,12 @@ ui-test: ui-deps-built
 
 ui-test-ci: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:ci
+
+testjs_ci:
+	echo "Update UI unittests later" #ui-test-ci
+
+jshint: ui-deps-built
+	grunt --gruntfile awx/ui/Gruntfile.js jshint #Depends on node 6.x and npm 3.x installed on Jenkins slave
 
 ui-test-saucelabs: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs
@@ -719,12 +739,20 @@ install:
 	export SCL_PREFIX HTTPD_SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
-# Docker Compose Development environment
-docker-compose:
-	docker-compose -f tools/docker-compose.yml up --no-recreate
+docker-auth:
+	docker login -e 1234@5678.com -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
 
-docker-compose-test:
-	cd tools && docker-compose run --rm --service-ports tower /bin/bash
+# Docker Compose Development environment
+docker-compose: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
+
+docker-compose-test: docker-auth
+	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+
+docker-compose-build:
+	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
+	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
+	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
@@ -732,7 +760,7 @@ docker-clean:
 	eval $$(docker-machine env $(MACHINE))
 	docker stop $$(docker ps -a -q)
 	-docker rm $$(docker ps -f name=tools_tower -a -q)
-	-docker rmi tools_tower
+	-docker images | grep "tower_devel" | awk '{print $3}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
 

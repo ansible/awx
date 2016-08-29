@@ -2,13 +2,14 @@ version: '2'
 services:
   # Primary Tower Development Container
   tower:
-    build: ./docker-compose
+    image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
     ports:
       - "8080:8080"
       - "8013:8013"
     links:
       - postgres
-      - redis
+      - memcached
+      - qpid
     #   - sync
     # volumes_from:
     #   - sync
@@ -19,9 +20,12 @@ services:
   postgres:
     image: postgres:9.4.1
 
-  # Redis Container
-  redis:
-    image: redis:3.0.1
+  memcached:
+    image: memcached:alpine
+
+  qpid:
+    image: fedora/qpid:latest
+    entrypoint: qpidd --auth=no
 
   # Source Code Synchronization Container
   # sync:

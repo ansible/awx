@@ -891,27 +891,14 @@ class RunJob(BaseTask):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        try:
-            if Version(kwargs['ansible_version']) < Version('1.9'):
-                if become_method and become_method == "sudo" and become_username != "":
-                    args.extend(['-U', become_username])
-                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-sudo-pass")
-                if become_method and become_method == "su" and become_username != "":
-                    args.extend(['-R', become_username])
-                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-su-pass")
-            else:
-                if job.become_enabled:
-                    args.append('--become')
-                if become_method:
-                    args.extend(['--become-method', become_method])
-                if become_username:
-                    args.extend(['--become-user', become_username])
-                if 'become_password' in kwargs.get('passwords', {}):
-                    args.append('--ask-become-pass')
-        except ValueError:
-            pass
+        if job.become_enabled:
+            args.append('--become')
+        if become_method:
+            args.extend(['--become-method', become_method])
+        if become_username:
+            args.extend(['--become-user', become_username])
+        if 'become_password' in kwargs.get('passwords', {}):
+            args.append('--ask-become-pass')
         # Support prompting for a vault password.
         if 'vault_password' in kwargs.get('passwords', {}):
             args.append('--ask-vault-pass')
@@ -1623,27 +1610,14 @@ class RunAdHocCommand(BaseTask):
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
         # credential.  Credential should never specify both sudo and su.
-        try:
-            if Version(kwargs['ansible_version']) < Version('1.9'):
-                if become_method and become_method == "sudo" and become_username != "":
-                    args.extend(['-U', become_username])
-                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-sudo-pass")
-                if become_method and become_method == "su" and become_username != "":
-                    args.extend(['-R', become_username])
-                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-su-pass")
-            else:
-                if ad_hoc_command.become_enabled:
-                    args.append('--become')
-                if become_method:
-                    args.extend(['--become-method', become_method])
-                if become_username:
-                    args.extend(['--become-user', become_username])
-                if 'become_password' in kwargs.get('passwords', {}):
-                    args.append('--ask-become-pass')
-        except ValueError:
-            pass
+        if ad_hoc_command.become_enabled:
+            args.append('--become')
+        if become_method:
+            args.extend(['--become-method', become_method])
+        if become_username:
+            args.extend(['--become-user', become_username])
+        if 'become_password' in kwargs.get('passwords', {}):
+            args.append('--ask-become-pass')
 
         if ad_hoc_command.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % ad_hoc_command.forks)
