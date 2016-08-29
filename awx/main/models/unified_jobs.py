@@ -782,6 +782,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
         status_data.update(self.websocket_emit_data())
+        status_data['group_name'] = 'jobs'
         emit_channel_notification('jobs-status_changed', status_data)
 
     def generate_dependencies(self, active_tasks):

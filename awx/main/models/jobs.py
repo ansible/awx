@@ -1260,7 +1260,7 @@ class JobEvent(CreatedModifiedModel):
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
-            emit_channel_notification('jobs-summary', dict(unified_job_id=job.id))
+            emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job.id))
 
     @classmethod
     def get_startevent_queryset(cls, parent_task, starting_events, ordering=None):

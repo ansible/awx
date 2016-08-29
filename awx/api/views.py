@@ -544,7 +544,9 @@ class AuthTokenView(APIView):
                 # Mark them as invalid and inform the user
                 invalid_tokens = AuthToken.get_tokens_over_limit(serializer.validated_data['user'])
                 for t in invalid_tokens:
-                    emit_channel_notification('control-limit_reached', dict(reason=force_text(AuthToken.reason_long('limit_reached')), token_key=t.key))
+                    emit_channel_notification('control-limit_reached', dict(group_name='control',
+                                                                            reason=force_text(AuthToken.reason_long('limit_reached')),
+                                                                            token_key=t.key))
                     t.invalidate(reason='limit_reached')
 
             # Note: This header is normally added in the middleware whenever an

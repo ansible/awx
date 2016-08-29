@@ -177,7 +177,7 @@ def tower_periodic_scheduler(self):
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['status', 'job_explanation'])
             new_unified_job.websocket_emit_status("failed")
-        emit_channel_notification('schedules-changed', dict(id=schedule.id))
+        emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
 @task(queue='default')
 def notify_task_runner(metadata_dict):

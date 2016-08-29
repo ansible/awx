@@ -42,6 +42,7 @@ def emit_job_event_detail(sender, **kwargs):
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
+        event_serialized["group_name"] = "job_events"
         emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
@@ -53,6 +54,7 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
+        event_serialized["group_name"] = "ad_hoc_command_events"
         emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
