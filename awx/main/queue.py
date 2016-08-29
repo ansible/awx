@@ -3,8 +3,6 @@
 
 import json
 
-from django.conf import settings
-
 __all__ = ['FifoQueue']
 
 # TODO: Figure out wtf to do with this class

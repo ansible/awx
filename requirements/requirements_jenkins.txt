@@ -6,7 +6,7 @@ pylint
 flake8
 distribute==0.7.3
 unittest2
-pytest
+pytest==2.9.2
 pytest-cov
 pytest-django
 pytest-pythonpath

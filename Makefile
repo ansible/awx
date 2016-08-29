@@ -298,7 +298,7 @@ requirements_jenkins:
 	else \
 		pip install -Ir requirements/requirements_jenkins..txt; \
 	fi && \
-	$(NPM_BIN) install csslint jshint
+	$(NPM_BIN) install csslint
 
 requirements: requirements_ansible requirements_tower
 
@@ -435,13 +435,22 @@ check: flake8 pep8 # pyflakes pylint
 TEST_DIRS=awx/main/tests
 # Run all API unit tests.
 test:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test $(TEST_DIRS)
 
 test_unit:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test awx/main/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	py.test --create-db --cov=awx --cov-report=xml --junitxml=./reports/junit.xml $(TEST_DIRS)
 
 # Output test coverage as HTML (into htmlcov directory).
@@ -477,6 +486,13 @@ ui-test: ui-deps-built
 
 ui-test-ci: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:ci
+
+testjs_ci:
+	echo "Update UI unittests later" #ui-test-ci
+
+jshint: ui-deps-built
+  grunt --gruntfile awx/ui/Gruntfile.js jshint
+  # Depends on node 6.x and npm 3.x installed on Jenkins slave
 
 ui-test-saucelabs: ui-deps-built
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs
