@@ -2,7 +2,9 @@ import logging
 from time import time
 
 from django.utils.encoding import smart_text
+from django.db import transaction
 from django.db.models import Q
+from django.db.utils import IntegrityError
 
 from collections import defaultdict
 from awx.main.utils import getattrd
@@ -489,7 +491,12 @@ def rebuild_role_hierarchy(apps, schema_editor):
         logger.info('Rebuild completed in %f seconds' % (stop - start))
         logger.info('Done.')
 
+
 def infer_credential_org_from_team(apps, schema_editor):
     Credential = apps.get_model('main', "Credential")
     for cred in Credential.objects.exclude(deprecated_team__isnull=True):
-        _update_credential_parents(cred.deprecated_team.organization, cred)
+        try:
+            with transaction.atomic():
+                _update_credential_parents(cred.deprecated_team.organization, cred)
+        except IntegrityError:
+            logger.info("Organization<{}> credential for old Team<{}> credential already created".format(cred.deprecated_team.organization.pk, cred.pk))
