@@ -503,7 +503,6 @@ class BaseFactSerializer(BaseSerializer):
         return ret
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
-    show_capabilities = ['start', 'delete']
 
     class Meta:
         model = UnifiedJobTemplate
@@ -545,6 +544,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
 
 class UnifiedJobSerializer(BaseSerializer):
+    show_capabilities = ['start', 'delete']
 
     result_stdout = serializers.SerializerMethodField()
 
@@ -1286,6 +1286,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 class CustomInventoryScriptSerializer(BaseSerializer):
 
     script = serializers.CharField(trim_whitespace=False)
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = CustomInventoryScript

@@ -234,6 +234,7 @@ class BaseAccess(object):
                 continue
 
             # Aliases for going form UI language to API language
+            # speedups in certain cases by deferring to earlier property
             if display_method == 'edit':
                 method = 'change'
             elif display_method == 'copy':
@@ -241,7 +242,7 @@ class BaseAccess(object):
             elif display_method == 'schedule' and 'edit' in user_capabilities:
                 user_capabilities['schedule'] = user_capabilities['edit']
                 continue
-            elif display_method == 'delete' and not isinstance(obj, User):
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
             else:
@@ -265,15 +266,12 @@ class BaseAccess(object):
                 data = {'reference_obj': obj}
 
             try:
-
-                if method in ['change', 'start']: # 3 args
+                if method in ['change']: # 3 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
-                elif method in ['delete']: # 2 args
+                elif method in ['delete', 'start']: # 2 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
                 elif method in ['add']: # 2 args with data
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, data)
-
-
             except Exception as exc:
                 user_capabilities[display_method] = False
                 print(exc)
@@ -887,6 +885,12 @@ class ProjectUpdateAccess(BaseAccess):
             return True
         # Project updates cascade delete with project, admin role descends from org admin
         return self.user in obj.project.admin_role
+
+    def can_start(self, obj):
+        # for relaunching
+        if obj and obj.project:
+            return self.user in obj.project.update_role
+        return False
 
     @check_superuser
     def can_delete(self, obj):
