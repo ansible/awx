@@ -818,7 +818,7 @@ var tower = angular.module('Tower', [
                     console.log(toState.name);
                 }
                 else if(toState.name === 'adHocJobStdout'){
-                    SocketService.emit(`{"groups":{"ad_hoc_command_events": [${toParams.id}]}}`);
+                    SocketService.emit(`{"groups":{"jobs": ["status_changed"] , "ad_hoc_command_events": [${toParams.id}]}}`);
                     console.log(toState.name);
                 }
             });

@@ -78,7 +78,7 @@ export default
                             $rootScope.$emit('ScheduleStatusChange', data);
                         }
                         if(data.group_name==="ad_hoc_command_events"){
-
+                            $rootScope.$emit('ad_hoc_command_events-'+data.ad_hoc_command, data);
                         }
                         if(data.group_name==="control"){
                             $log.debug(data.reason);
