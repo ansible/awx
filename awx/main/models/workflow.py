@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
+from awx.main.models.notifications import JobNotificationMixin
 from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -61,7 +62,7 @@ class WorkflowNode(CreatedModifiedModel):
     )
     job = models.ForeignKey(
         'UnifiedJob',
-        related_name='workflow_node',
+        related_name='workflow_job_nodes',
         blank=True,
         null=True,
         default=None,
@@ -96,7 +97,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         # TODO: ADD LABELS
-        return ['name', 'description', 'extra_vars', 'workflow_nodes']
+        return ['name', 'description', 'extra_vars',]
 
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_detail', args=(self.pk,))
@@ -109,14 +110,53 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
     # TODO: Notifications
     # TODO: Surveys
 
-    def create_job(self, **kwargs):
-        '''
-        Create a new job based on this template.
-        '''
-        return self.create_unified_job(**kwargs)
+    #def create_job(self, **kwargs):
+    #    '''
+    #    Create a new job based on this template.
+    #    '''
+    #    return self.create_unified_job(**kwargs)
 
+    # TODO: Delete create_unified_job here and explicitly call create_workflow_job() .. figure out where the call is
+    def create_unified_job(self, **kwargs):
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions):
+        #def create_workflow_job(self, **kwargs):
+        #workflow_job =  self.create_unified_job(**kwargs)
+        workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
+        workflow_job.inherit_jt_workflow_nodes()
+        return workflow_job
+
+class WorkflowJobInheritNodesMixin(object):
+    def _inherit_relationship(self, old_node, new_node, node_ids_map, node_type):
+        old_related_nodes = getattr(old_node, node_type).all()
+        new_node_type_mgr = getattr(new_node, node_type)
+
+        for old_related_node in old_related_nodes:
+            new_related_node_id = node_ids_map[old_related_node.id]
+            new_related_node = WorkflowNode.objects.get(id=new_related_node_id)
+            new_node_type_mgr.add(new_related_node)
+
+    def inherit_jt_workflow_nodes(self):
+        new_nodes = []
+        old_nodes = self.workflow_job_template.workflow_nodes.all()
+
+        node_ids_map = {}
+
+        for old_node in old_nodes:
+            new_node = WorkflowNode.objects.get(id=old_node.pk)
+            new_node.job = self
+            new_node.pk = None
+            new_node.save()
+            new_nodes.append(new_node)
+
+            node_ids_map[old_node.id] = new_node.id
+
+        for index, old_node in enumerate(old_nodes):
+            new_node = new_nodes[index]
+            for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
+                self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
+                
+
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, WorkflowJobInheritNodesMixin):
 
     class Meta:
         app_label = 'main'
@@ -157,4 +197,12 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions):
     @property
     def task_impact(self):
         return 0
+
+    # TODO: workflow job notifications
+    def get_notification_templates(self):
+        return []
+
+    # TODO: workflow job notifications
+    def get_notification_friendly_name(self):
+        return "Workflow Job"
 

@@ -1775,7 +1775,7 @@ class EnforceParentRelationshipMixin(object):
         # HACK: Make request data mutable.
         if getattr(data, '_mutable', None) is False:
             data._mutable = True
-        data[self.enforce_parent_relationship] = getattr(self.get_parent_object(), '%s_id' % relationship)
+        data[self.enforce_parent_relationship] = getattr(self.get_parent_object(), '%s_id' % self.enforce_parent_relationship)
         return super(EnforceParentRelationshipMixin, self).create(request, *args, **kwargs)
 
 class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
@@ -2702,7 +2702,7 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
 
         new_job = obj.create_unified_job(**request.data)
         new_job.signal_start(**request.data)
-        data = dict(system_job=new_job.id)
+        data = dict(workflow_job=new_job.id)
         return Response(data, status=status.HTTP_201_CREATED)
 
 # TODO:
@@ -2723,6 +2723,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     parent_model = WorkflowJobTemplate
     relationship = 'jobs'
     parent_key = 'workflow_job_template'
+
 # TODO: 
 class WorkflowJobList(ListCreateAPIView):
 
@@ -2739,6 +2740,16 @@ class WorkflowJobDetail(RetrieveDestroyAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobSerializer
+
+class WorkflowJobWorkflowNodesList(SubListAPIView):
+
+    model = WorkflowNode
+    serializer_class = WorkflowNodeListSerializer
+    always_allow_superuser = True # TODO: RBAC
+    parent_model = WorkflowJob
+    relationship = 'workflow_job_nodes'
+    parent_key = 'job'
+
 
 class SystemJobTemplateList(ListAPIView):
 

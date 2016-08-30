@@ -137,6 +137,13 @@ class SimpleDAG(object):
                 leafs.append(n)
         return leafs
 
+    def get_root_nodes(self):
+        roots = []
+        for n in self.nodes:
+            if len(self.get_dependents(n['node_object'])) < 1:
+                roots.append(n)
+        return roots
+
 def get_tasks():
     """Fetch all Tower tasks that are relevant to the task management
     system.
@@ -151,9 +158,11 @@ def get_tasks():
                              ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
     graph_system_jobs = [sj for sj in
                          SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
-
+    graph_workflow_jobs = [wf for wf in
+                           WorkflowJob.objects.filter(status__in=RELEVANT_JOBS)]
     all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
-                         graph_project_updates + graph_system_jobs,
+                         graph_project_updates + graph_system_jobs +
+                         graph_workflow_jobs,
                          key=lambda task: task.created)
     return all_actions
 

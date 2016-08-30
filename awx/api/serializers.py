@@ -2172,7 +2172,6 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 
 
-
 # TODO:
 class WorkflowJobSerializer(UnifiedJobSerializer):
 
@@ -2182,13 +2181,17 @@ class WorkflowJobSerializer(UnifiedJobSerializer):
 
     def get_related(self, obj):
         res = super(WorkflowJobSerializer, self).get_related(obj)
-        if obj.system_job_template:
+        if obj.workflow_job_template:
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail',
                                                  args=(obj.workflow_job_template.pk,))
             # TODO:
             #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
+        res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
+        # TODO: Cancel job
+        '''
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
+        '''
         return res
 
 

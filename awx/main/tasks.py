@@ -191,7 +191,6 @@ def notify_task_runner(metadata_dict):
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError("status_str must be either succeeded or failed")
-    print("Instance has some shit in it %s" % instance)
     notification_templates = instance.get_notification_templates()
     if notification_templates:
         all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
@@ -239,8 +238,6 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.socketio_emit_status("failed")
 
         if first_instance:
-            print("Instance type is %s" % first_instance_type)
-            print("Instance passing along %s" % first_instance.name)
             _send_notification_templates(first_instance, 'failed')
 
 @task()
@@ -1675,7 +1672,6 @@ class RunWorkflowJob(BaseTask):
         status, rc, tb = 'error', None, ''
         output_replacements = []
         try:
-            self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
                 instance = self.update_model(instance.pk, status='canceled')
             if instance.status != 'running':
@@ -1692,8 +1688,8 @@ class RunWorkflowJob(BaseTask):
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
+        status = 'successful'
         instance = self.update_model(pk, status=status, result_traceback=tb)
-        self.post_run_hook(instance, **kwargs)
         instance.socketio_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
