@@ -228,8 +228,6 @@ class BaseAccess(object):
         # elif hasattr(obj, 'can_edit'):
         #     user_capabilities['change'] = obj.can_edit
 
-        print(type(obj))
-
         for display_method in ['edit', 'delete', 'start', 'schedule', 'copy']:
             # Custom ordering of methods used so we can reuse earlier calcs
             if display_method not in method_list:
@@ -251,7 +249,6 @@ class BaseAccess(object):
 
             # Preprocessing before the access method is called
             data = None
-            sub_obj = None
             if method == 'add':
                 data = {}
 
@@ -269,10 +266,12 @@ class BaseAccess(object):
 
             try:
 
-                if method in ['change', 'start', 'delete']: # 3 args
+                if method in ['change', 'start']: # 3 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
-                elif method == 'add': # 2 args
+                elif method in ['delete']: # 2 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
+                elif method in ['add']: # 2 args with data
+                    user_capabilities[display_method] = self.user.can_access(type(obj), method, data)
 
 
             except Exception as exc:

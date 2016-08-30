@@ -690,7 +690,7 @@ class UserSerializer(BaseSerializer):
     class Meta:
         model = User
         fields = ('*', '-name', '-description', '-modified',
-                  '-summary_fields', 'username', 'first_name', 'last_name',
+                  'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
     def to_representation(self, obj):
