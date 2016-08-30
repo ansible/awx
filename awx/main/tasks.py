@@ -185,114 +185,61 @@ def notify_task_runner(metadata_dict):
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
 
+
+def _send_notification_templates(instance, status_str):
+    if status_str not in ['succeeded', 'failed']:
+        raise ValueError("status_str must be either succeeded or failed")
+    print("Instance has some shit in it %s" % instance)
+    notification_templates = instance.get_notification_templates()
+    if notification_templates:
+        all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
+        if len(all_notification_templates):
+            try:
+                (notification_subject, notification_body) = getattr(instance, 'build_notification_%s_message' % status_str)()
+            except AttributeError:
+                raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                      for n in all_notification_templates],
+                                     job_id=instance.id)
+
 @task(bind=True)
 def handle_work_success(self, result, task_actual):
-    if task_actual['type'] == 'project_update':
-        instance = ProjectUpdate.objects.get(id=task_actual['id'])
-        instance_name = instance.name
-        notification_templates = instance.project.notification_templates
-        friendly_name = "Project Update"
-    elif task_actual['type'] == 'inventory_update':
-        instance = InventoryUpdate.objects.get(id=task_actual['id'])
-        instance_name = instance.name
-        notification_templates = instance.inventory_source.notification_templates
-        friendly_name = "Inventory Update"
-    elif task_actual['type'] == 'job':
-        instance = Job.objects.get(id=task_actual['id'])
-        instance_name = instance.job_template.name
-        notification_templates = instance.job_template.notification_templates
-        friendly_name = "Job"
-    elif task_actual['type'] == 'ad_hoc_command':
-        instance = AdHocCommand.objects.get(id=task_actual['id'])
-        instance_name = instance.module_name
-        notification_templates = instance.notification_templates
-        friendly_name = "AdHoc Command"
-    elif task_actual['type'] == 'system_job':
-        instance = SystemJob.objects.get(id=task_actual['id'])
-        instance_name = instance.system_job_template.name
-        notification_templates = instance.system_job_template.notification_templates
-        friendly_name = "System Job"
-    else:
+    instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
+    if not instance:
         return
 
-    all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
-    if len(all_notification_templates):
-        notification_body = instance.notification_data()
-        notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
-                                                                                   task_actual['id'],
-                                                                                   smart_str(instance_name),
-                                                                                   notification_body['url'])
-        notification_body['friendly_name'] = friendly_name
-        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in all_notification_templates],
-                                 job_id=task_actual['id'])
+    _send_notification_templates(instance, 'succeeded')
 
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
-    first_task = None
-    first_task_id = None
-    first_task_type = ''
-    first_task_name = ''
+    first_instance = None
+    first_instance_type = ''
     if subtasks is not None:
         for each_task in subtasks:
-            instance_name = ''
-            if each_task['type'] == 'project_update':
-                instance = ProjectUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.name
-                notification_templates = instance.project.notification_templates
-                friendly_name = "Project Update"
-            elif each_task['type'] == 'inventory_update':
-                instance = InventoryUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.name
-                notification_templates = instance.inventory_source.notification_templates
-                friendly_name = "Inventory Update"
-            elif each_task['type'] == 'job':
-                instance = Job.objects.get(id=each_task['id'])
-                instance_name = instance.job_template.name
-                notification_templates = instance.job_template.notification_templates
-                friendly_name = "Job"
-            elif each_task['type'] == 'ad_hoc_command':
-                instance = AdHocCommand.objects.get(id=each_task['id'])
-                instance_name = instance.module_name
-                notification_templates = instance.notification_templates
-                friendly_name = "AdHoc Command"
-            elif each_task['type'] == 'system_job':
-                instance = SystemJob.objects.get(id=each_task['id'])
-                instance_name = instance.system_job_template.name
-                notification_templates = instance.system_job_template.notification_templates
-                friendly_name = "System Job"
-            else:
+            instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
+            if not instance:
                 # Unknown task type
                 logger.warn("Unknown task type: {}".format(each_task['type']))
                 continue
-            if first_task is None:
-                first_task = instance
-                first_task_id = instance.id
-                first_task_type = each_task['type']
-                first_task_name = instance_name
-                first_task_friendly_name = friendly_name
+
+            if first_instance is None:
+                first_instance = instance
+                first_instance_type = each_task['type']
+
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
                 instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                    (first_task_type, first_task_name, first_task_id)
+                    (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
                 instance.socketio_emit_status("failed")
 
-        all_notification_templates = set(notification_templates.get('error', []) + notification_templates.get('any', []))
-        if len(all_notification_templates):
-            notification_body = first_task.notification_data()
-            notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
-                                                                                    first_task_id,
-                                                                                    smart_str(first_task_name),
-                                                                                    notification_body['url'])
-            notification_body['friendly_name'] = first_task_friendly_name
-            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                      for n in all_notification_templates],
-                                     job_id=first_task_id)
-
+        if first_instance:
+            print("Instance type is %s" % first_instance_type)
+            print("Instance passing along %s" % first_instance.name)
+            _send_notification_templates(first_instance, 'failed')
 
 @task()
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -1710,3 +1657,4 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+

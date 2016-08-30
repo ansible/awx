@@ -20,7 +20,10 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin,
+)
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
@@ -372,8 +375,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
 
-
-class ProjectUpdate(UnifiedJob, ProjectOptions):
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -443,3 +445,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
                     if 'scm_delete_on_next_update' not in update_fields:
                         update_fields.append('scm_delete_on_next_update')
             parent_instance.save(update_fields=update_fields)
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.project.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Project Update"

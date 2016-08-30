@@ -24,7 +24,10 @@ from jsonfield import JSONField
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin,
+)
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
@@ -499,7 +502,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
-class Job(UnifiedJob, JobOptions):
+class Job(UnifiedJob, JobOptions, JobNotificationMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -791,6 +794,15 @@ class Job(UnifiedJob, JobOptions):
             return False
 
         return True
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.job_template.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Job"
 
 class JobHostSummary(CreatedModifiedModel):
     '''
@@ -1315,7 +1327,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
                     any=list(any_notification_templates))
 
 
-class SystemJob(UnifiedJob, SystemJobOptions):
+class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     class Meta:
         app_label = 'main'
@@ -1378,3 +1390,13 @@ class SystemJob(UnifiedJob, SystemJobOptions):
     @property
     def task_impact(self):
         return 150
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.system_job_template.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "System Job"
+
