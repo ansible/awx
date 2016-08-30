@@ -49,6 +49,9 @@ class ModelAccessPermission(permissions.BasePermission):
             if not check_user_access(request.user, view.parent_model, 'read',
                                      parent_obj):
                 return False
+            if hasattr(view, 'parent_key'):
+                if not check_user_access(request.user, view.model, 'add', {view.parent_key: parent_obj.pk}):
+                    return False
             return True
         elif getattr(view, 'is_job_start', False):
             if not obj:
