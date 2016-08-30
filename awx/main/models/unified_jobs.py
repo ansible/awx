@@ -18,6 +18,7 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_text
+from django.apps import apps
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -360,8 +361,30 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
+class UnifiedJobTypeStringMixin(object):
+    @classmethod
+    def _underscore_to_camel(cls, word):
+        return ''.join(x.capitalize() or '_' for x in word.split('_'))
 
-class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique):
+    @classmethod
+    def _model_type(cls, job_type):
+        # Django >= 1.9
+        #app = apps.get_app_config('main')
+        model_str = cls._underscore_to_camel(job_type)
+        try:
+            return apps.get_model('main', model_str)
+        except LookupError:
+            print("Lookup model error")
+            return None
+
+    @classmethod
+    def get_instance_by_type(cls, job_type, job_id):
+        model = cls._model_type(job_type)
+        if not model:
+            return None
+        return model.objects.get(id=job_id)
+
+class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):
     '''
     Concrete base class for unified job run by the task engine.
     '''

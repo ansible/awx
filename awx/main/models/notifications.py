@@ -171,3 +171,27 @@ class Notification(CreatedModifiedModel):
     
     def get_absolute_url(self):
         return reverse('api:notification_detail', args=(self.pk,))
+
+class JobNotificationMixin(object):
+    def get_notification_templates(self):
+        raise RuntimeError("Define me")
+
+    def get_notification_friendly_name(self):
+        raise RuntimeError("Define me")
+
+    def _build_notification_message(self, status_str):
+        notification_body = self.notification_data()
+        notification_subject = "{} #{} '{}' {} on Ansible Tower: {}".format(self.get_notification_friendly_name(),
+                                                                            self.id,
+                                                                            self.name,
+                                                                            status_str,
+                                                                            notification_body['url'])
+        notification_body['friendly_name'] = self.get_notification_friendly_name()
+        return (notification_subject, notification_body)
+
+    def build_notification_succeeded_message(self):
+        return self._build_notification_message('succeeded')
+
+    def build_notification_failed_message(self):
+        return self._build_notification_message('failed')
+

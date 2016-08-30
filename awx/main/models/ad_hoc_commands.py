@@ -23,13 +23,14 @@ from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import decrypt_field
 from awx.main.conf import tower_settings
+from awx.main.models.notifications import JobNotificationMixin
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
 __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 
 
-class AdHocCommand(UnifiedJob):
+class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     class Meta(object):
         app_label = 'main'
@@ -237,6 +238,14 @@ class AdHocCommand(UnifiedJob):
                 update_fields.append('name')
         super(AdHocCommand, self).save(*args, **kwargs)
 
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "AdHoc Command"
 
 class AdHocCommandEvent(CreatedModifiedModel):
     '''
