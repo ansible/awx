@@ -1567,6 +1567,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
+                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                    Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
             except:
                 pass
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
@@ -1585,6 +1587,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     role_dict['resource_name'] = role.content_object.name
                     role_dict['resource_type'] = role.content_type.name
                     role_dict['related'] = reverse_gfk(role.content_object)
+                    role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                        Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
                 except:
                     pass
                 ret.append({ 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
