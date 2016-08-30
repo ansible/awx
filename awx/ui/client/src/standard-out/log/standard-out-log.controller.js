@@ -22,7 +22,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         function openSockets() {
             if ($state.current.name === 'jobDetail') {
                $log.debug("socket watching on job_events-" + job_id);
-               $rootScope.socket.on("job_events-" + job_id, function() {
+               $rootScope.$on("job_events-" + job_id, function() {
                    $log.debug("socket fired on job_events-" + job_id);
                    if (api_complete) {
                        event_queue++;

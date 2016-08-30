@@ -4,7 +4,4 @@
  * All Rights Reserved
  *************************************************/
 
-import "./help/ChromeSocketHelp";
-import "./help/FirefoxSocketHelp";
 import "./help/InventoryGroups";
-import "./help/SafariSocketHelp";

@@ -75,7 +75,7 @@ import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import './shared/Socket';
+import socket from './shared/socket/main';
 import './shared/features/main';
 import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
@@ -183,7 +183,6 @@ var tower = angular.module('Tower', [
     'HostGroupsFormDefinition',
     'StreamWidget',
     'JobsHelper',
-    'InventoryGroupsHelpDefinition',
     'CredentialsHelper',
     'StreamListDefinition',
     'ActivityDetailDefinition',
@@ -197,10 +196,9 @@ var tower = angular.module('Tower', [
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'JobDetailHelper',
-    'SocketIO',
+    'socket',
     'lrInfiniteScroll',
     'LoadConfigHelper',
-    'SocketHelper',
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
@@ -528,15 +526,15 @@ var tower = angular.module('Tower', [
 
 .run(['$q', '$compile', '$cookieStore', '$rootScope', '$log',
     'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
-    'ClearScope', 'Socket', 'LoadConfig', 'Store',
-    'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
+    'ClearScope', 'LoadConfig', 'Store',
+    'pendoService', 'Prompt', 'Rest', 'Wait',
     'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-    'FeaturesService', '$filter',
+    'FeaturesService', '$filter', 'SocketService',
     function($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
-        $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
+        $location, Authorization, LoadBasePaths, Timer, ClearScope,
+        LoadConfig, Store, pendoService, Prompt, Rest, Wait,
         ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-        $filter) {
+        $filter, SocketService) {
         var sock;
         $rootScope.addPermission = function(scope) {
             $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
@@ -792,35 +790,35 @@ var tower = angular.module('Tower', [
             // }
             $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
                 if(toState.name === 'dashboard'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'jobDetail'){
-                    $rootScope.socket.emit(`{"groups":{"jobs": ["status_changed", "summary"] , "job_events":[${toParams.id}]}}`);
+                    SocketService.emit(`{"groups":{"jobs": ["status_changed", "summary"] , "job_events":[${toParams.id}]}}`);
                     console.log(toState.name);
                 }
                 else if(toState.name === 'jobStdout'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'jobs'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"] , "schedules": ["changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"] , "schedules": ["changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'portalMode'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'projects'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'inventory'){
-                    $rootScope.socket.emit('{"groups":{"jobs": ["status_changed"]}}');
+                    SocketService.emit('{"groups":{"jobs": ["status_changed"]}}');
                     console.log(toState.name);
                 }
                 else if(toState.name === 'adHocJobStdout'){
-                    $rootScope.socket.emit(`{"groups":{"ad_hoc_command_events": [${toParams.id}]}}`);
+                    SocketService.emit(`{"groups":{"ad_hoc_command_events": [${toParams.id}]}}`);
                     console.log(toState.name);
                 }
             });
@@ -882,7 +880,8 @@ var tower = angular.module('Tower', [
                     ConfigService.getConfig().then(function() {
                         Timer.init().then(function(timer) {
                             $rootScope.sessionTimer = timer;
-                            $rootScope.$emit('OpenSocket');
+                            // $rootScope.$emit('OpenSocket');
+                            SocketService.init();
                             pendoService.issuePendoIdentity();
                             CheckLicense.test();
                             FeaturesService.get();
@@ -908,10 +907,6 @@ var tower = angular.module('Tower', [
             $rootScope.toggleTab = function(e, tab, tabs) {
                 e.preventDefault();
                 $('#' + tabs + ' #' + tab).tab('show');
-            };
-
-            $rootScope.socketHelp = function() {
-                ShowSocketHelp();
             };
 
             $rootScope.leavePortal = function() {
