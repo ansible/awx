@@ -21,13 +21,13 @@ export default
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10
                     });
-                    self.socket.onopen = function () {
-                        console.log('websocket connected'); //log errors
-                    };
-
-                    self.socket.onerror = function (error) {
-                        console.log('Error Logged: ' + error); //log errors
-                    };
+                    // self.socket.onopen = function () {
+                    //     console.log('websocket connected'); //log errors
+                    // };
+                    //
+                    // self.socket.onerror = function (error) {
+                    //     console.log('Error Logged: ' + error); //log errors
+                    // };
                     self.socket.onmessage = function (e) {
                         console.log('Received From Server: ' + e.data);
                         var data = JSON.parse(e.data);
@@ -96,6 +96,11 @@ export default
                     $rootScope.sessionTimer.expireSession('idle');
                     $location.url('/login');
                 }
+
+                setTimeout(function() {
+                        self.checkStatus();
+                        $log.debug('socket status: ' + $rootScope.socketStatus);
+                }, 2000);
             },
             checkStatus: function() {
 
@@ -118,16 +123,16 @@ export default
                 if(self){
                     if(self.socket){
                         if (self.socket.readyState === 0 ) {
-                            self.scope.socketStatus = 'connecting';
+                            $rootScope.socketStatus = 'connecting';
                         }
                         else if (self.socket.readyState === 1){
-                            self.scope.socketStatus = 'ok';
+                            $rootScope.socketStatus = 'ok';
                         }
                         else if (self.socket.readyState === 2 || self.socket.readyState === 3 ){
-                            self.scope.socketStatus = 'error';
+                            $rootScope.socketStatus = 'error';
                         }
-                        self.scope.socketTip = getSocketTip(self.scope.socketStatus);
-                        return self.scope.socketStatus;
+                        self.socketTip = getSocketTip(self.socketStatus);
+                        return $rootScope.socketStatus;
                     }
                 }
 
