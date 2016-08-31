@@ -325,9 +325,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             kwargs['scm_delete_on_update'] = True
         return kwargs
 
-    def get_can_edit(self, user):
-        return user in self.admin_role
-
     def create_project_update(self, **kwargs):
         return self.create_unified_job(**kwargs)
 

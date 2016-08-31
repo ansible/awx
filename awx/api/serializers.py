@@ -2153,7 +2153,6 @@ class AdHocCommandRelaunchSerializer(AdHocCommandSerializer):
 
 
 class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
-    show_capabilities = ['start', 'schedule', 'edit']
 
     class Meta:
         model = SystemJobTemplate

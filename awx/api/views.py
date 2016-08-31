@@ -1528,10 +1528,9 @@ class InventoryList(ListCreateAPIView):
         readable_ids = [obj.id for obj in page]
         editable_ids = Inventory.accessible_objects(request.user, 'admin_role').filter(pk__in=readable_ids).values_list('pk', flat=True)
         for obj in page:
+            obj.capabilities_cache = {'edit': False, 'adhoc': False}
             if obj.pk in editable_ids:
-                obj.can_edit = True
-            else:
-                obj.can_edit = False
+                obj.capabilities_cache['edit'] = True
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)

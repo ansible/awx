@@ -219,18 +219,18 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids("Features not found in active license.")
 
-    def get_user_capabilities(self, obj, method_list=['edit', 'delete']):
+    def get_user_capabilities(self, obj, method_list):
         user_capabilities = {}
 
-        # TODO: pull data from the custom cache, which won't be exactly like this
-        # if hasattr(obj, 'get_can_edit'):
-        #     user_capabilities['change'] = obj.get_can_edit(self.user)
-        # elif hasattr(obj, 'can_edit'):
-        #     user_capabilities['change'] = obj.can_edit
-
-        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy']:
+        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc']:
             # Custom ordering of methods used so we can reuse earlier calcs
             if display_method not in method_list:
+                print ' Programming error: declared unavailable method'
+                continue
+
+            # Grab the answer from the cache, if available
+            if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
+                user_capabilities[display_method] = obj.capabilities_cache[display_method]
                 continue
 
             # Aliases for going form UI language to API language
@@ -245,6 +245,8 @@ class BaseAccess(object):
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
+            elif display_method == 'adhoc':
+                method = 'run_ad_hoc_commands'
             else:
                 method = display_method
 
@@ -268,7 +270,7 @@ class BaseAccess(object):
             try:
                 if method in ['change']: # 3 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
-                elif method in ['delete', 'start']: # 2 args
+                elif method in ['delete', 'start', 'adhoc']: # 2 args
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
                 elif method in ['add']: # 2 args with data
                     user_capabilities[display_method] = self.user.can_access(type(obj), method, data)
