@@ -1,6 +1,6 @@
 {
   "name": "angular-codemirror",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "dependencies": {
     "angular": "latest",
     "angular-route": "latest",
@@ -13,14 +13,13 @@
     "codemirror": "latest"
   },
   "homepage": "https://github.com/chouseknecht/angular-codemirror",
-  "_release": "1.0.2",
+  "_release": "1.0.3",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.2",
-    "commit": "94b7aac548b036f4fbd94e56129ed9574e472616"
+    "tag": "1.0.3",
+    "commit": "b94dc86fde8f60a50b324054806d29d742177d21"
   },
-  "_source": "git://github.com/chouseknecht/angular-codemirror.git",
-  "_target": "~1.0.2",
-  "_originalSource": "angular-codemirror",
-  "_direct": true
+  "_source": "https://github.com/chouseknecht/angular-codemirror.git",
+  "_target": "~1.0.3",
+  "_originalSource": "angular-codemirror"
 }

@@ -37,6 +37,7 @@ def job_template_prompts(project, inventory, machine_credential):
             name='deploy-job-template',
             ask_variables_on_launch=on_off,
             ask_tags_on_launch=on_off,
+            ask_skip_tags_on_launch=on_off,
             ask_job_type_on_launch=on_off,
             ask_inventory_on_launch=on_off,
             ask_limit_on_launch=on_off,
@@ -54,6 +55,7 @@ def job_template_prompts_null(project):
         name='deploy-job-template',
         ask_variables_on_launch=True,
         ask_tags_on_launch=True,
+        ask_skip_tags_on_launch=True,
         ask_job_type_on_launch=True,
         ask_inventory_on_launch=True,
         ask_limit_on_launch=True,
@@ -112,6 +114,20 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
     assert job_id == 968
 
     mock_job.signal_start.assert_called_once_with(**runtime_data)
+
+@pytest.mark.django_db
+@pytest.mark.job_runtime_vars
+def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
+    job_template = job_template_prompts(True)
+
+    mock_job = mocker.MagicMock(spec=Job, id=968)
+
+    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+        with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
+            post(reverse('api:job_template_launch', args=[job_template.pk]),
+                 {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
+
+    mock_job.signal_start.assert_called_once_with(job_tags='', skip_tags='')
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars

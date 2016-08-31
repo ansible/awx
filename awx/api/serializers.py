@@ -526,8 +526,10 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = InventorySourceSerializer
             elif isinstance(obj, JobTemplate):
                 serializer_class = JobTemplateSerializer
+            elif isinstance(obj, SystemJobTemplate):
+                serializer_class = SystemJobTemplateSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             return serializer.to_representation(obj)
         else:
             return super(UnifiedJobTemplateSerializer, self).to_representation(obj)
@@ -590,7 +592,7 @@ class UnifiedJobSerializer(BaseSerializer):
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobSerializer, self).to_representation(obj)
@@ -637,7 +639,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobListSerializer
         if serializer_class:
-            serializer = serializer_class(instance=obj)
+            serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobListSerializer, self).to_representation(obj)
@@ -1285,7 +1287,8 @@ class CustomInventoryScriptSerializer(BaseSerializer):
         request = self.context.get('request', None)
         if request.user not in obj.admin_role and \
            not request.user.is_superuser and \
-           not request.user.is_system_auditor:
+           not request.user.is_system_auditor and \
+           not (obj.organization is not None and request.user in obj.organization.auditor_role):
             ret['script'] = None
         return ret
 
@@ -1713,19 +1716,21 @@ class CredentialSerializerCreate(CredentialSerializer):
                     attrs.pop(field)
         if not owner_fields:
             raise serializers.ValidationError({"detail": "Missing 'user', 'team', or 'organization'."})
-        elif len(owner_fields) > 1:
-            raise serializers.ValidationError({"detail": "Expecting exactly one of 'user', 'team', or 'organization'."})
-
         return super(CredentialSerializerCreate, self).validate(attrs)
 
     def create(self, validated_data):
         user = validated_data.pop('user', None)
         team = validated_data.pop('team', None)
+        if team:
+            validated_data['organization'] = team.organization
         credential = super(CredentialSerializerCreate, self).create(validated_data)
         if user:
             credential.admin_role.members.add(user)
         if team:
-            credential.admin_role.parents.add(team.member_role)
+            if not credential.organization or team.organization.id != credential.organization.id:
+                raise serializers.ValidationError({"detail": "Credential organization must be set and match before assigning to a team"})
+            credential.admin_role.parents.add(team.admin_role)
+            credential.use_role.parents.add(team.member_role)
         return credential
 
 
@@ -1823,7 +1828,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
     class Meta:
         model = JobTemplate
         fields = ('*', 'host_config_key', 'ask_variables_on_launch', 'ask_limit_on_launch',
-                  'ask_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
+                  'ask_tags_on_launch', 'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_inventory_on_launch',
                   'ask_credential_on_launch', 'survey_enabled', 'become_enabled', 'allow_simultaneous')
 
     def get_related(self, obj):
@@ -1907,6 +1912,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     passwords_needed_to_start = serializers.ReadOnlyField()
     ask_variables_on_launch = serializers.ReadOnlyField()
     ask_limit_on_launch = serializers.ReadOnlyField()
+    ask_skip_tags_on_launch = serializers.ReadOnlyField()
     ask_tags_on_launch = serializers.ReadOnlyField()
     ask_job_type_on_launch = serializers.ReadOnlyField()
     ask_inventory_on_launch = serializers.ReadOnlyField()
@@ -1915,8 +1921,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     class Meta:
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
-                  'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_job_type_on_launch',
-                  'ask_inventory_on_launch', 'ask_credential_on_launch')
+                  'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
+                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -1977,7 +1983,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             return ret
         if 'job_template' in ret and not obj.job_template:
             ret['job_template'] = None
-        if obj.job_template and obj.job_template.survey_enabled and 'extra_vars' in ret:
+        if 'extra_vars' in ret:
             ret['extra_vars'] = obj.display_extra_vars()
         return ret
 
@@ -2280,14 +2286,15 @@ class JobLaunchSerializer(BaseSerializer):
         fields = ('can_start_without_user_input', 'passwords_needed_to_start',
                   'extra_vars', 'limit', 'job_tags', 'skip_tags', 'job_type', 'inventory',
                   'credential', 'ask_variables_on_launch', 'ask_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_limit_on_launch',
+                  'ask_skip_tags_on_launch', 'ask_job_type_on_launch', 'ask_limit_on_launch',
                   'ask_inventory_on_launch', 'ask_credential_on_launch',
                   'survey_enabled', 'variables_needed_to_start',
                   'credential_needed_to_start', 'inventory_needed_to_start',
                   'job_template_data', 'defaults')
-        read_only_fields = ('ask_variables_on_launch', 'ask_limit_on_launch',
-                            'ask_tags_on_launch', 'ask_job_type_on_launch',
-                            'ask_inventory_on_launch', 'ask_credential_on_launch')
+        read_only_fields = (
+            'ask_variables_on_launch', 'ask_limit_on_launch', 'ask_tags_on_launch',
+            'ask_skip_tags_on_launch', 'ask_job_type_on_launch',
+            'ask_inventory_on_launch', 'ask_credential_on_launch')
         extra_kwargs = {
             'credential': {'write_only': True,},
             'limit': {'write_only': True,},
@@ -2674,6 +2681,8 @@ class ActivityStreamSerializer(BaseSerializer):
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
+                        if fk == 'group':
+                            thisItemDict['inventory_id'] = getattr(thisItem, 'inventory_id', None)
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
                 pass

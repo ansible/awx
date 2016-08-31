@@ -100,6 +100,7 @@
             else{
                 var credentialBasePath = (source.value === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source.value === '' ? '' : '?kind=' + (source.value));
                 CredentialList.basePath = credentialBasePath;
+                $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' && source.value !== 'ec2' ? true : false;
                 LookUpInit({
                     scope: $scope,
                     url: credentialBasePath,
@@ -122,7 +123,7 @@
             // reset fields
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = source.value === 'azure_rm' ? $scope.azure_regions : $scope[source.value + '_regions'];
-            $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' ? true : false;
+            $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' && source.value !== 'ec2' ? true : false;
             $scope.group_by = null;
             $scope.source_regions = null;
             $scope.credential = null;

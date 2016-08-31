@@ -35,7 +35,8 @@ export default
                 label: 'Name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 List-staticColumnAdjacent',
                 defaultSearchField: true,
-                linkTo: '/#/jobs/{{job.id}}'
+                linkTo: '/#/jobs/{{job.id}}',
+                searchDefault: true
             },
             finished: {
                 label: 'Finished',

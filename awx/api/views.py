@@ -201,7 +201,7 @@ class ApiV1ConfigView(APIView):
         '''Return various sitewide configuration settings.'''
 
         license_reader = TaskSerializer()
-        license_data   = license_reader.from_database(show_key=request.user.is_superuser)
+        license_data   = license_reader.from_database(show_key=request.user.is_superuser or request.user.is_system_auditor)
         if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
             license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
 
@@ -225,7 +225,10 @@ class ApiV1ConfigView(APIView):
             user_ldap_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             data['user_ldap_fields'] = user_ldap_fields
 
-        if request.user.is_superuser or Organization.accessible_objects(request.user, 'admin_role').exists():
+        if request.user.is_superuser \
+                or request.user.is_system_auditor \
+                or Organization.accessible_objects(request.user, 'admin_role').exists() \
+                or Organization.accessible_objects(request.user, 'auditor_role').exists():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
@@ -876,11 +879,18 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg="Role 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        role = Role.objects.get(pk=sub_id)
-        content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == content_type:
+        role = get_object_or_400(Role, pk=sub_id)
+        org_content_type = ContentType.objects.get_for_model(Organization)
+        if role.content_type == org_content_type:
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        team = get_object_or_404(Team, pk=self.kwargs['pk'])
+        credential_content_type = ContentType.objects.get_for_model(Credential)
+        if role.content_type == credential_content_type:
+            if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
+                data = dict(msg="You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
 
@@ -1143,6 +1153,7 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+    permission_classes = (UserPermission,)
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
@@ -1205,7 +1216,24 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied('You may not remove your own admin_role.')
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        user = get_object_or_400(User, pk=self.kwargs['pk'])
+        role = get_object_or_400(Role, pk=sub_id)
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
+
+        credential_content_type = ContentType.objects.get_for_model(Credential)
+        if role.content_type == credential_content_type:
+            if role.content_object.organization and user not in role.content_object.organization.member_role:
+                data = dict(msg="You cannot grant credential access to a user not in the credentials' organization")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+            if not role.content_object.organization and not request.user.is_superuser:
+                data = dict(msg="You cannot grant private credential access to another user")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
 
         return super(UserRolesList, self).post(request, *args, **kwargs)
 
@@ -1291,7 +1319,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         can_admin = request.user.can_access(User, 'admin', obj, request.data)
 
         su_only_edit_fields = ('is_superuser', 'is_system_auditor')
-        admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active')
+        admin_only_edit_fields = ('username', 'is_active')
 
         fields_to_check = ()
         if not request.user.is_superuser:
@@ -1384,8 +1412,8 @@ class TeamCredentialsList(SubListCreateAPIView):
         self.check_parent_access(team)
 
         visible_creds = Credential.accessible_objects(self.request.user, 'read_role')
-        team_creds = Credential.objects.filter(admin_role__parents=team.member_role)
-        return team_creds & visible_creds
+        team_creds = Credential.objects.filter(Q(use_role__parents=team.member_role) | Q(admin_role__parents=team.member_role))
+        return (team_creds & visible_creds).distinct()
 
 
 class OrganizationCredentialList(SubListCreateAPIView):
@@ -3623,7 +3651,6 @@ class RoleDetail(RetrieveAPIView):
 
     model = Role
     serializer_class = RoleSerializer
-    permission_classes = (IsAuthenticated,)
     new_in_300 = True
 
 
@@ -3646,6 +3673,26 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         if not sub_id:
             data = dict(msg="User 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        user = get_object_or_400(User, pk=sub_id)
+        role = self.get_parent_object()
+        if role == self.request.user.admin_role:
+            raise PermissionDenied('You may not perform any action with your own admin_role.')
+
+        user_content_type = ContentType.objects.get_for_model(User)
+        if role.content_type == user_content_type:
+            raise PermissionDenied('You may not change the membership of a users admin_role')
+
+        credential_content_type = ContentType.objects.get_for_model(Credential)
+        if role.content_type == credential_content_type:
+            if role.content_object.organization and user not in role.content_object.organization.member_role:
+                data = dict(msg="You cannot grant credential access to a user not in the credentials' organization")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+            if not role.content_object.organization and not request.user.is_superuser:
+                data = dict(msg="You cannot grant private credential access to another user")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         return super(RoleUsersList, self).post(request, *args, **kwargs)
 
 
@@ -3670,13 +3717,20 @@ class RoleTeamsList(SubListAPIView):
             data = dict(msg="Team 'id' field is missing.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+        team = get_object_or_400(Team, pk=sub_id)
         role = Role.objects.get(pk=self.kwargs['pk'])
-        content_type = ContentType.objects.get_for_model(Organization)
-        if role.content_type == content_type:
+
+        organization_content_type = ContentType.objects.get_for_model(Organization)
+        if role.content_type == organization_content_type:
             data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        team = Team.objects.get(pk=sub_id)
+        credential_content_type = ContentType.objects.get_for_model(Credential)
+        if role.content_type == credential_content_type:
+            if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
+                data = dict(msg="You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization")
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         action = 'attach'
         if request.data.get('disassociate', None):
             action = 'unattach'

@@ -28,6 +28,7 @@ export default
                 Wait('stop');
                 if (scope.notification_templates) {
                     scope.notification_templates.forEach(function(notification_template, i) {
+                        setStatus(notification_template);
                         scope.notification_type_options.forEach(function(type) {
                             if (type.value === notification_template.notification_type) {
                                 scope.notification_templates[i].notification_type = type.label;
@@ -74,77 +75,32 @@ export default
                 callback: 'choicesReadyNotifierList'
             });
 
-            function attachElem(event, html, title) {
-                var elem = $(event.target).parent();
-                try {
-                    elem.tooltip('hide');
-                    elem.popover('destroy');
-                }
-                catch(err) {
-                    //ignore
-                }
+            function setStatus(notification_template) {
+                var html, recent_notifications = notification_template.summary_fields.recent_notifications;
+                if (recent_notifications.length > 0) {
+                    html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+                    html += "<thead>\n";
+                    html += "<tr>";
+                    html += "<th>Status</th>";
+                    html += "<th>Time</th>";
+                    html += "</tr>\n";
+                    html += "</thead>\n";
+                    html += "<tbody>\n";
 
-                $('.popover').each(function() {
-                    // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-                    $(this).remove();
-                });
-                $('.tooltip').each( function() {
-                    // close any lingering tool tipss
-                    $(this).hide();
-                });
-                elem.attr({
-                    "aw-pop-over": html,
-                    "data-popover-title": title,
-                    "data-placement": "right" });
-                $compile(elem)(scope);
-                elem.on('shown.bs.popover', function() {
-                    $('.popover').each(function() {
-                        $compile($(this))(scope);  //make nested directives work!
+                    recent_notifications.forEach(function(row) {
+                        html += "<tr>\n";
+                        html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
+                        html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
+                        html += "</tr>\n";
                     });
-                    $('.popover-content, .popover-title').click(function() {
-                        elem.popover('hide');
-                    });
-                });
-                elem.popover('show');
+                    html += "</tbody>\n";
+                    html += "</table>\n";
+                }
+                else {
+                    html = "<p>No recent notifications.</p>\n";
+                }
+                notification_template.template_status_html = html;
             }
-
-            scope.showSummary = function(event, id) {
-                setTimeout(function(){
-                    if (!Empty(id)) {
-                        var recent_notifications,
-                        html, title = "Recent Notifications";
-
-                        scope.notification_templates.forEach(function(notification_template){
-                            if(notification_template.id === id){
-                                recent_notifications = notification_template.summary_fields.recent_notifications;
-                            }
-                        });
-                        if (recent_notifications.length > 0) {
-                            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-                            html += "<thead>\n";
-                            html += "<tr>";
-                            html += "<th>Status</th>";
-                            html += "<th>Time</th>";
-                            html += "</tr>\n";
-                            html += "</thead>\n";
-                            html += "<tbody>\n";
-
-                            recent_notifications.forEach(function(row) {
-                                html += "<tr>\n";
-                                html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
-                                html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
-                                html += "</tr>\n";
-                            });
-                            html += "</tbody>\n";
-                            html += "</table>\n";
-                        }
-                        else {
-                            html = "<p>No recent notifications.</p>\n";
-                        }
-                        attachElem(event, html, title);
-                    }
-                }, 100);
-            };
 
             scope.testNotification = function(){
                 var name = $filter('sanitize')(this.notification_template.name),

@@ -161,7 +161,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                          break;
                          case 'net':
                             scope.username_required = true;
-                            scope.password_required = true;
+                            scope.password_required = false;
                             scope.passwordLabel = 'Password';
                             scope.sshKeyDataLabel = 'SSH Key';
                          break;

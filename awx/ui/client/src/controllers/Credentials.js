@@ -46,13 +46,13 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         Wait('stop');
         $('#prompt-modal').modal('hide');
 
-        list.fields.kind.searchOptions = $scope.credential_kind_options;
+        list.fields.kind.searchOptions = $scope.credential_kind_options_list;
 
         // Translate the kind value
         for (i = 0; i < $scope.credentials.length; i++) {
-            for (j = 0; j < $scope.credential_kind_options.length; j++) {
-                if ($scope.credential_kind_options[j].value === $scope.credentials[i].kind) {
-                    $scope.credentials[i].kind = $scope.credential_kind_options[j].label;
+            for (j = 0; j < $scope.credential_kind_options_list.length; j++) {
+                if ($scope.credential_kind_options_list[j].value === $scope.credentials[i].kind) {
+                    $scope.credentials[i].kind = $scope.credential_kind_options_list[j].label;
                     break;
                 }
             }
@@ -82,7 +82,7 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         scope: $scope,
         url: defaultUrl,
         field: 'kind',
-        variable: 'credential_kind_options',
+        variable: 'credential_kind_options_list',
         callback: 'choicesReadyCredential'
     });
 
@@ -148,7 +148,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         url;
 
     $scope.keyEntered = false;
-
+    $scope.permissionsTooltip = 'Please save before assigning permissions';
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     generator.reset();
 
@@ -391,6 +391,12 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         $scope.removeCredentialLoaded();
     }
     $scope.removeCredentialLoaded = $scope.$on('credentialLoaded', function () {
+        // if the credential is assigned to an organization, allow permission delegation
+        // do NOT use $scope.organization in a view directive to determine if a credential is associated with an org
+        $scope.disablePermissionAssignment = typeof($scope.organization) === 'number' ? false : true;
+        if ($scope.disablePermissionAssignment){
+            $scope.permissionsTooltip = 'Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.';
+        }
         var set;
         for (set in relatedSets) {
             $scope.search(relatedSets[set].iterator);

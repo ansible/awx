@@ -75,6 +75,9 @@ export default
                     case 'missing':
                         result = 'Missing. Click for details';
                         break;
+                    case 'canceled':
+                        result = 'Canceled. Click for details';
+                        break;
                 }
                 return result;
             };

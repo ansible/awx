@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/nvd3/build/nv.d3.css"  type="text/css">
-  <link rel="stylesheet" href="{{ STATIC_URL }}lib/ngToast/dist/ngToast.min.css"  type="text/css">
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/ng-toast/dist/ngToast.min.css"  type="text/css">
 
   <link rel="stylesheet" href="{{ STATIC_URL }}tower.min.css?v={{version}}"  type="text/css">
 
@@ -40,7 +40,7 @@
     <include-svg href="{{ STATIC_URL }}assets/icons.svg"></include-svg>
 
   <main-menu></main-menu>
-  <bread-crumb ng-if="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-if="includesCurrentState('inventoryManage')"></div>
+  <bread-crumb ng-show="!includesCurrentState('inventoryManage')"></bread-crumb><div ui-view="groupBreadcrumbs" ng-show="includesCurrentState('inventoryManage')"></div>
   <toast></toast>
 
     <div class="container-fluid" id="content-container">

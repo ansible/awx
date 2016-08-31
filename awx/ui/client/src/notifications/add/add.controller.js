@@ -149,6 +149,12 @@ export default
                     if(field.type === 'number'){
                         $scope[i] = Number($scope[i]);
                     }
+                    if(field.name === "username" && $scope.notification_type.value === "email" && value === null){
+                        $scope[i] = "";
+                    }
+                    if(field.type === 'sensitive' && value === null){
+                        $scope[i] = "";
+                    }
                     return $scope[i];
                 }
 

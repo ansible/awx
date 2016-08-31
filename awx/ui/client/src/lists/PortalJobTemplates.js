@@ -22,7 +22,8 @@ export default
                 key: true,
                 label: 'Name',
                 columnClass: 'col-lg-5 col-md-5 col-sm-9 col-xs-8',
-                linkTo: '/#/job_templates/{{job_template.id}}'
+                linkTo: '/#/job_templates/{{job_template.id}}',
+                searchDefault: true
             },
             description: {
                 label: 'Description',

@@ -3,12 +3,14 @@ import mock
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer, JobLaunchSerializer
-from awx.main.models.jobs import JobTemplate
+from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.projects import ProjectOptions
+from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
 from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
+from django.apps import apps
 
 @property
 def project_playbooks(self):
@@ -103,9 +105,10 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
         'extra_vars': '--',
         'job_tags': 'sometags',
         'force_handlers': True,
-        'skip_tags': True,
+        'skip_tags': 'thistag,thattag',
         'ask_variables_on_launch':True,
         'ask_tags_on_launch':True,
+        'ask_skip_tags_on_launch':True,
         'ask_job_type_on_launch':True,
         'ask_inventory_on_launch':True,
         'ask_credential_on_launch': True,
@@ -347,3 +350,20 @@ def test_disallow_template_delete_on_running_job(job_template_factory, delete, a
     objects.job_template.create_unified_job()
     delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
     assert delete_response.status_code == 409
+
+@pytest.mark.django_db
+def test_save_survey_passwords_to_job(job_template_with_survey_passwords):
+    """Test that when a new job is created, the survey_passwords field is
+    given all of the passwords that exist in the JT survey"""
+    job = job_template_with_survey_passwords.create_unified_job()
+    assert job.survey_passwords == {'SSN': '$encrypted$', 'secret_key': '$encrypted$'}
+
+@pytest.mark.django_db
+def test_save_survey_passwords_on_migration(job_template_with_survey_passwords):
+    """Test that when upgrading to 3.0.2, the jobs connected to a JT that has
+    a survey with passwords in it, the survey passwords get saved to the
+    job survey_passwords field."""
+    Job.objects.create(job_template=job_template_with_survey_passwords)
+    save_password_keys.migrate_survey_passwords(apps, None)
+    job = job_template_with_survey_passwords.jobs.all()[0]
+    assert job.survey_passwords == {'SSN': '$encrypted$', 'secret_key': '$encrypted$'}

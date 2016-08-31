@@ -314,7 +314,7 @@ export default
             ngClick: 'submitQuestion($event)',
             ngDisabled: true,
             'class': 'btn btn-sm Form-saveButton',
-            label: '{{editQuestionIndex === null ? "ADD" : "UPDATE"}}'
+            label: '{{editQuestionIndex === null ? "+ ADD" : "UPDATE"}}'
         }
     }
 

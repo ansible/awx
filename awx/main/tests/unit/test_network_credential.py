@@ -41,8 +41,8 @@ def test_net_cred_ssh_agent(mocker, options):
                           'credential': None, 'cloud_credential': None, 'network_credential': Credential(**options),
                           'become_enabled': False, 'become_method': None, 'become_username': None,
                           'inventory': mocker.MagicMock(spec=Inventory, id=2), 'force_handlers': False,
-                          'limit': None, 'verbosity': None, 'job_tags': None, 'skip_tags': False,
-                          'start_at_task': False, 'pk': 1, 'launch_type': 'normal', 'job_template':None,
+                          'limit': None, 'verbosity': None, 'job_tags': None, 'skip_tags': None,
+                          'start_at_task': None, 'pk': 1, 'launch_type': 'normal', 'job_template':None,
                           'created_by': None, 'extra_vars_dict': None, 'project':None, 'playbook': 'test.yml'}
         mock_job = mocker.MagicMock(spec=Job, **mock_job_attrs)
 

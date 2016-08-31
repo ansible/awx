@@ -132,6 +132,9 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   scope.ask_tags_on_launch = (data.ask_tags_on_launch) ? true : false;
                                   master.ask_tags_on_launch = scope.ask_tags_on_launch;
 
+                                  scope.ask_skip_tags_on_launch = (data.ask_skip_tags_on_launch) ? true : false;
+                                  master.ask_skip_tags_on_launch = scope.ask_skip_tags_on_launch;
+
                                   scope.ask_job_type_on_launch = (data.ask_job_type_on_launch) ? true : false;
                                   master.ask_job_type_on_launch = scope.ask_job_type_on_launch;
 

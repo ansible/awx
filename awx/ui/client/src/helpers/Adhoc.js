@@ -55,9 +55,9 @@ export default
     // Submit request to run an adhoc comamand
     .factory('AdhocRun', ['$location','$stateParams', 'LaunchJob',
         'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors',
-        'Wait', 'Empty', 'CreateLaunchDialog',
+        'Wait', 'Empty', 'CreateLaunchDialog', '$state',
     function ($location, $stateParams, LaunchJob, PromptForPasswords,
-        Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, CreateLaunchDialog) {
+        Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, CreateLaunchDialog, $state) {
         return function (params) {
             var id = params.project_id,
                 scope = params.scope.$new(),
@@ -87,25 +87,31 @@ export default
                     });
             });
 
-            if (scope.removeAdhocLaunchFinished) {
-                scope.removeAdhocLaunchFinished();
-            }
-            scope.removeAdhocLaunchFinished = scope.$on('AdhocLaunchFinished',
-                function(e, data) {
-                    $location.path('/ad_hoc_commands/' + data.id);
-                });
-
             if (scope.removeStartAdhocRun) {
                 scope.removeStartAdhocRun();
             }
 
             scope.removeStartAdhocRun = scope.$on('StartAdhocRun', function() {
-                LaunchJob({
-                    scope: scope,
-                    url: url,
-                    callback: 'AdhocLaunchFinished' // send to the adhoc
-                    // standard out page
-                });
+                var password,
+                    postData={};
+                for (password in scope.passwords) {
+                    postData[scope.passwords[password]] = scope[
+                        scope.passwords[password]
+                    ];
+                }
+                // Re-launch the adhoc job
+                Rest.setUrl(url);
+                Rest.post(postData)
+                    .success(function (data) {
+                         Wait('stop');
+                         $state.go('adHocJobStdout', {id: data.id});
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, {
+                            hdr: 'Error!',
+                            msg: 'Failed to launch adhoc command. POST ' +
+                                'returned status: ' + status });
+                    });
             });
 
             //  start routine only if passwords need to be prompted
