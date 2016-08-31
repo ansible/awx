@@ -125,11 +125,13 @@ class ApiV1RootView(APIView):
         data['organizations'] = reverse('api:organization_list')
         data['users'] = reverse('api:user_list')
         data['projects'] = reverse('api:project_list')
+        data['project_updates'] = reverse('api:project_update_list')
         data['teams'] = reverse('api:team_list')
         data['credentials'] = reverse('api:credential_list')
         data['inventory'] = reverse('api:inventory_list')
         data['inventory_scripts'] = reverse('api:inventory_script_list')
         data['inventory_sources'] = reverse('api:inventory_source_list')
+        data['inventory_updates'] = reverse('api:inventory_update_list')
         data['groups'] = reverse('api:group_list')
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
@@ -1106,6 +1108,11 @@ class ProjectUpdateView(RetrieveAPIView):
                                 status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class ProjectUpdateList(ListAPIView):
+
+    model = ProjectUpdate
+    serializer_class = ProjectUpdateListSerializer
 
 class ProjectUpdateDetail(RetrieveDestroyAPIView):
 
@@ -2169,6 +2176,11 @@ class InventorySourceUpdateView(RetrieveAPIView):
                 return Response(dict(inventory_update=inventory_update.id), status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class InventoryUpdateList(ListAPIView):
+
+    model = InventoryUpdate
+    serializer_class = InventoryUpdateListSerializer
 
 class InventoryUpdateDetail(RetrieveDestroyAPIView):
 
