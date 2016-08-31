@@ -54,10 +54,6 @@ class AutoOneToOneField(models.OneToOneField):
                 AutoSingleRelatedObjectDescriptor(related))
 
 
-
-
-
-
 def resolve_role_field(obj, field):
     ret = []
 
@@ -71,8 +67,8 @@ def resolve_role_field(obj, field):
         return []
 
     if len(field_components) == 1:
-        Role_ = get_current_apps().get_model('main', 'Role')
-        if type(obj) is not Role_:
+        role_cls = str(get_current_apps().get_model('main', 'Role'))
+        if not str(type(obj)) == role_cls:
             raise Exception(smart_text('{} refers to a {}, not a Role'.format(field, type(obj))))
         ret.append(obj.id)
     else:
