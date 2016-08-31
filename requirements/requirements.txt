@@ -108,7 +108,6 @@ python-troveclient==1.4.0
 pytz==2015.7
 PyYAML==3.11
 pyzmq==14.5.0
-qpid-python==0.32.1
 rackspace-auth-openstack==1.3
 rackspace-novaclient==1.5
 rax-default-network-flags-python-novaclient-ext==0.3.2

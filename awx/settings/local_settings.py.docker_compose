@@ -64,7 +64,7 @@ else:
     }
 
 # Celery AMQP configuration.
-BROKER_URL = 'qpid://qpid:5672'
+BROKER_URL = 'amqp://guest:guest@rabbitmq//'
 
 # Mongo host configuration
 MONGO_HOST = NotImplemented
