@@ -10,14 +10,15 @@ import traceback
 # Centos-7 doesn't include the svg mime type
 # /usr/lib64/python/mimetypes.py
 import mimetypes
-mimetypes.add_type("image/svg+xml", ".svg", True)
-mimetypes.add_type("image/svg+xml", ".svgz", True)
 
 # Django Split Settings
 from split_settings.tools import optional, include
 
 # Load default settings.
 from defaults import *  # NOQA
+
+mimetypes.add_type("image/svg+xml", ".svg", True)
+mimetypes.add_type("image/svg+xml", ".svgz", True)
 
 MONGO_HOST = '127.0.0.1'
 MONGO_PORT = 27017
