@@ -19,7 +19,6 @@ from awx.main.models import (
     Role,
 )
 
-@pytest.mark.skip(reason="Seeing pk error, suspect weirdness in mocking requests")
 @pytest.mark.parametrize("pk, err", [
     (111, "not change the membership"),
     (1, "may not perform"),
@@ -38,18 +37,17 @@ def test_user_roles_list_user_admin_role(pk, err):
             factory = APIRequestFactory()
             view = UserRolesList.as_view()
 
-            user = User(username="root", is_superuser=True)
+            user = User(username="root", is_superuser=True, pk=1, id=1)
 
             request = factory.post("/user/1/roles", {'id':pk}, format="json")
             force_authenticate(request, user)
 
-            response = view(request)
+            response = view(request, pk=user.pk)
             response.render()
 
             assert response.status_code == 403
             assert err in response.content
 
-@pytest.mark.skip(reason="db access or mocking needed for new tests in role assignment code")
 @pytest.mark.parametrize("admin_role, err", [
     (True, "may not perform"),
     (False, "not change the membership"),
@@ -70,10 +68,13 @@ def test_role_users_list_other_user_admin_role(admin_role, err):
             view = RoleUsersList.as_view()
 
             user = User(username="root", is_superuser=True, pk=1, id=1)
+            queried_user = User(username="maynard")
+
             request = factory.post("/role/1/users", {'id':1}, format="json")
             force_authenticate(request, user)
 
-            response = view(request)
+            with mock.patch('awx.api.views.get_object_or_400', return_value=queried_user):
+                response = view(request)
             response.render()
 
             assert response.status_code == 403
