@@ -7,6 +7,12 @@
 import sys
 import traceback
 
+# Centos-7 doesn't include the svg mime type
+# /usr/lib64/python/mimetypes.py
+import mimetypes
+mimetypes.add_type("image/svg+xml", ".svg", True)
+mimetypes.add_type("image/svg+xml", ".svgz", True)
+
 # Django Split Settings
 from split_settings.tools import optional, include
 
