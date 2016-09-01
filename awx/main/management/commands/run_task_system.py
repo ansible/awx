@@ -54,6 +54,8 @@ class SimpleDAG(object):
                 type_str = "Inventory"
             elif type(obj) == ProjectUpdate:
                 type_str = "Project"
+            elif type(obj) == WorkflowJob:
+                type_str = "Workflow"
             else:
                 type_str = "Unknown"
             type_str += "%s" % str(obj.id)
@@ -68,10 +70,11 @@ class SimpleDAG(object):
                 short_string_obj(n['node_object']),
                 "red" if n['node_object'].status == 'running' else "black",
             )
-        for from_node, to_node in self.edges:
-            doc += "%s -> %s;\n" % (
+        for from_node, to_node, label in self.edges:
+            doc += "%s -> %s [ label=\"%s\" ];\n" % (
                 short_string_obj(self.nodes[from_node]['node_object']),
                 short_string_obj(self.nodes[to_node]['node_object']),
+                label,
             )
         doc += "}\n"
         gv_file = open('/tmp/graph.gv', 'w')
@@ -82,16 +85,16 @@ class SimpleDAG(object):
         if self.find_ord(obj) is None:
             self.nodes.append(dict(node_object=obj, metadata=metadata))
 
-    def add_edge(self, from_obj, to_obj):
+    def add_edge(self, from_obj, to_obj, label=None):
         from_obj_ord = self.find_ord(from_obj)
         to_obj_ord = self.find_ord(to_obj)
         if from_obj_ord is None or to_obj_ord is None:
             raise LookupError("Object not found")
-        self.edges.append((from_obj_ord, to_obj_ord))
+        self.edges.append((from_obj_ord, to_obj_ord, label))
 
     def add_edges(self, edgelist):
         for edge_pair in edgelist:
-            self.add_edge(edge_pair[0], edge_pair[1])
+            self.add_edge(edge_pair[0], edge_pair[1], edge_pair[2])
 
     def find_ord(self, obj):
         for idx in range(len(self.nodes)):
@@ -114,20 +117,28 @@ class SimpleDAG(object):
             return "workflow_job"
         return "unknown"
 
-    def get_dependencies(self, obj):
+    def get_dependencies(self, obj, label=None):
         antecedents = []
         this_ord = self.find_ord(obj)
-        for node, dep in self.edges:
-            if node == this_ord:
-                antecedents.append(self.nodes[dep])
+        for node, dep, lbl in self.edges:
+            if label:
+                if node == this_ord and lbl == label:
+                    antecedents.append(self.nodes[dep])
+            else:
+                if node == this_ord:
+                    antecedents.append(self.nodes[dep])
         return antecedents
 
-    def get_dependents(self, obj):
+    def get_dependents(self, obj, label=None):
         decendents = []
         this_ord = self.find_ord(obj)
-        for node, dep in self.edges:
-            if dep == this_ord:
-                decendents.append(self.nodes[node])
+        for node, dep, lbl in self.edges:
+            if label:
+                if dep == this_ord and lbl == label:
+                    decendents.append(self.nodes[node])
+            else:
+                if dep == this_ord:
+                    decendents.append(self.nodes[node])
         return decendents
 
     def get_leaf_nodes(self):
@@ -143,6 +154,83 @@ class SimpleDAG(object):
             if len(self.get_dependents(n['node_object'])) < 1:
                 roots.append(n)
         return roots
+
+class WorkflowDAG(SimpleDAG):
+    def __init__(self, workflow_job=None):
+        super(WorkflowDAG, self).__init__()
+        if workflow_job:
+            self._init_graph(workflow_job)
+
+    def _init_graph(self, workflow_job):
+        workflow_nodes = workflow_job.workflow_job_nodes.all()
+        for workflow_node in workflow_nodes:
+            self.add_node(workflow_node)
+
+        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
+            for workflow_node in workflow_nodes:
+                related_nodes = getattr(workflow_node, node_type).all()
+                for related_node in related_nodes:
+                    self.add_edge(workflow_node, related_node, node_type)
+
+    def bfs_nodes_to_run(self):
+        root_nodes = self.get_root_nodes()
+        nodes = root_nodes
+        nodes_found = []
+
+        for index, n in enumerate(nodes):
+            obj = n['node_object']
+            job = obj.job
+            print("\t\tExamining node %s job %s" % (obj, job))
+
+            if not job:
+                print("\t\tNo job for node %s" % obj)
+                nodes_found.append(n)
+            # Job is about to run or is running. Hold our horses and wait for
+            # the job to finish. We can't proceed down the graph path until we
+            # have the job result.
+            elif job.status not in ['failed', 'error', 'successful']:
+                print("\t\tJob status not 'failed' 'error' nor 'successful' %s" % job.status)
+                continue
+            elif job.status in ['failed', 'error']:
+                print("\t\tJob status is failed or error %s" % job.status)
+                children_failed = self.get_dependencies(obj, 'failure_nodes')
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_failed + children_always
+                nodes.extend(children_all)
+            elif job.status in ['successful']:
+                print("\t\tJob status is successful %s" % job.status)
+                children_success = self.get_dependencies(obj, 'success_nodes')
+                nodes.extend(children_success)
+            else:
+                logger.warn("Incorrect graph structure")
+        return [n['node_object'] for n in nodes_found]
+
+    def is_workflow_done(self):
+        root_nodes = self.get_root_nodes()
+        nodes = root_nodes
+
+        for index, n in enumerate(nodes):
+            obj = n['node_object']
+            job = obj.job
+
+            if not job:
+                return False
+            # Job is about to run or is running. Hold our horses and wait for
+            # the job to finish. We can't proceed down the graph path until we
+            # have the job result.
+            elif job.status not in ['failed', 'error', 'successful']:
+                return False
+            elif job.status in ['failed', 'error']:
+                children_failed = self.get_dependencies(obj, 'failure_nodes')
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_failed + children_always
+                nodes.extend(children_all)
+            elif job.status in ['successful']:
+                children_success = self.get_dependencies(obj, 'success_nodes')
+                nodes.extend(children_success)
+            else:
+                logger.warn("Incorrect graph structure")
+        return True
 
 def get_tasks():
     """Fetch all Tower tasks that are relevant to the task management
@@ -166,6 +254,33 @@ def get_tasks():
                          key=lambda task: task.created)
     return all_actions
 
+def get_running_workflow_jobs():
+    graph_workflow_jobs = [wf for wf in
+                           WorkflowJob.objects.filter(status='running')]
+    return graph_workflow_jobs
+
+def do_spawn_workflow_jobs():
+    workflow_jobs = get_running_workflow_jobs()
+    print("Set of workflow jobs to process %s" % workflow_jobs)
+    for workflow_job in workflow_jobs:
+        print("Building the dag")
+        dag = WorkflowDAG(workflow_job)
+        print("Imported the workflow job dag")
+        for n in dag.nodes:
+            print("\tWorkflow dag node %s" % n)
+        for f, to, label in dag.edges:
+            print("\tWorkflow dag edge <%s,%s,%s>" % (f, to, label))
+        spawn_nodes = dag.bfs_nodes_to_run()
+        for spawn_node in spawn_nodes:
+            print("Spawning job %s" % spawn_node)
+            # TODO: Inject job template template params as kwargs
+            kv = {}
+            job = spawn_node.unified_job_template.create_unified_job(**kv)
+            print("Started new job %s" % job.id)
+            spawn_node.job = job
+            spawn_node.save()
+            result = job.signal_start(**kv)
+
 def rebuild_graph(message):
     """Regenerate the task graph by refreshing known tasks from Tower, purging
     orphaned running tasks, and creating dependencies for new tasks before
@@ -182,6 +297,8 @@ def rebuild_graph(message):
         logger.warn("Ignoring celery task inspector")
         active_task_queues = None
 
+    do_spawn_workflow_jobs()
+
     all_sorted_tasks = get_tasks()
     if not len(all_sorted_tasks):
         return None
@@ -196,6 +313,7 @@ def rebuild_graph(message):
         #       as a whole that celery appears to be down.
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             return None
+
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
     waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
     new_tasks = filter(lambda t: t.status == 'pending', all_sorted_tasks)

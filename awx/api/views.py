@@ -2627,8 +2627,6 @@ class WorkflowNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = WorkflowNode
     serializer_class = WorkflowNodeDetailSerializer
-    parent_model = WorkflowJobTemplate
-    relationship = 'workflow_job_template'
     new_in_310 = True
 
 class WorkflowNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
@@ -2748,7 +2746,7 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     always_allow_superuser = True # TODO: RBAC
     parent_model = WorkflowJob
     relationship = 'workflow_job_nodes'
-    parent_key = 'job'
+    parent_key = 'workflow_job'
 
 
 class SystemJobTemplateList(ListAPIView):

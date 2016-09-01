@@ -29,9 +29,13 @@ class WorkflowNode(CreatedModifiedModel):
     )
     '''
 
+    # TODO: Ensure the API forces workflow_job_template being set
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
         related_name='workflow_nodes',
+        blank=True,
+        null=True,
+        default=None,
         on_delete=models.CASCADE,
     )
     unified_job_template = models.ForeignKey(
@@ -60,9 +64,17 @@ class WorkflowNode(CreatedModifiedModel):
         blank=True,
         symmetrical=False,
     )
+    workflow_job = models.ForeignKey(
+        'WorkflowJob',
+        related_name='workflow_job_nodes',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     job = models.ForeignKey(
         'UnifiedJob',
-        related_name='workflow_job_nodes',
+        related_name='unified_job_nodes',
         blank=True,
         null=True,
         default=None,
@@ -143,7 +155,9 @@ class WorkflowJobInheritNodesMixin(object):
 
         for old_node in old_nodes:
             new_node = WorkflowNode.objects.get(id=old_node.pk)
-            new_node.job = self
+            new_node.workflow_job = self
+            new_node.job = None
+            new_node.workflow_job_template = None
             new_node.pk = None
             new_node.save()
             new_nodes.append(new_node)

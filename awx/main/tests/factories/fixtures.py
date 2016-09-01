@@ -177,4 +177,3 @@ def mk_workflow_node(workflow_job_template=None, unified_job_template=None,
     if persisted:
         workflow_node.save()
     return workflow_node
-

@@ -1663,41 +1663,23 @@ class RunWorkflowJob(BaseTask):
     model = WorkflowJob
 
     def run(self, pk, **kwargs):
+        from awx.main.management.commands.run_task_system import WorkflowDAG
         '''
         Run the job/task and capture its output.
         '''
+        pass
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
-
         instance.socketio_emit_status("running")
-        status, rc, tb = 'error', None, ''
-        output_replacements = []
-        try:
-            if instance.cancel_flag:
-                instance = self.update_model(instance.pk, status='canceled')
-            if instance.status != 'running':
-                if hasattr(settings, 'CELERY_UNIT_TEST'):
-                    return
-                else:
-                    # Stop the task chain and prevent starting the job if it has
-                    # already been canceled.
-                    instance = self.update_model(pk)
-                    status = instance.status
-                    raise RuntimeError('not starting %s task' % instance.status)
-            #status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
-            # TODO: Do the workflow logic here
-        except Exception:
-            if status != 'canceled':
-                tb = traceback.format_exc()
-        status = 'successful'
-        instance = self.update_model(pk, status=status, result_traceback=tb)
-        instance.socketio_emit_status(status)
-        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
-            # Raising an exception will mark the job as 'failed' in celery
-            # and will stop a task chain from continuing to execute
-            if status == 'canceled':
-                raise Exception("Task %s(pk:%s) was canceled (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
-            else:
-                raise Exception("Task %s(pk:%s) encountered an error (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
-        if not hasattr(settings, 'CELERY_UNIT_TEST'):
-            self.signal_finished(pk)
+
+        # FIXME: Detect workflow run completion
+        while True:
+            dag = WorkflowDAG(instance)
+            print("Deciding if workflow is done")
+            if dag.is_workflow_done():
+                # TODO: update with accurate finish status (i.e. canceled, error, etc.)
+                instance = self.update_model(instance.pk, status='success')
+                print("Workflow IS done")
+                return
+            time.sleep(1)
+        # TODO: Handle cancel
 

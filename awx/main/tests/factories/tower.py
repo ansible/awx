@@ -366,14 +366,10 @@ def create_workflow_job_template(name, persisted=True, **kwargs):
             if type(i) is Job:
                 jobs[i.pk] = i
             else:
-                # Fill in default survey answers
-                job_extra_vars = {}
-                for question in spec['spec']:
-                    job_extra_vars[question['variable']] = question['default']
-                jobs[i] = mk_job(job_template=wfjt, extra_vars=job_extra_vars, 
-                                 persisted=persisted)
+                # TODO: Create the job
+                raise RuntimeError("Currently, only already created jobs are supported")
 
     return Objects(workflow_job_template=wfjt,
-                   #jobs=jobs,
+                   jobs=jobs,
                    survey=spec,)
 

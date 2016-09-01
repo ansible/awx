@@ -2229,13 +2229,19 @@ class WorkflowNodeSerializer(BaseSerializer):
 
     class Meta:
         model = WorkflowNode
-        fields = ('id', 'url', 'related', 'workflow_job_template', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
+        # TODO: workflow_job and job read-only
+        fields = ('id', 'url', 'related', 'workflow_job_template', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes', 'job',)
 
     def get_related(self, obj):
         res = super(WorkflowNodeSerializer, self).get_related(obj)
-        res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
+        if obj.workflow_job_template:
+            res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        if obj.job:
+            res['job'] = reverse('api:job_detail', args=(obj.job.pk,))
+        if obj.workflow_job:
+            res['workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job.pk,))
         res['success_nodes'] = reverse('api:workflow_node_success_nodes_list', args=(obj.pk,))
         res['failure_nodes'] = reverse('api:workflow_node_failure_nodes_list', args=(obj.pk,))
         res['always_nodes'] = reverse('api:workflow_node_always_nodes_list', args=(obj.pk,))
