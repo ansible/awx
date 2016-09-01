@@ -963,6 +963,7 @@ class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
+    capabilities_prefetch = ['admin', 'update']
 
     def get_queryset(self):
         projects_qs = Project.accessible_objects(self.request.user, 'read_role')
@@ -1156,6 +1157,7 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+    capabilities_prefetch = ['admin']
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
@@ -1521,28 +1523,6 @@ class InventoryList(ListCreateAPIView):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
         qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
         return qs
-
-    def list(self, request, *args, **kwargs):
-        if not hasattr(self, 'capabilities_prefetch'):
-            return super(ListCreateAPIView, self).list(request, *args, **kwargs)
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        readable_ids = [obj.id for obj in page]
-        editable_ids = Inventory.accessible_objects(request.user, 'admin_role').filter(pk__in=readable_ids).values_list('pk', flat=True)
-        adhoc_ids = Inventory.accessible_objects(request.user, 'adhoc_role').filter(pk__in=readable_ids).values_list('pk', flat=True)
-        for obj in page:
-            obj.capabilities_cache = {'edit': False, 'adhoc': False}
-            if obj.pk in editable_ids:
-                obj.capabilities_cache['edit'] = True
-            if obj.pk in adhoc_ids:
-                obj.capabilities_cache['adhoc'] = True
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
@@ -2224,6 +2204,7 @@ class JobTemplateList(ListCreateAPIView):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
+    capabilities_prefetch = ['admin', 'execute']
 
     def post(self, request, *args, **kwargs):
         ret = super(JobTemplateList, self).post(request, *args, **kwargs)

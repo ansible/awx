@@ -33,7 +33,7 @@ logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
+           'get_type_for_model', 'get_model_for_type', 'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps']
@@ -407,6 +407,31 @@ def get_model_for_type(type):
         ct_type = get_type_for_model(ct_model)
         if type == ct_type:
             return ct_model
+
+
+def cache_list_capabilities(page, role_types, model, user):
+    '''
+    Given a `page` list of objects, the specified roles for the specified user
+    are save on each object in the list, using 1 query for each role type
+    '''
+    page_ids = [obj.id for obj in page]
+    id_lists = {}
+    for role_type in role_types:
+        # Role name translation to UI names for methods
+        display_method = role_type
+        if role_type == 'admin':
+            display_method = 'edit'
+        elif role_type in ['execute', 'update']:
+            display_method = 'start'
+        # Query for union of page objects & role accessible_objects
+        id_lists[display_method] = model.accessible_objects(
+            user, '%s_role' % role_type).filter(pk__in=page_ids).values_list('pk', flat=True)
+    # Save data item-by-item
+    for obj in page:
+        obj.capabilities_cache = {display_method: False for display_method in id_lists.keys()}
+        for display_method, id_list in id_lists.iteritems():
+            if obj.pk in id_list:
+                obj.capabilities_cache[display_method] = True
 
 
 def get_system_task_capacity():
