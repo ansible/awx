@@ -225,7 +225,6 @@ class BaseAccess(object):
         for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc']:
             # Custom ordering of methods used so we can reuse earlier calcs
             if display_method not in method_list:
-                print ' Programming error: declared unavailable method'
                 continue
 
             # Grab the answer from the cache, if available
@@ -255,28 +254,33 @@ class BaseAccess(object):
             if method == 'add':
                 data = {}
 
+            access_instance = self
+            obj_check = obj
             if isinstance(obj, (Group, Host)):
                 if method == 'start':
                     if obj.inventory_source:
-                        obj = obj.inventory_source
+                        obj_check = obj.inventory_source
                     else:
                         user_capabilities[method] = False
                         continue
                 else:
-                    obj = obj.inventory
+                    obj_check = obj.inventory
+                access_class = access_registry.get(type(obj_check), [])[0]
+                access_instance = access_class(self.user)
             if isinstance(obj, JobTemplate):
                 data = {'reference_obj': obj}
 
-            try:
-                if method in ['change']: # 3 args
-                    user_capabilities[display_method] = self.user.can_access(type(obj), method, obj, data)
-                elif method in ['delete', 'start', 'adhoc']: # 2 args
-                    user_capabilities[display_method] = self.user.can_access(type(obj), method, obj)
-                elif method in ['add']: # 2 args with data
-                    user_capabilities[display_method] = self.user.can_access(type(obj), method, data)
-            except Exception as exc:
-                user_capabilities[display_method] = False
-                print(exc)
+            # try:
+            access_method = getattr(access_instance, "can_%s" % method)
+            if method in ['change']: # 3 args
+                user_capabilities[display_method] = access_method(obj_check, data)
+            elif method in ['delete', 'start', 'run_ad_hoc_commands']: # 2 args
+                user_capabilities[display_method] = access_method(obj_check)
+            elif method in ['add']: # 2 args with data
+                user_capabilities[display_method] = access_method(data)
+            # except Exception as exc:
+            #     user_capabilities[display_method] = False
+            #     print(exc)
 
         return user_capabilities
 
