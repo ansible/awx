@@ -19,8 +19,19 @@ export default
             GetBasePath, JobTemplateForm, CredentialList, LookUpInit, InitiatePlaybookRun,
             Wait, $compile, $state, $filter
         ) {
-
             ClearScope();
+
+            $scope.canAdd = false;
+            $scope.canEdit = false;
+
+            Rest.setUrl(GetBasePath('job_templates'));
+            Rest.options()
+                .success(function(data) {
+                    if (data.actions.POST) {
+                        $scope.canAdd = true;
+                        $scope.canEdit = true;
+                    }
+                });
 
             var list = JobTemplateList,
                 defaultUrl = GetBasePath('job_templates'),

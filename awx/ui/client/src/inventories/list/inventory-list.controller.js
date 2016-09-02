@@ -16,6 +16,18 @@ function InventoriesList($scope, $rootScope, $location, $log,
     ClearScope, ProcessErrors, GetBasePath, Wait,
     Find, Empty, $state) {
 
+        $scope.canAdd = false;
+        $scope.canEdit = false;
+
+        Rest.setUrl(GetBasePath('inventory'));
+        Rest.options()
+            .success(function(data) {
+                if (data.actions.POST) {
+                    $scope.canAdd = true;
+                    $scope.canEdit = true;
+                }
+            });
+
     var list = InventoryList,
         defaultUrl = GetBasePath('inventory') + ($stateParams.status === 'sync-failed' ? '?not__inventory_sources_with_failures=0' : ''),
         view = generateList,

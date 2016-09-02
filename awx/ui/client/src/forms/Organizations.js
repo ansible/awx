@@ -25,23 +25,31 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: false
+                    capitalize: false,
+                    ngDisabled: '!canEdit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!canEdit'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!canEdit'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
-                    ngDisabled: true //Disable when $pristine or $invalid, optional
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 
@@ -62,7 +70,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: 'canEdit'
                         }
                     },
 

@@ -24,13 +24,15 @@ export default function() {
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false
+                capitalize: false,
+                ngDisabled: '!canEdit'
             },
             description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                ngDisabled: '!canEdit'
             },
             organization: {
                 label: 'Organization',
@@ -41,7 +43,8 @@ export default function() {
                 },
                 sourceModel: 'organization',
                 sourceField: 'name',
-                ngClick: 'lookUpOrganization()'
+                ngClick: 'lookUpOrganization()',
+                ngDisabled: '!canEdit'
             },
             script: {
                 label: 'Custom Script',
@@ -64,10 +67,16 @@ export default function() {
         buttons: { //for now always generates <button> tags
             cancel: {
                 ngClick: 'formCancel()',
+                ngShow: 'canEdit'
+            },
+            close: {
+                ngClick: 'formCancel()',
+                ngShow: '!canEdit'
             },
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
-                ngDisabled: 'custom_inventory_form.$pristine || custom_inventory_form.$invalid || !canEdit' //Disable when $pristine or $invalid, optional
+                ngDisabled: 'custom_inventory_form.$pristine || custom_inventory_form.$invalid || !canEdit', //Disable when $pristine or $invalid, optional
+                ngShow: 'canEdit'
             }
         }
     };

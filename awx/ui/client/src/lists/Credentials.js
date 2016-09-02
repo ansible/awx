@@ -58,7 +58,8 @@ export default
                 ngClick: 'addCredential()',
                 awToolTip: 'Create a new credential',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -72,7 +73,17 @@ export default
                 label: 'Edit',
                 "class": 'btn-sm',
                 awToolTip: 'Edit credential',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'credential.summary_fields.user_capabilities.edit'
+            },
+
+            view: {
+                ngClick: "editCredential(credential.id)",
+                label: 'View',
+                "class": 'btn-sm',
+                awToolTip: 'View credential',
+                dataPlacement: 'top',
+                ngShow: '!credential.summary_fields.user_capabilities.edit'
             },
 
             "delete": {
@@ -81,7 +92,8 @@ export default
                 label: 'Delete',
                 "class": 'btn-sm',
                 awToolTip: 'Delete credential',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'credential.summary_fields.user_capabilities.delete'
             }
         }
     });

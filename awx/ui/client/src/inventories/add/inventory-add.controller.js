@@ -16,6 +16,15 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
     PaginateInit, LookUpInit, GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state) {
 
+    Rest.setUrl(GetBasePath('inventory'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add an inventory.', 'alert-info');
+            }
+        });
+
     ClearScope();
 
     // Inject dynamic view

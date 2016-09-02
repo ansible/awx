@@ -8,13 +8,22 @@ export default
     [   '$rootScope', 'pagination', '$compile','SchedulerInit', 'Rest', 'Wait',
         'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', '$scope', '$state',
+        'LookUpInit', 'OrganizationList', '$scope', '$state', 'Alert',
         function(
             $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
             inventoryScriptsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, $scope, $state
+            LookUpInit, OrganizationList, $scope, $state, Alert
         ) {
+            Rest.setUrl(GetBasePath('inventory_scripts'));
+            Rest.options()
+                .success(function(data) {
+                    if (!data.actions.POST) {
+                        $state.go("^");
+                        Alert('Permission Error', 'You do not have permission to add an inventory script.', 'alert-info');
+                    }
+                });
+
             var scope = $scope,
                 generator = GenerateForm,
                 form = inventoryScriptsFormObject,

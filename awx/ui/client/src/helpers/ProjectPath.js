@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:ProjectPath
@@ -47,11 +47,13 @@ export default
                     Rest.get()
                         .success(function (data) {
                             var opts = [], i;
-                            for (i = 0; i < data.project_local_paths.length; i++) {
-                                opts.push({
-                                    label: data.project_local_paths[i],
-                                    value: data.project_local_paths[i]
-                                });
+                            if (data.project_local_paths) {
+                                for (i = 0; i < data.project_local_paths.length; i++) {
+                                    opts.push({
+                                        label: data.project_local_paths[i],
+                                        value: data.project_local_paths[i]
+                                    });
+                                }
                             }
                             if (scope.local_path) {
                                 // List only includes paths not assigned to projects, so add the

@@ -65,7 +65,8 @@ export default
                 ngClick: 'addProject()',
                 awToolTip: 'Create a new project',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: "canAdd"
             },
             refresh: {
                 mode: 'all',
@@ -86,30 +87,40 @@ export default
                 awToolTip: "{{ project.scm_update_tooltip }}",
                 dataTipWatch: "project.scm_update_tooltip",
                 ngClass: "project.scm_type_class",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "project.summary_fields.user_capabilities.start"
             },
             schedule: {
                 mode: 'all',
                 ngClick: "editSchedules(project.id)",
                 awToolTip: "{{ project.scm_schedule_tooltip }}",
                 ngClass: "project.scm_type_class",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "project.summary_fields.user_capabilities.schedule"
             },
             edit: {
                 ngClick: "editProject(project.id)",
                 awToolTip: 'Edit the project',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: "project.summary_fields.user_capabilities.edit"
+            },
+            view: {
+                ngClick: "editProject(project.id)",
+                awToolTip: 'View the project',
+                dataPlacement: 'top',
+                ngShow: "!project.summary_fields.user_capabilities.edit",
+                icon: 'fa-eye',
             },
             "delete": {
                 ngClick: "deleteProject(project.id, project.name)",
                 awToolTip: 'Delete the project',
-                ngShow: "project.status !== 'updating' && project.status !== 'running' && project.status !== 'pending'",
+                ngShow: "(project.status !== 'updating' && project.status !== 'running' && project.status !== 'pending')  && project.summary_fields.user_capabilities.delete",
                 dataPlacement: 'top'
             },
             cancel: {
                 ngClick: "cancelUpdate(project.id, project.name)",
                 awToolTip: 'Cancel the SCM update',
-                ngShow: "project.status == 'updating' || project.status == 'running' || project.status == 'pending'",
+                ngShow: "(project.status == 'updating' || project.status == 'running' || project.status == 'pending') && project.summary_fields.user_capabilities.start",
                 dataPlacement: 'top'
             }
         }

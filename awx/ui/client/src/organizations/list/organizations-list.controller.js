@@ -17,6 +17,18 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
 
         ClearScope();
 
+        $scope.canAdd = false;
+        $scope.canEdit = false;
+
+        Rest.setUrl(GetBasePath('organizations'));
+        Rest.options()
+            .success(function(data) {
+                if (data.actions.POST) {
+                    $scope.canAdd = true;
+                    $scope.canEdit = true;
+                }
+            });
+
         var defaultUrl = GetBasePath('organizations'),
             list = OrganizationList,
             pageSize = 24,
@@ -25,6 +37,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         var parseCardData = function(cards) {
             return cards.map(function(card) {
                 var val = {}, url = '/#/organizations/' + card.id + '/';
+                val.user_capabilities = card.summary_fields.user_capabilities;
                 val.name = card.name;
                 val.id = card.id;
                 val.description = card.description || undefined;

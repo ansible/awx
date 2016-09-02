@@ -68,7 +68,8 @@ export default
                 mode: 'all',
                 ngClick: 'submitJob(job_template.id)',
                 awToolTip: 'Start a job using this template',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'job_template.summary_fields.user_capabilities.start'
             },
             schedule: {
                 label: 'Schedule',
@@ -76,6 +77,7 @@ export default
                 ngClick: 'scheduleJob(job_template.id)',
                 awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top',
+                ngShow: 'job_template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: 'Copy',
@@ -83,7 +85,7 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Copy template',
                 dataPlacement: 'top',
-                ngHide: 'job_template.summary_fields.can_copy===false'
+                ngShow: 'job_template.summary_fields.user_capabilities.copy'
             },
             edit: {
                 label: 'Edit',
@@ -91,6 +93,15 @@ export default
                 awToolTip: 'Edit template',
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
+                ngShow: 'job_template.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                label: 'View',
+                ngClick: "editJobTemplate(job_template.id)",
+                awToolTip: 'View template',
+                "class": 'btn-default btn-xs',
+                dataPlacement: 'top',
+                ngShow: '!job_template.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 label: 'Delete',
@@ -98,6 +109,7 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top',
+                ngShow: 'job_template.summary_fields.user_capabilities.delete'
             }
         }
     });

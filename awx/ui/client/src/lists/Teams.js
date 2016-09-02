@@ -47,7 +47,8 @@ export default
                 ngClick: 'addTeam()',
                 awToolTip: 'Create a new team',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -61,16 +62,25 @@ export default
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'Edit team',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'team.summary_fields.user_capabilities.edit'
             },
-
+            view: {
+                label: 'View',
+                ngClick: "editTeam(team.id)",
+                "class": 'btn-xs btn-default',
+                awToolTip: 'View team',
+                dataPlacement: 'top',
+                ngShow: '!team.summary_fields.user_capabilities.edit'
+            },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteTeam(team.id, team.name)",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete team',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'team.summary_fields.user_capabilities.delete'
             }
         }
     });

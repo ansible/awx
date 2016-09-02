@@ -16,8 +16,19 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
     Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
-
     ClearScope();
+
+    $scope.canAdd = false;
+    $scope.canEdit = false;
+
+    Rest.setUrl(GetBasePath('projects'));
+    Rest.options()
+        .success(function(data) {
+            if (data.actions.POST) {
+                $scope.canAdd = true;
+                $scope.canEdit = true;
+            }
+        });
 
     Wait('start');
 
@@ -379,6 +390,15 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
     OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state,
     CreateSelect2) {
 
+    Rest.setUrl(GetBasePath('projects'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add a project.', 'alert-info');
+            }
+        });
+
     ClearScope();
 
     // Inject dynamic view
@@ -567,6 +587,16 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         master = {}, i,
         id = $stateParams.id,
         relatedSets = {};
+
+    $scope.canEdit = false;
+
+    Rest.setUrl(GetBasePath('projects') + id);
+    Rest.options()
+        .success(function(data) {
+            if (data.actions.PUT) {
+                $scope.canEdit = true;
+            }
+        });
 
     // remove "type" field from search options
     CredentialList = _.cloneDeep(CredentialList);

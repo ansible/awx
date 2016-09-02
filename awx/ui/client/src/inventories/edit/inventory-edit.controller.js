@@ -17,7 +17,6 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
     Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state,
     $filter) {
-
     ClearScope();
 
     // Inject dynamic view
@@ -28,6 +27,16 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         master = {},
         fld, json_data, data,
         relatedSets = {};
+
+    $scope.canEdit = false;
+
+    Rest.setUrl(GetBasePath('inventory') + inventory_id);
+    Rest.options()
+        .success(function(data) {
+            if (data.actions.PUT) {
+                $scope.canEdit = true;
+            }
+        });
 
     form.formLabelSize = null;
     form.formFieldSize = null;

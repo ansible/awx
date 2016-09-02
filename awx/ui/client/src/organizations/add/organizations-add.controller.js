@@ -12,6 +12,15 @@ export default ['$scope', '$rootScope', '$compile', '$location',
         $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
         ClearScope, GetBasePath, ReturnToCaller, Wait, $state) {
 
+        Rest.setUrl(GetBasePath('organizations'));
+        Rest.options()
+            .success(function(data) {
+                if (!data.actions.POST) {
+                    $state.go("^");
+                    Alert('Permission Error', 'You do not have permission to add an organization.', 'alert-info');
+                }
+            });
+
         ClearScope();
 
         // Inject dynamic view

@@ -26,14 +26,16 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: false
+                    capitalize: false,
+                    ngDisabled: '!canEdit'
                 },
                 inventory_description: {
                     realName: 'description',
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!canEdit'
                 },
                 organization: {
                     label: 'Organization',
@@ -44,7 +46,8 @@ export default
                     awRequiredWhen: {
                         reqExpression: "organizationrequired",
                         init: "true"
-                    }
+                    },
+                    ngDisabled: '!canEdit'
                 },
                 variables: {
                     label: 'Variables',
@@ -63,17 +66,24 @@ export default
                         '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataTitle: 'Inventory Variables',
                     dataPlacement: 'right',
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!canEdit' // TODO: get working
                 }
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngHide: 'canEdit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 
@@ -94,7 +104,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: 'canEdit'
                         }
                     },
 

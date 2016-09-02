@@ -15,8 +15,19 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
     SelectionInit, Wait, $state, Refresh, $filter) {
-
     ClearScope();
+
+    $scope.canAdd = false;
+    $scope.canEdit = false;
+
+    Rest.setUrl(GetBasePath('teams'));
+    Rest.options()
+        .success(function(data) {
+            if (data.actions.POST) {
+                $scope.canAdd = true;
+                $scope.canEdit = true;
+            }
+        });
 
     var list = TeamList,
         defaultUrl = GetBasePath('teams'),
@@ -137,6 +148,15 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
 
+    Rest.setUrl(GetBasePath('teams'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add a team.', 'alert-info');
+            }
+        });
+
     // Inject dynamic view
     var defaultUrl = GetBasePath('teams'),
         form = TeamForm,
@@ -205,6 +225,16 @@ export function TeamsEdit($scope, $rootScope, $location,
         id = $stateParams.team_id,
         relatedSets = {},
         set;
+
+    $scope.canEdit = false;
+
+    Rest.setUrl(GetBasePath('teams') + id);
+    Rest.options()
+        .success(function(data) {
+            if (data.actions.PUT) {
+                $scope.canEdit = true;
+            }
+        });
 
     $scope.team_id = id;
 

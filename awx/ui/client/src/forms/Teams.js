@@ -25,13 +25,15 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: false
+                    capitalize: false,
+                    ngDisabled: '!canEdit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!canEdit'
                 },
                 organization: {
                     label: 'Organization',
@@ -44,17 +46,24 @@ export default
                     awRequiredWhen: {
                         reqExpression: "orgrequired",
                         init: true
-                    }
+                    },
+                    ngDisabled: '!canEdit'
                 }
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!canEdit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 
@@ -75,7 +84,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add user to team',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: 'canEdit'
                         }
                     },
 

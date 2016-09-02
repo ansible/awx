@@ -26,21 +26,24 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: true
+                    capitalize: true,
+                    ngDisabled: '!canEdit'
                 },
                 last_name: {
                     label: 'Last Name',
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: true
+                    capitalize: true,
+                    ngDisabled: '!canEdit'
                 },
                 email: {
                     label: 'Email',
                     type: 'email',
                     addRequired: true,
                     editRequired: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!canEdit'
                 },
                 username: {
                     label: 'Username',
@@ -49,7 +52,8 @@ export default
                         reqExpression: "not_ldap_user && external_account === null",
                         init: true
                     },
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!canEdit'
                 },
                 organization: {
                     label: 'Organization',
@@ -63,7 +67,8 @@ export default
                     awRequiredWhen: {
                         reqExpression: "orgrequired",
                         init: true
-                    }
+                    },
+                    ngDisabled: '!canEdit'
                 },
                 password: {
                     label: 'Password',
@@ -74,7 +79,8 @@ export default
                     editRequired: false,
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
-                    chkPass: true
+                    chkPass: true,
+                    ngDisabled: '!canEdit'
                 },
                 password_confirm: {
                     label: 'Confirm Password',
@@ -85,7 +91,8 @@ export default
                     editRequired: false,
                     awPassMatch: true,
                     associated: 'password',
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!canEdit'
                 },
                 user_type: {
                     label: 'User Type',
@@ -94,16 +101,23 @@ export default
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
+                    ngDisabled: '!canEdit'
                 },
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!canEdit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 
@@ -186,7 +200,8 @@ export default
                             label: 'Remove',
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
-                            awToolTip: 'Dissasociate permission from user'
+                            awToolTip: 'Dissasociate permission from user',
+                            ngShow: 'canEdit'
                         }
                     },
                     hideOnSuperuser: true
