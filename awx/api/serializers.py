@@ -513,7 +513,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobTemplateSerializer:
-            return ['project', 'inventory_source', 'job_template', 'system_job_template']
+            return ['project', 'inventory_source', 'job_template', 'system_job_template', 'workflow_job_template',]
         else:
             return super(UnifiedJobTemplateSerializer, self).get_types()
 
@@ -528,7 +528,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
                 serializer_class = JobTemplateSerializer
             elif isinstance(obj, SystemJobTemplate):
                 serializer_class = SystemJobTemplateSerializer
-            elif isinstance(obj, WorkflowJobTemplateSerializer):
+            elif isinstance(obj, WorkflowJobTemplate):
                 serializer_class = WorkflowJobTemplateSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
@@ -560,7 +560,7 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobSerializer:
-            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
+            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job', 'workflow_job',]
         else:
             return super(UnifiedJobSerializer, self).get_types()
 
@@ -593,6 +593,8 @@ class UnifiedJobSerializer(BaseSerializer):
                 serializer_class = AdHocCommandSerializer
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobSerializer
+            elif isinstance(obj, WorkflowJob):
+                serializer_class = WorkflowJobSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)
@@ -640,6 +642,8 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
                 serializer_class = AdHocCommandListSerializer
             elif isinstance(obj, SystemJob):
                 serializer_class = SystemJobListSerializer
+            elif isinstance(obj, WorkflowJob):
+                serializer_class = WorkflowJobSerializer
         if serializer_class:
             serializer = serializer_class(instance=obj, context=self.context)
             ret = serializer.to_representation(obj)

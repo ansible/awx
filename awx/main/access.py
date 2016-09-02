@@ -1431,10 +1431,12 @@ class UnifiedJobTemplateAccess(BaseAccess):
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
         system_job_template_qs = self.user.get_queryset(SystemJobTemplate)
+        workflow_job_template_qs = self.user.get_queryset(WorkflowJobTemplate)
         qs = qs.filter(Q(Project___in=project_qs) |
                        Q(InventorySource___in=inventory_source_qs) |
                        Q(JobTemplate___in=job_template_qs) |
-                       Q(systemjobtemplate__in=system_job_template_qs))
+                       Q(systemjobtemplate__in=system_job_template_qs) |
+                       Q(workflowjobtemplate__in=workflow_job_template_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
@@ -1470,11 +1472,13 @@ class UnifiedJobAccess(BaseAccess):
         job_qs = self.user.get_queryset(Job)
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         system_job_qs = self.user.get_queryset(SystemJob)
+        workflow_job_qs = self.user.get_queryset(WorkflowJob)
         qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
                        Q(InventoryUpdate___in=inventory_update_qs) |
                        Q(Job___in=job_qs) |
                        Q(AdHocCommand___in=ad_hoc_command_qs) |
-                       Q(SystemJob___in=system_job_qs))
+                       Q(SystemJob___in=system_job_qs) |
+                       Q(WorkflowJob___in=workflow_job_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
