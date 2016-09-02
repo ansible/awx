@@ -2544,6 +2544,7 @@ class LabelSerializer(BaseSerializer):
         return res
 
 class ScheduleSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Schedule

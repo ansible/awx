@@ -416,6 +416,9 @@ def cache_list_capabilities(page, role_types, model, user):
     '''
     page_ids = [obj.id for obj in page]
     id_lists = {}
+    for obj in page:
+        obj.capabilities_cache = {}
+
     for role_type in role_types:
         # Role name translation to UI names for methods
         display_method = role_type
@@ -423,14 +426,15 @@ def cache_list_capabilities(page, role_types, model, user):
             display_method = 'edit'
         elif role_type in ['execute', 'update']:
             display_method = 'start'
+
         # Query for union of page objects & role accessible_objects
-        id_lists[display_method] = model.accessible_objects(
-            user, '%s_role' % role_type).filter(pk__in=page_ids).values_list('pk', flat=True)
-    # Save data item-by-item
-    for obj in page:
-        obj.capabilities_cache = {display_method: False for display_method in id_lists.keys()}
-        for display_method, id_list in id_lists.iteritems():
-            if obj.pk in id_list:
+        ids_with_role = set(model.accessible_objects(
+            user, '%s_role' % role_type).filter(pk__in=page_ids).values_list('pk', flat=True))
+
+        # Save data item-by-item
+        for obj in page:
+            obj.capabilities_cache[display_method] = False
+            if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
 
 

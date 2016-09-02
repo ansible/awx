@@ -222,8 +222,8 @@ class BaseAccess(object):
     def get_user_capabilities(self, obj, method_list):
         user_capabilities = {}
 
+        # Custom ordering to loop through methods so we can reuse earlier calcs
         for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc']:
-            # Custom ordering of methods used so we can reuse earlier calcs
             if display_method not in method_list:
                 continue
 
@@ -233,54 +233,38 @@ class BaseAccess(object):
                 continue
 
             # Aliases for going form UI language to API language
-            # speedups in certain cases by deferring to earlier property
             if display_method == 'edit':
                 method = 'change'
             elif display_method == 'copy':
                 method = 'add'
-            elif display_method == 'schedule' and 'edit' in user_capabilities:
-                user_capabilities['schedule'] = user_capabilities['edit']
-                continue
-            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
-                user_capabilities['delete'] = user_capabilities['edit']
-                continue
             elif display_method == 'adhoc':
                 method = 'run_ad_hoc_commands'
             else:
                 method = display_method
 
+            # Shortcuts in certain cases by deferring to earlier property
+            if display_method == 'schedule' and 'edit' in user_capabilities:
+                user_capabilities['schedule'] = user_capabilities['edit']
+                continue
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
+                user_capabilities['delete'] = user_capabilities['edit']
+                continue
+
             # Preprocessing before the access method is called
             data = None
-            if method == 'add':
-                data = {}
-
-            access_instance = self
-            obj_check = obj
-            if isinstance(obj, (Group, Host)):
-                if method == 'start':
-                    if obj.inventory_source:
-                        obj_check = obj.inventory_source
-                    else:
-                        user_capabilities[method] = False
-                        continue
-                else:
-                    obj_check = obj.inventory
-                access_class = access_registry.get(type(obj_check), [])[0]
-                access_instance = access_class(self.user)
             if isinstance(obj, JobTemplate):
                 data = {'reference_obj': obj}
+            elif method == 'add':
+                data = {}
 
-            # try:
-            access_method = getattr(access_instance, "can_%s" % method)
+            # Compute permission
+            access_method = getattr(self, "can_%s" % method)
             if method in ['change']: # 3 args
-                user_capabilities[display_method] = access_method(obj_check, data)
+                user_capabilities[display_method] = access_method(obj, data)
             elif method in ['delete', 'start', 'run_ad_hoc_commands']: # 2 args
-                user_capabilities[display_method] = access_method(obj_check)
+                user_capabilities[display_method] = access_method(obj)
             elif method in ['add']: # 2 args with data
                 user_capabilities[display_method] = access_method(data)
-            # except Exception as exc:
-            #     user_capabilities[display_method] = False
-            #     print(exc)
 
         return user_capabilities
 
@@ -602,6 +586,12 @@ class GroupAccess(BaseAccess):
             raise StateConflict({"conflict": "Resource is being used by running jobs",
                                  "active_jobs": active_jobs})
         return True
+
+    def can_start(self, obj):
+        # Used as another alias to inventory_source start access
+        if obj and obj.inventory_source:
+            return self.user.can_access(InventorySource, 'start', obj.inventory_source)
+        return False
 
 class InventorySourceAccess(BaseAccess):
     '''
@@ -938,7 +928,9 @@ class JobTemplateAccess(BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return True
+            return (
+                Project.accessible_objects(self.user, 'use_role').exists() or
+                Inventory.accessible_objects(self.user, 'use_role').exists())
 
         # if reference_obj is provided, determine if it can be coppied
         reference_obj = data.pop('reference_obj', None)
