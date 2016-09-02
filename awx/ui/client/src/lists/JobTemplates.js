@@ -55,7 +55,8 @@ export default
                 basePaths: ['job_templates'],
                 awToolTip: 'Create a new template',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
