@@ -143,7 +143,8 @@ export default
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: 'RUN COMMANDS',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: 'canAdhoc'
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
@@ -155,7 +156,8 @@ export default
                 ngClick: "createGroup()",
                 awToolTip: "Create a new group",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD GROUP'
+                buttonContent: '&#43; ADD GROUP',
+                ngShow: 'canAdd'
             }
         },
 
@@ -207,6 +209,14 @@ export default
                 awToolTip: 'Edit group',
                 dataPlacement: "top",
                 ngShow: "group.summary_fields.user_capabilities.edit"
+            },
+            view: {
+                //label: 'Edit',
+                mode: 'all',
+                ngClick: "editGroup(group.id)",
+                awToolTip: 'View group',
+                dataPlacement: "top",
+                ngShow: "!group.summary_fields.user_capabilities.edit"
             },
             "delete": {
                 //label: 'Delete',

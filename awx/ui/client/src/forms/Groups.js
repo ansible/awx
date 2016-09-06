@@ -26,14 +26,16 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    tab: 'properties'
+                    tab: 'properties',
+                    ngDisabled: '!canEdit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    tab: 'properties'
+                    tab: 'properties',
+                    ngDisabled: '!canEdit'
                 },
                 variables: {
                     label: 'Variables',
@@ -65,7 +67,8 @@ export default
                     ngChange: 'sourceChange(source)',
                     addRequired: false,
                     editRequired: false,
-                    ngModel: 'source'
+                    ngModel: 'source',
+                    ngDisabled: '!canEdit'
                 },
                 credential: {
                     label: 'Cloud Credential',
@@ -77,7 +80,8 @@ export default
                     awRequiredWhen: {
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
-                    }
+                    },
+                    ngDisabled: '!canEdit'
                 },
                 source_regions: {
                     label: 'Regions',
@@ -92,7 +96,8 @@ export default
                     awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
                         "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                         "</p>",
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!canEdit'
                 },
                 instance_filters: {
                     label: 'Instance Filters',
@@ -112,7 +117,8 @@ export default
                         "<blockquote>tag:Name=test*</blockquote>\n" +
                         "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                         "for a complete list of supported filters.</p>",
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!canEdit'
                 },
                 group_by: {
                     label: 'Only Group By',
@@ -137,7 +143,8 @@ export default
                         "<li>VPC ID: <strong>vpcs &raquo; vpc-5ca1ab1e</strong></li>" +
                         "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!canEdit'
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
@@ -149,6 +156,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
+                    ngDisabled: '!canEdit',
                 },
                 custom_variables: {
                     id: 'custom_variables',
@@ -269,7 +277,8 @@ export default
                         dataTitle: 'Overwrite',
                         dataContainer: 'body',
                         dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
+                        labelClass: 'checkbox-options',
+                        ngDisabled: '!canEdit'
                     }, {
                         name: 'overwrite_vars',
                         label: 'Overwrite Variables',
@@ -283,7 +292,8 @@ export default
                         dataTitle: 'Overwrite Variables',
                         dataContainer: 'body',
                         dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
+                        labelClass: 'checkbox-options',
+                        ngDisabled: '!canEdit'
                     }, {
                         name: 'update_on_launch',
                         label: 'Update on Launch',
@@ -296,7 +306,8 @@ export default
                         dataTitle: 'Update on Launch',
                         dataContainer: 'body',
                         dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
+                        labelClass: 'checkbox-options',
+                        ngDisabled: '!canEdit'
                     }]
                 },
                 update_cache_timeout: {
@@ -321,11 +332,17 @@ export default
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!canEdit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 

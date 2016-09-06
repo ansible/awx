@@ -46,13 +46,15 @@ export default
                         "</blockquote>",
                     dataTitle: 'Host Name',
                     dataPlacement: 'right',
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!canEdit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!canEdit'
                 },
                 variables: {
                     label: 'Variables',
@@ -83,10 +85,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
+                    ngShow: 'canEdit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!canEdit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'canEdit'
                 }
             },
 

@@ -5,13 +5,25 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus',
-    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
+    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Rest', 'GetBasePath',
     function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate, GroupManageService, GroupsCancelUpdate, ViewUpdateStatus,
-        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg){
+        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Rest, GetBasePath){
         var list = InventoryGroups,
             view = generateList,
             pageSize = 20;
         $scope.inventory_id = $stateParams.inventory_id;
+
+        $scope.canAdd = false;
+
+        Rest.setUrl(GetBasePath('inventory') + $scope.inventory_id + "/groups");
+        Rest.options()
+            .success(function(data) {
+                if (data.actions.POST) {
+                    $scope.canAdd = true;
+                }
+            });
+
+
         // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
         // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
         // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the

@@ -5,8 +5,18 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host', 'GetBasePath', 'Rest',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host, GetBasePath, Rest){
+        $scope.canEdit = false;
+
+        Rest.setUrl(GetBasePath('hosts') + $stateParams.host_id);
+        Rest.options()
+            .success(function(data) {
+                if (data.actions.PUT) {
+                    $scope.canEdit = true;
+                }
+            });
+
         var generator = GenerateForm,
             form = HostForm;
         $scope.parseType = 'yaml';

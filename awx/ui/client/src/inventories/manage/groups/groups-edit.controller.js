@@ -7,10 +7,21 @@
  export default
     ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ToggleNotification', 'ParseVariableString',
     'ParseTypeChange', 'GenerateForm', 'LookUpInit', 'RelatedSearchInit', 'RelatedPaginateInit', 'NotificationsListInit',
-    'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
+    'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData', 'Rest',
     function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ToggleNotification, ParseVariableString,
         ParseTypeChange, GenerateForm, LookUpInit, RelatedSearchInit, RelatedPaginateInit, NotificationsListInit,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData){
+        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData, Rest){
+
+        $scope.canEdit = false;
+
+        Rest.setUrl(GetBasePath('groups') + $stateParams.group_id);
+        Rest.options()
+            .success(function(data) {
+                if (data.actions.PUT) {
+                    $scope.canEdit = true;
+                }
+            });
+
         var generator = GenerateForm,
             form = GroupForm();
 
