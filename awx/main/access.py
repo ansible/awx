@@ -661,7 +661,6 @@ class CredentialAccess(BaseAccess):
                     or (not organization_pk and obj.organization):
                 return False
 
-        print(self.user in obj.admin_role)
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
