@@ -9,7 +9,7 @@ services:
     links:
       - postgres
       - memcached
-      - qpid
+      - rabbitmq
     #   - sync
     # volumes_from:
     #   - sync
@@ -23,9 +23,8 @@ services:
   memcached:
     image: memcached:alpine
 
-  qpid:
-    image: fedora/qpid:latest
-    entrypoint: qpidd --auth=no
+  rabbitmq:
+    image: rabbitmq:3-management
 
   # Source Code Synchronization Container
   # sync:
