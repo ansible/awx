@@ -1,6 +1,5 @@
 var path = require('path'),
-    webpack = require('webpack'),
-    StatsPlugin = require('stats-webpack-plugin');
+    webpack = require('webpack');
 
 var vendorPkgs = [
     'angular',
@@ -55,9 +54,6 @@ var dev = {
         }),
         // (chunkName, outfileName)
         new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
-        new StatsPlugin('stats.json', {
-            chunkModules: true
-        })
     ],
     module: {
         preLoaders: [{

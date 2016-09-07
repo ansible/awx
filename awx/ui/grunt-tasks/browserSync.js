@@ -5,7 +5,10 @@ module.exports = {
     http: {
         bsFiles: {
             src: [
-                'static/**/*'
+                'static/**/*',
+                '!static/tower.vendor.js',
+                '!static/tower.vendor.map.js',
+                '!static/tower.js.map'
             ]
         },
         options: {
