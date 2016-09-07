@@ -5,12 +5,12 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log', 'Authorization','$state', '$q',
-    function ($rootScope, $location, $log, Authorization, $state, $q) {
+['$rootScope', '$location', '$log', 'Authorization','$state',
+    function ($rootScope, $location, $log, Authorization, $state) {
         return {
             init: function() {
                 var self = this,
-                    token = Authorization.getToken(),
+                    // token = Authorization.getToken(),
                     host = window.location.host,
                     url = "ws://" + host + "/websocket/";
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
@@ -103,6 +103,44 @@ export default
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                 }, 2000);
             },
+            subscribe2: function(state){
+                console.log(state.name);
+                this.emit(JSON.stringify(state.socket));
+            },
+            // subscribe: function(toState, toParams){
+            //     if(toState.name === 'dashboard'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'jobDetail'){
+            //         this.emit(`{"groups":{"jobs": ["status_changed", "summary"] , "job_events":[${toParams.id}]}}`);
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'jobStdout'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'jobs'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"] , "schedules": ["changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'portalMode'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'projects'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'inventoryManage'){
+            //         this.emit('{"groups":{"jobs": ["status_changed"]}}');
+            //         console.log(toState.name);
+            //     }
+            //     if(toState.name === 'adHocJobStdout'){
+            //         this.emit(`{"groups":{"jobs": ["status_changed"] , "ad_hoc_command_events": [${toParams.id}]}}`);
+            //         console.log(toState.name);
+            //     }
+            // },
             checkStatus: function() {
 
                 function getSocketTip(status) {
@@ -138,23 +176,22 @@ export default
                 }
 
             },
-            on: function (eventName, callback) {
-                var self = this;
-                if(self){
-                  if(self.socket){
-                    // self.socket.onmessage(function (e) {
-                    //     var args = arguments;
-                    //     self.scope.$apply(function () {
-                    //         callback.apply(self.socket, args);
-                    //     });
-                    // });
-                  }
-                }
-
-            },
+            // on: function (eventName, callback) {
+            //     var self = this;
+            //     if(self){
+            //       if(self.socket){
+            //         // self.socket.onmessage(function (e) {
+            //         //     var args = arguments;
+            //         //     self.scope.$apply(function () {
+            //         //         callback.apply(self.socket, args);
+            //         //     });
+            //         // });
+            //       }
+            //     }
+            //
+            // },
             emit: function (eventName, data, callback) {
                 var self = this;
-                // console.log(eventName)
                 $rootScope.socketPromise.promise.then(function(){
                     self.socket.send(eventName, data, function () {
                         var args = arguments;
@@ -165,9 +202,6 @@ export default
                         });
                     });
                 });
-            },
-            getUrl: function() {
-                return url;
             },
             removeAllListeners: function (eventName) {
                 var self = this;
