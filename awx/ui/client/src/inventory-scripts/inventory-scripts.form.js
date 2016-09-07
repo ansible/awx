@@ -25,14 +25,14 @@ export default function() {
                 addRequired: true,
                 editRequired: true,
                 capitalize: false,
-                ngDisabled: '!canEdit'
+                ngDisabled: '!canEditInvScripts'
             },
             description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
-                ngDisabled: '!canEdit'
+                ngDisabled: '!canEditInvScripts'
             },
             organization: {
                 label: 'Organization',
@@ -44,7 +44,7 @@ export default function() {
                 sourceModel: 'organization',
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
-                ngDisabled: '!canEdit'
+                ngDisabled: '!canEditInvScripts'
             },
             script: {
                 label: 'Custom Script',
@@ -54,7 +54,7 @@ export default function() {
                 addRequired: true,
                 editRequired: true,
                 awDropFile: true,
-                ngDisabled: '!canEdit',
+                ngDisabled: '!canEditInvScripts',
                 rows: 10,
                 awPopOver: "<p>Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. " +
                                     "<br><br> Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python</p>",
@@ -67,16 +67,16 @@ export default function() {
         buttons: { //for now always generates <button> tags
             cancel: {
                 ngClick: 'formCancel()',
-                ngShow: 'canEdit'
+                ngShow: 'canEditInvScripts'
             },
             close: {
                 ngClick: 'formCancel()',
-                ngShow: '!canEdit'
+                ngShow: '!canEditInvScripts'
             },
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
                 ngDisabled: 'custom_inventory_form.$pristine || custom_inventory_form.$invalid || !canEdit', //Disable when $pristine or $invalid, optional
-                ngShow: 'canEdit'
+                ngShow: 'canEditInvScripts'
             }
         }
     };

@@ -24,6 +24,18 @@ export default
                 scope: scope
             });
 
+            scope.canAdd = false;
+            scope.canEdit = false;
+
+            Rest.setUrl(GetBasePath('notification_templates'));
+            Rest.options()
+                .success(function(data) {
+                    if (data.actions.POST) {
+                        scope.canAdd = true;
+                        scope.canEdit = true;;
+                    }
+                });
+
             scope.removePostRefresh = scope.$on('PostRefresh', function () {
                 Wait('stop');
                 if (scope.notification_templates) {

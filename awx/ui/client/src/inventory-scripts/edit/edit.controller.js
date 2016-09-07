@@ -17,6 +17,7 @@ export default
             LookUpInit, OrganizationList, inventory_script,
             $scope, $state
         ) {
+
             var generator = GenerateForm,
                 id = inventory_script.id,
                 form = inventoryScriptsFormObject,
@@ -24,13 +25,15 @@ export default
                 url = GetBasePath('inventory_scripts');
 
 
-            $scope.canEdit = false;
+            $scope.canEditInvScripts = false;
 
             Rest.setUrl(GetBasePath('inventory_scripts') + id);
             Rest.options()
                 .success(function(data) {
                     if (data.actions.PUT) {
-                        $scope.canEdit = true;
+                        $scope.canEditInvScripts = true;
+                    } else {
+                        $scope.canEditInvScripts = false;
                     }
                 });
 

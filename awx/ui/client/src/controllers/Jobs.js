@@ -13,7 +13,7 @@
 
 export function JobsListController ($rootScope, $log, $scope, $compile, $stateParams,
     ClearScope, LoadSchedulesScope,
-    LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait) {
+    LoadJobsScope, AllJobsList, ScheduledJobsList, GetChoices, GetBasePath, Wait, $state) {
 
     ClearScope();
 
@@ -61,6 +61,11 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
             }
         }
         jobs_scope = $scope.$new(true);
+
+        jobs_scope.viewJob = function (id) {
+            $state.transitionTo('jobDetail', {id: id});
+        };
+        
         jobs_scope.showJobType = true;
         LoadJobsScope({
             parent_scope: $scope,
@@ -153,4 +158,4 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
 
 JobsListController.$inject = ['$rootScope', '$log', '$scope', '$compile', '$stateParams',
 'ClearScope', 'LoadSchedulesScope', 'LoadJobsScope',
-'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait'];
+'AllJobsList', 'ScheduledJobsList', 'GetChoices', 'GetBasePath', 'Wait', '$state'];

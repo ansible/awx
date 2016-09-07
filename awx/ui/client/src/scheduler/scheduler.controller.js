@@ -48,6 +48,19 @@ export default [
         }
         $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
             url += "schedules/";
+
+            $scope.canAdd = false;
+            $scope.canEdit = false;
+
+            Rest.setUrl(url);
+            Rest.options()
+                .success(function(data) {
+                    if (data.actions.POST) {
+                        $scope.canAdd = true;
+                        $scope.canEdit = true;
+                    }
+                });
+
             schedList.well = true;
 
             // include name of item in listTitle

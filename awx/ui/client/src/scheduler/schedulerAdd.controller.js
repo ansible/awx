@@ -9,7 +9,6 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
     'Rest', 'ParamPass',
     function($compile, $filter, $state, $stateParams, AddSchedule, Wait, $scope,
         $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass) {
-
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
