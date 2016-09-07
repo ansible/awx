@@ -711,7 +711,7 @@ var tower = angular.module('Tower', [
             }
             $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
                 function openSocket() {
-                    $rootScope.socket = Socket({ scope: $rootScope});
+                    // $rootScope.socket = Socket({ scope: $rootScope});
                     $rootScope.socket.init();
                     // $rootScope.socket.on("status_changed", function(data) {
                     //     $log.debug('Job ' + data.unified_job_id +
@@ -923,6 +923,10 @@ var tower = angular.module('Tower', [
         if (!$rootScope.featuresConfigured) {
             // create a promise that will resolve when features are loaded
             $rootScope.featuresConfigured = $q.defer();
+        }
+        if (!$rootScope.socketPromise) {
+            // create a promise that resolves when the socket connection is open
+            $rootScope.socketPromise = $q.defer();
         }
         $rootScope.licenseMissing = true;
         //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override

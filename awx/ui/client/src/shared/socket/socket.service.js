@@ -3,10 +3,10 @@
  *
  * All Rights Reserved
  *************************************************/
-import ReconnectingWebSocket from 'reconnectingwebsocket'
+import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log', 'Authorization','$state',
-    function ($rootScope, $location, $log, Authorization, $state) {
+['$rootScope', '$location', '$log', 'Authorization','$state', '$q',
+    function ($rootScope, $location, $log, Authorization, $state, $q) {
         return {
             init: function() {
                 var self = this,
@@ -21,9 +21,10 @@ export default
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10
                     });
-                    // self.socket.onopen = function () {
-                    //     console.log('websocket connected'); //log errors
-                    // };
+                    self.socket.onopen = function () {
+                        console.log('websocket connected'); //log errors
+                        $rootScope.socketPromise.resolve();
+                    };
                     //
                     // self.socket.onerror = function (error) {
                     //     console.log('Error Logged: ' + error); //log errors
@@ -154,12 +155,14 @@ export default
             emit: function (eventName, data, callback) {
                 var self = this;
                 // console.log(eventName)
-                self.socket.send(eventName, data, function () {
-                    var args = arguments;
-                    self.scope.$apply(function () {
-                        if (callback) {
-                            callback.apply(self.socket, args);
-                        }
+                $rootScope.socketPromise.promise.then(function(){
+                    self.socket.send(eventName, data, function () {
+                        var args = arguments;
+                        self.scope.$apply(function () {
+                            if (callback) {
+                                callback.apply(self.socket, args);
+                            }
+                        });
                     });
                 });
             },
