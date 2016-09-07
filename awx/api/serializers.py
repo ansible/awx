@@ -1539,6 +1539,7 @@ class RoleSerializer(BaseSerializer):
 
 
 class ResourceAccessListElementSerializer(UserSerializer):
+    show_capabilities = []  # Clear fields from UserSerializer parent class
 
     def to_representation(self, user):
         '''
@@ -1564,14 +1565,12 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
-            try:
+            if role.content_type is not None:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
-                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
-                    Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
-            except:
-                pass
+            role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
@@ -1584,14 +1583,12 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     'team_id': team_role.object_id,
                     'team_name': team_role.content_object.name
                 }
-                try:
+                if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
                     role_dict['resource_type'] = role.content_type.name
                     role_dict['related'] = reverse_gfk(role.content_object)
-                    role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
-                        Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
-                except:
-                    pass
+                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                    Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
                 ret.append({ 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
             return ret
 
@@ -1885,6 +1882,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
 
+        # Remove the can_copy and can_edit fields when dependencies are fully removed
         # Check for conditions that would create a validation error if coppied
         validation_errors, resources_needed_to_start = obj.resource_validation_data()
 

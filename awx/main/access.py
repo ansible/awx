@@ -249,13 +249,16 @@ class BaseAccess(object):
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
+            if display_method == 'copy' and isinstance(obj, JobTemplate):
+                validation_errors, resources_needed_to_start = obj.resource_validation_data()
+                if validation_errors:
+                    user_capabilities['copy'] = False
+                    continue
 
             # Preprocessing before the access method is called
-            data = None
-            if isinstance(obj, JobTemplate):
-                data = {'reference_obj': obj}
-            elif method == 'add':
-                data = {}
+            data = {}
+            if method == 'add' and isinstance(obj, JobTemplate):
+                data['reference_obj'] = obj
 
             # Compute permission
             access_method = getattr(self, "can_%s" % method)

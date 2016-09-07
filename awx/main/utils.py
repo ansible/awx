@@ -415,7 +415,6 @@ def cache_list_capabilities(page, role_types, model, user):
     are save on each object in the list, using 1 query for each role type
     '''
     page_ids = [obj.id for obj in page]
-    id_lists = {}
     for obj in page:
         obj.capabilities_cache = {}
 
