@@ -29,7 +29,6 @@ import './helpers';
 import './forms';
 import './lists';
 import './widgets';
-import './help';
 import './filters';
 import { Home } from './controllers/Home';
 import { SocketsController } from './controllers/Sockets';
