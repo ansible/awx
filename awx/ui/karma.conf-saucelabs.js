@@ -74,7 +74,6 @@ module.exports = function(config) {
                         test: /\.angular.js$/,
                         loader: 'expose?angular'
                     },
-
                     {
                         test: /\.js$/,
                         loader: 'babel-loader',
@@ -85,11 +84,12 @@ module.exports = function(config) {
                         }
                     }, {
                         test: /\.js$/,
-                        loader: 'babel-istanbul',
+                        loader: 'babel-loader',
                         include: [path.resolve() + '/client/src/'],
                         exclude: '/(node_modules)/',
                         query: {
-                            presets: ['es2015']
+                            presets: ['es2015'],
+                            plugins: ['istanbul']
                         }
                     }
                 ]
