@@ -1,0 +1,59 @@
+version: '2'
+services:
+  haproxy:
+    build:
+      context: ./docker-compose
+      dockerfile: Dockerfile-haproxy
+    depends_on:
+      - "tower_1"
+      - "tower_2"
+      - "tower_3"
+    ports:
+      - "8013:8013"
+      - "1936:1936"
+  tower_1:
+    image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    environment:
+      RABBITMQ_HOST: rabbitmq_1
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      RABBITMQ_VHOST: /
+    volumes:
+      - "../:/tower_devel"
+  tower_2:
+    image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    environment:
+      RABBITMQ_HOST: rabbitmq_2
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      RABBITMQ_VHOST: /
+    volumes:
+      - "../:/tower_devel"
+  tower_3:
+    image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    environment:
+      RABBITMQ_HOST: rabbitmq_3
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      RABBITMQ_VHOST: /
+    volumes:
+      - "../:/tower_devel"
+  rabbitmq_1:
+    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    hostname: rabbitmq_1
+  rabbitmq_2:
+    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    hostname: rabbitmq_2
+    environment: 
+      - CLUSTERED=true
+      - CLUSTER_WITH=rabbitmq_1
+  rabbitmq_3:
+    image: gcr.io/ansible-tower-engineering/rabbit_cluster_node:latest
+    hostname: rabbitmq_3
+    environment: 
+      - CLUSTERED=true
+      - CLUSTER_WITH=rabbitmq_1
+  postgres:
+    image: postgres:9.4.1
+  memcached:
+    image: memcached:alpine

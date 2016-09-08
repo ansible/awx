@@ -731,6 +731,9 @@ docker-auth:
 docker-compose: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
 
+docker-compose-cluster: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
+
 docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
 

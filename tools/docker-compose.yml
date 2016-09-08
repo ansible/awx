@@ -3,6 +3,11 @@ services:
   # Primary Tower Development Container
   tower:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      RABBITMQ_VHOST: tower
     ports:
       - "8080:8080"
       - "8013:8013"
