@@ -331,10 +331,16 @@ class BaseSerializer(serializers.ModelSerializer):
                 }
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
+
+        # Advance display of RBAC capabilities
         if hasattr(self, 'show_capabilities'):
             view = self.context.get('view', None)
+            parent_obj = None
+            if hasattr(view, 'parent_model'):
+                parent_obj = view.get_parent_object()
             if view and view.request and view.request.user:
-                user_capabilities = get_user_capabilities(view.request.user, obj, self.show_capabilities)
+                user_capabilities = get_user_capabilities(
+                    view.request.user, obj, method_list=self.show_capabilities, parent_obj=parent_obj)
                 if user_capabilities:
                     summary_fields['user_capabilities'] = user_capabilities
 
@@ -1537,6 +1543,9 @@ class RoleSerializer(BaseSerializer):
         return ret
 
 
+class RoleSerializerWithParentAccess(RoleSerializer):
+    show_capabilities = ['unattach']
+
 
 class ResourceAccessListElementSerializer(UserSerializer):
     show_capabilities = []  # Clear fields from UserSerializer parent class
@@ -1569,8 +1578,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
-            role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
-                Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
+                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                    Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
+            else:
+                # Singleton roles should not be managed from this view, as per copy/edit rework spec
+                role_dict['user_capabilities'] = {'unattach': False}
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
@@ -1587,8 +1599,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     role_dict['resource_name'] = role.content_object.name
                     role_dict['resource_type'] = role.content_type.name
                     role_dict['related'] = reverse_gfk(role.content_object)
-                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
-                    Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
+                    role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                        Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
+                else:
+                    # Singleton roles should not be managed from this view, as per copy/edit rework spec
+                    role_dict['user_capabilities'] = {'unattach': False}
                 ret.append({ 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
             return ret
 

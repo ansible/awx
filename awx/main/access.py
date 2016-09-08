@@ -116,7 +116,7 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
-def get_user_capabilities(user, instance, method_list):
+def get_user_capabilities(user, instance, **kwargs):
     '''
     Returns a dictionary of capabilities the user has on the particular
     instance.  *NOTE* This is not a direct mapping of can_* methods into this
@@ -125,7 +125,7 @@ def get_user_capabilities(user, instance, method_list):
     actions in the interface.
     '''
     for access_class in access_registry.get(type(instance), []):
-        return access_class(user).get_user_capabilities(instance, method_list)
+        return access_class(user).get_user_capabilities(instance, **kwargs)
     return None
 
 def check_superuser(func):
@@ -219,11 +219,11 @@ class BaseAccess(object):
             elif "features" not in validation_info:
                 raise LicenseForbids("Features not found in active license.")
 
-    def get_user_capabilities(self, obj, method_list):
+    def get_user_capabilities(self, obj, method_list=[], parent_obj=None):
         user_capabilities = {}
 
         # Custom ordering to loop through methods so we can reuse earlier calcs
-        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc']:
+        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc', 'unattach']:
             if display_method not in method_list:
                 continue
 
@@ -268,6 +268,14 @@ class BaseAccess(object):
                 user_capabilities[display_method] = access_method(obj)
             elif method in ['add']: # 2 args with data
                 user_capabilities[display_method] = access_method(data)
+            elif method in ['attach', 'unattach']: # parent/sub-object call
+                if type(parent_obj) == Team:
+                    relationship = 'parents'
+                    parent_obj = parent_obj.member_role
+                else:
+                    relationship = 'members'
+                user_capabilities[display_method] = access_method(
+                    obj, parent_obj, relationship, skip_sub_obj_read_check=True, data=data)
 
         return user_capabilities
 

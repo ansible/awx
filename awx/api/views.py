@@ -864,7 +864,7 @@ class TeamUsersList(BaseUsersList):
 class TeamRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
-    serializer_class = RoleSerializer
+    serializer_class = RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
     parent_model = Team
     relationship='member_role.children'
@@ -1197,7 +1197,7 @@ class UserTeamsList(ListAPIView):
 class UserRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
-    serializer_class = RoleSerializer
+    serializer_class = RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
     parent_model = User
     relationship='roles'

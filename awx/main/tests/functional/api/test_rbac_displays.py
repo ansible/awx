@@ -159,54 +159,104 @@ def test_proj_jt_admin_copy_edit(jt_copy_edit, rando):
     assert response['summary_fields']['user_capabilities']['edit']
 
 
+@pytest.fixture
+def mock_access_method(mocker):
+    mock_method = mocker.MagicMock()
+    mock_method.return_value = 'foobar'
+    mock_method.__name__ = 'bars' # Required for a logging statement
+    return mock_method
+
+
 @pytest.mark.django_db
 class TestAccessListCapabilities:
-    @pytest.fixture
-    def mock_access_method(self, mocker):
-        "Mocking this requires extra work because of the logging statement"
-        mock_method = mocker.MagicMock()
-        mock_method.return_value = 'foobar'
-        mock_method.__name__ = 'bars'
-        return mock_method
+    """
+    Test that the access_list serializer shows the exact output of the RoleAccess.can_attach
+     - looks at /api/v1/inventories/N/access_list/
+     - test for types: direct, indirect, and team access
+    """
+
+    extra_kwargs = dict(skip_sub_obj_read_check=False, data={})
 
     def _assert_one_in_list(self, data, sublist='direct_access'):
+        "Establish that exactly 1 type of access exists so we know the entry is the right one"
         assert len(data['results']) == 1
         assert len(data['results'][0]['summary_fields'][sublist]) == 1
     
-    def test_access_list_direct_access_capability(self, inventory, rando, get, mocker, mock_access_method):
-        """Test that the access_list serializer shows the exact output of the
-        RoleAccess.can_attach method in the direct_access list"""
+    def test_access_list_direct_access_capability(
+            self, inventory, rando, get, mocker, mock_access_method):
         inventory.admin_role.members.add(rando)
+
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
             response = get(reverse('api:inventory_access_list', args=(inventory.id,)), rando)
+
+        mock_access_method.assert_called_once_with(inventory.admin_role, rando, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
-    def test_access_list_indirect_access_capability(self, inventory, admin_user, get, mocker, mock_access_method):
-        """Test the display of unattach access for a singleton permission"""
+    def test_access_list_indirect_access_capability(
+            self, inventory, organization, org_admin, get, mocker, mock_access_method):
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
-            response = get(reverse('api:inventory_access_list', args=(inventory.id,)), admin_user)
+            response = get(reverse('api:inventory_access_list', args=(inventory.id,)), org_admin)
+
+        mock_access_method.assert_called_once_with(organization.admin_role, org_admin, 'members', **self.extra_kwargs)
         self._assert_one_in_list(response.data, sublist='indirect_access')
         indirect_access_list = response.data['results'][0]['summary_fields']['indirect_access']
         assert indirect_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
-    def test_access_list_team_direct_access_capability(self, inventory, team, team_member, get, mocker, mock_access_method):
-        """Test the display of unattach access for team-based permissions
-        this happens in a difference place in the serializer code from the user permission"""
+    def test_access_list_team_direct_access_capability(
+            self, inventory, team, team_member, get, mocker, mock_access_method):
         team.member_role.children.add(inventory.admin_role)
+
         with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
             response = get(reverse('api:inventory_access_list', args=(inventory.id,)), team_member)
+
+        mock_access_method.assert_called_once_with(inventory.admin_role, team.member_role, 'parents', **self.extra_kwargs)
         self._assert_one_in_list(response.data)
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
 
 @pytest.mark.django_db
-def test_team_roles_unattach(mocker):
-    pass
+def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_method, get):
+    team.member_role.children.add(inventory.admin_role)
+
+    with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
+        response = get(reverse('api:team_roles_list', args=(team.id,)), team_member)
+
+    # Did we assess whether team_member can remove team's permission to the inventory?
+    mock_access_method.assert_called_once_with(
+        inventory.admin_role, team.member_role, 'parents', skip_sub_obj_read_check=True, data={})
+    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
 
 @pytest.mark.django_db
-def test_user_roles_unattach(mocker):
-    pass
+def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_method, get):
+    # Add to same organization so that alice and bob can see each other
+    organization.member_role.members.add(alice)
+    organization.member_role.members.add(bob)
+
+    with mocker.patch.object(access_registry[Role][0], 'can_unattach', mock_access_method):
+        response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
+
+    # Did we assess whether bob can remove alice's permission to the inventory?
+    mock_access_method.assert_called_once_with(
+        organization.member_role, alice, 'members', skip_sub_obj_read_check=True, data={})
+    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
+
+@pytest.mark.django_db
+def test_team_roles_unattach_functional(team, team_member, inventory, get):
+    team.member_role.children.add(inventory.admin_role)
+    response = get(reverse('api:team_roles_list', args=(team.id,)), team_member)
+    # Team member should be able to remove access to inventory, becauase
+    # the inventory admin_role grants that ability
+    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == True
+
+@pytest.mark.django_db
+def test_user_roles_unattach_functional(organization, alice, bob, get):
+    # Add to same organization so that alice and bob can see each other
+    organization.member_role.members.add(alice)
+    organization.member_role.members.add(bob)
+    response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
+    # Org members can not revoke the membership of other members
+    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == False
 
