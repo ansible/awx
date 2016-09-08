@@ -21,7 +21,7 @@ from django.db import connection
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.socket import Socket
+from awx.main.socket_queue import Socket
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 

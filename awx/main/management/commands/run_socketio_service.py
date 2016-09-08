@@ -16,7 +16,7 @@ from django.core.management.base import NoArgsCommand
 # AWX
 import awx
 from awx.main.models import * # noqa
-from awx.main.socket import Socket
+from awx.main.socket_queue import Socket
 
 # socketio
 from socketio import socketio_manage

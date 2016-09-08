@@ -14,7 +14,7 @@ from django.utils import timezone
 # AWX
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
-from awx.main.socket import Socket
+from awx.main.socket_queue import Socket
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
 

@@ -152,7 +152,6 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',

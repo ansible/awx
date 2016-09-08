@@ -15,6 +15,8 @@ COMPOSE_TAG ?= devel
 # NOTE: This defaults the container image version to the branch that's active
 # COMPOSE_TAG ?= $(GIT_BRANCH)
 
+COMPOSE_HOST ?= $(shell hostname)
+
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
@@ -325,7 +327,7 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	tower-manage register_instance --primary --hostname=127.0.0.1; \
+	tower-manage register_instance --hostname=$(COMPOSE_HOST); \
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate

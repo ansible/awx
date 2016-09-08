@@ -166,28 +166,13 @@ class ApiV1PingView(APIView):
         # Most of this response is canned; just build the dictionary.
         response = {
             'ha': is_ha_environment(),
-            'role': Instance.objects.my_role(),
             'version': get_awx_version(),
         }
 
-        # If this is an HA environment, we also include the IP address of
-        # all of the instances.
-        #
-        # Set up a default structure.
-        response['instances'] = {
-            'primary': None,
-            'secondaries': [],
-        }
-
-        # Add all of the instances into the structure.
+        response['instances'] = []
         for instance in Instance.objects.all():
-            if instance.primary:
-                response['instances']['primary'] = instance.hostname
-            else:
-                response['instances']['secondaries'].append(instance.hostname)
-        response['instances']['secondaries'].sort()
-
-        # Done; return the response.
+            response['instances'].append(instance.hostname)
+            response['instances'].sort()
         return Response(response)
 
 
