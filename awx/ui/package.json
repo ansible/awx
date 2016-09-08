@@ -7,7 +7,6 @@
   },
   "config": {
     "django_port": "8013",
-    "websocket_port": "8080",
     "django_host": "0.0.0.0",
     "sauce_username": "leigh-johnson",
     "sauce_access_key": "f740c3ad-c706-4e10-bb95-46e2cc50c2ac"
@@ -17,7 +16,7 @@
     "npm": "^3.10.3"
   },
   "scripts": {
-    "build-docker-machine": "docker-machine ssh $DOCKER_MACHINE_NAME -f -N -L ${npm_package_config_websocket_port}:localhost:${npm_package_config_websocket_port}; ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev",
+    "build-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev",
     "build-docker-cid": "ip=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DOCkER_CID` | npm set config ansible-tower:django_host ${ip}; grunt dev",
     "build-release": "grunt release",
     "pretest": "grunt clean:coverage",
