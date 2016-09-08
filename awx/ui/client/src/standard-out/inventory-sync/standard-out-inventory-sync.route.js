@@ -13,17 +13,16 @@ export default {
     route: '/inventory_sync/:id',
     templateUrl: templateUrl('standard-out/inventory-sync/standard-out-inventory-sync'),
     controller: 'JobStdoutController',
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     ncyBreadcrumb: {
         parent: "jobs",
         label: "{{ inventory_source_name }}"
     },
     data: {
         jobType: 'inventory_updates'
-    },
-    resolve: {
-        inventorySyncSocket: [function() {
-            // TODO: determine whether or not we have socket support for inventory sync standard out
-            return true;
-        }]
     }
 };

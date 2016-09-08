@@ -6,14 +6,19 @@ export default function($stateProvider) {
                 if(!state.resolve){
                     state.resolve = {};
                 }
-                state.resolve.socket = ['SocketService', '$rootScope',
-                    function(SocketService, $rootScope) {
-                        // var self = this;
+                state.resolve.socket = ['SocketService', '$rootScope', '$stateParams',
+                    function(SocketService, $rootScope, $stateParams) {
                         $rootScope.socketPromise.promise.then(function(){
+                            if(state.socket.groups.hasOwnProperty( "job_events")){
+                                state.socket.groups.job_events = [$stateParams.id];
+                            }
+                            if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
+                                state.socket.groups.job_events = [$stateParams.id];
+                            }
                             SocketService.subscribe2(state);
                             return true;
                         });
-                    }]
+                    }];
             },
 
             addState: function(state) {

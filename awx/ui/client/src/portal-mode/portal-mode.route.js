@@ -10,6 +10,11 @@ export default {
     ncyBreadcrumb: {
         label: "MY VIEW"
     },
+	socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     views: {
         // the empty parent ui-view
         "" : {

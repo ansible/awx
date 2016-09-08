@@ -15,8 +15,8 @@ export default {
     },
     socket: {
         "groups":{
-            "jobs": ["status_changed", "summary"]
-            // "job_events": `[${stateParams.id}]`
+            "jobs": ["status_changed", "summary"],
+            "job_events": []
         }
     },
     templateUrl: templateUrl('job-detail/job-detail'),
