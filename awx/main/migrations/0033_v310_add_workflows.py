@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import awx.main.models.notifications
 import django.db.models.deletion
+import awx.main.models.workflow
 import awx.main.fields
 
 
@@ -22,7 +24,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('id',),
             },
-            bases=('main.unifiedjob', models.Model),
+            bases=('main.unifiedjob', models.Model, awx.main.models.notifications.JobNotificationMixin, awx.main.models.workflow.WorkflowJobInheritNodesMixin),
         ),
         migrations.CreateModel(
             name='WorkflowJobTemplate',
@@ -41,10 +43,11 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=None, editable=False)),
                 ('always_nodes', models.ManyToManyField(related_name='parent_always_nodes', to='main.WorkflowNode', blank=True)),
                 ('failure_nodes', models.ManyToManyField(related_name='parent_failure_nodes', to='main.WorkflowNode', blank=True)),
-                ('job', models.ForeignKey(related_name='workflow_node', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJob', null=True)),
+                ('job', models.ForeignKey(related_name='unified_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJob', null=True)),
                 ('success_nodes', models.ManyToManyField(related_name='parent_success_nodes', to='main.WorkflowNode', blank=True)),
                 ('unified_job_template', models.ForeignKey(related_name='unified_jt_workflow_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJobTemplate', null=True)),
-                ('workflow_job_template', models.ForeignKey(related_name='workflow_nodes', to='main.WorkflowJobTemplate')),
+                ('workflow_job', models.ForeignKey(related_name='workflow_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.WorkflowJob', null=True)),
+                ('workflow_job_template', models.ForeignKey(related_name='workflow_nodes', default=None, blank=True, to='main.WorkflowJobTemplate', null=True)),
             ],
         ),
         migrations.AddField(

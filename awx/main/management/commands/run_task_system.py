@@ -180,25 +180,20 @@ class WorkflowDAG(SimpleDAG):
         for index, n in enumerate(nodes):
             obj = n['node_object']
             job = obj.job
-            print("\t\tExamining node %s job %s" % (obj, job))
 
             if not job:
-                print("\t\tNo job for node %s" % obj)
                 nodes_found.append(n)
             # Job is about to run or is running. Hold our horses and wait for
             # the job to finish. We can't proceed down the graph path until we
             # have the job result.
             elif job.status not in ['failed', 'error', 'successful']:
-                print("\t\tJob status not 'failed' 'error' nor 'successful' %s" % job.status)
                 continue
             elif job.status in ['failed', 'error']:
-                print("\t\tJob status is failed or error %s" % job.status)
                 children_failed = self.get_dependencies(obj, 'failure_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
             elif job.status in ['successful']:
-                print("\t\tJob status is successful %s" % job.status)
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 nodes.extend(children_success)
             else:
@@ -225,7 +220,7 @@ class WorkflowDAG(SimpleDAG):
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
-            elif job.status in ['successful']:
+            elif job.status in ['successfult']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 nodes.extend(children_success)
             else:
@@ -261,22 +256,13 @@ def get_running_workflow_jobs():
 
 def do_spawn_workflow_jobs():
     workflow_jobs = get_running_workflow_jobs()
-    print("Set of workflow jobs to process %s" % workflow_jobs)
     for workflow_job in workflow_jobs:
-        print("Building the dag")
         dag = WorkflowDAG(workflow_job)
-        print("Imported the workflow job dag")
-        for n in dag.nodes:
-            print("\tWorkflow dag node %s" % n)
-        for f, to, label in dag.edges:
-            print("\tWorkflow dag edge <%s,%s,%s>" % (f, to, label))
         spawn_nodes = dag.bfs_nodes_to_run()
         for spawn_node in spawn_nodes:
-            print("Spawning job %s" % spawn_node)
             # TODO: Inject job template template params as kwargs
             kv = {}
             job = spawn_node.unified_job_template.create_unified_job(**kv)
-            print("Started new job %s" % job.id)
             spawn_node.job = job
             spawn_node.save()
             result = job.signal_start(**kv)

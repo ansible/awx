@@ -1674,12 +1674,11 @@ class RunWorkflowJob(BaseTask):
         # FIXME: Detect workflow run completion
         while True:
             dag = WorkflowDAG(instance)
-            print("Deciding if workflow is done")
             if dag.is_workflow_done():
                 # TODO: update with accurate finish status (i.e. canceled, error, etc.)
-                instance = self.update_model(instance.pk, status='success')
-                print("Workflow IS done")
-                return
+                instance = self.update_model(instance.pk, status='successful')
+                break
             time.sleep(1)
+        instance.socketio_emit_status(instance.status)
         # TODO: Handle cancel
 
