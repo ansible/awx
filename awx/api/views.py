@@ -1749,6 +1749,7 @@ class GroupList(ListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
+    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc', 'inventory.update']
 
 class GroupChildrenList(SubListCreateAttachDetachAPIView):
 

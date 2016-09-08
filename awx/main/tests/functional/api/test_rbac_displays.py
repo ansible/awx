@@ -4,10 +4,10 @@ from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 
 from awx.main.models.jobs import JobTemplate
-from awx.main.models import Role
-from awx.api.serializers import JobTemplateSerializer
+from awx.main.models import Role, Group
 from awx.main.access import access_registry
-
+from awx.main.utils import cache_list_capabilities
+from awx.api.serializers import JobTemplateSerializer
 
 # This file covers special-cases of displays of user_capabilities
 # general functionality should be covered fully by unit tests, see:
@@ -253,10 +253,24 @@ def test_team_roles_unattach_functional(team, team_member, inventory, get):
 
 @pytest.mark.django_db
 def test_user_roles_unattach_functional(organization, alice, bob, get):
-    # Add to same organization so that alice and bob can see each other
     organization.member_role.members.add(alice)
     organization.member_role.members.add(bob)
     response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
     # Org members can not revoke the membership of other members
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == False
+
+
+@pytest.mark.django_db
+def test_prefetch_jt_capabilities(job_template, rando):
+    job_template.execute_role.members.add(rando)
+    qs = JobTemplate.objects.all()
+    cache_list_capabilities(qs, ['admin', 'execute'], JobTemplate, rando)
+    assert qs[0].capabilities_cache == {'edit': False, 'start': True}
+
+@pytest.mark.django_db
+def test_prefetch_group_capabilities(group, rando):
+    group.inventory.adhoc_role.members.add(rando)
+    qs = Group.objects.all()
+    cache_list_capabilities(qs, ['inventory.admin', 'inventory.adhoc'], Group, rando)
+    assert qs[0].capabilities_cache == {'edit': False, 'adhoc': True}
 

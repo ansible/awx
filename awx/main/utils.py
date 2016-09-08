@@ -413,12 +413,27 @@ def cache_list_capabilities(page, role_types, model, user):
     '''
     Given a `page` list of objects, the specified roles for the specified user
     are save on each object in the list, using 1 query for each role type
+
+    Examples:
+    capabilities_prefetch = ['admin', 'execute']
+      --> prefetch the admin (edit) and execute (start) permissions for
+          items in list for current user
+    capabilities_prefetch = ['inventory.admin_role']
+      --> prefetch the related inventory FK permissions for current user,
+          and put it into the object's cache
     '''
     page_ids = [obj.id for obj in page]
     for obj in page:
         obj.capabilities_cache = {}
 
-    for role_type in role_types:
+    for role_path in role_types:
+        if '.' in role_path:
+            path = '__'.join(role_path.split('.')[:-1])
+            role_type = role_path.split('.')[-1]
+        else:
+            path = None
+            role_type = role_path
+
         # Role name translation to UI names for methods
         display_method = role_type
         if role_type == 'admin':
@@ -427,8 +442,13 @@ def cache_list_capabilities(page, role_types, model, user):
             display_method = 'start'
 
         # Query for union of page objects & role accessible_objects
-        ids_with_role = set(model.accessible_objects(
-            user, '%s_role' % role_type).filter(pk__in=page_ids).values_list('pk', flat=True))
+        if path:
+            parent_model = model._meta.get_field(path).related_model
+            kwargs = {'%s__in' % path: parent_model.accessible_objects(user, '%s_role' % role_type)}
+            qs_obj = model.objects.filter(**kwargs)
+        else:
+            qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+        ids_with_role = set(qs_obj.filter(pk__in=page_ids).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:
