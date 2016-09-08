@@ -3,11 +3,12 @@ services:
   # Primary Tower Development Container
   tower:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    hostname: tower
     environment:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USER: guest
       RABBITMQ_PASS: guest
-      RABBITMQ_VHOST: tower
+      RABBITMQ_VHOST: /
     ports:
       - "8080:8080"
       - "8013:8013"
@@ -24,10 +25,8 @@ services:
   # Postgres Database Container
   postgres:
     image: postgres:9.4.1
-
   memcached:
     image: memcached:alpine
-
   rabbitmq:
     image: rabbitmq:3-management
 

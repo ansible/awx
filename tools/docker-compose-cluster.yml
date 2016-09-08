@@ -13,6 +13,7 @@ services:
       - "1936:1936"
   tower_1:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    hostname: tower_1
     environment:
       RABBITMQ_HOST: rabbitmq_1
       RABBITMQ_USER: guest
@@ -22,6 +23,7 @@ services:
       - "../:/tower_devel"
   tower_2:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    hostname: tower_2
     environment:
       RABBITMQ_HOST: rabbitmq_2
       RABBITMQ_USER: guest
@@ -31,6 +33,7 @@ services:
       - "../:/tower_devel"
   tower_3:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
+    hostname: tower_3
     environment:
       RABBITMQ_HOST: rabbitmq_3
       RABBITMQ_USER: guest
