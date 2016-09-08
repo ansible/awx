@@ -92,58 +92,21 @@ export default
                 return deferred.promise;
             },
 
-            getConfig: function () {
-                var config = ConfigService.get(),
-                deferred = $q.defer();
-                if(_.isEmpty(config)){
-                    var url = GetBasePath('config');
-                    Rest.setUrl(url);
-                    var promise = Rest.get();
-                    promise.then(function (response) {
-                        config = response.data.license_info;
-                        config.analytics_status = response.data.analytics_status;
-                        config.version = response.data.version;
-                        config.ansible_version = response.data.ansible_version;
-                        if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
-                            $pendolytics.bootstrap();
-                            deferred.resolve(config);
-                        }
-                        else {
-                            deferred.reject('Pendo is turned off.');
-                        }
-                    });
-                    promise.catch(function (response) {
-                        ProcessErrors($rootScope, response.data, response.status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get inventory name. GET returned status: ' +
-                            response.status });
-                        deferred.reject('Could not resolve pendo config.');
-                    });
-                }
-                else if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
-                    $pendolytics.bootstrap();
-                    deferred.resolve(config);
-                }
-                else {
-                    deferred.reject('Pendo is turned off.');
-                }
-                return deferred.promise;
-            },
-
             issuePendoIdentity: function () {
-                var that = this;
-                this.getConfig().then(function(config){
-                    var options = that.setPendoOptions(config);
-                    that.setRole(options).then(function(options){
-                        $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
-                        $log.debug(options);
-                        $pendolytics.identify(options);
-                    }, function(reason){
-                        // reject function for setRole
-                        $log.debug(reason);
-                    });
+                var config,
+                    options,
+                    c = ConfigService.get(),
+                config = c.license_info;
+                config.analytics_status = c.analytics_status;
+                config.version = c.version;
+                config.ansible_version = c.ansible_version;
+                options = this.setPendoOptions(config);
+                this.setRole(options).then(function(options){
+                    $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
+                    $log.debug(options);
+                    $pendolytics.identify(options);
                 }, function(reason){
-                    // reject function for getConfig
+                    // reject function for setRole
                     $log.debug(reason);
                 });
              }
