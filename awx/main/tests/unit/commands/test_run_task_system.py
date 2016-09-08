@@ -10,12 +10,12 @@ import pytest
 def dag_root():
     dag = SimpleDAG()
     data = [
-        { 1: 1 },
-        { 2: 2 },
-        { 3: 3 },
-        { 4: 4 },
-        { 5: 5 },
-        { 6: 6 },
+        {1: 1},
+        {2: 2},
+        {3: 3},
+        {4: 4},
+        {5: 5},
+        {6: 6},
     ]
     # Add all the nodes to the DAG
     [dag.add_node(d) for d in data]
@@ -30,12 +30,12 @@ def dag_root():
 def dag_simple_edge_labels():
     dag = SimpleDAG()
     data = [
-        { 1: 1 },
-        { 2: 2 },
-        { 3: 3 },
-        { 4: 4 },
-        { 5: 5 },
-        { 6: 6 },
+        {1: 1},
+        {2: 2},
+        {3: 3},
+        {4: 4},
+        {5: 5},
+        {6: 6},
     ]
     # Add all the nodes to the DAG
     [dag.add_node(d) for d in data]
@@ -46,23 +46,18 @@ def dag_simple_edge_labels():
 
     return dag
 
+'''
 class TestSimpleDAG(object):
     def test_get_root_nodes(self, dag_root):
         leafs = dag_root.get_leaf_nodes() 
-        for l in leafs:
-            print(l)
 
         roots = dag_root.get_root_nodes()
-        for n in roots:
-            print(n)
 
     def test_get_labeled_edges(self, dag_simple_edge_labels): 
         dag = dag_simple_edge_labels
         nodes = dag.get_dependencies(dag.nodes[0]['node_object'], 'one')
         nodes = dag.get_dependencies(dag.nodes[0]['node_object'], 'two')
-        print("Matching nodes: ")
-        for n in nodes:
-            print(n)
+'''
 
 @pytest.fixture
 def factory_node():
@@ -75,40 +70,21 @@ def factory_node():
     return fn
 
 @pytest.fixture
-def workflow_dag_multiple_roots(factory_node):
-    dag = WorkflowDAG()
-    data = [
-        factory_node(1, None),
-        factory_node(2, None),
-        factory_node(3, None),
-        factory_node(4, None),
-        factory_node(5, None),
-        factory_node(6, None),
-    ]
-    [dag.add_node(d) for d in data]
-
-    dag.add_edge(data[0], data[3], 'success')
-    dag.add_edge(data[1], data[4], 'success')
-    dag.add_edge(data[2], data[5], 'success')
-
-    return dag
-
-@pytest.fixture
 def workflow_dag_level_2(factory_node):
     dag = WorkflowDAG()
     data = [
-        factory_node(1, 'success'),
-        factory_node(2, 'success'),
-        factory_node(3, 'success'),
+        factory_node(0, 'successful'),
+        factory_node(1, 'successful'),
+        factory_node(2, 'successful'),
+        factory_node(3, None),
         factory_node(4, None),
         factory_node(5, None),
-        factory_node(6, None),
     ]
     [dag.add_node(d) for d in data]
 
-    dag.add_edge(data[0], data[3], 'success')
-    dag.add_edge(data[1], data[4], 'success')
-    dag.add_edge(data[2], data[5], 'success')
+    dag.add_edge(data[0], data[3], 'success_nodes')
+    dag.add_edge(data[1], data[4], 'success_nodes')
+    dag.add_edge(data[2], data[5], 'success_nodes')
 
     return (dag, data[3:6], False)
 
@@ -125,9 +101,9 @@ def workflow_dag_multiple_roots(factory_node):
     ]
     [dag.add_node(d) for d in data]
 
-    dag.add_edge(data[0], data[3], 'success')
-    dag.add_edge(data[1], data[4], 'success')
-    dag.add_edge(data[2], data[5], 'success')
+    dag.add_edge(data[0], data[3], 'success_nodes')
+    dag.add_edge(data[1], data[4], 'success_nodes')
+    dag.add_edge(data[2], data[5], 'success_nodes')
 
     expected = data[0:3]
     return (dag, expected, False)
@@ -145,11 +121,11 @@ def workflow_dag_multiple_edges_labeled(factory_node):
     ]
     [dag.add_node(d) for d in data]
 
-    dag.add_edge(data[0], data[1], 'success')
-    dag.add_edge(data[0], data[2], 'failure')
-    dag.add_edge(data[2], data[3], 'success')
-    dag.add_edge(data[2], data[4], 'failure')
-    dag.add_edge(data[4], data[5], 'failure')
+    dag.add_edge(data[0], data[1], 'success_nodes')
+    dag.add_edge(data[0], data[2], 'failure_nodes')
+    dag.add_edge(data[2], data[3], 'success_nodes')
+    dag.add_edge(data[2], data[4], 'failure_nodes')
+    dag.add_edge(data[4], data[5], 'failure_nodes')
 
     expected = data[5:6]
     return (dag, expected, False)
@@ -163,15 +139,15 @@ def workflow_dag_finished(factory_node):
         factory_node(2, 'failed'),
         factory_node(3, None),
         factory_node(4, 'failed'),
-        factory_node(5, 'success'),
+        factory_node(5, 'successful'),
     ]
     [dag.add_node(d) for d in data]
 
-    dag.add_edge(data[0], data[1], 'success')
-    dag.add_edge(data[0], data[2], 'failure')
-    dag.add_edge(data[2], data[3], 'success')
-    dag.add_edge(data[2], data[4], 'failure')
-    dag.add_edge(data[4], data[5], 'failure')
+    dag.add_edge(data[0], data[1], 'success_nodes')
+    dag.add_edge(data[0], data[2], 'failure_nodes')
+    dag.add_edge(data[2], data[3], 'success_nodes')
+    dag.add_edge(data[2], data[4], 'failure_nodes')
+    dag.add_edge(data[4], data[5], 'failure_nodes')
 
     expected = []
     return (dag, expected, True)

@@ -2187,7 +2187,7 @@ class WorkflowJobSerializer(UnifiedJobSerializer):
         res = super(WorkflowJobSerializer, self).get_related(obj)
         if obj.workflow_job_template:
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail',
-                                                 args=(obj.workflow_job_template.pk,))
+                                                   args=(obj.workflow_job_template.pk,))
             # TODO:
             #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))

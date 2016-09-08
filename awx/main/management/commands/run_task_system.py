@@ -220,7 +220,7 @@ class WorkflowDAG(SimpleDAG):
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
-            elif job.status in ['successfult']:
+            elif job.status in ['successful']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 nodes.extend(children_success)
             else:
@@ -260,12 +260,22 @@ def do_spawn_workflow_jobs():
         dag = WorkflowDAG(workflow_job)
         spawn_nodes = dag.bfs_nodes_to_run()
         for spawn_node in spawn_nodes:
-            # TODO: Inject job template template params as kwargs
+            # TODO: Inject job template template params as kwargs.
+            # Make sure to take into account extra_vars merge logic
             kv = {}
             job = spawn_node.unified_job_template.create_unified_job(**kv)
             spawn_node.job = job
             spawn_node.save()
-            result = job.signal_start(**kv)
+            can_start = job.signal_start(**kv)
+            if not can_start:
+                job.status = 'failed'
+                job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
+                job.save(update_fields=['status', 'job_explanation'])
+                job.socketio_emit_status("failed")
+
+            # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
+            #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+
 
 def rebuild_graph(message):
     """Regenerate the task graph by refreshing known tasks from Tower, purging

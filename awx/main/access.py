@@ -1172,9 +1172,6 @@ class WorkflowJobTemplateAccess(BaseAccess):
 
     model = WorkflowJobTemplate
 
-    def can_start(self, obj):
-        return self.can_read(obj)
-
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
             qs = self.model.objects.all()
@@ -1234,7 +1231,9 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return self.user in obj.execute_role
+        return self.can_read(obj)
+        # TODO: We should use execute role rather than read role
+        #return self.user in obj.execute_role
 
     def can_change(self, obj, data):
         data_for_change = data

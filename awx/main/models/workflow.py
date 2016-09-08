@@ -1,6 +1,9 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
+# Python
+#import urlparse
+
 # Django
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -202,8 +205,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def get_absolute_url(self):
         return reverse('api:workflow_job_detail', args=(self.pk,))
 
-    def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
+    # TODO: Ask UI if this is needed ?
+    #def get_ui_url(self):
+    #    return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         return True

@@ -14,6 +14,7 @@ from awx.main.models import (
     Inventory,
     Label,
     WorkflowJobTemplate,
+    WorkflowNode,
 )
 
 # mk methods should create only a single object of a single type.
@@ -169,7 +170,7 @@ def mk_workflow_node(workflow_job_template=None, unified_job_template=None,
                      success_nodes=None, failure_nodes=None, always_nodes=None,
                      job=None, persisted=True):
     workflow_node = WorkflowNode(workflow_job_template=workflow_job_template,
-                                 unified_job_template=job_template,
+                                 unified_job_template=unified_job_template,
                                  success_nodes=success_nodes,
                                  failure_nodes=failure_nodes,
                                  always_nodes=always_nodes,

@@ -9,7 +9,6 @@ from awx.main.models import (
     Inventory,
     Job,
     Label,
-    WorkflowJobTemplate,
 )
 
 from .objects import (

@@ -11,7 +11,6 @@ import socket
 import sys
 import errno
 import logging
-import copy
 from base64 import b64encode
 from collections import OrderedDict
 

@@ -2,7 +2,6 @@
 from awx.main.models import (
     WorkflowNode,
     WorkflowJobTemplate,
-    WorkflowJob,
 )
 from awx.main.models.jobs import JobTemplate
 
