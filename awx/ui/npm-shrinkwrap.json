@@ -124,9 +124,9 @@
       "resolved": "https://registry.npmjs.org/angular-sanitize/-/angular-sanitize-1.5.8.tgz"
     },
     "angular-scheduler": {
-      "version": "0.0.20",
-      "from": "chouseknecht/angular-scheduler#0.0.20",
-      "resolved": "git://github.com/chouseknecht/angular-scheduler.git#c7972cc98f5433011599978378e8150f54e11a1d",
+      "version": "0.1.0",
+      "from": "chouseknecht/angular-scheduler#0.1.0",
+      "resolved": "git://github.com/chouseknecht/angular-scheduler.git#784693054597b9a1c1e49efb4cf94e9054b92e66",
       "dependencies": {
         "angular-tz-extensions": {
           "version": "0.3.11",
@@ -151,14 +151,9 @@
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.8.0.tgz"
         },
         "rrule": {
-          "version": "2.1.0",
-          "from": "rrule@>=2.1.0 <2.2.0",
-          "resolved": "https://registry.npmjs.org/rrule/-/rrule-2.1.0.tgz"
-        },
-        "timezone-js": {
-          "version": "0.4.11",
-          "from": "leigh-johnson/timezone-js#0.4.13",
-          "resolved": "git://github.com/leigh-johnson/timezone-js.git#3b1de3f89106706483e79831312d3c325f95dd8a"
+          "version": "2.2.0-dev",
+          "from": "jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
+          "resolved": "git://github.com/jkbrzt/rrule.git#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c"
         }
       }
     },
@@ -176,11 +171,6 @@
           "version": "3.1.0",
           "from": "jquery@>=3.1.0 <4.0.0",
           "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.1.0.tgz"
-        },
-        "timezone-js": {
-          "version": "0.4.11",
-          "from": "leigh-johnson/timezone-js#0.4.13",
-          "resolved": "git://github.com/leigh-johnson/timezone-js.git#3b1de3f89106706483e79831312d3c325f95dd8a"
         }
       }
     },
@@ -695,6 +685,18 @@
       "version": "0.5.3",
       "from": "batch@0.5.3",
       "resolved": "https://registry.npmjs.org/batch/-/batch-0.5.3.tgz"
+    },
+    "bcrypt-pbkdf": {
+      "version": "1.0.0",
+      "from": "bcrypt-pbkdf@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.0.tgz",
+      "dependencies": {
+        "tweetnacl": {
+          "version": "0.14.3",
+          "from": "tweetnacl@>=0.14.3 <0.15.0",
+          "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.14.3.tgz"
+        }
+      }
     },
     "beeper": {
       "version": "1.1.0",
@@ -2809,6 +2811,11 @@
       "from": "istanbul-lib-coverage@>=1.0.0-alpha.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/istanbul-lib-coverage/-/istanbul-lib-coverage-1.0.0.tgz"
     },
+    "istanbul-lib-instrument": {
+      "version": "1.1.1",
+      "from": "istanbul-lib-instrument@>=1.1.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/istanbul-lib-instrument/-/istanbul-lib-instrument-1.1.1.tgz"
+    },
     "javascript-detect-element-resize": {
       "version": "0.5.3",
       "from": "javascript-detect-element-resize@>=0.5.3 <0.6.0",
@@ -3852,11 +3859,6 @@
       "from": "ripemd160@0.2.0",
       "resolved": "https://registry.npmjs.org/ripemd160/-/ripemd160-0.2.0.tgz"
     },
-    "rrule": {
-      "version": "2.2.0-dev",
-      "from": "jkbrzt/rrule#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c",
-      "resolved": "git://github.com/jkbrzt/rrule.git#4ff63b2f8524fd6d5ba6e80db770953b5cd08a0c"
-    },
     "rx": {
       "version": "4.1.0",
       "from": "rx@4.1.0",
@@ -4104,9 +4106,9 @@
       "resolved": "https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.0.3.tgz"
     },
     "sshpk": {
-      "version": "1.9.2",
+      "version": "1.10.0",
       "from": "sshpk@>=1.7.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/sshpk/-/sshpk-1.9.2.tgz",
+      "resolved": "https://registry.npmjs.org/sshpk/-/sshpk-1.10.0.tgz",
       "dependencies": {
         "assert-plus": {
           "version": "1.0.0",
@@ -4263,6 +4265,11 @@
       "version": "1.4.2",
       "from": "timers-browserify@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/timers-browserify/-/timers-browserify-1.4.2.tgz"
+    },
+    "timezone-js": {
+      "version": "0.4.11",
+      "from": "leigh-johnson/timezone-js#0.4.13",
+      "resolved": "git://github.com/leigh-johnson/timezone-js.git#3b1de3f89106706483e79831312d3c325f95dd8a"
     },
     "tiny-lr": {
       "version": "0.2.1",
