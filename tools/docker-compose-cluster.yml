@@ -11,6 +11,7 @@ services:
     ports:
       - "8013:8013"
       - "1936:1936"
+      - "5555:5555"
   tower_1:
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
     hostname: tower_1

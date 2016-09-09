@@ -8,6 +8,9 @@ import ldap
 import djcelery
 from datetime import timedelta
 
+from kombu import Queue, Exchange
+from kombu.common import Broadcast
+
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
 this_module = sys.modules[__name__]
@@ -326,6 +329,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost/'
+CELERY_DEFAULT_QUEUE = 'default'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -335,6 +339,22 @@ CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_QUEUES = (
+    Queue('default', Exchange('default'), routing_key='default'),
+    Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    Broadcast('projects'),
+)
+CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
+                                            'routing_key': 'jobs'},
+                  'awx.main.tasks.run_project_update': {'queue': 'projects'},
+                  'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
+                                                        'routing_key': 'jobs'},
+                  'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
+                                                     'routing_key': 'jobs'},
+                  'awx.main.tasks.run_system_job': {'queue': 'jobs',
+                                                  'routing_key': 'jobs'}
+})
+
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',

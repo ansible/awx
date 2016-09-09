@@ -80,7 +80,7 @@ def celery_startup(conf=None, **kwargs):
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
-@task()
+@task(queue='default')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -101,7 +101,7 @@ def send_notifications(notification_list, job_id=None):
         if job_id is not None:
             job_actual.notifications.add(notification)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def run_administrative_checks(self):
     if not tower_settings.TOWER_ADMIN_ALERTS:
         return
@@ -122,11 +122,11 @@ def run_administrative_checks(self):
                   tower_admin_emails,
                   fail_silently=True)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def cleanup_authtokens(self):
     AuthToken.objects.filter(expires__lt=now()).delete()
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
     def get_last_run():
         if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
@@ -177,7 +177,7 @@ def tower_periodic_scheduler(self):
             new_unified_job.socketio_emit_status("failed")
         emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
 
-@task()
+@task(queue='default')
 def notify_task_runner(metadata_dict):
     """Add the given task into the Tower task manager's queue, to be consumed
     by the task system.
@@ -185,7 +185,7 @@ def notify_task_runner(metadata_dict):
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
     if task_actual['type'] == 'project_update':
         instance = ProjectUpdate.objects.get(id=task_actual['id'])
@@ -227,7 +227,7 @@ def handle_work_success(self, result, task_actual):
                                   for n in all_notification_templates],
                                  job_id=task_actual['id'])
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
@@ -294,7 +294,7 @@ def handle_work_error(self, task_id, subtasks=None):
                                      job_id=first_task_id)
 
 
-@task()
+@task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to

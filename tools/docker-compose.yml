@@ -12,6 +12,7 @@ services:
     ports:
       - "8080:8080"
       - "8013:8013"
+      - "5555:5555"
     links:
       - postgres
       - memcached
