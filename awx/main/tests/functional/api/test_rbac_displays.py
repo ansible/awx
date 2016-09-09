@@ -16,147 +16,148 @@ from awx.api.serializers import JobTemplateSerializer
 #   awx/main/tests/unit/test_access.py ::
 #           test_user_capabilities_method
 
-class FakeView(object):
-    pass
-
-@pytest.fixture
-def jt_copy_edit(job_template_factory, project):
-    objects = job_template_factory(
-        'copy-edit-job-template',
-        project=project)
-    return objects.job_template
-
 
 @pytest.mark.django_db
-def test_inventory_group_host_can_add(inventory, alice, options):
-    inventory.admin_role.members.add(alice)
-
-    response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), alice)
-    assert 'POST' in response.data['actions']
-    response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), alice)
-    assert 'POST' in response.data['actions']
-
-@pytest.mark.django_db
-def test_inventory_group_host_can_not_add(inventory, bob, options):
-    inventory.read_role.members.add(bob)
-
-    response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), bob)
-    assert 'POST' not in response.data['actions']
-    response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), bob)
-    assert 'POST' not in response.data['actions']
-
-@pytest.mark.django_db
-def test_user_list_can_add(org_member, org_admin, options):
-    response = options(reverse('api:user_list'), org_admin)
-    assert 'POST' in response.data['actions']
-
-@pytest.mark.django_db
-def test_user_list_can_not_add(org_member, org_admin, options):
-    response = options(reverse('api:user_list'), org_member)
-    assert 'POST' not in response.data['actions']
-
-
-def fake_context(user):
-    request = RequestFactory().get('/api/v1/resource/42/')
-    request.user = user
-    fake_view = FakeView()
-    fake_view.request = request
-    context = {}
-    context['view'] = fake_view
-    context['request'] = request
-    return context
-
-# Test protection against limited set of validation problems
-
-@pytest.mark.django_db
-def test_bad_data_copy_edit(admin_user, project):
+class TestOptionsRBAC:
     """
-    If a required resource (inventory here) was deleted, copying not allowed
-    because doing so would caues a validation error
+    Several endpoints are relied-upon by the UI to list POST as an
+    allowed action or not depending on whether the user has permission
+    to create a resource.
     """
 
-    jt_res = JobTemplate.objects.create(
-        job_type='run',
-        project=project,
-        inventory=None,  ask_inventory_on_launch=False, # not allowed
-        credential=None, ask_credential_on_launch=True,
-        name='deploy-job-template'
-    )
-    serializer = JobTemplateSerializer(jt_res)
-    serializer.context = fake_context(admin_user)
-    response = serializer.to_representation(jt_res)
-    assert not response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+    def test_inventory_group_host_can_add(self, inventory, alice, options):
+        inventory.admin_role.members.add(alice)
 
-# Tests for correspondence between view info and intended access
+        response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), alice)
+        assert 'POST' in response.data['actions']
+        response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), alice)
+        assert 'POST' in response.data['actions']
 
-@pytest.mark.django_db
-def test_sys_admin_copy_edit(jt_copy_edit, admin_user):
-    "Absent a validation error, system admins can do everything"
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    serializer.context = fake_context(admin_user)
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+    def test_inventory_group_host_can_not_add(self, inventory, bob, options):
+        inventory.read_role.members.add(bob)
 
-@pytest.mark.django_db
-def test_org_admin_copy_edit(jt_copy_edit, org_admin):
-    "Organization admins SHOULD be able to copy a JT firmly in their org"
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    serializer.context = fake_context(org_admin)
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+        response = options(reverse('api:inventory_hosts_list', args=[inventory.pk]), bob)
+        assert 'POST' not in response.data['actions']
+        response = options(reverse('api:inventory_groups_list', args=[inventory.pk]), bob)
+        assert 'POST' not in response.data['actions']
+
+    def test_user_list_can_add(self, org_member, org_admin, options):
+        response = options(reverse('api:user_list'), org_admin)
+        assert 'POST' in response.data['actions']
+
+    def test_user_list_can_not_add(self, org_member, org_admin, options):
+        response = options(reverse('api:user_list'), org_member)
+        assert 'POST' not in response.data['actions']
+
 
 @pytest.mark.django_db
-def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_credential):
+class TestJobTemplateCopyEdit:
     """
-    Organization admins without access to the 3 related resources:
-    SHOULD NOT be able to copy JT
-    SHOULD be able to edit that job template, for nonsensitive changes
+    Tests contain scenarios that were raised as issues in the past,
+    which resulted from failed copy/edit actions even though the buttons
+    to do these actions were displayed.
     """
 
-    # Attach credential to JT that org admin can not use
-    jt_copy_edit.credential = machine_credential
-    jt_copy_edit.save()
+    @pytest.fixture
+    def jt_copy_edit(self, job_template_factory, project):
+        objects = job_template_factory(
+            'copy-edit-job-template',
+            project=project)
+        return objects.job_template
 
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    serializer.context = fake_context(org_admin)
-    response = serializer.to_representation(jt_copy_edit)
-    assert not response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+    def fake_context(self, user):
+        request = RequestFactory().get('/api/v1/resource/42/')
+        request.user = user
+        class FakeView(object):
+            pass
+        fake_view = FakeView()
+        fake_view.request = request
+        context = {}
+        context['view'] = fake_view
+        context['request'] = request
+        return context
 
-@pytest.mark.django_db
-def test_jt_admin_copy_edit(jt_copy_edit, rando):
-    """
-    JT admins wihout access to associated resources SHOULD NOT be able to copy
-    SHOULD be able to make nonsensitive changes"""
+    def test_validation_bad_data_copy_edit(self, admin_user, project):
+        """
+        If a required resource (inventory here) was deleted, copying not allowed
+        because doing so would caues a validation error
+        """
 
-    # random user given JT admin access only
-    jt_copy_edit.admin_role.members.add(rando)
-    jt_copy_edit.save()
+        jt_res = JobTemplate.objects.create(
+            job_type='run',
+            project=project,
+            inventory=None,  ask_inventory_on_launch=False, # not allowed
+            credential=None, ask_credential_on_launch=True,
+            name='deploy-job-template'
+        )
+        serializer = JobTemplateSerializer(jt_res)
+        serializer.context = self.fake_context(admin_user)
+        response = serializer.to_representation(jt_res)
+        assert not response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
 
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    serializer.context = fake_context(rando)
-    response = serializer.to_representation(jt_copy_edit)
-    assert not response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+    def test_sys_admin_copy_edit(self, jt_copy_edit, admin_user):
+        "Absent a validation error, system admins can do everything"
+        serializer = JobTemplateSerializer(jt_copy_edit)
+        serializer.context = self.fake_context(admin_user)
+        response = serializer.to_representation(jt_copy_edit)
+        assert response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
 
-@pytest.mark.django_db
-def test_proj_jt_admin_copy_edit(jt_copy_edit, rando):
-    "JT admins with access to associated resources SHOULD be able to copy"
+    def test_org_admin_copy_edit(self, jt_copy_edit, org_admin):
+        "Organization admins SHOULD be able to copy a JT firmly in their org"
+        serializer = JobTemplateSerializer(jt_copy_edit)
+        serializer.context = self.fake_context(org_admin)
+        response = serializer.to_representation(jt_copy_edit)
+        assert response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
 
-    # random user given JT and project admin abilities
-    jt_copy_edit.admin_role.members.add(rando)
-    jt_copy_edit.save()
-    jt_copy_edit.project.admin_role.members.add(rando)
-    jt_copy_edit.project.save()
+    def test_org_admin_foreign_cred_no_copy_edit(self, jt_copy_edit, org_admin, machine_credential):
+        """
+        Organization admins without access to the 3 related resources:
+        SHOULD NOT be able to copy JT
+        SHOULD be able to edit that job template, for nonsensitive changes
+        """
 
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    serializer.context = fake_context(rando)
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['user_capabilities']['copy']
-    assert response['summary_fields']['user_capabilities']['edit']
+        # Attach credential to JT that org admin can not use
+        jt_copy_edit.credential = machine_credential
+        jt_copy_edit.save()
+
+        serializer = JobTemplateSerializer(jt_copy_edit)
+        serializer.context = self.fake_context(org_admin)
+        response = serializer.to_representation(jt_copy_edit)
+        assert not response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
+
+    def test_jt_admin_copy_edit(self, jt_copy_edit, rando):
+        """
+        JT admins wihout access to associated resources SHOULD NOT be able to copy
+        SHOULD be able to make nonsensitive changes"""
+
+        # random user given JT admin access only
+        jt_copy_edit.admin_role.members.add(rando)
+        jt_copy_edit.save()
+
+        serializer = JobTemplateSerializer(jt_copy_edit)
+        serializer.context = self.fake_context(rando)
+        response = serializer.to_representation(jt_copy_edit)
+        assert not response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
+
+    def test_proj_jt_admin_copy_edit(self, jt_copy_edit, rando):
+        "JT admins with access to associated resources SHOULD be able to copy"
+
+        # random user given JT and project admin abilities
+        jt_copy_edit.admin_role.members.add(rando)
+        jt_copy_edit.save()
+        jt_copy_edit.project.admin_role.members.add(rando)
+        jt_copy_edit.project.save()
+
+        serializer = JobTemplateSerializer(jt_copy_edit)
+        serializer.context = self.fake_context(rando)
+        response = serializer.to_representation(jt_copy_edit)
+        assert response['summary_fields']['user_capabilities']['copy']
+        assert response['summary_fields']['user_capabilities']['edit']
 
 
 @pytest.fixture
@@ -165,7 +166,6 @@ def mock_access_method(mocker):
     mock_method.return_value = 'foobar'
     mock_method.__name__ = 'bars' # Required for a logging statement
     return mock_method
-
 
 @pytest.mark.django_db
 class TestAccessListCapabilities:
@@ -273,4 +273,28 @@ def test_prefetch_group_capabilities(group, rando):
     qs = Group.objects.all()
     cache_list_capabilities(qs, ['inventory.admin', 'inventory.adhoc'], Group, rando)
     assert qs[0].capabilities_cache == {'edit': False, 'adhoc': True}
+
+@pytest.mark.django_db
+def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_credential, rando):
+    job_template.project = project
+    job_template.inventory = inventory
+    job_template.credential = machine_credential
+    job_template.save()
+
+    qs = JobTemplate.objects.all()
+    cache_list_capabilities(qs, [{'copy': [
+        'project.use', 'inventory.use', 'credential.use',
+        'cloud_credential.use', 'network_credential.use'
+    ]}], JobTemplate, rando)
+    assert qs[0].capabilities_cache == {'copy': False}
+
+    project.use_role.members.add(rando)
+    inventory.use_role.members.add(rando)
+    machine_credential.use_role.members.add(rando)
+
+    cache_list_capabilities(qs, [{'copy': [
+        'project.use', 'inventory.use', 'credential.use',
+        'cloud_credential.use', 'network_credential.use'
+    ]}], JobTemplate, rando)
+    assert qs[0].capabilities_cache == {'copy': True}
 

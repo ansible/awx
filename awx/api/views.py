@@ -2205,7 +2205,10 @@ class JobTemplateList(ListCreateAPIView):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
-    capabilities_prefetch = ['admin', 'execute']
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['project.use', 'inventory.use', 'credential.use', 'cloud_credential.use', 'network_credential.use']}
+    ]
 
     def post(self, request, *args, **kwargs):
         ret = super(JobTemplateList, self).post(request, *args, **kwargs)

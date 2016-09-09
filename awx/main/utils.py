@@ -409,7 +409,7 @@ def get_model_for_type(type):
             return ct_model
 
 
-def cache_list_capabilities(page, role_types, model, user):
+def cache_list_capabilities(page, prefetch_list, model, user):
     '''
     Given a `page` list of objects, the specified roles for the specified user
     are save on each object in the list, using 1 query for each role type
@@ -418,36 +418,54 @@ def cache_list_capabilities(page, role_types, model, user):
     capabilities_prefetch = ['admin', 'execute']
       --> prefetch the admin (edit) and execute (start) permissions for
           items in list for current user
-    capabilities_prefetch = ['inventory.admin_role']
+    capabilities_prefetch = ['inventory.admin']
       --> prefetch the related inventory FK permissions for current user,
           and put it into the object's cache
+    capabilities_prefetch = [{'copy': ['inventory.admin', 'project.admin']}]
+      --> prefetch logical combination of admin permission to inventory AND
+          project, put into cache dictionary as "copy"
     '''
+    from django.db.models import Q
     page_ids = [obj.id for obj in page]
     for obj in page:
         obj.capabilities_cache = {}
 
-    for role_path in role_types:
-        if '.' in role_path:
-            path = '__'.join(role_path.split('.')[:-1])
-            role_type = role_path.split('.')[-1]
-        else:
-            path = None
-            role_type = role_path
+    for prefetch_entry in prefetch_list:
 
-        # Role name translation to UI names for methods
-        display_method = role_type
-        if role_type == 'admin':
-            display_method = 'edit'
-        elif role_type in ['execute', 'update']:
-            display_method = 'start'
-
-        # Query for union of page objects & role accessible_objects
-        if path:
-            parent_model = model._meta.get_field(path).related_model
-            kwargs = {'%s__in' % path: parent_model.accessible_objects(user, '%s_role' % role_type)}
-            qs_obj = model.objects.filter(**kwargs)
+        display_method = None
+        if type(prefetch_entry) is dict:
+            display_method = prefetch_entry.keys()[0]
+            paths = prefetch_entry[display_method]
         else:
-            qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+            paths = prefetch_entry
+
+        if type(paths) is not list:
+            paths = [paths]
+
+        # Build the query for accessible_objects according the user & role(s)
+        qs_obj = None
+        for role_path in paths:
+            if '.' in role_path:
+                res_path = '__'.join(role_path.split('.')[:-1])
+                role_type = role_path.split('.')[-1]
+                if qs_obj is None:
+                    qs_obj = model.objects
+                parent_model = model._meta.get_field(res_path).related_model
+                kwargs = {'%s__in' % res_path: parent_model.accessible_objects(user, '%s_role' % role_type)}
+                qs_obj = qs_obj.filter(Q(**kwargs) | Q(**{'%s__isnull' % res_path: True}))
+            else:
+                role_type = role_path
+                qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+
+        if display_method is None:
+            # Role name translation to UI names for methods
+            display_method = role_type
+            if role_type == 'admin':
+                display_method = 'edit'
+            elif role_type in ['execute', 'update']:
+                display_method = 'start'
+
+        # Union that query with the list of items on page
         ids_with_role = set(qs_obj.filter(pk__in=page_ids).values_list('pk', flat=True))
 
         # Save data item-by-item
