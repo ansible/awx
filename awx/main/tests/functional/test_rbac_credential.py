@@ -54,21 +54,40 @@ def test_credential_migration_team_member(credential, team, user, permissions):
 
     rbac.migrate_credential(apps, None)
 
-    # Admin permissions post migration
+    # User permissions post migration
     assert u in credential.use_role
+    assert u not in credential.admin_role
 
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
     u = user('user', False)
-    team.member_role.members.add(u)
+    team.admin_role.members.add(u)
     credential.deprecated_team = team
     credential.save()
 
     assert u not in credential.use_role
 
-    # Usage permissions post migration
+    # Admin permissions post migration
     rbac.migrate_credential(apps, None)
-    assert u in credential.use_role
+    assert u in credential.admin_role
+
+@pytest.mark.django_db
+def test_credential_migration_org_auditor(credential, team, org_auditor):
+    # Team's organization is the org_auditor's org
+    credential.deprecated_team = team
+    credential.save()
+
+    # No permissions pre-migration (this happens automatically so we patch this)
+    team.admin_role.children.remove(credential.admin_role)
+    team.member_role.children.remove(credential.use_role)
+    assert org_auditor not in credential.read_role
+
+    rbac.migrate_credential(apps, None)
+    rbac.infer_credential_org_from_team(apps, None)
+
+    # Read permissions post migration
+    assert org_auditor not in credential.use_role
+    assert org_auditor in credential.read_role
 
 def test_credential_access_superuser():
     u = User(username='admin', is_superuser=True)

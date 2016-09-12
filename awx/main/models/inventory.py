@@ -25,7 +25,10 @@ from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin,
+)
 from awx.main.utils import _inventory_updates
 from awx.main.conf import tower_settings
 
@@ -1192,7 +1195,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
         return source
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -1267,6 +1270,15 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
                 not (self.credential)):
             return False
         return True
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.inventory_source.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Inventory Update"
 
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):

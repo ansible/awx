@@ -60,6 +60,7 @@ project_urls = patterns('awx.api.views',
 )
 
 project_update_urls = patterns('awx.api.views',
+    url(r'^$',                                          'project_update_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'project_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'project_update_cancel'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'project_update_stdout'),
@@ -145,6 +146,7 @@ inventory_source_urls = patterns('awx.api.views',
 )
 
 inventory_update_urls = patterns('awx.api.views',
+    url(r'^$',                                          'inventory_update_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_update_detail'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'inventory_update_cancel'),
     url(r'^(?P<pk>[0-9]+)/stdout/$',                    'inventory_update_stdout'),

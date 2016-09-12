@@ -14,7 +14,6 @@ import 'jquery.resize';
 import 'codemirror';
 import 'js-yaml';
 import 'select2';
-import 'rrule';
 
 // Configuration dependencies
 global.$AnsibleConfig = null;

@@ -1,3 +1,4 @@
+
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
@@ -124,11 +125,13 @@ class ApiV1RootView(APIView):
         data['organizations'] = reverse('api:organization_list')
         data['users'] = reverse('api:user_list')
         data['projects'] = reverse('api:project_list')
+        data['project_updates'] = reverse('api:project_update_list')
         data['teams'] = reverse('api:team_list')
         data['credentials'] = reverse('api:credential_list')
         data['inventory'] = reverse('api:inventory_list')
         data['inventory_scripts'] = reverse('api:inventory_script_list')
         data['inventory_sources'] = reverse('api:inventory_source_list')
+        data['inventory_updates'] = reverse('api:inventory_update_list')
         data['groups'] = reverse('api:group_list')
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
@@ -1107,6 +1110,11 @@ class ProjectUpdateView(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class ProjectUpdateList(ListAPIView):
+
+    model = ProjectUpdate
+    serializer_class = ProjectUpdateListSerializer
+
 class ProjectUpdateDetail(RetrieveDestroyAPIView):
 
     model = ProjectUpdate
@@ -1158,6 +1166,7 @@ class UserList(ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
     capabilities_prefetch = ['admin']
+    permission_classes = (UserPermission,)
 
     def post(self, request, *args, **kwargs):
         ret = super(UserList, self).post( request, *args, **kwargs)
@@ -1323,7 +1332,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
         can_admin = request.user.can_access(User, 'admin', obj, request.data)
 
         su_only_edit_fields = ('is_superuser', 'is_system_auditor')
-        admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active')
+        admin_only_edit_fields = ('username', 'is_active')
 
         fields_to_check = ()
         if not request.user.is_superuser:
@@ -2172,6 +2181,11 @@ class InventorySourceUpdateView(RetrieveAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
+class InventoryUpdateList(ListAPIView):
+
+    model = InventoryUpdate
+    serializer_class = InventoryUpdateListSerializer
+
 class InventoryUpdateDetail(RetrieveDestroyAPIView):
 
     model = InventoryUpdate
@@ -3010,7 +3024,7 @@ class JobJobTasksList(BaseJobEventsList):
         # need stats on grandchildren, sorted by child.
         queryset = (JobEvent.objects.filter(parent__parent=parent_task,
                                             parent__event__in=STARTING_EVENTS)
-                                    .values('parent__id', 'event', 'changed', 'failed')
+                                    .values('parent__id', 'event', 'changed')
                                     .annotate(num=Count('event'))
                                     .order_by('parent__id'))
 
@@ -3071,13 +3085,10 @@ class JobJobTasksList(BaseJobEventsList):
             # make appropriate changes to the task data.
             for child_data in data.get(task_start_event.id, []):
                 if child_data['event'] == 'runner_on_failed':
+                    task_data['failed'] = True
                     task_data['host_count'] += child_data['num']
                     task_data['reported_hosts'] += child_data['num']
-                    if child_data['failed']:
-                        task_data['failed'] = True
-                        task_data['failed_count'] += child_data['num']
-                    else:
-                        task_data['skipped_count'] += child_data['num']
+                    task_data['failed_count'] += child_data['num']
                 elif child_data['event'] == 'runner_on_ok':
                     task_data['host_count'] += child_data['num']
                     task_data['reported_hosts'] += child_data['num']

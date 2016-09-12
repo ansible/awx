@@ -7,17 +7,30 @@
 import sys
 import traceback
 
+# Centos-7 doesn't include the svg mime type
+# /usr/lib64/python/mimetypes.py
+import mimetypes
+
 # Django Split Settings
 from split_settings.tools import optional, include
 
 # Load default settings.
 from defaults import *  # NOQA
 
+mimetypes.add_type("image/svg+xml", ".svg", True)
+mimetypes.add_type("image/svg+xml", ".svgz", True)
+
 MONGO_HOST = '127.0.0.1'
 MONGO_PORT = 27017
 MONGO_USERNAME = None
 MONGO_PASSWORD = None
 MONGO_DB = 'system_tracking_dev'
+
+# Override django.template.loaders.cached.Loader in defaults.py
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 
 # Disable capturing all SQL queries when running celeryd in development.
 if 'celeryd' in sys.argv:
@@ -71,9 +84,9 @@ include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 ANSIBLE_USE_VENV = True
-ANSIBLE_VENV_PATH = "/tower_devel/venv/ansible"
+ANSIBLE_VENV_PATH = "/venv/ansible"
 TOWER_USE_VENV = True
-TOWER_VENV_PATH = "/tower_devel/venv/tower"
+TOWER_VENV_PATH = "/venv/tower"
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using

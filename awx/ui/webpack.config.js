@@ -1,6 +1,5 @@
 var path = require('path'),
-    webpack = require('webpack'),
-    StatsPlugin = require('stats-webpack-plugin');
+    webpack = require('webpack');
 
 var vendorPkgs = [
     'angular',
@@ -51,13 +50,9 @@ var dev = {
             'CodeMirror': 'codemirror',
             'jsyaml': 'js-yaml',
             'jsonlint': 'codemirror.jsonlint',
-            'RRule': 'rrule'
         }),
         // (chunkName, outfileName)
         new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
-        new StatsPlugin('stats.json', {
-            chunkModules: true
-        })
     ],
     module: {
         preLoaders: [{
@@ -70,15 +65,6 @@ var dev = {
             }
         }],
         loaders: [
-        {   // expose RRule global for nlp module, whose AMD/CJS loading methods are broken
-            test: /\.rrule.js$/,
-            loader: 'expose?RRule'
-        },
-        {
-            test: /\.nlp.js$/,
-            // disable CommonJS & AMD loading (broken in this lib)
-            loader: 'imports?require=>false&define=>false'
-        },
         {
             // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
             test: /\.angular-tz-extensions.js$/,
@@ -91,9 +77,6 @@ var dev = {
             query: {
                 presets: ['es2015']
             }
-        }, {
-            test: /\.nlp.js$/,
-            loader: 'imports?RRule=rrule'
         }]
     },
     resolve: {
@@ -134,15 +117,7 @@ var release = {
         })
     ],
     module: {
-        loaders: [{
-            test: /\.rrule.js$/,
-            loader: 'expose?RRule'
-        },
-        {
-            test: /\.nlp.js$/,
-            // disable CommonJS (broken in this lib)
-            loader: 'imports?require=>false'
-        },
+        loaders: [
         {
             // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
             test: /\.angular-tz-extensions.js$/,

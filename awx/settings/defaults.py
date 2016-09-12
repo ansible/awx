@@ -351,7 +351,7 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 
-# Use Redis as cache backend (except when testing).
+# Django Caching Configuration
 if is_testing():
     CACHES = {
         'default': {
@@ -361,8 +361,8 @@ if is_testing():
 else:
     CACHES = {
         'default': {
-            'BACKEND': 'redis_cache.RedisCache',
-            'LOCATION': BROKER_URL,
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'memcached:11211',
         },
     }
 
