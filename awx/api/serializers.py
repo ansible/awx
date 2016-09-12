@@ -2229,16 +2229,21 @@ class WorkflowJobTemplateSerializer(WorkflowJobTemplateListSerializer):
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
-    #workflow_job_template = UnifiedJobTemplateSerializer()
 
     class Meta:
         # TODO: workflow_job and job read-only
-        fields = ('id', 'url', 'related', 'success_nodes', 'failure_nodes', 'always_nodes',)
+        fields = ('id', 'url', 'related', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
+
+    def get_related(self, obj):
+        res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
+        if obj.unified_job_template:
+            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        return res
 
 class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
         model = WorkflowJobTemplateNode
-        fields = ('*', 'workflow_job_template', 'unified_job_template',)
+        fields = ('*', 'workflow_job_template',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateNodeSerializer, self).get_related(obj)
@@ -2247,22 +2252,18 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         res['always_nodes'] = reverse('api:workflow_job_template_node_always_nodes_list', args=(obj.pk,))
         if obj.workflow_job_template:
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
-        if obj.unified_job_template:
-            res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
         model = WorkflowJobTemplateNode
-        fields = ('*', 'workflow_job_template', 'unified_job_template', 'job', 'workflow_job',)
+        fields = ('*', 'job', 'workflow_job',)
 
     def get_related(self, obj):
         res = super(WorkflowJobNodeSerializer, self).get_related(obj)
         res['success_nodes'] = reverse('api:workflow_job_node_success_nodes_list', args=(obj.pk,))
         res['failure_nodes'] = reverse('api:workflow_job_node_failure_nodes_list', args=(obj.pk,))
         res['always_nodes'] = reverse('api:workflow_job_node_always_nodes_list', args=(obj.pk,))
-        if obj.workflow_job_template:
-            res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
         if obj.job:
             res['job'] = reverse('api:job_detail', args=(obj.job.pk,))
         if obj.workflow_job:
