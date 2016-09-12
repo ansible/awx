@@ -1133,11 +1133,43 @@ class SystemJobAccess(BaseAccess):
     model = SystemJob
 
 # TODO:
-class WorkflowNodeAccess(BaseAccess):
+class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
-    I can see/use a WorkflowNode if I have permission to associated Workflow Job Template
+    I can see/use a WorkflowJobTemplateNode if I have permission to associated Workflow Job Template
     '''
-    model = WorkflowNode
+    model = WorkflowJobTemplateNode
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+
+    @check_superuser
+    def can_read(self, obj):
+        return True
+
+    @check_superuser
+    def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return True
+        
+        return True
+
+    @check_superuser
+    def can_change(self, obj, data):
+        if self.can_add(data) is False:
+            return False
+
+        return True
+
+    def can_delete(self, obj):
+        return self.can_change(obj, None)
+
+# TODO:
+class WorkflowJobNodeAccess(BaseAccess):
+    '''
+    I can see/use a WorkflowJobNode if I have permission to associated Workflow Job
+    '''
+    model = WorkflowJobNode
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
@@ -1863,6 +1895,7 @@ register_access(Role, RoleAccess)
 register_access(NotificationTemplate, NotificationTemplateAccess)
 register_access(Notification, NotificationAccess)
 register_access(Label, LabelAccess)
-register_access(WorkflowNode, WorkflowNodeAccess)
+register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
+register_access(WorkflowJobNode, WorkflowJobNodeAccess)
 register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
 register_access(WorkflowJob, WorkflowJobAccess)

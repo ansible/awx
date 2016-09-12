@@ -32,8 +32,8 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
 
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)
-    jt_fail= JobTemplate.objects.get(id=9)
-    jt_never= JobTemplate.objects.get(id=11)
+    jt_fail= JobTemplate.objects.get(id=6)
+    jt_never= JobTemplate.objects.get(id=7)
     
     jt_parallel = []
     jt_parallel.append(JobTemplate.objects.get(id=16))

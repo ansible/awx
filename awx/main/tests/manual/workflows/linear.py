@@ -1,6 +1,6 @@
 # AWX
 from awx.main.models import (
-    WorkflowNode,
+    WorkflowJobTemplateNode,
     WorkflowJobTemplate,
 )
 from awx.main.models.jobs import JobTemplate
@@ -10,16 +10,16 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
     wfjt.delete()
     wfjt, created = WorkflowJobTemplate.objects.get_or_create(name="linear workflow")
     print(wfjt.id)
-    WorkflowNode.objects.all().delete()
+    WorkflowJobTemplateNode.objects.all().delete()
     if created:
         nodes_success = []
         nodes_fail = []
         nodes_never = []
         for i in range(0, 2):
-            nodes_success.append(WorkflowNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_success))
-            nodes_fail.append(WorkflowNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_fail))
-            nodes_never.append(WorkflowNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_never))
-        nodes_never.append(WorkflowNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_never))
+            nodes_success.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_success))
+            nodes_fail.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_fail))
+            nodes_never.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_never))
+        nodes_never.append(WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt, unified_job_template=job_template_never))
         nodes_fail[1].delete()
 
         nodes_success[0].success_nodes.add(nodes_fail[0])
@@ -32,8 +32,8 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
 
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)
-    jt_fail= JobTemplate.objects.get(id=9)
-    jt_never= JobTemplate.objects.get(id=11)
+    jt_fail= JobTemplate.objects.get(id=6)
+    jt_never= JobTemplate.objects.get(id=7)
     do_init_workflow(jt_success, jt_fail, jt_never)
 
 if __name__ == "__main__":

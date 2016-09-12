@@ -2228,31 +2228,51 @@ class WorkflowJobTemplateListSerializer(UnifiedJobTemplateSerializer):
 class WorkflowJobTemplateSerializer(WorkflowJobTemplateListSerializer):
     pass
 
-class WorkflowNodeSerializer(BaseSerializer):
+class WorkflowNodeBaseSerializer(BaseSerializer):
     #workflow_job_template = UnifiedJobTemplateSerializer()
 
     class Meta:
-        model = WorkflowNode
         # TODO: workflow_job and job read-only
-        fields = ('id', 'url', 'related', 'workflow_job_template', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes', 'job',)
+        fields = ('id', 'url', 'related', 'success_nodes', 'failure_nodes', 'always_nodes',)
+
+class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
+    class Meta:
+        model = WorkflowJobTemplateNode
+        fields = ('*', 'workflow_job_template', 'unified_job_template',)
 
     def get_related(self, obj):
-        res = super(WorkflowNodeSerializer, self).get_related(obj)
+        res = super(WorkflowJobTemplateNodeSerializer, self).get_related(obj)
+        res['success_nodes'] = reverse('api:workflow_job_template_node_success_nodes_list', args=(obj.pk,))
+        res['failure_nodes'] = reverse('api:workflow_job_template_node_failure_nodes_list', args=(obj.pk,))
+        res['always_nodes'] = reverse('api:workflow_job_template_node_always_nodes_list', args=(obj.pk,))
         if obj.workflow_job_template:
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
+        return res
+
+class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
+    class Meta:
+        model = WorkflowJobTemplateNode
+        fields = ('*', 'workflow_job_template', 'unified_job_template', 'job', 'workflow_job',)
+
+    def get_related(self, obj):
+        res = super(WorkflowJobNodeSerializer, self).get_related(obj)
+        res['success_nodes'] = reverse('api:workflow_job_node_success_nodes_list', args=(obj.pk,))
+        res['failure_nodes'] = reverse('api:workflow_job_node_failure_nodes_list', args=(obj.pk,))
+        res['always_nodes'] = reverse('api:workflow_job_node_always_nodes_list', args=(obj.pk,))
+        if obj.workflow_job_template:
+            res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
         if obj.job:
             res['job'] = reverse('api:job_detail', args=(obj.job.pk,))
         if obj.workflow_job:
             res['workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job.pk,))
-        res['success_nodes'] = reverse('api:workflow_node_success_nodes_list', args=(obj.pk,))
-        res['failure_nodes'] = reverse('api:workflow_node_failure_nodes_list', args=(obj.pk,))
-        res['always_nodes'] = reverse('api:workflow_node_always_nodes_list', args=(obj.pk,))
-
         return res
 
-class WorkflowNodeDetailSerializer(WorkflowNodeSerializer):
+class WorkflowJobNodeListSerializer(WorkflowJobNodeSerializer):
+    pass
+
+class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer):
 
     '''
     Influence the api browser sample data to not include workflow_job_template
@@ -2262,14 +2282,13 @@ class WorkflowNodeDetailSerializer(WorkflowNodeSerializer):
     Maybe something to do with workflow_job_template being a relational field?
     '''
     def build_relational_field(self, field_name, relation_info):
-        field_class, field_kwargs = super(WorkflowNodeDetailSerializer, self).build_relational_field(field_name, relation_info)
+        field_class, field_kwargs = super(WorkflowJobTemplateNodeDetailSerializer, self).build_relational_field(field_name, relation_info)
         if self.instance and field_name == 'workflow_job_template':
             field_kwargs['read_only'] = True
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
 
-
-class WorkflowNodeListSerializer(WorkflowNodeSerializer):
+class WorkflowJobTemplateNodeListSerializer(WorkflowJobTemplateNodeSerializer):
     pass
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):

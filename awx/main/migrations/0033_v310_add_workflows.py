@@ -27,6 +27,21 @@ class Migration(migrations.Migration):
             bases=('main.unifiedjob', models.Model, awx.main.models.notifications.JobNotificationMixin, awx.main.models.workflow.WorkflowJobInheritNodesMixin),
         ),
         migrations.CreateModel(
+            name='WorkflowJobNode',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(default=None, editable=False)),
+                ('modified', models.DateTimeField(default=None, editable=False)),
+                ('always_nodes', models.ManyToManyField(related_name='workflowjobnodes_always', to='main.WorkflowJobNode', blank=True)),
+                ('failure_nodes', models.ManyToManyField(related_name='workflowjobnodes_failure', to='main.WorkflowJobNode', blank=True)),
+                ('job', models.ForeignKey(related_name='unified_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJob', null=True)),
+                ('success_nodes', models.ManyToManyField(related_name='workflowjobnodes_success', to='main.WorkflowJobNode', blank=True)),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
             name='WorkflowJobTemplate',
             fields=[
                 ('unifiedjobtemplate_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='main.UnifiedJobTemplate')),
@@ -36,19 +51,30 @@ class Migration(migrations.Migration):
             bases=('main.unifiedjobtemplate', models.Model),
         ),
         migrations.CreateModel(
-            name='WorkflowNode',
+            name='WorkflowJobTemplateNode',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(default=None, editable=False)),
                 ('modified', models.DateTimeField(default=None, editable=False)),
-                ('always_nodes', models.ManyToManyField(related_name='parent_always_nodes', to='main.WorkflowNode', blank=True)),
-                ('failure_nodes', models.ManyToManyField(related_name='parent_failure_nodes', to='main.WorkflowNode', blank=True)),
-                ('job', models.ForeignKey(related_name='unified_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJob', null=True)),
-                ('success_nodes', models.ManyToManyField(related_name='parent_success_nodes', to='main.WorkflowNode', blank=True)),
-                ('unified_job_template', models.ForeignKey(related_name='unified_jt_workflow_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJobTemplate', null=True)),
-                ('workflow_job', models.ForeignKey(related_name='workflow_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.WorkflowJob', null=True)),
-                ('workflow_job_template', models.ForeignKey(related_name='workflow_nodes', default=None, blank=True, to='main.WorkflowJobTemplate', null=True)),
+                ('always_nodes', models.ManyToManyField(related_name='workflowjobtemplatenodes_always', to='main.WorkflowJobTemplateNode', blank=True)),
+                ('failure_nodes', models.ManyToManyField(related_name='workflowjobtemplatenodes_failure', to='main.WorkflowJobTemplateNode', blank=True)),
+                ('success_nodes', models.ManyToManyField(related_name='workflowjobtemplatenodes_success', to='main.WorkflowJobTemplateNode', blank=True)),
+                ('unified_job_template', models.ForeignKey(related_name='workflowjobtemplatenodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJobTemplate', null=True)),
+                ('workflow_job_template', models.ForeignKey(related_name='workflow_job_template_nodes', default=None, blank=True, to='main.WorkflowJobTemplate', null=True)),
             ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.AddField(
+            model_name='workflowjobnode',
+            name='unified_job_template',
+            field=models.ForeignKey(related_name='workflowjobnodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.UnifiedJobTemplate', null=True),
+        ),
+        migrations.AddField(
+            model_name='workflowjobnode',
+            name='workflow_job',
+            field=models.ForeignKey(related_name='workflow_job_nodes', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='main.WorkflowJob', null=True),
         ),
         migrations.AddField(
             model_name='workflowjob',
@@ -62,12 +88,17 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='activitystream',
+            name='workflow_job_node',
+            field=models.ManyToManyField(to='main.WorkflowJobNode', blank=True),
+        ),
+        migrations.AddField(
+            model_name='activitystream',
             name='workflow_job_template',
             field=models.ManyToManyField(to='main.WorkflowJobTemplate', blank=True),
         ),
         migrations.AddField(
             model_name='activitystream',
-            name='workflow_node',
-            field=models.ManyToManyField(to='main.WorkflowNode', blank=True),
+            name='workflow_job_template_node',
+            field=models.ManyToManyField(to='main.WorkflowJobTemplateNode', blank=True),
         ),
     ]

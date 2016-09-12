@@ -18,11 +18,11 @@ from awx.main.models.rbac import (
 )
 from awx.main.fields import ImplicitRoleField
 
-__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowNode']
+__all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
-class WorkflowNode(CreatedModifiedModel):
-
+class WorkflowNodeBase(CreatedModifiedModel):
     class Meta:
+        abstract = True
         app_label = 'main'
 
     # TODO: RBAC
@@ -31,41 +31,55 @@ class WorkflowNode(CreatedModifiedModel):
         parent_role='workflow_job_template.admin_role',
     )
     '''
-
-    # TODO: Ensure the API forces workflow_job_template being set
-    workflow_job_template = models.ForeignKey(
-        'WorkflowJobTemplate',
-        related_name='workflow_nodes',
+    success_nodes = models.ManyToManyField(
+        'self',
         blank=True,
-        null=True,
-        default=None,
-        on_delete=models.CASCADE,
+        symmetrical=False,
+        related_name='%(class)ss_success',
+    )
+    failure_nodes = models.ManyToManyField(
+        'self',
+        blank=True,
+        symmetrical=False,
+        related_name='%(class)ss_failure',
+    )
+    always_nodes = models.ManyToManyField(
+        'self',
+        blank=True,
+        symmetrical=False,
+        related_name='%(class)ss_always',
     )
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
-        related_name='unified_jt_workflow_nodes',
+        related_name='%(class)ss',
         blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
     )
-    success_nodes = models.ManyToManyField(
-        'self',
-        related_name='parent_success_nodes',
+
+class WorkflowJobTemplateNode(WorkflowNodeBase):
+    # TODO: Ensure the API forces workflow_job_template being set
+    workflow_job_template = models.ForeignKey(
+        'WorkflowJobTemplate',
+        related_name='workflow_job_template_nodes',
         blank=True,
-        symmetrical=False,
+        null=True,
+        default=None,
+        on_delete=models.CASCADE,
     )
-    failure_nodes = models.ManyToManyField(
-        'self',
-        related_name='parent_failure_nodes',
+    
+    def get_absolute_url(self):
+        return reverse('api:workflow_job_template_node_detail', args=(self.pk,))
+
+class WorkflowJobNode(WorkflowNodeBase):
+    job = models.ForeignKey(
+        'UnifiedJob',
+        related_name='unified_job_nodes',
         blank=True,
-        symmetrical=False,
-    )
-    always_nodes = models.ManyToManyField(
-        'self',
-        related_name='parent_always_nodes',
-        blank=True,
-        symmetrical=False,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
     )
     workflow_job = models.ForeignKey(
         'WorkflowJob',
@@ -75,17 +89,9 @@ class WorkflowNode(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    job = models.ForeignKey(
-        'UnifiedJob',
-        related_name='unified_job_nodes',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
     
     def get_absolute_url(self):
-        return reverse('api:workflow_node_detail', args=(self.pk,))
+        return reverse('api:workflow_job_node_detail', args=(self.pk,))
 
 class WorkflowJobOptions(BaseModel):
     class Meta:
@@ -147,22 +153,17 @@ class WorkflowJobInheritNodesMixin(object):
 
         for old_related_node in old_related_nodes:
             new_related_node_id = node_ids_map[old_related_node.id]
-            new_related_node = WorkflowNode.objects.get(id=new_related_node_id)
+            new_related_node = WorkflowJobNode.objects.get(id=new_related_node_id)
             new_node_type_mgr.add(new_related_node)
 
     def inherit_jt_workflow_nodes(self):
         new_nodes = []
-        old_nodes = self.workflow_job_template.workflow_nodes.all()
+        old_nodes = self.workflow_job_template.workflow_job_template_nodes.all()
 
         node_ids_map = {}
 
         for old_node in old_nodes:
-            new_node = WorkflowNode.objects.get(id=old_node.pk)
-            new_node.workflow_job = self
-            new_node.job = None
-            new_node.workflow_job_template = None
-            new_node.pk = None
-            new_node.save()
+            new_node = WorkflowJobNode.objects.create(workflow_job=self, unified_job_template=old_node.unified_job_template)
             new_nodes.append(new_node)
 
             node_ids_map[old_node.id] = new_node.id
