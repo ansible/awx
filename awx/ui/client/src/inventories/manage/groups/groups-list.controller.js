@@ -5,12 +5,14 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus',
-    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Rest', 'GetBasePath', 'rbacUiControlService',
+    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Find', 'Rest', 'GetBasePath', 'rbacUiControlService',
     function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate, GroupManageService, GroupsCancelUpdate, ViewUpdateStatus,
-        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Rest, GetBasePath, rbacUiControlService){
+        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Find, Rest, GetBasePath, rbacUiControlService){
         var list = InventoryGroups,
             view = generateList,
             pageSize = 20;
+
+
         $scope.inventory_id = $stateParams.inventory_id;
 
         $scope.canAdd = false;
@@ -97,26 +99,30 @@
                 group_name: group.name,
                 group_source: res.data.results[0].source
             }));
-            $scope.$emit('WatchUpdateStatus');  // init socket io conneciton and start watching for status updates
-            $rootScope.$on('JobStatusChange-inventory', (event, data) => {
-                switch(data.status){
-                    case 'failed' || 'successful':
-                        $state.reload();
-                        break;
-                    default:
-                        var status = GetSyncStatusMsg({
-                            status: data.status,
-                            has_inventory_sources: group.has_inventory_sources,
-                            source: group.source
-                        });
-                        group.status = data.status;
-                        group.status_class = status.class;
-                        group.status_tooltip = status.tooltip;
-                        group.launch_tooltip = status.launch_tip;
-                        group.launch_class = status.launch_class;
-                }
-            });
         };
+
+        if ($rootScope.inventoryManageStatus) {
+            $rootScope.inventoryManageStatus();
+        }
+        $rootScope.inventoryManageStatus = $rootScope.$on('JobStatusChange-inventory', function(e, data){
+            var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
+            if(data.status === 'failed' || data.status === 'successful'){
+                $state.reload();
+            }
+            else{
+                var status = GetSyncStatusMsg({
+                    status: data.status,
+                    has_inventory_sources: group.has_inventory_sources,
+                    source: group.source
+                });
+                group.status = data.status;
+                group.status_class = status.class;
+                group.status_tooltip = status.tooltip;
+                group.launch_tooltip = status.launch_tip;
+                group.launch_class = status.launch_class;
+            }
+        });
+
         $scope.cancelUpdate = function (id) {
             GroupsCancelUpdate({ scope: $scope, id: id });
         };

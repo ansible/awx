@@ -62,8 +62,9 @@ export default
                                 $rootScope.$emit('JobStatusChange-portal', data);
                             } else if ($state.is('projects')) {
                                 $rootScope.$emit('JobStatusChange-projects', data);
-                            } else if ($state.is('inventoryManage')) {
-                                $rootScope.$emit('JobStatusChange-inventory', data);
+                            } else if ($state.is('inventoryManage') ||
+                                $state.includes('inventoryManage')) {
+                                    $rootScope.$emit('JobStatusChange-inventory', data);
                             }
                         }
                         if(data.group_name==="job_events"){
@@ -98,7 +99,7 @@ export default
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                 }, 2000);
             },
-            subscribe2: function(state){
+            subscribe: function(state){
                 console.log(state.name);
                 this.emit(JSON.stringify(state.socket));
             },
@@ -137,11 +138,11 @@ export default
                 }
 
             },
-            emit: function (eventName, data, callback) {
+            emit: function(data, callback) {
                 var self = this;
                 $log.debug('Sent to Server: ' + data);
                 $rootScope.socketPromise.promise.then(function(){
-                    self.socket.send(eventName, data, function () {
+                    self.socket.send(data, function () {
                         var args = arguments;
                         self.scope.$apply(function () {
                             if (callback) {

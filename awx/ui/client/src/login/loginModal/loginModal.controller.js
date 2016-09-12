@@ -136,7 +136,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
                 Authorization.setUserInfo(data);
                 Timer.init().then(function(timer){
                     $rootScope.sessionTimer = timer;
-                    // $rootScope.$emit('OpenSocket');
                     SocketService.init();
                     $rootScope.user_is_superuser = data.results[0].is_superuser;
                     $rootScope.user_is_system_auditor = data.results[0].is_system_auditor;

@@ -15,7 +15,7 @@ export default function($stateProvider) {
                             if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
                                 state.socket.groups.job_events = [$stateParams.id];
                             }
-                            SocketService.subscribe2(state);
+                            SocketService.subscribe(state);
                             return true;
                         });
                     }];
