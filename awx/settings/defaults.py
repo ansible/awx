@@ -342,6 +342,7 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    # Projects use a fanout queue, this isn't super well supported
     Broadcast('projects'),
 )
 CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
