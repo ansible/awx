@@ -201,7 +201,7 @@ export default
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
                             awToolTip: 'Dissasociate permission from user',
-                            ngShow: 'canEdit'
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
                     hideOnSuperuser: true

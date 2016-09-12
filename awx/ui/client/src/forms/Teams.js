@@ -142,7 +142,8 @@ export default
                             'class': "List-actionButton--delete",
                             iconClass: 'fa fa-times',
                             awToolTip: 'Dissasociate permission from team',
-                            dataPlacement: 'top'
+                            dataPlacement: 'top',
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
                     hideOnSuperuser: true
