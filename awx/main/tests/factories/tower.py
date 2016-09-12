@@ -29,6 +29,7 @@ from .fixtures import (
     mk_label,
     mk_notification_template,
     mk_workflow_job_template,
+    #mk_workflow_job_template_node,
 )
 
 
@@ -344,13 +345,33 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
                    users=_Mapped(users),
                    superusers=_Mapped(superusers),
                    teams=teams)
+'''
+def generate_workflow_job_template_nodes(workflow_job_template, 
+                                         unified_job_template,
+                                         persisted=True,
+                                         **kwargs):
+'''  
 
-def create_workflow_job_template(name, persisted=True, **kwargs):
+# TODO: Implement survey
+'''
+def create_workflow_job(name, persisted=True, **kwargs):
     Objects = generate_objects(["workflow_job_template",
                                 "survey",], kwargs)
 
     spec = None
     jobs = None
+
+    extra_vars = kwargs.get('extra_vars', '')
+'''
+
+
+# TODO: Implement survey
+def create_workflow_job_template(name, persisted=True, **kwargs):
+    Objects = generate_objects(["workflow_job_template",
+                                "survey",], kwargs)
+
+    spec = None
+    #jobs = None
 
     extra_vars = kwargs.get('extra_vars', '')
 
@@ -359,7 +380,9 @@ def create_workflow_job_template(name, persisted=True, **kwargs):
 
     wfjt = mk_workflow_job_template(name, spec=spec, extra_vars=extra_vars,
                                     persisted=persisted)
+    #workflow_nodes = generate_workflow_job_template_nodes(wfjt, persisted, workflow_nodes=kwargs.get('workflow_nodes'))
 
+    '''
     if 'jobs' in kwargs:
         for i in kwargs['jobs']:
             if type(i) is Job:
@@ -367,8 +390,8 @@ def create_workflow_job_template(name, persisted=True, **kwargs):
             else:
                 # TODO: Create the job
                 raise RuntimeError("Currently, only already created jobs are supported")
-
+    '''
     return Objects(workflow_job_template=wfjt,
-                   jobs=jobs,
+                   #jobs=jobs,
                    survey=spec,)
 

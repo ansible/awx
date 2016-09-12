@@ -143,7 +143,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
         #def create_workflow_job(self, **kwargs):
         #workflow_job =  self.create_unified_job(**kwargs)
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
-        workflow_job.inherit_jt_workflow_nodes()
+        workflow_job.inherit_job_template_workflow_nodes()
         return workflow_job
 
 class WorkflowJobInheritNodesMixin(object):
@@ -152,21 +152,33 @@ class WorkflowJobInheritNodesMixin(object):
         new_node_type_mgr = getattr(new_node, node_type)
 
         for old_related_node in old_related_nodes:
-            new_related_node_id = node_ids_map[old_related_node.id]
-            new_related_node = WorkflowJobNode.objects.get(id=new_related_node_id)
+            new_related_node = self._get_workflowJob_node_by_id(node_ids_map[old_related_node.id])
             new_node_type_mgr.add(new_related_node)
 
-    def inherit_jt_workflow_nodes(self):
-        new_nodes = []
-        old_nodes = self.workflow_job_template.workflow_job_template_nodes.all()
+    '''
+    Create a WorkflowJobNode for each WorkflowJobTemplateNode
+    '''
+    def _create_workflow_job_nodes(self, old_nodes):
+        return [WorkflowJobNode.objects.create(workflow_job=self, unified_job_template=old_node.unified_job_template) for old_node in old_nodes]
 
+    def _map_workflow_job_nodes(self, old_nodes, new_nodes):
         node_ids_map = {}
 
-        for old_node in old_nodes:
-            new_node = WorkflowJobNode.objects.create(workflow_job=self, unified_job_template=old_node.unified_job_template)
-            new_nodes.append(new_node)
+        for i, old_node in enumerate(old_nodes):
+            node_ids_map[old_node.id] = new_nodes[i].id
 
-            node_ids_map[old_node.id] = new_node.id
+        return node_ids_map
+
+    def _get_workflow_job_template_nodes(self):
+        return self.workflow_job_template.workflow_job_template_nodes.all()
+
+    def _get_workflowJob_node_by_id(self, id):
+        return WorkflowJobNode.objects.get(id=id)
+
+    def inherit_job_template_workflow_nodes(self):
+        old_nodes = self._get_workflow_job_template_nodes()
+        new_nodes = self._create_workflow_job_nodes(old_nodes)
+        node_ids_map = self._map_workflow_job_nodes(old_nodes, new_nodes)
 
         for index, old_node in enumerate(old_nodes):
             new_node = new_nodes[index]

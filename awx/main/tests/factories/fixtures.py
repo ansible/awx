@@ -14,7 +14,9 @@ from awx.main.models import (
     Inventory,
     Label,
     WorkflowJobTemplate,
-    WorkflowNode,
+    WorkflowJob,
+    WorkflowJobNode,
+    WorkflowJobTemplateNode,
 )
 
 # mk methods should create only a single object of a single type.
@@ -155,7 +157,20 @@ def mk_job_template(name, job_type='run',
         jt.save()
     return jt
 
+def mk_workflow_job(status='new', workflow_job_template=None, extra_vars={},
+                    persisted=True):
+    job = WorkflowJob(status=status, extra_vars=json.dumps(extra_vars))
+
+    job.workflow_job_template = workflow_job_template
+
+    if persisted:
+        job.save()
+    return job
+
 def mk_workflow_job_template(name, extra_vars='', spec=None, persisted=True):
+    if extra_vars:
+        extra_vars = json.dumps(extra_vars)
+
     wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars)
 
     wfjt.survey_spec = spec
@@ -166,15 +181,35 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, persisted=True):
         wfjt.save()
     return wfjt
 
-def mk_workflow_node(workflow_job_template=None, unified_job_template=None, 
-                     success_nodes=None, failure_nodes=None, always_nodes=None,
-                     job=None, persisted=True):
-    workflow_node = WorkflowNode(workflow_job_template=workflow_job_template,
-                                 unified_job_template=unified_job_template,
-                                 success_nodes=success_nodes,
-                                 failure_nodes=failure_nodes,
-                                 always_nodes=always_nodes,
-                                 job=job)
+def mk_workflow_job_template_node(workflow_job_template=None,
+                                  unified_job_template=None, 
+                                  success_nodes=None,
+                                  failure_nodes=None,
+                                  always_nodes=None,
+                                  persisted=True):
+    workflow_node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template,
+                                            unified_job_template=unified_job_template,
+                                            success_nodes=success_nodes,
+                                            failure_nodes=failure_nodes,
+                                            always_nodes=always_nodes)
     if persisted:
         workflow_node.save()
     return workflow_node
+
+def mk_workflow_job_node(unified_job_template=None, 
+                         success_nodes=None,
+                         failure_nodes=None,
+                         always_nodes=None,
+                         workflow_job=None, 
+                         job=None,
+                         persisted=True):
+    workflow_node = WorkflowJobNode(unified_job_template=unified_job_template,
+                                    success_nodes=success_nodes,
+                                    failure_nodes=failure_nodes,
+                                    always_nodes=always_nodes,
+                                    workflow_job=workflow_job,
+                                    job=job)
+    if persisted:
+        workflow_node.save()
+    return workflow_node
+
