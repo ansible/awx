@@ -17,16 +17,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
     SelectionInit, GetChoices, Wait, $state, $filter) {
     ClearScope();
 
-    $scope.canAdd = false;
-
-    Rest.setUrl(GetBasePath('credentials'));
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.POST) {
-                $scope.canAdd = true;
-            }
-        });
-
     Wait('start');
 
     var list = CredentialList,
@@ -148,16 +138,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
     LookUpInit, OrganizationList, GetBasePath, GetChoices, Empty, KindChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
-
-    Rest.setUrl(GetBasePath('credentials'));
-    Rest.options()
-        .success(function(data) {
-            if (!data.actions.POST) {
-                $state.go("^");
-                Alert('Permission Error', 'You do not have permission to add a credential.', 'alert-info');
-            }
-        });
-
     ClearScope();
 
     // Inject dynamic view

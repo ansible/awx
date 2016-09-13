@@ -5,24 +5,21 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
-     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'Rest', 'GetBasePath',
+     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'Rest', 'GetBasePath', 'rbacUiControlService',
     function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
-     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter, Rest, GetBasePath){
+     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter, Rest, GetBasePath, rbacUiControlService){
 
         var list = InventoryHosts,
             view = generateList,
             pageSize = 20;
 
-        $scope.canAdd = false;
-
         $scope.inventory_id = $stateParams.inventory_id;
 
-        Rest.setUrl(GetBasePath('inventory') + $scope.inventory_id + "/hosts");
-        Rest.options()
-            .success(function(data) {
-                if (data.actions.POST) {
-                    $scope.canAdd = true;
-                }
+        $scope.canAdd = false;
+
+        rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/hosts")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
             });
 
         // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.

@@ -5,9 +5,9 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus',
-    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Rest', 'GetBasePath',
+    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Rest', 'GetBasePath', 'rbacUiControlService',
     function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate, GroupManageService, GroupsCancelUpdate, ViewUpdateStatus,
-        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Rest, GetBasePath){
+        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Rest, GetBasePath, rbacUiControlService){
         var list = InventoryGroups,
             view = generateList,
             pageSize = 20;
@@ -15,12 +15,9 @@
 
         $scope.canAdd = false;
 
-        Rest.setUrl(GetBasePath('inventory') + $scope.inventory_id + "/groups");
-        Rest.options()
-            .success(function(data) {
-                if (data.actions.POST) {
-                    $scope.canAdd = true;
-                }
+        rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/groups")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
             });
 
 

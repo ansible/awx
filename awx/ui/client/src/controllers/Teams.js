@@ -14,17 +14,14 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, $state, Refresh, $filter) {
+    SelectionInit, Wait, $state, Refresh, $filter, rbacUiControlService) {
     ClearScope();
 
     $scope.canAdd = false;
 
-    Rest.setUrl(GetBasePath('teams'));
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.POST) {
-                $scope.canAdd = true;
-            }
+    rbacUiControlService.canAdd('teams')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
         });
 
     var list = TeamList,
@@ -135,7 +132,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    '$state', 'Refresh', '$filter'
+    '$state', 'Refresh', '$filter', 'rbacUiControlService'
 ];
 
 

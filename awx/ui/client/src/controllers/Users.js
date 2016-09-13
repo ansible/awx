@@ -34,17 +34,14 @@ function user_type_sync($scope) {
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, $state, Refresh, $filter) {
+    Wait, $state, Refresh, $filter, rbacUiControlService) {
     ClearScope();
 
     $scope.canAdd = false;
 
-    Rest.setUrl(GetBasePath('users'));
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.POST) {
-                $scope.canAdd = true;
-            }
+    rbacUiControlService.canAdd('users')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
         });
 
     var list = UserList,
@@ -145,7 +142,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
-    'Refresh', '$filter'
+    'Refresh', '$filter', 'rbacUiControlService'
 ];
 
 

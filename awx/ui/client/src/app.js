@@ -841,11 +841,6 @@ var tower = angular.module('Tower', [
                 $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
                 $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
 
-                Rest.setUrl($rootScope.current_user.related.admin_of_organizations);
-                Rest.get()
-                    .success(function(data) {
-                        $rootScope.current_user_admin_orgs = data.results.map(i => i.name);
-                    });
                 // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
                 if (!_.contains($location.$$url, '/login')) {
                     ConfigService.getConfig().then(function() {

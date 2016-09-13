@@ -8,23 +8,20 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
     '$log', '$compile', 'Rest', 'PaginateInit',
     'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'generateList', 'Refresh', '$filter',
+    '$state', 'generateList', 'Refresh', '$filter', 'rbacUiControlService',
     function($stateParams, $scope, $rootScope, $location,
         $log, $compile, Rest, PaginateInit,
         SearchInit, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait,
-        $state, generateList, Refresh, $filter) {
+        $state, generateList, Refresh, $filter, rbacUiControlService) {
 
         ClearScope();
 
         $scope.canAdd = false;
 
-        Rest.setUrl(GetBasePath('organizations'));
-        Rest.options()
-            .success(function(data) {
-                if (data.actions.POST) {
-                    $scope.canAdd = true;
-                }
+        rbacUiControlService.canAdd("organizations")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
             });
 
         var defaultUrl = GetBasePath('organizations'),

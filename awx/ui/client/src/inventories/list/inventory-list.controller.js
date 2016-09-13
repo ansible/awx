@@ -14,16 +14,13 @@ function InventoriesList($scope, $rootScope, $location, $log,
     $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
     generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
     ClearScope, ProcessErrors, GetBasePath, Wait,
-    Find, Empty, $state) {
+    Find, Empty, $state, rbacUiControlService) {
 
         $scope.canAdd = false;
 
-        Rest.setUrl(GetBasePath('inventory'));
-        Rest.options()
-            .success(function(data) {
-                if (data.actions.POST) {
-                    $scope.canAdd = true;
-                }
+        rbacUiControlService.canAdd('inventory')
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
             });
 
     var list = InventoryList,
@@ -386,4 +383,4 @@ function InventoriesList($scope, $rootScope, $location, $log,
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList',
     'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
-    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', InventoriesList];
+    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', InventoriesList];
