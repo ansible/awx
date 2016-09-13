@@ -2615,6 +2615,20 @@ class JobTemplateObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 # TODO:
+class WorkflowJobNodeList(ListCreateAPIView):
+
+    model = WorkflowJobNode
+    serializer_class = WorkflowJobNodeListSerializer
+    new_in_310 = True
+
+# TODO:
+class WorkflowJobNodeDetail(RetrieveUpdateDestroyAPIView):
+
+    model = WorkflowJobNode
+    serializer_class = WorkflowJobNodeDetailSerializer
+    new_in_310 = True
+
+# TODO:
 class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
@@ -2627,6 +2641,7 @@ class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeDetailSerializer
     new_in_310 = True
+
 
 class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
@@ -2656,19 +2671,20 @@ class WorkflowJobTemplateNodeFailureNodesList(WorkflowJobTemplateNodeChildrenBas
 class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'always_nodes'
 
-'''
-class WorkflowJobNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobNodeChildrenBaseList(SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
     always_allow_superuser = True # TODO: RBAC
-    parent_model = WorkflowJobTemplateNode
+    parent_model = Job
     relationship = ''
+    '''
     enforce_parent_relationship = 'workflow_job_template'
     new_in_310 = True
+    '''
  
     #
-    #Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
+    #Limit the set of WorkflowJobeNodes to the related nodes of specified by
     #'relationship'
     #
     def get_queryset(self):
@@ -2684,7 +2700,6 @@ class WorkflowJobNodeFailureNodesList(WorkflowJobNodeChildrenBaseList):
 
 class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'always_nodes'
-'''
 
 
 # TODO:

@@ -3,7 +3,7 @@ from awx.main.management.commands.run_task_system import (
     WorkflowDAG,
 )
 from awx.main.models import Job
-from awx.main.models.workflow import WorkflowNode
+from awx.main.models.workflow import WorkflowJobNode
 import pytest
 
 @pytest.fixture
@@ -62,7 +62,7 @@ class TestSimpleDAG(object):
 @pytest.fixture
 def factory_node():
     def fn(id, status):
-        wfn = WorkflowNode(id=id)
+        wfn = WorkflowJobNode(id=id)
         if status:
             j = Job(status=status)
             wfn.job = j

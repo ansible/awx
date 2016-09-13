@@ -2174,7 +2174,29 @@ class SystemJobCancelSerializer(SystemJobSerializer):
     class Meta:
         fields = ('can_cancel',)
 
+class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
+    class Meta:
+        model = WorkflowJobTemplate
+        fields = ('*',)
 
+    def get_related(self, obj):
+        res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
+        res.update(dict(
+            jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
+            #schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
+            launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
+            workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
+            # TODO: Implement notifications
+            #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
+            #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
+            #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
+
+        ))
+        return res
+
+# TODO:
+class WorkflowJobTemplateListSerializer(WorkflowJobTemplateSerializer):
+    pass
 
 # TODO:
 class WorkflowJobSerializer(UnifiedJobSerializer):
@@ -2198,34 +2220,8 @@ class WorkflowJobSerializer(UnifiedJobSerializer):
         '''
         return res
 
-
 # TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
-    pass
-
-# TODO:
-class WorkflowJobTemplateListSerializer(UnifiedJobTemplateSerializer):
-
-    class Meta:
-        model = WorkflowJobTemplate
-        fields = ('*',)
-
-    def get_related(self, obj):
-        res = super(WorkflowJobTemplateListSerializer, self).get_related(obj)
-        res.update(dict(
-            jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
-            #schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
-            launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
-            workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
-            # TODO: Implement notifications
-            #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
-            #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
-            #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
-
-        ))
-        return res
-
-class WorkflowJobTemplateSerializer(WorkflowJobTemplateListSerializer):
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
@@ -2271,6 +2267,9 @@ class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
         return res
 
 class WorkflowJobNodeListSerializer(WorkflowJobNodeSerializer):
+    pass
+
+class WorkflowJobNodeDetailSerializer(WorkflowJobNodeSerializer):
     pass
 
 class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer):

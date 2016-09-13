@@ -148,11 +148,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
 
 class WorkflowJobInheritNodesMixin(object):
     def _inherit_relationship(self, old_node, new_node, node_ids_map, node_type):
-        old_related_nodes = getattr(old_node, node_type).all()
+        old_related_nodes = self._get_all_by_type(old_node, node_type)
         new_node_type_mgr = getattr(new_node, node_type)
 
         for old_related_node in old_related_nodes:
-            new_related_node = self._get_workflowJob_node_by_id(node_ids_map[old_related_node.id])
+            new_related_node = self._get_workflow_job_node_by_id(node_ids_map[old_related_node.id])
             new_node_type_mgr.add(new_related_node)
 
     '''
@@ -172,8 +172,11 @@ class WorkflowJobInheritNodesMixin(object):
     def _get_workflow_job_template_nodes(self):
         return self.workflow_job_template.workflow_job_template_nodes.all()
 
-    def _get_workflowJob_node_by_id(self, id):
+    def _get_workflow_job_node_by_id(self, id):
         return WorkflowJobNode.objects.get(id=id)
+
+    def _get_all_by_type(node, node_type):
+        return getattr(node, node_type).all()
 
     def inherit_job_template_workflow_nodes(self):
         old_nodes = self._get_workflow_job_template_nodes()
