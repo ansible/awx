@@ -761,8 +761,7 @@ MACHINE?=default
 docker-clean:
 	rm -f awx/lib/.deps_built
 	eval $$(docker-machine env $(MACHINE))
-	docker stop $$(docker ps -a -q)
-	-docker rm $$(docker ps -f name=tools_tower -a -q)
+	$(foreach container_id,$(shell docker ps -f name=tools_tower -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	-docker images | grep "tower_devel" | awk '{print $3}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
