@@ -299,7 +299,7 @@ requirements_jenkins:
 		. $(VENV_BASE)/tower/bin/activate; \
 		$(VENV_BASE)/tower/bin/pip install -Ir requirements/requirements_jenkins.txt; \
 	else \
-		pip install -Ir requirements/requirements_jenkins..txt; \
+		pip install -Ir requirements/requirements_jenkins.txt; \
 	fi && \
 	$(NPM_BIN) install csslint
 
