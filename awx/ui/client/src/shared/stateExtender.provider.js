@@ -11,6 +11,7 @@ export default function($stateProvider) {
                         $rootScope.socketPromise.promise.then(function(){
                             if(!state.socket){
                                 state.socket = {groups: {}};
+                                SocketService.unsubscribe(state);
                             }
                             else{
                                 if(state.socket.groups.hasOwnProperty( "job_events")){
@@ -19,9 +20,8 @@ export default function($stateProvider) {
                                 if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
                                     state.socket.groups.job_events = [$stateParams.id];
                                 }
+                                SocketService.subscribe(state);
                             }
-                            
-                            SocketService.subscribe(state);
                             return true;
                         });
                     }];

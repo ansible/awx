@@ -100,8 +100,34 @@ export default
                 }, 2000);
             },
             subscribe: function(state){
-                console.log(state.name);
+                console.log("Next state: " + state.name);
                 this.emit(JSON.stringify(state.socket));
+                this.setLast(state);
+            },
+            unsubscribe: function(state){
+                if(this.requiresNewSubscribe(state)){
+                    this.emit(JSON.stringify(state.socket));
+                }
+                this.setLast(state);
+            },
+            setLast: function(state){
+                this.last = state;
+            },
+            getLast: function(){
+                return this.last;
+            },
+            requiresNewSubscribe(state){
+                if (this.getLast() !== undefined){
+                    if( _.isEmpty(state.socket.groups) && _.isEmpty(this.getLast().socket.groups)){
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return true;
+                }
             },
             checkStatus: function() {
 
@@ -140,7 +166,7 @@ export default
             },
             emit: function(data, callback) {
                 var self = this;
-                $log.debug('Sent to Server: ' + data);
+                $log.debug('Sent to Websocket Server: ' + data);
                 $rootScope.socketPromise.promise.then(function(){
                     self.socket.send(data, function () {
                         var args = arguments;
