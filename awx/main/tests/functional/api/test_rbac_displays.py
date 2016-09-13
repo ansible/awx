@@ -68,8 +68,10 @@ class TestJobTemplateCopyEdit:
     def fake_context(self, user):
         request = RequestFactory().get('/api/v1/resource/42/')
         request.user = user
+
         class FakeView(object):
             pass
+
         fake_view = FakeView()
         fake_view.request = request
         context = {}
@@ -249,7 +251,7 @@ def test_team_roles_unattach_functional(team, team_member, inventory, get):
     response = get(reverse('api:team_roles_list', args=(team.id,)), team_member)
     # Team member should be able to remove access to inventory, becauase
     # the inventory admin_role grants that ability
-    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == True
+    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
 
 @pytest.mark.django_db
 def test_user_roles_unattach_functional(organization, alice, bob, get):
@@ -257,7 +259,7 @@ def test_user_roles_unattach_functional(organization, alice, bob, get):
     organization.member_role.members.add(bob)
     response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
     # Org members can not revoke the membership of other members
-    assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == False
+    assert not response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
 
 
 @pytest.mark.django_db
