@@ -143,6 +143,10 @@ class JobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False,
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0, 
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -253,7 +257,11 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
+<<<<<<< 887818cb8987d465e23f1ed0c5886473acdbfcda
                 'labels', 'survey_passwords', 'allow_simultaneous',]
+=======
+                'labels', 'survey_passwords', 'timeout']
+>>>>>>> Implement timeout on job/job-template.
 
     def resource_validation_data(self):
         '''
