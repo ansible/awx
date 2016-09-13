@@ -32,13 +32,13 @@
         </div>
     </div>
     <div class="SurveyMaker-content">
-        <div class="SurveyMaker-questionPanel" ng-show="canEdit">
+        <div class="SurveyMaker-questionPanel" ng-show="job_template_obj.summary_fields.user_capabilities.edit">
             <div id="survey_maker_question_form"></div>
         </div>
-        <div class="SurveyMaker-separatorPanel" ng-show="canEdit">
+        <div class="SurveyMaker-separatorPanel" ng-show="job_template_obj.summary_fields.user_capabilities.edit">
             <div class="SurveyMaker-contentSeparator"></div>
         </div>
-        <div class="SurveyMaker-previewPanel" ng-class="{'SurveyMaker-previewPanel--viewOnly': !canEdit}">
+        <div class="SurveyMaker-previewPanel" ng-class="{'SurveyMaker-previewPanel--viewOnly': !job_template_obj.summary_fields.user_capabilities.edit}">
             <div style="display: flex; flex-direction: column; width: 100%;">
                 <div class="SurveyMaker-panelHeader">PREVIEW</div>
                 <div class="SurveyMaker-panelBody">
@@ -56,13 +56,13 @@
                                     <i>{{question.question_description}}</i>
                                 </div>
                                 <div class="SurveyMaker-previewInputRow">
-                                    <span dnd-handle class="SurveyMaker-reorderButton" data-placement="top" aw-tool-tip="Drag to reorder question" data-original-title="" title="" ng-show="canEdit">
+                                    <span dnd-handle class="SurveyMaker-reorderButton" data-placement="top" aw-tool-tip="Drag to reorder question" data-original-title="" title="" ng-show="job_template_obj.summary_fields.user_capabilities.edit">
                                         <i class="fa fa-ellipsis-v"></i>
                                         <span>&nbsp;</span>
                                         <i class="fa fa-ellipsis-v"></i>
                                     </span>
                                     <survey-question class="SurveyMaker-previewInput" preview="true" question="question" ng-required="question.required" ng-disabled=true></survey-question>
-                                    <div class="SurveyMaker-previewActions" ng-show="canEdit">
+                                    <div class="SurveyMaker-previewActions" ng-show="job_template_obj.summary_fields.user_capabilities.edit">
                                         <button class="List-actionButton" data-placement="top" ng-class="{'SurveyMaker-previewActions--selected' : editQuestionIndex == $index}" ng-click="editQuestion($index)" aw-tool-tip="Edit question" data-original-title="" title="">
                                             <i class="fa fa-pencil"></i>
                                         </button>
@@ -80,10 +80,10 @@
                 </div>
                 <div class="SurveyMaker-panelFooter">
                     <div class="Form-buttons">
-                        <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists && canEdit" ng-click="showDeleteOverlay('survey')">DELETE SURVEY</button>
-                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="canEdit">CANCEL</button>
-                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="!canEdit">CLOSE</button>
-                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null" ng-show="canEdit">SAVE</button>
+                        <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists && job_template_obj.summary_fields.user_capabilities.edit" ng-click="showDeleteOverlay('survey')">DELETE SURVEY</button>
+                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="job_template_obj.summary_fields.user_capabilities.edit">CANCEL</button>
+                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="!job_template_obj.summary_fields.user_capabilities.edit">CLOSE</button>
+                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null" ng-show="job_template_obj.summary_fields.user_capabilities.edit">SAVE</button>
                     </div>
                 </div>
             </div>

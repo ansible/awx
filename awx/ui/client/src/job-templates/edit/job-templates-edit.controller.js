@@ -46,16 +46,6 @@ export default
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
 
-            $scope.canEdit = false;
-
-            Rest.setUrl(GetBasePath('job_templates') + id);
-            Rest.options()
-                .success(function(data) {
-                    if (data.actions.PUT) {
-                        $scope.canEdit = true;
-                    }
-                });
-
             // remove "type" field from search options
             CredentialList = _.cloneDeep(CredentialList);
             CredentialList.fields.kind.noSearch = true;

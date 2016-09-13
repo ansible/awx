@@ -24,19 +24,6 @@ export default
                 master = {},
                 url = GetBasePath('inventory_scripts');
 
-
-            $scope.canEditInvScripts = false;
-
-            Rest.setUrl(GetBasePath('inventory_scripts') + id);
-            Rest.options()
-                .success(function(data) {
-                    if (data.actions.PUT) {
-                        $scope.canEditInvScripts = true;
-                    } else {
-                        $scope.canEditInvScripts = false;
-                    }
-                });
-
             $scope.inventory_script = inventory_script;
             generator.inject(form, {
                     mode: 'edit' ,

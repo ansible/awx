@@ -27,7 +27,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: true,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 last_name: {
                     label: 'Last Name',
@@ -35,7 +35,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: true,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 email: {
                     label: 'Email',
@@ -43,7 +43,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     autocomplete: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 username: {
                     label: 'Username',
@@ -53,7 +53,7 @@ export default
                         init: true
                     },
                     autocomplete: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     label: 'Organization',
@@ -68,7 +68,7 @@ export default
                         reqExpression: "orgrequired",
                         init: true
                     },
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 password: {
                     label: 'Password',
@@ -80,7 +80,7 @@ export default
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
                     chkPass: true,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 password_confirm: {
                     label: 'Confirm Password',
@@ -92,7 +92,7 @@ export default
                     awPassMatch: true,
                     associated: 'password',
                     autocomplete: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 user_type: {
                     label: 'User Type',
@@ -101,23 +101,23 @@ export default
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'canEdit'
+                    ngShow: 'user_obj.summary_fields.user_capabilities.edit'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!canEdit'
+                    ngShow: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: 'canEdit'
+                    ngShow: 'user_obj.summary_fields.user_capabilities.edit'
                 }
             },
 

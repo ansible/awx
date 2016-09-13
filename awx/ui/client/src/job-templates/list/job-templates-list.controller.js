@@ -22,14 +22,12 @@ export default
             ClearScope();
 
             $scope.canAdd = false;
-            $scope.canEdit = false;
 
             Rest.setUrl(GetBasePath('job_templates'));
             Rest.options()
                 .success(function(data) {
                     if (data.actions.POST) {
                         $scope.canAdd = true;
-                        $scope.canEdit = true;
                     }
                 });
 

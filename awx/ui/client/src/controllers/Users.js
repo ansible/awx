@@ -38,14 +38,12 @@ export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     ClearScope();
 
     $scope.canAdd = false;
-    $scope.canEdit = false;
 
     Rest.setUrl(GetBasePath('users'));
     Rest.options()
         .success(function(data) {
             if (data.actions.POST) {
                 $scope.canAdd = true;
-                $scope.canEdit = true;
             }
         });
 
@@ -291,16 +289,6 @@ export function UsersEdit($scope, $rootScope, $location,
         id = $stateParams.user_id,
         relatedSets = {},
         set;
-
-    $scope.canEdit = false;
-
-    Rest.setUrl(GetBasePath('users') + id);
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.PUT) {
-                $scope.canEdit = true;
-            }
-        });
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();

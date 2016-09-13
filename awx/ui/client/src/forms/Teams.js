@@ -26,14 +26,14 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     label: 'Organization',
@@ -47,23 +47,23 @@ export default
                         reqExpression: "orgrequired",
                         init: true
                     },
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'canEdit'
+                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!canEdit'
+                    ngShow: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: 'canEdit'
+                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
@@ -85,7 +85,7 @@ export default
                             awToolTip: 'Add user to team',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: 'canEdit'
+                            ngShow: 'team_obj.summary_fields.user_capabilities.edit'
                         }
                     },
 

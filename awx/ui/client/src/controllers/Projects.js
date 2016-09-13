@@ -19,14 +19,12 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     ClearScope();
 
     $scope.canAdd = false;
-    $scope.canEdit = false;
 
     Rest.setUrl(GetBasePath('projects'));
     Rest.options()
         .success(function(data) {
             if (data.actions.POST) {
                 $scope.canAdd = true;
-                $scope.canEdit = true;
             }
         });
 
@@ -587,16 +585,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         master = {}, i,
         id = $stateParams.id,
         relatedSets = {};
-
-    $scope.canEdit = false;
-
-    Rest.setUrl(GetBasePath('projects') + id);
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.PUT) {
-                $scope.canEdit = true;
-            }
-        });
 
     // remove "type" field from search options
     CredentialList = _.cloneDeep(CredentialList);

@@ -18,14 +18,12 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     ClearScope();
 
     $scope.canAdd = false;
-    $scope.canEdit = false;
 
     Rest.setUrl(GetBasePath('teams'));
     Rest.options()
         .success(function(data) {
             if (data.actions.POST) {
                 $scope.canAdd = true;
-                $scope.canEdit = true;
             }
         });
 
@@ -225,16 +223,6 @@ export function TeamsEdit($scope, $rootScope, $location,
         id = $stateParams.team_id,
         relatedSets = {},
         set;
-
-    $scope.canEdit = false;
-
-    Rest.setUrl(GetBasePath('teams') + id);
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.PUT) {
-                $scope.canEdit = true;
-            }
-        });
 
     $scope.team_id = id;
 

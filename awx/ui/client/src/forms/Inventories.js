@@ -27,7 +27,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!inventory_obj.summary_fields.user_capabilities.edit'
                 },
                 inventory_description: {
                     realName: 'description',
@@ -35,7 +35,7 @@ export default
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!inventory_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     label: 'Organization',
@@ -47,7 +47,7 @@ export default
                         reqExpression: "organizationrequired",
                         init: "true"
                     },
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!inventory_obj.summary_fields.user_capabilities.edit'
                 },
                 variables: {
                     label: 'Variables',
@@ -67,23 +67,23 @@ export default
                     dataTitle: 'Inventory Variables',
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    ngDisabled: '!canEdit' // TODO: get working
+                    ngDisabled: '!inventory_obj.summary_fields.user_capabilities.edit' // TODO: get working
                 }
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'canEdit'
+                    ngShow: 'inventory_obj.summary_fields.user_capabilities.edit'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngHide: 'canEdit'
+                    ngHide: 'inventory_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: 'canEdit'
+                    ngShow: 'inventory_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
@@ -105,7 +105,7 @@ export default
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: 'canEdit'
+                            ngShow: 'inventory_obj.summary_fields.user_capabilities.edit'
                         }
                     },
 

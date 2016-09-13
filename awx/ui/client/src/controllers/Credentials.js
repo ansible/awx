@@ -18,14 +18,12 @@ export function CredentialsList($scope, $rootScope, $location, $log,
     ClearScope();
 
     $scope.canAdd = false;
-    $scope.canEdit = false;
 
     Rest.setUrl(GetBasePath('credentials'));
     Rest.options()
         .success(function(data) {
             if (data.actions.POST) {
                 $scope.canAdd = true;
-                $scope.canEdit = true;
             }
         });
 
@@ -366,16 +364,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         master = {},
         id = $stateParams.credential_id,
         relatedSets = {};
-
-    $scope.canEdit = false;
-
-    Rest.setUrl(GetBasePath('credentials') + id);
-    Rest.options()
-        .success(function(data) {
-            if (data.actions.PUT) {
-                $scope.canEdit = true;
-            }
-        });
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();

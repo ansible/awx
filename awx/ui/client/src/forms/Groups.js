@@ -27,7 +27,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     tab: 'properties',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 description: {
                     label: 'Description',
@@ -35,7 +35,7 @@ export default
                     addRequired: false,
                     editRequired: false,
                     tab: 'properties',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 variables: {
                     label: 'Variables',
@@ -68,7 +68,7 @@ export default
                     addRequired: false,
                     editRequired: false,
                     ngModel: 'source',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 credential: {
                     label: 'Cloud Credential',
@@ -81,7 +81,7 @@ export default
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
                     },
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 source_regions: {
                     label: 'Regions',
@@ -97,7 +97,7 @@ export default
                         "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                         "</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 instance_filters: {
                     label: 'Instance Filters',
@@ -118,7 +118,7 @@ export default
                         "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                         "for a complete list of supported filters.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 group_by: {
                     label: 'Only Group By',
@@ -144,7 +144,7 @@ export default
                         "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
@@ -156,7 +156,7 @@ export default
                     addRequired: true,
                     editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
-                    ngDisabled: '!canEdit',
+                    ngDisabled: '!group_obj.summary_fields.user_capabilities.edit',
                 },
                 custom_variables: {
                     id: 'custom_variables',
@@ -278,7 +278,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!canEdit'
+                        ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                     }, {
                         name: 'overwrite_vars',
                         label: 'Overwrite Variables',
@@ -293,7 +293,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!canEdit'
+                        ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                     }, {
                         name: 'update_on_launch',
                         label: 'Update on Launch',
@@ -307,7 +307,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!canEdit'
+                        ngDisabled: '!group_obj.summary_fields.user_capabilities.edit'
                     }]
                 },
                 update_cache_timeout: {
@@ -333,16 +333,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'canEdit'
+                    ngShow: 'group_obj.summary_fields.user_capabilities.edit'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!canEdit'
+                    ngShow: '!group_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: 'canEdit'
+                    ngShow: 'group_obj.summary_fields.user_capabilities.edit'
                 }
             },
 

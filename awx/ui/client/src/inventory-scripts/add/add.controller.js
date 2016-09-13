@@ -29,8 +29,6 @@ export default
                 form = inventoryScriptsFormObject,
                 url = GetBasePath('inventory_scripts');
 
-            $scope.canEdit = true;
-
             generator.inject(form, {
                 mode: 'add' ,
                 scope:scope,

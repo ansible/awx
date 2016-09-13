@@ -26,30 +26,30 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!organization_obj.summary_fields.user_capabilities.edit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: '!canEdit'
+                    ngDisabled: '!organization_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'canEdit'
+                    ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!canEdit'
+                    ngShow: '!organization_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
-                    ngShow: 'canEdit'
+                    ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
@@ -71,7 +71,7 @@ export default
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: 'canEdit'
+                            ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
                         }
                     },
 

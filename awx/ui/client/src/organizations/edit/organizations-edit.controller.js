@@ -25,16 +25,6 @@ export default ['$scope', '$rootScope', '$compile', '$location',
             id = $stateParams.organization_id,
             relatedSets = {};
 
-        $scope.canEdit = false;
-
-        Rest.setUrl(GetBasePath('organizations') + id);
-        Rest.options()
-            .success(function(data) {
-                if (data.actions.PUT) {
-                    $scope.canEdit = true;
-                }
-            });
-
         $scope.$parent.activeMode = 'edit';
 
         $scope.$parent.activeCard = parseInt(id);

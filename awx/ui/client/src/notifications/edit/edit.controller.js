@@ -25,16 +25,6 @@ export default
                 master = {},
                 url = GetBasePath('notification_templates');
 
-            $scope.canEdit = false;
-
-            Rest.setUrl(GetBasePath('notification_templates') + id);
-            Rest.options()
-                .success(function(data) {
-                    if (data.actions.PUT) {
-                        $scope.canEdit = true;
-                    }
-                });
-
             $scope.notification_template = notification_template;
             generator.inject(form, {
                     mode: 'edit' ,
