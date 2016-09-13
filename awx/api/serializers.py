@@ -327,7 +327,7 @@ class BaseSerializer(serializers.ModelSerializer):
                 roles[field.name] = {
                     'id': role.id,
                     'name': role.name,
-                    'description': role.description,
+                    'description': role.get_description(reference_content_object=obj),
                 }
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
