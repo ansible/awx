@@ -285,7 +285,8 @@ class BaseSerializer(serializers.ModelSerializer):
                 # because it results in additional queries.
                 if fk == 'job' and isinstance(obj, UnifiedJob):
                     continue
-                if fk == 'project' and isinstance(obj, InventorySource):
+                if fk == 'project' and (isinstance(obj, InventorySource) or
+                                        isinstance(obj, Project)):
                     continue
 
                 fkval = getattr(obj, fk, None)
