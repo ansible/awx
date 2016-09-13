@@ -672,6 +672,13 @@ class InventoryUpdateAccess(BaseAccess):
         # Inventory cascade deletes to inventory update, descends from org admin
         return self.user in obj.inventory_source.inventory.admin_role
 
+    def can_start(self, obj):
+        # For relaunching
+        if obj and obj.inventory_source:
+            access = InventorySourceAccess(self.user)
+            return access.can_start(obj.inventory_source)
+        return False
+
     @check_superuser
     def can_delete(self, obj):
         return self.user in obj.inventory_source.inventory.admin_role
@@ -1217,6 +1224,9 @@ class SystemJobAccess(BaseAccess):
     I can only see manage System Jobs if I'm a super user
     '''
     model = SystemJob
+
+    def can_start(self, obj):
+        return False # no relaunching of system jobs
 
 class AdHocCommandAccess(BaseAccess):
     '''
