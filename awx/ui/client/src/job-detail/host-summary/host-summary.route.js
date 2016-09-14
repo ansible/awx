@@ -14,6 +14,12 @@ export default {
             "jobs": ["status_changed"]
         }
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed", "summary"],
+            "job_events": []
+        }
+    },
     views:{
         'host-summary': {
             controller: 'HostSummaryController',

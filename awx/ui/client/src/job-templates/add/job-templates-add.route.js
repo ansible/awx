@@ -15,6 +15,11 @@ export default {
         parent: "jobTemplates",
         label: "CREATE JOB TEMPLATE"
     },
+    socket:{
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     onExit: function(){
         // close the survey maker modal
         // using an onExit event to handle cases where the user navs away using the url bar / back and not modal "X"

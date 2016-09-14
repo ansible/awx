@@ -90,7 +90,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
                     if ($rootScope.removeJobStatusChange) {
                         $rootScope.removeJobStatusChange();
                     }
-                    $rootScope.removeJobStatusChange = $rootScope.$on(`${$state.current.name}-jobs`, function(e, data) {
+                    $rootScope.removeJobStatusChange = $rootScope.$on(`ws-${$state.current.name}-jobs`, function(e, data) {
                         var project;
                         $log.debug(data);
                         if ($scope.projects) {

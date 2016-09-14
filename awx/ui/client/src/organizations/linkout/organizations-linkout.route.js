@@ -99,6 +99,11 @@ export default [
             features: ['FeaturesService', function(FeaturesService) {
                 return FeaturesService.get();
             }]
+        },
+        socket: {
+            "groups":{
+                "jobs": ["status_changed"]
+            }
         }
     },
     {
@@ -121,6 +126,11 @@ export default [
             features: ['FeaturesService', function(FeaturesService) {
                 return FeaturesService.get();
             }]
+        },
+        socket: {
+            "groups":{
+                "jobs": ["status_changed"]
+            }
         }
     },
     {

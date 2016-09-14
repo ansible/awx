@@ -23,5 +23,10 @@ export default {
     },
     ncyBreadcrumb: {
         label: "RUN COMMAND"
+    },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
     }
 };

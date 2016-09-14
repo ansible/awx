@@ -21,6 +21,13 @@ export default ['$scope', '$rootScope', '$location', '$log',
             generator = GenerateList,
             orgBase = GetBasePath('organizations');
 
+        if ($rootScope.JobStatusChange) {
+            $rootScope.JobStatusChange();
+        }
+        $rootScope.JobStatusChange = $rootScope.$on(`ws-${$state.current.name}-jobs`, function (e, data) {
+            $scope.search(list.iterator);
+        });
+
         Rest.setUrl(orgBase + $stateParams.organization_id);
         Rest.get()
             .success(function (data) {

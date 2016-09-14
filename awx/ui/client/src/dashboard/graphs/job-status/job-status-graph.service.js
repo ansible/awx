@@ -58,7 +58,7 @@ function JobStatusGraphData(Rest, getBasePath, processErrors, $rootScope, $q) {
         destroyWatcher: angular.noop,
         setupWatcher: function(period, jobType) {
             this.destroyWatcher =
-                $rootScope.$on('dashboard-jobs', function() {
+                $rootScope.$on('ws-dashboard-jobs', function() {
                     getData(period, jobType).then(function(result) {
                         $rootScope.
                             $broadcast('DataReceived:JobStatusGraph',

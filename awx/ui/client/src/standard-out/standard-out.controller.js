@@ -28,7 +28,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     if ($scope.removeJobStatusChange) {
         $scope.removeJobStatusChange();
     }
-    $scope.removeJobStatusChange = $rootScope.$on(`${$state.current.name}-jobs`, function(e, data) {
+    $scope.removeJobStatusChange = $rootScope.$on(`ws-${$state.current.name}-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
             $scope.job.status = data.status;
         }

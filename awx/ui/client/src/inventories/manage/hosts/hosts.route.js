@@ -23,6 +23,11 @@ var ManageHostsEdit = {
             });
         }]
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     views: {
         'form@inventoryManage': {
             controller: editController,
@@ -39,6 +44,11 @@ var ManageHostsAdd = {
     },
     data: {
         mode: 'add'
+    },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
     },
     views: {
         'form@inventoryManage': {

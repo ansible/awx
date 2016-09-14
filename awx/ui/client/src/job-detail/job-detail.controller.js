@@ -201,7 +201,7 @@ export default
                 if ($rootScope.removeJobEventChange) {
                     $rootScope.removeJobEventChange();
                 }
-                $rootScope.removeJobEventChange = $rootScope.$on(`${$state.current.name}-job_events-${job_id}`, function(e, data) {
+                $rootScope.removeJobEventChange = $rootScope.$on(`ws-${$state.current.name}-job_events-${job_id}`, function(e, data) {
                     // update elapsed time on each event received
                     scope.job_status.elapsed = GetElapsed({
                         start: scope.job.created,
@@ -225,7 +225,7 @@ export default
             if ($rootScope.removeJobStatusChange) {
                 $rootScope.removeJobStatusChange();
             }
-            $rootScope.removeJobStatusChange = $rootScope.$on(`${$state.current.name}-jobs`, function(e, data) {
+            $rootScope.removeJobStatusChange = $rootScope.$on(`ws-${$state.current.name}-jobs`, function(e, data) {
                 // if we receive a status change event for the current job indicating the job
                 // is finished, stop event queue processing and reload
                 if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
@@ -242,7 +242,7 @@ export default
             if ($rootScope.removeJobSummaryComplete) {
                 $rootScope.removeJobSummaryComplete();
             }
-            $rootScope.removeJobSummaryComplete = $rootScope.$on('JobSummaryComplete', function() {
+            $rootScope.removeJobSummaryComplete = $rootScope.$on('ws-JobSummaryComplete', function() {
                 // the job host summary should now be available from the API
                 $log.debug('Trigging reload of job_host_summaries');
                 scope.$emit('InitialLoadComplete');

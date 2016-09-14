@@ -624,6 +624,11 @@ var tower = angular.module('Tower', [
             ncyBreadcrumb: {
                 parent: "projects",
                 label: "CREATE PROJECT"
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
             }
         });
 
@@ -638,6 +643,11 @@ var tower = angular.module('Tower', [
             ncyBreadcrumb: {
                 parent: 'projects',
                 label: '{{name}}'
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
             }
         });
 
@@ -654,6 +664,7 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/projects.html',
             controller: OrganizationsAdd
         });
+
         $rootScope.addPermission = function(scope) {
             $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
         };

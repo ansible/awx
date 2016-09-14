@@ -41,13 +41,13 @@ export default
                             // we know that this must have been a
                             // summary complete message
                             $log.debug('Job summary_complete ' + data.unified_job_id);
-                            $rootScope.$emit('JobSummaryComplete', data);
+                            $rootScope.$emit('ws-JobSummaryComplete', data);
                         }
                         else if(data.group_name==="job_events"){
-                            str = `${$state.current.name}-${data.group_name}-${data.job}`;
+                            str = `ws-${$state.current.name}-${data.group_name}-${data.job}`;
                         }
                         else if(data.group_name==="ad_hoc_command_events"){
-                            str = `${$state.current.name}-${data.group_name}-${data.ad_hoc_command}`;
+                            str = `ws-${$state.current.name}-${data.group_name}-${data.ad_hoc_command}`;
                         }
                         else if(data.group_name==="control"){
                             $log.debug(data.reason);
@@ -59,7 +59,7 @@ export default
                             // correct route is the route name followed by a
                             // dash (-) and the group_name.
                             // ex: 'jobDetail-job_events'
-                            str = `${$state.current.name}-${data.group_name}`;
+                            str = `ws-${$state.current.name}-${data.group_name}`;
                         }
                         $rootScope.$emit(str, data);
                         return self.socket;
