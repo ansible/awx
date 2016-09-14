@@ -79,7 +79,9 @@ export default
                 }, 2000);
             },
             disconnect: function(){
-                this.socket.close();
+                if(this.socket){
+                    this.socket.close();
+                }
             },
             subscribe: function(state){
                 console.log("Next state: " + state.name);
