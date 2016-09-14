@@ -914,7 +914,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
-                  'scm_update_cache_timeout') + \
+                  'scm_update_cache_timeout', 'timeout') + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
 
@@ -1329,7 +1329,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars')
+                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'timeout')
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -2061,7 +2062,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
-                  'become_enabled', '-unified_job_template', '-description')
+                  'become_enabled', 'timeout', '-unified_job_template', '-description')
         extra_kwargs = {
             'name': {
                 'read_only': True,
@@ -2159,7 +2160,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type', 'extra_vars')
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'timeout')
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)

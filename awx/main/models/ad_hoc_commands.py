@@ -88,6 +88,10 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         blank=True,
         default='',
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
