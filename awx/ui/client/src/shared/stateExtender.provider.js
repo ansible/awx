@@ -2,7 +2,6 @@ export default function($stateProvider) {
     this.$get = function() {
         return {
             addSocket: function(state){
-                // var resolve = state.resolve || {};
                 if(!state.resolve){
                     state.resolve = {};
                 }
@@ -18,7 +17,7 @@ export default function($stateProvider) {
                                     state.socket.groups.job_events = [$stateParams.id];
                                 }
                                 if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
-                                    state.socket.groups.job_events = [$stateParams.id];
+                                    state.socket.groups.ad_hoc_command_events = [$stateParams.id];
                                 }
                                 SocketService.subscribe(state);
                             }
