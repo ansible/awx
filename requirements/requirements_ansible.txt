@@ -25,6 +25,7 @@ jsonpatch==1.12
 jsonpointer==1.10
 jsonschema==2.5.1
 keyring==4.1
+kombu==3.0.35
 lxml==3.4.4
 mock==1.0.1
 monotonic==0.6

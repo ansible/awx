@@ -794,7 +794,8 @@ class RunJob(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
-        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
+        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:

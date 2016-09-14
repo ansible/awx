@@ -50,7 +50,7 @@ jsonpatch==1.12
 jsonpointer==1.10
 jsonschema==2.5.1
 keyring==4.1
-kombu==3.0.30
+kombu==3.0.35
 apache-libcloud==0.20.1
 lxml==3.4.4
 Markdown==2.4.1
