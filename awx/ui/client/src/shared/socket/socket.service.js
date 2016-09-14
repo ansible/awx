@@ -22,16 +22,17 @@ export default
                     });
 
                     self.socket.onopen = function () {
-                        $log.debug("Websocket connection opened");
+                        $log.debug("Websocket connection opened.");
                         $rootScope.socketPromise.resolve();
                     };
 
                     self.socket.onerror = function (error) {
-                        $log.debug('Error Logged: ' + error); //log errors
+                        $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onclose = function () {
-                        $log.debug('Websocket Disconnected.');
+                    self.socket.onclose = function (error, obj) {
+                        $log.debug('Websocket Disconnected: '+error);
+                        self.checkStatus();
                     };
 
                     self.socket.onmessage = function (e) {
@@ -57,12 +58,11 @@ export default
                         else {
                             // The naming scheme is "ws" then a
                             // dash (-) and the group_name.
-                            // ex: 'ws-jobs' 
+                            // ex: 'ws-jobs'
                             str = `ws-${data.group_name}`;
                         }
                         $rootScope.$emit(str, data);
                         return self.socket;
-
                     };
 
                 }
@@ -159,14 +159,6 @@ export default
                         });
                     });
                 });
-            },
-            removeAllListeners: function (eventName) {
-                var self = this;
-                if(self){
-                  if(self.socket){
-                    self.socket.removeEventListener(eventName);
-                  }
-                }
-            },
+            }
         };
     }];

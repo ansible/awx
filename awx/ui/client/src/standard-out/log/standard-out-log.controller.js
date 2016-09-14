@@ -28,11 +28,6 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                        event_queue++;
                    }
                });
-               // Unbind $rootScope socket event binding(s) so that they don't get triggered
-               // in another instance of this controller
-            //    $scope.$on('$destroy', function() {
-            //        $rootScope.socket.removeAllListeners("job_events-" + job_id);
-            //    });
             }
             if ($state.current.name === 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
@@ -42,11 +37,6 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
                         event_queue++;
                     }
                 });
-                // Unbind $rootScope socket event binding(s) so that they don't get triggered
-                // in another instance of this controller
-                // $scope.$on('$destroy', function() {
-                //     $rootScope.adhoc_event_socket.removeAllListeners("ad_hoc_command_events-" + job_id);
-                // });
             }
         }
 
