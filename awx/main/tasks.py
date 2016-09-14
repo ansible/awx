@@ -575,7 +575,7 @@ class BaseTask(Task):
         instance = self.update_model(instance.pk, status='running',
                                      output_replacements=output_replacements)
         while child.isalive():
-            result_id = child.expect(expect_list, timeout=pexpect_timeout)
+            result_id = child.expect(expect_list, timeout=pexpect_timeout, maxread=100, searchwindowsize=100)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
             if logfile_pos != logfile.tell():

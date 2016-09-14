@@ -438,6 +438,9 @@ AWX_TASK_ENV = {}
 # before it recycles
 JOB_EVENT_RECYCLE_THRESHOLD = 3000
 
+# Number of workers used to proecess job events in parallel
+JOB_EVENT_WORKERS = 4
+
 # Maximum number of job events that can be waiting on a single worker queue before
 # it can be skipped as too busy
 JOB_EVENT_MAX_QUEUE_SIZE = 100

@@ -25,8 +25,6 @@ from awx.main.socket import Socket
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
-WORKERS = 4
-
 class CallbackReceiver(object):
     def __init__(self):
         self.parent_mappings = {}
@@ -54,7 +52,7 @@ class CallbackReceiver(object):
 
         if use_workers:
             connection.close()
-            for idx in range(WORKERS):
+            for idx in range(settings.JOB_EVENT_WORKERS):
                 queue_actual = Queue(settings.JOB_EVENT_MAX_QUEUE_SIZE)
                 w = Process(target=self.callback_worker, args=(queue_actual, idx,))
                 w.start()
@@ -99,7 +97,7 @@ class CallbackReceiver(object):
             time.sleep(0.1)
 
     def write_queue_worker(self, preferred_queue, worker_queues, message):
-        queue_order = sorted(range(WORKERS), cmp=lambda x, y: -1 if x==preferred_queue else 0)
+        queue_order = sorted(range(settings.JOB_EVENT_WORKERS), cmp=lambda x, y: -1 if x==preferred_queue else 0)
         for queue_actual in queue_order:
             try:
                 worker_actual = worker_queues[queue_actual]
@@ -153,7 +151,7 @@ class CallbackReceiver(object):
                         if message['event'] == 'playbook_on_stats':
                             job_parent_events = {}
 
-                        actual_queue = self.write_queue_worker(total_messages % WORKERS, worker_queues, message)
+                        actual_queue = self.write_queue_worker(total_messages % settings.JOB_EVENT_WORKERS, worker_queues, message)
                         # NOTE: It might be better to recycle the entire callback receiver process if one or more of the queues are too full
                         # the drawback is that if we under extremely high load we may be legitimately taking a while to process messages
                         if actual_queue is None:
@@ -282,7 +280,6 @@ class CallbackReceiver(object):
         return None
 
     def callback_worker(self, queue_actual, idx):
-        messages_processed = 0
         while True:
             try:
                 message = queue_actual.get(block=True, timeout=1)
@@ -292,10 +289,6 @@ class CallbackReceiver(object):
                 logger.error("Exception on listen socket, restarting: " + str(e))
                 break
             self.process_job_event(message)
-            messages_processed += 1
-            if messages_processed >= settings.JOB_EVENT_RECYCLE_THRESHOLD:
-                logger.info("Shutting down message receiver")
-                break
 
 class Command(NoArgsCommand):
     '''
