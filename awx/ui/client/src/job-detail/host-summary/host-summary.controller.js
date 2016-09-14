@@ -60,11 +60,10 @@
             }
         });
 
-        // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
         if ($rootScope.removeJobSummaryComplete) {
             $rootScope.removeJobSummaryComplete();
         }
-        $rootScope.removeJobSummaryComplete = $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+        $rootScope.removeJobSummaryComplete = $rootScope.$on('jobDetail-jobs', function(e, data) {
             if (parseInt($stateParams.id) === data.unified_job_id){
                 $scope.status = data.status;
             }

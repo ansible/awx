@@ -9,6 +9,11 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 export default {
     name: 'jobDetail.host-summary',
     url: '/event-summary',
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     views:{
         'host-summary': {
             controller: 'HostSummaryController',

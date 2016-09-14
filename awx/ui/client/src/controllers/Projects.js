@@ -90,7 +90,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     if ($rootScope.removeJobStatusChange) {
         $rootScope.removeJobStatusChange();
     }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-projects', function(e, data) {
+    $rootScope.removeJobStatusChange = $rootScope.$on(`${$state.current.name}-jobs`, function(e, data) {
         var project;
         $log.debug(data);
         if ($scope.projects) {
