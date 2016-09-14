@@ -17,7 +17,6 @@ export default
                     $log.debug('Socket connecting to: ' + url);
 
                     self.socket = new ReconnectingWebSocket(url, null, {
-                        // debug: true,
                         timeoutInterval: 3000,
                         maxReconnectAttempts: 10
                     });
@@ -29,6 +28,10 @@ export default
 
                     self.socket.onerror = function (error) {
                         $log.debug('Error Logged: ' + error); //log errors
+                    };
+
+                    self.socket.onclose = function (error) {
+                        $log.debug('Websocket Disconnected.');
                     };
 
                     self.socket.onmessage = function (e) {
@@ -59,56 +62,6 @@ export default
                             str = `${$state.current.name}-${data.group_name}`;
                         }
                         $rootScope.$emit(str, data);
-                        // if(data.group_name==="jobs"){
-                        //
-                        //     if (!('status' in data)){
-                        //         // we know that this must have been a
-                        //         // summary complete message
-                        //         $log.debug('Job summary_complete ' + data.unified_job_id);
-                        //         $rootScope.$emit('JobSummaryComplete', data);
-                        //     }
-                        //
-                        //     if ($state.is('jobs')) {
-                        //         $rootScope.$emit('JobStatusChange-jobs', data);
-                        //     }
-                        // else if ($state.includes('jobDetail') ||
-                        //         $state.is('adHocJobStdout') ||
-                        //         $state.is('inventorySyncStdout') ||
-                        //         $state.is('managementJobStdout') ||
-                        //         $state.is('scmUpdateStdout')) {
-                        //
-                        //         $log.debug("sending status to standard out");
-                        //         $rootScope.$emit('JobStatusChange-jobStdout', data);
-                        //     }
-                        //     if ($state.includes('jobDetail')) {
-                        //         $rootScope.$emit('JobStatusChange-jobDetails', data);
-                        //     } else if ($state.is('dashboard')) {
-                        //         $rootScope.$emit('JobStatusChange-home', data);
-                        //     } else if ($state.is('portalMode')) {
-                        //         $rootScope.$emit('JobStatusChange-portal', data);
-                        //     } else if ($state.is('projects')) {
-                        //         $rootScope.$emit('JobStatusChange-projects', data);
-                        //     } else if ($state.is('inventoryManage') ||
-                        //         $state.includes('inventoryManage')) {
-                        //             $rootScope.$emit('JobStatusChange-inventory', data);
-                        //     }
-                        // }
-                        // if(data.group_name==="job_events"){
-                        //     $rootScope.$emit('job_events-'+data.job, data);
-                        // }
-                        // if(data.group_name==="schedules"){
-                        //     $log.debug('Schedule  ' + data.unified_job_id + ' status changed to ' + data.status);
-                        //     $rootScope.$emit('ScheduleStatusChange', data);
-                        // }
-                        // if(data.group_name==="ad_hoc_command_events"){
-                        //     $rootScope.$emit('ad_hoc_command_events-'+data.ad_hoc_command, data);
-                        // }
-                        // if(data.group_name==="control"){
-                        //     $log.debug(data.reason);
-                        //     $rootScope.sessionTimer.expireSession('session_limit');
-                        //     $state.go('signOut');
-                        // }
-
                         return self.socket;
 
                     };
@@ -124,6 +77,9 @@ export default
                         self.checkStatus();
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                 }, 2000);
+            },
+            disconnect: function(){
+                this.socket.close();
             },
             subscribe: function(state){
                 console.log("Next state: " + state.name);
@@ -156,7 +112,6 @@ export default
                 }
             },
             checkStatus: function() {
-
                 function getSocketTip(status) {
                     var result = '';
                     switch(status) {

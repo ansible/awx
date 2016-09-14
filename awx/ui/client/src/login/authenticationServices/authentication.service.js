@@ -65,6 +65,7 @@ export default
 
                 var x,
                 ConfigService = $injector.get('ConfigService'),
+                SocketService = $injector.get('SocketService'),
                 scope = angular.element(document.getElementById('main-view')).scope();
 
                 if(scope){
@@ -94,6 +95,7 @@ export default
                     $rootScope.lastUser = $cookieStore.get('current_user').id;
                 }
                 ConfigService.delete();
+                SocketService.disconnect();
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('token');
