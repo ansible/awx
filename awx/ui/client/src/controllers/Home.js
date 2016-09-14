@@ -28,7 +28,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
 
     var dataCount = 0;
 
-    $rootScope.$on('ws-dashboard-jobs', function () {
+    $rootScope.$on('ws-jobs', function () {
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
         .success(function (data) {

@@ -41,7 +41,7 @@ export default
             if ($rootScope.JobStatusChange) {
                 $rootScope.JobStatusChange();
             }
-            $rootScope.JobStatusChange = $rootScope.$on(`ws-${$state.current.name}-jobs`, function (e, data) {
+            $rootScope.JobStatusChange = $rootScope.$on(`ws-jobs`, function (e, data) {
                 $scope.search(list.iterator);
             });
 

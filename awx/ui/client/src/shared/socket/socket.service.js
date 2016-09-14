@@ -30,7 +30,7 @@ export default
                         $log.debug('Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onclose = function (error) {
+                    self.socket.onclose = function () {
                         $log.debug('Websocket Disconnected.');
                     };
 
@@ -41,13 +41,13 @@ export default
                             // we know that this must have been a
                             // summary complete message
                             $log.debug('Job summary_complete ' + data.unified_job_id);
-                            $rootScope.$emit('ws-JobSummaryComplete', data);
+                            $rootScope.$emit('ws-jobs-summary', data);
                         }
                         else if(data.group_name==="job_events"){
-                            str = `ws-${$state.current.name}-${data.group_name}-${data.job}`;
+                            str = `ws-${data.group_name}-${data.job}`;
                         }
                         else if(data.group_name==="ad_hoc_command_events"){
-                            str = `ws-${$state.current.name}-${data.group_name}-${data.ad_hoc_command}`;
+                            str = `ws-${data.group_name}-${data.ad_hoc_command}`;
                         }
                         else if(data.group_name==="control"){
                             $log.debug(data.reason);
@@ -55,11 +55,10 @@ export default
                             $state.go('signOut');
                         }
                         else {
-                            // The naming scheme for emitting socket messages to the
-                            // correct route is the route name followed by a
+                            // The naming scheme is "ws" then a
                             // dash (-) and the group_name.
-                            // ex: 'jobDetail-job_events'
-                            str = `ws-${$state.current.name}-${data.group_name}`;
+                            // ex: 'ws-jobs' 
+                            str = `ws-${data.group_name}`;
                         }
                         $rootScope.$emit(str, data);
                         return self.socket;

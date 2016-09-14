@@ -113,14 +113,14 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         if ($rootScope.removeJobStatusChange) {
             $rootScope.removeJobStatusChange();
         }
-        $rootScope.removeJobStatusChange = $rootScope.$on('ws-jobs-jobs', function() {
+        $rootScope.removeJobStatusChange = $rootScope.$on('ws-jobs', function() {
             $scope.refreshJobs();
         });
 
         if ($rootScope.removeScheduleStatusChange) {
             $rootScope.removeScheduleStatusChange();
         }
-        $rootScope.removeScheduleStatusChange = $rootScope.$on('ws-jobs-schedules', function() {
+        $rootScope.removeScheduleStatusChange = $rootScope.$on('ws-schedules', function() {
             if (api_complete) {
                 scheduled_scope.search('schedule');
             }

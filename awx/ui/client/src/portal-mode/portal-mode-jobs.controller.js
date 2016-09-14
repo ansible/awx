@@ -16,7 +16,7 @@ export function PortalModeJobsController($scope, $rootScope, GetBasePath, Genera
     if ($rootScope.removeJobStatusChange) {
            $rootScope.removeJobStatusChange();
     }
-   $rootScope.removeJobStatusChange = $rootScope.$on('ws-portalMode-jobs', function() {
+   $rootScope.removeJobStatusChange = $rootScope.$on('ws-jobs', function() {
        $scope.search('job');
    });
 

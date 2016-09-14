@@ -48,22 +48,22 @@
                 $scope.status = res.results[0].status;
             });
         };
-        if ($rootScope.removeJobStatusChange) {
-            $rootScope.removeJobStatusChange();
+        if ($rootScope.removeJobSummaryComplete) {
+            $rootScope.removeJobSummaryComplete();
         }
         // emitted by the API in the same function used to persist host summary data
         // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
-        $rootScope.removeJobStatusChange = $rootScope.$on('ws-JobSummaryComplete', function(e, data) {
+        $rootScope.removeJobSummaryComplete = $rootScope.$on('ws-jobs-summary', function(e, data) {
             // discard socket msgs we don't care about in this context
             if (parseInt($stateParams.id) === data.unified_job_id){
                 init();
             }
         });
 
-        if ($rootScope.removeJobSummaryComplete) {
-            $rootScope.removeJobSummaryComplete();
+        if ($rootScope.removeJobStatusChange) {
+            $rootScope.removeJobStatusChange();
         }
-        $rootScope.removeJobSummaryComplete = $rootScope.$on('ws-jobDetail-jobs', function(e, data) {
+        $rootScope.removeJobStatusChange = $rootScope.$on('ws-jobs', function(e, data) {
             if (parseInt($stateParams.id) === data.unified_job_id){
                 $scope.status = data.status;
             }
