@@ -1897,20 +1897,6 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
         request = self.context.get('request', None)
 
-        # Remove the can_copy and can_edit fields when dependencies are fully removed
-        # Check for conditions that would create a validation error if coppied
-        validation_errors, resources_needed_to_start = obj.resource_validation_data()
-
-        if request is None or request.user is None:
-            d['can_copy'] = False
-            d['can_edit'] = False
-        elif request.user.is_superuser:
-            d['can_copy'] = not validation_errors
-            d['can_edit'] = True
-        else:
-            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', {"reference_obj": obj})
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, {})
-
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
