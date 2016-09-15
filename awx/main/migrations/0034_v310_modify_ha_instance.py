@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0032_v302_credential_permissions_update'),
+        ('main', '0033_v310_add_workflows'),
     ]
 
     operations = [
