@@ -1902,8 +1902,6 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
-        request = self.context.get('request', None)
-
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
