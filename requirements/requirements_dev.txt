@@ -4,7 +4,7 @@ ipython
 unittest2
 pep8
 flake8
-pyflakes==1.0.0 # Pinned until PR merges https://gitlab.com/pycqa/flake8/merge_requests/56
+pyflakes
 pytest==2.9.2
 pytest-cov
 pytest-django
