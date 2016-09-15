@@ -55,8 +55,10 @@ from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
-           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
+           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
+           'handle_work_success', 'update_inventory_computed_fields', 
+           'send_notifications', 'run_administrative_checks', 
+           'run_workflow_job']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -189,7 +191,6 @@ def notify_task_runner(metadata_dict):
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError("status_str must be either succeeded or failed")
-    print("Instance has some shit in it %s" % instance)
     notification_templates = instance.get_notification_templates()
     if notification_templates:
         all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
@@ -237,8 +238,6 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.socketio_emit_status("failed")
 
         if first_instance:
-            print("Instance type is %s" % first_instance_type)
-            print("Instance passing along %s" % first_instance.name)
             _send_notification_templates(first_instance, 'failed')
 
 @task()
@@ -1662,4 +1661,29 @@ class RunSystemJob(BaseTask):
 
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
+
+class RunWorkflowJob(BaseTask):
+    
+    name = 'awx.main.tasks.run_workflow_job'
+    model = WorkflowJob
+
+    def run(self, pk, **kwargs):
+        from awx.main.management.commands.run_task_system import WorkflowDAG
+        '''
+        Run the job/task and capture its output.
+        '''
+        pass
+        instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
+        instance.socketio_emit_status("running")
+
+        # FIXME: Detect workflow run completion
+        while True:
+            dag = WorkflowDAG(instance)
+            if dag.is_workflow_done():
+                # TODO: update with accurate finish status (i.e. canceled, error, etc.)
+                instance = self.update_model(instance.pk, status='successful')
+                break
+            time.sleep(1)
+        instance.socketio_emit_status(instance.status)
+        # TODO: Handle cancel
 

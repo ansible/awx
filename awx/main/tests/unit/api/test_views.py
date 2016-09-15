@@ -43,6 +43,8 @@ class TestApiV1RootView:
             'unified_job_templates',
             'unified_jobs',
             'activity_stream',
+            'workflow_job_templates',
+            'workflow_jobs',
         ]
         view = ApiV1RootView()
         ret = view.get(mocker.MagicMock())

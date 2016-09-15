@@ -15,6 +15,7 @@ services:
     #   - sync
     volumes:
       - "../:/tower_devel"
+    privileged: true
 
   # Postgres Database Container
   postgres:

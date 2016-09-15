@@ -9,6 +9,7 @@ from awx.main.models import (
     Inventory,
     Job,
     Label,
+    WorkflowJobTemplateNode,
 )
 
 from .objects import (
@@ -28,6 +29,7 @@ from .fixtures import (
     mk_project,
     mk_label,
     mk_notification_template,
+    mk_workflow_job_template,
 )
 
 
@@ -343,3 +345,66 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
                    users=_Mapped(users),
                    superusers=_Mapped(superusers),
                    teams=teams)
+
+def generate_workflow_job_template_nodes(workflow_job_template,
+                                         persisted,
+                                         **kwargs):
+
+    workflow_job_template_nodes = kwargs.get('workflow_job_template_nodes', [])
+    if len(workflow_job_template_nodes) > 0 and not persisted:
+        raise RuntimeError('workflow job template nodes can not be used when persisted=False')
+
+    new_nodes = []
+
+    for i, node in enumerate(workflow_job_template_nodes):
+        new_node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template,
+                                           unified_job_template=node['unified_job_template'],
+                                           id=i)
+        new_nodes.append(new_node)
+
+    node_types = ['success_nodes', 'failure_nodes', 'always_nodes']
+    for node_type in node_types:
+        for i, new_node in enumerate(new_nodes):
+            for related_index in workflow_job_template_nodes[i][node_type]:
+                getattr(new_node, node_type).add(new_nodes[related_index])
+
+# TODO: Implement survey and jobs
+def create_workflow_job_template(name, persisted=True, **kwargs):
+    Objects = generate_objects(["workflow_job_template",
+                                "workflow_job_template_nodes",
+                                "survey",], kwargs)
+
+    spec = None
+    #jobs = None
+
+    extra_vars = kwargs.get('extra_vars', '')
+
+    if 'survey' in kwargs:
+        spec = create_survey_spec(kwargs['survey'])
+
+    wfjt = mk_workflow_job_template(name, 
+                                    spec=spec, 
+                                    extra_vars=extra_vars,
+                                    persisted=persisted)
+
+    
+
+    workflow_jt_nodes = generate_workflow_job_template_nodes(wfjt, 
+                                                             persisted, 
+                                                             workflow_job_template_nodes=kwargs.get('workflow_job_template_nodes', []))
+
+    '''
+    if 'jobs' in kwargs:
+        for i in kwargs['jobs']:
+            if type(i) is Job:
+                jobs[i.pk] = i
+            else:
+                # TODO: Create the job
+                raise RuntimeError("Currently, only already created jobs are supported")
+    '''
+    return Objects(workflow_job_template=wfjt,
+                   #jobs=jobs,
+                   workflow_job_template_nodes=workflow_jt_nodes,
+                   survey=spec,)
+
+
