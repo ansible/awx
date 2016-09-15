@@ -973,15 +973,6 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
-        'fact_receiver': {
-            'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
-            'formatter':'simple',
-        },
         'system_tracking_migrations': {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
