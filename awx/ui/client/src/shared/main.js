@@ -6,7 +6,6 @@
 
 import listGenerator from './list-generator/main';
 import pagination from './pagination/main';
-import title from './title.directive';
 import lodashAsPromised from './lodash-as-promised';
 import stringFilters from './string-filters/main';
 import truncatedText from './truncated-text.directive';
@@ -22,5 +21,4 @@ angular.module('shared', [listGenerator.name,
     ])
     .factory('lodashAsPromised', lodashAsPromised)
     .directive('truncatedText', truncatedText)
-    //.directive('title', title)
     .provider('$stateExtender', stateExtender);

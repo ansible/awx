@@ -3,5 +3,5 @@ import icon from './icon.directive';
 
 export default
     angular.module('awIcon', [])
-        .directive('awIcon', icon)
+        .directive('awIcon', icon);
         //.directive('includeSvg', includeSvg);

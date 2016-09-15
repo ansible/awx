@@ -30,7 +30,7 @@ export default
                         $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onclose = function (error, obj) {
+                    self.socket.onclose = function (error) {
                         $log.debug('Websocket Disconnected: '+error);
                         self.checkStatus();
                     };
@@ -83,7 +83,6 @@ export default
                 }
             },
             subscribe: function(state){
-                console.log("Next state: " + state.name);
                 this.emit(JSON.stringify(state.socket));
                 this.setLast(state);
             },

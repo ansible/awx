@@ -195,7 +195,7 @@ var tower = angular.module('Tower', [
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'JobDetailHelper',
-    'socket',
+    socket.name,
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'PortalJobsListDefinition',
@@ -240,99 +240,6 @@ var tower = angular.module('Tower', [
             });
 
             $stateProvider.
-            // state('dashboard', {
-            //     url: '/home',
-            //     templateUrl: urlPrefix + 'partials/home.html',
-            //     controller: Home,
-            //     params: { licenseMissing: null },
-            //     data: {
-            //         activityStream: true,
-            //         refreshButton: true
-            //     },
-            //     ncyBreadcrumb: {
-            //         label: "DASHBOARD"
-            //     },
-            //     resolve: {
-            //         graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-            //             function($q, jobStatusGraphData, $rootScope) {
-            //                 return $rootScope.featuresConfigured.promise.then(function() {
-            //                     return $q.all({
-            //                         jobStatus: jobStatusGraphData.get("month", "all"),
-            //                     });
-            //                 });
-            //             }
-            //         ]
-            //     }
-            // }).
-            //
-            // state('jobs', {
-            //     url: '/jobs',
-            //     templateUrl: urlPrefix + 'partials/jobs.html',
-            //     controller: JobsListController,
-            //     ncyBreadcrumb: {
-            //         label: "JOBS"
-            //     }
-            // }).
-            //
-            // state('projects', {
-            //     url: '/projects?{status}',
-            //     templateUrl: urlPrefix + 'partials/projects.html',
-            //     controller: ProjectsList,
-            //     data: {
-            //         activityStream: true,
-            //         activityStreamTarget: 'project'
-            //     },
-            //     ncyBreadcrumb: {
-            //         label: "PROJECTS"
-            //     },
-            //     // socket: '{"groups":{"jobs": ["status_changed"]}}'
-            //     // resolve: {
-            //     //     socket: ['SocketService', '$rootScope',
-            //     //     function(SocketService, $rootScope) {
-            //     //         var self = this;
-            //     //         $rootScope.socketPromise.promise.then(function(){
-            //     //             SocketService.subscribe(self);
-            //     //             return true;
-            //     //         });
-            //     //     }]
-            //     // },
-            // }).
-            //
-            // state('projects.add', {
-            //     url: '/add',
-            //     templateUrl: urlPrefix + 'partials/projects.html',
-            //     controller: ProjectsAdd,
-            //     ncyBreadcrumb: {
-            //         parent: "projects",
-            //         label: "CREATE PROJECT"
-            //     }
-            // }).
-            //
-            // state('projects.edit', {
-            //     url: '/:id',
-            //     templateUrl: urlPrefix + 'partials/projects.html',
-            //     controller: ProjectsEdit,
-            //     data: {
-            //         activityStreamId: 'id'
-            //     },
-            //     ncyBreadcrumb: {
-            //         parent: 'projects',
-            //         label: '{{name}}'
-            //     }
-            // }).
-            //
-            // state('projectOrganizations', {
-            //     url: '/projects/:project_id/organizations',
-            //     templateUrl: urlPrefix + 'partials/projects.html',
-            //     controller: OrganizationsList
-            // }).
-            //
-            // state('projectOrganizationAdd', {
-            //     url: '/projects/:project_id/organizations/add',
-            //     templateUrl: urlPrefix + 'partials/projects.html',
-            //     controller: OrganizationsAdd
-            // }).
-
             state('teams', {
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',

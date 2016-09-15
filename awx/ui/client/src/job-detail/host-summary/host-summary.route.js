@@ -11,11 +11,6 @@ export default {
     url: '/event-summary',
     socket: {
         "groups":{
-            "jobs": ["status_changed"]
-        }
-    },
-    socket: {
-        "groups":{
             "jobs": ["status_changed", "summary"],
             "job_events": []
         }
