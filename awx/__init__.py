@@ -5,7 +5,7 @@ import os
 import sys
 import warnings
 
-__version__ = '3.0.2'
+__version__ = '3.0.3'
 
 __all__ = ['__version__']
 
