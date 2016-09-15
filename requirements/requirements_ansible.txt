@@ -1,7 +1,7 @@
 anyjson==0.3.3
 apache-libcloud==0.20.1
 appdirs==1.4.0
-azure==2.0.0rc2
+azure==2.0.0rc5
 Babel==2.2.0
 boto==2.40.0
 cliff==1.15.0
@@ -25,6 +25,7 @@ jsonpatch==1.12
 jsonpointer==1.10
 jsonschema==2.5.1
 keyring==4.1
+kombu==3.0.35
 lxml==3.4.4
 mock==1.0.1
 monotonic==0.6
@@ -69,7 +70,7 @@ rackspace-auth-openstack==1.3
 rackspace-novaclient==1.5
 rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
-requests==2.5.1
+requests==2.11.0
 requestsexceptions==1.1.1
 shade==1.4.0
 simplejson==3.8.1

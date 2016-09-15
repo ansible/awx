@@ -1228,6 +1228,173 @@ class SystemJobAccess(BaseAccess):
     def can_start(self, obj):
         return False # no relaunching of system jobs
 
+# TODO:
+class WorkflowJobTemplateNodeAccess(BaseAccess):
+    '''
+    I can see/use a WorkflowJobTemplateNode if I have permission to associated Workflow Job Template
+    '''
+    model = WorkflowJobTemplateNode
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+
+    @check_superuser
+    def can_read(self, obj):
+        return True
+
+    @check_superuser
+    def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return True
+        
+        return True
+
+    @check_superuser
+    def can_change(self, obj, data):
+        if self.can_add(data) is False:
+            return False
+
+        return True
+
+    def can_delete(self, obj):
+        return self.can_change(obj, None)
+
+# TODO:
+class WorkflowJobNodeAccess(BaseAccess):
+    '''
+    I can see/use a WorkflowJobNode if I have permission to associated Workflow Job
+    '''
+    model = WorkflowJobNode
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            return self.model.objects.all()
+
+    @check_superuser
+    def can_read(self, obj):
+        return True
+
+    @check_superuser
+    def can_add(self, data):
+        if not data:  # So the browseable API will work
+            return True
+        
+        return True
+
+    @check_superuser
+    def can_change(self, obj, data):
+        if self.can_add(data) is False:
+            return False
+
+        return True
+
+    def can_delete(self, obj):
+        return self.can_change(obj, None)
+
+# TODO: 
+class WorkflowJobTemplateAccess(BaseAccess):
+    '''
+    I can only see/manage Workflow Job Templates if I'm a super user
+    '''
+
+    model = WorkflowJobTemplate
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.accessible_objects(self.user, 'read_role')
+        return qs.select_related('created_by', 'modified_by', 'next_schedule').all()
+
+    @check_superuser
+    def can_read(self, obj):
+        return self.user in obj.read_role
+
+    def can_add(self, data):
+        '''
+        a user can create a job template if they are a superuser, an org admin
+        of any org that the project is a member, or if they have user or team
+        based permissions tying the project to the inventory source for the
+        given action as well as the 'create' deploy permission.
+        Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
+        '''
+        if not data:  # So the browseable API will work
+            return True
+
+        # if reference_obj is provided, determine if it can be coppied
+        reference_obj = data.pop('reference_obj', None)
+
+        if 'survey_enabled' in data and data['survey_enabled']:
+            self.check_license(feature='surveys')
+
+        if self.user.is_superuser:
+            return True
+
+        def get_value(Class, field):
+            if reference_obj:
+                return getattr(reference_obj, field, None)
+            else:
+                pk = get_pk_from_dict(data, field)
+                if pk:
+                    return get_object_or_400(Class, pk=pk)
+                else:
+                    return None
+
+        return False
+
+    def can_start(self, obj, validate_license=True):
+        # TODO: Are workflows allowed for all licenses ??
+        # Check license.
+        '''
+        if validate_license:
+            self.check_license()
+            if obj.job_type == PERM_INVENTORY_SCAN:
+                self.check_license(feature='system_tracking')
+            if obj.survey_enabled:
+                self.check_license(feature='surveys')
+        '''
+
+        # Super users can start any job
+        if self.user.is_superuser:
+            return True
+
+        return self.can_read(obj)
+        # TODO: We should use execute role rather than read role
+        #return self.user in obj.execute_role
+
+    def can_change(self, obj, data):
+        data_for_change = data
+        if self.user not in obj.admin_role and not self.user.is_superuser:
+            return False
+        if data is not None:
+            data = dict(data)
+
+            if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+                self.check_license(feature='surveys')
+            return True
+
+        return self.can_read(obj) and self.can_add(data_for_change)
+
+    def can_delete(self, obj):
+        is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
+        if not is_delete_allowed:
+            return False
+        active_jobs = [dict(type="job", id=o.id)
+                       for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
+        if len(active_jobs) > 0:
+            raise StateConflict({"conflict": "Resource is being used by running jobs",
+                                 "active_jobs": active_jobs})
+        return True
+
+
+
+class WorkflowJobAccess(BaseAccess):
+    '''
+    I can only see Workflow Jobs if I'm a super user
+    '''
+    model = WorkflowJob
+
 class AdHocCommandAccess(BaseAccess):
     '''
     I can only see/run ad hoc commands when:
@@ -1391,10 +1558,12 @@ class UnifiedJobTemplateAccess(BaseAccess):
         inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
         job_template_qs = self.user.get_queryset(JobTemplate)
         system_job_template_qs = self.user.get_queryset(SystemJobTemplate)
+        workflow_job_template_qs = self.user.get_queryset(WorkflowJobTemplate)
         qs = qs.filter(Q(Project___in=project_qs) |
                        Q(InventorySource___in=inventory_source_qs) |
                        Q(JobTemplate___in=job_template_qs) |
-                       Q(systemjobtemplate__in=system_job_template_qs))
+                       Q(systemjobtemplate__in=system_job_template_qs) |
+                       Q(workflowjobtemplate__in=workflow_job_template_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
@@ -1430,11 +1599,13 @@ class UnifiedJobAccess(BaseAccess):
         job_qs = self.user.get_queryset(Job)
         ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
         system_job_qs = self.user.get_queryset(SystemJob)
+        workflow_job_qs = self.user.get_queryset(WorkflowJob)
         qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
                        Q(InventoryUpdate___in=inventory_update_qs) |
                        Q(Job___in=job_qs) |
                        Q(AdHocCommand___in=ad_hoc_command_qs) |
-                       Q(SystemJob___in=system_job_qs))
+                       Q(SystemJob___in=system_job_qs) |
+                       Q(WorkflowJob___in=workflow_job_qs))
         qs = qs.select_related(
             'created_by',
             'modified_by',
@@ -1825,3 +1996,7 @@ register_access(Role, RoleAccess)
 register_access(NotificationTemplate, NotificationTemplateAccess)
 register_access(Notification, NotificationAccess)
 register_access(Label, LabelAccess)
+register_access(WorkflowJobTemplateNode, WorkflowJobTemplateNodeAccess)
+register_access(WorkflowJobNode, WorkflowJobNodeAccess)
+register_access(WorkflowJobTemplate, WorkflowJobTemplateAccess)
+register_access(WorkflowJob, WorkflowJobAccess)

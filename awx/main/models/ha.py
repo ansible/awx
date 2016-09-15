@@ -1,8 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import functools
-
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -11,7 +9,7 @@ from awx.main.managers import InstanceManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
-from awx.main.models.unified_jobs import UnifiedJob, CAN_CANCEL
+from awx.main.models.unified_jobs import UnifiedJob
 
 __all__ = ('Instance', 'JobOrigin')
 
@@ -22,9 +20,8 @@ class Instance(models.Model):
     """
     objects = InstanceManager()
 
-    uuid = models.CharField(max_length=40, unique=True)
+    uuid = models.CharField(max_length=40)
     hostname = models.CharField(max_length=250, unique=True)
-    primary = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -33,29 +30,8 @@ class Instance(models.Model):
 
     @property
     def role(self):
-        """Return the role of this instance, as a string."""
-        if self.primary:
-            return 'primary'
-        return 'secondary'
-
-    @functools.wraps(models.Model.save)
-    def save(self, *args, **kwargs):
-        """Save the instance. If this is a secondary instance, then ensure
-        that any currently-running jobs that this instance started are
-        canceled.
-        """
-        # Perform the normal save.
-        result = super(Instance, self).save(*args, **kwargs)
-
-        # If this is not a primary instance, then kill any jobs that this
-        # instance was responsible for starting.
-        if not self.primary:
-            for job in UnifiedJob.objects.filter(job_origin__instance=self,
-                                                 status__in=CAN_CANCEL):
-                job.cancel()
-
-        # Return back the original result.
-        return result
+        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
+        return "tower"
 
 
 class JobOrigin(models.Model):

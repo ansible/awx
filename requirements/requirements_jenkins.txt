@@ -1,6 +1,6 @@
 ansible==1.9.4
 coverage
-pyflakes==1.0.0 # Pinned until PR merges https://gitlab.com/pycqa/flake8/merge_requests/56
+pyflakes
 pep8
 pylint
 flake8

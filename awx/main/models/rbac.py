@@ -164,16 +164,21 @@ class Role(models.Model):
         global role_names
         return role_names[self.role_field]
 
-    @property
-    def description(self):
+    def get_description(self, reference_content_object=None):
         global role_descriptions
         description = role_descriptions[self.role_field]
-        if '%s' in description and self.content_type:
-            model = self.content_type.model_class()
+        if reference_content_object:
+            content_type = ContentType.objects.get_for_model(reference_content_object)
+        else:
+            content_type = self.content_type
+        if '%s' in description and content_type:
+            model = content_type.model_class()
             model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
             description = description % model_name
 
         return description
+
+    description = property(get_description)
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):

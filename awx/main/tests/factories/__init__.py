@@ -3,6 +3,7 @@ from .tower import (
     create_job_template,
     create_notification_template,
     create_survey_spec,
+    create_workflow_job_template,
 )
 
 from .exc import (
@@ -14,5 +15,6 @@ __all__ = [
     'create_job_template',
     'create_notification_template',
     'create_survey_spec',
+    'create_workflow_job_template',
     'NotUnique',
 ]

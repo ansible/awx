@@ -8,6 +8,9 @@ import ldap
 import djcelery
 from datetime import timedelta
 
+from kombu import Queue, Exchange
+from kombu.common import Broadcast
+
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
 this_module = sys.modules[__name__]
@@ -152,7 +155,6 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
@@ -327,6 +329,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost/'
+CELERY_DEFAULT_QUEUE = 'default'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
@@ -336,6 +339,22 @@ CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_QUEUES = (
+    Queue('default', Exchange('default'), routing_key='default'),
+    Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    # Projects use a fanout queue, this isn't super well supported
+    Broadcast('projects'),
+)
+CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
+                                             'routing_key': 'jobs'},
+                  'awx.main.tasks.run_project_update': {'queue': 'projects'},
+                  'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
+                                                          'routing_key': 'jobs'},
+                  'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
+                                                        'routing_key': 'jobs'},
+                  'awx.main.tasks.run_system_job': {'queue': 'jobs',
+                                                    'routing_key': 'jobs'}})
+
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
@@ -973,15 +992,6 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
-        'fact_receiver': {
-            'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
-            'formatter':'simple',
-        },
         'system_tracking_migrations': {
             'level': 'WARNING',
             'class':'logging.handlers.RotatingFileHandler',
@@ -1014,11 +1024,6 @@ LOGGING = {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
             'propagate': False,
-        },
-        'qpid.messaging': {
-            'handlers': ['console', 'file', 'tower_warnings'],
-            'propagate': False,
-            'level': 'WARNING',
         },
         'py.warnings': {
             'handlers': ['console'],

@@ -7,6 +7,7 @@ from awx.main.tests.factories import (
     create_job_template,
     create_notification_template,
     create_survey_spec,
+    create_workflow_job_template,
 )
 
 @pytest.fixture
@@ -39,6 +40,10 @@ def job_template_with_survey_passwords_factory(job_template_factory):
 @pytest.fixture
 def job_with_secret_key_unit(job_with_secret_key_factory):
     return job_with_secret_key_factory(persisted=False)
+
+@pytest.fixture
+def workflow_job_template_factory():
+    return create_workflow_job_template
 
 @pytest.fixture
 def get_ssh_version(mocker):
