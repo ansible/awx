@@ -7,8 +7,6 @@ from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-from awx.main.models import Project
-
 
 class OptionEnforceError(Exception):
     def __init__(self, value):

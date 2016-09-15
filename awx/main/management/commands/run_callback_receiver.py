@@ -2,31 +2,22 @@
 # All Rights Reserved.
 
 # Python
-import os
-import sys
 import datetime
 import logging
-import signal
-import time
 
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
-from kombu.log import get_logger
-from kombu.utils import kwdict, reprcall
-from kombu.utils.debug import setup_logging
 
 # Django
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.core.cache import cache
-from django.db import transaction, DatabaseError
+from django.db import DatabaseError
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import FixedOffset
-from django.db import connection
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.socket_queue import Socket
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
@@ -106,7 +97,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     i['module_args'] = ''
 
             if 'ad_hoc_command_id' in payload:
-                ad_hoc_command_event = AdHocCommandEvent.objects.create(**data)
+                AdHocCommandEvent.objects.create(**data)
                 return
             
             j = JobEvent(**payload)
@@ -119,7 +110,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     parent_id = cache.get("{}_{}".format(payload['job_id'], parent_event_uuid), None)
                     if parent_id is None:
                         parent_id_obj = JobEvent.objects.filter(uuid=parent_event_uuid, job_id=payload['job_id'])
-                        if parent_id_obj.exists():  #Problematic if not there, means the parent hasn't been written yet... TODO
+                        if parent_id_obj.exists():  # Problematic if not there, means the parent hasn't been written yet... TODO
                             j.parent_id = parent_id_obj[0].id
                             print("Settings cache: {}_{} with value {}".format(payload['job_id'], parent_event_uuid, j.parent_id))
                             cache.set("{}_{}".format(payload['job_id'], parent_event_uuid), j.parent_id, 300)

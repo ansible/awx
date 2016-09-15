@@ -346,15 +346,14 @@ CELERY_QUEUES = (
     Broadcast('projects'),
 )
 CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
-                                            'routing_key': 'jobs'},
+                                             'routing_key': 'jobs'},
                   'awx.main.tasks.run_project_update': {'queue': 'projects'},
                   'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
-                                                        'routing_key': 'jobs'},
+                                                          'routing_key': 'jobs'},
                   'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
-                                                     'routing_key': 'jobs'},
+                                                        'routing_key': 'jobs'},
                   'awx.main.tasks.run_system_job': {'queue': 'jobs',
-                                                  'routing_key': 'jobs'}
-})
+                                                    'routing_key': 'jobs'}})
 
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {

@@ -161,13 +161,13 @@ class BaseCallbackModule(object):
                      'playbook_on_vars_prompt'):
             msg['parent_uuid'] = str(self.active_playbook)
         elif event in ('playbook_on_notify',
-                     'playbook_on_setup',
-                     'playbook_on_task_start',
-                     'playbook_on_no_hosts_matched',
-                     'playbook_on_no_hosts_remaining',
-                     'playbook_on_include',
-                     'playbook_on_import_for_host',
-                     'playbook_on_not_import_for_host'):
+                       'playbook_on_setup',
+                       'playbook_on_task_start',
+                       'playbook_on_no_hosts_matched',
+                       'playbook_on_no_hosts_remaining',
+                       'playbook_on_include',
+                       'playbook_on_import_for_host',
+                       'playbook_on_not_import_for_host'):
             msg['parent_uuid'] = str(self.active_play)
         elif event.startswith('runner_on_') or event.startswith('runner_item_on_'):
             msg['parent_uuid'] = str(self.active_task)

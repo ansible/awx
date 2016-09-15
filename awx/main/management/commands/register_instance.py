@@ -1,8 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from django.core.management.base import CommandError
-
 from awx.main.management.commands._base_instance import BaseCommandInstance
 from awx.main.models import Instance
 

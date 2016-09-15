@@ -8,12 +8,9 @@ import uuid
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
 from django.utils.functional import curry
 
-from awx import __version__ as version
-from awx.main.models import ActivityStream, Instance
+from awx.main.models import ActivityStream
 from awx.main.conf import tower_settings
 from awx.api.authentication import TokenAuthentication
 

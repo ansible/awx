@@ -1,8 +1,6 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import functools
-
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -11,7 +9,7 @@ from awx.main.managers import InstanceManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
-from awx.main.models.unified_jobs import UnifiedJob, CAN_CANCEL
+from awx.main.models.unified_jobs import UnifiedJob
 
 __all__ = ('Instance', 'JobOrigin')
 
