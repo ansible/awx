@@ -26,9 +26,9 @@ class TestWorkflowJob:
         workflow_job.inherit_job_template_workflow_nodes()
 
         nodes = WorkflowJob.objects.get(id=workflow_job.id).workflow_job_nodes.all().order_by('created')
-        assert nodes[0].success_nodes.filter(id=nodes[1].id).exists() == True
-        assert nodes[1].success_nodes.filter(id=nodes[2].id).exists() == True
-        assert nodes[0].failure_nodes.filter(id=nodes[3].id).exists() == True
-        assert nodes[3].failure_nodes.filter(id=nodes[4].id).exists() == True
+        assert nodes[0].success_nodes.filter(id=nodes[1].id).exists()
+        assert nodes[1].success_nodes.filter(id=nodes[2].id).exists()
+        assert nodes[0].failure_nodes.filter(id=nodes[3].id).exists()
+        assert nodes[3].failure_nodes.filter(id=nodes[4].id).exists()
 
 
