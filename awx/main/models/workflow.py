@@ -175,7 +175,7 @@ class WorkflowJobInheritNodesMixin(object):
     def _get_workflow_job_node_by_id(self, id):
         return WorkflowJobNode.objects.get(id=id)
 
-    def _get_all_by_type(node, node_type):
+    def _get_all_by_type(self, node, node_type):
         return getattr(node, node_type).all()
 
     def inherit_job_template_workflow_nodes(self):
