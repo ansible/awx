@@ -91,7 +91,8 @@ export default
                 ngClick: 'addInventory()',
                 awToolTip: 'Create a new inventory',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -103,13 +104,22 @@ export default
                 label: 'Edit',
                 ngClick: 'editInventory(inventory.id)',
                 awToolTip: 'Edit inventory',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'inventory.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                label: 'View',
+                ngClick: 'editInventory(inventory.id)',
+                awToolTip: 'View inventory',
+                dataPlacement: 'top',
+                ngShow: '!inventory.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteInventory(inventory.id, inventory.name)",
                 awToolTip: 'Delete inventory',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'inventory.summary_fields.user_capabilities.delete'
             }
         }
     });

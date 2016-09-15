@@ -13,6 +13,7 @@
             <div class="List-actions">
                 <button class="btn List-buttonSubmit"
                     aw-tool-tip="Create a new organization"
+                    ng-show="canAdd"
                     ng-click="addOrganization()">
                     + ADD
                 </button>
@@ -31,13 +32,23 @@
                         <div class="OrgCards-actionItems">
                             <button class="OrgCards-actionItem
                                 List-actionButton"
+                                ng-show="card.user_capabilities.edit"
                                 ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
                                 ng-click="editOrganization(card.id)">
                                 <i class="OrgCards-actionItemIcon fa fa-pencil">
                                 </i>
                             </button>
+                            <button class="OrgCards-actionItem
+                                List-actionButton"
+                                ng-show="!card.user_capabilities.edit"
+                                ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
+                                ng-click="editOrganization(card.id)">
+                                <i class="OrgCards-actionItemIcon fa fa-search-plus">
+                                </i>
+                            </button>
                             <button class="OrgCards-actionItem List-actionButton
                                 List-actionButton--delete"
+                                ng-show="card.user_capabilities.delete"
                                 ng-click="deleteOrganization(card.id, card.name)">
                                 <i class="OrgCards-actionItemIcon
                                     fa fa-trash-o">

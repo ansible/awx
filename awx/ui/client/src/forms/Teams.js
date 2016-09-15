@@ -25,13 +25,15 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: false
+                    capitalize: false,
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     label: 'Organization',
@@ -44,17 +46,24 @@ export default
                     awRequiredWhen: {
                         reqExpression: "orgrequired",
                         init: true
-                    }
+                    },
+                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!team_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
@@ -75,7 +84,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add user to team',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: 'team_obj.summary_fields.user_capabilities.edit'
                         }
                     },
 
@@ -132,7 +142,8 @@ export default
                             'class': "List-actionButton--delete",
                             iconClass: 'fa fa-times',
                             awToolTip: 'Dissasociate permission from team',
-                            dataPlacement: 'top'
+                            dataPlacement: 'top',
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
                     hideOnSuperuser: true

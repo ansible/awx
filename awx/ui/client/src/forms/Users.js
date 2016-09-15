@@ -26,21 +26,24 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: true
+                    capitalize: true,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 last_name: {
                     label: 'Last Name',
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: true
+                    capitalize: true,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 email: {
                     label: 'Email',
                     type: 'email',
                     addRequired: true,
                     editRequired: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 username: {
                     label: 'Username',
@@ -49,7 +52,8 @@ export default
                         reqExpression: "not_ldap_user && external_account === null",
                         init: true
                     },
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     label: 'Organization',
@@ -63,7 +67,8 @@ export default
                     awRequiredWhen: {
                         reqExpression: "orgrequired",
                         init: true
-                    }
+                    },
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 password: {
                     label: 'Password',
@@ -74,7 +79,8 @@ export default
                     editRequired: false,
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
-                    chkPass: true
+                    chkPass: true,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 password_confirm: {
                     label: 'Confirm Password',
@@ -85,7 +91,8 @@ export default
                     editRequired: false,
                     awPassMatch: true,
                     associated: 'password',
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 user_type: {
                     label: 'User Type',
@@ -94,16 +101,23 @@ export default
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
+                    ngDisabled: '!user_obj.summary_fields.user_capabilities.edit'
                 },
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: 'user_obj.summary_fields.user_capabilities.edit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!user_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: 'user_obj.summary_fields.user_capabilities.edit'
                 }
             },
 
@@ -186,7 +200,8 @@ export default
                             label: 'Remove',
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
-                            awToolTip: 'Dissasociate permission from user'
+                            awToolTip: 'Dissasociate permission from user',
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
                     hideOnSuperuser: true

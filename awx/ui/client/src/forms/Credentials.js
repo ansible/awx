@@ -32,13 +32,15 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 organization: {
                     addRequired: false,
@@ -52,7 +54,8 @@ export default
                     awPopOver: "<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>",
                     dataTitle: 'Organization ',
                     dataPlacement: 'bottom',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 kind: {
                     label: 'Type',
@@ -83,7 +86,8 @@ export default
                     dataTitle: 'Type',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    hasSubForm: true
+                    hasSubForm: true,
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 access_key: {
                     label: 'Access Key',
@@ -96,12 +100,13 @@ export default
                     autocomplete: false,
                     apiField: 'username',
                     subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 secret_key: {
                     label: 'Secret Key',
                     type: 'sensitive',
                     ngShow: "kind.value == 'aws'",
-                    ngDisabled: "secret_key_ask",
+                    ngDisabled: "secret_key_ask || !credential_obj.summary_fields.user_capabilities.edit",
                     awRequiredWhen: {
                         reqExpression: "aws_required",
                         init: false
@@ -123,7 +128,8 @@ export default
                     dataTitle: 'STS Token',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "host": {
                     labelBind: 'hostLabel',
@@ -139,7 +145,8 @@ export default
                         reqExpression: 'host_required',
                         init: false
                     },
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "subscription": {
                     label: "Subscription ID",
@@ -156,7 +163,8 @@ export default
                     dataTitle: 'Subscription ID',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "username": {
                     labelBind: 'usernameLabel',
@@ -168,7 +176,8 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    subForm: "credentialSubForm"
+                    subForm: "credentialSubForm",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "email_address": {
                     labelBind: 'usernameLabel',
@@ -183,7 +192,8 @@ export default
                     dataTitle: 'Email',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "api_key": {
                     label: 'API Key',
@@ -196,7 +206,8 @@ export default
                     autocomplete: false,
                     hasShowInputButton: true,
                     clear: false,
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "password": {
                     labelBind: 'passwordLabel',
@@ -209,13 +220,14 @@ export default
                         reqExpression: "password_required",
                         init: false
                     },
-                    subForm: "credentialSubForm"
+                    subForm: "credentialSubForm",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "ssh_password": {
                     label: 'Password',
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
-                    ngDisabled: "ssh_password_ask",
+                    ngDisabled: "ssh_password_ask || !credential_obj.summary_fields.user_capabilities.edit",
                     addRequired: false,
                     editRequired: false,
                     subCheckbox: {
@@ -247,7 +259,8 @@ export default
                     dataTitle: 'Private Key',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    subForm: "credentialSubForm"
+                    subForm: "credentialSubForm",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "ssh_key_unlock": {
                     label: 'Private Key Passphrase',
@@ -255,7 +268,7 @@ export default
                     ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: "keyEntered === false || ssh_key_unlock_ask",
+                    ngDisabled: "keyEntered === false || ssh_key_unlock_ask || !credential_obj.summary_fields.user_capabilities.edit",
                     subCheckbox: {
                         variable: 'ssh_key_unlock_ask',
                         ngShow: "kind.value == 'ssh'",
@@ -278,7 +291,8 @@ export default
                     "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>",
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "become_username": {
                     labelBind: 'becomeUsernameLabel',
@@ -287,13 +301,14 @@ export default
                     addRequired: false,
                     editRequired: false,
                     autocomplete: false,
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "become_password": {
                     labelBind: 'becomePasswordLabel',
                     type: 'sensitive',
                     ngShow: "(kind.value == 'ssh' && (become_method && become_method.value)) ",
-                    ngDisabled: "become_password_ask",
+                    ngDisabled: "become_password_ask || !credential_obj.summary_fields.user_capabilities.edit",
                     addRequired: false,
                     editRequired: false,
                     subCheckbox: {
@@ -309,7 +324,8 @@ export default
                     type: 'text',
                     label: 'Client ID',
                     subForm: 'credentialSubForm',
-                    ngShow: "kind.value === 'azure_rm'"
+                    ngShow: "kind.value === 'azure_rm'",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 secret:{
                     type: 'sensitive',
@@ -317,20 +333,23 @@ export default
                     autocomplete: false,
                     label: 'Client Secret',
                     subForm: 'credentialSubForm',
-                    ngShow: "kind.value === 'azure_rm'"
+                    ngShow: "kind.value === 'azure_rm'",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 tenant: {
                     type: 'text',
                     label: 'Tenant ID',
                     subForm: 'credentialSubForm',
-                    ngShow: "kind.value === 'azure_rm'"
+                    ngShow: "kind.value === 'azure_rm'",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 authorize: {
                     label: 'Authorize',
                     type: 'checkbox',
                     ngChange: "toggleCallback('host_config_key')",
                     subForm: 'credentialSubForm',
-                    ngShow: "kind.value === 'net'"
+                    ngShow: "kind.value === 'net'",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 authorize_password: {
                     label: 'Authorize Password',
@@ -339,6 +358,7 @@ export default
                     autocomplete: false,
                     subForm: 'credentialSubForm',
                     ngShow: "authorize && authorize !== 'false'",
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "project": {
                     labelBind: 'projectLabel',
@@ -355,7 +375,8 @@ export default
                         reqExpression: 'project_required',
                         init: false
                     },
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "domain": {
                     labelBind: 'domainLabel',
@@ -371,13 +392,14 @@ export default
                     dataContainer: "body",
                     addRequired: false,
                     editRequired: false,
-                    subForm: 'credentialSubForm'
+                    subForm: 'credentialSubForm',
+                    ngDisabled: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 "vault_password": {
                     label: "Vault Password",
                     type: 'sensitive',
                     ngShow: "kind.value == 'ssh'",
-                    ngDisabled: "vault_password_ask",
+                    ngDisabled: "vault_password_ask || !credential_obj.summary_fields.user_capabilities.edit",
                     addRequired: false,
                     editRequired: false,
                     subCheckbox: {
@@ -394,11 +416,17 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
+                    ngShow: 'credential_obj.summary_fields.user_capabilities.edit'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!credential_obj.summary_fields.user_capabilities.edit'
                 },
                 save: {
                     label: 'Save',
                     ngClick: 'formSave()', //$scope.function to call on click, optional
-                    ngDisabled: true //Disable when $pristine or $invalid, optional
+                    ngDisabled: true,
+                    ngShow: 'credential_obj.summary_fields.user_capabilities.edit' //Disable when $pristine or $invalid, optional
                 }
             },
 
@@ -421,7 +449,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: 'credential_obj.summary_fields.user_capabilities.edit'
                         }
                     },
 

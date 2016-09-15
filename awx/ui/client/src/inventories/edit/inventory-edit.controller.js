@@ -17,7 +17,6 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
     Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state,
     $filter) {
-
     ClearScope();
 
     // Inject dynamic view

@@ -15,9 +15,15 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
-    Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
-
+    Find, GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService) {
     ClearScope();
+
+    $scope.canAdd = false;
+
+    rbacUiControlService.canAdd('projects')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
+        });
 
     Wait('start');
 
@@ -369,7 +375,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
     'Refresh', 'Wait', 'GetChoices', 'Empty', 'Find',
-    'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state'
+    'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService'
 ];
 
 
@@ -378,6 +384,15 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
     OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state,
     CreateSelect2) {
+
+    Rest.setUrl(GetBasePath('projects'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add a project.', 'alert-info');
+            }
+        });
 
     ClearScope();
 

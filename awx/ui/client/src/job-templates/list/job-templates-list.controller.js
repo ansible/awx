@@ -10,17 +10,23 @@ export default
         'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
         'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
         'LookUpInit', 'InitiatePlaybookRun', 'Wait', '$compile',
-        '$state', '$filter',
+        '$state', '$filter', 'rbacUiControlService',
 
         function(
             $scope, $rootScope, $location, $log,
             $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
             SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
             GetBasePath, JobTemplateForm, CredentialList, LookUpInit, InitiatePlaybookRun,
-            Wait, $compile, $state, $filter
+            Wait, $compile, $state, $filter, rbacUiControlService
         ) {
-
             ClearScope();
+
+            $scope.canAdd = false;
+
+            rbacUiControlService.canAdd("job_templates")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
 
             var list = JobTemplateList,
                 defaultUrl = GetBasePath('job_templates'),

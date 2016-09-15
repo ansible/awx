@@ -49,7 +49,8 @@ export default function(){
                 ngClick: 'addNotification()',
                 awToolTip: 'Create a new custom inventory',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -62,7 +63,8 @@ export default function(){
                 label: 'Edit',
                 "class": 'btn-sm',
                 awToolTip: 'Test notification',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
             },
             edit: {
                 ngClick: "editNotification(notification_template.id)",
@@ -70,7 +72,16 @@ export default function(){
                 label: 'Edit',
                 "class": 'btn-sm',
                 awToolTip: 'Edit notification',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                ngClick: "editNotification(notification_template.id)",
+                label: 'View',
+                "class": 'btn-sm',
+                awToolTip: 'View notification',
+                dataPlacement: 'top',
+                ngShow: '!notification_template.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 ngClick: "deleteNotification(notification_template.id, notification_template.name)",
@@ -78,7 +89,8 @@ export default function(){
                 label: 'Delete',
                 "class": 'btn-sm',
                 awToolTip: 'Delete notification',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.delete'
             }
         }
     };

@@ -138,7 +138,6 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
     LookUpInit, OrganizationList, GetBasePath, GetChoices, Empty, KindChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
-
     ClearScope();
 
     // Inject dynamic view
@@ -337,6 +336,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     }
 
     ClearScope();
+
     var defaultUrl = GetBasePath('credentials'),
         generator = GenerateForm,
         form = CredentialForm,
@@ -344,6 +344,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         master = {},
         id = $stateParams.credential_id,
         relatedSets = {};
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;

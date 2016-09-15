@@ -78,13 +78,22 @@ export default
                 mode: "all",
                 ngClick: "editSchedule(schedule)",
                 awToolTip: "Edit the schedule",
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: 'schedule.summary_fields.user_capabilities.edit'
+            },
+            "view": {
+                mode: "all",
+                ngClick: "editSchedule(schedule)",
+                awToolTip: "View the schedule",
+                dataPlacement: "top",
+                ngShow: '!schedule.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteSchedule(schedule.id)',
                 awToolTip: 'Delete the schedule',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
     });

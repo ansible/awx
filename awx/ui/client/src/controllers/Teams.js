@@ -14,9 +14,15 @@
 export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, $state, Refresh, $filter) {
-
+    SelectionInit, Wait, $state, Refresh, $filter, rbacUiControlService) {
     ClearScope();
+
+    $scope.canAdd = false;
+
+    rbacUiControlService.canAdd('teams')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
+        });
 
     var list = TeamList,
         defaultUrl = GetBasePath('teams'),
@@ -126,7 +132,7 @@ TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    '$state', 'Refresh', '$filter'
+    '$state', 'Refresh', '$filter', 'rbacUiControlService'
 ];
 
 
@@ -136,6 +142,15 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
     PaginateInit, GetBasePath, LookUpInit, Wait, $state) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
+
+    Rest.setUrl(GetBasePath('teams'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add a team.', 'alert-info');
+            }
+        });
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('teams'),

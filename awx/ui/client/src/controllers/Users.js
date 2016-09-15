@@ -34,9 +34,15 @@ function user_type_sync($scope) {
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, $state, Refresh, $filter) {
-
+    Wait, $state, Refresh, $filter, rbacUiControlService) {
     ClearScope();
+
+    $scope.canAdd = false;
+
+    rbacUiControlService.canAdd('users')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
+        });
 
     var list = UserList,
         defaultUrl = GetBasePath('users'),
@@ -136,7 +142,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
-    'Refresh', '$filter'
+    'Refresh', '$filter', 'rbacUiControlService'
 ];
 
 
@@ -147,6 +153,15 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList,
     ResetForm, Wait, CreateSelect2, $state) {
+
+    Rest.setUrl(GetBasePath('users'));
+    Rest.options()
+        .success(function(data) {
+            if (!data.actions.POST) {
+                $state.go("^");
+                Alert('Permission Error', 'You do not have permission to add a user.', 'alert-info');
+            }
+        });
 
     ClearScope();
 

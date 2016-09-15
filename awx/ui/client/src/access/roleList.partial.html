@@ -1,13 +1,13 @@
 <div class="RoleList-tagContainer"
     ng-repeat="entry in access_list">
     <div class="RoleList-deleteContainer"
-        ng-if="entry.explicit"
+        ng-if="entry.explicit && entry.user_capabilities.unattach"
         ng-click="deletePermission(permission, entry)">
-        <i ng-if="entry.explicit"
+        <i ng-if="entry.explicit && entry.user_capabilities.unattach"
             class="fa fa-times RoleList-tagDelete"></i>
     </div>
     <div class="RoleList-tag"
-        ng-class="{'RoleList-tag--deletable': entry.explicit,
+        ng-class="{'RoleList-tag--deletable': entry.explicit && entry.user_capabilities.unattach,
             'RoleList-tag--team': entry.team_id}"
         aw-tool-tip='{{entry.team_name | sanitize}}' aw-tip-placement='bottom'>
         <span class="RoleList-name">{{ entry.name }}</span>

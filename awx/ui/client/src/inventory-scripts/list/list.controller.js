@@ -7,16 +7,23 @@
 export default
     [   '$rootScope','Wait', 'generateList', 'inventoryScriptsListObject',
         'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' , 'ProcessErrors',
-        'Prompt', '$state', '$filter',
+        'Prompt', '$state', '$filter', 'rbacUiControlService',
         function(
             $rootScope,Wait, GenerateList, inventoryScriptsListObject,
             GetBasePath, SearchInit, PaginateInit,
-            Rest, ProcessErrors, Prompt, $state, $filter
+            Rest, ProcessErrors, Prompt, $state, $filter, rbacUiControlService
         ) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('inventory_scripts'),
                 list = inventoryScriptsListObject,
                 view = GenerateList;
+
+            scope.canAdd = false;
+
+            rbacUiControlService.canAdd("inventory_scripts")
+                .then(function(canAdd) {
+                    scope.canAdd = canAdd;
+                });
 
             view.inject( list, {
                 mode: 'edit',

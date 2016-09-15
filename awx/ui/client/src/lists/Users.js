@@ -44,7 +44,8 @@ export default
                 basePaths: ['organizations', 'users'], // base path must be in list, or action not available
                 awToolTip: 'Create a new user',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -58,7 +59,17 @@ export default
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'Edit user',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'user.summary_fields.user_capabilities.edit'
+            },
+
+            view: {
+                label: 'View',
+                ngClick: "editUser(user.id)",
+                "class": 'btn-xs btn-default',
+                awToolTip: 'View user',
+                dataPlacement: 'top',
+                ngShow: '!user.summary_fields.user_capabilities.edit'
             },
 
             "delete": {
@@ -67,7 +78,8 @@ export default
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete user',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'user.summary_fields.user_capabilities.delete'
             }
         }
     });

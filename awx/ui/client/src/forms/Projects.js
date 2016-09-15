@@ -30,13 +30,15 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false
+                capitalize: false,
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             organization: {
                 label: 'Organization',
@@ -50,7 +52,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 },
                 dataTitle: 'Organization',
                 dataContainer: 'body',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             scm_type: {
                 label: 'SCM Type',
@@ -61,6 +64,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 addRequired: true,
                 editRequired: true,
                 hasSubForm: true,
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             missing_path_alert: {
                 type: 'alertblock',
@@ -82,7 +86,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Base Path',
                 dataContainer: 'body',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             local_path: {
                 label: 'Playbook Directory',
@@ -99,7 +104,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Path',
                 dataContainer: 'body',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             scm_url: {
                 label: 'SCM URL',
@@ -115,7 +121,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 awPopOver: "set in controllers/projects",
                 dataTitle: 'SCM URL',
                 dataContainer: 'body',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             scm_branch: {
                 labelBind: "scmBranchLabel",
@@ -123,7 +130,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 addRequired: false,
                 editRequired: false,
-                subForm: 'sourceSubForm'
+                subForm: 'sourceSubForm',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             credential: {
                 label: 'SCM Credential',
@@ -134,7 +142,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngClick: 'lookUpCredential()',
                 addRequired: false,
                 editRequired: false,
-                subForm: 'sourceSubForm'
+                subForm: 'sourceSubForm',
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
             },
             checkbox_group: {
                 label: 'SCM Update Options',
@@ -151,7 +160,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Clean',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
                 }, {
                     name: 'scm_delete_on_update',
                     label: 'Delete on Update',
@@ -163,7 +173,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Delete',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
                 }, {
                     name: 'scm_update_on_launch',
                     label: 'Update on Launch',
@@ -174,7 +185,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     dataTitle: 'SCM Update',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'checkbox-options stack-inline',
+                    ngDisabled: '!project_obj.summary_fields.user_capabilities.edit'
                 }]
             },
             scm_update_cache_timeout: {
@@ -193,17 +205,24 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     'and a new project update will be performed.</p>',
                 dataTitle: 'Cache Timeout',
                 dataPlacement: 'right',
-                dataContainer: "body"
+                dataContainer: "body",
+                ngDisabled: '!project_obj.summary_fields.user_capabilities.edit' // TODO: get working
             }
         },
 
         buttons: {
             cancel: {
-                ngClick: 'formCancel()'
+                ngClick: 'formCancel()',
+                ngShow: 'project_obj.summary_fields.user_capabilities.edit'
+            },
+            close: {
+                ngClick: 'formCancel()',
+                ngShow: '!project_obj.summary_fields.user_capabilities.edit'
             },
             save: {
                 ngClick: 'formSave()',
-                ngDisabled: true
+                ngDisabled: true,
+                ngShow: 'project_obj.summary_fields.user_capabilities.edit'
             }
         },
 
@@ -224,7 +243,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         label: 'Add',
                         awToolTip: 'Add a permission',
                         actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD'
+                        buttonContent: '&#43; ADD',
+                        ngShow: 'project_obj.summary_fields.user_capabilities.edit'
                     }
                 },
 

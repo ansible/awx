@@ -8,14 +8,21 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
     '$log', '$compile', 'Rest', 'PaginateInit',
     'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'generateList', 'Refresh', '$filter',
+    '$state', 'generateList', 'Refresh', '$filter', 'rbacUiControlService',
     function($stateParams, $scope, $rootScope, $location,
         $log, $compile, Rest, PaginateInit,
         SearchInit, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait,
-        $state, generateList, Refresh, $filter) {
+        $state, generateList, Refresh, $filter, rbacUiControlService) {
 
         ClearScope();
+
+        $scope.canAdd = false;
+
+        rbacUiControlService.canAdd("organizations")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
 
         var defaultUrl = GetBasePath('organizations'),
             list = OrganizationList,
@@ -25,6 +32,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         var parseCardData = function(cards) {
             return cards.map(function(card) {
                 var val = {}, url = '/#/organizations/' + card.id + '/';
+                val.user_capabilities = card.summary_fields.user_capabilities;
                 val.name = card.name;
                 val.id = card.id;
                 val.description = card.description || undefined;

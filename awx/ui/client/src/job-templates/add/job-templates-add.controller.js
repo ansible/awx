@@ -21,6 +21,15 @@
              $state, CreateSelect2, $q
          ) {
 
+             Rest.setUrl(GetBasePath('job_templates'));
+             Rest.options()
+                 .success(function(data) {
+                     if (!data.actions.POST) {
+                         $state.go("^");
+                         Alert('Permission Error', 'You do not have permission to add a job template.', 'alert-info');
+                     }
+                 });
+
             ClearScope();
             // Inject dynamic view
             var defaultUrl = GetBasePath('job_templates'),

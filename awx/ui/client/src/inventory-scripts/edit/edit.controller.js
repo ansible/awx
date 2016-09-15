@@ -17,6 +17,7 @@ export default
             LookUpInit, OrganizationList, inventory_script,
             $scope, $state
         ) {
+
             var generator = GenerateForm,
                 id = inventory_script.id,
                 form = inventoryScriptsFormObject,

@@ -256,6 +256,7 @@
                 $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
             $scope = angular.extend($scope, groupData);
+            $scope.group_obj = groupData;
 
             // instantiate lookup fields
             if (inventorySourceData.source !== 'custom'){

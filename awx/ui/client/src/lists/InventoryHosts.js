@@ -78,21 +78,31 @@ export default
                 mode: 'all',
                 ngClick: "copyMoveHost(host.id)",
                 awToolTip: 'Copy or move host to another group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: 'host.summary_fields.user_capabilities.edit'
             },
             edit: {
                 //label: 'Edit',
                 ngClick: "editHost(host.id)",
                 icon: 'icon-edit',
                 awToolTip: 'Edit host',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'host.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                //label: 'Edit',
+                ngClick: "editHost(host.id)",
+                awToolTip: 'View host',
+                dataPlacement: 'top',
+                ngShow: '!host.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 //label: 'Delete',
                 ngClick: "deleteHost(host.id, host.name)",
                 icon: 'icon-trash',
                 awToolTip: 'Delete host',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'host.summary_fields.user_capabilities.delete'
             }
         },
 
@@ -122,7 +132,8 @@ export default
                 ngClick: "createHost()",
                 awToolTip: "Create a new host",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD HOST'
+                buttonContent: '&#43; ADD HOST',
+                ngShow: 'canAdd'
             }
         }
 
