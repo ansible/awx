@@ -517,8 +517,9 @@ class BaseTask(Task):
         if pexpect_sleep is not None:
             logger.info("Suspending Job Execution for QA Work")
             time.sleep(pexpect_sleep)
-        # TODO: Update job_timeout using instance field instead.
-        job_timeout = 10
+        local_timeout = getattr(instance, 'timeout', 0)
+        global_timeout = getattr(settings, 'JOB_TIMEOUT', 0)
+        job_timeout = global_timeout if local_timeout == 0 else local_timeout
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
