@@ -6,7 +6,7 @@
 
 export default
     angular.module('rbacUiControl', [])
-        .service('rbacUiControlService', ['$q', 'GetBasePath', 'Rest', function($q, GetBasePath, Rest){
+        .service('rbacUiControlService', ['$q', 'GetBasePath', 'Rest', 'Wait', function($q, GetBasePath, Rest, Wait){
             this.canAdd = function(apiPath) {
                 var canAddVal = $q.defer();
 
@@ -16,6 +16,7 @@ export default
                     Rest.setUrl(GetBasePath(apiPath));
                 }
 
+                Wait("start");
                 Rest.options()
                     .success(function(data) {
                         if (data.actions.POST) {
@@ -23,6 +24,7 @@ export default
                         } else {
                             canAddVal.reject(false);
                         }
+                        Wait("stop");
                     });
 
                 return canAddVal.promise;
