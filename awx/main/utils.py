@@ -425,7 +425,7 @@ def get_system_task_capacity():
 
 
 def emit_websocket_notification(endpoint, event, payload, token_key=None):
-    from awx.main.socket import Socket
+    from awx.main.socket_queue import Socket
 
     try:
         with Socket('websocket', 'w', nowait=True, logger=logger) as websocket:

@@ -15,6 +15,8 @@ COMPOSE_TAG ?= devel
 # NOTE: This defaults the container image version to the branch that's active
 # COMPOSE_TAG ?= $(GIT_BRANCH)
 
+COMPOSE_HOST ?= $(shell hostname)
+
 VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
@@ -328,7 +330,7 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	tower-manage register_instance --primary --hostname=127.0.0.1; \
+	tower-manage register_instance --hostname=$(COMPOSE_HOST); \
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -379,6 +381,12 @@ honcho:
 	fi; \
 	honcho start
 
+flower:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
+
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -391,7 +399,8 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair --schedule=$(CELERY_SCHEDULE_FILE)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default
+	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
 receiver:
@@ -404,7 +413,11 @@ taskmanager:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py run_task_system
+	if [ "$(COMPOSE_HOST)" == "tower_1" ] || [ "$(COMPOSE_HOST)" == "tower" ]; then \
+		$(PYTHON) manage.py run_task_system; \
+	else \
+		while true; do sleep 2; done; \
+	fi
 
 socketservice:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -748,6 +761,9 @@ docker-auth:
 # Docker Compose Development environment
 docker-compose: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
+
+docker-compose-cluster: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
 
 docker-compose-test: docker-auth
 	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash

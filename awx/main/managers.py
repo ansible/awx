@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 import sys
+import socket
 
 from django.conf import settings
 from django.db import models
@@ -28,31 +29,12 @@ class InstanceManager(models.Manager):
         # If we are running unit tests, return a stub record.
         if len(sys.argv) >= 2 and sys.argv[1] == 'test':
             return self.model(id=1, primary=True,
+                              hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')
 
         # Return the appropriate record from the database.
-        return self.get(uuid=settings.SYSTEM_UUID)
+        return self.get(hostname=socket.gethostname())
 
     def my_role(self):
-        """Return the role of the currently active instance, as a string
-        ('primary' or 'secondary').
-        """
-        # If we are running unit tests, we are primary, because reasons.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return 'primary'
-
-        # Check if this instance is primary; if so, return "primary", otherwise
-        # "secondary".
-        if self.me().primary:
-            return 'primary'
-        return 'secondary'
-
-    def primary(self):
-        """Return the primary instance."""
-        # If we are running unit tests, return a stub record.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return self.model(id=1, primary=True,
-                              uuid='00000000-0000-0000-0000-000000000000')
-
-        # Return the appropriate record from the database.
-        return self.get(primary=True)
+        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
+        return "tower"

@@ -964,6 +964,11 @@ class JobEvent(CreatedModifiedModel):
         default=False,
         editable=False,
     )
+    uuid = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
     host = models.ForeignKey(
         'Host',
         related_name='job_events_as_primary_host',

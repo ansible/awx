@@ -11,6 +11,36 @@
 ###############################################################################
 # MISC PROJECT SETTINGS
 ###############################################################################
+import os
+
+def patch_broken_pipe_error():
+    """Monkey Patch BaseServer.handle_error to not write
+    a stacktrace to stderr on broken pipe.
+    http://stackoverflow.com/a/22618740/362702"""
+    import sys
+    from SocketServer import BaseServer
+    from wsgiref import handlers
+
+    handle_error = BaseServer.handle_error
+    log_exception = handlers.BaseHandler.log_exception
+
+    def is_broken_pipe_error():
+        type, err, tb = sys.exc_info()
+        return "Connection reset by peer" in repr(err)
+
+    def my_handle_error(self, request, client_address):
+        if not is_broken_pipe_error():
+            handle_error(self, request, client_address)
+
+    def my_log_exception(self, exc_info):
+        if not is_broken_pipe_error():
+            log_exception(self, exc_info)
+
+    BaseServer.handle_error = my_handle_error
+    handlers.BaseHandler.log_exception = my_log_exception
+
+patch_broken_pipe_error()
+
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -49,7 +79,10 @@ if is_testing(sys.argv):
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
-BROKER_URL = 'amqp://guest:guest@rabbitmq//'
+BROKER_URL = "amqp://{}:{}@{}/{}".format(os.environ.get("RABBITMQ_USER"),
+                                         os.environ.get("RABBITMQ_PASS"),
+                                         os.environ.get("RABBITMQ_HOST"),
+                                         os.environ.get("RABBITMQ_VHOST"))
 
 # Mongo host configuration
 MONGO_HOST = NotImplemented

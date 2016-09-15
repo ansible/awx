@@ -82,7 +82,7 @@ def celery_startup(conf=None, **kwargs):
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
-@task()
+@task(queue='default')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
@@ -103,7 +103,7 @@ def send_notifications(notification_list, job_id=None):
         if job_id is not None:
             job_actual.notifications.add(notification)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def run_administrative_checks(self):
     if not tower_settings.TOWER_ADMIN_ALERTS:
         return
@@ -124,11 +124,11 @@ def run_administrative_checks(self):
                   tower_admin_emails,
                   fail_silently=True)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def cleanup_authtokens(self):
     AuthToken.objects.filter(expires__lt=now()).delete()
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
     def get_last_run():
         if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
@@ -179,14 +179,13 @@ def tower_periodic_scheduler(self):
             new_unified_job.socketio_emit_status("failed")
         emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
 
-@task()
+@task(queue='default')
 def notify_task_runner(metadata_dict):
     """Add the given task into the Tower task manager's queue, to be consumed
     by the task system.
     """
     queue = FifoQueue('tower_task_manager')
     queue.push(metadata_dict)
-
 
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
@@ -203,7 +202,7 @@ def _send_notification_templates(instance, status_str):
                                       for n in all_notification_templates],
                                      job_id=instance.id)
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
     instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
     if not instance:
@@ -211,7 +210,7 @@ def handle_work_success(self, result, task_actual):
 
     _send_notification_templates(instance, 'succeeded')
 
-@task(bind=True)
+@task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
@@ -240,7 +239,7 @@ def handle_work_error(self, task_id, subtasks=None):
         if first_instance:
             _send_notification_templates(first_instance, 'failed')
 
-@task()
+@task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -740,7 +739,8 @@ class RunJob(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
-        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
+        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
