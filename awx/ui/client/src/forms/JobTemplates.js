@@ -399,7 +399,7 @@ export default
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "job_templates_form.$invalid || can_edit!==true",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
