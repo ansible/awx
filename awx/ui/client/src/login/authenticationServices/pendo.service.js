@@ -100,15 +100,21 @@ export default
                 config.analytics_status = c.analytics_status;
                 config.version = c.version;
                 config.ansible_version = c.ansible_version;
-                options = this.setPendoOptions(config);
-                this.setRole(options).then(function(options){
-                    $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
-                    $log.debug(options);
-                    $pendolytics.identify(options);
-                }, function(reason){
-                    // reject function for setRole
-                    $log.debug(reason);
-                });
+                if(config.analytics_status === 'detailed' || config.analytics_status === 'anonymous'){
+                    $pendolytics.bootstrap();
+                    options = this.setPendoOptions(config);
+                    this.setRole(options).then(function(options){
+                        $log.debug('Pendo status is '+ config.analytics_status + '. Object below:');
+                        $log.debug(options);
+                        $pendolytics.identify(options);
+                    }, function(reason){
+                        // reject function for setRole
+                        $log.debug(reason);
+                    });
+                }
+                else {
+                    $log.debug('Pendo is turned off.')
+                }
              }
         };
    }
