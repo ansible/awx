@@ -36,11 +36,6 @@ TEMPLATE_LOADERS = (
 if 'celeryd' in sys.argv:
     SQL_DEBUG = False
 
-# Use a different callback consumer/queue for development, to avoid a conflict
-# if there is also a nightly install running on the development machine.
-CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5557"
-CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
-
 CALLBACK_QUEUE = "callback_tasks"
 
 # Enable PROOT for tower-qa integration tests
