@@ -29,7 +29,7 @@ def mk_instance(persisted=True):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
     from django.conf import settings
-    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, primary=True, hostname="instance.example.org")
+    return Instance.objects.get_or_create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org")
 
 
 def mk_organization(name, description=None, persisted=True):

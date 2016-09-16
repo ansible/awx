@@ -337,7 +337,7 @@ class BaseSerializer(serializers.ModelSerializer):
         if hasattr(self, 'show_capabilities'):
             view = self.context.get('view', None)
             parent_obj = None
-            if hasattr(view, 'parent_model'):
+            if view and hasattr(view, 'parent_model'):
                 parent_obj = view.get_parent_object()
             if view and view.request and view.request.user:
                 user_capabilities = get_user_capabilities(

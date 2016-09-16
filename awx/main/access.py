@@ -220,12 +220,25 @@ class BaseAccess(object):
                 raise LicenseForbids("Features not found in active license.")
 
     def get_user_capabilities(self, obj, method_list=[], parent_obj=None):
+        if obj is None:
+            return {}
         user_capabilities = {}
 
         # Custom ordering to loop through methods so we can reuse earlier calcs
         for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc', 'unattach']:
             if display_method not in method_list:
                 continue
+
+            # Validation consistency checks
+            if display_method == 'copy' and isinstance(obj, JobTemplate):
+                validation_errors, resources_needed_to_start = obj.resource_validation_data()
+                if validation_errors:
+                    user_capabilities[display_method] = False
+                    continue
+            elif display_method == 'start' and isinstance(obj, Group):
+                if obj.inventory_source and not obj.inventory_source._can_update():
+                    user_capabilities[display_method] = False
+                    continue
 
             # Grab the answer from the cache, if available
             if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
@@ -243,22 +256,21 @@ class BaseAccess(object):
                 method = display_method
 
             # Shortcuts in certain cases by deferring to earlier property
-            if display_method == 'schedule' and 'edit' in user_capabilities:
+            if display_method == 'schedule':
                 user_capabilities['schedule'] = user_capabilities['edit']
                 continue
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
                 continue
-            if display_method == 'copy' and isinstance(obj, JobTemplate):
-                validation_errors, resources_needed_to_start = obj.resource_validation_data()
-                if validation_errors:
-                    user_capabilities['copy'] = False
-                    continue
+            elif display_method == 'copy' and isinstance(obj, (Group, Host)):
+                user_capabilities['copy'] = user_capabilities['edit']
+                continue
 
             # Preprocessing before the access method is called
             data = {}
-            if method == 'add' and isinstance(obj, JobTemplate):
-                data['reference_obj'] = obj
+            if method == 'add':
+                if isinstance(obj, JobTemplate):
+                    data['reference_obj'] = obj
 
             # Compute permission
             access_method = getattr(self, "can_%s" % method)
@@ -599,7 +611,7 @@ class GroupAccess(BaseAccess):
         return True
 
     def can_start(self, obj):
-        # Used as another alias to inventory_source start access
+        # Used as another alias to inventory_source start access for user_capabilities
         if obj and obj.inventory_source:
             return self.user.can_access(InventorySource, 'start', obj.inventory_source)
         return False

@@ -209,6 +209,8 @@ class ProjectUpdatePermission(ModelAccessPermission):
 
 class UserPermission(ModelAccessPermission):
     def check_post_permissions(self, request, view, obj=None):
-        if request.user.is_superuser:
+        if not request.data:
+            return request.user.admin_of_organizations.exists()
+        elif request.user.is_superuser:
             return True
         raise PermissionDenied()

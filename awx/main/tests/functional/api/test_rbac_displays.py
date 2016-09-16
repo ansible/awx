@@ -5,7 +5,10 @@ from django.test.client import RequestFactory
 
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Role, Group
-from awx.main.access import access_registry
+from awx.main.access import (
+    access_registry,
+    get_user_capabilities
+)
 from awx.main.utils import cache_list_capabilities
 from awx.api.serializers import JobTemplateSerializer
 
@@ -299,4 +302,22 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_c
         'cloud_credential.use', 'network_credential.use'
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': True}
+
+@pytest.mark.django_db
+def test_group_update_capabilities_possible(group, inventory_source, admin_user):
+    group.inventory_source = inventory_source
+    group.save()
+
+    capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
+    assert capabilities['start']
+
+@pytest.mark.django_db
+def test_group_update_capabilities_impossible(group, inventory_source, admin_user):
+    inventory_source.source = ""
+    inventory_source.save()
+    group.inventory_source = inventory_source
+    group.save()
+
+    capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
+    assert not capabilities['start']
 
