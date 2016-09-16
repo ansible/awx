@@ -13,6 +13,7 @@ export default
        return {
             setPendoOptions: function (config) {
                 var tower_version = config.version.split('-')[0],
+                trial = (config.trial) ? config.trial : false,
                 options = {
                     visitor: {
                       id: null,
@@ -24,7 +25,7 @@ export default
                       planLevel: config.license_type,
                       planPrice: config.instance_count,
                       creationDate: config.license_date,
-                      trial: config.trial,
+                      trial: trial,
                       tower_version: tower_version,
                       ansible_version: config.ansible_version
                     }
