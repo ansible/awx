@@ -18,6 +18,12 @@
         CredentialList = _.cloneDeep(CredentialList);
         CredentialList.fields.kind.noSearch = true;
 
+        $scope.$watch('group_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
         $scope.formCancel = function(){
             $state.go('^');
         };

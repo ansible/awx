@@ -26,14 +26,14 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: false,
-                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
                     label: 'Organization',
@@ -47,23 +47,23 @@ export default
                         reqExpression: "orgrequired",
                         init: true
                     },
-                    ngDisabled: '!team_obj.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!team_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: 'team_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -85,7 +85,7 @@ export default
                             awToolTip: 'Add user to team',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: 'team_obj.summary_fields.user_capabilities.edit'
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

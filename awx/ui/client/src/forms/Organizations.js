@@ -26,30 +26,30 @@ export default
                     addRequired: true,
                     editRequired: true,
                     capitalize: false,
-                    ngDisabled: '!organization_obj.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    ngDisabled: '!organization_obj.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!organization_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
-                    ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -71,7 +71,7 @@ export default
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: 'organization_obj.summary_fields.user_capabilities.edit'
+                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

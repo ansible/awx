@@ -14,8 +14,13 @@
 export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, GetChoices, Wait, $state, $filter) {
+    SelectionInit, GetChoices, Wait, $state, $filter, rbacUiControlService) {
     ClearScope();
+
+    rbacUiControlService.canAdd('credentials')
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
+        });
 
     Wait('start');
 
@@ -129,7 +134,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    '$state', '$filter'
+    '$state', '$filter', 'rbacUiControlService'
 ];
 
 
@@ -348,6 +353,12 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
     $scope.id = id;
+
+    $scope.$watch('credential_obj.summary_fields.user_capabilities.edit', function(val) {
+        if (val === false) {
+            $scope.canAdd = false;
+        }
+    });
 
     $scope.canShareCredential = false;
 

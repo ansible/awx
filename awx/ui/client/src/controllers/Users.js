@@ -294,6 +294,12 @@ export function UsersEdit($scope, $rootScope, $location,
     $scope.user_type = user_type_options[0];
     $scope.$watch('user_type', user_type_sync($scope));
 
+    $scope.$watch('user_obj.summary_fields.user_capabilities.edit', function(val) {
+        if (val === false) {
+            $scope.canAdd = false;
+        }
+    });
+
     var setScopeFields = function(data){
         _(data)
         .pick(function(value, key){

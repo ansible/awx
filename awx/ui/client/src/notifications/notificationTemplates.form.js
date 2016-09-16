@@ -28,14 +28,14 @@ export default function() {
                 addRequired: true,
                 editRequired: true,
                 capitalize: false,
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
                 label: 'Organization',
@@ -47,7 +47,7 @@ export default function() {
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notification_type: {
                 label:  'Type',
@@ -58,14 +58,14 @@ export default function() {
                 ngOptions: 'type.label for type in notification_type_options track by type.value',
                 ngChange: 'typeChange()',
                 hasSubForm: true,
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             username: {
                 label: 'Username',
                 type: 'text',
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
 
             host: {
@@ -77,7 +77,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             sender: {
                 label: 'Sender Email',
@@ -88,7 +88,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             recipients: {
                 label: 'Recipient List',
@@ -105,7 +105,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             password: {
                 labelBind: 'passwordLabel',
@@ -117,7 +117,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             port: {
                 labelBind: 'portLabel',
@@ -132,7 +132,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc'",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             channels: {
                 label: 'Destination Channels',
@@ -149,7 +149,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'slack'",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             rooms: {
                 label: 'Destination Channels',
@@ -166,7 +166,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'hipchat'",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             token: {
                 labelBind: 'tokenLabel',
@@ -178,7 +178,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'slack' || notification_type.value == 'pagerduty' || notification_type.value == 'hipchat'",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_token: {
                 label: 'Account Token',
@@ -190,7 +190,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'twilio' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             from_number: {
                 label: 'Source Phone Number',
@@ -203,7 +203,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'twilio' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             to_numbers: {
                 label: 'Destination SMS Number',
@@ -220,7 +220,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'twilio' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_sid: {
                 label: 'Account SID',
@@ -231,7 +231,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'twilio' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             subdomain: {
                 label: 'Pagerduty subdomain',
@@ -242,7 +242,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             service_key: {
                 label: 'API Service/Integration Key',
@@ -253,7 +253,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             client_name: {
                 label: 'Client Identifier',
@@ -264,7 +264,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             message_from: {
                 label: 'Label to be shown with notification',
@@ -275,7 +275,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             api_url: {
                 label: 'API URL',
@@ -287,7 +287,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             color: {
                 label: 'Notification Color',
@@ -300,14 +300,14 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notify: {
                 label: 'Notify Channel',
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             url: {
                 label: 'Target URL',
@@ -318,7 +318,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             headers: {
                 label: 'HTTP Headers',
@@ -339,7 +339,7 @@ export default function() {
                 dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             server: {
                 label: 'IRC Server Address',
@@ -350,7 +350,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'irc' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             nickname: {
                 label: 'IRC Nick',
@@ -361,7 +361,7 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'irc' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             targets: {
                 label: 'Destination Channels or Users',
@@ -378,14 +378,14 @@ export default function() {
                 },
                 ngShow: "notification_type.value == 'irc' ",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             use_ssl: {
                 label: 'SSL Connection',
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'irc'",
                 subForm: 'typeSubForm',
-                ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             checkbox_group: {
                 label: 'Options',
@@ -398,14 +398,14 @@ export default function() {
                     type: 'checkbox',
                     ngShow: "notification_type.value == 'email' ",
                     labelClass: 'checkbox-options stack-inline',
-                    ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'use_ssl',
                     label: 'Use SSL',
                     type: 'checkbox',
                     ngShow: "notification_type.value == 'email'",
                     labelClass: 'checkbox-options stack-inline',
-                    ngDisabled: '!notification_template.summary_fields.user_capabilities.edit'
+                    ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
                 }]
             }
         },
@@ -413,15 +413,15 @@ export default function() {
         buttons: { //for now always generates <button> tags
             cancel: {
                 ngClick: 'formCancel()',
-                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
+                ngShow: '(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             close: {
                 ngClick: 'formCancel()',
-                ngShow: '!notification_template.summary_fields.user_capabilities.edit'
+                ngShow: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()',
-                ngShow: 'notification_template.summary_fields.user_capabilities.edit', //$scope.function to call on click, optional
+                ngShow: '(notification_template.summary_fields.user_capabilities.edit || canAdd)', //$scope.function to call on click, optional
                 ngDisabled: true //Disable when $pristine or $invalid, optional
             }
         }

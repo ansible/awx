@@ -5,10 +5,17 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host', 'GetBasePath', 'Rest',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host, GetBasePath, Rest){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host){
         var generator = GenerateForm,
             form = HostForm;
+
+        $scope.$watch('host.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
         $scope.parseType = 'yaml';
         $scope.formCancel = function(){
             $state.go('^');

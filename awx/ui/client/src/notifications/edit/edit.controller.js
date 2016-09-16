@@ -26,6 +26,13 @@ export default
                 url = GetBasePath('notification_templates');
 
             $scope.notification_template = notification_template;
+
+            $scope.$watch('notification_template.summary_fields.user_capabilities.edit', function(val) {
+                if (val === false) {
+                    $scope.canAdd = false;
+                }
+            });
+
             generator.inject(form, {
                     mode: 'edit' ,
                     scope:$scope,

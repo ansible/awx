@@ -223,6 +223,12 @@ export function TeamsEdit($scope, $rootScope, $location,
 
     $scope.team_id = id;
 
+    $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
+        if (val === false) {
+            $scope.canAdd = false;
+        }
+    });
+
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();

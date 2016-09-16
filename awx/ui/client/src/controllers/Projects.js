@@ -574,6 +574,12 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 
     ClearScope('htmlTemplate');
 
+    $scope.$watch('project_obj.summary_fields.user_capabilities.edit', function(val) {
+        if (val === false) {
+            $scope.canAdd = false;
+        }
+    });
+
     // Inject dynamic view
     var form = ProjectsForm(),
         generator = GenerateForm,
