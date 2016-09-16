@@ -1,11 +1,6 @@
 # FROM gcr.io/ansible-tower-engineering/tower_devel:latest
 FROM centos
 
-# RUN locale-gen en_US.UTF-8
-# ENV LANG en_US.UTF-8
-# ENV LANGUAGE en_US:en
-# ENV LC_ALL en_US.UTF-8
-
 RUN yum install -y epel-release
 
 RUN yum install -y \
@@ -39,9 +34,7 @@ RUN yum install -y nodejs
 RUN npm set progress=false
 
 WORKDIR "/ansible-tower"
-ENV SHELL /bin/bash
-ENV PATH /usr/bin:$PATH
-ENV SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl"
+
 ENV VENV_BASE="/venv"
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["make requirements_test test"]
+CMD ["bash"]
