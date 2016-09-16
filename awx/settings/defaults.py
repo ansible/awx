@@ -737,9 +737,7 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
-# ZeroMQ callback settings.
-CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
-CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
+CALLBACK_QUEUE = "callback_tasks"
 
 TASK_COMMAND_PORT = 6559
 
