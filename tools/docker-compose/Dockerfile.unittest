@@ -1,0 +1,47 @@
+# FROM gcr.io/ansible-tower-engineering/tower_devel:latest
+FROM centos
+
+# RUN locale-gen en_US.UTF-8
+# ENV LANG en_US.UTF-8
+# ENV LANGUAGE en_US:en
+# ENV LC_ALL en_US.UTF-8
+
+RUN yum install -y epel-release
+
+RUN yum install -y \
+	python-pip \
+	python-virtualenv \
+	make \
+	swig \
+	git \
+	libffi-devel \
+	openssl-devel \
+	libxml2-devel \
+	xmlsec1-devel \
+	xmlsec1-openssl-devel \
+	gcc \
+	gcc-c++ \
+	/usr/bin/pg_config \
+	openldap-devel \
+	postgresql-devel \
+	libtool-ltdl-devel
+
+# NOTE: The following steps work for tower-3.0.0
+# RUN curl -LO https://rpm.nodesource.com/pub_0.12/el/7/x86_64/nodejs-0.12.9-1nodesource.el7.centos.x86_64.rpm
+# RUN yum install -y nodejs-0.12.9-1nodesource.el7.centos.x86_64.rpm
+# RUN rm nodejs-0.12.9-1nodesource.el7.centos.x86_64.rpm
+
+# Remove the 2 lines below and uncomment the 3 lines above to build
+# RPMs with the old JS build system.
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+RUN yum install -y nodejs
+
+RUN npm set progress=false
+
+WORKDIR "/ansible-tower"
+ENV SHELL /bin/bash
+ENV PATH /usr/bin:$PATH
+ENV SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl"
+ENV VENV_BASE="/venv"
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["make requirements_test test"]
