@@ -32,8 +32,13 @@ class InstanceManager(models.Manager):
                               hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')
 
-        # Return the appropriate record from the database.
-        return self.get(hostname=socket.gethostname())
+        # If we can determine the instance we are on then return
+        # that, otherwise None which would be the standalone
+        # case
+        # TODO: Replace, this doesn't work if the hostname
+        #       is different from the Instance.name
+        # node = self.filter(hostname=socket.gethostname())
+        return self.all()[0]
 
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
