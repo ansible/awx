@@ -85,7 +85,7 @@ def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible):
 # Ensure that the message flows from the socket through to process_fact_message()
 @pytest.mark.django_db
 def test_run_receiver(mocker, fact_msg_ansible):
-    mocker.patch("awx.main.socket.Socket.listen", return_value=[fact_msg_ansible])
+    mocker.patch("awx.main.socket_queue.Socket.listen", return_value=[fact_msg_ansible])
 
     receiver = FactCacheReceiver()
     mocker.patch.object(receiver, 'process_fact_message', return_value=None)

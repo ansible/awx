@@ -61,7 +61,7 @@ class Socket(object):
     def port(self):
         return {
             'callbacks': os.environ.get('CALLBACK_CONSUMER_PORT',
-                                        settings.CALLBACK_CONSUMER_PORT),
+                                        getattr(settings, 'CALLBACK_CONSUMER_PORT', 'tcp://127.0.0.1:5557')),
             'task_commands': settings.TASK_COMMAND_PORT,
             'websocket': settings.SOCKETIO_NOTIFICATION_PORT,
             'fact_cache': settings.FACT_CACHE_PORT,

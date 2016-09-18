@@ -958,7 +958,7 @@ class RunJob(BaseTask):
             update_inventory_computed_fields.delay(inventory.id, True)
         # Update job event fields after job has completed (only when using REST
         # API callback).
-        if not settings.CALLBACK_CONSUMER_PORT:
+        if not getattr(settings, 'CALLBACK_CONSUMER_PORT', None) and not getattr(settings, 'CALLBACK_QUEUE', None):
             for job_event in job.job_events.order_by('pk'):
                 job_event.save(post_process=True)
 
@@ -1519,7 +1519,8 @@ class RunAdHocCommand(BaseTask):
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
-        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
+        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'

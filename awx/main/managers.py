@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 import sys
-import socket
 
 from django.db import models
 
@@ -27,7 +26,7 @@ class InstanceManager(models.Manager):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
         if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return self.model(id=1, primary=True,
+            return self.model(id=1,
                               hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')
 
