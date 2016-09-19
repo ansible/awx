@@ -317,8 +317,8 @@ develop:
 	    pip uninstall -y awx; \
 	    $(PYTHON) setup.py develop; \
 	else \
-	    sudo pip uninstall -y awx; \
-	    sudo $(PYTHON) setup.py develop; \
+	    pip uninstall -y awx; \
+	    $(PYTHON) setup.py develop; \
 	fi
 
 version_file:
@@ -448,7 +448,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS=awx/main/tests
+TEST_DIRS ?= awx/main/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
