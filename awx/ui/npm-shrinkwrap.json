@@ -2837,15 +2837,6 @@
     },
     "istanbul-lib-coverage": {
       "version": "1.0.0",
-<<<<<<< 09aef3eb4366affa87873a3722971ca537d105a9
-      "from": "istanbul-lib-coverage@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/istanbul-lib-coverage/-/istanbul-lib-coverage-1.0.0.tgz"
-    },
-    "istanbul-lib-instrument": {
-      "version": "1.1.3",
-      "from": "istanbul-lib-instrument@>=1.1.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/istanbul-lib-instrument/-/istanbul-lib-instrument-1.1.3.tgz"
-=======
       "from": "istanbul-lib-coverage@>=1.0.0-alpha.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/istanbul-lib-coverage/-/istanbul-lib-coverage-1.0.0.tgz"
     },
@@ -2853,7 +2844,6 @@
       "version": "1.1.1",
       "from": "istanbul-lib-instrument@>=1.1.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/istanbul-lib-instrument/-/istanbul-lib-instrument-1.1.1.tgz"
->>>>>>> Fix schedules sitewide (#3469)
     },
     "javascript-detect-element-resize": {
       "version": "0.5.3",
