@@ -74,7 +74,6 @@ import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import socket from './shared/socket/main';
 import './shared/features/main';
 import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
@@ -195,7 +194,6 @@ var tower = angular.module('Tower', [
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'JobDetailHelper',
-    socket.name,
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'PortalJobsListDefinition',

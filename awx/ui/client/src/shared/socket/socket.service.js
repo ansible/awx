@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log', 'Authorization','$state',
-    function ($rootScope, $location, $log, Authorization, $state) {
+['$rootScope', '$location', '$log','$state',
+    function ($rootScope, $location, $log, $state) {
         return {
             init: function() {
                 var self = this,
@@ -35,36 +35,9 @@ export default
                         self.checkStatus();
                     };
 
-                    self.socket.onmessage = function (e) {
-                        $log.debug('Received From Server: ' + e.data);
-                        var data = JSON.parse(e.data), str = "";
-                        if(data.group_name==="jobs" && !('status' in data)){
-                            // we know that this must have been a
-                            // summary complete message
-                            $log.debug('Job summary_complete ' + data.unified_job_id);
-                            $rootScope.$emit('ws-jobs-summary', data);
-                        }
-                        else if(data.group_name==="job_events"){
-                            str = `ws-${data.group_name}-${data.job}`;
-                        }
-                        else if(data.group_name==="ad_hoc_command_events"){
-                            str = `ws-${data.group_name}-${data.ad_hoc_command}`;
-                        }
-                        else if(data.group_name==="control"){
-                            $log.debug(data.reason);
-                            $rootScope.sessionTimer.expireSession('session_limit');
-                            $state.go('signOut');
-                        }
-                        else {
-                            // The naming scheme is "ws" then a
-                            // dash (-) and the group_name.
-                            // ex: 'ws-jobs'
-                            str = `ws-${data.group_name}`;
-                        }
-                        $rootScope.$emit(str, data);
-                        return self.socket;
-                    };
+                    self.socket.onmessage = this.onMessage;
 
+                    return self.socket;
                 }
                 else {
                     // encountered expired token, redirect to login page
@@ -76,6 +49,35 @@ export default
                         self.checkStatus();
                         $log.debug('socket status: ' + $rootScope.socketStatus);
                 }, 2000);
+            },
+            onMessage: function(e){
+                $log.debug('Received From Server: ' + e.data);
+                var data = JSON.parse(e.data), str = "";
+                if(data.group_name==="jobs" && !('status' in data)){
+                    // we know that this must have been a
+                    // summary complete message b/c status is missing
+                    $log.debug('Job summary_complete ' + data.unified_job_id);
+                    $rootScope.$emit('ws-jobs-summary', data);
+                    return;
+                }
+                else if(data.group_name==="job_events"){
+                    str = `ws-${data.group_name}-${data.job}`;
+                }
+                else if(data.group_name==="ad_hoc_command_events"){
+                    str = `ws-${data.group_name}-${data.ad_hoc_command}`;
+                }
+                else if(data.group_name==="control"){
+                    $log.debug(data.reason);
+                    $rootScope.sessionTimer.expireSession('session_limit');
+                    $state.go('signOut');
+                }
+                else {
+                    // The naming scheme is "ws" then a
+                    // dash (-) and the group_name.
+                    // ex: 'ws-jobs'
+                    str = `ws-${data.group_name}`;
+                }
+                $rootScope.$emit(str, data);
             },
             disconnect: function(){
                 if(this.socket){
