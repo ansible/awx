@@ -31,6 +31,9 @@ except:
 # Pexpect
 import pexpect
 
+# Kombu
+from kombu import Connection, Exchange, Queue, Producer
+
 # Celery
 from celery import Task, task
 from celery.signals import celeryd_init
@@ -202,6 +205,18 @@ def _send_notification_templates(instance, status_str):
                                       for n in all_notification_templates],
                                      job_id=instance.id)
 
+
+def _send_job_complete_msg(instance):
+    connection = Connection(settings.BROKER_URL)
+    exchange = Exchange(settings.SCHEDULER_QUEUE, type='topic')
+    producer = Producer(connection)
+    producer.publish({ 'job_id': instance.id, 'msg_type': 'job_complete' },
+                     serializer='json',
+                     compression='bzip2',
+                     exchange=exchange,
+                     declare=[exchange],
+                     routing_key='scheduler.job.complete')
+
 @task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
     instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -209,6 +224,8 @@ def handle_work_success(self, result, task_actual):
         return
 
     _send_notification_templates(instance, 'succeeded')
+
+    _send_job_complete_msg(instance)
 
 @task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
@@ -238,6 +255,9 @@ def handle_work_error(self, task_id, subtasks=None):
 
         if first_instance:
             _send_notification_templates(first_instance, 'failed')
+    
+    if first_instance:
+        _send_job_complete_msg(first_instance)
 
 @task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):

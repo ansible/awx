@@ -2290,6 +2290,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
         new_job = obj.create_unified_job(**kv)
         result = new_job.signal_start(**kv)
+
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             new_job.delete()

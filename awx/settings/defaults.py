@@ -342,6 +342,7 @@ CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    #Queue('scheduler', Exchange('scheduler'), routing_key='scheduler.job.#'),
     # Projects use a fanout queue, this isn't super well supported
     Broadcast('projects'),
 )
@@ -737,6 +738,7 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
 CALLBACK_QUEUE = "callback_tasks"
+SCHEDULER_QUEUE = "scheduler"
 
 TASK_COMMAND_PORT = 6559
 
@@ -1039,6 +1041,10 @@ LOGGING = {
             'propagate': False
         },
         'awx.main.commands.run_task_system': {
+            'handlers': ['console', 'file', 'task_system'],
+            'propagate': False
+        },
+        'awx.main.scheduler': {
             'handlers': ['console', 'file', 'task_system'],
             'propagate': False
         },
