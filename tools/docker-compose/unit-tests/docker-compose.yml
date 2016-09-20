@@ -8,7 +8,6 @@ services:
     environment:
       SWIG_FEATURES: "-cpperraswarn -includeall -I/usr/include/openssl"
       TEST_DIRS: "awx/main/tests/unit"
-    command: ["make requirements_test test"]
-
+    command: ["make test"]
     volumes:
       - ../../../:/ansible-tower

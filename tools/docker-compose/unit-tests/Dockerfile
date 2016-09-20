@@ -29,12 +29,34 @@ RUN yum install -y \
 # Remove the 2 lines below and uncomment the 3 lines above to build
 # RPMs with the old JS build system.
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
-RUN yum install -y nodejs
 
-RUN npm set progress=false
+RUN yum install -y nodejs
 
 WORKDIR "/ansible-tower"
 
-ENV VENV_BASE="/venv"
+# Copy requirements files
+COPY requirements/*.txt requirements/
+
+# Copy __init__.py so the Makefile can retrieve `awx.__version__`
+COPY awx/__init__.py awx/
+
+# Copy Makefile
+COPY Makefile .
+
+# Make tower runtime virtualenvs
+ENV SWIG_FEATURES="-cpperraswarn -includeall -I/usr/include/openssl"
+RUN make requirements
+
+RUN pip install -r requirements/requirements_jenkins.txt
+# ENV VENV_BASE=""
+# RUN make requirements_jenkins
+
+# Build front-end deps
+COPY awx/ui/package.json awx/ui/
+
+RUN npm set progress=false
+
+RUN make ui-deps-built
+
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["bash"]
