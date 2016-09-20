@@ -53,6 +53,7 @@ import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 import workflowResults from './workflow-results/main';
+import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import about from './about/main';
@@ -123,6 +124,7 @@ var tower = angular.module('Tower', [
     footer.name,
     jobDetail.name,
     workflowResults.name,
+    jobResults.name,
     jobSubmission.name,
     notifications.name,
     standardOut.name,

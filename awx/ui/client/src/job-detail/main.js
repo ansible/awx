@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-import route from './job-detail.route';
+// import route from './job-detail.route';
 import controller from './job-detail.controller';
 import service from './job-detail.service';
 import hostEvents from './host-events/main';
@@ -19,6 +19,6 @@ export default
     	])
         .controller('JobDetailController', controller)
         .service('JobDetailService', service)
-        .run(['$stateExtender', function($stateExtender) {
-            $stateExtender.addState(route);
-        }]);
+        // .run(['$stateExtender', function($stateExtender) {
+        //     $stateExtender.addState(route);
+        // }]);
