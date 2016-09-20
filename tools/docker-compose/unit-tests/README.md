@@ -6,6 +6,13 @@ $ docker-compose -f tools/docker-compose/unit-tests/docker-compose.yml run unit-
 
 This will start the container, install the dependencies, and run the unit tests.
 
+To rebuild:
+
+
+```shell
+$ docker-compose -f tools/docker-compose/unit-tests/docker-compose.yml build
+```
+
 If you just want to pop into a shell and poke around, run:
 
 ```shell
