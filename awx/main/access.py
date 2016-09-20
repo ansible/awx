@@ -1141,7 +1141,12 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                    self.user, 'read_role'))
+        return qs
 
     @check_superuser
     def can_read(self, obj):
@@ -1164,37 +1169,35 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
-# TODO:
 class WorkflowJobNodeAccess(BaseAccess):
     '''
-    I can see/use a WorkflowJobNode if I have permission to associated Workflow Job
+    I can see a WorkflowJobNode if I have permission to...
+    the workflow job template associated with...
+    the workflow job associated with the node.
+
+    Any deletion of editing of individual nodes would undermine the integrity
+    of the graph structure.
+    Deletion must happen as a cascade delete from the workflow job.
     '''
     model = WorkflowJobNode
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return self.model.objects.all()
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                workflow_job__workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                    self.user, 'read_role'))
+        return qs
 
-    @check_superuser
-    def can_read(self, obj):
-        return True
-
-    @check_superuser
     def can_add(self, data):
-        if not data:  # So the browseable API will work
-            return True
-        
-        return True
+        return False
 
-    @check_superuser
     def can_change(self, obj, data):
-        if self.can_add(data) is False:
-            return False
-
-        return True
+        return False
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        return False
 
 # TODO: 
 class WorkflowJobTemplateAccess(BaseAccess):
@@ -1209,7 +1212,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
             qs = self.model.objects.all()
         else:
             qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by', 'next_schedule').all()
+        return qs.select_related('created_by', 'modified_by', 'next_schedule',
+                                 'admin_role', 'execute_role', 'read_role').all()
 
     @check_superuser
     def can_read(self, obj):
@@ -1224,61 +1228,79 @@ class WorkflowJobTemplateAccess(BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return True
+            return Organization.accessible_objects(self.user, 'admin_role').exists()
 
         # if reference_obj is provided, determine if it can be coppied
         reference_obj = data.pop('reference_obj', None)
-
-        if 'survey_enabled' in data and data['survey_enabled']:
-            self.check_license(feature='surveys')
-
-        if self.user.is_superuser:
+        if reference_obj:
+            for node in reference_obj.workflow_job_template_nodes.all():
+                if node.inventory and self.user not in node.inventory.use_role:
+                    return False
+                if node.credential and self.user not in node.credential.use_role:
+                    return False
+                if node.unified_job_template:
+                    if isinstance(node.unified_job_template, SystemJobTemplate):
+                        if not self.user.is_superuser:
+                            return False
+                    elif isinstance(node.unified_job_template, JobTemplate):
+                        if self.user not in node.unified_job_template.execute_role:
+                            return False
+                    elif isinstance(node.unified_job_template, Project):
+                        if self.user not in node.unified_job_template.update_role:
+                            return False
+                    elif isinstance(node.unified_job_template, InventorySource):
+                        if not self.user.can_access(InventorySource, 'start', node.unified_job_template):
+                            return False
+                    else:
+                        return False
             return True
 
-        def get_value(Class, field):
-            if reference_obj:
-                return getattr(reference_obj, field, None)
-            else:
-                pk = get_pk_from_dict(data, field)
-                if pk:
-                    return get_object_or_400(Class, pk=pk)
-                else:
-                    return None
+        # will check this if surveys are added to WFJT
+        # if 'survey_enabled' in data and data['survey_enabled']:
+        #     self.check_license(feature='surveys')
 
-        return False
+        org_pk = get_pk_from_dict(data, 'organization')
+        if not org_pk:
+            # only superusers can create or manage orphan WFJTs
+            return self.user.is_superuser
+
+        org = get_object_or_400(Organization, pk=org_pk)
+        return self.user in org.admin_role
 
     def can_start(self, obj, validate_license=True):
-        # TODO: Are workflows allowed for all licenses ??
-        # Check license.
-        '''
         if validate_license:
+            # check basic license, node count
             self.check_license()
-            if obj.job_type == PERM_INVENTORY_SCAN:
-                self.check_license(feature='system_tracking')
-            if obj.survey_enabled:
-                self.check_license(feature='surveys')
-        '''
+            # if surveys are added to WFJTs, check license here
+            # if obj.survey_enabled:
+            #     self.check_license(feature='surveys')
 
         # Super users can start any job
         if self.user.is_superuser:
             return True
 
-        return self.can_read(obj)
-        # TODO: We should use execute role rather than read role
-        #return self.user in obj.execute_role
+        return self.user in obj.execute_role
 
     def can_change(self, obj, data):
-        data_for_change = data
-        if self.user not in obj.admin_role and not self.user.is_superuser:
-            return False
-        if data is not None:
-            data = dict(data)
+        # # Check survey license if surveys are added to WFJTs
+        # if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+        #     self.check_license(feature='surveys')
 
-            if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
-                self.check_license(feature='surveys')
+        if self.user.is_superuser:
             return True
 
-        return self.can_read(obj) and self.can_add(data_for_change)
+        org_pk = get_pk_from_dict(data, 'organization')
+        if ('organization' not in data or
+                (org_pk is None and obj.organization is None) or
+                (obj.organization and obj.organization.pk == org_pk)):
+            # The simple case
+            return self.user in obj.admin_role
+
+        # If it already has an organization set, must be admin of the org to change it
+        if obj.organization and self.user not in obj.organization.admin_role:
+            return False
+        org = get_object_or_400(Organization, pk=org_pk)
+        return self.user in org.admin_role
 
     def can_delete(self, obj):
         is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
@@ -1295,9 +1317,34 @@ class WorkflowJobTemplateAccess(BaseAccess):
 
 class WorkflowJobAccess(BaseAccess):
     '''
-    I can only see Workflow Jobs if I'm a super user
+    I can only see Workflow Jobs if I can see the associated
+    workflow job template that it was created from.
     '''
     model = WorkflowJob
+
+    def get_queryset(self):
+        if self.user.is_superuser or self.user.is_system_auditor:
+            qs = self.model.objects.all()
+        else:
+            qs = WorkflowJob.objects.filter(
+                workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
+                    self.user, 'read_role'))
+        return qs.select_related('created_by', 'modified_by')
+
+    def can_add(self, data):
+        # Old add-start system for launching jobs is being depreciated, and
+        # not supported for new types of resources
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        if obj.workflow_job_template is None:
+            # only superusers can delete orphaned workflow jobs
+            return self.user.is_superuser
+        return self.user in obj.workflow_job_template.admin_role
+
 
 class AdHocCommandAccess(BaseAccess):
     '''

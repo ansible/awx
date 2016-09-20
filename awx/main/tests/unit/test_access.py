@@ -8,6 +8,7 @@ from awx.main.access import (
     BaseAccess,
     check_superuser,
     JobTemplateAccess,
+    WorkflowJobTemplateAccess,
 )
 from awx.main.models import Credential, Inventory, Project, Role, Organization
 
@@ -109,4 +110,19 @@ def test_jt_can_add_bad_data(user_unit):
     "Assure that no server errors are returned if we call JT can_add with bad data"
     access = JobTemplateAccess(user_unit)
     assert not access.can_add({'asdf': 'asdf'})
+
+
+class TestWorkflowAccessMethods:
+    @pytest.fixture
+    def workflow(self, workflow_job_template_factory):
+        objects = workflow_job_template_factory('test_workflow', persisted=False)
+        return objects.workflow_job_template
+
+    class MockQuerySet(object):
+        pass
+
+    def test_workflow_can_add(self, workflow, user_unit):
+        # user_unit.admin_of_organizations = self.MockQuerySet()
+        access = WorkflowJobTemplateAccess(user_unit)
+        assert access.can_add({'organization': 1})
 

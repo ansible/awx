@@ -110,6 +110,20 @@ def reverse_gfk(content_object):
         camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url()
     }
 
+def vars_validate_or_raise(vars_str):
+    # vars must be blank, a valid JSON or YAML dict, or ...
+    try:
+        json.loads((vars_str or '').strip() or '{}')
+        return vars_str
+    except ValueError:
+        pass
+    try:
+        yaml.safe_load(vars_str)
+        return vars_str
+    except yaml.YAMLError:
+        pass
+    raise serializers.ValidationError('Must be valid JSON or YAML.')
+
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
     '''
@@ -996,14 +1010,7 @@ class ProjectUpdateCancelSerializer(ProjectUpdateSerializer):
 class BaseSerializerWithVariables(BaseSerializer):
 
     def validate_variables(self, value):
-        try:
-            json.loads(value.strip() or '{}')
-        except ValueError:
-            try:
-                yaml.safe_load(value)
-            except yaml.YAMLError:
-                raise serializers.ValidationError('Must be valid JSON or YAML.')
-        return value
+        return vars_validate_or_raise(value)
 
 
 class InventorySerializer(BaseSerializerWithVariables):
@@ -1326,18 +1333,7 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         return res
 
     def validate_source_vars(self, value):
-        # source_env must be blank, a valid JSON or YAML dict, or ...
-        try:
-            json.loads((value or '').strip() or '{}')
-            return value
-        except ValueError:
-            pass
-        try:
-            yaml.safe_load(value)
-            return value
-        except yaml.YAMLError:
-            pass
-        raise serializers.ValidationError('Must be valid JSON or YAML.')
+        return vars_validate_or_raise(value)
 
     def validate(self, attrs):
         # TODO: Validate source, validate source_regions
@@ -1900,18 +1896,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         return super(JobTemplateSerializer, self).validate(attrs)
 
     def validate_extra_vars(self, value):
-        # extra_vars must be blank, a valid JSON or YAML dict, or ...
-        try:
-            json.loads((value or '').strip() or '{}')
-            return value
-        except ValueError:
-            pass
-        try:
-            yaml.safe_load(value)
-            return value
-        except yaml.YAMLError:
-            pass
-        raise serializers.ValidationError('Must be valid JSON or YAML.')
+        return vars_validate_or_raise(value)
 
 
 class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
@@ -2178,7 +2163,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*',)
+        fields = ('*', 'extra_vars', 'organization')
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
@@ -2194,6 +2179,9 @@ class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
 
         ))
         return res
+
+    def validate_extra_vars(self, value):
+        return vars_validate_or_raise(value)
 
 # TODO:
 class WorkflowJobTemplateListSerializer(WorkflowJobTemplateSerializer):
@@ -2226,16 +2214,34 @@ class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer)
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
+    job_type = serializers.SerializerMethodField()
+    job_tags = serializers.SerializerMethodField()
+    limit = serializers.SerializerMethodField()
+    skip_tags = serializers.SerializerMethodField()
 
     class Meta:
-        # TODO: workflow_job and job read-only
-        fields = ('id', 'url', 'related', 'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',)
+        fields = ('id', 'url', 'related', 'unified_job_template',
+                  'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags')
+        read_only_fields = ('success_nodes', 'failure_nodes', 'always_nodes')
 
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
         if obj.unified_job_template:
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
+
+    def get_job_type(self, obj):
+        return obj.char_prompts.get('job_type', None)
+
+    def get_job_tags(self, obj):
+        return obj.char_prompts.get('job_tags', None)
+
+    def get_skip_tags(self, obj):
+        return obj.char_prompts.get('skip_tags', None)
+
+    def get_limit(self, obj):
+        return obj.char_prompts.get('limit', None)
+
 
 class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
@@ -2251,9 +2257,36 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail', args=(obj.workflow_job_template.pk,))
         return res
 
+    def to_internal_value(self, data):
+        internal_value = super(WorkflowNodeBaseSerializer, self).to_internal_value(data)
+        char_prompts = self.extract_char_prompts(data)
+        internal_value['char_prompts'] = char_prompts
+        return internal_value
+
+    def extract_char_prompts(self, data):
+        char_prompts = {}
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
+            if data.get(fd, None):
+                char_prompts[fd] = data[fd]
+        return char_prompts
+
+    def validate(self, attrs):
+        if 'char_prompts' in attrs:
+            if 'job_type' in attrs['char_prompts']:
+                job_types = [t for t, v in JOB_TYPE_CHOICES]
+                if attrs['char_prompts']['job_type'] not in job_types:
+                    raise serializers.ValidationError({
+                        "job_type": "%s is not a valid job type. The choices are %s." % (
+                            attrs['char_prompts']['job_type'], job_types)})
+        ujt_obj = attrs.get('unified_job_template', None)
+        if isinstance(ujt_obj, WorkflowJobTemplate):
+            raise serializers.ValidationError({"unified_job_template": "Can not nest Workflow Job Templates inside of Workflow Job Templates"})
+        return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
+
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
-        model = WorkflowJobTemplateNode
+        # TODO: workflow_job and job read-only
+        model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job',)
 
     def get_related(self, obj):

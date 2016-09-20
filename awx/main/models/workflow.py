@@ -9,28 +9,28 @@ from django.db import models
 from django.core.urlresolvers import reverse
 #from django import settings as tower_settings
 
+from jsonfield import JSONField
+
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import JobNotificationMixin
 from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.fields import ImplicitRoleField
+from awx.main.models.mixins import ResourceMixin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
+
+CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']
 
 class WorkflowNodeBase(CreatedModifiedModel):
     class Meta:
         abstract = True
         app_label = 'main'
 
-    # TODO: RBAC
-    '''
-    admin_role = ImplicitRoleField(
-        parent_role='workflow_job_template.admin_role',
-    )
-    '''
     success_nodes = models.ManyToManyField(
         'self',
         blank=True,
@@ -52,11 +52,68 @@ class WorkflowNodeBase(CreatedModifiedModel):
     unified_job_template = models.ForeignKey(
         'UnifiedJobTemplate',
         related_name='%(class)ss',
+        blank=False,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    # Prompting-related fields
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='%(class)ss',
         blank=True,
         null=True,
         default=None,
         on_delete=models.SET_NULL,
     )
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='%(class)ss',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    char_prompts = JSONField(
+        blank=True,
+        default={}
+    )
+
+    def prompts_dict(self):
+        data = {}
+        if self.inventory:
+            data['inventory'] = self.inventory
+        if self.credential:
+            data['credential'] = self.credential
+        for fd in CHAR_PROMPTS_LIST:
+            if fd in self.char_prompts:
+                data[fd] = self.char_prompts[fd]
+        return data
+
+    def get_prompts_warnings(self):
+        ujt_obj = self.unified_job_template
+        if ujt_obj is None:
+            return {}
+        prompts_dict = self.prompts_dict()
+        from awx.main.models import JobTemplate
+        if not isinstance(ujt_obj, JobTemplate):
+            return {'ignored': {'all': 'Can not use prompts on unified_job_template that is not type of job template'}}
+        ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
+        ignored_dict = {}
+        missing_dict = {}
+        for fd in prompts_dict:
+            if not ask_for_vars_dict[fd]:
+                ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
+        for fd in ask_for_vars_dict:
+            ujt_field = getattr(ujt_obj, fd)
+            if ujt_field is None and prompts_dict.get(fd, None) is None:
+                missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
+        data = {}
+        if ignored_dict:
+            data.update(ignored_dict)
+        if missing_dict:
+            data.update(missing_dict)
+        return data
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     # TODO: Ensure the API forces workflow_job_template being set
@@ -87,7 +144,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         blank=True,
         null=True,
         default=None,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
     )
     
     def get_absolute_url(self):
@@ -102,14 +159,32 @@ class WorkflowJobOptions(BaseModel):
         default='',
     )
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin):
 
     class Meta:
         app_label = 'main'
 
-    admin_role = ImplicitRoleField(
-        parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    # admin_role = ImplicitRoleField(
+    #     parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+    # )
+    organization = models.ForeignKey(
+        'Organization',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='workflows',
     )
+    admin_role = ImplicitRoleField(parent_role=[
+        'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
+        'organization.admin_role'
+    ])
+    execute_role = ImplicitRoleField(parent_role=[
+        'admin_role'
+    ])
+    read_role = ImplicitRoleField(parent_role=[
+        'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
+        'organization.auditor_role', 'execute_role', 'admin_role'
+    ])
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -146,6 +221,17 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions):
         workflow_job.inherit_job_template_workflow_nodes()
         return workflow_job
 
+    def get_warnings(self):
+        warning_data = {}
+        for node in self.workflow_job_template_nodes.all():
+            if node.unified_job_template is None:
+                warning_data[node.pk] = 'Node is missing a linked unified_job_template'
+                continue
+            node_prompts_warnings = node.get_prompts_warnings()
+            if node_prompts_warnings:
+                warning_data[node.pk] = node_prompts_warnings
+        return warning_data
+
 class WorkflowJobInheritNodesMixin(object):
     def _inherit_relationship(self, old_node, new_node, node_ids_map, node_type):
         old_related_nodes = self._get_all_by_type(old_node, node_type)
@@ -159,7 +245,27 @@ class WorkflowJobInheritNodesMixin(object):
     Create a WorkflowJobNode for each WorkflowJobTemplateNode
     '''
     def _create_workflow_job_nodes(self, old_nodes):
-        return [WorkflowJobNode.objects.create(workflow_job=self, unified_job_template=old_node.unified_job_template) for old_node in old_nodes]
+        new_node_list = []
+        for old_node in old_nodes:
+            kwargs = dict(
+                workflow_job=self,
+                unified_job_template=old_node.unified_job_template,
+            )
+            ujt_obj = old_node.unified_job_template
+            if ujt_obj:
+                ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
+                if ask_for_vars_dict['inventory'] and old_node.inventory:
+                    kwargs['inventory'] = old_node.inventory
+                if ask_for_vars_dict['credential'] and old_node.credential:
+                    kwargs['credential'] = old_node.credential
+                for fd in CHAR_PROMPTS_LIST:
+                    new_char_prompts = {}
+                    if ask_for_vars_dict[fd] and old_node.char_prompts.get(fd, None):
+                        new_char_prompts[fd] = old_node.char_prompts[fd]
+                    if new_char_prompts:
+                        kwargs['char_prompts'] = new_char_prompts
+            new_node_list.append(WorkflowJobNode.objects.create(**kwargs))
+        return new_node_list
 
     def _map_workflow_job_nodes(self, old_nodes, new_nodes):
         node_ids_map = {}
