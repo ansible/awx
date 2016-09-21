@@ -523,7 +523,7 @@ class BaseTask(Task):
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
-        self.timeouted = False
+        self.timed_out = False
         last_stdout_update = time.time()
         idle_timeout = self.get_idle_timeout()
         expect_list = []
@@ -554,7 +554,7 @@ class BaseTask(Task):
                 canceled = True
         if canceled:
             return 'canceled', child.exitstatus
-        elif child.exitstatus == 0 and not self.timeouted:
+        elif child.exitstatus == 0 and not self.timed_out:
             return 'successful', child.exitstatus
         else:
             return 'failed', child.exitstatus
@@ -594,8 +594,7 @@ class BaseTask(Task):
             time.sleep(3)
             if is_cancel:
                 return True
-            else:
-                self.timeouted = True
+            self.timed_out = True
         except OSError:
             keyword = 'cancel' if is_cancel else 'timeout'
             logger.warn("Attempted to %s already finished job, ignoring" % keyword)
@@ -641,6 +640,7 @@ class BaseTask(Task):
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
+            job_explanation = ""
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
@@ -680,13 +680,15 @@ class BaseTask(Task):
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
-                if getattr(self, 'timeouted', False):
+                if getattr(self, 'timed_out', False):
+                    job_explanation = "Job terminated due to timeout"
                     with open(stdout_filename, 'a') as f:
                         f.write("\x1b[1;31m%s\x1b[0m" % "JOB FAILS DUE TO TIMEOUT!")
             except Exception:
                 pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
-                                     output_replacements=output_replacements)
+                                     output_replacements=output_replacements,
+                                     job_explanation=job_explanation)
         self.post_run_hook(instance, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
