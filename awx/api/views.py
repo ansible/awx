@@ -2631,10 +2631,6 @@ class WorkflowJobTemplateNodeList(ListCreateAPIView):
     serializer_class = WorkflowJobTemplateNodeListSerializer
     new_in_310 = True
 
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        return super(WorkflowJobTemplateNodeList, self).update_raw_data(data)
 
 class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 

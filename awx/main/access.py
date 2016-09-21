@@ -1132,10 +1132,26 @@ class SystemJobAccess(BaseAccess):
     '''
     model = SystemJob
 
-# TODO:
 class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
-    I can see/use a WorkflowJobTemplateNode if I have permission to associated Workflow Job Template
+    I can see/use a WorkflowJobTemplateNode if I have read permission
+        to associated Workflow Job Template
+
+    In order to add a node, I need:
+     - admin access to parent WFJT
+     - execute access to the unified job template being used
+     - access to any credential or inventory provided as the prompted fields
+
+    In order to do anything to a node, I need admin access to its WFJT
+
+    In order to edit fields on a node, I need:
+     - execute access to the unified job template of the node
+     - access to BOTH credential and inventory post-change, if present
+
+    In order to delete a node, I only need the admin access its WFJT
+
+    In order to manage connections (edges) between nodes I do not need anything
+      beyond the standard admin access to its WFJT
     '''
     model = WorkflowJobTemplateNode
 
@@ -1148,26 +1164,78 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
                     self.user, 'read_role'))
         return qs
 
-    @check_superuser
-    def can_read(self, obj):
+    def can_use_prompted_resources(self, data):
+        cred_pk = data.get('credential', None)
+        inv_pk = data.get('inventory', None)
+        if cred_pk:
+            credential = get_object_or_400(Credential, pk=cred_pk)
+            if self.user not in credential.use_role:
+                return False
+        if inv_pk:
+            inventory = get_object_or_400(Inventory, pk=inv_pk)
+            if self.user not in inventory.use_role:
+                return False
         return True
 
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return True
-        
+        wfjt_pk = data.get('workflow_job_template', None)
+        if wfjt_pk:
+            wfjt = get_object_or_400(WorkflowJobTemplate, pk=wfjt_pk)
+            if self.user not in wfjt.admin_role:
+                return False
+        else:
+            return False
+        if not self.can_use_prompted_resources(data):
+            return False
         return True
 
-    @check_superuser
+    def wfjt_admin(self, obj):
+        if not obj.workflow_job_template:
+            return self.user.is_superuser
+        else:
+            return self.user in obj.workflow_job_template.admin_role
+
+    def ujt_execute(self, obj):
+        if not obj.unified_job_template:
+            return self.wfjt_admin(obj)
+        else:
+            return self.user in obj.unified_job_template.execute_role and self.wfjt_admin(obj)
+
     def can_change(self, obj, data):
-        if self.can_add(data) is False:
+        if not data:
+            return True
+
+        if not self.ujt_execute(obj):
+            # should not be able to edit the prompts if lacking access to UJT
             return False
 
+        if 'credential' in data or 'inventory' in data:
+            new_data = data
+            if 'credential' not in data:
+                new_data['credential'] = self.credential
+            if 'inventory' not in data:
+                new_data['inventory'] = self.inventory
+            return self.can_use_prompted_resources(new_data)
         return True
 
     def can_delete(self, obj):
-        return self.can_change(obj, None)
+        return self.wfjt_admin(obj)
+
+    def check_same_WFJT(self, obj, sub_obj):
+        if type(obj) != self.model or type(sub_obj) != self.model:
+            raise Exception('Attaching workflow nodes only allowed for other nodes')
+        if obj.workflow_job_template != sub_obj.workflow_job_template:
+            return False
+        return True
+
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
+
+    def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
 
 class WorkflowJobNodeAccess(BaseAccess):
     '''
@@ -1199,7 +1267,7 @@ class WorkflowJobNodeAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
-# TODO: 
+# TODO: revisit for survey logic, notification attachments?
 class WorkflowJobTemplateAccess(BaseAccess):
     '''
     I can only see/manage Workflow Job Templates if I'm a super user
@@ -1293,7 +1361,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if ('organization' not in data or
                 (org_pk is None and obj.organization is None) or
                 (obj.organization and obj.organization.pk == org_pk)):
-            # The simple case
+            # No organization changes
             return self.user in obj.admin_role
 
         # If it already has an organization set, must be admin of the org to change it
@@ -1314,11 +1382,13 @@ class WorkflowJobTemplateAccess(BaseAccess):
         return True
 
 
-
 class WorkflowJobAccess(BaseAccess):
     '''
     I can only see Workflow Jobs if I can see the associated
     workflow job template that it was created from.
+    I can delete them if I am admin of their workflow job template
+    I can cancel one if I can delete it
+       I can also cancel it if I started it
     '''
     model = WorkflowJob
 
@@ -1345,6 +1415,10 @@ class WorkflowJobAccess(BaseAccess):
             return self.user.is_superuser
         return self.user in obj.workflow_job_template.admin_role
 
+    def can_cancel(self, obj):
+        if not obj.can_cancel:
+            return False
+        return self.can_delete(obj) or self.user == obj.created_by
 
 class AdHocCommandAccess(BaseAccess):
     '''

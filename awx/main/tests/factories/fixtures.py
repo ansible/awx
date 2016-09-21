@@ -167,11 +167,11 @@ def mk_workflow_job(status='new', workflow_job_template=None, extra_vars={},
         job.save()
     return job
 
-def mk_workflow_job_template(name, extra_vars='', spec=None, persisted=True):
+def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, persisted=True):
     if extra_vars:
         extra_vars = json.dumps(extra_vars)
 
-    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars)
+    wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization)
 
     wfjt.survey_spec = spec
     if wfjt.survey_spec is not None:

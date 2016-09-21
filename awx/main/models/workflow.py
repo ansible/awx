@@ -22,6 +22,9 @@ from awx.main.models.rbac import (
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
 
+import yaml
+import json
+
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
 CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']
@@ -150,6 +153,33 @@ class WorkflowJobNode(WorkflowNodeBase):
     def get_absolute_url(self):
         return reverse('api:workflow_job_node_detail', args=(self.pk,))
 
+    def get_job_kwargs(self):
+        data = {}
+        # rejecting/accepting prompting variables done with the node copy
+        if self.inventory:
+            data['inventory'] = self.inventory
+        if self.credential:
+            data['credential'] = self.credential
+        if self.char_prompts:
+            data.update(self.char_prompts)
+        # process extra_vars
+        extra_vars = {}
+        if self.workflow_job and self.workflow_job.extra_vars:
+            try:
+                WJ_json_extra_vars = json.loads(
+                    (self.workflow_job.extra_vars or '').strip() or '{}')
+            except ValueError:
+                try:
+                    WJ_json_extra_vars = yaml.safe_load(self.workflow_job.extra_vars)
+                except yaml.YAMLError:
+                    WJ_json_extra_vars = {}
+        extra_vars.update(WJ_json_extra_vars)
+        # TODO: merge artifacts, add ancestor_artifacts to kwargs
+        if extra_vars:
+            data['extra_vars'] = extra_vars
+        print ' job KV data: ' + str(data)
+        return data
+
 class WorkflowJobOptions(BaseModel):
     class Meta:
         abstract = True
@@ -164,9 +194,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin)
     class Meta:
         app_label = 'main'
 
-    # admin_role = ImplicitRoleField(
-    #     parent_role='singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
-    # )
     organization = models.ForeignKey(
         'Organization',
         blank=True,

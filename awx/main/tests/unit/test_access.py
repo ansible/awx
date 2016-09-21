@@ -118,11 +118,19 @@ class TestWorkflowAccessMethods:
         objects = workflow_job_template_factory('test_workflow', persisted=False)
         return objects.workflow_job_template
 
-    class MockQuerySet(object):
-        pass
-
     def test_workflow_can_add(self, workflow, user_unit):
-        # user_unit.admin_of_organizations = self.MockQuerySet()
+        organization = Organization(name='test-org')
+        workflow.organization = organization
+        organization.admin_role = Role()
+
+        def mock_get_object(Class, **kwargs):
+            if Class == Organization:
+                return organization
+            else:
+                raise Exception('Item requested has not been mocked')
+
         access = WorkflowJobTemplateAccess(user_unit)
-        assert access.can_add({'organization': 1})
+        with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
+            with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
+                assert access.can_add({'organization': 1})
 
