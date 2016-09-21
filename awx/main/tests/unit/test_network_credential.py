@@ -74,6 +74,7 @@ def test_net_cred_ssh_agent(mocker, get_ssh_version):
         mocker.patch.object(run_job, 'should_use_proot', return_value=False)
         mocker.patch.object(run_job, 'run_pexpect', return_value=('successful', 0))
         mocker.patch.object(run_job, 'open_fifo_write', return_value=None)
+        mocker.patch.object(run_job, 'post_run_hook', return_value=None)
 
         run_job.run(mock_job.id)
         assert run_job.update_model.call_count == 3
