@@ -116,6 +116,10 @@ export default {
         $scope.job = jobData;
         $scope.jobOptions = jobDataOptions.actions.GET;
         $scope.labels = jobLabels;
+        $scope.stdoutFullScreen = false;
+
+        $scope.job_status = {"status": ""};
+        $scope.job_status.status = (jobData.status === 'waiting' || jobData.status === 'new') ? 'pending' : jobData.status;
 
         // turn related api browser routes into tower routes
         getTowerLinks();
@@ -129,5 +133,10 @@ export default {
         ParseTypeChange({ scope: $scope,
             field_id: 'pre-formatted-variables',
             readOnly: true });
+
+        // Click binding for the expand/collapse button on the standard out log
+        $scope.toggleStdoutFullscreen = function() {
+            $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+        };
     }]
 };

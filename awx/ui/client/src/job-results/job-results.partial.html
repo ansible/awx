@@ -438,9 +438,34 @@
             </div>
         </div>
 
+        <!-- RIGHT PANE -->
         <div class="JobDetail-rightSide">
             <div class="JobDetail-stdoutPanel Panel">
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">
+                        <i class="JobDetail-statusIcon--results fa icon-job-{{ job_status.status }}"></i>
+                            {{job.name}}
+                    </div>
+                    <div class="JobResults-badgeRow">
+                        <div class="JobResults-badgeTitle">Plays</div><span class="badge List-titleBadge ng-binding">{{jobData.playCount || 0}}</span>
+                        <div class="JobResults-badgeTitle">Tasks</div><span class="badge List-titleBadge ng-binding">{{jobData.taskCount || 0}}</span>
+                        <div class="JobResults-badgeTitle">Hosts</div><span class="badge List-titleBadge ng-binding">{{jobData.hostCount || 0}}</span>
+                        <div class="JobResults-badgeTitle">Elapsed</div><span class="badge List-titleBadge ng-binding">{{ job_status.elapsed || "00:00:01"}}</span>
+                    </div>
+                    <div class="StandardOut-panelHeaderActions">
+                        <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}" ng-click="toggleStdoutFullscreen()">
+                            <i class="fa fa-arrows-alt"></i>
+                        </button>
+                        <a ng-show="job_status.status === 'failed' || job_status.status === 'successful' || job_status.status === 'canceled'" href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
+                                <i class="fa fa-download"></i>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <!-- <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log> -->
             </div>
         </div>
+        <!--END OF RIGHT PANE-->
     </div>
 </div>
