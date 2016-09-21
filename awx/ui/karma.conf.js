@@ -9,13 +9,13 @@ module.exports = function(config) {
         browsers: ['Chrome', 'Firefox'],
         coverageReporter: {
             reporters: [
-                { type: 'html', subdir: 'html' }
+                { type: 'html', subdir: 'html' },
             ]
         },
         frameworks: [
             'jasmine',
         ],
-        reporters: ['progress', 'coverage'],
+        reporters: ['progress', 'coverage', 'junit'],
         files: [
             './client/src/app.js',
             './node_modules/angular-mocks/angular-mocks.js',
@@ -86,7 +86,9 @@ module.exports = function(config) {
             }
         },
         junitReporter: {
-            outputFile: 'coverage/test-results.xml'
+            outputDir: 'coverage',
+            outputFile: 'ui-unit-test-results.xml',
+            useBrowserName: false
         }
     });
 };
