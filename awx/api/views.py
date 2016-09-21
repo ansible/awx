@@ -3677,6 +3677,7 @@ class NotificationTemplateTest(GenericAPIView):
     model = NotificationTemplate
     serializer_class = EmptySerializer
     new_in_300 = True
+    is_job_start = True
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()

@@ -1641,6 +1641,12 @@ class NotificationTemplateAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
+    @check_superuser
+    def can_start(self, obj):
+        if obj.organization is None:
+            return False
+        return self.user in obj.organization.admin_role
+
 class NotificationAccess(BaseAccess):
     '''
     I can see/use a notification if I have permission to
