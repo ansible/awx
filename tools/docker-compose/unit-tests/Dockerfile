@@ -43,13 +43,13 @@ COPY awx/__init__.py awx/
 # Copy Makefile
 COPY Makefile .
 
-# Make tower runtime virtualenvs
+# Install tower runtime virtualenvs
 ENV SWIG_FEATURES="-cpperraswarn -includeall -I/usr/include/openssl"
 RUN make requirements
 
-RUN pip install -r requirements/requirements_jenkins.txt
-# ENV VENV_BASE=""
-# RUN make requirements_jenkins
+# Install tower test requirements 
+ENV VENV_BASE=""
+RUN make requirements_jenkins
 
 # Build front-end deps
 COPY awx/ui/package.json awx/ui/
