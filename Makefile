@@ -485,7 +485,7 @@ test_jenkins : test_coverage
 # --------------------------------------
 
 ui-deps-built: awx/ui/package.json
-	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
+	$(NPM_BIN) --prefix awx/ui install awx/ui
 	touch awx/ui/.deps_built
 
 ui-docker-machine: ui-deps-built
