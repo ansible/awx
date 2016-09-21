@@ -2,7 +2,7 @@
 
 @import '../shared/branding/colors.less';
 @import '../shared/branding/colors.default.less';
-@import '../shared/layouts/one-plus-one.less';
+@import '../shared/layouts/one-plus-two.less';
 
 @breakpoint-md: 1200px;
 @breakpoint-sm: 623px;
@@ -21,7 +21,7 @@
     }
 }
 .JobDetail{
-    .OnePlusOne-container(100%, @breakpoint-md);
+    .OnePlusTwo-container(100%, @breakpoint-md);
 
     &.fullscreen {
         .JobDetail-rightSide {
@@ -31,11 +31,11 @@
 }
 
 .JobDetail-leftSide{
-    .OnePlusOne-panel--left(100%, @breakpoint-md);
+    .OnePlusTwo-left--panel(100%, @breakpoint-md);
 }
 
 .JobDetail-rightSide{
-    .OnePlusOne-panel--right(100%, @breakpoint-md);
+    .OnePlusTwo-right--panel(100%, @breakpoint-md);
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
     }
@@ -88,49 +88,42 @@
 }
 
 .JobDetail-resultRow{
-    width: 50%;
+    width: 100%;
     display: flex;
-    @media screen and(max-width: @breakpoint-sm){
-        width: 100%;
-    }
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.JobDetail-resultRow--variables {
+    flex-direction: column;
 }
 
 .JobDetail-resultRowLabel{
     text-transform: uppercase;
-}
-
-.JobDetail-resultRow label{
     color: @default-interface-txt;
     font-size: 14px;
     font-weight: normal!important;
-    flex: 1 0 auto;
+    width: 30%;
+    margin-right: 20px;
     @media screen and(max-width: @breakpoint-md){
         flex: 2.5 0 auto;
     }
 }
 
-.JobDetail-resultRow--variables{
+.JobDetail-resultRowLabel--fullWidth {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-left:15px;
-}
-
-.JobDetail-extraVars{
-    text-transform: none;
-}
-
-.JobDetail-extraVarsLabel{
-    margin-left:-15px;
-    padding-bottom: 15px;
+    margin-right: 0px;
 }
 
 .JobDetail-resultRowText{
-    width: 40%;
+    width: ~"calc(70% - 20px)";
     flex: 1 0 auto;
-    padding:0px 29px;
     text-transform: none;
     word-wrap: break-word;
+}
+
+.JobDetail-resultRowText--fullWidth {
+    width: 100%;
 }
 
 .JobDetail-searchHeaderRow{
