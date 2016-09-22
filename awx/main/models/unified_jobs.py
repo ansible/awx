@@ -798,34 +798,43 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     status=self.status,
                     traceback=self.result_traceback)
 
-    def start(self, error_callback, success_callback, **kwargs):
-        '''
-        Start the task running via Celery.
-        '''
-        task_class = self._get_task_class()
+    def pre_start(self, **kwargs):
         if not self.can_start:
             self.job_explanation = u'%s is not in a startable status: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
-            return False
+            return (False, None)
+
         needed = self.get_passwords_needed_to_start()
         try:
             start_args = json.loads(decrypt_field(self, 'start_args'))
         except Exception:
             start_args = None
+
         if start_args in (None, ''):
             start_args = kwargs
+
         opts = dict([(field, start_args.get(field, '')) for field in needed])
+
         if not all(opts.values()):
             missing_fields = ', '.join([k for k,v in opts.items() if not v])
             self.job_explanation = u'Missing needed fields: %s.' % missing_fields
             self.save(update_fields=['job_explanation'])
-            return False
-        #extra_data = dict([(field, kwargs[field]) for field in kwargs
-        #                   if field not in needed])
+            return (False, None)
+
         if 'extra_vars' in kwargs:
             self.handle_extra_data(kwargs['extra_vars'])
-        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
-        return True
+
+        return (True, opts)
+
+    def start(self, error_callback, success_callback, **kwargs):
+        '''
+        Start the task running via Celery.
+        '''
+        task_class = self._get_task_class()
+        (res, opts) = self.pre_start(**kwargs)
+        if res:
+            task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+        return res
 
     def signal_start(self, **kwargs):
         """Notify the task runner system to begin work on this task."""
@@ -852,6 +861,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.socketio_emit_status("pending")
 
+        print("Running job launch for job %s" % self.name)
         from awx.main.scheduler.tasks import run_job_launch
         run_job_launch.delay(self.id)
 

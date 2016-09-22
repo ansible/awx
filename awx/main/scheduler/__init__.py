@@ -4,13 +4,14 @@
 # Python
 import datetime
 import logging
+import struct, fcntl, os
 
 # Django
 from django.conf import settings
+from django.db import transaction
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.tasks import handle_work_error, handle_work_success
 from awx.main.utils import get_system_task_capacity
 from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
@@ -47,8 +48,8 @@ def get_running_workflow_jobs():
                            WorkflowJob.objects.filter(status='running')]
     return graph_workflow_jobs
 
-def do_spawn_workflow_jobs():
-    workflow_jobs = get_running_workflow_jobs()
+def spawn_workflow_graph_jobs(workflow_jobs):
+    # TODO: Consider using transaction.atomic
     for workflow_job in workflow_jobs:
         dag = WorkflowDAG(workflow_job)
         spawn_nodes = dag.bfs_nodes_to_run()
@@ -69,6 +70,16 @@ def do_spawn_workflow_jobs():
             # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
             #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
 
+# See comment in tasks.py::RunWorkflowJob::run()
+def process_finished_workflow_jobs(workflow_jobs):
+    for workflow_job in workflow_jobs:
+        dag = WorkflowDAG(workflow_job)
+        if dag.is_workflow_done():
+            with transaction.atomic():
+                # TODO: detect if wfj failed
+                workflow_job.status = 'completed'
+                workflow_job.save()
+                workflow_job.socketio_emit_status('completed')
 
 def rebuild_graph():
     """Regenerate the task graph by refreshing known tasks from Tower, purging
@@ -88,8 +99,6 @@ def rebuild_graph():
         logger.warn("Ignoring celery task inspector")
         active_task_queues = None
 
-    do_spawn_workflow_jobs()
-
     all_sorted_tasks = get_tasks()
     if not len(all_sorted_tasks):
         return None
@@ -106,12 +115,13 @@ def rebuild_graph():
             return None
 
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
+    running_celery_tasks = filter(lambda t: type(t) != WorkflowJob, running_tasks)
     waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
     new_tasks = filter(lambda t: t.status == 'pending', all_sorted_tasks)
 
     # Check running tasks and make sure they are active in celery
     logger.debug("Active celery tasks: " + str(active_tasks))
-    for task in list(running_tasks):
+    for task in list(running_celery_tasks):
         if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
             # NOTE: Pull status again and make sure it didn't finish in 
             #       the meantime?
@@ -122,7 +132,7 @@ def rebuild_graph():
             ))
             task.save()
             task.socketio_emit_status("failed")
-            running_tasks.pop(running_tasks.index(task))
+            running_tasks.pop(task)
             logger.error("Task %s appears orphaned... marking as failed" % task)
 
     # Create and process dependencies for new tasks
@@ -171,6 +181,8 @@ def process_graph(graph, task_capacity):
     """Given a task dependency graph, start and manage tasks given their
     priority and weight.
     """
+    from awx.main.tasks import handle_work_error, handle_work_success
+
     leaf_nodes = graph.get_leaf_nodes()
     running_nodes = filter(lambda x: x['node_object'].status == 'running', leaf_nodes)
     running_impact = sum([t['node_object'].task_impact for t in running_nodes])
@@ -190,33 +202,57 @@ def process_graph(graph, task_capacity):
             node_dependencies = graph.get_dependents(node_obj)
             # Allow other tasks to continue if a job fails, even if they are
             # other jobs.
-            if graph.get_node_type(node_obj) == 'job':
+
+            node_type = graph.get_node_type(node_obj)
+            if node_type == 'job':
+                # clear dependencies because a job can block (not necessarily 
+                # depend) on other jobs that share the same job template
                 node_dependencies = []
+
+            # Make the workflow_job look like it's started by setting status to
+            # running, but don't make a celery Task for it.
+            # Introduce jobs from the workflow so they are candidates to run.
+            # Call process_graph() again to allow choosing for run, the
+            # created candidate jobs.
+            elif node_type == 'workflow_job':
+                node_obj.start()
+                spawn_workflow_graph_jobs([node_obj])
+                return process_graph(graph, task_capacity)
+            
             dependent_nodes = [{'type': graph.get_node_type(node_obj), 'id': node_obj.id}] + \
                               [{'type': graph.get_node_type(n['node_object']),
                                 'id': n['node_object'].id} for n in node_dependencies]
             error_handler = handle_work_error.s(subtasks=dependent_nodes)
             success_handler = handle_work_success.s(task_actual={'type': graph.get_node_type(node_obj),
                                                                  'id': node_obj.id})
-            start_status = node_obj.start(error_callback=error_handler, success_callback=success_handler)
-            if not start_status:
-                node_obj.status = 'failed'
-                if node_obj.job_explanation:
-                    node_obj.job_explanation += ' '
-                node_obj.job_explanation += 'Task failed pre-start check.'
-                node_obj.save()
-                continue
+            with transaction.atomic():
+                start_status = node_obj.start(error_callback=error_handler, success_callback=success_handler)
+                if not start_status:
+                    node_obj.status = 'failed'
+                    if node_obj.job_explanation:
+                        node_obj.job_explanation += ' '
+                    node_obj.job_explanation += 'Task failed pre-start check.'
+                    node_obj.save()
+                    continue
             remaining_volume -= impact
             running_impact += impact
             logger.info('Started Node: %s (capacity hit: %s) '
                         'Remaining Capacity: %s' %
                         (str(node_obj), str(impact), str(remaining_volume)))
 
-
-
 def schedule():
+    lockfile = open("/tmp/tower_scheduler.lock", "w")
+    fcntl.lockf(lockfile, fcntl.LOCK_EX)
+
     task_capacity = get_system_task_capacity()
+
+    workflow_jobs = get_running_workflow_jobs()
+    process_finished_workflow_jobs(workflow_jobs)
+    spawn_workflow_graph_jobs(workflow_jobs)
+
     graph = rebuild_graph()
     if graph:
         process_graph(graph, task_capacity)
+
+    fcntl.lockf(lockfile, fcntl.LOCK_UN)
 

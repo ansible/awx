@@ -1665,21 +1665,30 @@ class RunSystemJob(BaseTask):
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
 
+'''
 class RunWorkflowJob(BaseTask):
     
     name = 'awx.main.tasks.run_workflow_job'
     model = WorkflowJob
 
     def run(self, pk, **kwargs):
-        print("I'm a running a workflow job")
-        '''
-        Run the job/task and capture its output.
-        '''
-        pass
+        #Run the job/task and capture its output.
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
         instance.socketio_emit_status("running")
 
-        # FIXME: Detect workflow run completion
+        # FIXME: Currently, the workflow job busy waits until the graph run is
+        # complete. Instead, the workflow job should return or never even run,
+        # because all of the "launch logic" can be done schedule().
+
+        # However, other aspects of our system depend on a 1-1 relationship 
+        # between a Job and a Celery Task.
+        # 
+        # * If we let the workflow job task (RunWorkflowJob.run()) complete
+        #   then how do we trigger the handle_work_error and 
+        #   handle_work_success subtasks?
+        #
+        # * How do we handle the recovery process? (i.e. there is an entry in 
+        #   the database but not in celery).
         while True:
             dag = WorkflowDAG(instance)
             if dag.is_workflow_done():
@@ -1689,4 +1698,4 @@ class RunWorkflowJob(BaseTask):
             time.sleep(1)
         instance.socketio_emit_status(instance.status)
         # TODO: Handle cancel
-
+'''
