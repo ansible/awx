@@ -868,9 +868,9 @@
       }
     },
     "caniuse-db": {
-      "version": "1.0.30000538",
+      "version": "1.0.30000539",
       "from": "caniuse-db@>=1.0.30000527 <2.0.0",
-      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000538.tgz"
+      "resolved": "https://registry.npmjs.org/caniuse-db/-/caniuse-db-1.0.30000539.tgz"
     },
     "caseless": {
       "version": "0.11.0",
@@ -2407,6 +2407,11 @@
       "version": "1.0.1",
       "from": "graceful-readlink@>=1.0.0",
       "resolved": "https://registry.npmjs.org/graceful-readlink/-/graceful-readlink-1.0.1.tgz"
+    },
+    "grunt-cli": {
+      "version": "1.2.0",
+      "from": "grunt-cli@>=1.2.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/grunt-cli/-/grunt-cli-1.2.0.tgz"
     },
     "grunt-known-options": {
       "version": "1.1.0",

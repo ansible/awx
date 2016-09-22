@@ -36,6 +36,7 @@
     "expose-loader": "^0.7.1",
     "grunt": "^1.0.1",
     "grunt-browser-sync": "^2.2.0",
+    "grunt-cli": "^1.2.0",
     "grunt-concurrent": "^2.3.0",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
