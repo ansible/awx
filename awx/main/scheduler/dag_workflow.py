@@ -1,4 +1,6 @@
-from dag_simple import SimpleDAG
+
+# AWX
+from awx.main.scheduler.dag_simple import SimpleDAG
 
 class WorkflowDAG(SimpleDAG):
     def __init__(self, workflow_job=None):
@@ -41,8 +43,6 @@ class WorkflowDAG(SimpleDAG):
             elif job.status in ['successful']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 nodes.extend(children_success)
-            else:
-                logger.warn("Incorrect graph structure")
         return [n['node_object'] for n in nodes_found]
 
     def is_workflow_done(self):
@@ -68,7 +68,5 @@ class WorkflowDAG(SimpleDAG):
             elif job.status in ['successful']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 nodes.extend(children_success)
-            else:
-                logger.warn("Incorrect graph structure")
         return True
 

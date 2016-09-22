@@ -31,9 +31,6 @@ except:
 # Pexpect
 import pexpect
 
-# Kombu
-from kombu import Connection, Exchange, Queue, Producer
-
 # Celery
 from celery import Task, task
 from celery.signals import celeryd_init
@@ -50,18 +47,18 @@ from django.contrib.auth.models import User
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
-from awx.main.queue import FifoQueue
 from awx.main.conf import tower_settings
 from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+from awx.main.scheduler.dag_workflow import WorkflowDAG
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
            'handle_work_success', 'update_inventory_computed_fields', 
            'send_notifications', 'run_administrative_checks', 
-           'run_workflow_job']
+           'RunJobLaunch']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -182,14 +179,6 @@ def tower_periodic_scheduler(self):
             new_unified_job.socketio_emit_status("failed")
         emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
 
-@task(queue='default')
-def notify_task_runner(metadata_dict):
-    """Add the given task into the Tower task manager's queue, to be consumed
-    by the task system.
-    """
-    queue = FifoQueue('tower_task_manager')
-    queue.push(metadata_dict)
-
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError("status_str must be either succeeded or failed")
@@ -206,17 +195,6 @@ def _send_notification_templates(instance, status_str):
                                      job_id=instance.id)
 
 
-def _send_job_complete_msg(instance):
-    connection = Connection(settings.BROKER_URL)
-    exchange = Exchange(settings.SCHEDULER_QUEUE, type='topic')
-    producer = Producer(connection)
-    producer.publish({ 'job_id': instance.id, 'msg_type': 'job_complete' },
-                     serializer='json',
-                     compression='bzip2',
-                     exchange=exchange,
-                     declare=[exchange],
-                     routing_key='scheduler.job.complete')
-
 @task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
     instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -225,7 +203,8 @@ def handle_work_success(self, result, task_actual):
 
     _send_notification_templates(instance, 'succeeded')
 
-    _send_job_complete_msg(instance)
+    from awx.main.scheduler.tasks import run_job_complete
+    run_job_complete.delay(instance.id)
 
 @task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
@@ -256,8 +235,14 @@ def handle_work_error(self, task_id, subtasks=None):
         if first_instance:
             _send_notification_templates(first_instance, 'failed')
     
+    # We only send 1 job complete message since all the job completion message
+    # handling does is trigger the scheduler. If we extend the functionality of
+    # what the job complete message handler does then we may want to send a
+    # completion event for each job here.
     if first_instance:
-        _send_job_complete_msg(first_instance)
+        from awx.main.scheduler.tasks import run_job_complete
+        run_job_complete.delay(first_instance.id)
+        pass
 
 @task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -322,10 +307,6 @@ class BaseTask(Task):
             else:
                 logger.error('Failed to update %s after %d retries.',
                              self.model._meta.object_name, _attempt)
-
-    def signal_finished(self, pk):
-        pass
-        # notify_task_runner(dict(complete=pk))
 
     def get_path_to(self, *args):
         '''
@@ -1690,7 +1671,7 @@ class RunWorkflowJob(BaseTask):
     model = WorkflowJob
 
     def run(self, pk, **kwargs):
-        from awx.main.management.commands.run_task_system import WorkflowDAG
+        print("I'm a running a workflow job")
         '''
         Run the job/task and capture its output.
         '''

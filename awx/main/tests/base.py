@@ -30,7 +30,7 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.management.commands.run_task_system import run_taskmanager
+from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings
@@ -653,18 +653,6 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
             self.assertFalse(job.result_traceback,
                              u'expected no traceback, got:\n%s' %
                              job.result_traceback)
-
-
-    def start_taskmanager(self, command_port):
-        self.start_redis()
-        self.taskmanager_process = Process(target=run_taskmanager,
-                                           args=(command_port,))
-        self.taskmanager_process.start()
-
-    def terminate_taskmanager(self):
-        if hasattr(self, 'taskmanager_process'):
-            self.taskmanager_process.terminate()
-        self.stop_redis()
 
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''

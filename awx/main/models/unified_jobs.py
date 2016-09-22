@@ -852,16 +852,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.socketio_emit_status("pending")
 
-        from kombu import Connection, Exchange, Producer
-        connection = Connection(settings.BROKER_URL)
-        exchange = Exchange(settings.SCHEDULER_QUEUE, type='topic')
-        producer = Producer(connection)
-        producer.publish({ 'msg_type': 'job_launch', 'job_id': self.id },
-                         serializer='json',
-                         compression='bzip2',
-                         exchange=exchange,
-                         declare=[exchange],
-                         routing_key='scheduler.job.launch')  
+        from awx.main.scheduler.tasks import run_job_launch
+        run_job_launch.delay(self.id)
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.

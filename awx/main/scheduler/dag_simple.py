@@ -1,5 +1,12 @@
 
-from awx.main.models import * # noqa
+from awx.main.models import (
+        Job,
+        AdHocCommand,
+        InventoryUpdate,
+        ProjectUpdate,
+        WorkflowJob,
+        SystemJob,
+)
 
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
