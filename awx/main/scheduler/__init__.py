@@ -241,18 +241,18 @@ def process_graph(graph, task_capacity):
                         (str(node_obj), str(impact), str(remaining_volume)))
 
 def schedule():
-    lockfile = open("/tmp/tower_scheduler.lock", "w")
-    fcntl.lockf(lockfile, fcntl.LOCK_EX)
+    with transaction.atomic():
+        # Lock
+        Instance.objects.select_for_update().all()[0]
 
-    task_capacity = get_system_task_capacity()
+        task_capacity = get_system_task_capacity()
 
-    workflow_jobs = get_running_workflow_jobs()
-    process_finished_workflow_jobs(workflow_jobs)
-    spawn_workflow_graph_jobs(workflow_jobs)
+        workflow_jobs = get_running_workflow_jobs()
+        process_finished_workflow_jobs(workflow_jobs)
+        spawn_workflow_graph_jobs(workflow_jobs)
 
-    graph = rebuild_graph()
-    if graph:
-        process_graph(graph, task_capacity)
+        graph = rebuild_graph()
+        if graph:
+            process_graph(graph, task_capacity)
 
-    fcntl.lockf(lockfile, fcntl.LOCK_UN)
-
+        # Unlock, due to transaction ending
