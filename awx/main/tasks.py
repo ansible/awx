@@ -682,8 +682,6 @@ class BaseTask(Task):
                 stdout_handle.close()
                 if getattr(self, 'timed_out', False):
                     job_explanation = "Job terminated due to timeout"
-                    with open(stdout_filename, 'a') as f:
-                        f.write("\x1b[1;31m%s\x1b[0m" % "JOB FAILS DUE TO TIMEOUT!")
             except Exception:
                 pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
