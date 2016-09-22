@@ -854,7 +854,7 @@ class TeamUsersList(BaseUsersList):
 class TeamRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
-    serializer_class = RoleSerializer
+    serializer_class = RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
     parent_model = Team
     relationship='member_role.children'
@@ -953,6 +953,7 @@ class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
+    capabilities_prefetch = ['admin', 'update']
 
     def get_queryset(self):
         projects_qs = Project.accessible_objects(self.request.user, 'read_role')
@@ -1151,6 +1152,7 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
+    capabilities_prefetch = ['admin']
     permission_classes = (UserPermission,)
 
     def post(self, request, *args, **kwargs):
@@ -1191,7 +1193,7 @@ class UserTeamsList(ListAPIView):
 class UserRolesList(SubListCreateAttachDetachAPIView):
 
     model = Role
-    serializer_class = RoleSerializer
+    serializer_class = RoleSerializerWithParentAccess
     metadata_class = RoleMetadata
     parent_model = User
     relationship='roles'
@@ -1511,6 +1513,7 @@ class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+    capabilities_prefetch = ['admin', 'adhoc']
 
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
@@ -1742,6 +1745,7 @@ class GroupList(ListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
+    capabilities_prefetch = ['inventory.admin', 'inventory.adhoc', 'inventory.update']
 
 '''
 Useful when you have a self-refering ManyToManyRelationship.
@@ -2210,6 +2214,10 @@ class JobTemplateList(ListCreateAPIView):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     always_allow_superuser = False
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['project.use', 'inventory.use', 'credential.use', 'cloud_credential.use', 'network_credential.use']}
+    ]
 
     def post(self, request, *args, **kwargs):
         ret = super(JobTemplateList, self).post(request, *args, **kwargs)

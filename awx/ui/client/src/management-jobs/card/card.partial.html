@@ -17,6 +17,7 @@
 				<div class="MgmtCards-actionItems">
 					<button class="MgmtCards-actionItem List-actionButton"
 						ng-click='chooseRunJob(card.id, card.name)'
+						ng-show='current_user.is_superuser'
 						data-placement="top" aw-tool-tip="Launch Management Job" data-original-title="" title="">
 						<i class="MgmtCards-actionItemIcon icon-launch"></i>
 					</button>
@@ -27,6 +28,7 @@
 					</button>
 					<button class="MgmtCards-actionItem List-actionButton"
 						ng-click='goToNotifications(card, card.id)'
+						ng-show='current_user.is_superuser'
 						data-placement="top" aw-tool-tip="Configure Notifications" data-original-title="" title="" ng-class="{'List-editButton--selected': activeCard === card.id && cardAction === 'notifications'}">
 						<i class="MgmtCards-actionItemIcon fa fa-bell-o"></i>
 					</button>

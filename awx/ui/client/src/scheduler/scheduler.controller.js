@@ -14,11 +14,11 @@
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait',
-    'Find', 'LoadSchedulesScope', 'GetChoices', '$q', '$state',
+    'Find', 'LoadSchedulesScope', 'GetChoices', '$q', '$state', 'rbacUiControlService',
     function ($scope, $compile, $location, $stateParams,
     SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
     GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices,
-    $q, $state) {
+    $q, $state, rbacUiControlService) {
         var schedList = _.cloneDeep(SchedulesList);
 
         ClearScope();
@@ -48,6 +48,14 @@ export default [
         }
         $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
             url += "schedules/";
+
+            $scope.canAdd = false;
+
+            rbacUiControlService.canAdd(url)
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
+
             schedList.well = true;
 
             // include name of item in listTitle

@@ -69,7 +69,8 @@ export default
                 ngClick: 'addSchedule()',
                 awToolTip: 'Add a new schedule',
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ADD',
+                ngShow: 'canAdd'
             }
         },
 
@@ -79,14 +80,23 @@ export default
                 ngClick: "editSchedule(schedule.id)",
                 icon: 'icon-edit',
                 awToolTip: 'Edit schedule',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                label: 'View',
+                ngClick: "editSchedule(schedule.id)",
+                awToolTip: 'View schedule',
+                dataPlacement: 'top',
+                ngShow: '!schedule.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteSchedule(schedule.id)",
                 icon: 'icon-trash',
                 awToolTip: 'Delete schedule',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
     });

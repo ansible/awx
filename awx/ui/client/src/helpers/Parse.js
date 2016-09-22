@@ -46,7 +46,7 @@ export default
                 function createField(onChange, onReady, fld) {
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
 
-                    scope[fld + 'codeMirror'] = AngularCodeMirror();
+                    scope[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
                     scope[fld + 'codeMirror'].addModes(global.$AnsibleConfig.variable_edit_modes);
                     scope[fld + 'codeMirror'].showTextArea({
                         scope: scope,

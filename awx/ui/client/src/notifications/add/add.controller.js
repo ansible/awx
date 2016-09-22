@@ -9,14 +9,23 @@ export default
         'NotificationsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
         'GenerateForm', 'SearchInit' , 'PaginateInit', 'LookUpInit',
         'OrganizationList', '$scope', '$state', 'CreateSelect2', 'GetChoices',
-        'NotificationsTypeChange', 'ParseTypeChange',
+        'NotificationsTypeChange', 'ParseTypeChange', 'Alert',
         function(
             $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
             NotificationsFormObject, ProcessErrors, GetBasePath, Empty,
             GenerateForm, SearchInit, PaginateInit, LookUpInit,
             OrganizationList, $scope, $state, CreateSelect2, GetChoices,
-            NotificationsTypeChange, ParseTypeChange
+            NotificationsTypeChange, ParseTypeChange, Alert
         ) {
+            Rest.setUrl(GetBasePath('projects'));
+            Rest.options()
+                .success(function(data) {
+                    if (!data.actions.POST) {
+                        $state.go("^");
+                        Alert('Permission Error', 'You do not have permission to add a notification template.', 'alert-info');
+                    }
+                });
+
             var generator = GenerateForm,
                 form = NotificationsFormObject,
                 url = GetBasePath('notification_templates');

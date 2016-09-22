@@ -26,14 +26,16 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    capitalize: false
+                    capitalize: false,
+                    ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 inventory_description: {
                     realName: 'description',
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
-                    editRequired: false
+                    editRequired: false,
+                    ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
                     label: 'Organization',
@@ -44,7 +46,8 @@ export default
                     awRequiredWhen: {
                         reqExpression: "organizationrequired",
                         init: "true"
-                    }
+                    },
+                    ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 variables: {
                     label: 'Variables',
@@ -63,17 +66,24 @@ export default
                         '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                     dataTitle: 'Inventory Variables',
                     dataPlacement: 'right',
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
                 }
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -94,7 +104,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

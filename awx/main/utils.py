@@ -33,7 +33,7 @@ logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'to_python_boolean',
+           'get_type_for_model', 'get_model_for_type', 'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps']
@@ -407,6 +407,72 @@ def get_model_for_type(type):
         ct_type = get_type_for_model(ct_model)
         if type == ct_type:
             return ct_model
+
+
+def cache_list_capabilities(page, prefetch_list, model, user):
+    '''
+    Given a `page` list of objects, the specified roles for the specified user
+    are save on each object in the list, using 1 query for each role type
+
+    Examples:
+    capabilities_prefetch = ['admin', 'execute']
+      --> prefetch the admin (edit) and execute (start) permissions for
+          items in list for current user
+    capabilities_prefetch = ['inventory.admin']
+      --> prefetch the related inventory FK permissions for current user,
+          and put it into the object's cache
+    capabilities_prefetch = [{'copy': ['inventory.admin', 'project.admin']}]
+      --> prefetch logical combination of admin permission to inventory AND
+          project, put into cache dictionary as "copy"
+    '''
+    from django.db.models import Q
+    page_ids = [obj.id for obj in page]
+    for obj in page:
+        obj.capabilities_cache = {}
+
+    for prefetch_entry in prefetch_list:
+
+        display_method = None
+        if type(prefetch_entry) is dict:
+            display_method = prefetch_entry.keys()[0]
+            paths = prefetch_entry[display_method]
+        else:
+            paths = prefetch_entry
+
+        if type(paths) is not list:
+            paths = [paths]
+
+        # Build the query for accessible_objects according the user & role(s)
+        qs_obj = None
+        for role_path in paths:
+            if '.' in role_path:
+                res_path = '__'.join(role_path.split('.')[:-1])
+                role_type = role_path.split('.')[-1]
+                if qs_obj is None:
+                    qs_obj = model.objects
+                parent_model = model._meta.get_field(res_path).related_model
+                kwargs = {'%s__in' % res_path: parent_model.accessible_objects(user, '%s_role' % role_type)}
+                qs_obj = qs_obj.filter(Q(**kwargs) | Q(**{'%s__isnull' % res_path: True}))
+            else:
+                role_type = role_path
+                qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+
+        if display_method is None:
+            # Role name translation to UI names for methods
+            display_method = role_type
+            if role_type == 'admin':
+                display_method = 'edit'
+            elif role_type in ['execute', 'update']:
+                display_method = 'start'
+
+        # Union that query with the list of items on page
+        ids_with_role = set(qs_obj.filter(pk__in=page_ids).values_list('pk', flat=True))
+
+        # Save data item-by-item
+        for obj in page:
+            obj.capabilities_cache[display_method] = False
+            if obj.pk in ids_with_role:
+                obj.capabilities_cache[display_method] = True
 
 
 def get_system_task_capacity():

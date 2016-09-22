@@ -17,7 +17,6 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     ParseVariableString, RelatedSearchInit, RelatedPaginateInit,
     Prompt, InitiatePlaybookRun, CreateDialog, deleteJobTemplate, $state,
     $filter) {
-
     ClearScope();
 
     // Inject dynamic view
@@ -32,6 +31,13 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     form.formLabelSize = null;
     form.formFieldSize = null;
     $scope.inventory_id = inventory_id;
+
+    $scope.$watch('invnentory_obj.summary_fields.user_capabilities.edit', function(val) {
+        if (val === false) {
+            $scope.canAdd = false;
+        }
+    });
+
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     generator.reset();

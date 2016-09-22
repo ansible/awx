@@ -11,12 +11,14 @@ import lodashAsPromised from './lodash-as-promised';
 import stringFilters from './string-filters/main';
 import truncatedText from './truncated-text.directive';
 import stateExtender from './stateExtender.provider';
+import rbacUiControl from './rbacUiControl';
 
 export default
 angular.module('shared', [listGenerator.name,
         pagination.name,
         stringFilters.name,
-        'ui.router'
+        'ui.router',
+        rbacUiControl.name
     ])
     .factory('lodashAsPromised', lodashAsPromised)
     .directive('truncatedText', truncatedText)

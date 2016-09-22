@@ -6,15 +6,20 @@
 
  export default
     ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ParseTypeChange', 'GenerateForm', 'inventoryData', 'LookUpInit',
-    'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
+    'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'rbacUiControlService',
     function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ParseTypeChange, GenerateForm, inventoryData, LookUpInit,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions){
+        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService){
         var generator = GenerateForm,
             form = GroupForm();
 
         // remove "type" field from search options
         CredentialList = _.cloneDeep(CredentialList);
         CredentialList.fields.kind.noSearch = true;
+
+        rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
 
         $scope.formCancel = function(){
             $state.go('^');

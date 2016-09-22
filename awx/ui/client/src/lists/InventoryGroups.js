@@ -143,7 +143,8 @@ export default
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: 'RUN COMMANDS',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: 'canAdhoc'
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
@@ -155,7 +156,8 @@ export default
                 ngClick: "createGroup()",
                 awToolTip: "Create a new group",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD GROUP'
+                buttonContent: '&#43; ADD GROUP',
+                ngShow: 'canAdd'
             }
         },
 
@@ -169,8 +171,8 @@ export default
                 ngClick: 'updateGroup(group)',
                 awToolTip: "{{ group.launch_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
-                ngShow: "group.status !== 'running' && group.status " +
-                    "!== 'pending' && group.status !== 'updating'",
+                ngShow: "(group.status !== 'running' && group.status " +
+                    "!== 'pending' && group.status !== 'updating') && group.summary_fields.user_capabilities.start",
                 ngClass: "group.launch_class",
                 dataPlacement: "top",
             },
@@ -180,8 +182,8 @@ export default
                 ngClick: "cancelUpdate(group.id)",
                 awToolTip: "Cancel sync process",
                 'class': 'red-txt',
-                ngShow: "group.status == 'running' || group.status == 'pending' " +
-                    "|| group.status == 'updating'",
+                ngShow: "(group.status == 'running' || group.status == 'pending' " +
+                    "|| group.status == 'updating') && group.summary_fields.user_capabilities.start",
                 dataPlacement: "top",
                 iconClass: "fa fa-minus-circle"
             },
@@ -189,7 +191,7 @@ export default
                 mode: 'all',
                 ngClick: "copyMoveGroup(group.id)",
                 awToolTip: 'Copy or move group',
-                ngShow: "group.id > 0",
+                ngShow: "group.id > 0 && group.summary_fields.user_capabilities.copy",
                 dataPlacement: "top"
             },
             schedule: {
@@ -198,21 +200,31 @@ export default
                 awToolTip: "{{ group.group_schedule_tooltip }}",
                 ngClass: "group.scm_type_class",
                 dataPlacement: 'top',
-                ngHide: "group.summary_fields.inventory_source.source === ''"
+                ngShow: "!(group.summary_fields.inventory_source.source === '') && group.summary_fields.user_capabilities.schedule"
             },
             edit: {
                 //label: 'Edit',
                 mode: 'all',
                 ngClick: "editGroup(group.id)",
                 awToolTip: 'Edit group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: "group.summary_fields.user_capabilities.edit"
+            },
+            view: {
+                //label: 'Edit',
+                mode: 'all',
+                ngClick: "editGroup(group.id)",
+                awToolTip: 'View group',
+                dataPlacement: "top",
+                ngShow: "!group.summary_fields.user_capabilities.edit"
             },
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
                 ngClick: "deleteGroup(group)",
                 awToolTip: 'Delete group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: "group.summary_fields.user_capabilities.delete"
             }
         }
     });

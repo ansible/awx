@@ -100,13 +100,14 @@ export default
                 ngClick: 'relaunchJob($event, completed_job.id)',
                 awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top',
-                ngHide: "completed_job.type == 'system_job' "
+                ngShow: "!completed_job.type == 'system_job' || completed_job.summary_fields.user_capabilities.start"
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'completed_job.summary_fields.user_capabilities.delete'
             }
         }
     });

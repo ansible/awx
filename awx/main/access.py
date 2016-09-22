@@ -116,6 +116,18 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
+def get_user_capabilities(user, instance, **kwargs):
+    '''
+    Returns a dictionary of capabilities the user has on the particular
+    instance.  *NOTE* This is not a direct mapping of can_* methods into this
+    dictionary, it is intended to munge some queries in a way that is
+    convenient for the user interface to consume and hide or show various
+    actions in the interface.
+    '''
+    for access_class in access_registry.get(type(instance), []):
+        return access_class(user).get_user_capabilities(instance, **kwargs)
+    return None
+
 def check_superuser(func):
     '''
     check_superuser is a decorator that provides a simple short circuit
@@ -206,6 +218,78 @@ class BaseAccess(object):
                 raise LicenseForbids("Feature %s is not enabled in the active license." % feature)
             elif "features" not in validation_info:
                 raise LicenseForbids("Features not found in active license.")
+
+    def get_user_capabilities(self, obj, method_list=[], parent_obj=None):
+        if obj is None:
+            return {}
+        user_capabilities = {}
+
+        # Custom ordering to loop through methods so we can reuse earlier calcs
+        for display_method in ['edit', 'delete', 'start', 'schedule', 'copy', 'adhoc', 'unattach']:
+            if display_method not in method_list:
+                continue
+
+            # Validation consistency checks
+            if display_method == 'copy' and isinstance(obj, JobTemplate):
+                validation_errors, resources_needed_to_start = obj.resource_validation_data()
+                if validation_errors:
+                    user_capabilities[display_method] = False
+                    continue
+            elif display_method == 'start' and isinstance(obj, Group):
+                if obj.inventory_source and not obj.inventory_source._can_update():
+                    user_capabilities[display_method] = False
+                    continue
+
+            # Grab the answer from the cache, if available
+            if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
+                user_capabilities[display_method] = obj.capabilities_cache[display_method]
+                continue
+
+            # Aliases for going form UI language to API language
+            if display_method == 'edit':
+                method = 'change'
+            elif display_method == 'copy':
+                method = 'add'
+            elif display_method == 'adhoc':
+                method = 'run_ad_hoc_commands'
+            else:
+                method = display_method
+
+            # Shortcuts in certain cases by deferring to earlier property
+            if display_method == 'schedule':
+                user_capabilities['schedule'] = user_capabilities['edit']
+                continue
+            elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
+                user_capabilities['delete'] = user_capabilities['edit']
+                continue
+            elif display_method == 'copy' and isinstance(obj, (Group, Host)):
+                user_capabilities['copy'] = user_capabilities['edit']
+                continue
+
+            # Preprocessing before the access method is called
+            data = {}
+            if method == 'add':
+                if isinstance(obj, JobTemplate):
+                    data['reference_obj'] = obj
+
+            # Compute permission
+            access_method = getattr(self, "can_%s" % method)
+            if method in ['change']: # 3 args
+                user_capabilities[display_method] = access_method(obj, data)
+            elif method in ['delete', 'start', 'run_ad_hoc_commands']: # 2 args
+                user_capabilities[display_method] = access_method(obj)
+            elif method in ['add']: # 2 args with data
+                user_capabilities[display_method] = access_method(data)
+            elif method in ['attach', 'unattach']: # parent/sub-object call
+                if type(parent_obj) == Team:
+                    relationship = 'parents'
+                    parent_obj = parent_obj.member_role
+                else:
+                    relationship = 'members'
+                user_capabilities[display_method] = access_method(
+                    obj, parent_obj, relationship, skip_sub_obj_read_check=True, data=data)
+
+        return user_capabilities
 
 
 class UserAccess(BaseAccess):
@@ -526,6 +610,12 @@ class GroupAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+    def can_start(self, obj):
+        # Used as another alias to inventory_source start access for user_capabilities
+        if obj and obj.inventory_source:
+            return self.user.can_access(InventorySource, 'start', obj.inventory_source)
+        return False
+
 class InventorySourceAccess(BaseAccess):
     '''
     I can see inventory sources whenever I can see their group or inventory.
@@ -593,6 +683,13 @@ class InventoryUpdateAccess(BaseAccess):
             return True
         # Inventory cascade deletes to inventory update, descends from org admin
         return self.user in obj.inventory_source.inventory.admin_role
+
+    def can_start(self, obj):
+        # For relaunching
+        if obj and obj.inventory_source:
+            access = InventorySourceAccess(self.user)
+            return access.can_start(obj.inventory_source)
+        return False
 
     @check_superuser
     def can_delete(self, obj):
@@ -815,6 +912,12 @@ class ProjectUpdateAccess(BaseAccess):
         # Project updates cascade delete with project, admin role descends from org admin
         return self.user in obj.project.admin_role
 
+    def can_start(self, obj):
+        # for relaunching
+        if obj and obj.project:
+            return self.user in obj.project.update_role
+        return False
+
     @check_superuser
     def can_delete(self, obj):
         return obj and self.user in obj.project.admin_role
@@ -855,7 +958,9 @@ class JobTemplateAccess(BaseAccess):
         Users who are able to create deploy jobs can also run normal and check (dry run) jobs.
         '''
         if not data:  # So the browseable API will work
-            return True
+            return (
+                Project.accessible_objects(self.user, 'use_role').exists() or
+                Inventory.accessible_objects(self.user, 'use_role').exists())
 
         # if reference_obj is provided, determine if it can be coppied
         reference_obj = data.pop('reference_obj', None)
@@ -1131,6 +1236,9 @@ class SystemJobAccess(BaseAccess):
     I can only see manage System Jobs if I'm a super user
     '''
     model = SystemJob
+
+    def can_start(self, obj):
+        return False # no relaunching of system jobs
 
 # TODO:
 class WorkflowJobTemplateNodeAccess(BaseAccess):
@@ -1855,8 +1963,13 @@ class RoleAccess(BaseAccess):
 
     @check_superuser
     def can_unattach(self, obj, sub_obj, relationship, data=None, skip_sub_obj_read_check=False):
-        if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents']:
-            if not check_user_access(self.user, sub_obj.__class__, 'read', sub_obj):
+        if not skip_sub_obj_read_check and relationship in ['members', 'member_role.parents', 'parents']:
+            # If we are unattaching a team Role, check the Team read access
+            if relationship == 'parents':
+                sub_obj_resource = sub_obj.content_object
+            else:
+                sub_obj_resource = sub_obj
+            if not check_user_access(self.user, sub_obj_resource.__class__, 'read', sub_obj_resource):
                 return False
 
         if isinstance(obj.content_object, ResourceMixin) and \

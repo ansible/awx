@@ -5,10 +5,18 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, rbacUiControlService, GetBasePath){
         var generator = GenerateForm,
             form = HostForm;
+
+        $scope.canAdd = false;
+
+        rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/hosts")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
+
         $scope.parseType = 'yaml';
         $scope.formCancel = function(){
             $state.go('^');

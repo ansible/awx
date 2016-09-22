@@ -5,12 +5,23 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
-     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter',
+     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'Rest', 'GetBasePath', 'rbacUiControlService',
     function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
-     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter){
+     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter, Rest, GetBasePath, rbacUiControlService){
+
         var list = InventoryHosts,
             view = generateList,
             pageSize = 20;
+
+        $scope.inventory_id = $stateParams.inventory_id;
+
+        $scope.canAdd = false;
+
+        rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/hosts")
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
+
         // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
         // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
         // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the

@@ -17,6 +17,7 @@ export default
             LookUpInit, OrganizationList, inventory_script,
             $scope, $state
         ) {
+
             var generator = GenerateForm,
                 id = inventory_script.id,
                 form = inventoryScriptsFormObject,
@@ -24,6 +25,13 @@ export default
                 url = GetBasePath('inventory_scripts');
 
             $scope.inventory_script = inventory_script;
+
+            $scope.$watch('inventory_script_obj.summary_fields.user_capabilities.edit', function(val) {
+                if (val === false) {
+                    $scope.canAdd = false;
+                }
+            });
+
             generator.inject(form, {
                     mode: 'edit' ,
                     scope:$scope,
