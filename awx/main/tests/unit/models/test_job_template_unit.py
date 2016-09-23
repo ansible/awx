@@ -50,3 +50,32 @@ def test_job_template_survey_password_redaction(job_template_with_survey_passwor
     """Tests the JobTemplate model's funciton to redact passwords from
     extra_vars - used when creating a new job"""
     assert job_template_with_survey_passwords_unit.survey_password_variables() == ['secret_key', 'SSN']
+
+def test_job_template_survey_variable_validation(job_template_factory):
+    objects = job_template_factory(
+        'survey_variable_validation',
+        organization='org1',
+        inventory='inventory1',
+        credential='cred1',
+        persisted=False,
+    )
+    obj = objects.job_template
+    obj.survey_spec = {
+        "description": "",
+        "spec": [
+            {
+                "required": True,
+                "min": 0,
+                "default": "5",
+                "max": 1024,
+                "question_description": "",
+                "choices": "",
+                "variable": "a",
+                "question_name": "Whosyourdaddy",
+                "type": "text"
+            }
+        ],
+        "name": ""
+    }
+    obj.survey_enabled = True
+    assert obj.survey_variable_validation({"a": 5}) == ["Value 5 for 'a' expected to be a string."]

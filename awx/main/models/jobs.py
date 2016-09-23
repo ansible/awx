@@ -340,6 +340,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 errors.append("'%s' value missing" % survey_element['variable'])
             elif survey_element['type'] in ["textarea", "text", "password"]:
                 if survey_element['variable'] in data:
+                    if type(data[survey_element['variable']]) not in (str, unicode):
+                        errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
+                                                                                      survey_element['variable']))
+                        continue
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
                         errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
@@ -348,6 +352,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
+                    if type(data[survey_element['variable']]) != int:
+                        errors.append("Value %s for '%s' expected to be an integer." % (data[survey_element['variable']],
+                                                                                        survey_element['variable']))
+                        continue
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
                        data[survey_element['variable']] < int(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
@@ -356,20 +364,18 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                        data[survey_element['variable']] > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-                    if type(data[survey_element['variable']]) != int:
-                        errors.append("Value %s for '%s' expected to be an integer." % (data[survey_element['variable']],
-                                                                                        survey_element['variable']))
             elif survey_element['type'] == 'float':
                 if survey_element['variable'] in data:
+                    if type(data[survey_element['variable']]) not in (float, int):
+                        errors.append("Value %s for '%s' expected to be a numeric type." % (data[survey_element['variable']],
+                                                                                            survey_element['variable']))
+                        continue
                     if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < float(survey_element['min']):
                         errors.append("'%s' value %s is too small (must be at least %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > float(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-                    if type(data[survey_element['variable']]) not in (float, int):
-                        errors.append("Value %s for '%s' expected to be a numeric type." % (data[survey_element['variable']],
-                                                                                            survey_element['variable']))
             elif survey_element['type'] == 'multiselect':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != list:
