@@ -8,7 +8,7 @@ import threading
 xmlsec_init_lock = threading.Lock()
 xmlsec_initialized = False
 
-import dm.xmlsec.binding
+import dm.xmlsec.binding # noqa
 original_xmlsec_initialize = dm.xmlsec.binding.initialize
 
 def xmlsec_initialize(*args, **kwargs):
