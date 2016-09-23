@@ -31,4 +31,4 @@ if not all([SOCIAL_AUTH_SAML_SP_ENTITY_ID, SOCIAL_AUTH_SAML_SP_PUBLIC_CERT,
     AUTHENTICATION_BACKENDS = [x for x in AUTHENTICATION_BACKENDS if x != 'awx.sso.backends.SAMLAuth']
 
 if not AUTH_BASIC_ENABLED:
-    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [x for x in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] if x != 'rest_framework.authentication.BasicAuthentication']
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [x for x in REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] if x != 'awx.api.authentication.LoggedBasicAuthentication']
