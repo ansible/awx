@@ -1122,8 +1122,10 @@ class SystemJobTemplateAccess(BaseAccess):
 
     model = SystemJobTemplate
 
+    @check_superuser
     def can_start(self, obj):
-        return self.can_read(obj)
+        '''Only a superuser can start a job from a SystemJobTemplate'''
+        return False
 
 class SystemJobAccess(BaseAccess):
     '''
