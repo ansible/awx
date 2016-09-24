@@ -597,9 +597,6 @@ class BaseTask(Task):
             else:
                 os.kill(job.pid, signal.SIGTERM)
             time.sleep(3)
-            if is_cancel:
-                return True
-            self.timed_out = True
         except OSError:
             keyword = 'cancel' if is_cancel else 'timeout'
             logger.warn("Attempted to %s already finished job, ignoring" % keyword)

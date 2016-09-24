@@ -2062,7 +2062,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         model = AdHocCommand
         fields = ('*', 'job_type', 'inventory', 'limit', 'credential',
                   'module_name', 'module_args', 'forks', 'verbosity', 'extra_vars',
-                  'become_enabled', 'timeout', '-unified_job_template', '-description')
+                  'become_enabled', '-unified_job_template', '-description')
         extra_kwargs = {
             'name': {
                 'read_only': True,
@@ -2160,7 +2160,7 @@ class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
         model = SystemJob
-        fields = ('*', 'system_job_template', 'job_type', 'extra_vars', 'timeout')
+        fields = ('*', 'system_job_template', 'job_type', 'extra_vars')
 
     def get_related(self, obj):
         res = super(SystemJobSerializer, self).get_related(obj)

@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='adhoccommand',
-            name='timeout',
-            field=models.PositiveIntegerField(default=0, blank=True),
-        ),
-        migrations.AddField(
             model_name='inventorysource',
             name='timeout',
             field=models.PositiveIntegerField(default=0, blank=True),
@@ -43,16 +38,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='projectupdate',
-            name='timeout',
-            field=models.PositiveIntegerField(default=0, blank=True),
-        ),
-        migrations.AddField(
-            model_name='systemjob',
-            name='timeout',
-            field=models.PositiveIntegerField(default=0, blank=True),
-        ),
-        migrations.AddField(
-            model_name='systemjobtemplate',
             name='timeout',
             field=models.PositiveIntegerField(default=0, blank=True),
         ),

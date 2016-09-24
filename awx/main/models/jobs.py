@@ -1336,10 +1336,6 @@ class SystemJobOptions(BaseModel):
         default='',
     )
 
-    timeout = models.PositiveIntegerField(
-        blank=True, 
-        default=0,
-    )
 
 class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
@@ -1352,7 +1348,7 @@ class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type', 'extra_vars', 'timeout']
+        return ['name', 'description', 'job_type', 'extra_vars']
 
     def get_absolute_url(self):
         return reverse('api:system_job_template_detail', args=(self.pk,))
