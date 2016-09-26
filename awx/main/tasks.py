@@ -621,6 +621,7 @@ class BaseTask(Task):
         status, rc, tb = 'error', None, ''
         output_replacements = []
         runtime_flags = {}
+        extra_update_fields = {}
         try:
             self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
@@ -643,7 +644,6 @@ class BaseTask(Task):
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
-            job_explanation = ""
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
@@ -685,12 +685,12 @@ class BaseTask(Task):
                 stdout_handle.flush()
                 stdout_handle.close()
                 if runtime_flags.get('timed_out', False):
-                    job_explanation = "Job terminated due to timeout"
+                    extra_update_fields['job_explanation'] = "Job terminated due to timeout"
             except Exception:
                 pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
-                                     job_explanation=job_explanation)
+                                     **extra_update_fields)
         self.post_run_hook(instance, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
