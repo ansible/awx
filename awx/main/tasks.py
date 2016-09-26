@@ -501,7 +501,7 @@ class BaseTask(Task):
         return OrderedDict()
 
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
-                    output_replacements=None, runtime_flags={}):
+                    output_replacements=None, extra_update_fields={}):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -517,7 +517,7 @@ class BaseTask(Task):
         if pexpect_sleep is not None:
             logger.info("Suspending Job Execution for QA Work")
             time.sleep(pexpect_sleep)
-        global_timeout = getattr(settings, 'DEFAULT_TIMEOUT', {})
+        global_timeout = getattr(settings, 'DEFAULT_JOB_TIMEOUTS', {})
         cls_name = instance.__class__.__name__
         if cls_name in global_timeout:
             local_timeout = getattr(instance, 'timeout', 0)
@@ -526,8 +526,8 @@ class BaseTask(Task):
             job_timeout = 0
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
-        runtime_flags['canceled'] = False
-        runtime_flags['timed_out'] = False
+        canceled = False
+        timed_out = False
         last_stdout_update = time.time()
         idle_timeout = self.get_idle_timeout()
         expect_list = []
@@ -550,17 +550,18 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                runtime_flags['canceled'] = True
+                canceled = True
             elif job_timeout != 0 and (time.time() - job_start) > job_timeout:
-                runtime_flags['timed_out'] = True
-            if any(list(runtime_flags.values())):
-                self._handle_termination(instance, child, is_cancel=runtime_flags['canceled'])
+                timed_out = True
+                extra_update_fields['job_explanation'] = "Job terminated due to timeout"
+            if canceled or timed_out:
+                self._handle_termination(instance, child, is_cancel=canceled)
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
-                runtime_flags['canceled'] = True
-        if runtime_flags['canceled']:
+                canceled = True
+        if canceled:
             return 'canceled', child.exitstatus
-        elif child.exitstatus == 0 and not runtime_flags['timed_out']:
+        elif child.exitstatus == 0 and not timed_out:
             return 'successful', child.exitstatus
         else:
             return 'failed', child.exitstatus
@@ -620,7 +621,6 @@ class BaseTask(Task):
         instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
-        runtime_flags = {}
         extra_update_fields = {}
         try:
             self.pre_run_hook(instance, **kwargs)
@@ -666,7 +666,7 @@ class BaseTask(Task):
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
             status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle,
-                                          runtime_flags=runtime_flags)
+                                          extra_update_fields=extra_update_fields)
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
@@ -684,8 +684,6 @@ class BaseTask(Task):
             try:
                 stdout_handle.flush()
                 stdout_handle.close()
-                if runtime_flags.get('timed_out', False):
-                    extra_update_fields['job_explanation'] = "Job terminated due to timeout"
             except Exception:
                 pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
