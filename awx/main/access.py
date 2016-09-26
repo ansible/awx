@@ -1524,6 +1524,10 @@ class WorkflowJobAccess(BaseAccess):
             return self.user.is_superuser
         return self.user in obj.workflow_job_template.admin_role
 
+    # TODO: add support for relaunching workflow jobs
+    def can_start(self, obj):
+        return False
+
     def can_cancel(self, obj):
         if not obj.can_cancel:
             return False

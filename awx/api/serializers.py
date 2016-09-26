@@ -2184,6 +2184,8 @@ class SystemJobCancelSerializer(SystemJobSerializer):
         fields = ('can_cancel',)
 
 class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
+    show_capabilities = ['start', 'edit', 'delete']
+
     class Meta:
         model = WorkflowJobTemplate
         fields = ('*', 'extra_vars', 'organization')
