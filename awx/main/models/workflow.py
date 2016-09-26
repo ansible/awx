@@ -278,18 +278,18 @@ class WorkflowJobInheritNodesMixin(object):
                 unified_job_template=old_node.unified_job_template,
             )
             ujt_obj = old_node.unified_job_template
-            if ujt_obj:
+            if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
                 ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
                 if ask_for_vars_dict['inventory'] and old_node.inventory:
                     kwargs['inventory'] = old_node.inventory
                 if ask_for_vars_dict['credential'] and old_node.credential:
                     kwargs['credential'] = old_node.credential
+                new_char_prompts = {}
                 for fd in CHAR_PROMPTS_LIST:
-                    new_char_prompts = {}
                     if ask_for_vars_dict[fd] and old_node.char_prompts.get(fd, None):
                         new_char_prompts[fd] = old_node.char_prompts[fd]
-                    if new_char_prompts:
-                        kwargs['char_prompts'] = new_char_prompts
+                if new_char_prompts:
+                    kwargs['char_prompts'] = new_char_prompts
             new_node_list.append(WorkflowJobNode.objects.create(**kwargs))
         return new_node_list
 
