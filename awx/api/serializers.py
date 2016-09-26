@@ -1585,7 +1585,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
-            except:
+            except AttributeError:
                 pass
             if role.content_type is not None:
                 role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
