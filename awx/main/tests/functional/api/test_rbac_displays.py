@@ -221,6 +221,12 @@ class TestAccessListCapabilities:
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
+    def test_user_access_list_direct_access_capability(self, rando, get):
+        "When a user views their own access list, they can not unattach their admin role"
+        response = get(reverse('api:user_access_list', args=(rando.id,)), rando)
+        direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
+        assert not direct_access_list[0]['role']['user_capabilities']['unattach']
+
 
 @pytest.mark.django_db
 def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_method, get):
