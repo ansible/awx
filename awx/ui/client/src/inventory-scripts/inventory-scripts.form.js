@@ -24,13 +24,15 @@ export default function() {
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false
+                capitalize: false,
+                ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
                 label: 'Organization',
@@ -41,7 +43,8 @@ export default function() {
                 },
                 sourceModel: 'organization',
                 sourceField: 'name',
-                ngClick: 'lookUpOrganization()'
+                ngClick: 'lookUpOrganization()',
+                ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             script: {
                 label: 'Custom Script',
@@ -51,7 +54,7 @@ export default function() {
                 addRequired: true,
                 editRequired: true,
                 awDropFile: true,
-                ngDisabled: '!canEdit',
+                ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)',
                 rows: 10,
                 awPopOver: "<p>Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. " +
                                     "<br><br> Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python</p>",
@@ -64,10 +67,16 @@ export default function() {
         buttons: { //for now always generates <button> tags
             cancel: {
                 ngClick: 'formCancel()',
+                ngShow: '(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            close: {
+                ngClick: 'formCancel()',
+                ngShow: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
-                ngDisabled: 'custom_inventory_form.$pristine || custom_inventory_form.$invalid || !canEdit' //Disable when $pristine or $invalid, optional
+                ngDisabled: 'custom_inventory_form.$pristine || custom_inventory_form.$invalid', //Disable when $pristine or $invalid, optional
+                ngShow: '(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             }
         }
     };

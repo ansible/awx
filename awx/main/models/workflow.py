@@ -177,7 +177,6 @@ class WorkflowJobNode(WorkflowNodeBase):
         # TODO: merge artifacts, add ancestor_artifacts to kwargs
         if extra_vars:
             data['extra_vars'] = extra_vars
-        print ' job KV data: ' + str(data)
         return data
 
 class WorkflowJobOptions(BaseModel):

@@ -235,6 +235,13 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
     def get_queryset(self):
         return self.request.user.get_queryset(self.model)
 
+    def paginate_queryset(self, queryset):
+        page = super(ListAPIView, self).paginate_queryset(queryset)
+        # Queries RBAC info & stores into list objects
+        if hasattr(self, 'capabilities_prefetch') and page is not None:
+            cache_list_capabilities(page, self.capabilities_prefetch, self.model, self.request.user)
+        return page
+
     def get_description_context(self):
         opts = self.model._meta
         if 'username' in opts.get_all_field_names():

@@ -134,3 +134,28 @@ class TestWorkflowAccessMethods:
             with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
                 assert access.can_add({'organization': 1})
 
+
+@pytest.mark.django_db
+def test_user_capabilities_method():
+    """Unit test to verify that the user_capabilities method will defer
+    to the appropriate sub-class methods of the access classes.
+    Note that normal output is True/False, but a string is returned
+    in these tests to establish uniqueness.
+    """
+
+    class FooAccess(BaseAccess):
+        def can_change(self, obj, data):
+            return 'bar'
+
+        def can_add(self, data):
+            return 'foobar'
+
+    user = User(username='auser')
+    foo_access = FooAccess(user)
+    foo = object()
+    foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
+    assert foo_capabilities == {
+        'edit': 'bar',
+        'copy': 'foobar'
+    }
+

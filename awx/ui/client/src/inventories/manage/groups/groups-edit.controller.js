@@ -18,6 +18,12 @@
         CredentialList = _.cloneDeep(CredentialList);
         CredentialList.fields.kind.noSearch = true;
 
+        $scope.$watch('group_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
         $scope.formCancel = function(){
             $state.go('^');
         };
@@ -256,6 +262,7 @@
                 $scope.credential_name = inventorySourceData.summary_fields.credential.name;
             }
             $scope = angular.extend($scope, groupData);
+            $scope.group_obj = groupData;
 
             // instantiate lookup fields
             if (inventorySourceData.source !== 'custom'){

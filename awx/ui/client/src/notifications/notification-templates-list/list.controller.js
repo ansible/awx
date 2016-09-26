@@ -8,12 +8,12 @@ export default
     [   '$rootScope','Wait', 'generateList', 'NotificationTemplatesList',
         'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' ,
         'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
-        'ngToast', '$compile', '$filter',
+        'ngToast', '$compile', '$filter', 'rbacUiControlService',
         function(
             $rootScope,Wait, GenerateList, NotificationTemplatesList,
             GetBasePath, SearchInit, PaginateInit, Rest,
             ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
-            $compile, $filter) {
+            $compile, $filter, rbacUiControlService) {
             var scope = $rootScope.$new(),
                 defaultUrl = GetBasePath('notification_templates'),
                 list = NotificationTemplatesList,
@@ -23,6 +23,13 @@ export default
                 mode: 'edit',
                 scope: scope
             });
+
+            scope.canAdd = false;
+
+            rbacUiControlService.canAdd("notification_templates")
+                .then(function(canAdd) {
+                    scope.canAdd = canAdd;
+                });
 
             scope.removePostRefresh = scope.$on('PostRefresh', function () {
                 Wait('stop');

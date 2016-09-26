@@ -27,14 +27,16 @@ export default
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
-                    column: 1
+                    column: 1,
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
-                    column: 1
+                    column: 1,
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 job_type: {
                     label: 'Job Type',
@@ -56,7 +58,8 @@ export default
                         variable: 'ask_job_type_on_launch',
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 inventory: {
                     label: 'Inventory',
@@ -78,7 +81,8 @@ export default
                         variable: 'ask_inventory_on_launch',
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 project: {
                     label: 'Project',
@@ -100,12 +104,13 @@ export default
                     dataTitle: 'Project',
                     dataPlacement: 'right',
                     dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 playbook: {
                     label: 'Playbook',
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "job_type.value === 'scan' && project_name === 'Default'",
+                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAdd)",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
@@ -138,7 +143,8 @@ export default
                     subCheckbox: {
                         variable: 'ask_credential_on_launch',
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 cloud_credential: {
                     label: 'Cloud Credential',
@@ -153,7 +159,8 @@ export default
                         "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.</p>",
                     dataTitle: 'Cloud Credential',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 network_credential: {
                     label: 'Network Credential',
@@ -167,7 +174,8 @@ export default
                     awPopOver: "<p>Network credentials are used by Ansible networking modules to connect to and manage networking devices.</p>",
                     dataTitle: 'Network Credential',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 forks: {
                     label: 'Forks',
@@ -186,7 +194,8 @@ export default
                         ' target=\"_blank\">ansible configuration file</a>.</p>',
                     dataTitle: 'Forks',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
                 },
                 limit: {
                     label: 'Limit',
@@ -203,7 +212,8 @@ export default
                     subCheckbox: {
                         variable: 'ask_limit_on_launch',
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 verbosity: {
                     label: 'Verbosity',
@@ -216,7 +226,8 @@ export default
                     awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
                     dataTitle: 'Verbosity',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 job_tags: {
                     label: 'Job Tags',
@@ -235,7 +246,8 @@ export default
                     subCheckbox: {
                         variable: 'ask_tags_on_launch',
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 skip_tags: {
                     label: 'Skip Tags',
@@ -254,7 +266,8 @@ export default
                     subCheckbox: {
                         variable: 'ask_skip_tags_on_launch',
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 checkbox_group: {
                     label: 'Options',
@@ -270,7 +283,8 @@ export default
                         dataPlacement: 'right',
                         dataTitle: 'Become Privilege Escalation',
                         dataContainer: "body",
-                        labelClass: 'stack-inline'
+                        labelClass: 'stack-inline',
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }, {
                         name: 'allow_callbacks',
                         label: 'Allow Provisioning Callbacks',
@@ -284,7 +298,8 @@ export default
                         dataPlacement: 'right',
                         dataTitle: 'Allow Provisioning Callbacks',
                         dataContainer: "body",
-                        labelClass: 'stack-inline'
+                        labelClass: 'stack-inline',
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }]
                 },
                 callback_url: {
@@ -299,7 +314,8 @@ export default
                     awPopOverWatch: "callback_help",
                     dataPlacement: 'top',
                     dataTitle: 'Provisioning Callback URL',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 host_config_key: {
                     label: 'Host Config Key',
@@ -312,7 +328,8 @@ export default
                     awPopOverWatch: "callback_help",
                     dataPlacement: 'right',
                     dataTitle: "Host Config Key",
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 labels: {
                     label: 'Labels',
@@ -325,7 +342,8 @@ export default
                     dataTitle: 'Labels',
                     dataPlacement: 'right',
                     awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 variables: {
                     label: 'Extra Variables',
@@ -348,14 +366,15 @@ export default
                     subCheckbox: {
                         variable: 'ask_variables_on_launch',
                         text: 'Prompt on launch'
-                    }
+                    },
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists',
+                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
                     awFeature: 'surveys',
                     awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top'
@@ -363,14 +382,25 @@ export default
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists'
+                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                view_survey: {
+                    ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
+                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "job_templates_form.$invalid || can_edit!==true"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -394,7 +424,8 @@ export default
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ADD',
+                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

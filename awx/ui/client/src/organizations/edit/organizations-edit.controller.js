@@ -25,6 +25,12 @@ export default ['$scope', '$rootScope', '$compile', '$location',
             id = $stateParams.organization_id,
             relatedSets = {};
 
+        $scope.$watch('organization_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
         $scope.$parent.activeMode = 'edit';
 
         $scope.$parent.activeCard = parseInt(id);

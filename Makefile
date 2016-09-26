@@ -298,12 +298,10 @@ requirements_tower_dev:
 # Install third-party requirements needed for running unittests in jenkins
 requirements_jenkins:
 	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -Ir requirements/requirements_jenkins.txt; \
+		. $(VENV_BASE)/tower/bin/activate && pip install -Ir requirements/requirements_jenkins.txt; \
 	else \
 		pip install -Ir requirements/requirements_jenkins.txt; \
-	fi && \
-	$(NPM_BIN) install csslint
+	fi
 
 requirements: requirements_ansible requirements_tower
 
@@ -317,8 +315,8 @@ develop:
 	    pip uninstall -y awx; \
 	    $(PYTHON) setup.py develop; \
 	else \
-	    sudo pip uninstall -y awx; \
-	    sudo $(PYTHON) setup.py develop; \
+	    pip uninstall -y awx; \
+	    $(PYTHON) setup.py develop; \
 	fi
 
 version_file:
@@ -448,7 +446,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS=awx/main/tests
+TEST_DIRS ?= awx/main/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \

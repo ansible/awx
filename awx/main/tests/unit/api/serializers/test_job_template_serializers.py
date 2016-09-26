@@ -6,9 +6,13 @@ import mock
 from awx.api.serializers import (
     JobTemplateSerializer,
 )
+from awx.api.views import JobTemplateDetail
 from awx.main.models import (
+    Role,
+    User,
     Job,
 )
+from rest_framework.test import APIRequestFactory
 
 #DRF
 from rest_framework import serializers
@@ -77,21 +81,33 @@ class TestJobTemplateSerializerGetSummaryFields():
         summary = get_summary_fields_mock_and_run(JobTemplateSerializer, job_template)
         assert 'survey' not in summary
 
-    @pytest.mark.skip(reason="RBAC needs to land")
-    def test_can_copy_true(self, mocker, job_template):
-        pass
+    def test_copy_edit_standard(self, mocker, job_template_factory):
+        """Verify that the exact output of the access.py methods
+        are put into the serializer user_capabilities"""
 
-    @pytest.mark.skip(reason="RBAC needs to land")
-    def test_can_copy_false(self, mocker, job_template):
-        pass
+        jt_obj = job_template_factory('testJT', project='proj1', persisted=False).job_template
+        jt_obj.id = 5
+        jt_obj.admin_role = Role(id=9, role_field='admin_role')
+        jt_obj.execute_role = Role(id=8, role_field='execute_role')
+        jt_obj.read_role = Role(id=7, role_field='execute_role')
+        user = User(username="auser")
+        serializer = JobTemplateSerializer(job_template)
+        serializer.show_capabilities = ['copy', 'edit']
+        serializer._summary_field_labels = lambda self: []
+        serializer._recent_jobs = lambda self: []
+        request = APIRequestFactory().get('/api/v1/job_templates/42/')
+        request.user = user
+        view = JobTemplateDetail()
+        view.request = request
+        serializer.context['view'] = view
 
-    @pytest.mark.skip(reason="RBAC needs to land")
-    def test_can_edit_true(self, mocker, job_template):
-        pass
+        with mocker.patch("awx.main.models.rbac.Role.get_description", return_value='Can eat pie'):
+            with mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar'):
+                with mocker.patch("awx.main.access.JobTemplateAccess.can_add", return_value='foo'):
+                    response = serializer.get_summary_fields(jt_obj)
 
-    @pytest.mark.skip(reason="RBAC needs to land")
-    def test_can_edit_false(self, mocker, job_template):
-        pass
+        assert response['user_capabilities']['copy'] == 'foo'
+        assert response['user_capabilities']['edit'] == 'foobar'
 
 class TestJobTemplateSerializerValidation(object):
 

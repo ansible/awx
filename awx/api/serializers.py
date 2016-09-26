@@ -37,6 +37,7 @@ from polymorphic import PolymorphicModel
 # AWX
 from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
+from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
 from awx.main.conf import tower_settings
@@ -345,6 +346,19 @@ class BaseSerializer(serializers.ModelSerializer):
                 }
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
+
+        # Advance display of RBAC capabilities
+        if hasattr(self, 'show_capabilities'):
+            view = self.context.get('view', None)
+            parent_obj = None
+            if view and hasattr(view, 'parent_model'):
+                parent_obj = view.get_parent_object()
+            if view and view.request and view.request.user:
+                user_capabilities = get_user_capabilities(
+                    view.request.user, obj, method_list=self.show_capabilities, parent_obj=parent_obj)
+                if user_capabilities:
+                    summary_fields['user_capabilities'] = user_capabilities
+
         return summary_fields
 
     def get_created(self, obj):
@@ -553,6 +567,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
 
 class UnifiedJobSerializer(BaseSerializer):
+    show_capabilities = ['start', 'delete']
 
     result_stdout = serializers.SerializerMethodField()
 
@@ -697,11 +712,12 @@ class UserSerializer(BaseSerializer):
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
     external_account = serializers.SerializerMethodField(help_text='Set if the account is managed by an external service')
     is_system_auditor = serializers.BooleanField(default=False)
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = User
         fields = ('*', '-name', '-description', '-modified',
-                  '-summary_fields', 'username', 'first_name', 'last_name',
+                  'username', 'first_name', 'last_name',
                   'email', 'is_superuser', 'is_system_auditor', 'password', 'ldap_dn', 'external_account')
 
     def to_representation(self, obj):
@@ -822,6 +838,7 @@ class UserSerializer(BaseSerializer):
 
 
 class OrganizationSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Organization
@@ -906,6 +923,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     status = serializers.ChoiceField(choices=Project.PROJECT_STATUS_CHOICES, read_only=True)
     last_update_failed = serializers.BooleanField(read_only=True)
     last_updated = serializers.DateTimeField(read_only=True)
+    show_capabilities = ['start', 'schedule', 'edit', 'delete']
 
     class Meta:
         model = Project
@@ -1014,6 +1032,7 @@ class BaseSerializerWithVariables(BaseSerializer):
 
 
 class InventorySerializer(BaseSerializerWithVariables):
+    show_capabilities = ['edit', 'delete', 'adhoc']
 
     class Meta:
         model = Inventory
@@ -1064,12 +1083,14 @@ class InventoryDetailSerializer(InventorySerializer):
 
 
 class InventoryScriptSerializer(InventorySerializer):
+    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         fields = ()
 
 
 class HostSerializer(BaseSerializerWithVariables):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Host
@@ -1180,6 +1201,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
 
 class GroupSerializer(BaseSerializerWithVariables):
+    show_capabilities = ['start', 'copy', 'schedule', 'edit', 'delete']
 
     class Meta:
         model = Group
@@ -1284,6 +1306,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 class CustomInventoryScriptSerializer(BaseSerializer):
 
     script = serializers.CharField(trim_whitespace=False)
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = CustomInventoryScript
@@ -1454,6 +1477,7 @@ class InventoryUpdateCancelSerializer(InventoryUpdateSerializer):
 
 
 class TeamSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Team
@@ -1522,8 +1546,12 @@ class RoleSerializer(BaseSerializer):
         return ret
 
 
+class RoleSerializerWithParentAccess(RoleSerializer):
+    show_capabilities = ['unattach']
+
 
 class ResourceAccessListElementSerializer(UserSerializer):
+    show_capabilities = []  # Clear fields from UserSerializer parent class
 
     def to_representation(self, user):
         '''
@@ -1539,18 +1567,25 @@ class ResourceAccessListElementSerializer(UserSerializer):
         ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
         object_id = self.context['view'].object_id
         obj = self.context['view'].resource_model.objects.get(pk=object_id)
+        if self.context['view'].request is not None:
+            requesting_user = self.context['view'].request.user
+        else:
+            requesting_user = None
 
         if 'summary_fields' not in ret:
             ret['summary_fields'] = {}
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
-            try:
+            if role.content_type is not None:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
-            except:
-                pass
+                role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                    Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
+            else:
+                # Singleton roles should not be managed from this view, as per copy/edit rework spec
+                role_dict['user_capabilities'] = {'unattach': False}
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
         def format_team_role_perm(team_role, permissive_role_ids):
@@ -1563,20 +1598,21 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     'team_id': team_role.object_id,
                     'team_name': team_role.content_object.name
                 }
-                try:
+                if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
                     role_dict['resource_type'] = role.content_type.name
                     role_dict['related'] = reverse_gfk(role.content_object)
-                except:
-                    pass
+                    role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
+                        Role, 'unattach', role, team_role, 'parents', data={}, skip_sub_obj_read_check=False)}
+                else:
+                    # Singleton roles should not be managed from this view, as per copy/edit rework spec
+                    role_dict['user_capabilities'] = {'unattach': False}
                 ret.append({ 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, team_role)})
             return ret
 
         team_content_type = ContentType.objects.get_for_model(Team)
         content_type = ContentType.objects.get_for_model(obj)
 
-
-        content_type = ContentType.objects.get_for_model(obj)
         direct_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('id', flat=True)
         all_permissive_role_ids = Role.objects.filter(content_type=content_type, object_id=obj.id).values_list('ancestors__id', flat=True)
 
@@ -1621,6 +1657,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
 
 class CredentialSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Credential
@@ -1825,6 +1862,7 @@ class JobOptionsSerializer(BaseSerializer):
 
 
 class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
+    show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
 
@@ -1860,21 +1898,6 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         d = super(JobTemplateSerializer, self).get_summary_fields(obj)
         if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
             d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
-        request = self.context.get('request', None)
-
-        # Check for conditions that would create a validation error if coppied
-        validation_errors, resources_needed_to_start = obj.resource_validation_data()
-
-        if request is None or request.user is None:
-            d['can_copy'] = False
-            d['can_edit'] = False
-        elif request.user.is_superuser:
-            d['can_copy'] = not validation_errors
-            d['can_edit'] = True
-        else:
-            d['can_copy'] = (not validation_errors) and request.user.can_access(JobTemplate, 'add', {"reference_obj": obj})
-            d['can_edit'] = request.user.can_access(JobTemplate, 'change', obj, {})
-
         d['recent_jobs'] = self._recent_jobs(obj)
         return d
 
@@ -2561,6 +2584,7 @@ class JobLaunchSerializer(BaseSerializer):
         return attrs
 
 class NotificationTemplateSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = NotificationTemplate
@@ -2674,6 +2698,7 @@ class LabelSerializer(BaseSerializer):
         return res
 
 class ScheduleSerializer(BaseSerializer):
+    show_capabilities = ['edit', 'delete']
 
     class Meta:
         model = Schedule

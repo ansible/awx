@@ -7,7 +7,7 @@ services:
       dockerfile: tools/docker-compose/unit-tests/Dockerfile
     environment:
       SWIG_FEATURES: "-cpperraswarn -includeall -I/usr/include/openssl"
-    command: ["make requirements_test test"]
-
+      TEST_DIRS: "awx/main/tests/unit"
+    command: ["make test"]
     volumes:
       - ../../../:/ansible-tower
