@@ -187,6 +187,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'channels',
     'polymorphic',
     'taggit',
     'social.apps.django_app.default',
