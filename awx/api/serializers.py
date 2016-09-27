@@ -2290,7 +2290,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
     def extract_char_prompts(self, data):
         char_prompts = {}
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
             if data.get(fd, None):
                 char_prompts[fd] = data[fd]
         return char_prompts

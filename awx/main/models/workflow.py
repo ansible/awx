@@ -27,7 +27,7 @@ import json
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
-CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']
+CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit']
 
 class WorkflowNodeBase(CreatedModifiedModel):
     class Meta:
@@ -173,7 +173,7 @@ class WorkflowJobNode(WorkflowNodeBase):
                     WJ_json_extra_vars = yaml.safe_load(self.workflow_job.extra_vars)
                 except yaml.YAMLError:
                     WJ_json_extra_vars = {}
-        extra_vars.update(WJ_json_extra_vars)
+            extra_vars.update(WJ_json_extra_vars)
         # TODO: merge artifacts, add ancestor_artifacts to kwargs
         if extra_vars:
             data['extra_vars'] = extra_vars

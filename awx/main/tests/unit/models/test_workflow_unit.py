@@ -1,7 +1,12 @@
 import pytest
 
 from awx.main.models.jobs import JobTemplate
-from awx.main.models.workflow import WorkflowJobTemplateNode, WorkflowJobInheritNodesMixin, WorkflowJobNode
+from awx.main.models.inventory import Inventory
+from awx.main.models.credential import Credential
+from awx.main.models.workflow import (
+    WorkflowJobTemplateNode, WorkflowJobInheritNodesMixin,
+    WorkflowJob, WorkflowJobNode
+)
 
 class TestWorkflowJobInheritNodesMixin():
     class TestCreateWorkflowJobNodes():
@@ -79,3 +84,37 @@ class TestWorkflowJobInheritNodesMixin():
                 job_nodes[i].success_nodes.add.assert_any_call(job_nodes[i + 1])
 
 
+class TestWorkflowJobHelperMethods:
+
+    @pytest.fixture
+    def workflow_job_unit(self):
+        return WorkflowJob(name='workflow', status='new')
+
+    @pytest.fixture
+    def workflow_job_node_unit(self, workflow_job_unit, job_template_factory):
+        # note: factory sets ask_inventory_on_launch to true when not provided
+        jt = job_template_factory(name='example-jt', persisted=False).job_template
+        return WorkflowJobNode(workflow_job=workflow_job_unit, unified_job_template=jt)
+
+    def test_null_kwargs(self, workflow_job_node_unit):
+        assert workflow_job_node_unit.get_job_kwargs() == {}
+
+    def test_inherit_workflow_job_extra_vars(self, workflow_job_node_unit):
+        workflow_job = workflow_job_node_unit.workflow_job
+        workflow_job.extra_vars = '{"a": 84}'
+        assert workflow_job_node_unit.get_job_kwargs() == {'extra_vars': {'a': 84}}
+
+    def test_char_prompts_and_res_node_prompts(self, workflow_job_node_unit):
+        barnyard_kwargs = dict(
+            job_type='scan',
+            job_tags='quack',
+            limit='duck',
+            skip_tags='oink'
+        )
+        workflow_job_node_unit.char_prompts = barnyard_kwargs
+        inv = Inventory(name='example-inv')
+        cred = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
+        workflow_job_node_unit.inventory = inv
+        workflow_job_node_unit.credential = cred
+        assert workflow_job_node_unit.get_job_kwargs() == dict(
+            inventory=inv, credential=cred, **barnyard_kwargs)
