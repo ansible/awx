@@ -85,9 +85,9 @@ class WorkflowNodeBase(CreatedModifiedModel):
     def prompts_dict(self):
         data = {}
         if self.inventory:
-            data['inventory'] = self.inventory
+            data['inventory'] = self.inventory.pk
         if self.credential:
-            data['credential'] = self.credential
+            data['credential'] = self.credential.pk
         for fd in CHAR_PROMPTS_LIST:
             if fd in self.char_prompts:
                 data[fd] = self.char_prompts[fd]
@@ -103,16 +103,20 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 return {'ignored': {'all': 'Can not use prompts on unified_job_template that is not type of job template'}}
             else:
                 return {}
+
+        accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
         ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
+
         ignored_dict = {}
         missing_dict = {}
-        for fd in prompts_dict:
-            if not ask_for_vars_dict[fd]:
-                ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
-        for fd in ask_for_vars_dict:
-            ujt_field = getattr(ujt_obj, fd)
-            if ujt_field is None and prompts_dict.get(fd, None) is None:
+        for fd in ignored_fields:
+            ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
+        scan_errors = ujt_obj._extra_job_type_errors(accepted_fields)
+        ignored_dict.update(scan_errors)
+        for fd in ['inventory', 'credential']:
+            if getattr(ujt_obj, fd) is None and not (ask_for_vars_dict.get(fd, False) and fd in prompts_dict):
                 missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
+
         data = {}
         if ignored_dict:
             data['ignored'] = ignored_dict
@@ -160,11 +164,11 @@ class WorkflowJobNode(WorkflowNodeBase):
         data = {}
         ujt_obj = self.unified_job_template
         if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
-            ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
-            prompts_dict = self.prompts_dict()
-            for fd in prompts_dict:
-                if ask_for_vars_dict.get(fd, False):
-                    data[fd] = prompts_dict[fd]
+            accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
+            for fd in ujt_obj._extra_job_type_errors(accepted_fields):
+                accepted_fields.pop(fd)
+            data.update(accepted_fields)
+            # TODO: decide what to do in the event of missing fields
         # process extra_vars
         extra_vars = {}
         if self.workflow_job and self.workflow_job.extra_vars:

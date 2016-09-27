@@ -102,7 +102,7 @@ def node_no_prompts(workflow_job_unit, job_template_factory):
 def project_unit():
     return Project(name='example-proj')
 
-example_prompts = dict(job_type='scan', job_tags='quack', limit='duck', skip_tags='oink')
+example_prompts = dict(job_type='check', job_tags='quack', limit='duck', skip_tags='oink')
 
 @pytest.fixture
 def node_with_prompts(node_no_prompts):
@@ -129,15 +129,15 @@ class TestWorkflowJobNodeJobKWARGS:
 
     def test_char_prompts_and_res_node_prompts(self, node_with_prompts):
         assert node_with_prompts.get_job_kwargs() == dict(
-            inventory=node_with_prompts.inventory,
-            credential=node_with_prompts.credential,
+            inventory=node_with_prompts.inventory.pk,
+            credential=node_with_prompts.credential.pk,
             **example_prompts)
 
     def test_reject_some_node_prompts(self, node_with_prompts):
         node_with_prompts.unified_job_template.ask_inventory_on_launch = False
         node_with_prompts.unified_job_template.ask_job_type_on_launch = False
-        expect_kwargs = dict(inventory=node_with_prompts.inventory,
-                             credential=node_with_prompts.credential,
+        expect_kwargs = dict(inventory=node_with_prompts.inventory.pk,
+                             credential=node_with_prompts.credential.pk,
                              **example_prompts)
         expect_kwargs.pop('inventory')
         expect_kwargs.pop('job_type')
@@ -153,7 +153,7 @@ class TestWorkflowWarnings:
     Tests of warnings that show user errors in the construction of a workflow
     """
 
-    def test_warn_project_node_no_prompts(self, node_no_prompts, project_unit):
+    def test_no_warn_project_node_no_prompts(self, node_no_prompts, project_unit):
         node_no_prompts.unified_job_template = project_unit
         assert node_no_prompts.get_prompts_warnings() == {}
 
@@ -162,12 +162,24 @@ class TestWorkflowWarnings:
         assert 'ignored' in node_with_prompts.get_prompts_warnings()
         assert 'all' in node_with_prompts.get_prompts_warnings()['ignored']
 
+    def test_no_warn_accept_all_prompts(self, node_with_prompts):
+        assert node_with_prompts.get_prompts_warnings() == {}
+
     def test_warn_reject_some_prompts(self, node_with_prompts):
         node_with_prompts.unified_job_template.ask_credential_on_launch = False
         node_with_prompts.unified_job_template.ask_job_type_on_launch = False
         assert 'ignored' in node_with_prompts.get_prompts_warnings()
         assert 'job_type' in node_with_prompts.get_prompts_warnings()['ignored']
         assert 'credential' in node_with_prompts.get_prompts_warnings()['ignored']
+        assert len(node_with_prompts.get_prompts_warnings()['ignored']) == 2
+
+    def test_warn_scan_errors_node_prompts(self, node_with_prompts):
+        node_with_prompts.unified_job_template.job_type = 'scan'
+        node_with_prompts.job_type = 'run'
+        node_with_prompts.inventory = Inventory(name='different-inventory', pk=23)
+        assert 'ignored' in node_with_prompts.get_prompts_warnings()
+        assert 'job_type' in node_with_prompts.get_prompts_warnings()['ignored']
+        assert 'inventory' in node_with_prompts.get_prompts_warnings()['ignored']
         assert len(node_with_prompts.get_prompts_warnings()['ignored']) == 2
 
     def test_warn_missing_fields(self, node_no_prompts):

@@ -2557,13 +2557,7 @@ class JobLaunchSerializer(BaseSerializer):
                 errors['variables_needed_to_start'] = validation_errors
 
         # Special prohibited cases for scan jobs
-        if 'job_type' in data and obj.ask_job_type_on_launch:
-            if ((obj.job_type == PERM_INVENTORY_SCAN and not data['job_type'] == PERM_INVENTORY_SCAN) or
-                    (data['job_type'] == PERM_INVENTORY_SCAN and not obj.job_type == PERM_INVENTORY_SCAN)):
-                errors['job_type'] = 'Can not override job_type to or from a scan job.'
-        if (obj.job_type == PERM_INVENTORY_SCAN and ('inventory' in data) and obj.ask_inventory_on_launch and
-                obj.inventory != data['inventory']):
-            errors['inventory'] = 'Inventory can not be changed at runtime for scan jobs.'
+        errors.update(obj._extra_job_type_errors(data))
 
         if errors:
             raise serializers.ValidationError(errors)
