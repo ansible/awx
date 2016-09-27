@@ -343,7 +343,7 @@ CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
-    Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#'),
+    Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
     # Projects use a fanout queue, this isn't super well supported
     Broadcast('projects'),
 )
