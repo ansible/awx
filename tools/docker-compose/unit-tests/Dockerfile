@@ -4,6 +4,7 @@ FROM centos
 RUN yum install -y epel-release
 
 RUN yum install -y \
+	bzip2 \
 	python-pip \
 	python-virtualenv \
 	make \
