@@ -98,9 +98,11 @@ class WorkflowNodeBase(CreatedModifiedModel):
         if ujt_obj is None:
             return {}
         prompts_dict = self.prompts_dict()
-        from awx.main.models import JobTemplate
-        if not isinstance(ujt_obj, JobTemplate):
-            return {'ignored': {'all': 'Can not use prompts on unified_job_template that is not type of job template'}}
+        if not hasattr(ujt_obj, '_ask_for_vars_dict'):
+            if prompts_dict:
+                return {'ignored': {'all': 'Can not use prompts on unified_job_template that is not type of job template'}}
+            else:
+                return {}
         ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
         ignored_dict = {}
         missing_dict = {}
@@ -113,9 +115,9 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
         data = {}
         if ignored_dict:
-            data.update(ignored_dict)
+            data['ignored'] = ignored_dict
         if missing_dict:
-            data.update(missing_dict)
+            data['missing'] = missing_dict
         return data
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
@@ -154,14 +156,15 @@ class WorkflowJobNode(WorkflowNodeBase):
         return reverse('api:workflow_job_node_detail', args=(self.pk,))
 
     def get_job_kwargs(self):
+        # reject/accept prompted fields
         data = {}
-        # rejecting/accepting prompting variables done with the node copy
-        if self.inventory:
-            data['inventory'] = self.inventory
-        if self.credential:
-            data['credential'] = self.credential
-        if self.char_prompts:
-            data.update(self.char_prompts)
+        ujt_obj = self.unified_job_template
+        if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
+            ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
+            prompts_dict = self.prompts_dict()
+            for fd in prompts_dict:
+                if ask_for_vars_dict.get(fd, False):
+                    data[fd] = prompts_dict[fd]
         # process extra_vars
         extra_vars = {}
         if self.workflow_job and self.workflow_job.extra_vars:
@@ -271,27 +274,11 @@ class WorkflowJobInheritNodesMixin(object):
     Create a WorkflowJobNode for each WorkflowJobTemplateNode
     '''
     def _create_workflow_job_nodes(self, old_nodes):
-        new_node_list = []
-        for old_node in old_nodes:
-            kwargs = dict(
-                workflow_job=self,
-                unified_job_template=old_node.unified_job_template,
-            )
-            ujt_obj = old_node.unified_job_template
-            if ujt_obj and hasattr(ujt_obj, '_ask_for_vars_dict'):
-                ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
-                if ask_for_vars_dict['inventory'] and old_node.inventory:
-                    kwargs['inventory'] = old_node.inventory
-                if ask_for_vars_dict['credential'] and old_node.credential:
-                    kwargs['credential'] = old_node.credential
-                new_char_prompts = {}
-                for fd in CHAR_PROMPTS_LIST:
-                    if ask_for_vars_dict[fd] and old_node.char_prompts.get(fd, None):
-                        new_char_prompts[fd] = old_node.char_prompts[fd]
-                if new_char_prompts:
-                    kwargs['char_prompts'] = new_char_prompts
-            new_node_list.append(WorkflowJobNode.objects.create(**kwargs))
-        return new_node_list
+        return [WorkflowJobNode.objects.create(
+            workflow_job=self, unified_job_template=old_node.unified_job_template,
+            inventory=old_node.inventory, credential=old_node.credential,
+            char_prompts=old_node.char_prompts
+        ) for old_node in old_nodes]
 
     def _map_workflow_job_nodes(self, old_nodes, new_nodes):
         node_ids_map = {}

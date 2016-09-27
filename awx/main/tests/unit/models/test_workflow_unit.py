@@ -1,8 +1,7 @@
 import pytest
 
 from awx.main.models.jobs import JobTemplate
-from awx.main.models.inventory import Inventory
-from awx.main.models.credential import Credential
+from awx.main.models import Inventory, Credential, Project
 from awx.main.models.workflow import (
     WorkflowJobTemplateNode, WorkflowJobInheritNodesMixin,
     WorkflowJob, WorkflowJobNode
@@ -25,8 +24,9 @@ class TestWorkflowJobInheritNodesMixin():
             mixin._create_workflow_job_nodes(job_template_nodes)
             
             for job_template_node in job_template_nodes:
-                workflow_job_node_create.assert_any_call(workflow_job=mixin, 
-                                                         unified_job_template=job_template_node.unified_job_template)
+                workflow_job_node_create.assert_any_call(
+                    workflow_job=mixin, unified_job_template=job_template_node.unified_job_template,
+                    credential=None, inventory=None, char_prompts={})
 
     class TestMapWorkflowJobNodes():
         @pytest.fixture
@@ -84,37 +84,95 @@ class TestWorkflowJobInheritNodesMixin():
                 job_nodes[i].success_nodes.add.assert_any_call(job_nodes[i + 1])
 
 
-class TestWorkflowJobHelperMethods:
+@pytest.fixture
+def workflow_job_unit():
+    return WorkflowJob(name='workflow', status='new')
 
-    @pytest.fixture
-    def workflow_job_unit(self):
-        return WorkflowJob(name='workflow', status='new')
+@pytest.fixture
+def node_no_prompts(workflow_job_unit, job_template_factory):
+    # note: factory sets ask_xxxx_on_launch to true for inventory & credential
+    jt = job_template_factory(name='example-jt', persisted=False).job_template
+    jt.ask_job_type_on_launch = True
+    jt.ask_skip_tags_on_launch = True
+    jt.ask_limit_on_launch = True
+    jt.ask_tags_on_launch = True
+    return WorkflowJobNode(workflow_job=workflow_job_unit, unified_job_template=jt)
 
-    @pytest.fixture
-    def workflow_job_node_unit(self, workflow_job_unit, job_template_factory):
-        # note: factory sets ask_inventory_on_launch to true when not provided
-        jt = job_template_factory(name='example-jt', persisted=False).job_template
-        return WorkflowJobNode(workflow_job=workflow_job_unit, unified_job_template=jt)
+@pytest.fixture
+def project_unit():
+    return Project(name='example-proj')
 
-    def test_null_kwargs(self, workflow_job_node_unit):
-        assert workflow_job_node_unit.get_job_kwargs() == {}
+example_prompts = dict(job_type='scan', job_tags='quack', limit='duck', skip_tags='oink')
 
-    def test_inherit_workflow_job_extra_vars(self, workflow_job_node_unit):
-        workflow_job = workflow_job_node_unit.workflow_job
+@pytest.fixture
+def node_with_prompts(node_no_prompts):
+    node_no_prompts.char_prompts = example_prompts
+    inv = Inventory(name='example-inv')
+    cred = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
+    node_no_prompts.inventory = inv
+    node_no_prompts.credential = cred
+    return node_no_prompts
+
+class TestWorkflowJobNodeJobKWARGS:
+    """
+    Tests for building the keyword arguments that go into creating and
+    launching a new job that corresponds to a workflow node.
+    """
+
+    def test_null_kwargs(self, node_no_prompts):
+        assert node_no_prompts.get_job_kwargs() == {}
+
+    def test_inherit_workflow_job_extra_vars(self, node_no_prompts):
+        workflow_job = node_no_prompts.workflow_job
         workflow_job.extra_vars = '{"a": 84}'
-        assert workflow_job_node_unit.get_job_kwargs() == {'extra_vars': {'a': 84}}
+        assert node_no_prompts.get_job_kwargs() == {'extra_vars': {'a': 84}}
 
-    def test_char_prompts_and_res_node_prompts(self, workflow_job_node_unit):
-        barnyard_kwargs = dict(
-            job_type='scan',
-            job_tags='quack',
-            limit='duck',
-            skip_tags='oink'
-        )
-        workflow_job_node_unit.char_prompts = barnyard_kwargs
-        inv = Inventory(name='example-inv')
-        cred = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
-        workflow_job_node_unit.inventory = inv
-        workflow_job_node_unit.credential = cred
-        assert workflow_job_node_unit.get_job_kwargs() == dict(
-            inventory=inv, credential=cred, **barnyard_kwargs)
+    def test_char_prompts_and_res_node_prompts(self, node_with_prompts):
+        assert node_with_prompts.get_job_kwargs() == dict(
+            inventory=node_with_prompts.inventory,
+            credential=node_with_prompts.credential,
+            **example_prompts)
+
+    def test_reject_some_node_prompts(self, node_with_prompts):
+        node_with_prompts.unified_job_template.ask_inventory_on_launch = False
+        node_with_prompts.unified_job_template.ask_job_type_on_launch = False
+        expect_kwargs = dict(inventory=node_with_prompts.inventory,
+                             credential=node_with_prompts.credential,
+                             **example_prompts)
+        expect_kwargs.pop('inventory')
+        expect_kwargs.pop('job_type')
+        assert node_with_prompts.get_job_kwargs() == expect_kwargs
+
+    def test_no_accepted_project_node_prompts(self, node_with_prompts, project_unit):
+        node_with_prompts.unified_job_template = project_unit
+        assert node_with_prompts.get_job_kwargs() == {}
+
+
+class TestWorkflowWarnings:
+    """
+    Tests of warnings that show user errors in the construction of a workflow
+    """
+
+    def test_warn_project_node_no_prompts(self, node_no_prompts, project_unit):
+        node_no_prompts.unified_job_template = project_unit
+        assert node_no_prompts.get_prompts_warnings() == {}
+
+    def test_warn_project_node_reject_all_prompts(self, node_with_prompts, project_unit):
+        node_with_prompts.unified_job_template = project_unit
+        assert 'ignored' in node_with_prompts.get_prompts_warnings()
+        assert 'all' in node_with_prompts.get_prompts_warnings()['ignored']
+
+    def test_warn_reject_some_prompts(self, node_with_prompts):
+        node_with_prompts.unified_job_template.ask_credential_on_launch = False
+        node_with_prompts.unified_job_template.ask_job_type_on_launch = False
+        assert 'ignored' in node_with_prompts.get_prompts_warnings()
+        assert 'job_type' in node_with_prompts.get_prompts_warnings()['ignored']
+        assert 'credential' in node_with_prompts.get_prompts_warnings()['ignored']
+        assert len(node_with_prompts.get_prompts_warnings()['ignored']) == 2
+
+    def test_warn_missing_fields(self, node_no_prompts):
+        node_no_prompts.inventory = None
+        assert 'missing' in node_no_prompts.get_prompts_warnings()
+        assert 'inventory' in node_no_prompts.get_prompts_warnings()['missing']
+        assert 'credential' in node_no_prompts.get_prompts_warnings()['missing']
+        assert len(node_no_prompts.get_prompts_warnings()['missing']) == 2
