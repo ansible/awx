@@ -13,10 +13,10 @@ from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-def mock_feature_enabled(feature, bypass_database=None):
+def mock_feature_enabled(feature):
     return True
 
-def mock_feature_disabled(feature, bypass_database=None):
+def mock_feature_disabled(feature):
     return False
 
 def setup_common(hosts, fact_scans, get, user, epoch=timezone.now(), get_params={}, host_count=1):

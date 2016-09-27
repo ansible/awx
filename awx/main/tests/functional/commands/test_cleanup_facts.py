@@ -16,10 +16,10 @@ from awx.main.management.commands.cleanup_facts import CleanupFacts, Command
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
 
-def mock_feature_enabled(feature, bypass_database=None):
+def mock_feature_enabled(feature):
     return True
 
-def mock_feature_disabled(feature, bypass_database=None):
+def mock_feature_disabled(feature):
     return False
 
 @pytest.mark.django_db
