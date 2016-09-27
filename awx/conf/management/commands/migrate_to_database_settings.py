@@ -112,7 +112,7 @@ class Command(BaseCommand):
         if os.path.exists(license_file):
             try:
                 raw_license_data = open(license_file).read()
-                license_data = json.loads(raw_license_data)
+                json.loads(raw_license_data)
             except Exception as e:
                 raise CommandError('Error reading license from {0}: {1!r}'.format(license_file, e))
             if self.backup_suffix:

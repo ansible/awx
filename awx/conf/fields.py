@@ -1,7 +1,5 @@
 # Python
-import json
 import logging
-import os
 import urlparse
 
 # Django
