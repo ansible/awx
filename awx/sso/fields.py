@@ -581,7 +581,7 @@ class SAMLIdPField(BaseDictWithChildField):
         'missing_keys': _('Missing required key(s) for IdP: {missing_keys}.'),
     }
     child_fields = {
-        'entity_id': fields.URLField(),
+        'entity_id': fields.CharField(),
         'url': fields.URLField(),
         'x509cert': fields.CharField(validators=[validate_certificate]),
         'attr_user_permanent_id': fields.CharField(required=False),
