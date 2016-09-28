@@ -1,0 +1,328 @@
+# Copyright (c) 2016 Ansible, Inc.
+# All Rights Reserved.
+
+# Python
+import collections
+import difflib
+import json
+import os
+import shutil
+
+# Django
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from django.utils.text import slugify
+from django.utils.timezone import now
+
+# Tower
+from awx import MODE
+from awx.conf import settings_registry
+from awx.conf.fields import empty, SkipField
+from awx.conf.models import Setting
+from awx.conf.utils import comment_assignments
+
+
+class Command(BaseCommand):
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'category',
+            nargs='*',
+            type=str,
+        )
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            dest='dry_run',
+            default=False,
+            help='Only show which settings would be commented/migrated.',
+        )
+        parser.add_argument(
+            '--no-comment',
+            action='store_true',
+            dest='no_comment',
+            default=False,
+            help='Skip commenting out settings in files.',
+        )
+        parser.add_argument(
+            '--backup-suffix',
+            dest='backup_suffix',
+            default=now().strftime('.%Y%m%d%H%M%S'),
+            help='Backup existing settings files with this suffix.',
+        )
+
+    @transaction.atomic
+    def handle(self, *args, **options):
+        self.verbosity = int(options.get('verbosity', 1))
+        self.dry_run = bool(options.get('dry_run', False))
+        self.no_comment = bool(options.get('no_comment', False))
+        self.backup_suffix = options.get('backup_suffix', '')
+        self.categories = options.get('category', None) or ['all']
+        self.style.HEADING = self.style.MIGRATE_HEADING
+        self.style.LABEL = self.style.MIGRATE_LABEL
+        self.style.OK = self.style.SQL_FIELD
+        self.style.SKIP = self.style.WARNING
+        self.style.VALUE = self.style.SQL_KEYWORD
+
+        # Determine if any categories provided are invalid.
+        category_slugs = []
+        invalid_categories = []
+        for category in self.categories:
+            category_slug = slugify(category)
+            if category_slug in settings_registry.get_registered_categories():
+                if category_slug not in category_slugs:
+                    category_slugs.append(category_slug)
+            else:
+                if category not in invalid_categories:
+                    invalid_categories.append(category)
+        if len(invalid_categories) == 1:
+            raise CommandError('Invalid setting category: {}'.format(invalid_categories[0]))
+        elif len(invalid_categories) > 1:
+            raise CommandError('Invalid setting categories: {}'.format(', '.join(invalid_categories)))
+
+        # Build a list of all settings to be migrated.
+        registered_settings = []
+        for category_slug in category_slugs:
+            for registered_setting in settings_registry.get_registered_settings(category_slug=category_slug, read_only=False):
+                if registered_setting not in registered_settings:
+                    registered_settings.append(registered_setting)
+
+        self._migrate_settings(registered_settings)
+
+    def _get_settings_file_patterns(self):
+        if MODE == 'development':
+            return [
+                '/etc/tower/settings.py', 
+                '/etc/tower/conf.d/*.py',
+                os.path.join(os.path.dirname(__file__), '..', '..', '..', 'settings', 'local_*.py')
+            ]
+        else:
+            return [
+                os.environ.get('AWX_SETTINGS_FILE', '/etc/tower/settings.py'),
+                os.path.join(os.environ.get('AWX_SETTINGS_DIR', '/etc/tower/conf.d/'), '*.py'),
+            ]
+
+    def _get_license_file(self):
+        return os.environ.get('AWX_LICENSE_FILE', '/etc/tower/license')
+
+    def _comment_license_file(self, dry_run=True):
+        license_file = self._get_license_file()
+        diff_lines = []
+        if os.path.exists(license_file):
+            try:
+                raw_license_data = open(license_file).read()
+                json.loads(raw_license_data)
+            except Exception as e:
+                raise CommandError('Error reading license from {0}: {1!r}'.format(license_file, e))
+            if self.backup_suffix:
+                backup_license_file = '{}{}'.format(license_file, self.backup_suffix)
+            else:
+                backup_license_file = '{}.old'.format(license_file)
+            diff_lines = list(difflib.unified_diff(
+                raw_license_data.splitlines(),
+                [],
+                fromfile=backup_license_file,
+                tofile=license_file,
+                lineterm='',
+            ))
+            if not dry_run:
+                if self.backup_suffix:
+                    shutil.copy2(license_file, backup_license_file)
+                os.remove(license_file)
+        return diff_lines
+
+    def _check_if_needs_comment(self, patterns, setting):
+        files_to_comment = []
+        try:
+            # If any diffs are returned, this setting needs to be commented.
+            diffs = comment_assignments(patterns, setting, dry_run=True)
+            if setting == 'LICENSE':
+                diffs.extend(self._comment_license_file(dry_run=True))
+            for diff in diffs:
+                for line in diff.splitlines():
+                    if line.startswith('+++ '):
+                        files_to_comment.append(line[4:])
+        except Exception as e:
+            raise CommandError('Error commenting {0}: {1!r}'.format(setting, e))
+        return files_to_comment
+
+    def _check_if_needs_migration(self, setting):
+        # Check whether the current value differs from the default.
+        default_value = settings.DEFAULTS_SNAPSHOT.get(setting, empty)
+        if default_value is empty and setting != 'LICENSE':
+            field = settings_registry.get_setting_field(setting, read_only=True)
+            try:
+                default_value = field.get_default()
+            except SkipField:
+                pass
+        current_value = getattr(settings, setting, empty)
+        if current_value != default_value:
+            if current_value is empty:
+                current_value = None
+            return current_value
+        return empty
+
+    def _display_tbd(self, setting, files_to_comment, migrate_value):
+        if self.verbosity >= 1:
+            if files_to_comment:
+                if migrate_value is not empty:
+                    action = 'Migrate + Comment'
+                else:
+                    action = 'Comment'
+                self.stdout.write('  {}: {}'.format(
+                    self.style.LABEL(setting),
+                    self.style.OK(action),
+                ))
+                if self.verbosity >= 2:
+                    if migrate_value is not empty:
+                        self.stdout.write('    - Migrate value: {}'.format(
+                            self.style.VALUE(repr(migrate_value)),
+                        ))
+                    for file_to_comment in files_to_comment:
+                        self.stdout.write('    - Comment in: {}'.format(
+                            self.style.VALUE(file_to_comment),
+                        ))
+            else:
+                if self.verbosity >= 2:
+                    self.stdout.write('  {}: {}'.format(
+                        self.style.LABEL(setting),
+                        self.style.SKIP('No Migration'),
+                    ))
+
+    def _display_migrate(self, setting, action, display_value):
+        if self.verbosity >= 1:
+            if action == 'No Change':
+                action = self.style.SKIP(action)
+            else:
+                action = self.style.OK(action)
+            self.stdout.write('  {}: {}'.format(
+                self.style.LABEL(setting),
+                action,
+            ))
+            if self.verbosity >= 2:
+                for line in display_value.splitlines():
+                    self.stdout.write('    {}'.format(
+                        self.style.VALUE(line),
+                    ))
+
+    def _display_diff_summary(self, filename, added, removed):
+        self.stdout.write('  {} {}{} {}{}'.format(
+            self.style.LABEL(filename),
+            self.style.ERROR('-'),
+            self.style.ERROR(int(removed)),
+            self.style.OK('+'),
+            self.style.OK(str(added)),
+        ))
+
+    def _display_comment(self, diffs):
+        for diff in diffs:
+            if self.verbosity >= 2:
+                for line in diff.splitlines():
+                    display_line = line
+                    if line.startswith('--- ') or line.startswith('+++ '):
+                        display_line = self.style.LABEL(line)
+                    elif line.startswith('-'):
+                        display_line = self.style.ERROR(line)
+                    elif line.startswith('+'):
+                        display_line = self.style.OK(line)
+                    elif line.startswith('@@'):
+                        display_line = self.style.VALUE(line)
+                    if line.startswith('--- ') or line.startswith('+++ '):
+                        self.stdout.write('  ' + display_line)
+                    else:
+                        self.stdout.write('    ' + display_line)
+            elif self.verbosity >= 1:
+                filename, lines_added, lines_removed = None, 0, 0
+                for line in diff.splitlines():
+                    if line.startswith('+++ '):
+                        if filename:
+                            self._display_diff_summary(filename, lines_added, lines_removed)
+                        filename, lines_added, lines_removed = line[4:], 0, 0
+                    elif line.startswith('+'):
+                        lines_added += 1
+                    elif line.startswith('-'):
+                        lines_removed += 1
+                if filename:
+                    self._display_diff_summary(filename, lines_added, lines_removed)
+
+    def _migrate_settings(self, registered_settings):
+        patterns = self._get_settings_file_patterns()
+
+        # Determine which settings need to be commented/migrated.
+        if self.verbosity >= 1:
+            self.stdout.write(self.style.HEADING('Discovering settings to be migrated and commented:'))
+        to_migrate = collections.OrderedDict()
+        to_comment = collections.OrderedDict()
+        for name in registered_settings:
+            files_to_comment = self._check_if_needs_comment(patterns, name)
+            if files_to_comment:
+                to_comment[name] = files_to_comment
+            migrate_value = empty
+            if files_to_comment:
+                migrate_value = self._check_if_needs_migration(name)
+                if migrate_value is not empty:
+                    to_migrate[name] = migrate_value
+            self._display_tbd(name, files_to_comment, migrate_value)
+        if self.verbosity == 1 and not to_migrate and not to_comment:
+            self.stdout.write('  No settings found to migrate or comment!')
+
+        # Now migrate those settings to the database.
+        if self.verbosity >= 1:
+            if self.dry_run:
+                self.stdout.write(self.style.HEADING('Migrating settings to database (dry-run):'))
+            else:
+                self.stdout.write(self.style.HEADING('Migrating settings to database:'))
+            if not to_migrate:
+                self.stdout.write('  No settings to migrate!')
+        for name, value in to_migrate.items():
+            field = settings_registry.get_setting_field(name)
+            assert not field.read_only
+            try:
+                data = field.to_representation(value)
+                setting_value = field.run_validation(data)
+                db_value = field.to_representation(setting_value)
+            except Exception as e:
+                raise CommandError('Unable to assign value {0!r} to setting "{1}: {2!s}".'.format(value, name, e))
+            display_value = json.dumps(db_value, indent=4)
+            # Always encode "raw" strings as JSON.
+            if isinstance(db_value, basestring):
+                db_value = json.dumps(db_value)
+            setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
+            action = 'No Change'
+            if not setting:
+                action = 'Migrated'
+                if not self.dry_run:
+                    Setting.objects.create(key=name, user=None, value=db_value)
+            elif setting.value != db_value or type(setting.value) != type(db_value):
+                action = 'Updated'
+                if not self.dry_run:
+                    setting.value = db_value
+                    setting.save(update_fields=['value'])
+            self._display_migrate(name, action, display_value)
+
+        # Now comment settings in settings files.
+        if self.verbosity >= 1:
+            if bool(self.dry_run or self.no_comment):
+                self.stdout.write(self.style.HEADING('Commenting settings in files (dry-run):'))
+            else:
+                self.stdout.write(self.style.HEADING('Commenting settings in files:'))
+            if not to_comment:
+                self.stdout.write('  No settings to comment!')
+        if to_comment:
+            to_comment_patterns = []
+            license_file_to_comment = None
+            for files_to_comment in to_comment.values():
+                for file_to_comment in files_to_comment:
+                    if file_to_comment == self._get_license_file():
+                        license_file_to_comment = file_to_comment
+                    elif file_to_comment not in to_comment_patterns:
+                        to_comment_patterns.append(file_to_comment)
+            # Run once in dry-run mode to catch any errors from updating the files.
+            diffs = comment_assignments(to_comment_patterns, to_comment.keys(), dry_run=True, backup_suffix=self.backup_suffix)
+            # Then, if really updating, run again.
+            if not self.dry_run and not self.no_comment:
+                diffs = comment_assignments(to_comment_patterns, to_comment.keys(), dry_run=False, backup_suffix=self.backup_suffix)
+                if license_file_to_comment:
+                    diffs.extend(self._comment_license_file(dry_run=False))
+            self._display_comment(diffs)

@@ -3,6 +3,7 @@
 
 # Django REST Framework
 from rest_framework import renderers
+from rest_framework.request import override_method
 
 
 class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
@@ -30,6 +31,8 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
         # Set a flag on the view to indiciate to the view/serializer that we're
         # creating a raw data form for the browsable API.  Store the original
         # request method to determine how to populate the raw data form.
+        if request.method in {'OPTIONS', 'DELETE'}:
+            return
         try:
             setattr(view, '_raw_data_form_marker', True)
             setattr(view, '_raw_data_request_method', request.method)
@@ -41,10 +44,13 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     def get_rendered_html_form(self, data, view, method, request):
         # Never show auto-generated form (only raw form).
         obj = getattr(view, 'object', None)
-        if not self.show_form_for_method(view, method, request, obj):
-            return
-        if method in ('DELETE', 'OPTIONS'):
-            return True  # Don't actually need to return a form
+        if obj is None and hasattr(view, 'get_object') and hasattr(view, 'retrieve'):
+            obj = view.get_object()
+        with override_method(view, request, method) as request:
+            if not self.show_form_for_method(view, method, request, obj):
+                return
+            if method in ('DELETE', 'OPTIONS'):
+                return True  # Don't actually need to return a form
 
     def get_filter_form(self, data, view, request):
         # Don't show filter form in browsable API.

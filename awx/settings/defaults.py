@@ -116,6 +116,7 @@ LOG_ROOT = os.path.join(BASE_DIR)
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
 # Maximum number of the same job that can be waiting to run when launching from scheduler
+# Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
 
 SITE_ID = 1
@@ -132,6 +133,7 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+# Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
@@ -190,6 +192,7 @@ INSTALLED_APPS = (
     'polymorphic',
     'taggit',
     'social.apps.django_app.default',
+    'awx.conf',
     'awx.main',
     'awx.api',
     'awx.ui',
@@ -242,28 +245,34 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # LDAP server (default to None to skip using LDAP authentication).
+# Note: This setting may be overridden by database settings.
 AUTH_LDAP_SERVER_URI = None
 
 # Disable LDAP referrals by default (to prevent certain LDAP queries from
 # hanging with AD).
+# Note: This setting may be overridden by database settings.
 AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_REFERRALS: 0,
 }
 
 # Radius server settings (default to empty string to skip using Radius auth).
+# Note: These settings may be overridden by database settings.
 RADIUS_SERVER = ''
 RADIUS_PORT = 1812
 RADIUS_SECRET = ''
 
 # Seconds before auth tokens expire.
+# Note: This setting may be overridden by database settings.
 AUTH_TOKEN_EXPIRATION = 1800
 
 # Maximum number of per-user valid, concurrent tokens.
 # -1 is unlimited
+# Note: This setting may be overridden by database settings.
 AUTH_TOKEN_PER_USER = -1
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
+# Note: This setting may be overridden by database settings.
 AUTH_BASIC_ENABLED = True
 
 # If set, serve only minified JS for UI.
@@ -407,6 +416,20 @@ SOCIAL_AUTH_PIPELINE = (
     'awx.sso.pipeline.update_user_teams',
 )
 
+SOCIAL_AUTH_LOGIN_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
+SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
+
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
+SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+SOCIAL_AUTH_CLEAN_USERNAMES = True
+
+SOCIAL_AUTH_SANITIZE_REDIRECTS = True
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+# Note: These settings may be overridden by database settings.
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
@@ -432,19 +455,6 @@ SOCIAL_AUTH_SAML_ORG_INFO = {}
 SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
-
-SOCIAL_AUTH_LOGIN_URL = '/'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
-SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
-SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
-
-SOCIAL_AUTH_RAISE_EXCEPTIONS = False
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
-SOCIAL_AUTH_SLUGIFY_USERNAMES = True
-SOCIAL_AUTH_CLEAN_USERNAMES = True
-
-SOCIAL_AUTH_SANITIZE_REDIRECTS = True
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 SOCIAL_AUTH_ORGANIZATION_MAP = {}
 SOCIAL_AUTH_TEAM_MAP = {}
@@ -480,30 +490,37 @@ JOB_EVENT_MAX_QUEUE_SIZE = 100
 CAPTURE_JOB_EVENT_HOSTS = False
 
 # Enable proot support for running jobs (playbook runs only).
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = False
 
 # Command/path to proot.
 AWX_PROOT_CMD = 'proot'
 
 # Additional paths to hide from jobs using proot.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_HIDE_PATHS = []
 
 # Additional paths to show for jobs using proot.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_SHOW_PATHS = []
 
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
 # The directory in which proot will create new temporary directories for its root
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_BASE_PATH = "/tmp"
 
 # User definable ansible callback plugins
+# Note: This setting may be overridden by database settings.
 AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
+# Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
 # Default list of modules allowed for ad hoc commands.
+# Note: This setting may be overridden by database settings.
 AD_HOC_COMMANDS = [
     'command',
     'shell',
@@ -730,6 +747,7 @@ CLOUDFORMS_INSTANCE_ID_VAR = 'id'
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.
+# Note: These settings may be overridden by database settings.
 ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
@@ -745,161 +763,17 @@ SOCKETIO_LISTEN_PORT = 8080
 
 FACT_CACHE_PORT = 6564
 
+# Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+# Note: This setting may be overridden by database settings.
 TOWER_ADMIN_ALERTS = True
 
+# Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
-TOWER_SETTINGS_MANIFEST = {
-    "SCHEDULE_MAX_JOBS": {
-        "name": "Maximum Scheduled Jobs",
-        "description": "Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created",
-        "default": SCHEDULE_MAX_JOBS,
-        "type": "int",
-        "category": "jobs",
-    },
-    "STDOUT_MAX_BYTES_DISPLAY": {
-        "name": "Standard Output Maximum Display Size",
-        "description": "Maximum Size of Standard Output in bytes to display before requiring the output be downloaded",
-        "default": STDOUT_MAX_BYTES_DISPLAY,
-        "type": "int",
-        "category": "jobs",
-    },
-    "AUTH_TOKEN_EXPIRATION": {
-        "name": "Idle Time Force Log Out",
-        "description": "Number of seconds that a user is inactive before they will need to login again",
-        "type": "int",
-        "default": AUTH_TOKEN_EXPIRATION,
-        "category": "authentication",
-    },
-    "AUTH_TOKEN_PER_USER": {
-        "name": "Maximum number of simultaneous logins",
-        "description": "Maximum number of simultaneous logins a user may have. To disable enter -1",
-        "type": "int",
-        "default": AUTH_TOKEN_PER_USER,
-        "category": "authentication",
-    },
-    # "AUTH_BASIC_ENABLED": {
-    #     "name": "Enable HTTP Basic Auth",
-    #     "description": "Enable HTTP Basic Auth for the API Browser",
-    #     "default": AUTH_BASIC_ENABLED,
-    #     "type": "bool",
-    #     "category": "authentication",
-    # },
-    # "AUTH_LDAP_SERVER_URI": {
-    #     "name": "LDAP Server URI",
-    #     "description": "URI Location of the LDAP Server",
-    #     "default": AUTH_LDAP_SERVER_URI,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_SERVER": {
-    #     "name": "Radius Server Host",
-    #     "description": "Host to communicate with for Radius Authentication",
-    #     "default": RADIUS_SERVER,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_PORT": {
-    #     "name": "Radius Server Port",
-    #     "description": "Port on the Radius host for Radius Authentication",
-    #     "default": RADIUS_PORT,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_SECRET": {
-    #     "name": "Radius Server Secret",
-    #     "description": "Secret used when negotiating with the Radius server",
-    #     "default": RADIUS_SECRET,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    "AWX_PROOT_ENABLED": {
-        "name": "Enable PRoot for Job Execution",
-        "description": "Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information",
-        "default": AWX_PROOT_ENABLED,
-        "type": "bool",
-        "category": "jobs",
-    },
-    "AWX_PROOT_HIDE_PATHS": {
-        "name": "Paths to hide from PRoot jobs",
-        "description": "Extra paths to hide from PRoot isolated processes",
-        "default": AWX_PROOT_HIDE_PATHS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "AWX_PROOT_SHOW_PATHS": {
-        "name": "Paths to expose to PRoot jobs",
-        "description": "Explicit whitelist of paths to expose to PRoot jobs",
-        "default": AWX_PROOT_SHOW_PATHS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "AWX_PROOT_BASE_PATH": {
-        "name": "Base PRoot execution path",
-        "description": "The location that PRoot will create its temporary working directory",
-        "default": AWX_PROOT_BASE_PATH,
-        "type": "string",
-        "category": "jobs",
-    },
-    "AWX_ANSIBLE_CALLBACK_PLUGINS": {
-        "name": "Ansible Callback Plugins",
-        "description": "Colon Seperated Paths for extra callback plugins to be used when running jobs",
-        "default": AWX_ANSIBLE_CALLBACK_PLUGINS,
-        "type": "string",
-        "category": "jobs",
-    },
-    "PENDO_TRACKING_STATE": {
-        "name": "Analytics Tracking State",
-        "description": "Enable or Disable Analytics Tracking",
-        "default": PENDO_TRACKING_STATE,
-        "type": "string",
-        "category": "ui",
-    },
-    "AD_HOC_COMMANDS": {
-        "name": "Ansible Modules Allowed for Ad Hoc Jobs",
-        "description": "A colon-seperated whitelist of modules allowed to be used by ad-hoc jobs",
-        "default": AD_HOC_COMMANDS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "ACTIVITY_STREAM_ENABLED": {
-        "name": "Enable Activity Stream",
-        "description": "Enable capturing activity for the Tower activity stream",
-        "default": ACTIVITY_STREAM_ENABLED,
-        "type": "bool",
-        "category": "system",
-    },
-    "ORG_ADMINS_CAN_SEE_ALL_USERS": {
-        "name": "All Users Visible to Organization Admins",
-        "description": "Controls whether any Organization Admin can view all users, even those not associated with their Organization",
-        "default": ORG_ADMINS_CAN_SEE_ALL_USERS,
-        "type": "bool",
-        "category": "system",
-    },
-    "TOWER_ADMIN_ALERTS": {
-        "name": "Enable Tower Administrator Alerts",
-        "description": "Allow Tower to email Admin users for system events that may require attention",
-        "default": TOWER_ADMIN_ALERTS,
-        "type": "bool",
-        "category": "system",
-    },
-    "TOWER_URL_BASE": {
-        "name": "Base URL of the Tower host",
-        "description": "This is used by services like Notifications to render a valid url to the Tower host",
-        "default": TOWER_URL_BASE,
-        "type": "string",
-        "category": "system",
-    },
-    "LICENSE": {
-        "name": "Tower License",
-        "description": "Controls what features and functionality is enabled in Tower.",
-        "default": "{}",
-        "type": "string",
-        "category": "system",
-    },
-}
+TOWER_SETTINGS_MANIFEST = {}
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
@@ -1029,6 +903,11 @@ LOGGING = {
         'awx': {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
+        },
+        'awx.conf': {
+            'handlers': ['console', 'file', 'tower_warnings'],
+            'level': 'WARNING',
+            'propagate': False,
         },
         'awx.main.commands.run_callback_receiver': {
             'handlers': ['console', 'file', 'callback_receiver'],

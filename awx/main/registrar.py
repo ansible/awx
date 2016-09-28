@@ -1,11 +1,8 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved.
 
-import logging
-
 from django.db.models.signals import pre_save, post_save, pre_delete, m2m_changed
 
-logger = logging.getLogger('awx.main.registrar')
 
 class ActivityStreamRegistrar(object):
 
@@ -13,9 +10,7 @@ class ActivityStreamRegistrar(object):
         self.models = []
 
     def connect(self, model):
-        from awx.main.conf import tower_settings
-        if not getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True):
-            return
+        # Always register model; the signal handlers will check if activity stream is enabled.
         from awx.main.signals import activity_stream_create, activity_stream_update, activity_stream_delete, activity_stream_associate
 
         if model not in self.models:
