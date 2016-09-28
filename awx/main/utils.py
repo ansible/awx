@@ -538,7 +538,7 @@ def check_proot_installed():
     Check that proot is installed.
     '''
     from django.conf import settings
-    cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+    cmd = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--version']
     try:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -566,8 +566,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /tmp (except for own tmp files)
     '''
     from django.conf import settings
-    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-v',
-                str(getattr(settings, 'AWX_PROOT_VERBOSITY', '0')), '-r', '/']
+    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--dev-bind', '/', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
                   settings.JOBOUTPUT_ROOT]
@@ -582,7 +581,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
             handle, new_path = tempfile.mkstemp(dir=kwargs['proot_temp_dir'])
             os.close(handle)
             os.chmod(new_path, stat.S_IRUSR | stat.S_IWUSR)
-        new_args.extend(['-b', '%s:%s' % (new_path, path)])
+        new_args.extend(['--bind', '%s' %(new_path,), '%s' % (path,)])
     if 'private_data_dir' in kwargs:
         show_paths = [cwd, kwargs['private_data_dir']]
     else:
@@ -595,8 +594,8 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue
-        new_args.extend(['-b', '%s:%s' % (path, path)])
-    new_args.extend(['-w', cwd])
+        new_args.extend(['--bind', '%s' % (path,), '%s' % (path,)])
+    new_args.extend(['--chdir', cwd])
     new_args.extend(args)
     return new_args
 
