@@ -1075,7 +1075,6 @@ class InventoryDetailSerializer(InventorySerializer):
 
 
 class InventoryScriptSerializer(InventorySerializer):
-    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         fields = ()
