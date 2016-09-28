@@ -319,19 +319,19 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.assertIn('ssh-agent', ad_hoc_command.job_args)
         self.assertNotIn('Bad passphrase', ad_hoc_command.result_stdout)
 
-    def test_run_with_proot(self):
-        # Only run test if proot is installed
-        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+    def test_run_with_bubblewrap(self):
+        # Only run test if bubblewrap is installed
+        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--version']
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             proc.communicate()
-            has_proot = bool(proc.returncode == 0)
+            has_bubblewrap = bool(proc.returncode == 0)
         except (OSError, ValueError):
-            has_proot = False
-        if not has_proot:
-            self.skipTest('proot is not installed')
-        # Enable proot for this test.
+            has_bubblewrap = False
+        if not has_bubblewrap:
+            self.skipTest('bubblewrap is not installed')
+        # Enable bubblewrap for this test.
         settings.AWX_PROOT_ENABLED = True
         # Hide local settings path.
         settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
@@ -362,8 +362,8 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
         self.check_ad_hoc_command_events(ad_hoc_command, 'ok')
 
     @mock.patch('awx.main.tasks.BaseTask.run_pexpect', return_value=('failed', 0))
-    def test_run_with_proot_not_installed(self, ignore):
-        # Enable proot for this test, specify invalid proot cmd.
+    def test_run_with_bubblewrap_not_installed(self, ignore):
+        # Enable bubblewrap for this test, specify invalid bubblewrap cmd.
         settings.AWX_PROOT_ENABLED = True
         settings.AWX_PROOT_CMD = 'PR00T'
         ad_hoc_command = self.create_test_ad_hoc_command()
