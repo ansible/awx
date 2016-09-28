@@ -40,6 +40,7 @@ from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
+from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
@@ -109,20 +110,6 @@ def reverse_gfk(content_object):
     return {
         camelcase_to_underscore(content_object.__class__.__name__): content_object.get_absolute_url()
     }
-
-def vars_validate_or_raise(vars_str):
-    # vars must be blank, a valid JSON or YAML dict, or ...
-    try:
-        json.loads((vars_str or '').strip() or '{}')
-        return vars_str
-    except ValueError:
-        pass
-    try:
-        yaml.safe_load(vars_str)
-        return vars_str
-    except yaml.YAMLError:
-        pass
-    raise serializers.ValidationError('Must be valid JSON or YAML.')
 
 
 class BaseSerializerMetaclass(serializers.SerializerMetaclass):
