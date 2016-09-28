@@ -48,8 +48,7 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
 from awx.main.queue import FifoQueue
-from awx.main.conf import tower_settings
-from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
@@ -105,10 +104,9 @@ def send_notifications(notification_list, job_id=None):
 
 @task(bind=True, queue='default')
 def run_administrative_checks(self):
-    if not tower_settings.TOWER_ADMIN_ALERTS:
+    if not settings.TOWER_ADMIN_ALERTS:
         return
-    reader = TaskSerializer()
-    validation_info = reader.from_database()
+    validation_info = TaskEnhancer().validate_enhancements()
     if validation_info.get('instance_count', 0) < 1:
         return
     used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
@@ -118,7 +116,7 @@ def run_administrative_checks(self):
                   "Ansible Tower host usage over 90%",
                   tower_admin_emails,
                   fail_silently=True)
-    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+    if validation_info.get('date_warning', False):
         send_mail("Ansible Tower license will expire soon",
                   "Ansible Tower license will expire soon",
                   tower_admin_emails,
@@ -417,7 +415,7 @@ class BaseTask(Task):
         # NOTE:
         # Derived class should call add_ansible_venv() or add_tower_venv()
         if self.should_use_proot(instance, **kwargs):
-            env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
+            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -530,7 +528,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
+                    if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
@@ -727,9 +725,9 @@ class RunJob(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         plugin_dirs = [plugin_dir]
-        if hasattr(tower_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         env = self.add_ansible_venv(env)
@@ -944,7 +942,7 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, job, **kwargs):
         '''
@@ -1624,7 +1622,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, ad_hoc_command, **kwargs):
         '''

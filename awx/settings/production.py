@@ -4,6 +4,7 @@
 # Production settings for AWX project.
 
 # Python
+import copy
 import errno
 import sys
 import traceback
@@ -57,6 +58,15 @@ LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
 LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
 
+# Store a snapshot of default settings at this point (only for migrating from
+# file to database settings).
+if 'migrate_to_database_settings' in sys.argv:
+    DEFAULTS_SNAPSHOT = {}
+    this_module = sys.modules[__name__]
+    for setting in dir(this_module):
+        if setting == setting.upper():
+            DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
+
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.
 settings_dir = os.environ.get('AWX_SETTINGS_DIR', '/etc/tower/conf.d/')
@@ -71,7 +81,6 @@ settings_file = os.environ.get('AWX_SETTINGS_FILE',
 # /etc/tower/conf.d/*.py.
 try:
     include(settings_file, optional(settings_files), scope=locals())
-    include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

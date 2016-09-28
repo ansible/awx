@@ -19,3 +19,6 @@ def xmlsec_initialize(*args, **kwargs):
             xmlsec_initialized = True
 
 dm.xmlsec.binding.initialize = xmlsec_initialize
+
+
+default_app_config = 'awx.sso.apps.SSOConfig'

@@ -4,7 +4,7 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 from django.utils.timezone import now
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 class Migration(DataMigration):
 

@@ -4,6 +4,7 @@
 # Development settings for AWX project.
 
 # Python
+import copy
 import sys
 import traceback
 
@@ -38,9 +39,12 @@ if 'celeryd' in sys.argv:
 
 CALLBACK_QUEUE = "callback_tasks"
 
-# Enable PROOT for tower-qa integration tests
+# Enable PROOT for tower-qa integration tests.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
 
+# Disable Pendo on the UI for development/test.
+# Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
@@ -75,6 +79,15 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+# Store a snapshot of default settings at this point (only for migrating from
+# file to database settings).
+if 'migrate_to_database_settings' in sys.argv:
+    DEFAULTS_SNAPSHOT = {}
+    this_module = sys.modules[__name__]
+    for setting in dir(this_module):
+        if setting == setting.upper():
+            DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
+
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())
@@ -90,8 +103,6 @@ TOWER_VENV_PATH = "/venv/tower"
 # only the defaults.
 try:
     include(optional('local_*.py'), scope=locals())
-    if not is_testing(sys.argv):
-        include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

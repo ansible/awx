@@ -7,6 +7,7 @@ import sys
 import logging
 
 # Django
+from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -19,9 +20,8 @@ from awx.main.utils import * # noqa
 from awx.main.models import * # noqa
 from awx.main.models.unified_jobs import ACTIVE_STATES
 from awx.main.models.mixins import ResourceMixin
-from awx.api.license import LicenseForbids
-from awx.main.task_engine import TaskSerializer
-from awx.main.conf import tower_settings
+from awx.main.task_engine import TaskEnhancer
+from awx.conf.license import LicenseForbids
 
 __all__ = ['get_user_queryset', 'check_user_access',
            'user_accessible_objects',
@@ -192,8 +192,7 @@ class BaseAccess(object):
         return self.can_change(obj, data)
 
     def check_license(self, add_host=False, feature=None, check_expiration=True):
-        reader = TaskSerializer()
-        validation_info = reader.from_database()
+        validation_info = TaskEnhancer().validate_enhancements()
         if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
             validation_info['time_remaining'] = 99999999
@@ -311,7 +310,7 @@ class UserAccess(BaseAccess):
         if self.user.is_superuser or self.user.is_system_auditor:
             return User.objects.all()
 
-        if tower_settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
                 (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
             return User.objects.all()
 
@@ -2045,20 +2044,6 @@ class CustomInventoryScriptAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_admin(obj)
 
-
-class TowerSettingsAccess(BaseAccess):
-    '''
-    - I can see settings when
-      - I am a super user
-    - I can edit settings when
-      - I am a super user
-    - I can clear settings when
-      - I am a super user
-    '''
-
-    model = TowerSettings
-
-
 class RoleAccess(BaseAccess):
     '''
     - I can see roles when
@@ -2135,7 +2120,6 @@ register_access(UnifiedJobTemplate, UnifiedJobTemplateAccess)
 register_access(UnifiedJob, UnifiedJobAccess)
 register_access(ActivityStream, ActivityStreamAccess)
 register_access(CustomInventoryScript, CustomInventoryScriptAccess)
-register_access(TowerSettings, TowerSettingsAccess)
 register_access(Role, RoleAccess)
 register_access(NotificationTemplate, NotificationTemplateAccess)
 register_access(Notification, NotificationAccess)

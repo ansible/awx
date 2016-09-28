@@ -3,7 +3,7 @@
 .tags1
 
 # Tower
-awx/settings/local_settings.py*
+awx/settings/local_*.py*
 awx/*.sqlite3
 awx/*.sqlite3_*
 awx/job_status

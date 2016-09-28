@@ -31,7 +31,6 @@ from awx.main.models.notifications import (
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
 from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
-from awx.main.conf import tower_settings
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
@@ -495,9 +494,9 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
 
     @property
     def cache_timeout_blocked(self):
-        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(tower_settings, 'SCHEDULE_MAX_JOBS', 10):
+        if Job.objects.filter(job_template=self, status__in=['pending', 'waiting', 'running']).count() > getattr(settings, 'SCHEDULE_MAX_JOBS', 10):
             logger.error("Job template %s could not be started because there are more than %s other jobs from that template waiting to run" %
-                         (self.name, getattr(tower_settings, 'SCHEDULE_MAX_JOBS', 10)))
+                         (self.name, getattr(settings, 'SCHEDULE_MAX_JOBS', 10)))
             return True
         return False
 
@@ -564,7 +563,7 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         return reverse('api:job_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
 
     @property
     def task_auth_token(self):
@@ -1388,7 +1387,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         return True
