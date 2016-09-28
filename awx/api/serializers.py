@@ -2270,14 +2270,27 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
     def to_internal_value(self, data):
         internal_value = super(WorkflowNodeBaseSerializer, self).to_internal_value(data)
-        char_prompts = self.extract_char_prompts(data)
+        view = self.context.get('view', None)
+        request_method = None
+        if view and view.request:
+            request_method = view.request.method
+        if request_method in ['PATCH']:
+            obj = view.get_object()
+            char_prompts = copy.copy(obj.char_prompts)
+            char_prompts.update(self.extract_char_prompts(data))
+        else:
+            char_prompts = self.extract_char_prompts(data)
+        for fd in copy.copy(char_prompts):
+            if char_prompts[fd] is None:
+                char_prompts.pop(fd)
         internal_value['char_prompts'] = char_prompts
         return internal_value
 
     def extract_char_prompts(self, data):
         char_prompts = {}
         for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
-            if data.get(fd, None):
+            # Accept null values, if given
+            if fd in data:
                 char_prompts[fd] = data[fd]
         return char_prompts
 
