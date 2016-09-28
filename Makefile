@@ -170,6 +170,10 @@ ifeq ($(DISTRO),ubuntu)
     SETUP_INSTALL_ARGS += --install-layout=deb
 endif
 
+# UI flag files
+UI_DEPS_FLAG_FILE = awx/ui/.deps_built
+UI_RELEASE_FLAG_FILE = awx/ui/.release_built
+
 .DEFAULT_GOAL := build
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
@@ -213,7 +217,8 @@ clean-bundle:
 clean-ui:
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
-	rm -f awx/ui/.deps_built
+	rm -f $(UI_DEPS_FLAG_FILE)
+	rm -f $(UI_RELEASE_FLAG_FILE)
 
 clean-tmp:
 	rm -rf tmp/
@@ -224,7 +229,6 @@ clean-venv:
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
-	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
 	rm -rf tmp
 	mkdir tmp
@@ -482,32 +486,35 @@ test_jenkins : test_coverage
 # UI TASKS
 # --------------------------------------
 
-ui-deps-built: awx/ui/package.json
+$(UI_DEPS_FLAG_FILE): awx/ui/package.json
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
-	touch awx/ui/.deps_built
+	touch $(UI_DEPS_FLAG_FILE)
 
-ui-docker-machine: ui-deps-built
+ui-docker-machine: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-docker-machine
 
-ui-docker: ui-deps-built
+ui-docker: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-docker-cid
 
-ui-release: ui-deps-built
-	$(NPM_BIN) --prefix awx/ui run build-release
+ui-release: $(UI_RELEASE_FLAG_FILE)
 
-ui-test: ui-deps-built
+$(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-release
+	touch $(UI_RELEASE_FLAG_FILE)
+
+ui-test: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test
 
-ui-test-ci: ui-deps-built
+ui-test-ci: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:ci
 
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
-jshint: ui-deps-built
+jshint: $(UI_DEPS_FLAG_FILE)
 	grunt --gruntfile awx/ui/Gruntfile.js jshint #Depends on node 6.x and npm 3.x installed on Jenkins slave
 
-ui-test-saucelabs: ui-deps-built
+ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs
 
 # END UI TASKS
@@ -773,7 +780,6 @@ docker-compose-build:
 
 MACHINE?=default
 docker-clean:
-	rm -f awx/lib/.deps_built
 	eval $$(docker-machine env $(MACHINE))
 	$(foreach container_id,$(shell docker ps -f name=tools_tower -aq),docker stop $(container_id); docker rm -f $(container_id);)
 	-docker images | grep "tower_devel" | awk '{print $3}' | xargs docker rmi
