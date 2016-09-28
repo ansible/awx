@@ -2282,7 +2282,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         else:
             data = OrderedDict()
             data['ignored_fields'] = ignored_fields
-            data.update(JobSerializer(new_job).to_representation(new_job))
+            data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             data['job'] = new_job.id
             return Response(data, status=status.HTTP_201_CREATED)
 
@@ -2965,7 +2965,7 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = JobSerializer(new_job).data
+            data = JobSerializer(new_job, context=self.get_serializer_context()).data
             # Add job key to match what old relaunch returned.
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url()}
@@ -3423,7 +3423,7 @@ class AdHocCommandRelaunch(GenericAPIView):
             data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = AdHocCommandSerializer(new_ad_hoc_command).data
+            data = AdHocCommandSerializer(new_ad_hoc_command, context=self.get_serializer_context()).data
             # Add ad_hoc_command key to match what was previously returned.
             data['ad_hoc_command'] = new_ad_hoc_command.id
             headers = {'Location': new_ad_hoc_command.get_absolute_url()}
