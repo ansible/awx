@@ -39,6 +39,13 @@ class Command(BaseCommand):
             help='Only show which settings would be commented/migrated.',
         )
         parser.add_argument(
+            '--skip-errors',
+            action='store_true',
+            dest='skip_errors',
+            default=False,
+            help='Skip over settings that would raise an error when commenting/migrating.',
+        )
+        parser.add_argument(
             '--no-comment',
             action='store_true',
             dest='no_comment',
@@ -56,6 +63,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.dry_run = bool(options.get('dry_run', False))
+        self.skip_errors = bool(options.get('skip_errors', False))
         self.no_comment = bool(options.get('no_comment', False))
         self.backup_suffix = options.get('backup_suffix', '')
         self.categories = options.get('category', None) or ['all']
@@ -134,17 +142,14 @@ class Command(BaseCommand):
 
     def _check_if_needs_comment(self, patterns, setting):
         files_to_comment = []
-        try:
-            # If any diffs are returned, this setting needs to be commented.
-            diffs = comment_assignments(patterns, setting, dry_run=True)
-            if setting == 'LICENSE':
-                diffs.extend(self._comment_license_file(dry_run=True))
-            for diff in diffs:
-                for line in diff.splitlines():
-                    if line.startswith('+++ '):
-                        files_to_comment.append(line[4:])
-        except Exception as e:
-            raise CommandError('Error commenting {0}: {1!r}'.format(setting, e))
+        # If any diffs are returned, this setting needs to be commented.
+        diffs = comment_assignments(patterns, setting, dry_run=True)
+        if setting == 'LICENSE':
+            diffs.extend(self._comment_license_file(dry_run=True))
+        for diff in diffs:
+            for line in diff.splitlines():
+                if line.startswith('+++ '):
+                    files_to_comment.append(line[4:])
         return files_to_comment
 
     def _check_if_needs_migration(self, setting):
@@ -163,26 +168,39 @@ class Command(BaseCommand):
             return current_value
         return empty
 
-    def _display_tbd(self, setting, files_to_comment, migrate_value):
+    def _display_tbd(self, setting, files_to_comment, migrate_value, comment_error=None, migrate_error=None):
         if self.verbosity >= 1:
             if files_to_comment:
                 if migrate_value is not empty:
                     action = 'Migrate + Comment'
                 else:
                     action = 'Comment'
+                if comment_error or migrate_error:
+                    action = self.style.ERROR('{} (skipped)'.format(action))
+                else:
+                    action = self.style.OK(action)
                 self.stdout.write('  {}: {}'.format(
                     self.style.LABEL(setting),
-                    self.style.OK(action),
+                    action,
                 ))
                 if self.verbosity >= 2:
-                    if migrate_value is not empty:
+                    if migrate_error:
+                        self.stdout.write('    - Migrate value: {}'.format(
+                            self.style.ERROR(migrate_error),
+                        ))
+                    elif migrate_value is not empty:
                         self.stdout.write('    - Migrate value: {}'.format(
                             self.style.VALUE(repr(migrate_value)),
                         ))
-                    for file_to_comment in files_to_comment:
-                        self.stdout.write('    - Comment in: {}'.format(
-                            self.style.VALUE(file_to_comment),
+                    if comment_error:
+                        self.stdout.write('    - Comment: {}'.format(
+                            self.style.ERROR(comment_error),
                         ))
+                    elif files_to_comment:
+                        for file_to_comment in files_to_comment:
+                            self.stdout.write('    - Comment in: {}'.format(
+                                self.style.VALUE(file_to_comment),
+                            ))
             else:
                 if self.verbosity >= 2:
                     self.stdout.write('  {}: {}'.format(
@@ -255,15 +273,33 @@ class Command(BaseCommand):
         to_migrate = collections.OrderedDict()
         to_comment = collections.OrderedDict()
         for name in registered_settings:
-            files_to_comment = self._check_if_needs_comment(patterns, name)
+            comment_error, migrate_error = None, None
+            files_to_comment = []
+            try:
+                files_to_comment = self._check_if_needs_comment(patterns, name)
+            except Exception as e:
+                comment_error = 'Error commenting {0}: {1!r}'.format(name, e)
+                if not self.skip_errors:
+                    raise CommandError(comment_error)
             if files_to_comment:
                 to_comment[name] = files_to_comment
             migrate_value = empty
             if files_to_comment:
                 migrate_value = self._check_if_needs_migration(name)
                 if migrate_value is not empty:
-                    to_migrate[name] = migrate_value
-            self._display_tbd(name, files_to_comment, migrate_value)
+                    field = settings_registry.get_setting_field(name)
+                    assert not field.read_only
+                    try:
+                        data = field.to_representation(migrate_value)
+                        setting_value = field.run_validation(data)
+                        db_value = field.to_representation(setting_value)
+                        to_migrate[name] = db_value
+                    except Exception as e:
+                        to_comment.pop(name)
+                        migrate_error = 'Unable to assign value {0!r} to setting "{1}: {2!s}".'.format(migrate_value, name, e)
+                        if not self.skip_errors:
+                            raise CommandError(migrate_error)
+            self._display_tbd(name, files_to_comment, migrate_value, comment_error, migrate_error)
         if self.verbosity == 1 and not to_migrate and not to_comment:
             self.stdout.write('  No settings found to migrate or comment!')
 
@@ -275,15 +311,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.HEADING('Migrating settings to database:'))
             if not to_migrate:
                 self.stdout.write('  No settings to migrate!')
-        for name, value in to_migrate.items():
-            field = settings_registry.get_setting_field(name)
-            assert not field.read_only
-            try:
-                data = field.to_representation(value)
-                setting_value = field.run_validation(data)
-                db_value = field.to_representation(setting_value)
-            except Exception as e:
-                raise CommandError('Unable to assign value {0!r} to setting "{1}: {2!s}".'.format(value, name, e))
+        for name, db_value in to_migrate.items():
             display_value = json.dumps(db_value, indent=4)
             # Always encode "raw" strings as JSON.
             if isinstance(db_value, basestring):
