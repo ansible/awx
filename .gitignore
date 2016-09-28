@@ -51,8 +51,9 @@ __pycache__
 /tmp
 npm-debug.log
 
-# UI build debugging
+# UI build flag files
 awx/ui/.deps_built
+awx/ui/.release_built
 
 # Testing
 .cache
