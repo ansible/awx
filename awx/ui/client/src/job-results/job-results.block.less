@@ -1,19 +1,110 @@
-
 @import '../shared/branding/colors.less';
 @import '../shared/branding/colors.default.less';
+@import '../shared/layouts/one-plus-two.less';
 
+@breakpoint-md: 1200px;
+@breakpoint-sm: 623px;
+
+.JobResults {
+    .OnePlusTwo-container(100%, @breakpoint-md);
+
+    &.fullscreen {
+        .JobResults-rightSide {
+            max-width: 100%;
+        }
+    }
+}
+
+.JobResults-leftSide {
+    .OnePlusTwo-left--panel(100%, @breakpoint-md);
+}
+
+.JobResults-rightSide {
+    .OnePlusTwo-right--panel(100%, @breakpoint-md);
+
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
+}
+
+.JobResults-stdoutActionButton--active {
+    display: none;
+    visibility: hidden;
+    flex:none;
+    width:0px;
+    padding-right: 0px;
+}
+
+.JobResults-panelHeader {
+    display: flex;
+    height: 30px;
+}
+
+.JobResults-panelHeaderText {
+    color: @default-interface-txt;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.JobResults-resultRow {
+    width: 100%;
+    display: flex;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.JobResults-resultRow--variables {
+    flex-direction: column;
+}
+
+.JobResults-resultRowLabel {
+    text-transform: uppercase;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: normal!important;
+    width: 30%;
+    margin-right: 20px;
+
+    @media screen and (max-width: @breakpoint-md) {
+        flex: 2.5 0 auto;
+    }
+}
+
+.JobResults-resultRowLabel--fullWidth {
+    width: 100%;
+    margin-right: 0px;
+}
+
+.JobResults-resultRowText {
+    width: ~"calc(70% - 20px)";
+    flex: 1 0 auto;
+    text-transform: none;
+    word-wrap: break-word;
+}
+
+.JobResults-resultRowText--fullWidth {
+    width: 100%;
+}
+
+.JobResults-statusResultIcon {
+    padding-left: 0px;
+    padding-right: 10px;
+}
+
+.JobResults-badgeRow {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+}
 
 .JobResults-badgeTitle{
-    color: #707070;
+    color: @default-interface-txt;
     font-size: 14px;
     margin-right: 10px;
     font-weight: normal;
     text-transform: uppercase;
     margin-left: 20px;
-}
-
-.JobResults-badgeRow{
-    display:flex;
-    align-items: center;
-    margin-right: 5px;
 }
