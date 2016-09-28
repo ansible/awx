@@ -2303,8 +2303,9 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
                         "job_type": "%s is not a valid job type. The choices are %s." % (
                             attrs['char_prompts']['job_type'], job_types)})
         ujt_obj = attrs.get('unified_job_template', None)
-        if isinstance(ujt_obj, WorkflowJobTemplate):
-            raise serializers.ValidationError({"unified_job_template": "Can not nest Workflow Job Templates inside of Workflow Job Templates"})
+        if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
+            raise serializers.ValidationError({
+                "unified_job_template": "Can not nest a %s inside a WorkflowJobTemplate" % ujt_obj.__class__.__name__})
         return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
