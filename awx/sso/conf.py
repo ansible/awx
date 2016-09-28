@@ -169,6 +169,7 @@ register(
     field_class=fields.URLField,
     schemes=('ldap', 'ldaps'),
     allow_blank=True,
+    default='',
     label=_('LDAP Server URI'),
     help_text=_('URI to connect to LDAP server, such as "ldap://ldap.example.com:389" '
                 '(non-SSL) or "ldaps://ldap.example.com:636" (SSL).  LDAP authentication '
@@ -880,6 +881,7 @@ register(
 register(
     'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT',
     field_class=fields.SAMLContactField,
+    allow_blank=True,
     default={},
     label=_('SAML Service Provider Technical Contact'),
     help_text=_('Configure this setting with your contact information.'),
@@ -894,6 +896,7 @@ register(
 register(
     'SOCIAL_AUTH_SAML_SUPPORT_CONTACT',
     field_class=fields.SAMLContactField,
+    allow_blank=True,
     default={},
     label=_('SAML Service Provider Support Contact'),
     help_text=_('Configure this setting with your contact information.'),
