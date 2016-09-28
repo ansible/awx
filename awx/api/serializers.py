@@ -1580,10 +1580,13 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
-            if role.content_type is not None:
+            try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
+            except AttributeError:
+                pass
+            if role.content_type is not None:
                 role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                     Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
             else:
