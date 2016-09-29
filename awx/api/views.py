@@ -3759,7 +3759,16 @@ class RoleList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        return Role.visible_roles(self.request.user)
+        result = Role.visible_roles(self.request.user)
+        # Sanity check: is the requesting user an orphaned non-admin/auditor? 
+        # if yes, make system admin/auditor mandatorily visible.
+        if not self.request.user.organizations.exists() and\
+           not self.request.user.is_superuser and\
+           not self.request.user.is_system_auditor:
+            mandatories = ('system_administrator', 'system_auditor')
+            super_qs = Role.objects.filter(singleton_name__in=mandatories)
+            result = result | super_qs
+        return result
 
 
 class RoleDetail(RetrieveAPIView):
