@@ -348,9 +348,11 @@ CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
 CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
     # Projects use a fanout queue, this isn't super well supported
     Broadcast('projects'),
 )
@@ -362,8 +364,12 @@ CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
                   'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
                                                         'routing_key': 'jobs'},
                   'awx.main.tasks.run_system_job': {'queue': 'jobs',
-                                                    'routing_key': 'jobs'}})
-
+                                                    'routing_key': 'jobs'},
+                  'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
+                                                              'routing_key': 'scheduler.job.launch'},
+                  'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
+                                                                'routing_key': 'scheduler.job.complete'},})
+                  
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
@@ -755,6 +761,7 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
 CALLBACK_QUEUE = "callback_tasks"
+SCHEDULER_QUEUE = "scheduler"
 
 TASK_COMMAND_PORT = 6559
 
@@ -917,7 +924,11 @@ LOGGING = {
             'handlers': ['console', 'file', 'socketio_service'],
             'propagate': False
         },
-        'awx.main.commands.run_task_system': {
+        'awx.main.tasks': {
+            'handlers': ['console', 'file', 'task_system'],
+            'propagate': False
+        },
+        'awx.main.scheduler': {
             'handlers': ['console', 'file', 'task_system'],
             'propagate': False
         },

@@ -361,7 +361,6 @@ server_noattach:
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux split-window -h 'exec make taskmanager'
 	tmux new-window 'exec make receiver'
 	tmux select-window -t tower:1
 	tmux rename-window 'Extra Services'
@@ -401,7 +400,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -410,16 +409,6 @@ receiver:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
-
-taskmanager:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	if [ "$(COMPOSE_HOST)" == "tower_1" ] || [ "$(COMPOSE_HOST)" == "tower" ]; then \
-		$(PYTHON) manage.py run_task_system; \
-	else \
-		while true; do sleep 2; done; \
-	fi
 
 socketservice:
 	@if [ "$(VENV_BASE)" ]; then \
