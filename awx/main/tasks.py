@@ -305,6 +305,10 @@ class BaseTask(Task):
                 logger.error('Failed to update %s after %d retries.',
                              self.model._meta.object_name, _attempt)
 
+    def signal_finished(self, pk):
+        pass
+        # notify_task_runner(dict(complete=pk))
+
     def get_path_to(self, *args):
         '''
         Return absolute path relative to this file.
