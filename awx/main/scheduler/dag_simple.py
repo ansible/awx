@@ -1,11 +1,11 @@
 
 from awx.main.models import (
-        Job,
-        AdHocCommand,
-        InventoryUpdate,
-        ProjectUpdate,
-        WorkflowJob,
-        SystemJob,
+    Job,
+    AdHocCommand,
+    InventoryUpdate,
+    ProjectUpdate,
+    WorkflowJob,
+    SystemJob,
 )
 
 class SimpleDAG(object):

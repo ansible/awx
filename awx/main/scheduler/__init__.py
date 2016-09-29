@@ -4,7 +4,6 @@
 # Python
 import datetime
 import logging
-import struct, fcntl, os
 
 # Django
 from django.conf import settings

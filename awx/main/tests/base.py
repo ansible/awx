@@ -12,7 +12,6 @@ import sys
 import tempfile
 import time
 import urllib
-from multiprocessing import Process
 import re
 import mock
 
@@ -30,7 +29,6 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.management.commands.run_callback_receiver import CallbackReceiver
 from awx.main.utils import get_ansible_version
 from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings

@@ -52,7 +52,6 @@ from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
-from awx.main.scheduler.dag_workflow import WorkflowDAG
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
