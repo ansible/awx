@@ -1,4 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -57,7 +57,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
-    
+
     $scope.deleteJob = function() {
         jobResultsService.deleteJob($scope.job);
     };
@@ -66,9 +66,23 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         jobResultsService.cancelJob($scope.job);
     };
 
-    // Set the job status
-    // TODO: pull from websockets
-    $scope.job_status = {"status": ""};
-    $scope.job_status.status = (jobData.status === 'waiting' ||
-        jobData.status === 'new') ? 'pending' : jobData.status;
+    $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
+        console.log(data);
+        if(data.event_name === "playbook_on_stats"){
+            // get the data for populating the host status bar
+            jobResultsService.getHostStatusBarCounts(data.event_data);
+        }
+
+    });
+
+    $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+        console.log(data);
+        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
+            $scope.job.status = data.status;
+
+            // $scope.job.elapsed = data.elapsed;
+        }
+    });
+
+
 }];

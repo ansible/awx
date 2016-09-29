@@ -447,7 +447,7 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="JobResults-statusResultIcon
-                            fa icon-job-{{ job_status.status }}">
+                            fa icon-job-{{ job.status }}">
                         </i>
                         {{ job.name }}
                     </div>
@@ -483,7 +483,7 @@
                             Elapsed
                         </div>
                         <span class="badge List-titleBadge">
-                            {{ job_status.elapsed || "00:00:01"}}
+                            {{ job.elapsed * 1000 | duration: "hh:mm:ss" }}
                         </span>
                     </div>
 
@@ -513,6 +513,8 @@
 
                     </div>
                 </div>
+                <host-status-bar></host-status-bar>
+                <!-- <standard-out-log stdout-endpoint="job.related.stdout"></standard-out-log> -->
             </div>
         </div>
     </div>

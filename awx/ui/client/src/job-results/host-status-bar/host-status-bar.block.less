@@ -1,0 +1,39 @@
+@import '../../shared/branding/colors.default.less';
+
+.JobResults-hostStatusBar{
+    display: flex;
+    flex: 1 0 auto;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.JobResults-hostStatusBar--ok{
+    background-color: @default-succ;
+    display: flex;
+    flex: 1 0 auto;
+    height: 5px;
+}
+
+.JobResults-hostStatusBar--changed{
+    background-color: @default-warning;
+    flex: 1 0 auto;
+    height: 5px;
+}
+
+.JobResults-hostStatusBar--unreachable{
+    background-color: @default-unreachable;
+    flex: 1 0 auto;
+    height: 5px;
+}
+
+.JobResults-hostStatusBar--failures{
+    background-color: @default-err;
+    flex: 1 0 auto;
+    height: 5px;
+}
+
+.JobResults-hostStatusBar--skipped{
+    background-color: @default-link;
+    flex: 1 0 auto;
+    height: 5px;
+}

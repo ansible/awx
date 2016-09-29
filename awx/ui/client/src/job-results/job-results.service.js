@@ -5,8 +5,67 @@
 *************************************************/
 
 
-export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function (Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
-    return {
+export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', '$rootScope', function (Prompt, $filter, Wait, Rest, $state, ProcessErrors, $rootScope) {
+    var val = {
+        getHostStatusBarCounts: function(event_data) {
+            var hosts = {};
+
+            // iterate over the event_data and populate an object with hosts
+            // and their status data
+            Object.keys(event_data).forEach(key => {
+                // failed passes boolean not integer
+                if (key === "failed") {
+                    // array of hosts from failed type
+                    var hostsArr = Object.keys(event_data[key]);
+                    hostsArr.forEach(host => {
+                        if (!hosts[host]) {
+                            // host has not been added to hosts object
+                            // add now
+                            hosts[host] = {};
+                        }
+
+                        hosts[host][key] = event_data[key][host];
+                    });
+                } else {
+                    // array of hosts from each type ("changed", "dark", etc.)
+                    var hostsArr = Object.keys(event_data[key]);
+                    hostsArr.forEach(host => {
+                        if (!hosts[host]) {
+                            // host has not been added to hosts object
+                            // add now
+                            hosts[host] = {};
+                        }
+
+                        if (!hosts[host][key]) {
+                            // host doesn't have key
+                            hosts[host][key] = 0;
+                        }
+                        hosts[host][key] += event_data[key][host];
+                    });
+                }
+            });
+
+            // use the hosts data populate above to get the count
+            var count = {
+                ok : _.filter(hosts, function(o){
+                    return !o.failures && !o.changed && o.ok > 0;
+                }),
+                skipped : _.filter(hosts, function(o){
+                    return o.skipped > 0;
+                }),
+                unreachable : _.filter(hosts, function(o){
+                    return o.dark > 0;
+                }),
+                failures : _.filter(hosts, function(o){
+                    return o.failed === true;
+                }),
+                changed : _.filter(hosts, function(o){
+                    return o.changed > 0;
+                })
+            };
+
+            return count;
+        },
         deleteJob: function(job) {
             Prompt({
                 hdr: 'Delete Job',
@@ -100,4 +159,5 @@ export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 
             });
         }
     };
+    return val;
 }];
