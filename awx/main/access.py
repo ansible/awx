@@ -1105,10 +1105,7 @@ class JobAccess(BaseAccess):
                 job_fields[fd] = getattr(obj, fd)
             accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
             for fd in ignored_fields:
-                if fd == 'extra_vars':
-                    if ignored_fields[fd]:
-                        prompts_access = False
-                elif job_fields[fd] != getattr(obj.job_template, fd):
+                if fd != 'extra_vars' and job_fields[fd] != getattr(obj.job_template, fd):
                     # Job has field that is not promptable
                     prompts_access = False
             if obj.credential != obj.job_template.credential and not credential_access:

@@ -45,26 +45,25 @@ def test_inventory_use_access(inventory, user):
 @pytest.mark.django_db
 class TestJobRelaunchAccess:
     @pytest.fixture
-    def jt_no_prompts(self, machine_credential, inventory):
-        return JobTemplate.objects.create(name='test-job_template', credential=machine_credential, inventory=inventory)
+    def job_no_prompts(self, machine_credential, inventory):
+        jt = JobTemplate.objects.create(name='test-job_template', credential=machine_credential, inventory=inventory)
+        return jt.create_unified_job()
 
     @pytest.fixture
-    def jt_with_prompts(self, jt_no_prompts):
-        jt_no_prompts.update(
+    def job_with_prompts(self, machine_credential, inventory, organization):
+        jt = JobTemplate.objects.create(
+            name='test-job-template-prompts', credential=machine_credential, inventory=inventory,
             ask_tags_on_launch=True, ask_variables_on_launch=True, ask_skip_tags_on_launch=True,
             ask_limit_on_launch=True, ask_job_type_on_launch=True, ask_inventory_on_launch=True,
             ask_credential_on_launch=True)
-        return jt_no_prompts
-
-    @pytest.fixture
-    def job_no_prompts(self, jt_no_prompts):
-        return jt_no_prompts.create_unified_job()
-
-    @pytest.fixture
-    def job_with_prompts(self, jt_with_prompts, organization):
         new_cred = Credential.objects.create(name='new-cred', kind='ssh', username='test_user', password='pas4word')
         new_inv = Inventory.objects.create(name='new-inv', organization=organization)
-        return jt_with_prompts.create_unified_job(credential=new_cred, inventory=new_inv)
+        return jt.create_unified_job(credential=new_cred, inventory=new_inv)
+
+    def test_normal_relaunch_via_job_template(self, job_no_prompts, rando):
+        "Has JT execute_role, job unchanged relative to JT"
+        job_no_prompts.job_template.execute_role.members.add(rando)
+        assert rando.can_access(Job, 'start', job_no_prompts)
 
     def test_no_relaunch_without_prompted_fields_access(self, job_with_prompts, rando):
         "Has JT execute_role but no use_role on inventory & credential - deny relaunch"
