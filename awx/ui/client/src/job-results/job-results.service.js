@@ -5,7 +5,7 @@
 *************************************************/
 
 
-export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', '$rootScope', function (Prompt, $filter, Wait, Rest, $state, ProcessErrors, $rootScope) {
+export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function (Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
     var val = {
         getHostStatusBarCounts: function(event_data) {
             var hosts = {};
@@ -63,6 +63,12 @@ export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 
                     return o.changed > 0;
                 })
             };
+
+            // turn the count into an actual count, rather than a list of host
+            // names
+            Object.keys(count).forEach(key => {
+                count[key] = count[key].length;
+            });
 
             return count;
         },

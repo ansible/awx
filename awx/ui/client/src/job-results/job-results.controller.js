@@ -58,6 +58,9 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
 
+    // Initially set the count data to have no hosts as finsihed
+    $scope.count = {ok: 0, skipped: 0, unreachable: 0, failures: 0, changed: 0};
+
     $scope.deleteJob = function() {
         jobResultsService.deleteJob($scope.job);
     };
@@ -67,20 +70,17 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
     };
 
     $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
-        console.log(data);
         if(data.event_name === "playbook_on_stats"){
             // get the data for populating the host status bar
-            jobResultsService.getHostStatusBarCounts(data.event_data);
+            $scope.count = jobResultsService
+                .getHostStatusBarCounts(data.event_data);
         }
 
     });
 
     $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
-        console.log(data);
         if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
             $scope.job.status = data.status;
-
-            // $scope.job.elapsed = data.elapsed;
         }
     });
 
