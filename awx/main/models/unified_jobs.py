@@ -861,7 +861,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
         self.socketio_emit_status("pending")
 
-        print("Running job launch for job %s" % self.name)
         from awx.main.scheduler.tasks import run_job_launch
         run_job_launch.delay(self.id)
 
