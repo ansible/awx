@@ -1094,17 +1094,35 @@ class JobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        # If a user can launch the job template then they can relaunch a job from that
-        # job template
+        inventory_access = obj.inventory and self.user in obj.inventory.use_role
+        credential_access = obj.credential and self.user in obj.credential.use_role
+
+        # Check if JT execute access (and related prompts) is sufficient
         if obj.job_template is not None:
-            return self.user in obj.job_template.execute_role
+            prompts_access = True
+            job_fields = {}
+            for fd in obj.job_template._ask_for_vars_dict():
+                job_fields[fd] = getattr(obj, fd)
+            accepted_fields, ignored_fields = obj.job_template._accept_or_ignore_job_kwargs(**job_fields)
+            for fd in ignored_fields:
+                if fd == 'extra_vars':
+                    if ignored_fields[fd]:
+                        prompts_access = False
+                elif job_fields[fd] != getattr(obj.job_template, fd):
+                    # Job has field that is not promptable
+                    prompts_access = False
+            if obj.credential != obj.job_template.credential and not credential_access:
+                prompts_access = False
+            if obj.inventory != obj.job_template.inventory and not inventory_access:
+                prompts_access = False
+            if prompts_access and self.user in obj.job_template.execute_role:
+                return True
 
-        inventory_access = self.user in obj.inventory.use_role
-        credential_access = self.user in obj.credential.use_role
 
-        org_access = self.user in obj.inventory.organization.admin_role
+        org_access = obj.inventory and self.user in obj.inventory.organization.admin_role
         project_access = obj.project is None or self.user in obj.project.admin_role
 
+        # job can be relaunched if user could make an equivalent JT
         return inventory_access and credential_access and (org_access or project_access)
 
     def can_cancel(self, obj):
