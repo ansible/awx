@@ -76,37 +76,60 @@ export default [function(){
         return count;
     };
 
+    // Get the count of the last event
+    var getPreviousCount = function(id) {
+        // get the ids of all the queue
+        var ids = Object.keys(val.queue).map(id => parseInt(id));
+
+        // iterate backwards to find the last count
+        while(ids.indexOf(id - 1) > -1) {
+            id = id - 1;
+            if (val.queue[id].count) {
+                // need to create a new copy of count when returning
+                // so that it is accurate for the particular event
+                return _.clone(val.queue[id].count);
+            }
+        }
+
+        // no count initialized
+        return {
+            ok: 0,
+            skipped: 0,
+            unreachable: 0,
+            failures: 0,
+            changed: 0
+        };
+    };
+
     // munge the raw event from the backend into the event_queue's format
     var mungeEvent = function(event) {
         var mungedEvent = {
             id: event.id,
-            processed: false
+            processed: false,
+            name: event.event_name,
+            count: getPreviousCount(event.id)
         };
+
         if (event.event_name === 'playbook_on_start') {
-            event.count = val.queue.count;
+            // sets count initially so this is a change
             mungedEvent.changes = ['count'];
         } else if (event.event_name === 'runner_on_ok' ||
             event.event_name === 'runner_on_async_ok') {
-            val.queue.count.ok++;
-            event.count = val.queue.count;
+            mungedEvent.count.ok++;
             mungedEvent.changes = ['count'];
         } else if (event.event_name === 'runner_on_skipped') {
-            val.queue.count.skipped++;
-            event.count = val.queue.count;
+            mungedEvent.count.skipped++;
             mungedEvent.changes = ['count'];
         } else if (event.event_name === 'runner_on_unreachable') {
-            val.queue.count.unreachable++;
-            event.count = val.queue.count;
+            mungedEvent.count.unreachable++;
             mungedEvent.changes = ['count'];
         } else if (event.event_name === 'runner_on_error' ||
             event.event_name === 'runner_on_async_failed') {
-            val.queue.count.failed++;
-            event.count = val.queue.count;
+            mungedEvent.count.failed++;
             mungedEvent.changes = ['count'];
         } else if (event.event_name === 'playbook_on_stats') {
             // get the data for populating the host status bar
-            val.queue.count = getCountsFromStatsEvent(event.event_data);
-            event.count = val.queue.count;
+            mungedEvent.count = getCountsFromStatsEvent(event.event_data);
             mungedEvent.changes = ['count'];
         }
         return mungedEvent;
@@ -117,15 +140,6 @@ export default [function(){
         // reinitializes the event queue value for the job results page
         initialize: function() {
             val.queue = {};
-
-            // initialize the host status counts
-            val.queue.count = {
-                ok: 0,
-                skipped: 0,
-                unreachable: 0,
-                failures: 0,
-                changed: 0
-            };
         },
         // populates the event queue
         populate: function(event) {

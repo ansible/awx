@@ -16,23 +16,27 @@ export default [ 'templateUrl',
             // as count is changed by event data coming in,
             // update the host status bar
             scope.$watch('count', function(val) {
-                Object.keys(val).forEach(key => {
-                    // reposition the hosts status bar by setting the
-                    // various flex values to the count of those hosts
-                    $(`.HostStatusBar-${key}`)
-                        .css('flex', `${val[key]} 0 auto`);
+                if (val) {
+                    Object.keys(val).forEach(key => {
+                        // reposition the hosts status bar by setting
+                        // the various flex values to the count of
+                        // those hosts
+                        $(`.HostStatusBar-${key}`)
+                            .css('flex', `${val[key]} 0 auto`);
 
-                    // set the tooltip to give how many hosts of each
-                    // type
-                    if (val[key] > 0) {
-                        scope[`${key}CountTip`] = `<span class='HostStatusBar-tooltipLabel'>${key}</span><span class='badge HostStatusBar-tooltipBadge HostStatusBar-tooltipBadge--${key}'>${val[key]}</span>`;
-                    }
-                });
+                        // set the tooltip to give how many hosts of
+                        // each type
+                        if (val[key] > 0) {
+                            scope[`${key}CountTip`] = `<span class='HostStatusBar-tooltipLabel'>${key}</span><span class='badge HostStatusBar-tooltipBadge HostStatusBar-tooltipBadge--${key}'>${val[key]}</span>`;
+                        }
+                    });
 
-                // if there are any hosts that have finished, don't show
-                // default grey bar
-                scope.hostsFinished = (Object
-                    .keys(val).filter(key => (val[key] > 0)).length > 0);
+                    // if there are any hosts that have finished, don't
+                    // show default grey bar
+                    scope.hostsFinished = (Object
+                        .keys(val)
+                        .filter(key => (val[key] > 0)).length > 0);
+                }
             });
         }
     };

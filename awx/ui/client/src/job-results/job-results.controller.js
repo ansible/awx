@@ -77,11 +77,13 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         var mungedEvent = eventQueue.populate(event);
 
         // make changes to ui based on the event returned from the queue
-        mungedEvent.changes.forEach(change => {
-            if (change === 'count') {
-                $scope.count = mungedEvent.count;
-            }
-        });
+        if (mungedEvent.changes) {
+            mungedEvent.changes.forEach(change => {
+                if (change === 'count') {
+                    $scope.count = mungedEvent.count;
+                }
+            });
+        }
 
         // the changes have been processed in the ui, mark it in the queue
         eventQueue.markProcessed(event);
