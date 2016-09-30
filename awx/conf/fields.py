@@ -34,6 +34,11 @@ class URLField(CharField):
             validator_kwargs['schemes'] = schemes
         self.validators.append(URLValidator(**validator_kwargs))
 
+    def to_representation(self, value):
+        if value is None:
+            return ''
+        return super(URLField, self).to_representation(value)
+
     def run_validators(self, value):
         if self.allow_plain_hostname:
             try:

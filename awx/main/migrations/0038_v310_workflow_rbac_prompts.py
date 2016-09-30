@@ -10,7 +10,7 @@ import awx.main.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0036_v310_remove_tower_settings'),
+        ('main', '0037_job_allow_simultaneous'),
     ]
 
     operations = [

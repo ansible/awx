@@ -349,6 +349,10 @@ class BaseDictWithChildField(fields.DictField):
     }
     allow_unknown_keys = False
 
+    def __init__(self, *args, **kwargs):
+        self.allow_blank = kwargs.pop('allow_blank', False)
+        super(BaseDictWithChildField, self).__init__(*args, **kwargs)
+
     def to_representation(self, value):
         value = super(BaseDictWithChildField, self).to_representation(value)
         for k, v in value.items():
@@ -367,7 +371,7 @@ class BaseDictWithChildField(fields.DictField):
                 continue
             elif key not in data:
                 missing_keys.add(key)
-        if missing_keys:
+        if missing_keys and (data or not self.allow_blank):
             keys_display = json.dumps(list(missing_keys)).lstrip('[').rstrip(']')
             self.fail('missing_keys', missing_keys=keys_display)
         if not self.allow_unknown_keys:

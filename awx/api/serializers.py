@@ -1069,7 +1069,6 @@ class InventoryDetailSerializer(InventorySerializer):
 
 
 class InventoryScriptSerializer(InventorySerializer):
-    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         fields = ()
@@ -1563,10 +1562,13 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
-            if role.content_type is not None:
+            try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
+            except AttributeError:
+                pass
+            if role.content_type is not None:
                 role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                     Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
             else:
@@ -1923,7 +1925,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch')
+                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
+                  'allow_simultaneous',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

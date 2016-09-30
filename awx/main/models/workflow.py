@@ -363,3 +363,11 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def get_notification_friendly_name(self):
         return "Workflow Job"
 
+    def start(self, *args, **kwargs):
+        (res, opts) = self.pre_start(**kwargs)
+        if res: 
+                self.status = 'running'
+                self.save()
+                self.socketio_emit_status("running")
+        return res
+
