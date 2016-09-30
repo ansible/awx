@@ -7,41 +7,46 @@
     margin-top: 10px;
 }
 
+.HostStatusBar-ok,
+.HostStatusBar-changed,
+.HostStatusBar-unreachable,
+.HostStatusBar-failures,
+.HostStatusBar-skipped,
+.HostStatusBar-noData {
+    height: 15px;
+    border-top: 5px solid @default-bg;
+    border-bottom: 5px solid @default-bg;
+}
+
 .HostStatusBar-ok {
     background-color: @default-succ;
     display: flex;
     flex: 0 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-changed {
     background-color: @default-warning;
     flex: 0 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-unreachable {
     background-color: @default-unreachable;
     flex: 0 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-failures {
     background-color: @default-err;
     flex: 0 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-skipped {
     background-color: @default-link;
     flex: 0 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-noData {
     background-color: @default-icon-hov;
     flex: 1 0 auto;
-    height: 5px;
 }
 
 .HostStatusBar-tooltipLabel {

@@ -7,13 +7,81 @@
 
 export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
     var val = {
-        getEvents: function(job) {
+        // the playbook_on_stats event returns the count data in a weird format.
+        // format to what we need!
+        getCountsFromStatsEvent: function(event_data) {
+            var hosts = {},
+                hostsArr;
+
+            // iterate over the event_data and populate an object with hosts
+            // and their status data
+            Object.keys(event_data).forEach(key => {
+                // failed passes boolean not integer
+                if (key === "failed") {
+                    // array of hosts from failed type
+                    hostsArr = Object.keys(event_data[key]);
+                    hostsArr.forEach(host => {
+                        if (!hosts[host]) {
+                            // host has not been added to hosts object
+                            // add now
+                            hosts[host] = {};
+                        }
+
+                        hosts[host][key] = event_data[key][host];
+                    });
+                } else {
+                    // array of hosts from each type ("changed", "dark", etc.)
+                    hostsArr = Object.keys(event_data[key]);
+                    hostsArr.forEach(host => {
+                        if (!hosts[host]) {
+                            // host has not been added to hosts object
+                            // add now
+                            hosts[host] = {};
+                        }
+
+                        if (!hosts[host][key]) {
+                            // host doesn't have key
+                            hosts[host][key] = 0;
+                        }
+                        hosts[host][key] += event_data[key][host];
+                    });
+                }
+            });
+
+            // use the hosts data populate above to get the count
+            var count = {
+                ok : _.filter(hosts, function(o){
+                    return !o.failures && !o.changed && o.ok > 0;
+                }),
+                skipped : _.filter(hosts, function(o){
+                    return o.skipped > 0;
+                }),
+                unreachable : _.filter(hosts, function(o){
+                    return o.dark > 0;
+                }),
+                failures : _.filter(hosts, function(o){
+                    return o.failed === true;
+                }),
+                changed : _.filter(hosts, function(o){
+                    return o.changed > 0;
+                })
+            };
+
+            // turn the count into an actual count, rather than a list of host
+            // names
+            Object.keys(count).forEach(key => {
+                count[key] = count[key].length;
+            });
+
+            return count;
+        },
+        getEvents: function(url) {
             var val = $q.defer();
 
-            Rest.setUrl(job.related.job_events);
+            Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    val.resolve(data.results);
+                    val.resolve({results: data.results, next: data.next});
                 })
                 .error(function(obj, status) {
                     ProcessErrors(null, obj, status, null, {

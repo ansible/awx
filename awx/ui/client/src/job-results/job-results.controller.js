@@ -1,4 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', function(jobData, jobDataOptions, jobLabels, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -34,6 +34,11 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         $scope.verbosity_label = getTowerLabel('verbosity');
     };
 
+    var getTotalHostCount = function(count) {
+        return Object
+            .keys(count).reduce((acc, i) => acc += count[i], 0);
+    };
+
     // put initially resolved request data on scope
     $scope.job = jobData;
     $scope.jobOptions = jobDataOptions.actions.GET;
@@ -66,6 +71,11 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         jobResultsService.cancelJob($scope.job);
     };
 
+    // get initial count from resolve
+    $scope.count = count.val;
+    $scope.hostCount = getTotalHostCount(count.val);
+    $scope.countFinished = count.countFinished;
+
     // EVENT STUFF BELOW
 
     // just putting the event queue on scope so it can be inspected in the
@@ -79,8 +89,14 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         // make changes to ui based on the event returned from the queue
         if (mungedEvent.changes) {
             mungedEvent.changes.forEach(change => {
-                if (change === 'count') {
+                if (change === 'count' && !$scope.countFinished) {
                     $scope.count = mungedEvent.count;
+                    $scope.hostCount = getTotalHostCount(mungedEvent
+                        .count);
+                }
+
+                if (change === 'countFnished') {
+                    $scope.countFinished = true;
                 }
             });
         }
@@ -90,15 +106,21 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
     };
 
     // grab completed event data and process each event
-    jobResultsService.getEvents($scope.job)
-        .then(events => {
-            events.forEach(event => {
-                // get the name in the same format as the data
-                // coming over the websocket
-                event.event_name = event.event;
-                processEvent(event);
+    var getEvents = function(url) {
+        jobResultsService.getEvents(url)
+            .then(events => {
+                events.results.forEach(event => {
+                    // get the name in the same format as the data
+                    // coming over the websocket
+                    event.event_name = event.event;
+                    processEvent(event);
+                });
+                if (events.next) {
+                    getEvents(events.next);
+                }
             });
-        });
+    };
+    getEvents($scope.job.related.job_events);
 
     // process incoming job events
     $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {

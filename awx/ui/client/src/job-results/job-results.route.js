@@ -35,6 +35,43 @@ export default {
                 });
             return val.promise;
         }],
+        count: ['jobData', 'jobResultsService', 'Rest', '$q', function(jobData, jobResultsService, Rest, $q) {
+            var defer = $q.defer();
+            if (jobData.finished) {
+                // if the job is finished, grab the playbook_on_stats
+                // role to get the final count
+                Rest.setUrl(jobData.related.job_events +
+                    "?event=playbook_on_stats");
+                Rest.get()
+                    .success(function(data) {
+                        defer.resolve({
+                            val: jobResultsService
+                                .getCountsFromStatsEvent(data
+                                    .results[0].event_data),
+                            countFinished: true});
+                    })
+                    .error(function() {
+                        defer.resolve({val: {
+                            ok: 0,
+                            skipped: 0,
+                            unreachable: 0,
+                            failures: 0,
+                            changed: 0
+                        }, countFinished: false});
+                    });
+            } else {
+                // job isn't finished so just send an empty count and read
+                // from events
+                defer.resolve({val: {
+                    ok: 0,
+                    skipped: 0,
+                    unreachable: 0,
+                    failures: 0,
+                    changed: 0
+                }, countFinished: false});
+            }
+            return defer.promise;
+        }],
         jobLabels: ['Rest', 'GetBasePath', '$stateParams', '$q', function(Rest, GetBasePath, $stateParams, $q) {
             var getNext = function(data, arr, resolve) {
                 Rest.setUrl(data.next);
