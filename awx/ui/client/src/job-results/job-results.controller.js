@@ -1,22 +1,4 @@
 export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue) {
-    // just putting the event queue on scope so it can be inspected in the
-    // console
-    $scope.event_queue = eventQueue.queue;
-
-    var processEvent = function(event) {
-        // put the event in the queue
-        eventQueue.populate(event);
-
-        if(event.event_name === "playbook_on_stats"){
-            // get the data for populating the host status bar
-            $scope.count = jobResultsService
-                .getHostStatusBarCounts(event.event_data);
-
-            // mark the event as processed in the queue;
-            eventQueue.markProcessed(event);
-        }
-    }
-
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -76,15 +58,33 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
     };
 
-    // Initially set the count data to have no hosts as finsihed
-    $scope.count = {ok: 0, skipped: 0, unreachable: 0, failures: 0, changed: 0};
-
     $scope.deleteJob = function() {
         jobResultsService.deleteJob($scope.job);
     };
 
     $scope.cancelJob = function() {
         jobResultsService.cancelJob($scope.job);
+    };
+
+    // EVENT STUFF BELOW
+
+    // just putting the event queue on scope so it can be inspected in the
+    // console
+    $scope.event_queue = eventQueue.queue;
+
+    var processEvent = function(event) {
+        // put the event in the queue
+        var mungedEvent = eventQueue.populate(event);
+
+        // make changes to ui based on the event returned from the queue
+        mungedEvent.changes.forEach(change => {
+            if (change === 'count') {
+                $scope.count = mungedEvent.count;
+            }
+        });
+
+        // the changes have been processed in the ui, mark it in the queue
+        eventQueue.markProcessed(event);
     };
 
     // grab completed event data and process each event
@@ -96,12 +96,11 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
                 event.event_name = event.event;
                 processEvent(event);
             });
-        })
+        });
 
     // process incoming job events
     $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
         processEvent(data);
-
     });
 
     // process incoming job status changes
