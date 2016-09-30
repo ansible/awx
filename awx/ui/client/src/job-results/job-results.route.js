@@ -88,6 +88,9 @@ export default {
             } else {
                 return true;
             }
+        }],
+        eventQueueInit: ['eventQueue', function(eventQueue) {
+            eventQueue.initialize();
         }]
     },
     templateUrl: templateUrl('job-results/job-results'),

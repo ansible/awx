@@ -1,4 +1,22 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', function(jobData, jobDataOptions, jobLabels, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue) {
+    // just putting the event queue on scope so it can be inspected in the
+    // console
+    $scope.event_queue = eventQueue.queue;
+
+    var processEvent = function(event) {
+        // put the event in the queue
+        eventQueue.populate(event);
+
+        if(event.event_name === "playbook_on_stats"){
+            // get the data for populating the host status bar
+            $scope.count = jobResultsService
+                .getHostStatusBarCounts(event.event_data);
+
+            // mark the event as processed in the queue;
+            eventQueue.markProcessed(event);
+        }
+    }
+
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -69,20 +87,27 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', '$scope', 'ParseTypeCh
         jobResultsService.cancelJob($scope.job);
     };
 
+    // grab completed event data and process each event
+    jobResultsService.getEvents($scope.job)
+        .then(events => {
+            events.forEach(event => {
+                // get the name in the same format as the data
+                // coming over the websocket
+                event.event_name = event.event;
+                processEvent(event);
+            });
+        })
+
+    // process incoming job events
     $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
-        if(data.event_name === "playbook_on_stats"){
-            // get the data for populating the host status bar
-            $scope.count = jobResultsService
-                .getHostStatusBarCounts(data.event_data);
-        }
+        processEvent(data);
 
     });
 
+    // process incoming job status changes
     $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
         if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
             $scope.job.status = data.status;
         }
     });
-
-
 }];

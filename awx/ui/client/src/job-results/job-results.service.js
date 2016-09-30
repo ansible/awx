@@ -5,10 +5,11 @@
 *************************************************/
 
 
-export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function (Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
     var val = {
         getHostStatusBarCounts: function(event_data) {
-            var hosts = {};
+            var hosts = {},
+                hostsArr;
 
             // iterate over the event_data and populate an object with hosts
             // and their status data
@@ -16,7 +17,7 @@ export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 
                 // failed passes boolean not integer
                 if (key === "failed") {
                     // array of hosts from failed type
-                    var hostsArr = Object.keys(event_data[key]);
+                    hostsArr = Object.keys(event_data[key]);
                     hostsArr.forEach(host => {
                         if (!hosts[host]) {
                             // host has not been added to hosts object
@@ -28,7 +29,7 @@ export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 
                     });
                 } else {
                     // array of hosts from each type ("changed", "dark", etc.)
-                    var hostsArr = Object.keys(event_data[key]);
+                    hostsArr = Object.keys(event_data[key]);
                     hostsArr.forEach(host => {
                         if (!hosts[host]) {
                             // host has not been added to hosts object
@@ -71,6 +72,25 @@ export default ['Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 
             });
 
             return count;
+        },
+        getEvents: function(job) {
+            var val = $q.defer();
+
+            Rest.setUrl(job.related.job_events);
+            Rest.get()
+                .success(function(data) {
+                    val.resolve(data.results);
+                })
+                .error(function(obj, status) {
+                    ProcessErrors(null, obj, status, null, {
+                        hdr: 'Error!',
+                        msg: `Could not get job events.
+                            Returned status: ${status}`
+                    });
+                    val.reject(obj);
+                });
+
+            return val.promise;
         },
         deleteJob: function(job) {
             Prompt({
