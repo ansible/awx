@@ -44,12 +44,12 @@ which users can administer the organization.
   users who will be added to the organization. Strings in the format
   "/<pattern>/<flags>" will be interpreted as regular expressions and may also
   be used instead of string literals; only "i" and "m" are supported for flags.
-- remove_admins: True/False. Defaults to False.
+- remove_admins: True/False. Defaults to True.
   If True, a user who does not match will be removed from the organization's
   administrative list.
 - users: None, True/False, string or list/tuple of strings. Same rules apply
   as for admins.
-- remove_users: True/False. Defaults to False. Same rules as apply for 
+- remove_users: True/False. Defaults to True. Same rules as apply for 
   remove_admins.\
 ''')
 
@@ -90,7 +90,7 @@ for each team's membership, where each can contain the following parameters:
   Strings in the format "/<pattern>/<flags>" will be interpreted as regular
   expressions and may also be used instead of string literals; only "i" and "m"
   are supported for flags.
-- remove: True/False. Defaults to False. If True, a user who does not match
+- remove: True/False. Defaults to True. If True, a user who does not match
   the rules above will be removed from the team.\
 ''')
 
@@ -434,7 +434,7 @@ register(
                 '   If a string or list of strings, specifies the group DN(s). '
                 'User will be added as a team member if the user is a member of '
                 'ANY of these groups.\n'
-                '- remove: True/False. Defaults to False. If True, a user who is '
+                '- remove: True/False. Defaults to True. If True, a user who is '
                 'not a member of the given groups will be removed from the team.'),
     category=_('LDAP'),
     category_slug='ldap',
