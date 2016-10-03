@@ -14,7 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_text
 
 # Django REST Framework
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, PermissionDenied
 from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
@@ -97,7 +97,10 @@ class FieldLookupBackend(BaseFilterBackend):
 
             new_parts.append(name)
 
-            if name == 'pk':
+            
+            if name in getattr(model, 'PASSWORD_FIELDS', ()):
+                raise PermissionDenied('Filtering on password fields is not allowed.')
+            elif name == 'pk':
                 field = model._meta.pk
             else:
                 field = model._meta.get_field_by_name(name)[0]
