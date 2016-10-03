@@ -14,7 +14,7 @@ from awx.api.serializers import JobTemplateSerializer
 
 # This file covers special-cases of displays of user_capabilities
 # general functionality should be covered fully by unit tests, see:
-#   awx/main/tests/unit/api/test_serializers.py :: 
+#   awx/main/tests/unit/api/serializers/test_job_template_serializers.py ::
 #           TestJobTemplateSerializerGetSummaryFields.test_copy_edit_standard
 #   awx/main/tests/unit/test_access.py ::
 #           test_user_capabilities_method
@@ -326,4 +326,13 @@ def test_group_update_capabilities_impossible(group, inventory_source, admin_use
 
     capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
     assert not capabilities['start']
+
+@pytest.mark.django_db
+def test_license_check_not_called(mocker, job_template, project, org_admin, get):
+    job_template.project = project
+    job_template.save() # need this to make the JT visible
+    mock_license_check = mocker.MagicMock()
+    with mocker.patch('awx.main.access.BaseAccess.check_license', mock_license_check):
+        get(reverse('api:job_template_detail', args=[job_template.pk]), org_admin, expect=200)
+        assert not mock_license_check.called
 
