@@ -61,4 +61,3 @@ def test_label_access_user(label, user):
 
     assert access.can_read(label)
     assert access.can_add({'organization': label.organization.id})
-
