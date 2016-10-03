@@ -2313,7 +2313,6 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
-        # TODO: workflow_job and job read-only
         model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job',)
 

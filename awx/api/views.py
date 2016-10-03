@@ -145,6 +145,8 @@ class ApiV1RootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list')
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list')
         data['workflow_jobs'] = reverse('api:workflow_job_list')
+        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list')
+        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list')
         return Response(data)
 
 
@@ -246,16 +248,16 @@ class ApiV1ConfigView(APIView):
         try:
             from awx.main.task_engine import TaskEnhancer
             license_data = json.loads(data_actual)
-            license_data = TaskEnhancer(**license_data).validate_enhancements()
+            license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
-        if license_data['valid_key']:
-            settings.LICENSE = data_actual
+        if license_data_validated['valid_key']:
+            settings.LICENSE = license_data
             settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
-            return Response(license_data)
+            return Response(license_data_validated)
 
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -2624,7 +2626,6 @@ class WorkflowJobTemplateNodeList(ListCreateAPIView):
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
     new_in_310 = True
-
 
 class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 
