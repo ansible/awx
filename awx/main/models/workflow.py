@@ -124,6 +124,14 @@ class WorkflowNodeBase(CreatedModifiedModel):
             data['missing'] = missing_dict
         return data
 
+    @classmethod
+    def _get_workflow_job_field_names(cls):
+        '''
+        Return field names that should be copied from template node to job node.
+        '''
+        return ['workflow_job', 'unified_job_template',
+                'inventory', 'credential', 'char_prompts']
+
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     # TODO: Ensure the API forces workflow_job_template being set
     workflow_job_template = models.ForeignKey(
@@ -137,6 +145,18 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
     
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_node_detail', args=(self.pk,))
+
+    def create_workflow_job_node(self, **kwargs):
+        '''
+        Create a new workflow job node based on this workflow node.
+        '''
+        create_kwargs = {}
+        for field_name in self._get_workflow_job_field_names():
+            if field_name in kwargs:
+                create_kwargs[field_name] = kwargs[field_name]
+            elif hasattr(self, field_name):
+                create_kwargs[field_name] = getattr(self, field_name)
+        return WorkflowJobNode.objects.create(**create_kwargs)
 
 class WorkflowJobNode(WorkflowNodeBase):
     job = models.ForeignKey(
@@ -278,11 +298,7 @@ class WorkflowJobInheritNodesMixin(object):
     Create a WorkflowJobNode for each WorkflowJobTemplateNode
     '''
     def _create_workflow_job_nodes(self, old_nodes):
-        return [WorkflowJobNode.objects.create(
-            workflow_job=self, unified_job_template=old_node.unified_job_template,
-            inventory=old_node.inventory, credential=old_node.credential,
-            char_prompts=old_node.char_prompts
-        ) for old_node in old_nodes]
+        return [old_node.create_workflow_job_node(workflow_job=self) for old_node in old_nodes]
 
     def _map_workflow_job_nodes(self, old_nodes, new_nodes):
         node_ids_map = {}
