@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host', 'ParseVariableString',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host, ParseVariableString){
         var generator = GenerateForm,
             form = HostForm;
         $scope.parseType = 'yaml';
@@ -31,12 +31,12 @@
         var init = function(){
             $scope.host = host;
             generator.inject(form, {mode: 'edit', related: false, id: 'Inventory-hostManage--panel', scope: $scope});
-            $scope.variables = host.variables === '' ? '---' : host.variables;
+            $scope.variables = host.variables === '' ? '---' : ParseVariableString(host.variables);
             $scope.name = host.name;
             $scope.description = host.description;
             ParseTypeChange({
                 scope: $scope,
-                field_id: 'host_variables',
+                field_id: 'host_variables'
             });
         };
         init();
