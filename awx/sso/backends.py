@@ -3,11 +3,13 @@
 
 # Python
 import logging
+import uuid
 
 # Django
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
+from django.core.signals import setting_changed
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -23,7 +25,7 @@ from social.backends.saml import SAMLAuth as BaseSAMLAuth
 from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 logger = logging.getLogger('awx.sso.backends')
 
@@ -42,6 +44,20 @@ class LDAPBackend(BaseLDAPBackend):
     '''
 
     settings_prefix = 'AUTH_LDAP_'
+
+    def __init__(self, *args, **kwargs):
+        self._dispatch_uid = uuid.uuid4()
+        super(LDAPBackend, self).__init__(*args, **kwargs)
+        setting_changed.connect(self._on_setting_changed, dispatch_uid=self._dispatch_uid)
+
+    def __del__(self):
+        setting_changed.disconnect(dispatch_uid=self._dispatch_uid)
+
+    def _on_setting_changed(self, sender, **kwargs):
+        # If any AUTH_LDAP_* setting changes, force settings to be reloaded for
+        # this backend instance.
+        if kwargs.get('setting', '').startswith(self.settings_prefix):
+            self._settings = None
 
     def _get_settings(self):
         if self._settings is None:

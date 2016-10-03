@@ -3,7 +3,7 @@
 .tags1
 
 # Tower
-awx/settings/local_settings.py*
+awx/settings/local_*.py*
 awx/*.sqlite3
 awx/*.sqlite3_*
 awx/job_status
@@ -51,8 +51,9 @@ __pycache__
 /tmp
 npm-debug.log
 
-# UI build debugging
+# UI build flag files
 awx/ui/.deps_built
+awx/ui/.release_built
 
 # Testing
 .cache

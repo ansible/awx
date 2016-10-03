@@ -40,9 +40,8 @@ from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
 from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
-from awx.main.conf import tower_settings
 
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 from awx.api.fields import BooleanNullField, CharNullField, ChoiceNullField, EncryptedPasswordField, VerbatimField
 
 logger = logging.getLogger('awx.api.serializers')
@@ -622,9 +621,9 @@ class UnifiedJobSerializer(BaseSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
+                                                                                                                         settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
 
@@ -679,9 +678,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
-        if obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+        if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                         tower_settings.STDOUT_MAX_BYTES_DISPLAY)
+                                                                                                                         settings.STDOUT_MAX_BYTES_DISPLAY)
         return obj.result_stdout
 
     def get_types(self):
@@ -1076,7 +1075,6 @@ class InventoryDetailSerializer(InventorySerializer):
 
 
 class InventoryScriptSerializer(InventorySerializer):
-    show_capabilities = ['copy', 'edit', 'delete']
 
     class Meta:
         fields = ()
@@ -1581,10 +1579,13 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         def format_role_perm(role):
             role_dict = { 'id': role.id, 'name': role.name, 'description': role.description}
-            if role.content_type is not None:
+            try:
                 role_dict['resource_name'] = role.content_object.name
                 role_dict['resource_type'] = role.content_type.name
                 role_dict['related'] = reverse_gfk(role.content_object)
+            except AttributeError:
+                pass
+            if role.content_type is not None:
                 role_dict['user_capabilities'] = {'unattach': requesting_user.can_access(
                     Role, 'unattach', role, user, 'members', data={}, skip_sub_obj_read_check=False)}
             else:
@@ -1952,7 +1953,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
-                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch')
+                  'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
+                  'allow_simultaneous',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -2099,7 +2101,7 @@ class AdHocCommandSerializer(UnifiedJobSerializer):
         # Load module name choices dynamically from DB settings.
         if field_name == 'module_name':
             field_class = serializers.ChoiceField
-            module_name_choices = [(x, x) for x in tower_settings.AD_HOC_COMMANDS]
+            module_name_choices = [(x, x) for x in settings.AD_HOC_COMMANDS]
             module_name_default = 'command' if 'command' in [x[0] for x in module_name_choices] else ''
             field_kwargs['choices'] = module_name_choices
             field_kwargs['required'] = bool(not module_name_default)
@@ -2276,7 +2278,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
-        model = WorkflowJobTemplateNode
+        model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job',)
 
     def get_related(self, obj):
@@ -2842,58 +2844,6 @@ class ActivityStreamSerializer(BaseSerializer):
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
-
-
-class TowerSettingsSerializer(BaseSerializer):
-
-    value = VerbatimField()
-
-    class Meta:
-        model = TowerSettings
-        fields = ('key', 'description', 'category', 'value', 'value_type', 'user')
-        read_only_fields = ('description', 'category', 'value_type', 'user')
-
-    def __init__(self, instance=None, data=serializers.empty, **kwargs):
-        if instance is None and data is not serializers.empty and 'key' in data:
-            try:
-                instance = TowerSettings.objects.get(key=data['key'])
-            except TowerSettings.DoesNotExist:
-                pass
-        super(TowerSettingsSerializer, self).__init__(instance, data, **kwargs)
-
-    def to_representation(self, obj):
-        ret = super(TowerSettingsSerializer, self).to_representation(obj)
-        ret['value'] = getattr(obj, 'value_converted', obj.value)
-        return ret
-
-    def to_internal_value(self, data):
-        if data['key'] not in settings.TOWER_SETTINGS_MANIFEST:
-            raise serializers.ValidationError({'key': ['Key {0} is not a valid settings key.'.format(data['key'])]})
-        ret = super(TowerSettingsSerializer, self).to_internal_value(data)
-        manifest_val = settings.TOWER_SETTINGS_MANIFEST[data['key']]
-        ret['description'] = manifest_val['description']
-        ret['category'] = manifest_val['category']
-        ret['value_type'] = manifest_val['type']
-        return ret
-
-    def validate(self, attrs):
-        manifest = settings.TOWER_SETTINGS_MANIFEST
-        if attrs['key'] not in manifest:
-            raise serializers.ValidationError(dict(key=["Key {0} is not a valid settings key.".format(attrs['key'])]))
-
-        if attrs['value_type'] == 'json':
-            attrs['value'] = json.dumps(attrs['value'])
-        elif attrs['value_type'] == 'list':
-            try:
-                attrs['value'] = ','.join(map(force_text, attrs['value']))
-            except TypeError:
-                attrs['value'] = force_text(attrs['value'])
-        elif attrs['value_type'] == 'bool':
-            attrs['value'] = force_text(bool(attrs['value']))
-        else:
-            attrs['value'] = force_text(attrs['value'])
-
-        return super(TowerSettingsSerializer, self).validate(attrs)
 
 
 class AuthTokenSerializer(serializers.Serializer):

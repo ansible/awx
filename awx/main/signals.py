@@ -8,6 +8,7 @@ import threading
 import json
 
 # Django
+from django.conf import settings
 from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
@@ -21,7 +22,6 @@ from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
-from awx.main.conf import tower_settings
 
 from awx.main.consumers import emit_channel_notification
 
@@ -302,10 +302,10 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
-        self.enabled = getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True)
+        self.enabled = True
 
     def __nonzero__(self):
-        return bool(self.enabled)
+        return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
 
 activity_stream_enabled = ActivityStreamEnabled()
 
@@ -335,7 +335,6 @@ model_serializer_mapping = {
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
-    TowerSettings: TowerSettingsSerializer,
     NotificationTemplate: NotificationTemplateSerializer,
     Notification: NotificationSerializer,
 }
@@ -359,7 +358,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.
-        if type(instance) is not TowerSettings:
+        if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
             getattr(activity_entry, object1).add(instance)
 
 def activity_stream_update(sender, instance, **kwargs):
@@ -382,7 +381,7 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-    if type(instance) is not TowerSettings:
+    if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         getattr(activity_entry, object1).add(instance)
 
 def activity_stream_delete(sender, instance, **kwargs):

@@ -8,7 +8,7 @@ import re
 from social.exceptions import AuthException
 
 # Tower
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 
 class AuthNotFound(AuthException):

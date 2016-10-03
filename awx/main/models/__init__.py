@@ -16,7 +16,6 @@ from awx.main.models.ad_hoc_commands import * # noqa
 from awx.main.models.schedules import * # noqa
 from awx.main.models.activity_stream import * # noqa
 from awx.main.models.ha import * # noqa
-from awx.main.models.configuration import * # noqa
 from awx.main.models.rbac import * # noqa
 from awx.main.models.mixins import * # noqa
 from awx.main.models.notifications import * # noqa
@@ -99,7 +98,6 @@ activity_stream_registrar.connect(AdHocCommand)
 # activity_stream_registrar.connect(Profile)
 activity_stream_registrar.connect(Schedule)
 activity_stream_registrar.connect(CustomInventoryScript)
-activity_stream_registrar.connect(TowerSettings)
 activity_stream_registrar.connect(NotificationTemplate)
 activity_stream_registrar.connect(Notification)
 activity_stream_registrar.connect(Label)

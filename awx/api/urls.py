@@ -319,10 +319,6 @@ activity_stream_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'activity_stream_detail'),
 )
 
-settings_urls = patterns('awx.api.views',
-                         url(r'^$',                     'settings_list'),
-                         url(r'^reset/$',               'settings_reset'))
-
 v1_urls = patterns('awx.api.views',
     url(r'^$',                      'api_v1_root_view'),
     url(r'^ping/$',                 'api_v1_ping_view'),
@@ -332,7 +328,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^me/$',                   'user_me_list'),
     url(r'^dashboard/$',            'dashboard_view'),
     url(r'^dashboard/graphs/jobs/$','dashboard_jobs_graph_view'),
-    url(r'^settings/',              include(settings_urls)),
+    url(r'^settings/',              include('awx.conf.urls')),
     url(r'^schedules/',             include(schedule_urls)),
     url(r'^organizations/',         include(organization_urls)),
     url(r'^users/',                 include(user_urls)),

@@ -12,7 +12,6 @@ import sys
 import tempfile
 import time
 import urllib
-from multiprocessing import Process
 import re
 import mock
 
@@ -30,9 +29,8 @@ from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.management.commands.run_task_system import run_taskmanager
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import get_ansible_version
-from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings
 from awx.main.tests.URI import URI # noqa
 
@@ -143,35 +141,25 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         return __name__ + '-generated-' + string + rnd_str
 
     def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features=None):
-        writer = LicenseWriter(
+        settings.LICENSE = TaskEnhancer(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
             license_type='enterprise',
-            features=features)
-        handle, license_path = tempfile.mkstemp(suffix='.json')
-        os.close(handle)
-        writer.write_file(license_path)
-        self._temp_paths.append(license_path)
-        os.environ['AWX_LICENSE_FILE'] = license_path
-        cache.clear()
+            features=features,
+        ).enhance()
 
     def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
-        writer = LicenseWriter(
+        settings.LICENSE = TaskEnhancer(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
-            license_type='basic')
-        handle, license_path = tempfile.mkstemp(suffix='.json')
-        os.close(handle)
-        writer.write_file(license_path)
-        self._temp_paths.append(license_path)
-        os.environ['AWX_LICENSE_FILE'] = license_path
-        cache.clear()
+            license_type='basic',
+        ).enhance()
 
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
@@ -653,18 +641,6 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
             self.assertFalse(job.result_traceback,
                              u'expected no traceback, got:\n%s' %
                              job.result_traceback)
-
-
-    def start_taskmanager(self, command_port):
-        self.start_redis()
-        self.taskmanager_process = Process(target=run_taskmanager,
-                                           args=(command_port,))
-        self.taskmanager_process.start()
-
-    def terminate_taskmanager(self):
-        if hasattr(self, 'taskmanager_process'):
-            self.taskmanager_process.terminate()
-        self.stop_redis()
 
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''

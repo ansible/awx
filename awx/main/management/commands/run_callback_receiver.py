@@ -117,7 +117,7 @@ class CallbackBrokerWorker(ConsumerMixin):
                     else:
                         print("Cache hit")
                         j.parent_id = parent_id
-                j.save()
+                j.save(post_process=True)
                 if event_uuid:
                     cache.set("{}_{}".format(payload['job_id'], event_uuid), j.id, 300)
         except DatabaseError as e:

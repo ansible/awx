@@ -4,6 +4,7 @@
 import sys
 
 from django.db import models
+from django.conf import settings
 
 
 class HostManager(models.Manager):
@@ -25,7 +26,7 @@ class InstanceManager(models.Manager):
     def me(self):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
+        if settings.IS_TESTING(sys.argv):
             return self.model(id=1,
                               hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')

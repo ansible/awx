@@ -13,7 +13,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models.fact import Fact
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 OLDER_THAN = 'older_than'
 GRANULARITY = 'granularity'

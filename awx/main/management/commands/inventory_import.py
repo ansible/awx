@@ -26,10 +26,9 @@ from django.utils.encoding import smart_text
 
 # AWX
 from awx.main.models import * # noqa
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import ignore_inventory_computed_fields, check_proot_installed, wrap_args_with_proot
 from awx.main.signals import disable_activity_stream
-from awx.main.task_engine import TaskSerializer as LicenseReader
-from awx.main.conf import tower_settings
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -358,7 +357,7 @@ class ExecutableJsonLoader(BaseLoader):
         data = {}
         stdout, stderr = '', ''
         try:
-            if self.is_custom and getattr(tower_settings, 'AWX_PROOT_ENABLED', False):
+            if self.is_custom and getattr(settings, 'AWX_PROOT_ENABLED', False):
                 if not check_proot_installed():
                     raise RuntimeError("proot is not installed but is configured for use")
                 kwargs = {'proot_temp_dir': self.source_dir} # TODO: Remove proot dir
@@ -1191,8 +1190,7 @@ class Command(NoArgsCommand):
         self._create_update_group_hosts()
 
     def check_license(self):
-        reader = LicenseReader()
-        license_info = reader.from_database()
+        license_info = TaskEnhancer().validate_enhancements()
         if not license_info or len(license_info) == 0:
             self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No Tower license found!')

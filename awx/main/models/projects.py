@@ -28,7 +28,6 @@ from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
 from awx.main.fields import ImplicitRoleField
-from awx.main.conf import tower_settings
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
@@ -433,7 +432,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         return reverse('api:project_update_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
+        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

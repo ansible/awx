@@ -22,7 +22,6 @@ from jsonfield import JSONField
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.utils import decrypt_field
-from awx.main.conf import tower_settings
 from awx.main.models.notifications import JobNotificationMixin
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
@@ -115,7 +114,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         if type(self.module_name) not in (str, unicode):
             raise ValidationError("Invalid type for ad hoc command")
         module_name = self.module_name.strip() or 'command'
-        if module_name not in tower_settings.AD_HOC_COMMANDS:
+        if module_name not in settings.AD_HOC_COMMANDS:
             raise ValidationError('Unsupported module for ad hoc commands.')
         return module_name
 
@@ -148,7 +147,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         return reverse('api:ad_hoc_command_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
 
     @property
     def task_auth_token(self):

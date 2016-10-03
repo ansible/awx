@@ -29,13 +29,18 @@ class Metadata(metadata.SimpleMetadata):
         text_attrs = [
             'read_only', 'label', 'help_text',
             'min_length', 'max_length',
-            'min_value', 'max_value'
+            'min_value', 'max_value',
+            'category', 'category_slug',
         ]
 
         for attr in text_attrs:
             value = getattr(field, attr, None)
             if value is not None and value != '':
                 field_info[attr] = force_text(value, strings_only=True)
+
+        placeholder = getattr(field, 'placeholder', serializers.empty)
+        if placeholder is not serializers.empty:
+            field_info['placeholder'] = placeholder
 
         # Update help text for common fields.
         serializer = getattr(field, 'parent', None)
@@ -52,9 +57,10 @@ class Metadata(metadata.SimpleMetadata):
                 'modified': 'Timestamp when this {} was last modified.',
             }
             if field.field_name in field_help_text:
-                opts = serializer.Meta.model._meta.concrete_model._meta
-                verbose_name = smart_text(opts.verbose_name)
-                field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
+                if hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
+                    opts = serializer.Meta.model._meta.concrete_model._meta
+                    verbose_name = smart_text(opts.verbose_name)
+                    field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
@@ -140,11 +146,10 @@ class Metadata(metadata.SimpleMetadata):
                 # For GET method, remove meta attributes that aren't relevant
                 # when reading a field and remove write-only fields.
                 if method == 'GET':
-                    meta.pop('required', None)
-                    meta.pop('read_only', None)
-                    meta.pop('default', None)
-                    meta.pop('min_length', None)
-                    meta.pop('max_length', None)
+                    attrs_to_remove = ('required', 'read_only', 'default', 'min_length', 'max_length', 'placeholder')
+                    for attr in attrs_to_remove:
+                        meta.pop(attr, None)
+                        meta.get('child', {}).pop(attr, None)
                     if meta.pop('write_only', False):
                         actions['GET'].pop(field)
 
@@ -160,7 +165,7 @@ class Metadata(metadata.SimpleMetadata):
 
         # Add version number in which view was added to Tower.
         added_in_version = '1.2'
-        for version in ('3.0.0', '2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
+        for version in ('3.1.0', '3.0.0', '2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
             if getattr(view, 'new_in_%s' % version.replace('.', ''), False):
                 added_in_version = version
                 break

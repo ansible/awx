@@ -97,14 +97,14 @@ class RequireDebugTrueOrTest(logging.Filter):
         return settings.DEBUG or 'test' in sys.argv
 
 
-def memoize(ttl=60):
+def memoize(ttl=60, cache_key=None):
     '''
     Decorator to wrap a function and cache its result.
     '''
     from django.core.cache import cache
 
     def _memoizer(f, *args, **kwargs):
-        key = slugify('%s %r %r' % (f.__name__, args, kwargs))
+        key = cache_key or slugify('%s %r %r' % (f.__name__, args, kwargs))
         value = cache.get(key)
         if value is None:
             value = f(*args, **kwargs)
@@ -475,6 +475,7 @@ def cache_list_capabilities(page, prefetch_list, model, user):
                 obj.capabilities_cache[display_method] = True
 
 
+@memoize()
 def get_system_task_capacity():
     '''
     Measure system memory and use it as a baseline for determining the system's capacity
@@ -537,8 +538,8 @@ def build_proot_temp_dir():
     '''
     Create a temporary directory for proot to use.
     '''
-    from awx.main.conf import tower_settings
-    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=tower_settings.AWX_PROOT_BASE_PATH)
+    from django.conf import settings
+    path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
 
@@ -551,14 +552,13 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /var/log/supervisor
      - /tmp (except for own tmp files)
     '''
-    from awx.main.conf import tower_settings
     from django.conf import settings
     new_args = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '-v',
                 str(getattr(settings, 'AWX_PROOT_VERBOSITY', '0')), '-r', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
                   settings.JOBOUTPUT_ROOT]
-    hide_paths.extend(getattr(tower_settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
+    hide_paths.extend(getattr(settings, 'AWX_PROOT_HIDE_PATHS', None) or [])
     for path in sorted(set(hide_paths)):
         if not os.path.exists(path):
             continue
@@ -578,7 +578,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
         show_paths.append(settings.ANSIBLE_VENV_PATH)
     if settings.TOWER_USE_VENV:
         show_paths.append(settings.TOWER_VENV_PATH)
-    show_paths.extend(getattr(tower_settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
+    show_paths.extend(getattr(settings, 'AWX_PROOT_SHOW_PATHS', None) or [])
     for path in sorted(set(show_paths)):
         if not os.path.exists(path):
             continue

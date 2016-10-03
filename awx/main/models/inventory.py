@@ -30,7 +30,6 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import _inventory_updates
-from awx.main.conf import tower_settings
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
 
@@ -1244,7 +1243,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         return reverse('api:inventory_update_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
 
     def is_blocked_by(self, obj):
         if type(obj) == InventoryUpdate:

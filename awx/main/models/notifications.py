@@ -181,11 +181,11 @@ class JobNotificationMixin(object):
 
     def _build_notification_message(self, status_str):
         notification_body = self.notification_data()
-        notification_subject = "{} #{} '{}' {} on Ansible Tower: {}".format(self.get_notification_friendly_name(),
-                                                                            self.id,
-                                                                            self.name,
-                                                                            status_str,
-                                                                            notification_body['url'])
+        notification_subject = u"{} #{} '{}' {} on Ansible Tower: {}".format(self.get_notification_friendly_name(),
+                                                                             self.id,
+                                                                             self.name,
+                                                                             status_str,
+                                                                             notification_body['url'])
         notification_body['friendly_name'] = self.get_notification_friendly_name()
         return (notification_subject, notification_body)
 
