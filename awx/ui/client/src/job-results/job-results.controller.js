@@ -76,36 +76,55 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     $scope.hostCount = getTotalHostCount(count.val);
     $scope.countFinished = count.countFinished;
 
+    // Process incoming job status changes
+    $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
+            $scope.job.status = data.status;
+        }
+    });
+
     // EVENT STUFF BELOW
 
     // just putting the event queue on scope so it can be inspected in the
     // console
     $scope.event_queue = eventQueue.queue;
+    $scope.defersArr = eventQueue.populateDefers;
 
+    // This is where the async updates to the UI actually happen.
+    // Flow is event queue munging in the service -> $scope setting in here
     var processEvent = function(event) {
         // put the event in the queue
-        var mungedEvent = eventQueue.populate(event);
+        eventQueue.populate(event).then(mungedEvent => {
+            // make changes to ui based on the event returned from the queue
+            if (mungedEvent.changes) {
+                mungedEvent.changes.forEach(change => {
+                    // we've got a change we need to make to the UI!
+                    // update the necessary scope and make the change
+                    if (change === 'count' && !$scope.countFinished) {
+                        // for all events that affect the host count,
+                        // update the status bar as well as the host
+                        // count badge
+                        $scope.count = mungedEvent.count;
+                        $scope.hostCount = getTotalHostCount(mungedEvent
+                            .count);
+                    }
 
-        // make changes to ui based on the event returned from the queue
-        if (mungedEvent.changes) {
-            mungedEvent.changes.forEach(change => {
-                if (change === 'count' && !$scope.countFinished) {
-                    $scope.count = mungedEvent.count;
-                    $scope.hostCount = getTotalHostCount(mungedEvent
-                        .count);
-                }
+                    if (change === 'countFinished') {
+                        // the playbook_on_stats event actually lets
+                        // us know that we don't need to iteratively
+                        // look at event to update the host counts
+                        // any more.
+                        $scope.countFinished = true;
+                    }
+                });
+            }
 
-                if (change === 'countFnished') {
-                    $scope.countFinished = true;
-                }
-            });
-        }
-
-        // the changes have been processed in the ui, mark it in the queue
-        eventQueue.markProcessed(event);
+            // the changes have been processed in the ui, mark it in the queue
+            eventQueue.markProcessed(event);
+        });
     };
 
-    // grab completed event data and process each event
+    // PULL! grab completed event data and process each event
     var getEvents = function(url) {
         jobResultsService.getEvents(url)
             .then(events => {
@@ -122,15 +141,14 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     };
     getEvents($scope.job.related.job_events);
 
-    // process incoming job events
+    // PUSH! process incoming job events
     $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
         processEvent(data);
     });
 
-    // process incoming job status changes
-    $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
-        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
-            $scope.job.status = data.status;
-        }
+    // STOP! stop listening to job events
+    $scope.$on('$destroy', function() {
+        $rootScope.event_socket.removeAllListeners("job_events-" +
+            $scope.job.id);
     });
 }];

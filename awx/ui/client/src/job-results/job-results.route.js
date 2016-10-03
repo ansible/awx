@@ -16,6 +16,7 @@ export default {
         label: '{{ job.id }} - {{ job.name }}'
     },
     resolve: {
+        // the GET for the particular job
         jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', function(Rest, GetBasePath, $stateParams, $q, $state, Alert) {
             Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
             var val = $q.defer();
@@ -35,6 +36,10 @@ export default {
                 });
             return val.promise;
         }],
+        // after the GET for the job, this helps us keep the status bar from
+        // flashing as rest data comes in.  If the job is finished and
+        // there's a playbook_on_stats event, go ahead and resolve the count
+        // so you don't get that flashing!
         count: ['jobData', 'jobResultsService', 'Rest', '$q', function(jobData, jobResultsService, Rest, $q) {
             var defer = $q.defer();
             if (jobData.finished) {
@@ -72,6 +77,8 @@ export default {
             }
             return defer.promise;
         }],
+        // GET for the particular jobs labels to be displayed in the
+        // left-hand pane
         jobLabels: ['Rest', 'GetBasePath', '$stateParams', '$q', function(Rest, GetBasePath, $stateParams, $q) {
             var getNext = function(data, arr, resolve) {
                 Rest.setUrl(data.next);
@@ -101,6 +108,9 @@ export default {
 
             return seeMoreResolve.promise;
         }],
+        // OPTIONS request for the job.  Used to make things like the
+        // verbosity data in the left-hand pane prettier than just an
+        // integer
         jobDataOptions: ['Rest', 'GetBasePath', '$stateParams', '$q', function(Rest, GetBasePath, $stateParams, $q) {
             Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
             var val = $q.defer();
@@ -112,6 +122,11 @@ export default {
                 });
             return val.promise;
         }],
+        // This gives us access to the job events socket so we can start
+        // listening for updates we need to make for the ui as data comes in
+        //
+        // TODO: we could probably make this better by not initing
+        // job_events for completed jobs
         jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
             if (!$rootScope.event_socket) {
                 $rootScope.event_socket = Socket({
@@ -126,6 +141,8 @@ export default {
                 return true;
             }
         }],
+        // This clears out the event queue, otherwise it'd be full of events
+        // for previous job results the user had navigated to
         eventQueueInit: ['eventQueue', function(eventQueue) {
             eventQueue.initialize();
         }]
