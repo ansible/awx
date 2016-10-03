@@ -53,9 +53,7 @@ def spawn_workflow_graph_jobs(workflow_jobs):
         dag = WorkflowDAG(workflow_job)
         spawn_nodes = dag.bfs_nodes_to_run()
         for spawn_node in spawn_nodes:
-            # TODO: Inject job template template params as kwargs.
-            # Make sure to take into account extra_vars merge logic
-            kv = {}
+            kv = spawn_node.get_job_kwargs()
             job = spawn_node.unified_job_template.create_unified_job(**kv)
             spawn_node.job = job
             spawn_node.save()

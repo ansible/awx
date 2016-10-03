@@ -4,10 +4,15 @@
 # Python
 import base64
 import re
+import yaml
+import json
 
 # Django
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
+
+# REST framework
+from rest_framework.serializers import ValidationError as RestValidationError
 
 
 def validate_pem(data, min_keys=0, max_keys=None, min_certs=0, max_certs=None):
@@ -166,3 +171,21 @@ def validate_ssh_private_key(data):
     credential.
     """
     return validate_pem(data, min_keys=1)
+
+def vars_validate_or_raise(vars_str):
+    """
+    Validate that fields like extra_vars or variables on resources like
+    job templates, inventories, or hosts are either an acceptable
+    blank string, or are valid JSON or YAML dict
+    """
+    try:
+        json.loads((vars_str or '').strip() or '{}')
+        return vars_str
+    except ValueError:
+        pass
+    try:
+        yaml.safe_load(vars_str)
+        return vars_str
+    except yaml.YAMLError:
+        pass
+    raise RestValidationError('Must be valid JSON or YAML.')

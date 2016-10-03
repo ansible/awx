@@ -360,16 +360,20 @@ def generate_workflow_job_template_nodes(workflow_job_template,
         new_node = WorkflowJobTemplateNode(workflow_job_template=workflow_job_template,
                                            unified_job_template=node['unified_job_template'],
                                            id=i)
+        if persisted:
+            new_node.save()
         new_nodes.append(new_node)
 
     node_types = ['success_nodes', 'failure_nodes', 'always_nodes']
     for node_type in node_types:
         for i, new_node in enumerate(new_nodes):
+            if node_type not in workflow_job_template_nodes[i]:
+                continue
             for related_index in workflow_job_template_nodes[i][node_type]:
                 getattr(new_node, node_type).add(new_nodes[related_index])
 
 # TODO: Implement survey and jobs
-def create_workflow_job_template(name, persisted=True, **kwargs):
+def create_workflow_job_template(name, organization=None, persisted=True, **kwargs):
     Objects = generate_objects(["workflow_job_template",
                                 "workflow_job_template_nodes",
                                 "survey",], kwargs)
@@ -382,7 +386,8 @@ def create_workflow_job_template(name, persisted=True, **kwargs):
     if 'survey' in kwargs:
         spec = create_survey_spec(kwargs['survey'])
 
-    wfjt = mk_workflow_job_template(name, 
+    wfjt = mk_workflow_job_template(name,
+                                    organization=organization,
                                     spec=spec, 
                                     extra_vars=extra_vars,
                                     persisted=persisted)

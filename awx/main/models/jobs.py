@@ -33,6 +33,7 @@ from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
+from awx.main.models.base import PERM_INVENTORY_SCAN
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -271,7 +272,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 validation_errors['credential'] = ["Job Template must provide 'credential' or allow prompting for it.",]
 
         # Job type dependent checks
-        if self.job_type == 'scan':
+        if self.job_type == PERM_INVENTORY_SCAN:
             if self.inventory is None or self.ask_inventory_on_launch:
                 validation_errors['inventory'] = ["Scan jobs must be assigned a fixed inventory.",]
         elif self.project is None:
@@ -473,12 +474,23 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                     else:
                         ignored_fields[field] = kwargs[field]
 
-        # Special case to ignore inventory if it is a scan job
-        if prompted_fields.get('job_type', None) == 'scan' or self.job_type == 'scan':
-            if 'inventory' in prompted_fields:
-                ignored_fields['inventory'] = prompted_fields.pop('inventory')
-
         return prompted_fields, ignored_fields
+
+    def _extra_job_type_errors(self, data):
+        """
+        Used to enforce 2 special cases around scan jobs and prompting
+         - the inventory can not be changed on a scan job template
+         - scan jobs can not be switched to run/check type and vice versa
+        """
+        errors = {}
+        if 'job_type' in data and self.ask_job_type_on_launch:
+            if ((self.job_type == PERM_INVENTORY_SCAN and not data['job_type'] == PERM_INVENTORY_SCAN) or
+                    (data['job_type'] == PERM_INVENTORY_SCAN and not self.job_type == PERM_INVENTORY_SCAN)):
+                errors['job_type'] = 'Can not override job_type to or from a scan job.'
+        if (self.job_type == PERM_INVENTORY_SCAN and ('inventory' in data) and self.ask_inventory_on_launch and
+                self.inventory != data['inventory']):
+            errors['inventory'] = 'Inventory can not be changed at runtime for scan jobs.'
+        return errors
 
     @property
     def cache_timeout_blocked(self):

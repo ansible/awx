@@ -2609,13 +2609,13 @@ class JobTemplateObjectRolesList(SubListAPIView):
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
-class WorkflowJobNodeList(ListCreateAPIView):
+class WorkflowJobNodeList(ListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
     new_in_310 = True
 
-class WorkflowJobNodeDetail(RetrieveUpdateDestroyAPIView):
+class WorkflowJobNodeDetail(RetrieveAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeDetailSerializer
@@ -2632,6 +2632,16 @@ class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeDetailSerializer
     new_in_310 = True
+
+    def update_raw_data(self, data):
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
+            data[fd] = None
+        try:
+            obj = self.get_object()
+            data.update(obj.char_prompts)
+        except:
+            pass
+        return super(WorkflowJobTemplateNodeDetail, self).update_raw_data(data)
 
 
 class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
@@ -2724,7 +2734,10 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
     serializer_class = EmptySerializer
 
     def get(self, request, *args, **kwargs):
-        return Response({})
+        data = {}
+        obj = self.get_object()
+        data['warnings'] = obj.get_warnings()
+        return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2741,7 +2754,6 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
-    always_allow_superuser = True # TODO: RBAC
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
@@ -2755,16 +2767,10 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'workflow_job_template'
 
-# TODO: 
 class WorkflowJobList(ListCreateAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_superuser and not request.user.is_system_auditor:
-            raise PermissionDenied("Superuser privileges needed.")
-        return super(WorkflowJobList, self).get(request, *args, **kwargs)
 
 # TODO:
 class WorkflowJobDetail(RetrieveDestroyAPIView):
