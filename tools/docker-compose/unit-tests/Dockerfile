@@ -20,6 +20,7 @@ RUN yum install -y \
 	/usr/bin/pg_config \
 	openldap-devel \
 	postgresql-devel \
+    rabbitmq-server \
 	libtool-ltdl-devel
 
 # NOTE: The following steps work for tower-3.0.0

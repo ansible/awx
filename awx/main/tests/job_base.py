@@ -616,12 +616,12 @@ class BaseJobTestMixin(BaseTestMixin):
 
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
-        self.start_redis()
+        self.start_rabbit()
         self.setup_instances()
         self.populate()
         self.start_queue()
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
         self.terminate_queue()
