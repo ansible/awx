@@ -130,12 +130,20 @@ export default
                                 goToJobDetails('managementJobStdout');
                             }
                             else if(_.has(data, 'project_update')) {
-                                if($state.current.name !== 'projects') {
+                                // If we are on the projects list or any child state of that list
+                                // then we want to stay on that page.  Otherwise go to the stdout
+                                // view.
+                                if(!$state.includes('projects')) {
                                     goToJobDetails('scmUpdateStdout');
                                 }
                             }
                             else if(_.has(data, 'inventory_update')) {
-                                goToJobDetails('inventorySyncStdout');
+                                // If we are on the inventory manage page or any child state of that
+                                // page then we want to stay on that page.  Otherwise go to the stdout
+                                // view.
+                                if(!$state.includes('inventoryManage')) {
+                                    goToJobDetails('inventorySyncStdout');
+                                }
                             }
                         }
                         if(scope.clearDialog) {
