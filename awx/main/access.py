@@ -1066,7 +1066,7 @@ class JobTemplateAccess(BaseAccess):
                 required_obj = getattr(obj, required_field, None)
                 if required_field not in data_for_change and required_obj is not None:
                     data_for_change[required_field] = required_obj.pk
-        return self.can_read(obj) and self.can_add(data_for_change)
+        return self.can_read(obj) and (self.can_add(data_for_change) if data is not None else True)
 
     def changes_are_non_sensitive(self, obj, data):
         '''
