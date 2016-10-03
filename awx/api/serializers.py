@@ -2278,7 +2278,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
-        model = WorkflowJobTemplateNode
+        model = WorkflowJobNode
         fields = ('*', 'job', 'workflow_job',)
 
     def get_related(self, obj):

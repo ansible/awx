@@ -145,6 +145,8 @@ class ApiV1RootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list')
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list')
         data['workflow_jobs'] = reverse('api:workflow_job_list')
+        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list')
+        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list')
         return Response(data)
 
 
@@ -2607,28 +2609,24 @@ class JobTemplateObjectRolesList(SubListAPIView):
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
-# TODO:
 class WorkflowJobNodeList(ListCreateAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeDetailSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplateNode
