@@ -23,7 +23,7 @@ CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
-SRC_ONLY_PKGS ?= cffi
+SRC_ONLY_PKGS ?= cffi,pycparser
 
 # Determine appropriate shasum command
 UNAME_S := $(shell uname -s)
