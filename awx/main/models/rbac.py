@@ -381,7 +381,7 @@ class Role(models.Model):
             'ancestors_table': Role.ancestors.through._meta.db_table,
             'parents_table': Role.parents.through._meta.db_table,
             'roles_table': Role._meta.db_table,
-            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True))
+            'ids': ','.join(str(x) for x in user.roles.values_list('id', flat=True)),
         }
 
         qs = Role.objects.extra(

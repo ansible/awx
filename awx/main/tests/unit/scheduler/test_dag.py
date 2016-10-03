@@ -1,10 +1,12 @@
-from awx.main.management.commands.run_task_system import (
-    SimpleDAG,
-    WorkflowDAG,
-)
+
+# Python
+import pytest
+
+# AWX
+from awx.main.scheduler.dag_simple import SimpleDAG
+from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.models import Job
 from awx.main.models.workflow import WorkflowJobNode
-import pytest
 
 @pytest.fixture
 def dag_root():

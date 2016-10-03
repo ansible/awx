@@ -47,9 +47,7 @@ from django.contrib.auth.models import User
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
-from awx.main.queue import FifoQueue
-from awx.main.conf import tower_settings
-from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
 from awx.main.consumers import emit_channel_notification
@@ -58,7 +56,7 @@ __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error',
            'handle_work_success', 'update_inventory_computed_fields',
            'send_notifications', 'run_administrative_checks',
-           'run_workflow_job']
+           'RunJobLaunch']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -105,10 +103,9 @@ def send_notifications(notification_list, job_id=None):
 
 @task(bind=True, queue='default')
 def run_administrative_checks(self):
-    if not tower_settings.TOWER_ADMIN_ALERTS:
+    if not settings.TOWER_ADMIN_ALERTS:
         return
-    reader = TaskSerializer()
-    validation_info = reader.from_database()
+    validation_info = TaskEnhancer().validate_enhancements()
     if validation_info.get('instance_count', 0) < 1:
         return
     used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
@@ -118,7 +115,7 @@ def run_administrative_checks(self):
                   "Ansible Tower host usage over 90%",
                   tower_admin_emails,
                   fail_silently=True)
-    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+    if validation_info.get('date_warning', False):
         send_mail("Ansible Tower license will expire soon",
                   "Ansible Tower license will expire soon",
                   tower_admin_emails,
@@ -179,14 +176,6 @@ def tower_periodic_scheduler(self):
             new_unified_job.websocket_emit_status("failed")
         emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
-@task(queue='default')
-def notify_task_runner(metadata_dict):
-    """Add the given task into the Tower task manager's queue, to be consumed
-    by the task system.
-    """
-    queue = FifoQueue('tower_task_manager')
-    queue.push(metadata_dict)
-
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError("status_str must be either succeeded or failed")
@@ -202,6 +191,7 @@ def _send_notification_templates(instance, status_str):
                                       for n in all_notification_templates],
                                      job_id=instance.id)
 
+
 @task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
     instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
@@ -209,6 +199,9 @@ def handle_work_success(self, result, task_actual):
         return
 
     _send_notification_templates(instance, 'succeeded')
+
+    from awx.main.scheduler.tasks import run_job_complete
+    run_job_complete.delay(instance.id)
 
 @task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
@@ -235,15 +228,18 @@ def handle_work_error(self, task_id, subtasks=None):
                     (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
                 instance.websocket_emit_status("failed")
-        notification_body = first_task.notification_data()
-        notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
-                                                                                first_task_id,
-                                                                                smart_str(first_task_name),
-                                                                                notification_body['url'])
-        notification_body['friendly_name'] = first_task_friendly_name
-        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in set(notification_templates.get('error', []) + notification_templates.get('any', []))],
-                                 job_id=first_task_id)
+
+        if first_instance:
+            _send_notification_templates(first_instance, 'failed')
+
+    # We only send 1 job complete message since all the job completion message
+    # handling does is trigger the scheduler. If we extend the functionality of
+    # what the job complete message handler does then we may want to send a
+    # completion event for each job here.
+    if first_instance:
+        from awx.main.scheduler.tasks import run_job_complete
+        run_job_complete.delay(first_instance.id)
+        pass
 
 @task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -423,7 +419,7 @@ class BaseTask(Task):
         # NOTE:
         # Derived class should call add_ansible_venv() or add_tower_venv()
         if self.should_use_proot(instance, **kwargs):
-            env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
+            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -536,7 +532,7 @@ class BaseTask(Task):
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
                 try:
-                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
+                    if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                         # NOTE: Refactor this once we get a newer psutil across the board
                         if not psutil:
                             os.kill(child.pid, signal.SIGKILL)
@@ -733,9 +729,9 @@ class RunJob(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         plugin_dirs = [plugin_dir]
-        if hasattr(tower_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         env = self.add_ansible_venv(env)
@@ -950,7 +946,7 @@ class RunJob(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, job, **kwargs):
         '''
@@ -1630,7 +1626,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def post_run_hook(self, ad_hoc_command, **kwargs):
         '''
@@ -1670,21 +1666,30 @@ class RunSystemJob(BaseTask):
     def build_cwd(self, instance, **kwargs):
         return settings.BASE_DIR
 
+'''
 class RunWorkflowJob(BaseTask):
 
     name = 'awx.main.tasks.run_workflow_job'
     model = WorkflowJob
 
     def run(self, pk, **kwargs):
-        from awx.main.management.commands.run_task_system import WorkflowDAG
-        '''
-        Run the job/task and capture its output.
-        '''
-        pass
+        #Run the job/task and capture its output.
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
         instance.socketio_emit_status("running")
 
-        # FIXME: Detect workflow run completion
+        # FIXME: Currently, the workflow job busy waits until the graph run is
+        # complete. Instead, the workflow job should return or never even run,
+        # because all of the "launch logic" can be done schedule().
+
+        # However, other aspects of our system depend on a 1-1 relationship
+        # between a Job and a Celery Task.
+        #
+        # * If we let the workflow job task (RunWorkflowJob.run()) complete
+        #   then how do we trigger the handle_work_error and
+        #   handle_work_success subtasks?
+        #
+        # * How do we handle the recovery process? (i.e. there is an entry in
+        #   the database but not in celery).
         while True:
             dag = WorkflowDAG(instance)
             if dag.is_workflow_done():
@@ -1694,4 +1699,4 @@ class RunWorkflowJob(BaseTask):
             time.sleep(1)
         instance.socketio_emit_status(instance.status)
         # TODO: Handle cancel
-
+'''

@@ -5,7 +5,7 @@ from django.core.management.base import CommandError
 from django.db import transaction
 
 from awx.main.management.commands._base_instance import BaseCommandInstance
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 from awx.main.models import Instance
 
 instance_str = BaseCommandInstance.instance_str

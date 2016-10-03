@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 from awx.main.models.jobs import JobTemplate, Job
 from awx.main.models.activity_stream import ActivityStream
-from awx.api.license import LicenseForbids
+from awx.conf.license import LicenseForbids
 from awx.main.access import JobTemplateAccess
 
 

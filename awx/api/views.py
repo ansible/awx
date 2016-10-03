@@ -3,14 +3,12 @@
 # All Rights Reserved.
 
 # Python
-import os
 import cgi
 import datetime
 import dateutil
 import time
 import socket
 import sys
-import errno
 import logging
 from base64 import b64encode
 from collections import OrderedDict
@@ -18,7 +16,6 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count
@@ -57,7 +54,6 @@ import ansiconv
 from social.backends.utils import load_backends
 
 # AWX
-from awx.main.task_engine import TaskSerializer, TASK_FILE, TEMPORARY_TASK_FILE
 from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
@@ -65,14 +61,13 @@ from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
 from awx.api.utils.decorators import paginated
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
-from awx.api.license import feature_enabled, feature_exists, LicenseForbids
+from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
-from awx.main.conf import tower_settings
 from awx.main.consumers import emit_channel_notification
 
 logger = logging.getLogger('awx.api.views')
@@ -119,7 +114,7 @@ class ApiV1RootView(APIView):
         data['authtoken'] = reverse('api:auth_token_view')
         data['ping'] = reverse('api:api_v1_ping_view')
         data['config'] = reverse('api:api_v1_config_view')
-        data['settings'] = reverse('api:settings_list')
+        data['settings'] = reverse('api:setting_category_list')
         data['me'] = reverse('api:user_me_list')
         data['dashboard'] = reverse('api:dashboard_view')
         data['organizations'] = reverse('api:organization_list')
@@ -150,6 +145,8 @@ class ApiV1RootView(APIView):
         data['activity_stream'] = reverse('api:activity_stream_list')
         data['workflow_job_templates'] = reverse('api:workflow_job_template_list')
         data['workflow_jobs'] = reverse('api:workflow_job_list')
+        data['workflow_job_template_nodes'] = reverse('api:workflow_job_template_node_list')
+        data['workflow_job_nodes'] = reverse('api:workflow_job_node_list')
         return Response(data)
 
 
@@ -189,12 +186,15 @@ class ApiV1ConfigView(APIView):
     def get(self, request, format=None):
         '''Return various sitewide configuration settings.'''
 
-        license_reader = TaskSerializer()
-        license_data   = license_reader.from_database(show_key=request.user.is_superuser or request.user.is_system_auditor)
+        if request.user.is_superuser or request.user.is_system_auditor:
+            license_data = get_license(show_key=True)
+        else:
+            license_data = get_license(show_key=False)
         if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
-            license_data['features']['activity_streams'] &= tower_settings.ACTIVITY_STREAM_ENABLED
+            # FIXME: Make the final setting value dependent on the feature?
+            license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
 
-        pendo_state = tower_settings.PENDO_TRACKING_STATE if tower_settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
+        pendo_state = settings.PENDO_TRACKING_STATE if settings.PENDO_TRACKING_STATE in ('off', 'anonymous', 'detailed') else 'off'
 
         data = dict(
             time_zone=settings.TIME_ZONE,
@@ -245,20 +245,19 @@ class ApiV1ConfigView(APIView):
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
-        license_reader = TaskSerializer()
         try:
-            license_data = license_reader.from_string(data_actual)
+            from awx.main.task_engine import TaskEnhancer
+            license_data = json.loads(data_actual)
+            license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
         except Exception:
             # FIX: Log
             return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # If the license is valid, write it to disk.
-        if license_data['valid_key']:
-            tower_settings.LICENSE = data_actual
-            tower_settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
-            # Clear cache when license is updated.
-            cache.clear()
-            return Response(license_data)
+        # If the license is valid, write it to the database.
+        if license_data_validated['valid_key']:
+            settings.LICENSE = license_data
+            settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
+            return Response(license_data_validated)
 
         return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -266,25 +265,13 @@ class ApiV1ConfigView(APIView):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
 
-        # Remove license file
-        has_error = None
-        for fname in (TEMPORARY_TASK_FILE, TASK_FILE):
-            try:
-                os.remove(fname)
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    has_error = e.errno
-                    break
-
-        TowerSettings.objects.filter(key="LICENSE").delete()
-        # Clear cache when license is updated.
-        cache.clear()
-
-        # Only stop mongod if license removal succeeded
-        if has_error is None:
+        try:
+            settings.LICENSE = {}
             return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
+        except:
+            # FIX: Log
             return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DashboardView(APIView):
 
@@ -552,7 +539,7 @@ class AuthTokenView(APIView):
             # Note: This header is normally added in the middleware whenever an
             # auth token is included in the request header.
             headers = {
-                'Auth-Token-Timeout': int(tower_settings.AUTH_TOKEN_EXPIRATION)
+                'Auth-Token-Timeout': int(settings.AUTH_TOKEN_EXPIRATION)
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         if 'username' in request.data:
@@ -2288,6 +2275,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
         new_job = obj.create_unified_job(**kv)
         result = new_job.signal_start(**kv)
+
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             new_job.delete()
@@ -2295,7 +2283,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
         else:
             data = OrderedDict()
             data['ignored_fields'] = ignored_fields
-            data.update(JobSerializer(new_job).to_representation(new_job))
+            data.update(JobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
             data['job'] = new_job.id
             return Response(data, status=status.HTTP_201_CREATED)
 
@@ -2619,28 +2607,24 @@ class JobTemplateObjectRolesList(SubListAPIView):
         content_type = ContentType.objects.get_for_model(self.parent_model)
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
-# TODO:
 class WorkflowJobNodeList(ListCreateAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeDetailSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobTemplateNodeList(ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
     new_in_310 = True
 
-# TODO:
 class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplateNode
@@ -2657,7 +2641,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
     relationship = ''
     enforce_parent_relationship = 'workflow_job_template'
     new_in_310 = True
- 
+
     '''
     Limit the set of WorkflowJobTemplateNodes to the related nodes of specified by
     'relationship'
@@ -2666,7 +2650,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         return getattr(parent, self.relationship).all()
-   
+
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
 
@@ -2687,7 +2671,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
     enforce_parent_relationship = 'workflow_job_template'
     new_in_310 = True
     '''
- 
+
     #
     #Limit the set of WorkflowJobeNodes to the related nodes of specified by
     #'relationship'
@@ -2696,7 +2680,7 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         return getattr(parent, self.relationship).all()
-   
+
 class WorkflowJobNodeSuccessNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'success_nodes'
 
@@ -2769,7 +2753,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'workflow_job_template'
 
-# TODO: 
+# TODO:
 class WorkflowJobList(ListCreateAPIView):
 
     model = WorkflowJob
@@ -2978,7 +2962,7 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = JobSerializer(new_job).data
+            data = JobSerializer(new_job, context=self.get_serializer_context()).data
             # Add job key to match what old relaunch returned.
             data['job'] = new_job.id
             headers = {'Location': new_job.get_absolute_url()}
@@ -3423,7 +3407,7 @@ class AdHocCommandRelaunch(GenericAPIView):
             data = dict(passwords_needed_to_start=new_ad_hoc_command.passwords_needed_to_start)
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = AdHocCommandSerializer(new_ad_hoc_command).data
+            data = AdHocCommandSerializer(new_ad_hoc_command, context=self.get_serializer_context()).data
             # Add ad_hoc_command key to match what was previously returned.
             data['ad_hoc_command'] = new_ad_hoc_command.id
             headers = {'Location': new_ad_hoc_command.get_absolute_url()}
@@ -3575,9 +3559,9 @@ class UnifiedJobStdout(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
-        if request.accepted_renderer.format != 'txt_download' and obj_size > tower_settings.STDOUT_MAX_BYTES_DISPLAY:
+        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                                     tower_settings.STDOUT_MAX_BYTES_DISPLAY)
+                                                                                                                                     settings.STDOUT_MAX_BYTES_DISPLAY)
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
@@ -3674,8 +3658,8 @@ class NotificationTemplateTest(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, tower_settings.TOWER_URL_BASE),
-                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, tower_settings.TOWER_URL_BASE)})
+        notification = obj.generate_notification("Tower Notification Test {} {}".format(obj.id, settings.TOWER_URL_BASE),
+                                                 {"body": "Ansible Tower Test Notification {} {}".format(obj.id, settings.TOWER_URL_BASE)})
         if not notification:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -3750,71 +3734,6 @@ class ActivityStreamDetail(RetrieveAPIView):
         # Okay, let it through.
         return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
 
-class SettingsList(ListCreateAPIView):
-
-    model = TowerSettings
-    serializer_class = TowerSettingsSerializer
-    authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    new_in_300 = True
-    filter_backends = ()
-
-    def get_queryset(self):
-        class SettingsIntermediary(object):
-            def __init__(self, key, description, category, value,
-                         value_type, user=None):
-                self.key = key
-                self.description = description
-                self.category = category
-                self.value = value
-                self.value_type = value_type
-                self.user = user
-
-        if not self.request.user.is_superuser:
-            # NOTE: Shortcutting the rbac class due to the merging of the settings manifest and the database
-            #       we'll need to extend this more in the future when we have user settings
-            return []
-        all_defined_settings = {}
-        for s in TowerSettings.objects.all():
-            all_defined_settings[s.key] = SettingsIntermediary(s.key,
-                                                               s.description,
-                                                               s.category,
-                                                               s.value_converted,
-                                                               s.value_type,
-                                                               s.user)
-        manifest_settings = settings.TOWER_SETTINGS_MANIFEST
-        settings_actual = []
-        for settings_key in manifest_settings:
-            if settings_key in all_defined_settings:
-                settings_actual.append(all_defined_settings[settings_key])
-            else:
-                m_entry = manifest_settings[settings_key]
-                settings_actual.append(SettingsIntermediary(settings_key,
-                                                            m_entry['description'],
-                                                            m_entry['category'],
-                                                            m_entry['default'],
-                                                            m_entry['type']))
-        return settings_actual
-
-    def delete(self, request, *args, **kwargs):
-        if not request.user.can_access(self.model, 'delete', None):
-            raise PermissionDenied()
-        TowerSettings.objects.all().delete()
-        return Response()
-
-class SettingsReset(APIView):
-
-    view_name = "Reset a settings value"
-    new_in_300 = True
-
-    def post(self, request):
-        # NOTE: Extend more with user settings
-        if not request.user.can_access(TowerSettings, 'delete', None):
-            raise PermissionDenied()
-        settings_key = request.data.get('key', None)
-        if settings_key is not None:
-            TowerSettings.objects.filter(key=settings_key).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 class RoleList(ListAPIView):
 
@@ -3824,7 +3743,16 @@ class RoleList(ListAPIView):
     new_in_300 = True
 
     def get_queryset(self):
-        return Role.visible_roles(self.request.user)
+        result = Role.visible_roles(self.request.user)
+        # Sanity check: is the requesting user an orphaned non-admin/auditor?
+        # if yes, make system admin/auditor mandatorily visible.
+        if not self.request.user.organizations.exists() and\
+           not self.request.user.is_superuser and\
+           not self.request.user.is_system_auditor:
+            mandatories = ('system_administrator', 'system_auditor')
+            super_qs = Role.objects.filter(singleton_name__in=mandatories)
+            result = result | super_qs
+        return result
 
 
 class RoleDetail(RetrieveAPIView):

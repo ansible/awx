@@ -4,15 +4,17 @@ anyjson==0.3.3
 appdirs==1.4.0
 azure==2.0.0rc2
 Babel==2.2.0
+baron==0.6.2
 billiard==3.3.0.16
 boto==2.40.0
 celery==3.1.23
 channels==0.17.2
+asgi_amqp==0.2.1
 cliff==1.15.0
 cmd2==0.6.8
 d2to1==0.2.11   # TODO: Still needed?
 defusedxml==0.4.1
-Django==1.8.10
+Django==1.8.15
 debtcollector==1.2.0
 decorator==4.0.6
 django-auth-ldap==1.2.6
@@ -114,9 +116,11 @@ rackspace-auth-openstack==1.3
 rackspace-novaclient==1.5
 rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
+redbaron==0.6.1
 requests-oauthlib==0.5.0
 requests==2.9.1
 requestsexceptions==1.1.1
+rply==0.7.4
 shade==1.4.0
 simplejson==3.8.1
 six==1.9.0

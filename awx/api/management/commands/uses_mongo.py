@@ -6,7 +6,7 @@ import sys
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from awx.main.ha import is_ha_environment
-from awx.main.task_engine import TaskSerializer
+from awx.main.task_engine import TaskEnhancer
 
 
 class Command(BaseCommand):
@@ -27,8 +27,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Get the license data.
-        license_reader = TaskSerializer()
-        license_data = license_reader.from_database()
+        license_data = TaskEnhancer().validate_enhancements()
 
         # Does the license have features, at all?
         # If there is no license yet, then all features are clearly off.

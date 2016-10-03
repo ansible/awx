@@ -6,10 +6,10 @@ from awx.main.utils import timestamp_apiformat
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-def mock_feature_enabled(feature, bypass_database=None):
+def mock_feature_enabled(feature):
     return True
 
-def mock_feature_disabled(feature, bypass_database=None):
+def mock_feature_disabled(feature):
     return False
 
 # TODO: Consider making the fact_scan() fixture a Class, instead of a function, and move this method into it
