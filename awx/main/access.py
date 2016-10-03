@@ -264,6 +264,10 @@ class BaseAccess(object):
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
                 user_capabilities['copy'] = user_capabilities['edit']
                 continue
+            elif display_method == 'start' and isinstance(obj, (Project)) and obj.scm_type == '':
+                # Special case to return False for a manual project
+                user_capabilities['start'] = False
+                continue
 
             # Preprocessing before the access method is called
             data = {}

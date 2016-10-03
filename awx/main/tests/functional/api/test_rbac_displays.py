@@ -310,6 +310,11 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_c
     assert qs[0].capabilities_cache == {'copy': True}
 
 @pytest.mark.django_db
+def test_manual_projects_no_update(project, get, admin_user):
+    response = get(reverse('api:project_detail', args=[project.pk]), admin_user, expect=200)
+    assert not response.data['summary_fields']['user_capabilities']['start']
+
+@pytest.mark.django_db
 def test_group_update_capabilities_possible(group, inventory_source, admin_user):
     group.inventory_source = inventory_source
     group.save()
