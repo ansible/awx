@@ -18,7 +18,7 @@ angular.module('shared', [listGenerator.name,
         pagination.name,
         stringFilters.name,
         'ui.router',
-        rbacUiControl.name
+        rbacUiControl.name,
         socket.name
     ])
     .factory('lodashAsPromised', lodashAsPromised)
