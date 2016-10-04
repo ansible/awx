@@ -1194,7 +1194,10 @@ class JobAccess(BaseAccess):
             return True
         return self.org_access(obj, role_types=['auditor_role', 'admin_role'])
 
-    def can_add(self, data):
+    def can_add(self, data, validate_license=True):
+        if validate_license:
+            self.check_license()
+
         if not data:  # So the browseable API will work
             return True
         if not self.user.is_superuser:
