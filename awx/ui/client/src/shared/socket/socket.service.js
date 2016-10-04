@@ -30,13 +30,15 @@ export default
                         $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onclose = function (error) {
-                        $log.debug('Websocket Disconnected: '+error);
-                        self.checkStatus();
+                    self.socket.onclose = function () {
+                        $log.debug('Websocket Disconnected');
                     };
 
                     self.socket.onmessage = this.onMessage;
-
+                    setTimeout(function() {
+                            self.checkStatus();
+                            $log.debug('Socket Status: ' + $rootScope.socketStatus);
+                    }, 2000);
                     return self.socket;
                 }
                 else {
@@ -44,11 +46,6 @@ export default
                     $rootScope.sessionTimer.expireSession('idle');
                     $location.url('/login');
                 }
-
-                setTimeout(function() {
-                        self.checkStatus();
-                        $log.debug('socket status: ' + $rootScope.socketStatus);
-                }, 2000);
             },
             onMessage: function(e){
                 $log.debug('Received From Server: ' + e.data);
@@ -114,35 +111,22 @@ export default
                 }
             },
             checkStatus: function() {
-                function getSocketTip(status) {
-                    var result = '';
-                    switch(status) {
-                        case 'error':
-                            result = "Live events: error connecting to the Tower server.";
-                            break;
-                        case 'connecting':
-                            result = "Live events: attempting to connect to the Tower server.";
-                            break;
-                        case "ok":
-                            result = "Live events: connected. Pages containing job status information will automatically update in real-time.";
-                    }
-                    return result;
-                }
-                // Check connection status
                 var self = this;
                 if(self){
                     if(self.socket){
                         if (self.socket.readyState === 0 ) {
                             $rootScope.socketStatus = 'connecting';
+                            $rootScope.socketTip = "Live events: attempting to connect to the Tower server.";
                         }
                         else if (self.socket.readyState === 1){
                             $rootScope.socketStatus = 'ok';
+                            $rootScope.socketTip = "Live events: connected. Pages containing job status information will automatically update in real-time.";
                         }
                         else if (self.socket.readyState === 2 || self.socket.readyState === 3 ){
                             $rootScope.socketStatus = 'error';
+                            $rootScope.socketTip = "Live events: error connecting to the Tower server.";
                         }
-                        self.socketTip = getSocketTip(self.socketStatus);
-                        return $rootScope.socketStatus;
+                        return;
                     }
                 }
 
