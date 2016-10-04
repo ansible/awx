@@ -149,6 +149,11 @@ When verifying acceptance we should ensure the following statements are true
 ## Testing Considerations
 
 * Basic testing should be able to demonstrate parity with a standalone node for all integration testing.
+* Basic playbook testing to verify routing differences, including:
+  - Basic FQDN
+  - Short-name name resolution
+  - ip addresses
+  - /etc/hosts static routing information
 * We should test behavior of large and small clusters. I would envision small clusters as 2 - 3 nodes and large
   clusters as 10 - 15 nodes
 * Failure testing should involve killing single nodes and killing multiple nodes while the cluster is performing work.
@@ -162,6 +167,7 @@ When verifying acceptance we should ensure the following statements are true
   - Break the link between nodes such that it forms 2 or more groups where groupA and groupB can't communicate but all nodes
     can communicate with the database.
 * Crucially when network partitioning is resolved all nodes should recover into a consistent state
+* Upgrade Testing, verify behavior before and after are the same for the end user.
 
 ## Performance Testing
 
