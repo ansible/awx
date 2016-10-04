@@ -8,7 +8,17 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
     var val = {};
 
     // Get the count of the last event
-    var getPreviousCount = function(counter) {
+    var getPreviousCount = function(counter, type) {
+        var countAttr;
+
+        if (type === 'play') {
+            countAttr = 'playCount';
+        } else if (type === 'task') {
+            countAttr = 'taskCount';
+        } else {
+            countAttr = 'count';
+        }
+
         var previousCount = $q.defer();
 
         // iteratively find the last count
@@ -16,16 +26,22 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
             if (counter === 0) {
                 // if counter is 0, no count has been initialized
                 // initialize one!
-                previousCount.resolve({
-                    ok: 0,
-                    skipped: 0,
-                    unreachable: 0,
-                    failures: 0,
-                    changed: 0
-                });
-            } else if (val.queue[counter] && val.queue[counter].count) {
+
+                if (countAttr === 'count') {
+                    previousCount.resolve({
+                        ok: 0,
+                        skipped: 0,
+                        unreachable: 0,
+                        failures: 0,
+                        changed: 0
+                    });
+                } else {
+                    previousCount.resolve(0);
+                }
+
+            } else if (val.queue[counter] && val.queue[counter][countAttr] !== undefined) {
                 // this event has a count, resolve!
-                previousCount.resolve(_.clone(val.queue[counter].count));
+                previousCount.resolve(_.clone(val.queue[counter][countAttr]));
             } else {
                 // this event doesn't have a count, decrement to the
                 // previous event and check it
@@ -70,7 +86,18 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                 changed: 0
             };
             mungedEvent.changes = ['count'];
-            mungedEventDefer.resolve(mungedEvent);
+        } else if (event.event_name === 'playbook_on_play_start') {
+            getPreviousCount(mungedEvent.counter, "play")
+                .then(count => {
+                    mungedEvent.playCount = count + 1;
+                    mungedEvent.changes = ['playCount'];
+                });
+        } else if (event.event_name === 'playbook_on_task_start') {
+            getPreviousCount(mungedEvent.counter, "task")
+                .then(count => {
+                    mungedEvent.taskCount = count + 1;
+                    mungedEvent.changes = ['taskCount'];
+                });
         } else if (event.event_name === 'runner_on_ok' ||
             event.event_name === 'runner_on_async_ok') {
                 getPreviousCount(mungedEvent.counter)
@@ -78,7 +105,6 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                         mungedEvent.count = count;
                         mungedEvent.count.ok++;
                         mungedEvent.changes = ['count'];
-                        mungedEventDefer.resolve(mungedEvent);
                     });
         } else if (event.event_name === 'runner_on_skipped') {
             getPreviousCount(mungedEvent.counter)
@@ -86,7 +112,6 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                     mungedEvent.count = count;
                     mungedEvent.count.skipped++;
                     mungedEvent.changes = ['count'];
-                    mungedEventDefer.resolve(mungedEvent);
                 });
         } else if (event.event_name === 'runner_on_unreachable') {
             getPreviousCount(mungedEvent.counter)
@@ -94,7 +119,6 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                     mungedEvent.count = count;
                     mungedEvent.count.unrecahble++;
                     mungedEvent.changes = ['count'];
-                    mungedEventDefer.resolve(mungedEvent);
                 });
         } else if (event.event_name === 'runner_on_error' ||
             event.event_name === 'runner_on_async_failed') {
@@ -103,17 +127,16 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                         mungedEvent.count = count;
                         mungedEvent.count.failed++;
                         mungedEvent.changes = ['count'];
-                        mungedEventDefer.resolve(mungedEvent);
                     });
         } else if (event.event_name === 'playbook_on_stats') {
             // get the data for populating the host status bar
             mungedEvent.count = jobResultsService
                 .getCountsFromStatsEvent(event.event_data);
             mungedEvent.changes = ['count', 'countFinished'];
-            mungedEventDefer.resolve(mungedEvent);
         } else {
-            mungedEventDefer.resolve(mungedEvent);
         }
+
+        mungedEventDefer.resolve(mungedEvent);
 
         return mungedEventDefer.promise;
     };
@@ -150,7 +173,7 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                     // where you put in local storage
                     val.queue[event.counter] = event;
                     val.populateDefers[event.counter].resolve(event);
-                }
+                };
 
                 if (event.counter === 1) {
                     // for the first event, go ahead and munge and

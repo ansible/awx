@@ -109,6 +109,14 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                             .count);
                     }
 
+                    if (change === 'playCount') {
+                        $scope.playCount = mungedEvent.playCount;
+                    }
+
+                    if (change === 'taskCount') {
+                        $scope.taskCount = mungedEvent.taskCount;
+                    }
+
                     if (change === 'countFinished') {
                         // the playbook_on_stats event actually lets
                         // us know that we don't need to iteratively
