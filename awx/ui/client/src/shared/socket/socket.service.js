@@ -24,9 +24,11 @@ export default
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
                         $rootScope.socketPromise.resolve();
+                        self.checkStatus();
                     };
 
                     self.socket.onerror = function (error) {
+                        self.checkStatus();
                         $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
@@ -35,10 +37,7 @@ export default
                     };
 
                     self.socket.onmessage = this.onMessage;
-                    setTimeout(function() {
-                            self.checkStatus();
-                            $log.debug('Socket Status: ' + $rootScope.socketStatus);
-                    }, 2000);
+
                     return self.socket;
                 }
                 else {
