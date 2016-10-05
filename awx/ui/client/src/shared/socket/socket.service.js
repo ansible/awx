@@ -7,6 +7,7 @@ import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
 ['$rootScope', '$location', '$log','$state',
     function ($rootScope, $location, $log, $state) {
+        var needsResubscribing = false;
         return {
             init: function() {
                 var self = this,
@@ -25,6 +26,11 @@ export default
                         $log.debug("Websocket connection opened.");
                         $rootScope.socketPromise.resolve();
                         self.checkStatus();
+                        if(needsResubscribing){
+                            self.subscribe(self.getLast());
+                            needsResubscribing = false;
+                        }
+
                     };
 
                     self.socket.onerror = function (error) {
@@ -32,8 +38,15 @@ export default
                         $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onclose = function () {
-                        $log.debug('Websocket Disconnected');
+                    self.socket.onconnecting = function (event) {
+                        self.checkStatus();
+                        $log.debug('Websocket reconnecting');
+                        needsResubscribing = true;
+                    };
+
+                    self.socket.onclose = function (event) {
+                        self.checkStatus();
+                        $log.debug(`Websocket disconnected`);
                     };
 
                     self.socket.onmessage = this.onMessage;
