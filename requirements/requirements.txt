@@ -9,7 +9,7 @@ billiard==3.3.0.16
 boto==2.40.0
 celery==3.1.23
 channels==0.17.2
-asgi_amqp==0.2.1
+asgi_amqp==0.3
 cliff==1.15.0
 cmd2==0.6.8
 d2to1==0.2.11   # TODO: Still needed?

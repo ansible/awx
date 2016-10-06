@@ -22,6 +22,7 @@ from awx.main.models.notifications import * # noqa
 from awx.main.models.fact import * # noqa
 from awx.main.models.label import * # noqa
 from awx.main.models.workflow import * # noqa
+from awx.main.models.channels import * # noqa
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
