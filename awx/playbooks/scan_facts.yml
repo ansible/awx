@@ -3,11 +3,31 @@
     scan_use_checksum: false
     scan_use_recursive: false
   tasks:
-    - scan_packages:
+
+    - name: "Scan packages (Unix/Linux)"
+      scan_packages:
         os_family: '{{ ansible_os_family }}'
-    - scan_services:
-    - scan_files:
+      when: ansible_os_family != "Windows"
+    - name: "Scan services (Unix/Linux)"
+      scan_services:
+      when: ansible_os_family != "Windows"
+    - name: "Scan files (Unix/Linux)"
+      scan_files:
         paths: '{{ scan_file_paths }}'
         get_checksum: '{{ scan_use_checksum }}'
         recursive: '{{ scan_use_recursive }}'
-      when: scan_file_paths is defined
+      when: scan_file_paths is defined and ansible_os_family != "Windows"
+
+    - name: "Scan packages (Windows)"
+      win_scan_packages:
+      when: ansible_os_family == "Windows"
+    - name: "Scan services (Windows)"
+      win_scan_services:
+      when: ansible_os_family == "Windows"
+    - name: "Scan files (Windows)"
+      win_scan_files:
+        paths: '{{ scan_file_paths }}'
+        get_checksum: '{{ scan_use_checksum }}'
+        recursive: '{{ scan_use_recursive }}'
+      when: scan_file_paths is defined and ansible_os_family == "Windows"
+
