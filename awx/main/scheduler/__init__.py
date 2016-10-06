@@ -64,7 +64,7 @@ def spawn_workflow_graph_jobs(workflow_jobs):
                 job.status = 'failed'
                 job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
                 job.save(update_fields=['status', 'job_explanation'])
-                job.socketio_emit_status("failed")
+                job.websocket_emit_status("failed")
 
             # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
             #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
@@ -78,7 +78,7 @@ def process_finished_workflow_jobs(workflow_jobs):
                 # TODO: detect if wfj failed
                 workflow_job.status = 'completed'
                 workflow_job.save()
-                workflow_job.socketio_emit_status('completed')
+                workflow_job.websocket_emit_status('completed')
 
 def rebuild_graph():
     """Regenerate the task graph by refreshing known tasks from Tower, purging
@@ -130,8 +130,8 @@ def rebuild_graph():
                 'Celery, so it has been marked as failed.',
             ))
             task.save()
-            task.socketio_emit_status("failed")
-            running_tasks.pop(task)
+            task.websocket_emit_status("failed")
+            running_tasks.pop(running_tasks.index(task))
             logger.error("Task %s appears orphaned... marking as failed" % task)
 
     # Create and process dependencies for new tasks
@@ -144,7 +144,7 @@ def rebuild_graph():
             task.status = 'failed'
             task.job_explanation += 'Task failed to generate dependencies: {}'.format(e)
             task.save()
-            task.socketio_emit_status("failed")
+            task.websocket_emit_status("failed")
             continue
         logger.debug("New dependencies: %s" % str(task_dependencies))
         for dep in task_dependencies:
