@@ -71,7 +71,27 @@ export default
 
             // if you're editing an object, make sure you're on the right
             // page to display the element you are editing
-            if (scope.addedItem) {
+            if (params.fromSearch) {
+                var url = params.url;
+                // for a search, we want to make sure to get the first page of
+                // results
+                if (url.indexOf("page=") > -1) {
+                    // if the url includes a page, remove that part
+                    var urlArr = url.split("page=");
+                    var afterPageUrlArr = urlArr[1].split("&");
+
+                    if (afterPageUrlArr.length > 1) {
+                        // if there's stuff after the page part,
+                        // put that back in
+                        afterPageUrlArr.shift();
+                        url = urlArr[0] +
+                            afterPageUrlArr.join("&");
+                    } else {
+                        url = urlArr[0];
+                    }
+                }
+                getPage(url);
+            } else if (scope.addedItem) {
                 id = scope.addedItem + "";
                 delete scope.addedItem;
                 $rootScope.rowBeingEdited = id;
