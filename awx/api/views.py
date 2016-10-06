@@ -169,11 +169,12 @@ class ApiV1PingView(APIView):
         response = {
             'ha': is_ha_environment(),
             'version': get_awx_version(),
+            'active_node': settings.CLUSTER_HOST_ID,
         }
 
         response['instances'] = []
         for instance in Instance.objects.all():
-            response['instances'].append(instance.hostname)
+            response['instances'].append(dict(node=instance.hostname, heartbeat=instance.modified))
             response['instances'].sort()
         return Response(response)
 

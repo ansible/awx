@@ -125,6 +125,15 @@ def run_administrative_checks(self):
 def cleanup_authtokens(self):
     AuthToken.objects.filter(expires__lt=now()).delete()
 
+@task(bind=True)
+def cluster_node_heartbeat(self):
+    inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
+    if inst.exists():
+        inst = inst[0]
+        inst.save()
+        return
+    raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+
 @task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
     def get_last_run():
@@ -154,6 +163,7 @@ def tower_periodic_scheduler(self):
 
     # Sanity check: If this is a secondary machine, there is nothing
     # on the schedule.
+    # TODO: Fix for clustering/ha
     if Instance.objects.my_role() == 'secondary':
         return
 

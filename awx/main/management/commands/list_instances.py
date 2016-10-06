@@ -1,12 +1,10 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from awx.main.management.commands._base_instance import BaseCommandInstance
 from awx.main.models import Instance
+from django.core.management.base import NoArgsCommand
 
-instance_str = BaseCommandInstance.instance_str
-
-class Command(BaseCommandInstance):
+class Command(NoArgsCommand):
     """List instances from the Tower database
     """
 
@@ -14,5 +12,4 @@ class Command(BaseCommandInstance):
         super(Command, self).__init__()
 
         for instance in Instance.objects.all():
-            print("uuid: %s; hostname: %s; primary: %s; created: %s; modified: %s" %
-                  (instance.uuid, instance.hostname, instance.primary, instance.created, instance.modified))
+            print("hostname: {}; created: {}; heartbeat: {}".format(instance.hostname, instance.created, instance.modified))
