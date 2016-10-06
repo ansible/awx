@@ -43,7 +43,7 @@ print json.dumps(inventory)
 class InventoryTest(BaseTest):
 
     def setUp(self):
-        self.start_redis()
+        self.start_rabbit()
         super(InventoryTest, self).setUp()
         self.setup_instances()
         self.setup_users()
@@ -63,7 +63,7 @@ class InventoryTest(BaseTest):
 
     def tearDown(self):
         super(InventoryTest, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
 
     def test_get_inventory_list(self):
         url = reverse('api:inventory_list')

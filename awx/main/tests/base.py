@@ -41,6 +41,47 @@ TEST_PLAYBOOK = '''- hosts: mygroup
     command: test 1 = 1
 '''
 
+class QueueTestMixin(object):
+    def start_queue(self):
+        self.start_rabbit()
+        receiver = CallbackReceiver()
+        self.queue_process = Process(target=receiver.run_subscriber,
+                                     args=(False,))
+        self.queue_process.start()
+
+    def terminate_queue(self):
+        if hasattr(self, 'queue_process'):
+            self.queue_process.terminate()
+        self.stop_rabbit()
+
+    def start_rabbit(self):
+        if not getattr(self, 'redis_process', None):
+            # Centos 6.5 redis is runnable by non-root user but is not in a normal users path by default
+            env = dict(os.environ)
+            env['PATH'] = '%s:/usr/sbin/' % env['PATH']
+            env['RABBITMQ_NODENAME'] = 'towerunittest'
+            env['RABBITMQ_NODE_PORT'] = '55672'
+            self.redis_process = Popen('rabbitmq-server > /dev/null',
+                                       shell=True, executable='/bin/bash',
+                                       env=env)
+
+    def stop_rabbit(self):
+        if getattr(self, 'redis_process', None):
+            self.redis_process.kill()
+            self.redis_process = None
+
+
+# The observed effect of not calling terminate_queue() if you call start_queue() are
+# an hang on test cleanup database delete. Thus, to ensure terminate_queue() is called
+# whenever start_queue() is called just inherit  from this class when you want to use the queue.
+class QueueStartStopTestMixin(QueueTestMixin):
+    def setUp(self):
+        super(QueueStartStopTestMixin, self).setUp()
+        self.start_queue()
+
+    def tearDown(self):
+        super(QueueStartStopTestMixin, self).tearDown()
+        self.terminate_queue()
 
 class MockCommonlySlowTestMixin(object):
     def __init__(self, *args, **kwargs):
@@ -87,17 +128,9 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         # Set flag so that task chain works with unit tests.
         settings.CELERY_UNIT_TEST = True
         settings.SYSTEM_UUID='00000000-0000-0000-0000-000000000000'
-        settings.BROKER_URL='redis://localhost:16379/'
+        settings.BROKER_URL='redis://localhost:55672/'
+        settings.CALLBACK_QUEUE = 'callback_tasks_unit'
 
-        # Create unique random consumer and queue ports for zeromq callback.
-        if settings.CALLBACK_CONSUMER_PORT:
-            callback_port = random.randint(55700, 55799)
-            settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
-            os.environ['CALLBACK_CONSUMER_PORT'] = settings.CALLBACK_CONSUMER_PORT
-            callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
-            self._temp_paths.append(callback_queue_path)
-            settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
-            settings.TASK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
         # Disable socket notifications for unit tests.
         settings.SOCKETIO_NOTIFICATION_PORT = None
         # Make temp job status directory for unit tests.
@@ -140,7 +173,7 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         rnd_str = '____' + str(random.randint(1, 9999999))
         return __name__ + '-generated-' + string + rnd_str
 
-    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features=None):
+    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features={}):
         settings.LICENSE = TaskEnhancer(
             company_name='AWX',
             contact_name='AWX Admin',
@@ -343,7 +376,7 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
         return cred
 
     def setup_instances(self):
-        instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
+        instance = Instance(uuid=settings.SYSTEM_UUID, hostname='127.0.0.1')
         instance.save()
 
     def setup_users(self, just_super_user=False):

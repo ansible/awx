@@ -240,3 +240,10 @@ def test_job_template_creator_access(project, rando, post):
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
     assert rando in jt_obj.admin_role
+
+@pytest.mark.django_db
+def test_associate_label(label, user, job_template):
+    access = JobTemplateAccess(user('joe', False))
+    job_template.admin_role.members.add(user('joe', False))
+    label.organization.read_role.members.add(user('joe', False))
+    assert access.can_attach(job_template, label, 'labels', None)

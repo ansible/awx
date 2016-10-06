@@ -104,6 +104,42 @@ class TestWorkflowJobTemplateNodeSerializerGetRelated():
         assert 'workflow_job_template' not in related
 
 
+class FakeView:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def get_object(self):
+        return self.obj
+
+class FakeRequest:
+    pass
+
+class TestWorkflowJobTemplateNodeSerializerCharPrompts():
+
+    @pytest.fixture
+    def WFJT_serializer(self):
+        serializer = WorkflowJobTemplateNodeSerializer()
+        node = WorkflowJobTemplateNode(pk=1)
+        node.char_prompts = {'limit': 'webservers'}
+        view = FakeView(node)
+        view.request = FakeRequest()
+        view.request.method = "PATCH"
+        serializer.context = {'view': view}
+        return serializer
+
+    def test_change_single_field(self, WFJT_serializer):
+        "Test that a single prompt field can be changed without affecting other fields"
+        internal_value = WFJT_serializer.to_internal_value({'job_type': 'check'})
+        assert internal_value['char_prompts']['job_type'] == 'check'
+        assert internal_value['char_prompts']['limit'] == 'webservers'
+
+    def test_null_single_field(self, WFJT_serializer):
+        "Test that a single prompt field can be removed without affecting other fields"
+        internal_value = WFJT_serializer.to_internal_value({'job_type': None})
+        assert 'job_type' not in internal_value['char_prompts']
+        assert internal_value['char_prompts']['limit'] == 'webservers'
+
+
 @mock.patch('awx.api.serializers.WorkflowNodeBaseSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobNodeSerializerGetRelated():
     @pytest.fixture

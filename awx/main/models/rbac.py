@@ -51,7 +51,7 @@ role_descriptions = {
     'adhoc_role'           : 'May run ad hoc commands on an inventory',
     'admin_role'           : 'Can manage all aspects of the %s',
     'auditor_role'         : 'Can view all settings for the %s',
-    'execute_role'         : 'May run the job template',
+    'execute_role'         : 'May run the %s',
     'member_role'          : 'User is a member of the %s',
     'read_role'            : 'May view settings for the %s',
     'update_role'          : 'May update project or inventory or group using the configured source update system',

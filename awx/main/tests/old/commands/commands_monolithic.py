@@ -389,13 +389,13 @@ class CleanupActivityStreamTest(BaseCommandMixin, BaseTest):
     '''
 
     def setUp(self):
-        self.start_redis()
         super(CleanupActivityStreamTest, self).setUp()
+        self.start_rabbit()
         self.create_test_inventories()
 
     def tearDown(self):
+        self.stop_rabbit()
         super(CleanupActivityStreamTest, self).tearDown()
-        self.stop_redis()
 
     def test_cleanup(self):
         # Should already have entries due to test case setup. With no
@@ -457,7 +457,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def setUp(self):
         super(InventoryImportTest, self).setUp()
-        self.start_redis()
+        self.start_rabbit()
         self.setup_instances()
         self.create_test_inventories()
         self.create_test_ini()
@@ -465,7 +465,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def tearDown(self):
         super(InventoryImportTest, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
 
     def create_test_ini(self, inv_dir=None, ini_content=None):
         ini_content = ini_content or TEST_INVENTORY_INI
