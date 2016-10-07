@@ -25,10 +25,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 
     // Listen for job status updates that may come across via sockets.  We need to check the payload
     // to see whethere the updated job is the one that we're currently looking at.
-    if ($scope.removeJobStatusChange) {
-        $scope.removeJobStatusChange();
-    }
-    $scope.removeJobStatusChange = $rootScope.$on(`ws-jobs`, function(e, data) {
+    $scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
             $scope.job.status = data.status;
         }
@@ -37,12 +34,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
             // Go out and refresh the job details
             getJobDetails();
         }
-    });
-
-    // Unbind $rootScope socket event binding(s) so that they don't get triggered
-    // in another instance of this controller
-    $scope.$on('$destroy', function() {
-        $scope.removeJobStatusChange();
     });
 
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON

@@ -101,10 +101,7 @@
             }));
         };
 
-        if ($rootScope.inventoryManageStatus) {
-            $rootScope.inventoryManageStatus();
-        }
-        $rootScope.inventoryManageStatus = $rootScope.$on(`ws-jobs`, function(e, data){
+        $scope.$on(`ws-jobs`, function(e, data){
             var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
             if(data.status === 'failed' || data.status === 'successful'){
                 $state.reload();

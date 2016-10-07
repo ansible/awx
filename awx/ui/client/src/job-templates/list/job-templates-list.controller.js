@@ -37,11 +37,7 @@ export default
             view.inject(list, { mode: mode, scope: $scope });
             $rootScope.flashMessage = null;
 
-
-            if ($rootScope.JobStatusChange) {
-                $rootScope.JobStatusChange();
-            }
-            $rootScope.JobStatusChange = $rootScope.$on(`ws-jobs`, function () {
+            $scope.$on(`ws-jobs`, function () {
                 $scope.search(list.iterator);
             });
 

@@ -22,7 +22,6 @@ describe('Service: SocketService', () => {
         it('should send to ws-jobs-summary', function(){
             event = {data : {group_name: "jobs"}};
             event.data = JSON.stringify(event.data);
-            console.log(event);
             SocketService.onMessage(event);
             expect(rootScope.$emit).toHaveBeenCalledWith('ws-jobs-summary', event.data);
         });

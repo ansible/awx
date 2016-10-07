@@ -5,9 +5,10 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state',
-    function ($rootScope, $location, $log, $state) {
-        var needsResubscribing = false;
+['$rootScope', '$location', '$log','$state', '$q',
+    function ($rootScope, $location, $log, $state, $q) {
+        var needsResubscribing = false,
+        socketPromise = $q.defer();
         return {
             init: function() {
                 var self = this,
@@ -24,7 +25,7 @@ export default
 
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
-                        $rootScope.socketPromise.resolve();
+                        socketPromise.resolve();
                         self.checkStatus();
                         if(needsResubscribing){
                             self.subscribe(self.getLast());
@@ -60,22 +61,40 @@ export default
                 }
             },
             onMessage: function(e){
+                // Function called when messages are received on by the UI from
+                // the API over the websocket. This will route each message to
+                // the appropriate controller for the current $state.
+                e.data = e.data.replace(/\\/g, '');
+                e.data = e.data.substr(0, e.data.length-1);
+                e.data = e.data.substr(1);
                 $log.debug('Received From Server: ' + e.data);
+
                 var data = JSON.parse(e.data), str = "";
                 if(data.group_name==="jobs" && !('status' in data)){
                     // we know that this must have been a
-                    // summary complete message b/c status is missing
+                    // summary complete message b/c status is missing.
+                    // A an object w/ group_name === "jobs" AND a 'status' key
+                    // means it was for the event: status_changed.
                     $log.debug('Job summary_complete ' + data.unified_job_id);
-                    $rootScope.$emit('ws-jobs-summary', data);
+                    $rootScope.$broadcast('ws-jobs-summary', data);
                     return;
                 }
                 else if(data.group_name==="job_events"){
-                    str = `ws-${data.group_name}-${data.job}`;
+                    // The naming scheme is "ws" then a
+                    // dash (-) and the group_name, then the job ID
+                    // ex: 'ws-jobs-<jobId>'
+                    str = `ws-${data.group_name}-${data.job}`
                 }
                 else if(data.group_name==="ad_hoc_command_events"){
+                    // The naming scheme is "ws" then a
+                    // dash (-) and the group_name, then the job ID
+                    // ex: 'ws-jobs-<jobId>'
                     str = `ws-${data.group_name}-${data.ad_hoc_command}`;
                 }
                 else if(data.group_name==="control"){
+                    // As of Tower v. 3.1.0, there is only 1 "control"
+                    // message, which is for expiring the session if the
+                    // session limit is breached.
                     $log.debug(data.reason);
                     $rootScope.sessionTimer.expireSession('session_limit');
                     $state.go('signOut');
@@ -86,7 +105,7 @@ export default
                     // ex: 'ws-jobs'
                     str = `ws-${data.group_name}`;
                 }
-                $rootScope.$emit(str, data);
+                $rootScope.$broadcast(str, data);
             },
             disconnect: function(){
                 if(this.socket){
@@ -94,10 +113,18 @@ export default
                 }
             },
             subscribe: function(state){
+                // Subscribe is used to tell the API that the UI wants to
+                // listen for specific messages. A subscription object could
+                // look like {"groups":{"jobs": ["status_changed", "summary"]}.
+                // This is used by all socket-enabled $states
                 this.emit(JSON.stringify(state.socket));
                 this.setLast(state);
             },
             unsubscribe: function(state){
+                // Unsubscribing tells the API that the user is no longer on
+                // on a socket-enabled page, and sends an empty groups object
+                // to the API: {"groups": {}}.
+                // This is used for all pages that are socket-disabled
                 if(this.requiresNewSubscribe(state)){
                     this.emit(JSON.stringify(state.socket));
                 }
@@ -110,6 +137,9 @@ export default
                 return this.last;
             },
             requiresNewSubscribe(state){
+                // This function is used for unsubscribing. If the last $state
+                // required an "unsubscribe", then we don't need to unsubscribe
+                // again, b/c the UI is already unsubscribed from all groups
                 if (this.getLast() !== undefined){
                     if( _.isEmpty(state.socket.groups) && _.isEmpty(this.getLast().socket.groups)){
                         return false;
@@ -123,6 +153,7 @@ export default
                 }
             },
             checkStatus: function() {
+                // Function for changing the socket indicator icon in the nav bar
                 var self = this;
                 if(self){
                     if(self.socket){
@@ -144,9 +175,11 @@ export default
 
             },
             emit: function(data, callback) {
+                // Function used for sending objects to the API over the
+                // websocket.
                 var self = this;
                 $log.debug('Sent to Websocket Server: ' + data);
-                $rootScope.socketPromise.promise.then(function(){
+                socketPromise.promise.then(function(){
                     self.socket.send(data, function () {
                         var args = arguments;
                         self.scope.$apply(function () {
@@ -155,6 +188,28 @@ export default
                             }
                         });
                     });
+                });
+            },
+            addStateResolve: function(state, id){
+                // This function is used for add a state resolve to all states,
+                // socket-enabled AND socket-disabled, and whether the $state
+                // requires a subscribe or an unsubscribe
+                self = this;
+                socketPromise.promise.then(function(){
+                    if(!state.socket){
+                        state.socket = {groups: {}};
+                        self.unsubscribe(state);
+                    }
+                    else{
+                        if(state.socket.groups.hasOwnProperty( "job_events")){
+                            state.socket.groups.job_events = [id];
+                        }
+                        if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
+                            state.socket.groups.ad_hoc_command_events = [id];
+                        }
+                        self.subscribe(state);
+                    }
+                    return true;
                 });
             }
         };
