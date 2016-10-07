@@ -197,30 +197,22 @@ export default
                 "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
                 "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
-            function openSocket() {
-                if ($rootScope.removeJobEventChange) {
-                    $rootScope.removeJobEventChange();
-                }
-                $rootScope.removeJobEventChange = $rootScope.$on(`ws-job_events-${job_id}`, function(e, data) {
-                    // update elapsed time on each event received
-                    scope.job_status.elapsed = GetElapsed({
-                        start: scope.job.created,
-                        end: Date.now()
-                    });
-                    if (api_complete && data.id > lastEventId) {
-                        scope.waiting = false;
-                        data.event = data.event_name;
-                        DigestEvent({ scope: scope, event: data });
-                    }
-                    UpdateDOM({ scope: scope });
-                });
-            }
-            openSocket();
 
-            if ($rootScope.removeJobStatusChange) {
-                $rootScope.removeJobStatusChange();
-            }
-            $rootScope.removeJobStatusChange = $rootScope.$on(`ws-jobs`, function(e, data) {
+            scope.$on(`ws-job_events-${job_id}`, function(e, data) {
+                // update elapsed time on each event received
+                scope.job_status.elapsed = GetElapsed({
+                    start: scope.job.created,
+                    end: Date.now()
+                });
+                if (api_complete && data.id > lastEventId) {
+                    scope.waiting = false;
+                    data.event = data.event_name;
+                    DigestEvent({ scope: scope, event: data });
+                }
+                UpdateDOM({ scope: scope });
+            });
+
+            scope.$on(`ws-jobs`, function(e, data) {
                 // if we receive a status change event for the current job indicating the job
                 // is finished, stop event queue processing and reload
                 if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
@@ -234,10 +226,7 @@ export default
                 }
             });
 
-            if ($rootScope.removeJobSummaryComplete) {
-                $rootScope.removeJobSummaryComplete();
-            }
-            $rootScope.removeJobSummaryComplete = $rootScope.$on('ws-jobs-summary', function() {
+            scope.$on('ws-jobs-summary', function() {
                 // the job host summary should now be available from the API
                 $log.debug('Trigging reload of job_host_summaries');
                 scope.$emit('InitialLoadComplete');

@@ -802,7 +802,6 @@ var tower = angular.module('Tower', [
                     ConfigService.getConfig().then(function() {
                         Timer.init().then(function(timer) {
                             $rootScope.sessionTimer = timer;
-                            // $rootScope.$emit('OpenSocket');
                             SocketService.init();
                             pendoService.issuePendoIdentity();
                             CheckLicense.test();
@@ -846,10 +845,6 @@ var tower = angular.module('Tower', [
         if (!$rootScope.featuresConfigured) {
             // create a promise that will resolve when features are loaded
             $rootScope.featuresConfigured = $q.defer();
-        }
-        if (!$rootScope.socketPromise) {
-            // create a promise that resolves when the socket connection is open
-            $rootScope.socketPromise = $q.defer();
         }
         $rootScope.licenseMissing = true;
         //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override

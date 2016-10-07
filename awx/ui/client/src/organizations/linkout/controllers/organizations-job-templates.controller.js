@@ -21,10 +21,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
             generator = GenerateList,
             orgBase = GetBasePath('organizations');
 
-        if ($rootScope.JobStatusChange) {
-            $rootScope.JobStatusChange();
-        }
-        $rootScope.JobStatusChange = $rootScope.$on(`ws-jobs`, function () {
+        $scope.$on(`ws-jobs`, function () {
             $scope.search(list.iterator);
         });
 
