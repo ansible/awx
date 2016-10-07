@@ -117,7 +117,7 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
             getPreviousCount(mungedEvent.counter)
                 .then(count => {
                     mungedEvent.count = count;
-                    mungedEvent.count.unrecahble++;
+                    mungedEvent.count.unreachable++;
                     mungedEvent.changes = ['count'];
                 });
         } else if (event.event_name === 'runner_on_error' ||
