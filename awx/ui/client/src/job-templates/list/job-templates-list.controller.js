@@ -37,6 +37,10 @@ export default
             view.inject(list, { mode: mode, scope: $scope });
             $rootScope.flashMessage = null;
 
+            $scope.$on(`ws-jobs`, function () {
+                $scope.search(list.iterator);
+            });
+
             if ($scope.removePostRefresh) {
                 $scope.removePostRefresh();
             }

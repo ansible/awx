@@ -16,6 +16,11 @@ var ManageGroupsEdit = {
     data: {
         mode: 'edit'
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     resolve: {
         groupData: ['$stateParams', 'GroupManageService', function($stateParams, GroupManageService){
             return GroupManageService.get({id: $stateParams.group_id}).then(res => res.data.results[0]);
@@ -40,6 +45,11 @@ var ManageGroupsAdd = {
     },
     data: {
         mode: 'add'
+    },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
     },
     views: {
         'form@inventoryManage': {

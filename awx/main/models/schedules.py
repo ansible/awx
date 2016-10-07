@@ -16,7 +16,8 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models.base import * # noqa
-from awx.main.utils import ignore_inventory_computed_fields, emit_websocket_notification
+from awx.main.utils import ignore_inventory_computed_fields
+from awx.main.consumers import emit_channel_notification
 from django.core.urlresolvers import reverse
 
 logger = logging.getLogger('awx.main.models.schedule')
@@ -112,7 +113,7 @@ class Schedule(CommonModel):
             self.dtend = make_aware(datetime.datetime.strptime(until_date, "%Y%m%dT%H%M%SZ"), get_default_timezone())
         if 'count' in self.rrule.lower():
             self.dtend = future_rs[-1]
-        emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=self.id))
+        emit_channel_notification('schedules-changed', dict(id=self.id, group_name='schedules'))
         with ignore_inventory_computed_fields():
             self.unified_job_template.update_computed_fields()
 

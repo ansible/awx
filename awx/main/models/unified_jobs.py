@@ -32,8 +32,9 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.utils import decrypt_field, emit_websocket_notification, _inventory_updates
-from awx.main.redact import UriCleaner, REPLACE_STR
+from awx.main.utils import decrypt_field, _inventory_updates
+from awx.main.redact import UriCleaner
+from awx.main.consumers import emit_channel_notification
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -774,14 +775,15 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ''' Given another task object determine if this task would be blocked by it '''
         raise NotImplementedError # Implement in subclass.
 
-    def socketio_emit_data(self):
+    def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
         return {}
 
-    def socketio_emit_status(self, status):
+    def websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
-        status_data.update(self.socketio_emit_data())
-        emit_websocket_notification('/socket.io/jobs', 'status_changed', status_data)
+        status_data.update(self.websocket_emit_data())
+        status_data['group_name'] = 'jobs'
+        emit_channel_notification('jobs-status_changed', status_data)
 
     def generate_dependencies(self, active_tasks):
         ''' Generate any tasks that the current task might be dependent on given a list of active
@@ -859,7 +861,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
-        self.socketio_emit_status("pending")
+        self.websocket_emit_status("pending")
 
         from awx.main.scheduler.tasks import run_job_launch
         run_job_launch.delay(self.id)
@@ -912,7 +914,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     instance.job_explanation = 'Forced cancel'
                     update_fields.append('job_explanation')
                 instance.save(update_fields=update_fields)
-                self.socketio_emit_status("canceled")
+                self.websocket_emit_status("canceled")
         except: # FIXME: Log this exception!
             if settings.DEBUG:
                 raise
@@ -926,8 +928,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     self.status = 'canceled'
                     cancel_fields.append('status')
                 self.save(update_fields=cancel_fields)
-                self.socketio_emit_status("canceled")
+                self.websocket_emit_status("canceled")
             if settings.BROKER_URL.startswith('amqp://'):
                 self._force_cancel()
         return self.cancel_flag
-

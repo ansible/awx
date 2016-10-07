@@ -14,6 +14,11 @@ export default {
     data: {
         activityStreamId: 'id'
     },
+    socket:{
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     ncyBreadcrumb: {
         parent: 'jobTemplates',
         label: "{{name}}"

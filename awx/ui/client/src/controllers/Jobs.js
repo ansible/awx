@@ -65,7 +65,7 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
         jobs_scope.viewJob = function (id) {
             $state.transitionTo('jobDetail', {id: id});
         };
-        
+
         jobs_scope.showJobType = true;
         LoadJobsScope({
             parent_scope: $scope,
@@ -110,17 +110,11 @@ export function JobsListController ($rootScope, $log, $scope, $compile, $statePa
            }
        };
 
-        if ($rootScope.removeJobStatusChange) {
-            $rootScope.removeJobStatusChange();
-        }
-        $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
+        $scope.$on('ws-jobs', function() {
             $scope.refreshJobs();
         });
 
-        if ($rootScope.removeScheduleStatusChange) {
-            $rootScope.removeScheduleStatusChange();
-        }
-        $rootScope.removeScheduleStatusChange = $rootScope.$on('ScheduleStatusChange', function() {
+        $scope.$on('ws-schedules', function() {
             if (api_complete) {
                 scheduled_scope.search('schedule');
             }

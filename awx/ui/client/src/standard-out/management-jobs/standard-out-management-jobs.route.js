@@ -11,17 +11,16 @@ export default {
     route: '/management_jobs/:id',
     templateUrl: templateUrl('standard-out/management-jobs/standard-out-management-jobs'),
     controller: 'JobStdoutController',
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     ncyBreadcrumb: {
         parent: "jobs",
         label: "{{ job.name }}"
     },
     data: {
         jobType: 'system_jobs'
-    },
-    resolve: {
-        managementJobSocket: [function() {
-            // TODO: determine whether or not we have socket support for management job standard out
-            return true;
-        }]
     }
 };

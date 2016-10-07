@@ -49,13 +49,13 @@ from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            emit_websocket_notification,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error', 
-           'handle_work_success', 'update_inventory_computed_fields', 
-           'send_notifications', 'run_administrative_checks', 
+           'RunAdHocCommand', 'RunWorkflowJob', 'handle_work_error',
+           'handle_work_success', 'update_inventory_computed_fields',
+           'send_notifications', 'run_administrative_checks',
            'RunJobLaunch']
 
 HIDDEN_PASSWORD = '**********'
@@ -183,8 +183,8 @@ def tower_periodic_scheduler(self):
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['status', 'job_explanation'])
-            new_unified_job.socketio_emit_status("failed")
-        emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
+            new_unified_job.websocket_emit_status("failed")
+        emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
 
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
@@ -237,11 +237,11 @@ def handle_work_error(self, task_id, subtasks=None):
                 instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
                     (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
-                instance.socketio_emit_status("failed")
+                instance.websocket_emit_status("failed")
 
         if first_instance:
             _send_notification_templates(first_instance, 'failed')
-    
+
     # We only send 1 job complete message since all the job completion message
     # handling does is trigger the scheduler. If we extend the functionality of
     # what the job complete message handler does then we may want to send a
@@ -590,7 +590,7 @@ class BaseTask(Task):
         '''
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
 
-        instance.socketio_emit_status("running")
+        instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
         try:
@@ -659,7 +659,7 @@ class BaseTask(Task):
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
-        instance.socketio_emit_status(status)
+        instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
@@ -1678,7 +1678,7 @@ class RunSystemJob(BaseTask):
 
 '''
 class RunWorkflowJob(BaseTask):
-    
+
     name = 'awx.main.tasks.run_workflow_job'
     model = WorkflowJob
 
@@ -1691,14 +1691,14 @@ class RunWorkflowJob(BaseTask):
         # complete. Instead, the workflow job should return or never even run,
         # because all of the "launch logic" can be done schedule().
 
-        # However, other aspects of our system depend on a 1-1 relationship 
+        # However, other aspects of our system depend on a 1-1 relationship
         # between a Job and a Celery Task.
-        # 
+        #
         # * If we let the workflow job task (RunWorkflowJob.run()) complete
-        #   then how do we trigger the handle_work_error and 
+        #   then how do we trigger the handle_work_error and
         #   handle_work_success subtasks?
         #
-        # * How do we handle the recovery process? (i.e. there is an entry in 
+        # * How do we handle the recovery process? (i.e. there is an entry in
         #   the database but not in celery).
         while True:
             dag = WorkflowDAG(instance)

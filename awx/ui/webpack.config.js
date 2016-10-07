@@ -27,7 +27,7 @@ var vendorPkgs = [
     'ng-toast',
     'nvd3',
     'select2',
-    'socket.io-client',
+    'reconnectingwebsocket'
 ];
 
 var dev = {

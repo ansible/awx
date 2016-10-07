@@ -86,11 +86,7 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         }
     });
 
-    // Handle project update status changes
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-projects', function(e, data) {
+    $scope.$on(`ws-jobs`, function(e, data) {
         var project;
         $log.debug(data);
         if ($scope.projects) {

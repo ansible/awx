@@ -13,6 +13,11 @@ import GroupsListController from './groups/groups-list.controller';
 export default {
     name: 'inventoryManage',
     url: '/inventories/:inventory_id/manage?{group:int}{failed}',
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     params:{
         group:{
             array: true

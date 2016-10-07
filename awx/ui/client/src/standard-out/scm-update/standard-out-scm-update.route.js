@@ -17,13 +17,12 @@ export default {
         parent: "jobs",
         label: "{{ project_name }}"
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     data: {
         jobType: 'project_updates'
-    },
-    resolve: {
-        scmUpdateSocket: [function() {
-            // TODO: determine whether or not we have socket support for scm update standard out
-            return true;
-        }]
     }
 };

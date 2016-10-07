@@ -17,5 +17,10 @@ export default {
     },
     ncyBreadcrumb: {
         label: "JOB TEMPLATES"
+    },
+    socket:{
+        "groups":{
+            "jobs": ["status_changed"]
+        }
     }
 };

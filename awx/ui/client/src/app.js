@@ -29,7 +29,6 @@ import './helpers';
 import './forms';
 import './lists';
 import './widgets';
-import './help';
 import './filters';
 import { Home } from './controllers/Home';
 import { SocketsController } from './controllers/Sockets';
@@ -75,7 +74,6 @@ import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
-import './shared/Socket';
 import './shared/features/main';
 import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
@@ -183,7 +181,6 @@ var tower = angular.module('Tower', [
     'HostGroupsFormDefinition',
     'StreamWidget',
     'JobsHelper',
-    'InventoryGroupsHelpDefinition',
     'CredentialsHelper',
     'StreamListDefinition',
     'ActivityDetailDefinition',
@@ -197,10 +194,8 @@ var tower = angular.module('Tower', [
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'JobDetailHelper',
-    'SocketIO',
     'lrInfiniteScroll',
     'LoadConfigHelper',
-    'SocketHelper',
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
@@ -243,88 +238,6 @@ var tower = angular.module('Tower', [
             });
 
             $stateProvider.
-            state('dashboard', {
-                url: '/home',
-                templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home,
-                params: { licenseMissing: null },
-                data: {
-                    activityStream: true,
-                    refreshButton: true
-                },
-                ncyBreadcrumb: {
-                    label: "DASHBOARD"
-                },
-                resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-                        function($q, jobStatusGraphData, $rootScope) {
-                            return $rootScope.featuresConfigured.promise.then(function() {
-                                return $q.all({
-                                    jobStatus: jobStatusGraphData.get("month", "all"),
-                                });
-                            });
-                        }
-                    ]
-                }
-            }).
-
-            state('jobs', {
-                url: '/jobs',
-                templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: JobsListController,
-                ncyBreadcrumb: {
-                    label: "JOBS"
-                }
-            }).
-
-            state('projects', {
-                url: '/projects?{status}',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'project'
-                },
-                ncyBreadcrumb: {
-                    label: "PROJECTS"
-                }
-            }).
-
-            state('projects.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsAdd,
-                ncyBreadcrumb: {
-                    parent: "projects",
-                    label: "CREATE PROJECT"
-                }
-            }).
-
-            state('projects.edit', {
-                url: '/:id',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: ProjectsEdit,
-                data: {
-                    activityStreamId: 'id'
-                },
-                ncyBreadcrumb: {
-                    parent: 'projects',
-                    label: '{{name}}'
-                }
-            }).
-
-            state('projectOrganizations', {
-                url: '/projects/:project_id/organizations',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsList
-            }).
-
-            state('projectOrganizationAdd', {
-                url: '/projects/:project_id/organizations/add',
-                templateUrl: urlPrefix + 'partials/projects.html',
-                controller: OrganizationsAdd
-            }).
-
             state('teams', {
                 url: '/teams',
                 templateUrl: urlPrefix + 'partials/teams.html',
@@ -526,18 +439,137 @@ var tower = angular.module('Tower', [
     }]);
 }])
 
-.run(['$q', '$compile', '$cookieStore', '$rootScope', '$log',
+.run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log',
     'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
-    'ClearScope', 'Socket', 'LoadConfig', 'Store',
-    'ShowSocketHelp', 'pendoService', 'Prompt', 'Rest', 'Wait',
-    'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-    'FeaturesService', '$filter',
-    function($q, $compile, $cookieStore, $rootScope, $log, CheckLicense,
-        $location, Authorization, LoadBasePaths, Timer, ClearScope, Socket,
-        LoadConfig, Store, ShowSocketHelp, pendoService, Prompt, Rest, Wait,
+    'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
+    'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+    'FeaturesService', '$filter', 'SocketService',
+    function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log,
+        CheckLicense, $location, Authorization, LoadBasePaths, Timer,
+        ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
         ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-        $filter) {
-        var sock;
+        $filter, SocketService) {
+
+        $stateExtender.addState({
+            name: 'dashboard',
+            url: '/home',
+            templateUrl: urlPrefix + 'partials/home.html',
+            controller: Home,
+            params: { licenseMissing: null },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
+            },
+            data: {
+                activityStream: true,
+                refreshButton: true
+            },
+            ncyBreadcrumb: {
+                label: "DASHBOARD"
+            },
+            resolve: {
+                graphData: ['$q', 'jobStatusGraphData', '$rootScope',
+                    function($q, jobStatusGraphData, $rootScope) {
+                        return $rootScope.featuresConfigured.promise.then(function() {
+                            return $q.all({
+                                jobStatus: jobStatusGraphData.get("month", "all"),
+                            });
+                        });
+                    }
+                ]
+            }
+        });
+
+        $stateExtender.addState({
+            name: 'jobs',
+            url: '/jobs',
+            templateUrl: urlPrefix + 'partials/jobs.html',
+            controller: JobsListController,
+            ncyBreadcrumb: {
+                label: "JOBS"
+            },
+            params: {
+                search: {
+                    value: {order_by:'-finished'}
+                }
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"],
+                    "schedules": ["changed"]
+                }
+            }
+        });
+
+        $stateExtender.addState({
+            name: 'projects',
+            url: '/projects?{status}',
+            templateUrl: urlPrefix + 'partials/projects.html',
+            controller: ProjectsList,
+            data: {
+                activityStream: true,
+                activityStreamTarget: 'project'
+            },
+            ncyBreadcrumb: {
+                label: "PROJECTS"
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
+            }
+        });
+
+        $stateExtender.addState({
+            name: 'projects.add',
+            url: '/add',
+            templateUrl: urlPrefix + 'partials/projects.html',
+            controller: ProjectsAdd,
+            ncyBreadcrumb: {
+                parent: "projects",
+                label: "CREATE PROJECT"
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
+            }
+        });
+
+        $stateExtender.addState({
+            name: 'projects.edit',
+            url: '/:id',
+            templateUrl: urlPrefix + 'partials/projects.html',
+            controller: ProjectsEdit,
+            data: {
+                activityStreamId: 'id'
+            },
+            ncyBreadcrumb: {
+                parent: 'projects',
+                label: '{{name}}'
+            },
+            socket: {
+                "groups":{
+                    "jobs": ["status_changed"]
+                }
+            }
+        });
+
+        $stateExtender.addState({
+            name: 'projectOrganizations',
+            url: '/projects/:project_id/organizations',
+            templateUrl: urlPrefix + 'partials/projects.html',
+            controller: OrganizationsList
+        });
+
+        $stateExtender.addState({
+            name: 'projectOrganizationAdd',
+            url: '/projects/:project_id/organizations/add',
+            templateUrl: urlPrefix + 'partials/projects.html',
+            controller: OrganizationsAdd
+        });
+
         $rootScope.addPermission = function(scope) {
             $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
         };
@@ -709,84 +741,9 @@ var tower = angular.module('Tower', [
 
             $rootScope.crumbCache = [];
 
-            if ($rootScope.removeOpenSocket) {
-                $rootScope.removeOpenSocket();
-            }
-            $rootScope.removeOpenSocket = $rootScope.$on('OpenSocket', function() {
-                // Listen for job changes and issue callbacks to initiate
-                // DOM updates
-                function openSocket() {
-                    var schedule_socket, control_socket;
-
-                    sock = Socket({ scope: $rootScope, endpoint: "jobs" });
-                    sock.init();
-                    sock.on("status_changed", function(data) {
-                        $log.debug('Job ' + data.unified_job_id +
-                            ' status changed to ' + data.status +
-                            ' send to ' + $location.$$url);
-
-                        // this acts as a router...it emits the proper
-                        // value based on what URL the user is currently
-                        // accessing.
-                        if ($state.is('jobs')) {
-                            $rootScope.$emit('JobStatusChange-jobs', data);
-                        } else if ($state.includes('jobDetail') ||
-                            $state.is('adHocJobStdout') ||
-                            $state.is('inventorySyncStdout') ||
-                            $state.is('managementJobStdout') ||
-                            $state.is('scmUpdateStdout')) {
-
-                            $log.debug("sending status to standard out");
-                            $rootScope.$emit('JobStatusChange-jobStdout', data);
-                        }
-                        if ($state.includes('jobDetail')) {
-                            $rootScope.$emit('JobStatusChange-jobDetails', data);
-                        } else if ($state.is('dashboard')) {
-                            $rootScope.$emit('JobStatusChange-home', data);
-                        } else if ($state.is('portalMode')) {
-                            $rootScope.$emit('JobStatusChange-portal', data);
-                        } else if ($state.is('projects')) {
-                            $rootScope.$emit('JobStatusChange-projects', data);
-                        } else if ($state.is('inventoryManage')) {
-                            $rootScope.$emit('JobStatusChange-inventory', data);
-                        }
-                    });
-                    sock.on("summary_complete", function(data) {
-                        $log.debug('Job summary_complete ' + data.unified_job_id);
-                        $rootScope.$emit('JobSummaryComplete', data);
-                    });
-
-                    schedule_socket = Socket({
-                        scope: $rootScope,
-                        endpoint: "schedules"
-                    });
-                    schedule_socket.init();
-                    schedule_socket.on("schedule_changed", function(data) {
-                        $log.debug('Schedule  ' + data.unified_job_id + ' status changed to ' + data.status);
-                        $rootScope.$emit('ScheduleStatusChange', data);
-                    });
-
-                    control_socket = Socket({
-                        scope: $rootScope,
-                        endpoint: "control"
-                    });
-                    control_socket.init();
-                    control_socket.on("limit_reached", function(data) {
-                        $log.debug(data.reason);
-                        $rootScope.sessionTimer.expireSession('session_limit');
-                        $state.go('signOut');
-                    });
-                }
-                openSocket();
-
-                setTimeout(function() {
-                    $rootScope.$apply(function() {
-                        sock.checkStatus();
-                        $log.debug('socket status: ' + $rootScope.socketStatus);
-                    });
-                }, 2000);
-            });
-
+            // $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
+            //     SocketService.subscribe(toState, toParams);
+            // });
 
             $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
 
@@ -845,7 +802,7 @@ var tower = angular.module('Tower', [
                     ConfigService.getConfig().then(function() {
                         Timer.init().then(function(timer) {
                             $rootScope.sessionTimer = timer;
-                            $rootScope.$emit('OpenSocket');
+                            SocketService.init();
                             pendoService.issuePendoIdentity();
                             CheckLicense.test();
                             FeaturesService.get();
@@ -871,10 +828,6 @@ var tower = angular.module('Tower', [
             $rootScope.toggleTab = function(e, tab, tabs) {
                 e.preventDefault();
                 $('#' + tabs + ' #' + tab).tab('show');
-            };
-
-            $rootScope.socketHelp = function() {
-                ShowSocketHelp();
             };
 
             $rootScope.leavePortal = function() {

@@ -192,6 +192,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'channels',
     'polymorphic',
     'taggit',
     'social.apps.django_app.default',
@@ -375,7 +376,7 @@ CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                   'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
                                                             'routing_key': 'cluster.heartbeat'},
 }
-                  
+
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
@@ -976,4 +977,3 @@ LOGGING = {
         },
     }
 }
-

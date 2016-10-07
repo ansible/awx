@@ -29,11 +29,12 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
-from awx.main.utils import emit_websocket_notification
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
+
+from awx.main.consumers import emit_channel_notification
 
 
 logger = logging.getLogger('awx.main.models.jobs')
@@ -1270,11 +1271,10 @@ class JobEvent(CreatedModifiedModel):
                     if update_fields:
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
-            emit_websocket_notification('/socket.io/jobs', 'summary_complete', dict(unified_job_id=job.id))
-
+            emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job.id))
 
     @classmethod
-    def start_event_queryset(cls, parent_task, starting_events, ordering=None):
+    def get_startevent_queryset(cls, parent_task, starting_events, ordering=None):
         '''
         We need to pull information about each start event.
 
@@ -1380,7 +1380,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         from awx.main.tasks import RunSystemJob
         return RunSystemJob
 
-    def socketio_emit_data(self):
+    def websocket_emit_data(self):
         return {}
 
     def get_absolute_url(self):
@@ -1421,4 +1421,3 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "System Job"
-

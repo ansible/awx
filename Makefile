@@ -364,7 +364,6 @@ server_noattach:
 	tmux new-window 'exec make receiver'
 	tmux select-window -t tower:1
 	tmux rename-window 'Extra Services'
-	tmux split-window -v 'exec make socketservice'
 	tmux split-window -h 'exec make factcacher'
 
 server: server_noattach

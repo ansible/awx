@@ -21,6 +21,10 @@ export default ['$scope', '$rootScope', '$location', '$log',
             generator = GenerateList,
             orgBase = GetBasePath('organizations');
 
+        $scope.$on(`ws-jobs`, function () {
+            $scope.search(list.iterator);
+        });
+
         Rest.setUrl(orgBase + $stateParams.organization_id);
         Rest.get()
             .success(function (data) {

@@ -22,6 +22,11 @@ var copyMoveGroup = {
             return GroupManageService.get({id: $stateParams.group_id}).then(res => res.data.results[0]);
         }]
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
+    },
     views: {
         'form@inventoryManage' : {
             controller: CopyMoveGroupsController,
@@ -39,6 +44,11 @@ var copyMoveHost = {
         host: ['HostManageService', '$stateParams', function(HostManageService, $stateParams){
             return HostManageService.get({id: $stateParams.host_id}).then(res => res.data.results[0]);
         }]
+    },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed"]
+        }
     },
     views: {
         'form@inventoryManage': {
