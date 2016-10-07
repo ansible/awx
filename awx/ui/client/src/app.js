@@ -7,6 +7,7 @@
 // Vendor dependencies
 import 'jquery';
 import 'angular';
+import 'angular-gettext';
 import 'bootstrap';
 import 'jquery-ui';
 import 'bootstrap-datepicker';
@@ -79,6 +80,7 @@ import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
+import {N_} from './i18n';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -203,6 +205,8 @@ var tower = angular.module('Tower', [
     scheduler.name,
     'ApiModelHelper',
     'ActivityStreamHelper',
+    'gettext',
+    'I18N',
 ])
 
 .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
@@ -237,6 +241,10 @@ var tower = angular.module('Tower', [
                 $state.go('dashboard');
             });
 
+            /* Mark translatable strings with N_() and
+             * extract them by 'grunt nggettext_extract'
+             * but angular.config() cannot get gettextCatalog.
+             */
             $stateProvider.
             state('teams', {
                 url: '/teams',
@@ -248,7 +256,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: 'setup',
-                    label: 'TEAMS'
+                    label: N_("TEAMS")
                 }
             }).
 
@@ -258,7 +266,7 @@ var tower = angular.module('Tower', [
                 controller: TeamsAdd,
                 ncyBreadcrumb: {
                     parent: "teams",
-                    label: "CREATE TEAM"
+                    label: N_("CREATE TEAM")
                 }
             }).
 
@@ -333,7 +341,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: 'setup',
-                    label: 'CREDENTIALS'
+                    label: N_("CREDENTIALS")
                 }
             }).
 
@@ -343,7 +351,7 @@ var tower = angular.module('Tower', [
                 controller: CredentialsAdd,
                 ncyBreadcrumb: {
                     parent: "credentials",
-                    label: "CREATE CREDENTIAL"
+                    label: N_("CREATE CREDENTIAL")
                 }
             }).
 
@@ -370,7 +378,7 @@ var tower = angular.module('Tower', [
                 },
                 ncyBreadcrumb: {
                     parent: 'setup',
-                    label: 'USERS'
+                    label: N_("USERS")
                 }
             }).
 
@@ -380,7 +388,7 @@ var tower = angular.module('Tower', [
                 controller: UsersAdd,
                 ncyBreadcrumb: {
                     parent: "users",
-                    label: "CREATE USER"
+                    label: N_("CREATE USER")
                 }
             }).
 
@@ -420,7 +428,7 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/sockets.html',
                 controller: SocketsController,
                 ncyBreadcrumb: {
-                    label: 'SOCKETS'
+                    label: N_("SOCKETS")
                 }
             });
         }
@@ -443,12 +451,12 @@ var tower = angular.module('Tower', [
     'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
     'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
     'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-    'FeaturesService', '$filter', 'SocketService',
+    'FeaturesService', '$filter', 'SocketService', 'I18NInit',
     function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log,
         CheckLicense, $location, Authorization, LoadBasePaths, Timer,
         ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
         ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-        $filter, SocketService) {
+        $filter, SocketService, I18NInit) {
 
         $stateExtender.addState({
             name: 'dashboard',
@@ -466,7 +474,7 @@ var tower = angular.module('Tower', [
                 refreshButton: true
             },
             ncyBreadcrumb: {
-                label: "DASHBOARD"
+                label: N_("DASHBOARD")
             },
             resolve: {
                 graphData: ['$q', 'jobStatusGraphData', '$rootScope',
@@ -487,7 +495,7 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/jobs.html',
             controller: JobsListController,
             ncyBreadcrumb: {
-                label: "JOBS"
+                label: N("JOBS")
             },
             params: {
                 search: {
@@ -512,7 +520,7 @@ var tower = angular.module('Tower', [
                 activityStreamTarget: 'project'
             },
             ncyBreadcrumb: {
-                label: "PROJECTS"
+                label: N("PROJECTS")
             },
             socket: {
                 "groups":{
@@ -528,7 +536,7 @@ var tower = angular.module('Tower', [
             controller: ProjectsAdd,
             ncyBreadcrumb: {
                 parent: "projects",
-                label: "CREATE PROJECT"
+                label: N("CREATE PROJECT")
             },
             socket: {
                 "groups":{
@@ -569,6 +577,8 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/projects.html',
             controller: OrganizationsAdd
         });
+
+        I18NInit();
 
         $rootScope.addPermission = function(scope) {
             $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);

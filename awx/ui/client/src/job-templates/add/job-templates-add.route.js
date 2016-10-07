@@ -5,6 +5,7 @@
  *************************************************/
 
 import {templateUrl} from '../../shared/template-url/template-url.factory';
+import {N_} from "../../i18n";
 
 export default {
     name: 'jobTemplates.add',
@@ -13,7 +14,7 @@ export default {
     controller: 'JobTemplatesAdd',
     ncyBreadcrumb: {
         parent: "jobTemplates",
-        label: "CREATE JOB TEMPLATE"
+        label: N_("CREATE JOB TEMPLATE")
     },
     socket:{
         "groups":{

@@ -8,13 +8,13 @@
   * used in the related tabs
   */
 
-export default function(){
+export default ['i18n', function(i18n){
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
         dataPlacement: 'top',
-        awToolTip: 'Please save before adding notifications',
+        awToolTip: i18n._('Please save before adding notifications'),
         name:  'notifications' ,
-        title: 'Notifications',
+        title: i18n._('Notifications'),
         iterator: 'notification',
         index: false,
         hover: false,
@@ -23,19 +23,19 @@ export default function(){
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 linkTo: '/#/notification_templates/{{notifier.id}}',
             },
             notification_type: {
-                label: 'Type',
+                label: i18n._('Type'),
                 searchType: 'select',
                 searchOptions: [],
                 excludeModal: true,
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             notification_templates_success: {
-                label: 'Success',
+                label: i18n._('Success'),
                 flag: 'notification_templates_success',
                 type: "toggle",
                 ngClick: "toggleNotification($event, notification.id, \"notification_templates_success\")",
@@ -46,7 +46,7 @@ export default function(){
                 nosort: true,
             },
             notification_templates_error: {
-                label: 'Failure',
+                label: i18n._('Failure'),
                 columnClass: 'NotifierList-lastColumn',
                 flag: 'notification_templates_error',
                 type: "toggle",
@@ -63,12 +63,12 @@ export default function(){
                 label: 'Add Notification',
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addNotificationTemplate()',
-                awToolTip: 'Create a new notification template',
+                awToolTip: i18n._('Create a new notification template'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD NOTIFICATION TEMPLATE',
+                buttonContent: i18n._('&#43; ADD NOTIFICATION TEMPLATE'),
                 ngShow: 'current_user.is_superuser || (current_user_admin_orgs && current_user_admin_orgs.length > 0)'
             }
         }
 
     };
-}
+}];

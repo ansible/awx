@@ -15,7 +15,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, GenerateList, Prompt, SearchInit,
     PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     SelectionInit, ProjectUpdate, Refresh, Wait, GetChoices, Empty,
-    Find, GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService) {
+    Find, GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService,
+    i18n) {
     ClearScope();
 
     $scope.canAdd = false;
@@ -57,16 +58,16 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             $scope.projects.forEach(function(project, i) {
                 $scope.projects[i].statusIcon = GetProjectIcon(project.status);
                 $scope.projects[i].statusTip = GetProjectToolTip(project.status);
-                $scope.projects[i].scm_update_tooltip = "Start an SCM update";
-                $scope.projects[i].scm_schedule_tooltip = "Schedule future SCM updates";
+                $scope.projects[i].scm_update_tooltip = i18n._("Start an SCM update");
+                $scope.projects[i].scm_schedule_tooltip = i18n._("Schedule future SCM updates");
                 $scope.projects[i].scm_type_class = "";
 
                 if (project.status === 'failed' && project.summary_fields.last_update && project.summary_fields.last_update.status === 'canceled') {
-                    $scope.projects[i].statusTip = 'Canceled. Click for details';
+                    $scope.projects[i].statusTip = i18n._('Canceled. Click for details');
                 }
 
                 if (project.status === 'running' || project.status === 'updating') {
-                    $scope.projects[i].scm_update_tooltip = "SCM update currently running";
+                    $scope.projects[i].scm_update_tooltip = i18n._("SCM update currently running");
                     $scope.projects[i].scm_type_class = "btn-disabled";
                 }
 
@@ -74,10 +75,10 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
                     if (type.value === project.scm_type) {
                         $scope.projects[i].scm_type = type.label;
                         if (type.label === 'Manual') {
-                            $scope.projects[i].scm_update_tooltip = 'Manual projects do not require an SCM update';
-                            $scope.projects[i].scm_schedule_tooltip = 'Manual projects do not require a schedule';
+                            $scope.projects[i].scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
+                            $scope.projects[i].scm_schedule_tooltip = i18n._('Manual projects do not require a schedule');
                             $scope.projects[i].scm_type_class = 'btn-disabled';
-                            $scope.projects[i].statusTip = 'Not configured for SCM';
+                            $scope.projects[i].statusTip = i18n._('Not configured for SCM');
                             $scope.projects[i].statusIcon = 'none';
                         }
                     }
@@ -215,8 +216,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
             $state.go('scmUpdateStdout', {id: id});
 
         } else {
-            Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
-                ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
+            Alert(i18n._('No Updates Available'), i18n._('There is no SCM update information available for this project. An update has not yet been ' +
+                ' completed.  If you have not already done so, start an update for this project.'), 'alert-info');
         }
     });
 
@@ -224,8 +225,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         // Refresh the project list
         var project = Find({ list: $scope.projects, key: 'id', val: id });
         if (Empty(project.scm_type) || project.scm_type === 'Manual') {
-            Alert('No SCM Configuration', 'The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, ' +
-                'and then run an update.', 'alert-info');
+            Alert(i18n._('No SCM Configuration'), i18n._('The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, ' +
+                'and then run an update.'), 'alert-info');
         } else {
             // Refresh what we have in memory to insure we're accessing the most recent status record
             Rest.setUrl(project.url);
@@ -234,8 +235,8 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
                     $scope.$emit('GoToJobDetails', data);
                 })
                 .error(function(data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Project lookup failed. GET returned: ' + status });
+                    ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                        msg: i18n._('Project lookup failed. GET returned: ') + status });
                 });
         }
     };
@@ -255,14 +256,14 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
                     }
                 })
                 .error(function (data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                        msg: i18n.format(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
                 });
         };
 
         Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the project below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            hdr: i18n._('Delete'),
+            body: i18n._('<div class="Prompt-bodyQuery">Are you sure you want to delete the project below?</div>') + '<div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -276,11 +277,11 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
         Rest.setUrl(url);
         Rest.post()
             .success(function () {
-                Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task manager.', 'alert-info');
+                Alert(i18n._('SCM Update Cancel'), i18n._('Your request to cancel the update was submitted to the task manager.'), 'alert-info');
                 $scope.refresh();
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.format(i18n._('Call to %s failed. POST status: '), url) + status });
             });
     });
 
@@ -296,12 +297,12 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
                 if (data.can_cancel) {
                     $scope.$emit('Cancel_Update', url);
                 } else {
-                    Alert('Cancel Not Allowed', '<div>Either you do not have access or the SCM update process completed. ' +
-                        'Click the <em>Refresh</em> button to view the latest status.</div>', 'alert-info', null, null, null, null, true);
+                    Alert(i18n._('Cancel Not Allowed'), i18n._('<div>Either you do not have access or the SCM update process completed. ' +
+                        'Click the <em>Refresh</em> button to view the latest status.</div>'), 'alert-info', null, null, null, null, true);
                 }
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
+                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.format(i18n._('Call to %s failed. GET status: '), url) + status });
             });
     });
 
@@ -316,17 +317,17 @@ export function ProjectsList ($scope, $rootScope, $location, $log, $stateParams,
                             $scope.$emit('Check_Cancel', data);
                         })
                         .error(function (data, status) {
-                            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + data.related.current_update + ' failed. GET status: ' + status });
+                            ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                                msg: i18n.format(i18n._('Call to %s failed. GET status: '), data.related.current_update) + status });
                         });
                 } else {
-                    Alert('Update Not Found', '<div>An SCM update does not appear to be running for project: ' + $filter('sanitize')(name) + '. Click the <em>Refresh</em> ' +
-                        'button to view the latest status.</div>', 'alert-info',undefined,undefined,undefined,undefined,true);
+                    Alert(i18n._('Update Not Found'), i18n.format(i18n._('<div>An SCM update does not appear to be running for project: %s. Click the <em>Refresh</em> ' +
+                        'button to view the latest status.</div>'), $filter('sanitize')(name)), 'alert-info',undefined,undefined,undefined,undefined,true);
                 }
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                    msg: 'Call to get project failed. GET status: ' + status });
+                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
+                    msg: i18n._('Call to get project failed. GET status: ') + status });
             });
     };
 
@@ -371,7 +372,8 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
     'Refresh', 'Wait', 'GetChoices', 'Empty', 'Find',
-    'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService'
+    'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService',
+    'i18n'
 ];
 
 
@@ -379,7 +381,7 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
     $stateParams, ProjectsForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit,
     OrganizationList, CredentialList, GetChoices, DebugForm, Wait, $state,
-    CreateSelect2) {
+    CreateSelect2, i18n) {
 
     Rest.setUrl(GetBasePath('projects'));
     Rest.options()
@@ -504,8 +506,8 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
             })
             .error(function (data, status) {
                 Wait('stop');
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to create new project. POST returned status: ' + status });
+                ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
+                    msg: i18n._('Failed to create new project. POST returned status: ') + status });
             });
     };
 
@@ -521,27 +523,27 @@ export function ProjectsAdd(Refresh, $scope, $rootScope, $compile, $location, $l
         if($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
-                    $scope.urlPopover = '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
                         '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                         'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH. GIT read only protocol (git://) does not use username or password information.';
+                        'SSH. GIT read only protocol (git://) does not use username or password information.');
                 break;
                 case 'svn':
-                    $scope.urlPopover = '<p>Example URLs for Subversion SCM include:</p>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for Subversion SCM include:</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
-                        '<li>svn+ssh://servername.example.com/path</li></ul>';
+                        '<li>svn+ssh://servername.example.com/path</li></ul>');
                     break;
                 case 'hg':
-                    $scope.urlPopover = '<p>Example URLs for Mercurial SCM include:</p>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for Mercurial SCM include:</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
                         '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
                         'Do not put the username and key in the URL. ' +
-                        'If using Bitbucket and SSH, do not supply your Bitbucket username.';
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.');
                     break;
                 default:
-                    $scope.urlPopover = '<p> URL popover text';
+                    $scope.urlPopover = i18n._('<p> URL popover text');
             }
         }
 
@@ -556,7 +558,7 @@ ProjectsAdd.$inject = ['Refresh', '$scope', '$rootScope', '$compile', '$location
     '$stateParams', 'ProjectsForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller',
     'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList',
-    'GetChoices', 'DebugForm', 'Wait', '$state', 'CreateSelect2'
+    'GetChoices', 'DebugForm', 'Wait', '$state', 'CreateSelect2', 'i18n'
 ];
 
 
@@ -566,7 +568,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     ReturnToCaller, GetProjectPath, Authorization, CredentialList, LookUpInit,
     GetChoices, Empty, DebugForm, Wait, SchedulesControllerInit,
     SchedulesListInit, SchedulesList, ProjectUpdate, $state, CreateSelect2,
-    OrganizationList, NotificationsListInit, ToggleNotification) {
+    OrganizationList, NotificationsListInit, ToggleNotification, i18n) {
 
     ClearScope('htmlTemplate');
 
@@ -769,8 +771,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 $scope.$emit('projectLoaded');
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to retrieve project: ' + id + '. GET status: ' + status
+                ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
+                    msg: i18n._('Failed to retrieve project: ') + id + i18n._('. GET status: ') + status
                 });
             });
     });
@@ -871,8 +873,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         };
 
         Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.name + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            hdr: i18n._('Delete'),
+            body: i18n.format(i18n._('<div class="Prompt-bodyQuery">Are you sure you want to remove the %s below from %s?</div>'), title, $scope.name) + '<div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -889,27 +891,27 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
-                    $scope.urlPopover = '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
                         '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                         'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH. GIT read only protocol (git://) does not use username or password information.';
+                        'SSH. GIT read only protocol (git://) does not use username or password information.');
                 break;
                 case 'svn':
-                    $scope.urlPopover = '<p>Example URLs for Subversion SCM include:</p>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for Subversion SCM include:</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
-                        '<li>svn+ssh://servername.example.com/path</li></ul>';
+                        '<li>svn+ssh://servername.example.com/path</li></ul>');
                     break;
                 case 'hg':
-                    $scope.urlPopover = '<p>Example URLs for Mercurial SCM include:</p>' +
+                    $scope.urlPopover = i18n._('<p>Example URLs for Mercurial SCM include:</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
                         '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
                         'Do not put the username and key in the URL. ' +
-                        'If using Bitbucket and SSH, do not supply your Bitbucket username.';
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.');
                     break;
                 default:
-                    $scope.urlPopover = '<p> URL popover text';
+                    $scope.urlPopover = i18n._('<p> URL popover text');
             }
         }
     };
@@ -918,7 +920,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.project_obj.scm_type === "Manual" || Empty($scope.project_obj.scm_type)) {
             // ignore
         } else if ($scope.project_obj.status === 'updating' || $scope.project_obj.status === 'running' || $scope.project_obj.status === 'pending') {
-            Alert('Update in Progress', 'The SCM update process is running.', 'alert-info');
+            Alert('Update in Progress', i18n._('The SCM update process is running.'), 'alert-info');
         } else {
             ProjectUpdate({ scope: $scope, project_id: $scope.project_obj.id });
         }
@@ -936,5 +938,5 @@ ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'SchedulesControllerInit', 'SchedulesListInit',
     'SchedulesList', 'ProjectUpdate', '$state', 'CreateSelect2',
-    'OrganizationList', 'NotificationsListInit', 'ToggleNotification'
+    'OrganizationList', 'NotificationsListInit', 'ToggleNotification', 'i18n'
 ];

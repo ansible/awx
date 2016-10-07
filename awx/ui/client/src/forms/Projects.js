@@ -12,21 +12,22 @@
 
 export default
 angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
-    .value('ProjectsFormObject', {
+    .factory('ProjectsFormObject', ['i18n', function(i18n) {
+    return {
 
-        addTitle: 'New Project',
+        addTitle: i18n._('New Project'),
         editTitle: '{{ name }}',
         name: 'project',
         forceListeners: true,
         tabs: true,
         subFormTitles: {
-            sourceSubForm: 'Source Details',
+            sourceSubForm: i18n._('Source Details'),
         },
 
 
         fields: {
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
@@ -34,14 +35,14 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
@@ -50,13 +51,13 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                dataTitle: 'Organization',
+                dataTitle: i18n._('Organization'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             scm_type: {
-                label: 'SCM Type',
+                label: i18n._('SCM Type'),
                 type: 'select',
                 class: 'Form-dropDown--scmType',
                 ngOptions: 'type.label for type in scm_type_options track by type.value',
@@ -76,21 +77,21 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 closeable: false
             },
             base_dir: {
-                label: 'Project Base Path',
+                label: i18n._('Project Base Path'),
                 type: 'text',
                 class: 'Form-textUneditable',
                 showonly: true,
                 ngShow: "scm_type.value == 'manual' " ,
-                awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
+                awPopOver: i18n._('<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' +
-                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
-                dataTitle: 'Project Base Path',
+                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>'),
+                dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             local_path: {
-                label: 'Playbook Directory',
+                label: i18n._('Playbook Directory'),
                 type: 'select',
                 id: 'local-path-select',
                 ngOptions: 'path.label for path in project_local_paths',
@@ -99,10 +100,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
-                awPopOver: '<p>Select from the list of directories found in the base path.' +
+                awPopOver: i18n._('<p>Select from the list of directories found in the base path.' +
                     'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' +
-                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
-                dataTitle: 'Project Path',
+                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>'),
+                dataTitle: i18n._('Project Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -134,7 +135,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             credential: {
-                label: 'SCM Credential',
+                label: i18n._('SCM Credential'),
                 type: 'lookup',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',
@@ -146,43 +147,43 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             checkbox_group: {
-                label: 'SCM Update Options',
+                label: i18n._('SCM Update Options'),
                 type: 'checkbox_group',
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 subForm: 'sourceSubForm',
                 fields: [{
                     name: 'scm_clean',
-                    label: 'Clean',
+                    label: i18n._('Clean'),
                     type: 'checkbox',
                     addRequired: false,
                     editRequired: false,
-                    awPopOver: '<p>Remove any local modifications prior to performing an update.</p>',
-                    dataTitle: 'SCM Clean',
+                    awPopOver: i18n._('<p>Remove any local modifications prior to performing an update.</p>'),
+                    dataTitle: i18n._('SCM Clean'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'scm_delete_on_update',
-                    label: 'Delete on Update',
+                    label: i18n._('Delete on Update'),
                     type: 'checkbox',
                     addRequired: false,
                     editRequired: false,
-                    awPopOver: '<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
-                        'repository this may significantly increase the amount of time required to complete an update.</p>',
-                    dataTitle: 'SCM Delete',
+                    awPopOver: i18n._('<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
+                        'repository this may significantly increase the amount of time required to complete an update.</p>'),
+                    dataTitle: i18n._('SCM Delete'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'scm_update_on_launch',
-                    label: 'Update on Launch',
+                    label: i18n._('Update on Launch'),
                     type: 'checkbox',
                     addRequired: false,
                     editRequired: false,
-                    awPopOver: '<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>',
-                    dataTitle: 'SCM Update',
+                    awPopOver: i18n._('<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>'),
+                    dataTitle: i18n._('SCM Update'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     labelClass: 'checkbox-options stack-inline',
@@ -190,7 +191,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 }]
             },
             scm_update_cache_timeout: {
-                label: 'Cache Timeout<span class=\"small-text\"> (seconds)</span>',
+                label: i18n._('Cache Timeout<span class=\"small-text\"> (seconds)</span>'),
                 id: 'scm-cache-timeout',
                 type: 'number',
                 integer: true,
@@ -200,10 +201,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 "default": '0',
                 addRequired: false,
                 editRequired: false,
-                awPopOver: '<p>Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
+                awPopOver: i18n._('<p>Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
                     'evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, ' +
-                    'and a new project update will be performed.</p>',
-                dataTitle: 'Cache Timeout',
+                    'and a new project update will be performed.</p>'),
+                dataTitle: i18n._('Cache Timeout'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
@@ -228,11 +229,11 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
 
         related: {
             permissions: {
-                awToolTip: 'Please save before assigning permissions',
+                awToolTip: i18n._('Please save before assigning permissions'),
                 dataPlacement: 'top',
                 basePath: 'projects/:id/access_list/',
                 type: 'collection',
-                title: 'Permissions',
+                title: i18n._('Permissions'),
                 iterator: 'permission',
                 index: false,
                 open: false,
@@ -241,9 +242,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     add: {
                         ngClick: "addPermission",
                         label: 'Add',
-                        awToolTip: 'Add a permission',
+                        awToolTip: i18n._('Add a permission'),
                         actionClass: 'btn List-buttonSubmit',
-                        buttonContent: '&#43; ADD',
+                        buttonContent: i18n._('&#43; ADD'),
                         ngShow: '(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },
@@ -289,9 +290,10 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             };
         }
 
-    })
+    };}])
 
-    .factory('ProjectsForm', ['ProjectsFormObject', 'NotificationsList', function(ProjectsFormObject, NotificationsList) {
+    .factory('ProjectsForm', ['ProjectsFormObject', 'NotificationsList',
+    function(ProjectsFormObject, NotificationsList) {
         return function() {
             var itm;
             for (itm in ProjectsFormObject.related) {

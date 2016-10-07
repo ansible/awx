@@ -7,13 +7,14 @@
 
 export default
     angular.module('TeamsListDefinition', [])
-    .value('TeamList', {
+    .factory('TeamList', ['i18n', function(i18n) {
+    return {
 
         name: 'teams',
         iterator: 'team',
-        selectTitle: 'Add Team',
-        editTitle: 'Teams',
-        listTitle: 'Teams',
+        selectTitle: i18n._('Add Team'),
+        editTitle: i18n._('Teams'),
+        listTitle: i18n._('Teams'),
         selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
             "button to create a new team.",
         index: false,
@@ -22,17 +23,17 @@ export default
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-3 col-md-4 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 columnClass: 'col-lg-3 col-md-3 hidden-sm hidden-xs',
                 excludeModal: true
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 ngBind: 'team.organization_name',
                 sourceModel: 'organization',
                 sourceField: 'name',
@@ -45,9 +46,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addTeam()',
-                awToolTip: 'Create a new team',
+                awToolTip: i18n._('Create a new team'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD',
+                buttonContent: i18n._('&#43; ADD'),
                 ngShow: 'canAdd'
             }
         },
@@ -57,30 +58,30 @@ export default
             columnClass: 'col-lg-3 col-md-2 col-sm-3 col-xs-3',
 
             edit: {
-                label: 'Edit',
+                label: i18n._('Edit'),
                 ngClick: "editTeam(team.id)",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'Edit team',
+                awToolTip: i18n._('Edit team'),
                 dataPlacement: 'top',
                 ngShow: 'team.summary_fields.user_capabilities.edit'
             },
             view: {
-                label: 'View',
+                label: i18n._('View'),
                 ngClick: "editTeam(team.id)",
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View team',
+                awToolTip: i18n._('View team'),
                 dataPlacement: 'top',
                 ngShow: '!team.summary_fields.user_capabilities.edit'
             },
             "delete": {
-                label: 'Delete',
+                label: i18n._('Delete'),
                 ngClick: "deleteTeam(team.id, team.name)",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete team',
+                awToolTip: i18n._('Delete team'),
                 dataPlacement: 'top',
                 ngShow: 'team.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

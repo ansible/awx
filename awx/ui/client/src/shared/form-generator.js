@@ -142,10 +142,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
     'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', 'getSearchHtml',
+    'Store', 'ActionButton', 'getSearchHtml', 'i18n',
     function ($rootScope, $location, $compile, GenerateList, SearchWidget,
         PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml) {
+        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml,
+        i18n) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -875,20 +876,27 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
+                            var error_message = i18n._("Please enter a value.");
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : error_message) + "</div>\n";
                         }
                         if (field.type === "email") {
+                            var error_message = i18n._("Please enter a valid email address.");
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-email-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.email\">Please enter a valid email address.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.email\">" +
+                                error_message + "</div>\n";
                         }
                         if (field.awPassMatch) {
+                            var error_message = i18n._("This value does not match the password you entered previously.  Please confirm that password.");
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-passmatch-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awpassmatch\">This value does not match the password you entered previously.  Please confirm that password.</div>\n";
+                                ".$error.awpassmatch\">" +
+                                error_message + "</div>\n";
                         }
                         if (field.awValidUrl) {
+                            var error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-url-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awvalidurl\">Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character. </div>\n";
+                                ".$error.awvalidurl\">" +
+                                error_message + "</div>\n";
                         }
 
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -901,7 +909,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //fields with sensitive data that needs to be obfuscated from view
                     if (field.type === 'sensitive') {
-                        field.showInputInnerHTML = "Show";
+                        field.showInputInnerHTML = i18n._("Show");
                         field.inputType = "password";
 
                         html += "\t" + label();
@@ -918,6 +926,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     $(inputId).attr("type", "password");
                                 }
                             };
+                            var tooltip = i18n._("Toggle the display of plaintext.");
                             html += "\<div class='input-group";
                             html += (horizontal) ? " " + getFieldWidth() : "";
                             html += "'>\n";
@@ -925,7 +934,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<span class='input-group-btn'>\n";
                             html += "<button type='button' class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
-                            html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
+                            html += "aw-tool-tip='" + tooltip + "' aw-tip-placement='top' ";
                             html += "tabindex='-1' ";
                             html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
                             html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
@@ -997,42 +1006,59 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         // Add error messages
                         if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
                             field.awRequiredWhen) {
+                            var error_message = i18n._("Please enter a value.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-required-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
-                                this.form.name + "_form." + fld + ".$error.required'>\n" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "\n</div>\n";
+                                this.form.name + "_form." + fld + ".$error.required'>\n" + (field.requiredErrorMsg ? field.requiredErrorMsg : error_message) + "\n</div>\n";
                         }
                         if (field.type === "email") {
+                            var error_message = i18n._("Please enter a valid email address.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-email-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
-                                this.form.name + "_form." + fld + ".$error.email'>\nPlease enter a valid email address.\n</div>\n";
+                                this.form.name + "_form." + fld + ".$error.email'>\n" +
+                                error_message + "\n</div>\n";
                         }
                         if (field.awPassMatch) {
+                            var error_message = i18n._("This value does not match the password you entered previously.  Please confirm that password.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-passmatch-error' ng-show='" + this.form.name + "_form." + fld +
-                                ".$error.awpassmatch'>\nThis value does not match the password you entered previously.  Please confirm that password.\n</div>\n";
+                                ".$error.awpassmatch'>\n" +
+                                error_message + "\n</div>\n";
                         }
                         if (field.awValidUrl) {
+                            var error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
-                                ".$error.awvalidurl'>\nPlease enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.\n</div>\n";
+                                ".$error.awvalidurl'>\n" +
+                                error_message + "\n</div>\n";
                         }
                         if (field.chkPass && $AnsibleConfig) {
                             // password strength
                             if ($AnsibleConfig.password_length) {
+                                var error_message = i18n.format(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.password_length\">Your password must be " + $AnsibleConfig.password_length + " characters long.</div>\n";
+                                    ".$error.password_length\">" +
+                                    error_message  + "</div>\n";
                             }
                             if ($AnsibleConfig.password_hasLowercase) {
+                                var error_message = i18n._("Your password must contain a lowercase letter.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasLowercase\">Your password must contain a lowercase letter.</div>\n";
+                                    ".$error.hasLowercase\">" +
+                                    error_message + "</div>\n";
                             }
                             if ($AnsibleConfig.password_hasUppercase) {
+                                var error_message = i18n._("Your password must contain an uppercase letter.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasUppercase\">Your password must contain an uppercase letter.</div>\n";
+                                    ".$error.hasUppercase\">" +
+                                    error_message + "</div>\n";
                             }
                             if ($AnsibleConfig.password_hasNumber) {
+                                var error_message = i18n._("Your password must contain a number.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasNumber\">Your password must contain a number.</div>\n";
+                                    ".$error.hasNumber\">" +
+                                    error_message + "</div>\n";
                             }
                             if ($AnsibleConfig.password_hasSymbol) {
+                                var error_message = i18n.format(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasSymbol\">Your password must contain one of the following characters: `~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,</div>\n";
+                                    ".$error.hasSymbol\">" +
+                                    error_message + "</div>\n";
                             }
                         }
 
@@ -1136,7 +1162,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(!field.multiSelect && !field.disableChooseOption){
                             html += "<option value=\"\">";
                                 // Add a custom default select 'value' (default text)
-                            html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
+                            if (field.defaultText) {
+                                html += field.defaultText;
+                            } else {
+                                // i18n is used with src/forms/Projects.js
+                                html += i18n.format(i18n._("Choose a %s"),
+                                                    field.label.toLowerCase());
+                            }
                             html += "</option>\n";
                         }
 
@@ -1488,10 +1520,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<div class=\"Form-title\">";
                     html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                     if(this.form.name === "user"){
+                        var user_str  = i18n._("Admin");
                         html+= "<span class=\"Form-title--is_superuser\" "+
-                            "ng-show='is_superuser'>Admin</span>";
+                            "ng-show='is_superuser'>" +
+                            user_str + "</span>";
+                        user_str  = i18n._("Auditor");
                         html+= "<span class=\"Form-title--is_system_auditor\" "+
-                            "ng-show='is_system_auditor'>Auditor</span>";
+                            "ng-show='is_system_auditor'>" +
+                            user_str + "</span>";
                         html+= "<span class=\"Form-title--is_ldap_user\" "+
                             "ng-show='ldap_user'>LDAP</span>";
                         html+= "<span class=\"Form-title--is_external_account\" "+
@@ -1521,13 +1557,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if (!_.isEmpty(this.form.related)) {
                     var collection;
+                    // i18n is used with src/forms/Projects.js
+                    var details = i18n._("Details");
                     html += "<div class=\"Form-tabHolder\">";
 
                     if(this.mode === "edit"){
                         html += "<div id=\"" + this.form.name + "_tab\""+
                             "class=\"Form-tab\" "+
                             "ng-click=\"toggleFormTabs($event)\"" +
-                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">Details</div>";
+                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">" +
+                            details + "</div>";
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
@@ -1548,7 +1587,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                     else if(this.mode === "add"){
                         html += "<div id=\"" + this.form.name + "_tab\""+
-                            "class=\"Form-tab is-selected\">Details</div>";
+                            "class=\"Form-tab is-selected\">" +
+                            details + "</div>";
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
@@ -1693,31 +1733,31 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                                 // Set default color and label for Save and Reset
                                 if (btn === 'save') {
-                                    button.label = 'Save';
+                                    button.label = i18n._('Save');
                                     button['class'] = 'Form-saveButton';
                                 }
                                 if (btn === 'cancel') {
-                                    button.label = 'Cancel';
+                                    button.label = i18n._('Cancel');
                                     button['class'] = 'Form-cancelButton';
                                 }
                                 if (btn === 'close') {
-                                    button.label = 'Close';
+                                    button.label = i18n._('Close');
                                     button['class'] = 'Form-cancelButton';
                                 }
                                 if (btn === 'launch') {
-                                    button.label = 'Launch';
+                                    button.label = i18n._('Launch');
                                     button['class'] = 'Form-launchButton';
                                 }
                                 if (btn === 'add_survey') {
-                                    button.label = 'Add Survey';
+                                    button.label = i18n._('Add Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
                                 if (btn === 'edit_survey') {
-                                    button.label = 'Edit Survey';
+                                    button.label = i18n._('Edit Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
                                 if (btn === 'view_survey') {
-                                    button.label = 'View Survey';
+                                    button.label = i18n._('View Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
 

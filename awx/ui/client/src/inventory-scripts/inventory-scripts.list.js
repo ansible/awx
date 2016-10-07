@@ -6,10 +6,10 @@
 
 
 
-export default function(){
+export default ['i18n', function(i18n){
     return {
         name:  'inventory_scripts' ,
-        listTitle: 'Inventory Scripts',
+        listTitle: i18n._('Inventory Scripts'),
         iterator: 'inventory_script',
         index: false,
         hover: false,
@@ -17,17 +17,17 @@ export default function(){
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-8'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 excludeModal: true,
                 columnClass: 'col-md-4 hidden-sm hidden-xs'
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 ngBind: 'inventory_script.summary_fields.organization.name',
                 sourceModel: 'organization',
                 sourceField: 'name',
@@ -40,9 +40,9 @@ export default function(){
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCustomInv()',
-                awToolTip: 'Create a new custom inventory',
+                awToolTip: i18n._('Create a new custom inventory'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD',
+                buttonContent: i18n._('&#43; ADD'),
                 ngShow: 'canAdd'
             }
         },
@@ -54,29 +54,29 @@ export default function(){
             edit: {
                 ngClick: "editCustomInv(inventory_script.id)",
                 icon: 'fa-edit',
-                label: 'Edit',
+                label: i18n._('Edit'),
                 "class": 'btn-sm',
-                awToolTip: 'Edit inventory script',
+                awToolTip: i18n._('Edit inventory script'),
                 dataPlacement: 'top',
                 ngShow: 'inventory_script.summary_fields.user_capabilities.edit'
             },
             view: {
                 ngClick: "editCustomInv(inventory_script.id)",
-                label: 'View',
+                label: i18n._('View'),
                 "class": 'btn-sm',
-                awToolTip: 'View inventory script',
+                awToolTip: i18n._('View inventory script'),
                 dataPlacement: 'top',
                 ngShow: '!inventory_script.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 ngClick: "deleteCustomInv(inventory_script.id, inventory_script.name)",
                 icon: 'fa-trash',
-                label: 'Delete',
+                label: i18n._('Delete'),
                 "class": 'btn-sm',
-                awToolTip: 'Delete inventory script',
+                awToolTip: i18n._('Delete inventory script'),
                 dataPlacement: 'top',
                 ngShow: 'inventory_script.summary_fields.user_capabilities.delete'
             }
         }
     };
-}
+}];

@@ -7,6 +7,7 @@ var vendorPkgs = [
     'angular-codemirror',
     'angular-cookies',
     'angular-drag-and-drop-lists',
+    'angular-gettext',
     'angular-md5',
     'angular-moment',
     'angular-sanitize',

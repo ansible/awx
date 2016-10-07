@@ -1,7 +1,8 @@
 /* jshint unused: vars */
 export default
     [   'templateUrl',
-        function(templateUrl) {
+        'i18n',
+        function(templateUrl, i18n) {
             return {
                 restrict: 'E',
                 scope: {
@@ -35,34 +36,34 @@ export default
                             {
                                 url: "/#/home/hosts",
                                 number: scope.data.hosts.total,
-                                label: "Hosts"
+                                label: i18n._("Hosts")
                             },
                             {
                                 url: "/#/home/hosts?active-failures=true",
                                 number: scope.data.hosts.failed,
-                                label: "Failed Hosts",
+                                label: i18n._("Failed Hosts"),
                                 isFailureCount: true
                             },
                             {
                                 url: "/#/inventories",
                                 number: scope.data.inventories.total,
-                                label: "Inventories",
+                                label: i18n._("Inventories"),
                             },
                             {
                                 url: "/#/inventories?status=sync-failed",
                                 number: scope.data.inventories.inventory_failed,
-                                label: "Inventory Sync Failures",
+                                label: i18n._("Inventory Sync Failures"),
                                 isFailureCount: true
                             },
                             {
                                 url: "/#/projects",
                                 number: scope.data.projects.total,
-                                label: "Projects"
+                                label: i18n._("Projects")
                             },
                             {
                                 url: "/#/projects?status=failed,canceled",
                                 number: scope.data.projects.failed,
-                                label: "Project Sync Failures",
+                                label: i18n._("Project Sync Failures"),
                                 isFailureCount: true
                             }
                         ], function(val) { return addFailureToCount(val); });

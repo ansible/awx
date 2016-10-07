@@ -16,6 +16,7 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig(configs);
     grunt.loadNpmTasks('grunt-newer');
+    grunt.loadNpmTasks('grunt-angular-gettext');
 
     // writes environment variables for development. current manages:
     // browser-sync + websocket proxy

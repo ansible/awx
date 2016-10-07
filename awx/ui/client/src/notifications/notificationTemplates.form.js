@@ -10,20 +10,20 @@
  * @description This form is for adding/editing an organization
 */
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
 
-        addTitle: 'New Notification Template',
+        addTitle: i18n._('New Notification Template'),
         editTitle: '{{ name }}',
         name: 'notification_template',
         showActions: true,
         subFormTitles: {
-            typeSubForm: 'Type Details',
+            typeSubForm: i18n._('Type Details'),
         },
 
         fields: {
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
@@ -31,14 +31,14 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
@@ -50,7 +50,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notification_type: {
-                label:  'Type',
+                label:  i18n._('Type'),
                 type: 'select',
                 addRequired: true,
                 editRequired: true,
@@ -61,7 +61,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             username: {
-                label: 'Username',
+                label: i18n._('Username'),
                 type: 'text',
                 ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
@@ -69,7 +69,7 @@ export default function() {
             },
 
             host: {
-                label: 'Host',
+                label: i18n._('Host'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "email_required",
@@ -80,7 +80,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             sender: {
-                label: 'Sender Email',
+                label: i18n._('Sender Email'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "email_required",
@@ -91,12 +91,12 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             recipients: {
-                label: 'Recipient List',
+                label: i18n._('Recipient List'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line.</p>'+
-                            '<p>For example:<br>alias1@email.com<br>\n alias2@email.com<br>\n',
-                dataTitle: 'Recipient List',
+                awPopOver: i18n._('<p>Type an option on each line.</p>'+
+                            '<p>For example:<br>alias1@email.com<br>\n alias2@email.com<br>\n'),
+                dataTitle: i18n._('Recipient List'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -135,12 +135,12 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             channels: {
-                label: 'Destination Channels',
+                label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
+                            '<p>For example:<br>engineering<br>\n #support<br>\n'),
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -152,12 +152,12 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             rooms: {
-                label: 'Destination Channels',
+                label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
+                            '<p>For example:<br>engineering<br>\n #support<br>\n'),
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -181,7 +181,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_token: {
-                label: 'Account Token',
+                label: i18n._('Account Token'),
                 type: 'sensitive',
                 hasShowInputButton: true,
                 awRequiredWhen: {
@@ -193,10 +193,10 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             from_number: {
-                label: 'Source Phone Number',
+                label: i18n._('Source Phone Number'),
                 type: 'text',
-                awPopOver: '<p>Number associated with the "Messaging Service" in Twilio.</p>'+
-                            '<p>This must be of the form <code>+18005550199</code>.</p>',
+                awPopOver: i18n._('<p>Number associated with the "Messaging Service" in Twilio.</p>'+
+                            '<p>This must be of the form <code>+18005550199</code>.</p>'),
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
@@ -206,12 +206,12 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             to_numbers: {
-                label: 'Destination SMS Number',
+                label: i18n._('Destination SMS Number'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line.</p>'+
-                            '<p>For example:<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
-                dataTitle: 'Destination SMS Number',
+                awPopOver: i18n._('<p>Type an option on each line.</p>'+
+                            '<p>For example:<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n'),
+                dataTitle: i18n._('Destination SMS Number'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -223,7 +223,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_sid: {
-                label: 'Account SID',
+                label: i18n._('Account SID'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
@@ -234,7 +234,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             subdomain: {
-                label: 'Pagerduty subdomain',
+                label: i18n._('Pagerduty subdomain'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
@@ -245,7 +245,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             service_key: {
-                label: 'API Service/Integration Key',
+                label: i18n._('API Service/Integration Key'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
@@ -256,7 +256,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             client_name: {
-                label: 'Client Identifier',
+                label: i18n._('Client Identifier'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
@@ -267,7 +267,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             message_from: {
-                label: 'Label to be shown with notification',
+                label: i18n._('Label to be shown with notification'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
@@ -290,10 +290,10 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             color: {
-                label: 'Notification Color',
+                label: i18n._('Notification Color'),
                 type: 'text',
-                awPopOver: '<p>Color can be one of <code>yellow</code>, <code>green</code>, <code>red</code>, ' +
-                           '<code>purple</code>, <code>gray</code>, or <code>random</code>.\n',
+                awPopOver: i18n._('<p>Color can be one of <code>yellow</code>, <code>green</code>, <code>red</code>, ' +
+                           '<code>purple</code>, <code>gray</code>, or <code>random</code>.\n'),
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
@@ -303,14 +303,14 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notify: {
-                label: 'Notify Channel',
+                label: i18n._('Notify Channel'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'hipchat' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             url: {
-                label: 'Target URL',
+                label: i18n._('Target URL'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
@@ -321,7 +321,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             headers: {
-                label: 'HTTP Headers',
+                label: i18n._('HTTP Headers'),
                 type: 'textarea',
                 rows: 5,
                 'class': 'Form-formGroup--fullWidth',
@@ -329,20 +329,20 @@ export default function() {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
-                awPopOver: '<p>Specify HTTP Headers in JSON format</p>' +
+                awPopOver: i18n._('<p>Specify HTTP Headers in JSON format</p>' +
                            '<p>For example:<br><pre>\n' +
                            '{\n' +
                            '  "X-Auth-Token": "828jf0",\n' +
                            '  "X-Ansible": "Is great!"\n' +
                            '}\n' +
-                           '</pre></p>',
+                           '</pre></p>'),
                 dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             server: {
-                label: 'IRC Server Address',
+                label: i18n._('IRC Server Address'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "irc_required",
@@ -353,7 +353,7 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             nickname: {
-                label: 'IRC Nick',
+                label: i18n._('IRC Nick'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "irc_required",
@@ -364,12 +364,12 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             targets: {
-                label: 'Destination Channels or Users',
+                label: i18n._('Destination Channels or Users'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>#support or support<br>\n @username or username<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
+                            '<p>For example:<br>#support or support<br>\n @username or username<br>\n'),
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -381,27 +381,27 @@ export default function() {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             use_ssl: {
-                label: 'SSL Connection',
+                label: i18n._('SSL Connection'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'irc'",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             checkbox_group: {
-                label: 'Options',
+                label: i18n._('Options'),
                 type: 'checkbox_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
                 fields: [{
                     name: 'use_tls',
-                    label: 'Use TLS',
+                    label: i18n._('Use TLS'),
                     type: 'checkbox',
                     ngShow: "notification_type.value == 'email' ",
                     labelClass: 'checkbox-options stack-inline',
                     ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
                 }, {
                     name: 'use_ssl',
-                    label: 'Use SSL',
+                    label: i18n._('Use SSL'),
                     type: 'checkbox',
                     ngShow: "notification_type.value == 'email'",
                     labelClass: 'checkbox-options stack-inline',
@@ -426,4 +426,4 @@ export default function() {
             }
         }
     };
-}
+}];
