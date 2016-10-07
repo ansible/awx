@@ -97,6 +97,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         settings_qs = self.get_queryset()
         user = self.request.user if self.category_slug == 'user' else None
         for key, value in serializer.validated_data.items():
+            if key == 'LICENSE':
+                continue
             setattr(serializer.instance, key, value)
             # Always encode "raw" strings as JSON.
             if isinstance(value, basestring):
@@ -114,7 +116,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_destroy(self, instance):
-        for setting in self.get_queryset():
+        for setting in self.get_queryset().exclude(key='LICENSE'):
             setting.delete()
 
 
