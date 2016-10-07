@@ -360,7 +360,7 @@ CELERY_QUEUES = (
     # Projects use a fanout queue, this isn't super well supported
     Broadcast('projects'),
 )
-CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
+CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                                              'routing_key': 'jobs'},
                   'awx.main.tasks.run_project_update': {'queue': 'projects'},
                   'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
@@ -372,7 +372,10 @@ CELERY_ROUTES = ({'awx.main.tasks.run_job': {'queue': 'jobs',
                   'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
                                                               'routing_key': 'scheduler.job.launch'},
                   'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
-                                                                'routing_key': 'scheduler.job.complete'},})
+                                                                'routing_key': 'scheduler.job.complete'},
+                  'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
+                                                            'routing_key': 'cluster.heartbeat'},
+}
 
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
@@ -386,6 +389,10 @@ CELERYBEAT_SCHEDULE = {
     'authtoken_cleanup': {
         'task': 'awx.main.tasks.cleanup_authtokens',
         'schedule': timedelta(days=30)
+    },
+    'cluster_heartbeat': {
+        'task': 'awx.main.tasks.cluster_node_heartbeat',
+        'schedule': timedelta(seconds=60)
     },
 }
 

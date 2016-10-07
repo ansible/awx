@@ -4,6 +4,7 @@
 # Development settings for AWX project.
 
 # Python
+import socket
 import copy
 import sys
 import traceback
@@ -106,3 +107,7 @@ try:
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
+
+CLUSTER_HOST_ID = socket.gethostname()
+CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+

@@ -399,7 +399,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -770,7 +770,7 @@ MACHINE?=default
 docker-clean:
 	eval $$(docker-machine env $(MACHINE))
 	$(foreach container_id,$(shell docker ps -f name=tools_tower -aq),docker stop $(container_id); docker rm -f $(container_id);)
-	-docker images | grep "tower_devel" | awk '{print $$3}' | xargs docker rmi
+	-docker images | grep "tower_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
 

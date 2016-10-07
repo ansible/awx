@@ -1,31 +1,30 @@
 # Copyright (c) 2015 Ansible, Inc.
 # All Rights Reserved
 
-from awx.main.management.commands._base_instance import BaseCommandInstance
 from awx.main.models import Instance
+from django.conf import settings
 
-instance_str = BaseCommandInstance.instance_str
+from django.core.management.base import CommandError, NoArgsCommand
 
-class Command(BaseCommandInstance):
+class Command(NoArgsCommand):
     """
     Internal tower command.
     Regsiter this instance with the database for HA tracking.
-
-    This command is idempotent.
     """
-    def __init__(self):
-        super(Command, self).__init__()
-        self.include_option_hostname_set()
+
+    option_list = NoArgsCommand.option_list + (
+        make_option('--hostname', dest='hostname', type='string',
+                    help='Hostname used during provisioning')
+    )
 
     def handle(self, *args, **options):
-        super(Command, self).handle(*args, **options)
+        super(Command, self).handle(**options)
+        uuid = settings.SYSTEM_UUID
 
-        uuid = self.get_UUID()
-
-        instance = Instance.objects.filter(hostname=self.get_option_hostname())
+        instance = Instance.objects.filter(hostname=options.get('hostname'))
         if instance.exists():
             print("Instance already registered %s" % instance_str(instance[0]))
             return
-        instance = Instance(uuid=uuid, hostname=self.get_option_hostname())
+        instance = Instance(uuid=uuid, hostname=options.get('hostname'))
         instance.save()
         print('Successfully registered instance %s.' % instance_str(instance))
