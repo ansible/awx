@@ -30,7 +30,7 @@ services:
   memcached:
     image: memcached:alpine
   rabbitmq:
-    image: gcr.io/ansible-tower-engineering/rabbitmq:latest
+    image: rabbitmq:3-management
     ports:
       - "15672:15672"
 
