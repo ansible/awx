@@ -134,4 +134,5 @@ wsgiref==0.1.2
 xmltodict==0.9.2
 channels==0.17.2
 asgi_amqp==0.3
-
+uwsgi==2.0.14
+daphne==0.15.0
