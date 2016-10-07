@@ -133,6 +133,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     };
 
     // PULL! grab completed event data and process each event
+    // TODO: implement retry logic in case one of these requests fails
     var getEvents = function(url) {
         jobResultsService.getEvents(url)
             .then(events => {
