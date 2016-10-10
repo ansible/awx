@@ -305,13 +305,13 @@ class BaseAccess(object):
             if display_method not in method_list:
                 continue
 
-            # Validation consistency checks
+            # Actions not possible for reason unrelated to RBAC: validation, etc.
             if display_method == 'copy' and isinstance(obj, JobTemplate):
                 validation_errors, resources_needed_to_start = obj.resource_validation_data()
                 if validation_errors:
                     user_capabilities[display_method] = False
                     continue
-            elif display_method == 'start' and isinstance(obj, Group):
+            elif display_method in ['start', 'schedule'] and isinstance(obj, Group):
                 if obj.inventory_source and not obj.inventory_source._can_update():
                     user_capabilities[display_method] = False
                     continue
