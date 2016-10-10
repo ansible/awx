@@ -22,6 +22,8 @@ def copy_tower_settings(apps, schema_editor):
             setting, created = Setting.objects.get_or_create(
                 key=tower_setting.key,
                 user=tower_setting.user,
+                created=tower_setting.created,
+                modified=tower_setting.modified,
                 defaults=dict(value=value),
             )
             if not created and setting.value != value:
