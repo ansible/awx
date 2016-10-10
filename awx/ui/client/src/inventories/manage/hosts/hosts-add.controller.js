@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'ToJSON',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, ToJSON){
         var generator = GenerateForm,
             form = HostForm;
         $scope.parseType = 'yaml';
@@ -17,8 +17,9 @@
             $scope.host.enabled = !$scope.host.enabled;
         };
         $scope.formSave = function(){
-            var params = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+            var json_data = ToJSON($scope.parseType, $scope.variables, true),
+            params = {
+                variables: json_data,// $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
                 description: $scope.description,
                 enabled: $scope.host.enabled,
