@@ -1273,6 +1273,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
             qs = self.model.objects.filter(
                 workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
                     self.user, 'read_role'))
+        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
         return qs
 
     def can_use_prompted_resources(self, data):
@@ -1367,6 +1368,8 @@ class WorkflowJobNodeAccess(BaseAccess):
             qs = self.model.objects.filter(
                 workflow_job__workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
                     self.user, 'read_role'))
+        qs = qs.select_related('unified_job_template', 'job')
+        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
         return qs
 
     def can_add(self, data):
