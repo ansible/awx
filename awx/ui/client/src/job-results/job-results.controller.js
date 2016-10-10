@@ -76,13 +76,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     $scope.hostCount = getTotalHostCount(count.val);
     $scope.countFinished = count.countFinished;
 
-    // Process incoming job status changes
-    $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
-        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
-            $scope.job.status = data.status;
-        }
-    });
-
     // EVENT STUFF BELOW
 
     // just putting the event queue on scope so it can be inspected in the
@@ -150,14 +143,26 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     };
     getEvents($scope.job.related.job_events);
 
-    // PUSH! process incoming job events
-    $rootScope.event_socket.on("job_events-" + $scope.job.id, function(data) {
+    // Processing of job_events messages from the websocket 
+    $scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
         processEvent(data);
     });
 
-    // STOP! stop listening to job events
-    $scope.$on('$destroy', function() {
-        $rootScope.event_socket.removeAllListeners("job_events-" +
-            $scope.job.id);
+    // Processing of job-status messages from the websocket
+    $scope.$on(`ws-jobs`, function(e, data) {
+        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
+            $scope.job.status = data.status;
+        }
     });
+
+    // The code below was used in the old job detail controller,
+    // and is for processing the 'Job Summary' event that is delivered
+    // for a completed job. Not sure if we have an equivalent function
+    // at this point. TODO: write function to handle Job Summary
+    // scope.$on('ws-jobs-summary', function() {
+    //     // the job host summary should now be available from the API
+    //     $log.debug('Trigging reload of job_host_summaries');
+    //     scope.$emit('InitialLoadComplete');
+    // });
+
 }];

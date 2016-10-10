@@ -1,3 +1,4 @@
+<<<<<<< 4cf6a946a1aa14b7d64a8e1e8dabecfd3d056f27
 //<<<<<<< bc59236851902d7c768aa26abdb7dc9c9dc27a5a
 /*************************************************
  * Copyright (c) 2016 Ansible, Inc.
@@ -46,6 +47,8 @@
 //     controller: 'JobDetailController'
 // };
 //=======
+=======
+>>>>>>> Rebase of devel (w/ channels) + socket rework for new job details
 // /*************************************************
 //  * Copyright (c) 2016 Ansible, Inc.
 //  *
@@ -60,6 +63,12 @@
 //     ncyBreadcrumb: {
 //         parent: 'jobs',
 //         label: "{{ job.id }} - {{ job.name }}"
+//     },
+//     socket: {
+//         "groups":{
+//             "jobs": ["status_changed", "summary"],
+//             "job_events": []
+//         }
 //     },
 //     resolve: {
 //         jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {

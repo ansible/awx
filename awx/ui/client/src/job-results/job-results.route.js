@@ -15,6 +15,12 @@ export default {
         parent: 'jobs',
         label: '{{ job.id }} - {{ job.name }}'
     },
+    socket: {
+        "groups":{
+            "jobs": ["status_changed", "summary"],
+            "job_events": []
+        }
+    },
     resolve: {
         // the GET for the particular job
         jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', function(Rest, GetBasePath, $stateParams, $q, $state, Alert) {
@@ -121,25 +127,6 @@ export default {
                     val.reject(data);
                 });
             return val.promise;
-        }],
-        // This gives us access to the job events socket so we can start
-        // listening for updates we need to make for the ui as data comes in
-        //
-        // TODO: we could probably make this better by not initing
-        // job_events for completed jobs
-        jobEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-            if (!$rootScope.event_socket) {
-                $rootScope.event_socket = Socket({
-                    scope: $rootScope,
-                    endpoint: "job_events"
-                });
-                $rootScope.event_socket.init();
-                // returns should really be providing $rootScope.event_socket
-                // otherwise, we have to inject the entire $rootScope into the controller
-                return true;
-            } else {
-                return true;
-            }
         }],
         // This clears out the event queue, otherwise it'd be full of events
         // for previous job results the user had navigated to
