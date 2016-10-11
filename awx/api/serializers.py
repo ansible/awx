@@ -2232,11 +2232,14 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     job_tags = serializers.SerializerMethodField()
     limit = serializers.SerializerMethodField()
     skip_tags = serializers.SerializerMethodField()
+    success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
-        fields = ('id', 'url', 'related', 'unified_job_template',
+        fields = ('*', '-name', '-description', 'id', 'url', 'related',
+                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
                   'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags')
-        read_only_fields = ('success_nodes', 'failure_nodes', 'always_nodes')
 
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
