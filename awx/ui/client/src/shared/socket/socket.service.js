@@ -13,7 +13,17 @@ export default
             init: function() {
                 var self = this,
                     host = window.location.host,
-                    url = "ws://" + host + "/websocket/";
+                    protocol,
+                    url;
+
+                if($location.protocol() === 'http'){
+                    protocol = 'ws';
+                }
+                if($location.protocol() === 'https'){
+                    protocol = 'wss';
+                }
+                url = `${protocol}://${host}/websocket/`;
+
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
                     // We have a valid session token, so attempt socket connection
                     $log.debug('Socket connecting to: ' + url);
@@ -83,7 +93,7 @@ export default
                     // The naming scheme is "ws" then a
                     // dash (-) and the group_name, then the job ID
                     // ex: 'ws-jobs-<jobId>'
-                    str = `ws-${data.group_name}-${data.job}`
+                    str = `ws-${data.group_name}-${data.job}`;
                 }
                 else if(data.group_name==="ad_hoc_command_events"){
                     // The naming scheme is "ws" then a
@@ -194,7 +204,7 @@ export default
                 // This function is used for add a state resolve to all states,
                 // socket-enabled AND socket-disabled, and whether the $state
                 // requires a subscribe or an unsubscribe
-                self = this;
+                var self = this;
                 socketPromise.promise.then(function(){
                     if(!state.socket){
                         state.socket = {groups: {}};
