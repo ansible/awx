@@ -384,6 +384,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
         if res: 
                 self.status = 'running'
                 self.save()
-                self.socketio_emit_status("running")
+                self.websocket_emit_status("running")
         return res
 
