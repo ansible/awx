@@ -821,11 +821,6 @@ class RunJob(BaseTask):
             env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
             env['ANSIBLE_CACHE_PLUGIN'] = "tower"
             env['ANSIBLE_CACHE_PLUGIN_CONNECTION'] = "tcp://127.0.0.1:%s" % str(settings.FACT_CACHE_PORT)
-
-        # Set artifact module path
-        # TODO: restrict this to workflow jobs, or JTs expecting artifacts
-        env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
-
         return env
 
     def build_args(self, job, **kwargs):
