@@ -126,7 +126,8 @@ register(
 register(
     'SOCIAL_AUTH_ORGANIZATION_MAP',
     field_class=fields.SocialOrganizationMapField,
-    default={},
+    allow_null=True,
+    default=None,
     label=_('Social Auth Organization Map'),
     help_text=SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT,
     category=_('Authentication'),
@@ -137,7 +138,8 @@ register(
 register(
     'SOCIAL_AUTH_TEAM_MAP',
     field_class=fields.SocialTeamMapField,
-    default={},
+    allow_null=True,
+    default=None,
     label=_('Social Auth Team Map'),
     help_text=SOCIAL_AUTH_TEAM_MAP_HELP_TEXT,
     category=_('Authentication'),

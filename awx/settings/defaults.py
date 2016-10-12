@@ -473,9 +473,6 @@ SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
 
-SOCIAL_AUTH_ORGANIZATION_MAP = {}
-SOCIAL_AUTH_TEAM_MAP = {}
-
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
 
