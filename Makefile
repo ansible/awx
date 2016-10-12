@@ -519,10 +519,10 @@ release_build:
 # Build setup tarball
 tar-build/$(SETUP_TAR_FILE):
 	@mkdir -p tar-build
-	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@rsync -az --exclude /test setup/ tar-build/$(SETUP_TAR_NAME)
 	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" --exclude "**/test/*" $(SETUP_TAR_NAME)/
+	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 
 tar-build/$(SETUP_TAR_CHECKSUM):
@@ -559,7 +559,7 @@ setup-bundle-build:
 
 # TODO - Somehow share implementation with setup_tarball
 setup-bundle-build/$(OFFLINE_TAR_FILE):
-	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	rsync -az --exclude /test setup/ setup-bundle-build/$(OFFLINE_TAR_NAME)
 	rsync -az docs/licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/
 	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
