@@ -2249,11 +2249,15 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    fail_on_job_failure = serializers.BooleanField(
+        help_text=('If set to true, and if the job runs and fails, '
+                   'the workflow will also be marked as failed.'),
+        default=True)
 
     class Meta:
         fields = ('*', '-name', '-description', 'id', 'url', 'related',
                   'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
-                  'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags')
+                  'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags', 'fail_on_job_failure')
 
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)
