@@ -1,14 +1,17 @@
 
 # Python
 import logging
-import time
+
+# Django
+from django.db import transaction
+from django.db.utils import DatabaseError
 
 # Celery
 from celery import task
 
 # AWX
-from awx.main.models import UnifiedJob
-from awx.main.scheduler import schedule
+from awx.main.models import Instance
+from awx.main.scheduler import Scheduler
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -18,6 +21,7 @@ logger = logging.getLogger('awx.main.scheduler')
 
 @task
 def run_job_launch(job_id):
+    '''
     # Wait for job to exist.
     # The job is created in a transaction then the message is created, but
     # the transaction may not have completed.
@@ -45,11 +49,13 @@ def run_job_launch(job_id):
 
     # TODO: while not loop should call get wrapped in a try except
     #job = UnifiedJob.objects.get(id=job_id)
+    '''
 
-    schedule()
+    Scheduler().schedule()
 
 @task
 def run_job_complete(job_id):
+    '''
     # TODO: use list of finished status from jobs.py or unified_jobs.py
     finished_status = ['successful', 'error', 'failed', 'completed']
     q = UnifiedJob.objects.filter(id=job_id)
@@ -74,6 +80,29 @@ def run_job_complete(job_id):
             logger.error("Expected job status '%s' to be one of '%s' while processing 'job_complete' message." % (job.status, finished_status))
             return
         retry += 1
+    '''
 
-    schedule()
+    Scheduler().schedule()
+
+@task
+def run_scheduler():
+    Scheduler().schedule()
+
+@task
+def run_fail_inconsistent_running_jobs():
+    return
+    print("run_fail_inconsistent_running_jobs() running")
+    with transaction.atomic():
+        # Lock
+        try:
+            Instance.objects.select_for_update(nowait=True).all()[0]
+            scheduler = Scheduler()
+            active_tasks = scheduler.get_activate_tasks()
+            if active_tasks is None:
+                return None
+
+            all_sorted_tasks = scheduler.get_tasks()
+            scheduler.process_celery_tasks(active_tasks, all_sorted_tasks)
+        except DatabaseError:
+            return
 

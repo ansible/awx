@@ -392,6 +392,14 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
         'schedule': timedelta(seconds=60)
     },
+    'task_scheduler': {
+        'task': 'awx.main.scheduler.tasks.run_scheduler',
+        'schedule': timedelta(seconds=10)
+    },
+    'task_fail_inconsistent_running_jobs': {
+        'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
+        'schedule': timedelta(seconds=30)
+    },
 }
 
 # Django Caching Configuration

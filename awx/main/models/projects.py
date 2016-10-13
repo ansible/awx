@@ -275,7 +275,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'local_path', 'scm_type', 'scm_url',
                 'scm_branch', 'scm_clean', 'scm_delete_on_update',
-                'credential', 'schedule', 'timeout']
+                'credential', 'schedule', 'timeout', 'launch_type',]
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
