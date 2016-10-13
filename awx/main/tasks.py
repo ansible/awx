@@ -1685,7 +1685,7 @@ class RunWorkflowJob(BaseTask):
     def run(self, pk, **kwargs):
         #Run the job/task and capture its output.
         instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
-        instance.socketio_emit_status("running")
+        instance.websocket_emit_status("running")
 
         # FIXME: Currently, the workflow job busy waits until the graph run is
         # complete. Instead, the workflow job should return or never even run,
@@ -1707,6 +1707,6 @@ class RunWorkflowJob(BaseTask):
                 instance = self.update_model(instance.pk, status='successful')
                 break
             time.sleep(1)
-        instance.socketio_emit_status(instance.status)
+        instance.websocket_emit_status(instance.status)
         # TODO: Handle cancel
 '''
