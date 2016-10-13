@@ -550,6 +550,11 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         default={},
         editable=False,
     )
+    artifacts = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -774,6 +779,15 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
+
+    def display_artifacts(self):
+        '''
+        Hides artifacts if they are marked as no_log type artifacts.
+        '''
+        artifacts = self.artifacts
+        if artifacts.get('_ansible_no_log', False):
+            return "$hidden due to Ansible no_log flag$"
+        return artifacts
 
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.

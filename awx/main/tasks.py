@@ -893,7 +893,7 @@ class RunJob(BaseTask):
                 'tower_user_name': job.created_by.username,
             })
         if job.extra_vars_dict:
-            if kwargs.get('display', False) and job.job_template and job.job_template.survey_enabled:
+            if kwargs.get('display', False) and job.job_template:
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(job.extra_vars_dict)

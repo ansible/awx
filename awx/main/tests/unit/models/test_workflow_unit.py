@@ -6,6 +6,7 @@ from awx.main.models.workflow import (
     WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobInheritNodesMixin,
     WorkflowJob, WorkflowJobNode
 )
+import mock
 
 class TestWorkflowJobInheritNodesMixin():
     class TestCreateWorkflowJobNodes():
@@ -151,6 +152,7 @@ class TestWorkflowJobCreate:
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
                 workflow_job=workflow_job_unit)
 
+@mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
 class TestWorkflowJobNodeJobKWARGS:
     """
     Tests for building the keyword arguments that go into creating and

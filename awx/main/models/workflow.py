@@ -21,9 +21,9 @@ from awx.main.models.rbac import (
 )
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
+from awx.main.redact import REPLACE_STR
 
-import yaml
-import json
+from copy import copy
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
@@ -124,6 +124,13 @@ class WorkflowNodeBase(CreatedModifiedModel):
             data['missing'] = missing_dict
         return data
 
+    def get_parent_nodes(self):
+        '''Returns queryset containing all parents of this node'''
+        success_parents = getattr(self, '%ss_success' % self.__class__.__name__.lower()).all()
+        failure_parents = getattr(self, '%ss_failure' % self.__class__.__name__.lower()).all()
+        always_parents = getattr(self, '%ss_always' % self.__class__.__name__.lower()).all()
+        return success_parents | failure_parents | always_parents
+
     @classmethod
     def _get_workflow_job_field_names(cls):
         '''
@@ -175,11 +182,22 @@ class WorkflowJobNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
+    ancestor_artifacts = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
     
     def get_absolute_url(self):
         return reverse('api:workflow_job_node_detail', args=(self.pk,))
 
     def get_job_kwargs(self):
+        '''
+        In advance of creating a new unified job as part of a workflow,
+        this method builds the attributes to use
+        It alters the node by saving its updated version of
+        ancestor_artifacts, making it available to subsequent nodes.
+        '''
         # reject/accept prompted fields
         data = {}
         ujt_obj = self.unified_job_template
@@ -189,19 +207,31 @@ class WorkflowJobNode(WorkflowNodeBase):
                 accepted_fields.pop(fd)
             data.update(accepted_fields)
             # TODO: decide what to do in the event of missing fields
+        # build ancestor artifacts, save them to node model for later
+        aa_dict = {}
+        for parent_node in self.get_parent_nodes():
+            aa_dict.update(parent_node.ancestor_artifacts)
+            if parent_node.job and hasattr(parent_node.job, 'artifacts'):
+                aa_dict.update(parent_node.job.artifacts)
+        if aa_dict:
+            self.ancestor_artifacts = aa_dict
+            self.save(update_fields=['ancestor_artifacts'])
+        if '_ansible_no_log' in aa_dict:
+            # TODO: merge Workflow Job survey passwords into this
+            password_dict = {}
+            for key in aa_dict:
+                if key != '_ansible_no_log':
+                    password_dict[key] = REPLACE_STR
+            data['survey_passwords'] = password_dict
         # process extra_vars
+        # TODO: still lack consensus about variable precedence
         extra_vars = {}
         if self.workflow_job and self.workflow_job.extra_vars:
-            try:
-                WJ_json_extra_vars = json.loads(
-                    (self.workflow_job.extra_vars or '').strip() or '{}')
-            except ValueError:
-                try:
-                    WJ_json_extra_vars = yaml.safe_load(self.workflow_job.extra_vars)
-                except yaml.YAMLError:
-                    WJ_json_extra_vars = {}
-            extra_vars.update(WJ_json_extra_vars)
-        # TODO: merge artifacts, add ancestor_artifacts to kwargs
+            extra_vars.update(self.workflow_job.extra_vars_dict)
+        if aa_dict:
+            functional_aa_dict = copy(aa_dict)
+            functional_aa_dict.pop('_ansible_no_log', None)
+            extra_vars.update(functional_aa_dict)
         if extra_vars:
             data['extra_vars'] = extra_vars
         return data
