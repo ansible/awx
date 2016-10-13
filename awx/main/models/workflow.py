@@ -24,8 +24,6 @@ from awx.main.models.mixins import ResourceMixin
 from awx.main.redact import REPLACE_STR
 
 from copy import copy
-import yaml
-import json
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
