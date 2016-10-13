@@ -33,7 +33,7 @@ from djcelery.models import TaskMeta
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, _inventory_updates
-from awx.main.redact import UriCleaner
+from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
