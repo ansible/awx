@@ -354,7 +354,8 @@ class UserAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data):
-        return Organization.objects.filter(member_role__members=obj, admin_role__members=self.user).exists()
+        return Organization.objects.filter(Q(member_role__members=obj) | Q(admin_role__members=obj),
+                                           Q(admin_role__members=self.user)).exists()
 
     def can_delete(self, obj):
         if obj == self.user:
