@@ -871,6 +871,8 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        if obj.organization is None:
+            return False
         org_pk = get_pk_from_dict(data, 'organization')
         if obj and org_pk and obj.organization.pk != org_pk:
             org = get_object_or_400(Organization, pk=org_pk)
