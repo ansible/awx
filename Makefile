@@ -357,12 +357,16 @@ dbshell:
 	sudo -u postgres psql -d awx-dev
 
 server_noattach:
-	tmux new-session -d -s tower 'exec make runserver'
+	tmux new-session -d -s tower 'exec make uwsgi'
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux new-window 'exec make receiver'
+	tmux new-window 'exec make daphne'
 	tmux select-window -t tower:1
+	tmux rename-window 'WebSockets'
+	tmux split-window -h 'exec make runworker'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
 	tmux split-window -h 'exec make factcacher'
 
