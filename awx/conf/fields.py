@@ -20,7 +20,13 @@ logger = logging.getLogger('awx.conf.fields')
 
 
 class StringListField(ListField):
+
     child = CharField()
+
+    def to_representation(self, value):
+        if value is None and self.allow_null:
+            return None
+        return super(StringListField, self).to_representation(value)
 
 
 class URLField(CharField):

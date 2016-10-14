@@ -104,6 +104,7 @@ class APIView(views.APIView):
                 logger.warn(status_msg)
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
+        response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
             time_elapsed = time.time() - self.time_started
             response['X-API-Time'] = '%0.3fs' % time_elapsed

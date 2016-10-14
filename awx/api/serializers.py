@@ -1920,13 +1920,14 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
     ask_job_type_on_launch = serializers.ReadOnlyField()
     ask_inventory_on_launch = serializers.ReadOnlyField()
     ask_credential_on_launch = serializers.ReadOnlyField()
+    artifacts = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'allow_simultaneous',)
+                  'allow_simultaneous', 'artifacts',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -1948,6 +1949,11 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
+
+    def get_artifacts(self, obj):
+        if obj:
+            return obj.display_artifacts()
+        return {}
 
     def to_internal_value(self, data):
         # When creating a new job and a job template is specified, populate any
@@ -2232,11 +2238,14 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     job_tags = serializers.SerializerMethodField()
     limit = serializers.SerializerMethodField()
     skip_tags = serializers.SerializerMethodField()
+    success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
-        fields = ('id', 'url', 'related', 'unified_job_template',
+        fields = ('*', '-name', '-description', 'id', 'url', 'related',
+                  'unified_job_template', 'success_nodes', 'failure_nodes', 'always_nodes',
                   'inventory', 'credential', 'job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags')
-        read_only_fields = ('success_nodes', 'failure_nodes', 'always_nodes')
 
     def get_related(self, obj):
         res = super(WorkflowNodeBaseSerializer, self).get_related(obj)

@@ -184,6 +184,9 @@ class BaseCallbackModule(object):
         if getattr(self, 'ad_hoc_command_id', None):
             msg['ad_hoc_command_id'] = self.ad_hoc_command_id
 
+        if getattr(self, 'artifact_data', None):
+            msg['artifact_data'] = self.artifact_data
+
         active_pid = os.getpid()
         if self.job_callback_debug:
             msg.update({
@@ -416,6 +419,9 @@ class JobCallbackModule(BaseCallbackModule):
             event_data['task'] = task_name
         if role_name and event not in self.EVENTS_WITHOUT_TASK:
             event_data['role'] = role_name
+        self.artifact_data = None
+        if 'res' in event_data and 'artifact_data' in event_data['res']:
+            self.artifact_data = event_data['res']['artifact_data']
         super(JobCallbackModule, self)._log_event(event, **event_data)
 
     def playbook_on_start(self):

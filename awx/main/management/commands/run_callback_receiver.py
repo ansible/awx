@@ -4,6 +4,7 @@
 # Python
 import datetime
 import logging
+import json
 
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
@@ -80,6 +81,7 @@ class CallbackBrokerWorker(ConsumerMixin):
 
         event_uuid = payload.get("uuid", '')
         parent_event_uuid = payload.get("parent_uuid", '')
+        artifact_data = payload.get("artifact_data", None)
 
         # Sanity check: Don't honor keys that we don't recognize.
         for key in payload.keys():
@@ -122,6 +124,23 @@ class CallbackBrokerWorker(ConsumerMixin):
                     cache.set("{}_{}".format(payload['job_id'], event_uuid), j.id, 300)
         except DatabaseError as e:
             logger.error("Database Error Saving Job Event: {}".format(e))
+
+        if artifact_data:
+            try:
+                self.process_artifacts(artifact_data, res, payload)
+            except DatabaseError as e:
+                logger.error("Database Error Saving Job Artifacts: {}".format(e))
+
+    def process_artifacts(self, artifact_data, res, payload):
+        artifact_dict = json.loads(artifact_data)
+        if res and isinstance(res, dict):
+            if res.get('_ansible_no_log', False):
+                artifact_dict['_ansible_no_log'] = True
+        if artifact_data is not None:
+            parent_job = Job.objects.filter(pk=payload['job_id']).first()
+            if parent_job is not None and parent_job.artifacts != artifact_dict:
+                parent_job.artifacts = artifact_dict
+                parent_job.save(update_fields=['artifacts'])
 
 
 class Command(NoArgsCommand):

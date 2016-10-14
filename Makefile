@@ -357,12 +357,16 @@ dbshell:
 	sudo -u postgres psql -d awx-dev
 
 server_noattach:
-	tmux new-session -d -s tower 'exec make runserver'
+	tmux new-session -d -s tower 'exec make uwsgi'
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux new-window 'exec make receiver'
+	tmux new-window 'exec make daphne'
 	tmux select-window -t tower:1
+	tmux rename-window 'WebSockets'
+	tmux split-window -h 'exec make runworker'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
 	tmux split-window -h 'exec make factcacher'
 
@@ -386,6 +390,24 @@ flower:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
+
+uwsgi:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/public/static
+
+daphne:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	daphne -b 0.0.0.0 -p 8051 awx.asgi:channel_layer
+
+runworker:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py runworker --only-channels websocket.*
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
@@ -519,10 +541,10 @@ release_build:
 # Build setup tarball
 tar-build/$(SETUP_TAR_FILE):
 	@mkdir -p tar-build
-	@cp -a setup tar-build/$(SETUP_TAR_NAME)
+	@rsync -az --exclude /test setup/ tar-build/$(SETUP_TAR_NAME)
 	@rsync -az docs/licenses tar-build/$(SETUP_TAR_NAME)/
 	@cd tar-build/$(SETUP_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
-	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" --exclude "**/test/*" $(SETUP_TAR_NAME)/
+	@cd tar-build && tar -czf $(SETUP_TAR_FILE) --exclude "*/all.in" $(SETUP_TAR_NAME)/
 	@ln -sf $(SETUP_TAR_FILE) tar-build/$(SETUP_TAR_LINK)
 
 tar-build/$(SETUP_TAR_CHECKSUM):
@@ -559,7 +581,7 @@ setup-bundle-build:
 
 # TODO - Somehow share implementation with setup_tarball
 setup-bundle-build/$(OFFLINE_TAR_FILE):
-	cp -a setup setup-bundle-build/$(OFFLINE_TAR_NAME)
+	rsync -az --exclude /test setup/ setup-bundle-build/$(OFFLINE_TAR_NAME)
 	rsync -az docs/licenses setup-bundle-build/$(OFFLINE_TAR_NAME)/
 	cd setup-bundle-build/$(OFFLINE_TAR_NAME) && sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%RELEASE%#$(RELEASE)#;' group_vars/all.in > group_vars/all
 	$(PYTHON) $(DEPS_SCRIPT) -d $(DIST) -r $(DIST_MAJOR) -u $(AW_REPO_URL) -s setup-bundle-build/$(OFFLINE_TAR_NAME) -v -v -v
@@ -753,7 +775,7 @@ docker-auth:
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate nginx tower
 
 docker-compose-cluster: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up

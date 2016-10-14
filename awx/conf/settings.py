@@ -191,6 +191,10 @@ class SettingsWrapper(UserSettingsHolder):
     def _get_default(self, name):
         return getattr(self.default_settings, name)
 
+    @property
+    def SETTINGS_MODULE(self):
+        return self._get_default('SETTINGS_MODULE')
+
     def __getattr__(self, name):
         value = empty
         if name in self._get_supported_settings():
