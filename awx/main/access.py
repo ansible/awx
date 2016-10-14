@@ -1168,21 +1168,28 @@ class JobAccess(BaseAccess):
             Q(inventory__organization__in=org_access_qs) |
             Q(project__organization__in=org_access_qs)).distinct()
 
-    def org_access(self, obj):
-        """
-        Via the organization of a related resource, user has a claim to org_admin access of this job
-        """
-        if obj.inventory and obj.inventory.organization and self.user in obj.inventory.organization.admin_role:
-            return True
-        elif obj.project and obj.project.organization and self.user in obj.project.organization.admin_role:
-            return True
+    def related_orgs(self, obj):
+        orgs = []
+        if obj.inventory and obj.inventory.organization:
+            orgs.append(obj.inventory.organization)
+        if obj.project and obj.project.organization and obj.project.organization not in orgs:
+            orgs.append(obj.project.organization)
+        return orgs
+
+    def org_access(self, obj, role_types=['admin_role']):
+        orgs = self.related_orgs(obj)
+        for org in orgs:
+            for role_type in role_types:
+                role = getattr(org, role_type)
+                if self.user in role:
+                    return True
         return False
 
     @check_superuser
     def can_read(self, obj):
         if obj.job_template and self.user in obj.job_template.read_role:
             return True
-        return self.org_access(obj)
+        return self.org_access(obj, role_types=['auditor_role', 'admin_role'])
 
     def can_add(self, data):
         if not data:  # So the browseable API will work
