@@ -397,7 +397,7 @@ daphne:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
+	daphne -b 0.0.0.0 -p 8051 awx.asgi:channel_layer
 
 runworker:
 	@if [ "$(VENV_BASE)" ]; then \
