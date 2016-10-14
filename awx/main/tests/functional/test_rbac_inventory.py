@@ -32,9 +32,8 @@ def test_custom_inv_script_access(organization, user):
 
 @pytest.mark.django_db
 def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project):
-    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test')
-    custom_inv.organization = organization
-    custom_inv.save()
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test',
+                                                      organization=organization)
 
     other_org = organization_factory('not-my-org').organization
     access = CustomInventoryScriptAccess(org_admin)
