@@ -11,8 +11,9 @@ services:
       RABBITMQ_VHOST: /
     ports:
       - "8080:8080"
-      - "8013:8013"
       - "5555:5555"
+      - "8050:8050"
+      - "8051:8051"
     links:
       - postgres
       - memcached
@@ -33,6 +34,13 @@ services:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
+
+  nginx:
+    image: gcr.io/ansible-tower-engineering/tower_nginx:${TAG}
+    ports:
+      - "8013:80"
+    links:
+      - tower
 
   # Source Code Synchronization Container
   # sync:

@@ -387,6 +387,24 @@ flower:
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
 
+uwsgi:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/public/static
+
+daphne:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	daphne -b 127.0.0.1 -p 8051 awx.asgi:channel_layer
+
+runworker:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py runworker --only-channels websocket.*
+
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -753,7 +771,7 @@ docker-auth:
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate nginx tower
 
 docker-compose-cluster: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
