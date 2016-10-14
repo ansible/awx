@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved
 
-from django.core.management.base import CommandError, BaseCommand
+from django.core.management.base import BaseCommand
 from optparse import make_option
 from awx.main.models import Instance
 

@@ -6,9 +6,10 @@ from awx import __version__ as tower_version
 
 # Prepare the AWX environment.
 from awx import prepare_env, MODE
-prepare_env()
+prepare_env() # NOQA
 
 from django.core.wsgi import get_wsgi_application  # NOQA
+from channels.asgi import get_channel_layer
 
 """
 ASGI config for AWX project.
@@ -29,7 +30,6 @@ if MODE == 'production':
         logger.error("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
         raise Exception("Missing or incorrect metadata for Tower version.  Ensure Tower was installed using the setup playbook.")
 
-from channels.asgi import get_channel_layer
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings")
 

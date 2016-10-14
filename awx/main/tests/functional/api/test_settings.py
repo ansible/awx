@@ -3,7 +3,6 @@
 
 # Python
 import pytest
-import mock
 
 # Django
 from django.core.urlresolvers import reverse
