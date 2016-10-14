@@ -357,12 +357,16 @@ dbshell:
 	sudo -u postgres psql -d awx-dev
 
 server_noattach:
-	tmux new-session -d -s tower 'exec make runserver'
+	tmux new-session -d -s tower 'exec make uwsgi'
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux new-window 'exec make receiver'
+	tmux new-window 'exec make daphne'
 	tmux select-window -t tower:1
+	tmux rename-window 'WebSockets'
+	tmux split-window -h 'exec make runworker'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
 	tmux split-window -h 'exec make factcacher'
 
@@ -386,6 +390,24 @@ flower:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
+
+uwsgi:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/public/static
+
+daphne:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	daphne -b 0.0.0.0 -p 8051 awx.asgi:channel_layer
+
+runworker:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py runworker --only-channels websocket.*
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
@@ -753,7 +775,7 @@ docker-auth:
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate nginx tower
 
 docker-compose-cluster: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up

@@ -27,6 +27,6 @@ RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_developm
 WORKDIR /tmp
 RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
 WORKDIR /
-EXPOSE 8013 8080 22
+EXPOSE 8050 8051 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh
