@@ -139,6 +139,7 @@ class TestWorkflowJobCreate:
                 char_prompts=wfjt_node_no_prompts.char_prompts,
                 inventory=None, credential=None,
                 unified_job_template=wfjt_node_no_prompts.unified_job_template,
+                fail_on_job_failure=True,
                 workflow_job=workflow_job_unit)
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, mocker):
@@ -150,6 +151,7 @@ class TestWorkflowJobCreate:
                 inventory=wfjt_node_with_prompts.inventory,
                 credential=wfjt_node_with_prompts.credential,
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
+                fail_on_job_failure=True,
                 workflow_job=workflow_job_unit)
 
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
