@@ -5,7 +5,7 @@ from awx.main.models import Instance
 from django.conf import settings
 
 from optparse import make_option
-from django.core.management.base import CommandError, BaseCommand
+from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     """
