@@ -217,3 +217,10 @@ def test_create_project_foreign_org_admin(org_admin, organization, organization_
     other_org = organization_factory('not-my-org').organization
     access = ProjectAccess(org_admin)
     assert not access.can_add({'organization': other_org.pk, 'name': 'new-project'})
+
+@pytest.mark.django_db
+def test_modify_project_foreign_org_admin(org_admin, organization, organization_factory, project):
+    """Org admins can only modify projects in their own org."""
+    other_org = organization_factory('not-my-org').organization
+    access = ProjectAccess(org_admin)
+    assert not access.can_change(project, {'organization': other_org.pk, 'name': 'new-project'})

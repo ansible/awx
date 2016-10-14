@@ -871,6 +871,11 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
+        org_pk = get_pk_from_dict(data, 'organization')
+        if obj and org_pk and obj.organization and obj.organization.pk != org_pk:
+            org = get_object_or_400(Organization, pk=org_pk)
+            if self.user not in org.admin_role:
+                return False
         return self.user in obj.admin_role
 
     def can_delete(self, obj):
@@ -2045,11 +2050,16 @@ class CustomInventoryScriptAccess(BaseAccess):
 
     @check_superuser
     def can_admin(self, obj, data=None):
+        org_pk = get_pk_from_dict(data, 'organization')
+        if obj and org_pk and obj.organization and obj.organization.pk != org_pk:
+            org = get_object_or_400(Organization, pk=org_pk)
+            if self.user not in org.admin_role:
+                return False
         return self.user in obj.admin_role
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.can_admin(obj)
+        return self.can_admin(obj, data=data)
 
     @check_superuser
     def can_delete(self, obj):

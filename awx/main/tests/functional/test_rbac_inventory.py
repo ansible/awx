@@ -9,7 +9,8 @@ from awx.main.models import (
 from awx.main.access import (
     InventoryAccess,
     HostAccess,
-    InventoryUpdateAccess
+    InventoryUpdateAccess,
+    CustomInventoryScriptAccess
 )
 from django.apps import apps
 
@@ -28,6 +29,15 @@ def test_custom_inv_script_access(organization, user):
 
     organization.admin_role.members.add(ou)
     assert ou in custom_inv.admin_role
+
+@pytest.mark.django_db
+def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project):
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test',
+                                                      organization=organization)
+
+    other_org = organization_factory('not-my-org').organization
+    access = CustomInventoryScriptAccess(org_admin)
+    assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
