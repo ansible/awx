@@ -233,7 +233,8 @@ class ProjectsTest(BaseTransactionTest):
             'name': 'My Test Project',
             'description': 'Does amazing things',
             'local_path': os.path.basename(project_dir),
-            'scm_type': None,
+            'scm_type': 'git', # must not be manual in order to schedule
+            'scm_url': 'http://192.168.100.128.git',
             'scm_update_on_launch': '',
             'scm_delete_on_update': None,
             'scm_clean': False,
@@ -244,7 +245,7 @@ class ProjectsTest(BaseTransactionTest):
         # or an empty string for False, but save the value as a boolean.
         response = self.post(projects, project_data, expect=201,
                              auth=self.get_super_credentials())
-        self.assertEqual(response['scm_type'], u'')
+        self.assertEqual(response['scm_type'], u'git')
         self.assertEqual(response['scm_update_on_launch'], False)
         self.assertEqual(response['scm_delete_on_update'], False)
         self.assertEqual(response['scm_clean'], False)
