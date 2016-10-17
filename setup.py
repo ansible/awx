@@ -79,13 +79,13 @@ setup(
     name='ansible-tower',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
     author='Ansible, Inc.',
-    author_email='support@ansible.com',
+    author_email='info@ansible.com',
     description='ansible-tower: API, UI and Task Engine for Ansible',
-    long_description='AWX provides a web-based user interface, REST API and '
+    long_description='Ansible Tower provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
     license='Proprietary',
     keywords='ansible',
-    url='http://github.com/ansible/ansible-commander',
+    url='http://github.com/ansible/ansible-tower',
     packages=['awx'],
     include_package_data=True,
     zip_safe=False,
