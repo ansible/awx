@@ -2251,7 +2251,7 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     fail_on_job_failure = serializers.BooleanField(
         help_text=('If set to true, and if the job runs and fails, '
-                   'the workflow will also be marked as failed.'),
+                   'the workflow is marked as failed.'),
         default=True)
 
     class Meta:
