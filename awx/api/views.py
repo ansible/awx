@@ -259,14 +259,16 @@ class ApiV1ConfigView(APIView):
         try:
             data_actual = json.dumps(request.data)
         except Exception:
-            # FIX: Log
+            logger.info(smart_text(u"Invalid JSON submitted for Tower license."),
+                        extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
         try:
             from awx.main.task_engine import TaskEnhancer
             license_data = json.loads(data_actual)
             license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
         except Exception:
-            # FIX: Log
+            logger.warning(smart_text(u"Invalid Tower license submitted."),
+                           extra=dict(actor=request.user.username))
             return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
@@ -275,6 +277,8 @@ class ApiV1ConfigView(APIView):
             settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
+        logger.warning(smart_text(u"Invalid Tower license submitted."),
+                       extra=dict(actor=request.user.username))
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
@@ -541,12 +545,14 @@ class AuthTokenView(APIView):
                                                  reason='')[0]
                 token.refresh()
                 if 'username' in request.data:
-                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])),
+                                extra=dict(actor=request.data['username']))
             except IndexError:
                 token = AuthToken.objects.create(user=serializer.validated_data['user'],
                                                  request_hash=request_hash)
                 if 'username' in request.data:
-                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])))
+                    logger.info(smart_text(u"User {} logged in".format(request.data['username'])),
+                                extra=dict(actor=request.data['username']))
                 # Get user un-expired tokens that are not invalidated that are
                 # over the configured limit.
                 # Mark them as invalid and inform the user
@@ -564,7 +570,8 @@ class AuthTokenView(APIView):
             }
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         if 'username' in request.data:
-            logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])))
+            logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])),
+                           user=dict(actor=request.data['username']))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

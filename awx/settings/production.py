@@ -52,7 +52,6 @@ TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'
-LOGGING['handlers']['socketio_service']['filename'] = '/var/log/tower/socketio_service.log'
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'
 LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver.log'
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'

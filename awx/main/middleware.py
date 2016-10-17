@@ -16,6 +16,7 @@ from awx.api.authentication import TokenAuthentication
 
 
 logger = logging.getLogger('awx.main.middleware')
+analytics_logger = logging.getLogger('awx.analytics.activity_stream')
 
 
 class ActivityStreamMiddleware(threading.local):
@@ -46,6 +47,10 @@ class ActivityStreamMiddleware(threading.local):
                 instance.actor = drf_user
                 try:
                     instance.save(update_fields=['actor'])
+                    analytics_logger.info('Activity Stream update entry for %s' % str(instance.object1),
+                                          extra=dict(changes=instance.changes, relationship=instance.object_relationship_type,
+                                          actor=drf_user.username, operation=instance.operation,
+                                          object1=instance.object1, object2=instance.object2))
                 except IntegrityError:
                     logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
             # else:

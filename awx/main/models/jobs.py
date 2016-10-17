@@ -32,6 +32,7 @@ from awx.main.models.notifications import (
 from awx.main.utils import (
     ignore_inventory_computed_fields,
     parse_yaml_or_json,
+    format_for_log
 )
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
@@ -43,6 +44,7 @@ from awx.main.consumers import emit_channel_notification
 
 
 logger = logging.getLogger('awx.main.models.jobs')
+event_logger = logging.getLogger('awx.analytics.job_events')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
@@ -1186,6 +1188,9 @@ class JobEvent(CreatedModifiedModel):
             if parent_id:
                 kwargs['parent_id'] = parent_id
 
+        # event_logger.info('Body: {}'.format(str(data_for_log)), extra=data_for_log)
+        event_logger.info('Job event data saved.', extra=format_for_log(kwargs, kind='event'))
+
         job_event = JobEvent.objects.create(**kwargs)
 
         # Cache this job event ID vs. UUID for future parent lookups.
@@ -1196,7 +1201,6 @@ class JobEvent(CreatedModifiedModel):
         # Save artifact data to parent job (if provided).
         if artifact_data:
             artifact_dict = json.loads(artifact_data)
-            event_data = kwargs.get('event_data', None)
             if event_data and isinstance(event_data, dict):
                 res = event_data.get('res', None)
                 if res and isinstance(res, dict):

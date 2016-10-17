@@ -1,5 +1,6 @@
 import json
 import urlparse
+import logging
 
 from channels import Group
 from channels.sessions import channel_session
@@ -7,6 +8,8 @@ from channels.sessions import channel_session
 from django.contrib.auth.models import User
 from awx.main.models.organization import AuthToken
 
+
+logger = logging.getLogger('awx.main.consumers')
 
 def discard_groups(message):
     if 'groups' in message.channel_session:
@@ -52,11 +55,13 @@ def ws_receive(message):
 
     auth_token = validate_token(token)
     if auth_token is None:
+        logger.error("Authentication Failure validating user")
         message.reply_channel.send({"text": json.dumps({"error": "invalid auth token"})})
         return None
 
     user = user_from_token(auth_token)
     if user is None:
+        logger.error("No valid user corresponding to submitted auth_token")
         message.reply_channel.send({"text": json.dumps({"error": "no valid user"})})
         return None
 

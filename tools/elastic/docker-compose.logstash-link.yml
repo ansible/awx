@@ -1,0 +1,6 @@
+version: '2'
+services:
+  # Primary Tower Development Container
+  tower:
+    links:
+      - logstash

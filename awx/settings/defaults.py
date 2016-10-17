@@ -842,6 +842,19 @@ LOGGING = {
         'simple': {
             'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
         },
+        'logstash': {
+            '()': 'awx.main.log_utils.formatters.LogstashFormatter'
+        },
+        'json': {
+            '()': 'awx.main.log_utils.formatters.LogstashFormatter'
+        }
+        # From loggly examples
+        # 'json': {
+        #     'format': '{ "loggerName":"%(name)s", "asciTime":"%(asctime)s", "fileName":"%(filename)s", "logRecordCreationTime":"%(created)f", "functionName":"%(funcName)s", "levelNo":"%(levelno)s", "lineNo":"%(lineno)d", "time":"%(msecs)d", "levelName":"%(levelname)s", "message":"%(message)s"}',
+        # },
+        # 'json': { 
+        #     'format': '{"message": %(message)s}',
+        # },
     },
     'handlers': {
         'console': {
@@ -862,6 +875,24 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.NullHandler',
             'formatter': 'simple',
+        },
+        'http_receiver': {
+            'class': 'awx.main.log_utils.handlers.HTTPSHandler',
+            'level': 'INFO',
+            'formatter': 'json',
+            'host': '',
+        },
+        'logstash': {
+            'level': 'INFO',
+            'class': 'awx.main.log_utils.handlers.HTTPSHandler',
+            'host': 'logstash',   # IP/name of our Logstash EC2 instance
+            'port': 8085,
+            # 'port': 5000,
+            # 'version': 1,
+            'message_type': 'logstash',
+            'fqdn': True,
+            # 'tags': ['tower'],
+            'formatter': 'json'
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -939,7 +970,6 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
-            'propagate': False,
         },
         'rest_framework.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
@@ -954,29 +984,30 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'awx.conf': {
-            'handlers': ['console', 'file', 'tower_warnings'],
+            'handlers': ['null'],
             'level': 'WARNING',
-            'propagate': False,
+        },
+        'awx.conf.settings': {
+            'handlers': ['null'],
+            'level': 'WARNING',
+        },
+        'awx.main': {
+            'handlers': ['null']
         },
         'awx.main.commands.run_callback_receiver': {
-            'handlers': ['console', 'file', 'callback_receiver'],
-            'propagate': False
-        },
-        'awx.main.commands.run_socketio_service': {
-            'handlers': ['console', 'file', 'socketio_service'],
-            'propagate': False
+            'handlers': ['callback_receiver'],
         },
         'awx.main.tasks': {
-            'handlers': ['console', 'file', 'task_system'],
-            'propagate': False
+            'handlers': ['task_system']
         },
         'awx.main.scheduler': {
-            'handlers': ['console', 'file', 'task_system'],
-            'propagate': False
+            'handlers': ['task_system'],
+        },
+        'awx.main.consumers': {
+            'handlers': ['null']
         },
         'awx.main.commands.run_fact_cache_receiver': {
-            'handlers': ['console', 'file', 'fact_receiver'],
-            'propagate': False
+            'handlers': ['fact_receiver'],
         },
         'awx.main.access': {
             'handlers': ['null'],
@@ -989,6 +1020,23 @@ LOGGING = {
         'awx.api.permissions': {
             'handlers': ['null'],
             'propagate': False,
+        },
+        'awx.analytics': {
+            'handlers': ['null'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'awx.analytics.job_events': {
+            'handlers': ['null'],
+            'level': 'INFO'
+        },
+        'awx.analytics.activity_stream': {
+            'handlers': ['null'],
+            'level': 'INFO'
+        },
+        'awx.analytics.system_tracking': {
+            'handlers': ['null'],
+            'level': 'INFO'
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],

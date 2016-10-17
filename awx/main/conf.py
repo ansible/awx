@@ -223,3 +223,36 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
 )
+
+register(
+    'LOG_AGGREGATOR_HOST',
+    field_class=fields.CharField,
+    label=_('Logging Aggregator Receiving Host'),
+    help_text=_('External host maintain a log collector to send logs to'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_PORT',
+    field_class=fields.CharField,
+    label=_('Logging Aggregator Receiving Port'),
+    help_text=_('Port that the log collector is listening on'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_TYPE',
+    field_class=fields.CharField,
+    label=_('Logging Aggregator Type: Logstash, Loggly, Datadog, etc'),
+    help_text=_('The type of log aggregator service to format messages for'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_USERNAME',
+    field_class=fields.CharField,
+    label=_('Logging Aggregator Receiver Username'),
+    help_text=_('Username for Logstash or others'),
+    category=_('Logging'),
+    category_slug='logging',
+)
