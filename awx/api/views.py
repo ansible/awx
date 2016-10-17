@@ -2726,6 +2726,11 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = WorkflowJobTemplateSerializer
     always_allow_superuser = False
 
+
+class WorkflowJobTemplateLabelList(JobTemplateLabelList):
+    parent_model = WorkflowJobTemplate
+
+
 # TODO:
 class WorkflowJobTemplateLaunch(GenericAPIView):
 
@@ -2882,6 +2887,9 @@ class JobLabelList(SubListAPIView):
     parent_model = Job
     relationship = 'labels'
     parent_key = 'job'
+
+class WorkflowJobLabelList(JobLabelList):
+    parent_model = WorkflowJob
 
 class JobActivityStreamList(SubListAPIView):
 

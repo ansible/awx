@@ -1474,6 +1474,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
 
         if self.user.is_superuser:
             return True
+        if data is None:
+            return self.user in obj.admin_role
 
         org_pk = get_pk_from_dict(data, 'organization')
         if ('organization' not in data or
