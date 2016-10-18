@@ -2607,6 +2607,96 @@ class JobLaunchSerializer(BaseSerializer):
         obj.credential = JT_credential
         return attrs
 
+class WorkflowJobLaunchSerializer(BaseSerializer):
+
+    can_start_without_user_input = serializers.BooleanField(read_only=True)
+    variables_needed_to_start = serializers.ReadOnlyField()
+    
+    survey_enabled = serializers.SerializerMethodField()
+    extra_vars = VerbatimField(required=False, write_only=True)
+    workflow_job_template_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkflowJobTemplate
+        fields = ('can_start_without_user_input',
+                  'extra_vars',
+                  'survey_enabled', 'variables_needed_to_start',
+                  'workflow_job_template_data')
+
+    def get_survey_enabled(self, obj):
+        if obj:
+            return obj.survey_enabled and 'spec' in obj.survey_spec
+        return False
+
+    def get_workflow_job_template_data(self, obj):
+        return dict(name=obj.name, id=obj.id, description=obj.description)
+
+    def validate(self, attrs):
+        errors = {}
+        obj = self.context.get('obj')
+        data = self.context.get('data')
+
+        for field in obj.resources_needed_to_start:
+            if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
+                errors[field] = "Job Template '%s' is missing or undefined." % field
+
+        if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
+            credential = obj.credential
+        else:
+            credential = attrs.get('credential', None)
+
+        # fill passwords dict with request data passwords
+        if credential and credential.passwords_needed:
+            passwords = self.context.get('passwords')
+            try:
+                for p in credential.passwords_needed:
+                    passwords[p] = data[p]
+            except KeyError:
+                errors['passwords_needed_to_start'] = credential.passwords_needed
+
+        extra_vars = attrs.get('extra_vars', {})
+
+        if isinstance(extra_vars, basestring):
+            try:
+                extra_vars = json.loads(extra_vars)
+            except (ValueError, TypeError):
+                try:
+                    extra_vars = yaml.safe_load(extra_vars)
+                    assert isinstance(extra_vars, dict)
+                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary.'
+
+        if not isinstance(extra_vars, dict):
+            extra_vars = {}
+
+        if self.get_survey_enabled(obj):
+            validation_errors = obj.survey_variable_validation(extra_vars)
+            if validation_errors:
+                errors['variables_needed_to_start'] = validation_errors
+
+        # Special prohibited cases for scan jobs
+        errors.update(obj._extra_job_type_errors(data))
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        JT_extra_vars = obj.extra_vars
+        JT_limit = obj.limit
+        JT_job_type = obj.job_type
+        JT_job_tags = obj.job_tags
+        JT_skip_tags = obj.skip_tags
+        JT_inventory = obj.inventory
+        JT_credential = obj.credential
+        attrs = super(JobLaunchSerializer, self).validate(attrs)
+        obj.extra_vars = JT_extra_vars
+        obj.limit = JT_limit
+        obj.job_type = JT_job_type
+        obj.skip_tags = JT_skip_tags
+        obj.job_tags = JT_job_tags
+        obj.inventory = JT_inventory
+        obj.credential = JT_credential
+        return attrs
+
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
 

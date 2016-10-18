@@ -39,7 +39,7 @@ from awx.main.utils import (
 )
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
 
 from awx.main.consumers import emit_channel_notification
@@ -191,7 +191,7 @@ class JobOptions(BaseModel):
         else:
             return []
 
-class JobTemplate(UnifiedJobTemplate, SurveyJobTemplate, JobOptions, ResourceMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -395,7 +395,7 @@ class JobTemplate(UnifiedJobTemplate, SurveyJobTemplate, JobOptions, ResourceMix
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
-class Job(UnifiedJob, SurveyJob, JobOptions, JobNotificationMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the

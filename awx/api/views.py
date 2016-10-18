@@ -2790,20 +2790,35 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
 class WorkflowJobTemplateLaunch(GenericAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = EmptySerializer
+    serializer_class = WorkflowJobLaunchSerializer
     new_in_310 = True
 
-    def get(self, request, *args, **kwargs):
-        data = {}
+    def update_raw_data(self, data):
         obj = self.get_object()
-        data['warnings'] = obj.get_warnings()
-        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
-        return Response(data)
+        extra_vars = data.pop('extra_vars', None) or {}
+        if obj:
+            for v in obj.variables_needed_to_start:
+                extra_vars.setdefault(v, u'')
+            if extra_vars:
+                data['extra_vars'] = extra_vars
+        return data
+
+    # def get(self, request, *args, **kwargs):
+    #     data = {}
+    #     obj = self.get_object()
+    #     data['warnings'] = obj.get_warnings()
+    #     data['variables_needed_to_start'] = obj.variables_needed_to_start
+    #     return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
+
+
+# serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
+# if not serializer.is_valid():
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 

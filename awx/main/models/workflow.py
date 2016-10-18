@@ -13,7 +13,6 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
-from awx.main.models.unified_jobs import SurveyJobTemplate, SurveyJob
 from awx.main.models.notifications import JobNotificationMixin
 from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
@@ -21,7 +20,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import parse_yaml_or_json
 
@@ -264,7 +263,7 @@ class WorkflowJobOptions(BaseModel):
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
-class WorkflowJobTemplate(UnifiedJobTemplate, SurveyJobTemplate, WorkflowJobOptions, ResourceMixin):
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
     class Meta:
         app_label = 'main'
@@ -294,7 +293,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, SurveyJobTemplate, WorkflowJobOpti
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'extra_vars', 'labels', 'schedule', 'launch_type']
+        return ['name', 'description', 'extra_vars', 'labels', 'survey_passwords', 'schedule', 'launch_type']
 
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_detail', args=(self.pk,))
@@ -340,6 +339,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, SurveyJobTemplate, WorkflowJobOpti
             prompted_fields['extra_vars'] = extra_vars
 
         return prompted_fields, ignored_fields
+
+    def can_start_without_user_input(self):
+        '''Return whether WFJT can be launched without survey passwords.'''
+        return bool(self.variables_needed_to_start)
 
     def get_warnings(self):
         warning_data = {}
@@ -395,7 +398,7 @@ class WorkflowJobInheritNodesMixin(object):
                 self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
                 
 
-class WorkflowJob(UnifiedJob, SurveyJob, WorkflowJobOptions, JobNotificationMixin, WorkflowJobInheritNodesMixin):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WorkflowJobInheritNodesMixin):
 
     class Meta:
         app_label = 'main'
