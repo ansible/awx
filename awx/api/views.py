@@ -191,6 +191,8 @@ class ApiV1ConfigView(APIView):
             license_data = get_license(show_key=True)
         else:
             license_data = get_license(show_key=False)
+        if not license_data.get('valid_key', False):
+            license_data = {}
         if license_data and 'features' in license_data and 'activity_streams' in license_data['features']:
             # FIXME: Make the final setting value dependent on the feature?
             license_data['features']['activity_streams'] &= settings.ACTIVITY_STREAM_ENABLED
