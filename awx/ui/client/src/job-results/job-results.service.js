@@ -5,7 +5,7 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun) {
     var val = {
         // the playbook_on_stats event returns the count data in a weird format.
         // format to what we need!
@@ -185,6 +185,10 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                 },
                 actionText: 'CANCEL'
             });
+        },
+        relaunchJob: function(scope) {
+            InitiatePlaybookRun({ scope: scope, id: scope.job.id,
+                relaunch: true });
         }
     };
     return val;

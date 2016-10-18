@@ -71,6 +71,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
         jobResultsService.cancelJob($scope.job);
     };
 
+    $scope.relaunchJob = function() {
+        jobResultsService.relaunchJob($scope);
+    };
+
     // get initial count from resolve
     $scope.count = count.val;
     $scope.hostCount = getTotalHostCount(count.val);
@@ -93,6 +97,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                 mungedEvent.changes.forEach(change => {
                     // we've got a change we need to make to the UI!
                     // update the necessary scope and make the change
+                    if (change === 'startTime' && !$scope.job.start) {
+                        $scope.job.start = mungedEvent.startTime;
+                    }
+
                     if (change === 'count' && !$scope.countFinished) {
                         // for all events that affect the host count,
                         // update the status bar as well as the host
@@ -108,6 +116,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
 
                     if (change === 'taskCount') {
                         $scope.taskCount = mungedEvent.taskCount;
+                    }
+
+                    if (change === 'finishedTime'  && !$scope.job.finished) {
+                        $scope.job.finished = mungedEvent.finishedTime;
                     }
 
                     if (change === 'countFinished') {
@@ -143,7 +155,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     };
     getEvents($scope.job.related.job_events);
 
-    // Processing of job_events messages from the websocket 
+    // Processing of job_events messages from the websocket
     $scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
         processEvent(data);
     });
@@ -154,15 +166,4 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
             $scope.job.status = data.status;
         }
     });
-
-    // The code below was used in the old job detail controller,
-    // and is for processing the 'Job Summary' event that is delivered
-    // for a completed job. Not sure if we have an equivalent function
-    // at this point. TODO: write function to handle Job Summary
-    // scope.$on('ws-jobs-summary', function() {
-    //     // the job host summary should now be available from the API
-    //     $log.debug('Trigging reload of job_host_summaries');
-    //     scope.$emit('InitialLoadComplete');
-    // });
-
 }];

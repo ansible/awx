@@ -85,7 +85,8 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                 failures: 0,
                 changed: 0
             };
-            mungedEvent.changes = ['count'];
+            mungedEvent.startTime = event.modified;
+            mungedEvent.changes = ['count', 'startTime'];
         } else if (event.event_name === 'playbook_on_play_start') {
             getPreviousCount(mungedEvent.counter, "play")
                 .then(count => {
@@ -129,10 +130,12 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                         mungedEvent.changes = ['count'];
                     });
         } else if (event.event_name === 'playbook_on_stats') {
+            console.log(event.modified);
             // get the data for populating the host status bar
             mungedEvent.count = jobResultsService
                 .getCountsFromStatsEvent(event.event_data);
-            mungedEvent.changes = ['count', 'countFinished'];
+            mungedEvent.finishedTime = event.modified;
+            mungedEvent.changes = ['count', 'countFinished', 'finishedTime'];
         } else {
         }
 
