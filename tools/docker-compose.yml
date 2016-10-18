@@ -12,8 +12,8 @@ services:
     ports:
       - "8080:8080"
       - "5555:5555"
-      - "8050:8050"
-      - "8051:8051"
+      - "8013:8013"
+      - "8043:8043"
     links:
       - postgres
       - memcached
@@ -34,14 +34,6 @@ services:
     image: rabbitmq:3-management
     ports:
       - "15672:15672"
-
-  nginx:
-    image: gcr.io/ansible-tower-engineering/tower_nginx:${TAG}
-    ports:
-      - "8043:443"
-      - "8013:80"
-    links:
-      - tower
 
   # Source Code Synchronization Container
   # sync:
