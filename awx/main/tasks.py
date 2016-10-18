@@ -501,7 +501,7 @@ class BaseTask(Task):
         return OrderedDict()
 
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
-                    output_replacements=None, extra_update_fields={}):
+                    output_replacements=None, extra_update_fields=None):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -553,7 +553,8 @@ class BaseTask(Task):
                 canceled = True
             elif job_timeout != 0 and (time.time() - job_start) > job_timeout:
                 timed_out = True
-                extra_update_fields['job_explanation'] = "Job terminated due to timeout"
+                if isinstance(extra_update_fields, dict):
+                    extra_update_fields['job_explanation'] = "Job terminated due to timeout"
             if canceled or timed_out:
                 self._handle_termination(instance, child, is_cancel=canceled)
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
@@ -579,7 +580,7 @@ class BaseTask(Task):
             None.
         '''
         try:
-            if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
+            if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
                 # NOTE: Refactor this once we get a newer psutil across the board
                 if not psutil:
                     os.kill(job.pid, signal.SIGKILL)
