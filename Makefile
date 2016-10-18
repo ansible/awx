@@ -449,6 +449,9 @@ factcacher:
 	fi; \
 	$(PYTHON) manage.py run_fact_cache_receiver
 
+nginx:
+	nginx -g "daemon off;"
+
 reports:
 	mkdir -p $@
 

@@ -1,3 +1,4 @@
+nginx:          make nginx
 runworker:      make runworker
 daphne:         make daphne
 celeryd:        make celeryd

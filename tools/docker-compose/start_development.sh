@@ -40,8 +40,5 @@ make version_file
 make migrate
 make init
 
-# Start nginx
-nginx
-
 # Start the service
 make honcho
