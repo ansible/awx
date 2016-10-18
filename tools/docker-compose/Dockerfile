@@ -23,8 +23,8 @@ ADD tools/docker-compose/ansible-tower.egg-link /tmp/ansible-tower.egg-link
 ADD tools/docker-compose/tower-manage /usr/local/bin/tower-manage
 ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
 ADD tools/docker-compose/ansible_tower.egg-info /tmp/ansible_tower.egg-info
-ADD tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
-ADD tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
+RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_development.sh
 RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=Tower Development/CN=tower.localhost"
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
