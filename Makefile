@@ -391,11 +391,17 @@ flower:
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
 
-uwsgi:
+collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/ui/static --static-map /static=/tower_devel/awx/static
+	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+
+uwsgi: collectstatic
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/ui/static --static-map /static=/tower_devel/awx/static --static-map /static=/tower_devel/awx/public/static
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
