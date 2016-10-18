@@ -395,7 +395,7 @@ collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
 
 uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
