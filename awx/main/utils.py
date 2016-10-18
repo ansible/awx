@@ -244,7 +244,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             # SCP style before passed to git module.
             parts = urlparse.urlsplit('git+ssh://%s' % modified_url)
         # Handle local paths specified without file scheme (e.g. /path/to/foo).
-        # Only supported by git and hg. (not currently allowed)
+        # Only supported by git and hg.
         elif scm_type in ('git', 'hg'):
             if not url.startswith('/'):
                 parts = urlparse.urlsplit('file:///%s' % url)
@@ -255,9 +255,9 @@ def update_scm_url(scm_type, url, username=True, password=True,
 
     # Validate that scheme is valid for given scm_type.
     scm_type_schemes = {
-        'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps'),
-        'hg': ('http', 'https', 'ssh'),
-        'svn': ('http', 'https', 'svn', 'svn+ssh'),
+        'git': ('ssh', 'git', 'git+ssh', 'http', 'https', 'ftp', 'ftps', 'file'),
+        'hg': ('http', 'https', 'ssh', 'file'),
+        'svn': ('http', 'https', 'svn', 'svn+ssh', 'file'),
     }
     if parts.scheme not in scm_type_schemes.get(scm_type, ()):
         raise ValueError('Unsupported %s URL' % scm_type)
