@@ -2191,7 +2191,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization')
+        fields = ('*', 'extra_vars', 'organization', 'survey_enabled',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
@@ -2205,7 +2205,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
             #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
             #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
-
+            survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
         return res
 
@@ -2235,6 +2235,14 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
         return res
+
+    def to_representation(self, obj):
+        ret = super(WorkflowJobSerializer, self).to_representation(obj)
+        if obj is None:
+            return ret
+        if 'extra_vars' in ret:
+            ret['extra_vars'] = obj.display_extra_vars()
+        return ret
 
 # TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):

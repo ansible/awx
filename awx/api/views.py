@@ -2376,6 +2376,11 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj.save()
         return Response()
 
+class WorkflowJobTemplateSurveySpec(JobTemplateSurveySpec):
+
+    model = WorkflowJobTemplate
+    parent_model = WorkflowJobTemplate
+
 class JobTemplateActivityStreamList(SubListAPIView):
 
     model = ActivityStream
@@ -2792,6 +2797,7 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
         data = {}
         obj = self.get_object()
         data['warnings'] = obj.get_warnings()
+        data['passwords_needed_to_start'] = obj.passwords_needed_to_start
         return Response(data)
 
     def post(self, request, *args, **kwargs):
@@ -2799,9 +2805,12 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        new_job = obj.create_unified_job(**request.data)
-        new_job.signal_start(**request.data)
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
+
+        new_job = obj.create_unified_job(**prompted_fields)
+        new_job.signal_start(**prompted_fields)
         data = dict(workflow_job=new_job.id)
+        data['ignored_fields'] = ignored_fields
         return Response(data, status=status.HTTP_201_CREATED)
 
 # TODO:

@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
+from jsonfield import JSONField
 
 # AWX
 from awx.main.models.rbac import (

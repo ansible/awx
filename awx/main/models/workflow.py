@@ -13,6 +13,7 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
+from awx.main.models.unified_jobs import SurveyJobTemplate, SurveyJob
 from awx.main.models.notifications import JobNotificationMixin
 from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
@@ -22,6 +23,7 @@ from awx.main.models.rbac import (
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
 from awx.main.redact import REPLACE_STR
+from awx.main.utils import parse_yaml_or_json
 
 from copy import copy
 
@@ -260,7 +262,9 @@ class WorkflowJobOptions(BaseModel):
         default='',
     )
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin):
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
+
+class WorkflowJobTemplate(UnifiedJobTemplate, SurveyJobTemplate, WorkflowJobOptions, ResourceMixin):
 
     class Meta:
         app_label = 'main'
@@ -318,6 +322,25 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin)
         workflow_job.inherit_job_template_workflow_nodes()
         return workflow_job
 
+    def _accept_or_ignore_job_kwargs(self, extra_vars=None, **kwargs):
+        # Only accept allowed survey variables
+        ignored_fields = {}
+        prompted_fields = {}
+        prompted_fields['extra_vars'] = {}
+        ignored_fields['extra_vars'] = {}
+        extra_vars = parse_yaml_or_json(extra_vars)
+        if self.survey_enabled and self.survey_spec:
+            survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
+            for key in extra_vars:
+                if key in survey_vars:
+                    prompted_fields[field][key] = extra_vars[key]
+                else:
+                    ignored_fields[field][key] = extra_vars[key]
+        else:
+            prompted_fields['extra_vars'] = extra_vars
+
+        return prompted_fields, ignored_fields
+
     def get_warnings(self):
         warning_data = {}
         for node in self.workflow_job_template_nodes.all():
@@ -372,7 +395,7 @@ class WorkflowJobInheritNodesMixin(object):
                 self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
                 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, WorkflowJobInheritNodesMixin):
+class WorkflowJob(UnifiedJob, SurveyJob, WorkflowJobOptions, JobNotificationMixin, WorkflowJobInheritNodesMixin):
 
     class Meta:
         app_label = 'main'
@@ -386,8 +409,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
         default=None,
         on_delete=models.SET_NULL,
     )
-
-    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     @classmethod
     def _get_parent_field_name(cls):
