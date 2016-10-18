@@ -29,6 +29,7 @@ from django.template.loader import render_to_string
 from django.core.servers.basehttp import FileWrapper
 from django.http import HttpResponse
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
 
 
 # Django REST Framework
@@ -86,14 +87,14 @@ class ApiRootView(APIView):
 
     authentication_classes = []
     permission_classes = (AllowAny,)
-    view_name = 'REST API'
+    view_name = _('REST API')
 
     def get(self, request, format=None):
         ''' list supported API versions '''
 
         current = reverse('api:api_v1_root_view', args=[])
         data = dict(
-            description = 'Ansible Tower REST API',
+            description = _('Ansible Tower REST API'),
             current_version = current,
             available_versions = dict(
                 v1 = current
@@ -105,7 +106,7 @@ class ApiV1RootView(APIView):
 
     authentication_classes = []
     permission_classes = (AllowAny,)
-    view_name = 'Version 1'
+    view_name = _('Version 1')
 
     def get(self, request, format=None):
         ''' list top level resources '''
@@ -156,7 +157,7 @@ class ApiV1PingView(APIView):
     """
     permission_classes = (AllowAny,)
     authentication_classes = ()
-    view_name = 'Ping'
+    view_name = _('Ping')
     new_in_210 = True
 
     def get(self, request, format=None):
@@ -182,7 +183,7 @@ class ApiV1PingView(APIView):
 class ApiV1ConfigView(APIView):
 
     permission_classes = (IsAuthenticated,)
-    view_name = 'Configuration'
+    view_name = _('Configuration')
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings.'''
@@ -278,7 +279,7 @@ class ApiV1ConfigView(APIView):
 
 class DashboardView(APIView):
 
-    view_name = "Dashboard"
+    view_name = _("Dashboard")
     new_in_14 = True
 
     def get(self, request, format=None):
@@ -383,7 +384,7 @@ class DashboardView(APIView):
 
 class DashboardJobsGraphView(APIView):
 
-    view_name = "Dashboard Jobs Graphs"
+    view_name = _("Dashboard Jobs Graphs")
     new_in_200 = True
 
     def get(self, request, format=None):
@@ -433,7 +434,7 @@ class DashboardJobsGraphView(APIView):
 
 class ScheduleList(ListAPIView):
 
-    view_name = "Schedules"
+    view_name = _("Schedules")
     model = Schedule
     serializer_class = ScheduleSerializer
     new_in_148 = True
@@ -450,7 +451,7 @@ class ScheduleUnifiedJobsList(SubListAPIView):
     serializer_class = UnifiedJobSerializer
     parent_model = Schedule
     relationship = 'unifiedjob_set'
-    view_name = 'Schedule Jobs List'
+    view_name = _('Schedule Jobs List')
     new_in_148 = True
 
 class AuthView(APIView):
@@ -998,7 +999,7 @@ class ProjectTeamsList(ListAPIView):
 
 class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
 
-    view_name = "Project Schedules"
+    view_name = _("Project Schedules")
 
     model = Schedule
     serializer_class = ScheduleSerializer
@@ -1162,7 +1163,7 @@ class UserMeList(ListAPIView):
 
     model = User
     serializer_class = UserSerializer
-    view_name = 'Me'
+    view_name = _('Me')
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
@@ -2038,7 +2039,7 @@ class InventoryInventorySourcesList(SubListAPIView):
     serializer_class = InventorySourceSerializer
     parent_model = Inventory
     relationship = None # Not defined since using get_queryset().
-    view_name = 'Inventory Source List'
+    view_name = _('Inventory Source List')
     new_in_14 = True
 
     def get_queryset(self):
@@ -2071,7 +2072,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
 
 class InventorySourceSchedulesList(SubListCreateAttachDetachAPIView):
 
-    view_name = "Inventory Source Schedules"
+    view_name = _("Inventory Source Schedules")
 
     model = Schedule
     serializer_class = ScheduleSerializer
@@ -2292,7 +2293,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
 
 class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
-    view_name = "Job Template Schedules"
+    view_name = _("Job Template Schedules")
 
     model = Schedule
     serializer_class = ScheduleSerializer
@@ -2823,7 +2824,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
 
 class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
 
-    view_name = "System Job Template Schedules"
+    view_name = _("System Job Template Schedules")
 
     model = Schedule
     serializer_class = ScheduleSerializer
@@ -2991,7 +2992,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     serializer_class = JobHostSummarySerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
-    view_name = 'Job Host Summaries List'
+    view_name = _('Job Host Summaries List')
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
 
@@ -3026,7 +3027,7 @@ class JobEventChildrenList(SubListAPIView):
     serializer_class = JobEventSerializer
     parent_model = JobEvent
     relationship = 'children'
-    view_name = 'Job Event Children List'
+    view_name = _('Job Event Children List')
 
 class JobEventHostsList(SubListAPIView):
 
@@ -3034,7 +3035,7 @@ class JobEventHostsList(SubListAPIView):
     serializer_class = HostSerializer
     parent_model = JobEvent
     relationship = 'hosts'
-    view_name = 'Job Event Hosts List'
+    view_name = _('Job Event Hosts List')
 
 class BaseJobEventsList(SubListAPIView):
 
@@ -3042,7 +3043,7 @@ class BaseJobEventsList(SubListAPIView):
     serializer_class = JobEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
-    view_name = 'Job Events List'
+    view_name = _('Job Events List')
 
 class HostJobEventsList(BaseJobEventsList):
 
@@ -3074,7 +3075,7 @@ class JobJobEventsList(BaseJobEventsList):
 class JobJobPlaysList(BaseJobEventsList):
 
     parent_model = Job
-    view_name = 'Job Plays List'
+    view_name = _('Job Plays List')
     new_in_200 = True
 
     @paginated
@@ -3149,7 +3150,7 @@ class JobJobTasksList(BaseJobEventsList):
     and their completion status.
     """
     parent_model = Job
-    view_name = 'Job Play Tasks List'
+    view_name = _('Job Play Tasks List')
     new_in_200 = True
 
     @paginated
@@ -3444,7 +3445,7 @@ class BaseAdHocCommandEventsList(SubListAPIView):
     serializer_class = AdHocCommandEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'ad_hoc_command_events'
-    view_name = 'Ad Hoc Command Events List'
+    view_name = _('Ad Hoc Command Events List')
     new_in_220 = True
 
 
@@ -3660,7 +3661,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
 class NotificationTemplateTest(GenericAPIView):
 
-    view_name = 'NotificationTemplate Test'
+    view_name = _('NotificationTemplate Test')
     model = NotificationTemplate
     serializer_class = EmptySerializer
     new_in_300 = True

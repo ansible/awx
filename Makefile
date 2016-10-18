@@ -493,6 +493,25 @@ test_tox:
 # Alias existing make target so old versions run against Jekins the same way
 test_jenkins : test_coverage
 
+# l10n TASKS
+# --------------------------------------
+
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG)
+
+languages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py compilemessages
+
+# End l10n TASKS
+# --------------------------------------
+
 # UI TASKS
 # --------------------------------------
 
@@ -506,7 +525,7 @@ ui-docker-machine: $(UI_DEPS_FLAG_FILE)
 ui-docker: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-docker-cid
 
-ui-release: $(UI_RELEASE_FLAG_FILE)
+ui-release: languages $(UI_RELEASE_FLAG_FILE)
 
 $(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release

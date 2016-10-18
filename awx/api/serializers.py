@@ -20,7 +20,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
-# from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
 
@@ -694,9 +694,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 class UserSerializer(BaseSerializer):
 
     password = serializers.CharField(required=False, default='', write_only=True,
-                                     help_text='Write-only field used to change the password.')
+                                     help_text=_('Write-only field used to change the password.'))
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
-    external_account = serializers.SerializerMethodField(help_text='Set if the account is managed by an external service')
+    external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -961,7 +961,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
-    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
+    playbooks = serializers.ReadOnlyField(help_text=_('Array of playbooks available within this project.'))
 
     class Meta:
         model = Project
@@ -1717,18 +1717,18 @@ class CredentialSerializerCreate(CredentialSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add user to owner role. If provided, '
-                  'do not give either team or organization. Only valid for creation.')
+        help_text=_('Write-only field used to add user to owner role. If provided, '
+                    'do not give either team or organization. Only valid for creation.'))
     team = serializers.PrimaryKeyRelatedField(
         queryset=Team.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add team to owner role. If provided, '
-                  'do not give either user or organization. Only valid for creation.')
+        help_text=_('Write-only field used to add team to owner role. If provided, '
+                    'do not give either user or organization. Only valid for creation.'))
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add organization to owner role. If provided, '
-                  'do not give either team or team. Only valid for creation.')
+        help_text=_('Write-only field used to add organization to owner role. If provided, '
+                    'do not give either team or team. Only valid for creation.'))
 
     class Meta:
         model = Credential
@@ -2791,15 +2791,15 @@ class ActivityStreamSerializer(BaseSerializer):
         ret = super(ActivityStreamSerializer, self).get_fields()
         for key, field in ret.items():
             if key == 'changes':
-                field.help_text = 'A summary of the new and changed values when an object is created, updated, or deleted'
+                field.help_text = _('A summary of the new and changed values when an object is created, updated, or deleted')
             if key == 'object1':
-                field.help_text = ('For create, update, and delete events this is the object type that was affected. '
-                                   'For associate and disassociate events this is the object type associated or disassociated with object2.')
+                field.help_text = _('For create, update, and delete events this is the object type that was affected. '
+                                    'For associate and disassociate events this is the object type associated or disassociated with object2.')
             if key == 'object2':
-                field.help_text = ('Unpopulated for create, update, and delete events. For associate and disassociate '
-                                   'events this is the object type that object1 is being associated with.')
+                field.help_text = _('Unpopulated for create, update, and delete events. For associate and disassociate '
+                                    'events this is the object type that object1 is being associated with.')
             if key == 'operation':
-                field.help_text = 'The action taken with respect to the given object(s).'
+                field.help_text = _('The action taken with respect to the given object(s).')
         return ret
 
     def get_changes(self, obj):

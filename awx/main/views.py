@@ -4,6 +4,7 @@
 # Django
 from django.shortcuts import render
 from django.utils.html import format_html
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import exceptions, permissions, views
@@ -16,7 +17,7 @@ class ApiErrorView(views.APIView):
     metadata_class = None
     allowed_methods = ('GET', 'HEAD')
     exception_class = exceptions.APIException
-    view_name = 'API Error'
+    view_name = _('API Error')
 
     def get_view_name(self):
         return self.view_name
@@ -45,31 +46,31 @@ def handle_error(request, status=404, **kwargs):
 
 def handle_400(request):
     kwargs = {
-        'name': 'Bad Request',
-        'content': 'The request could not be understood by the server.',
+        'name': _('Bad Request'),
+        'content': _('The request could not be understood by the server.'),
     }
     return handle_error(request, 400, **kwargs)
 
 
 def handle_403(request):
     kwargs = {
-        'name': 'Forbidden',
-        'content': 'You don\'t have permission to access the requested resource.',
+        'name': _('Forbidden'),
+        'content': _('You don\'t have permission to access the requested resource.'),
     }
     return handle_error(request, 403, **kwargs)
 
 
 def handle_404(request):
     kwargs = {
-        'name': 'Not Found',
-        'content': 'The requested resource could not be found.',
+        'name': _('Not Found'),
+        'content': _('The requested resource could not be found.'),
     }
     return handle_error(request, 404, **kwargs)
 
 
 def handle_500(request):
     kwargs = {
-        'name': 'Server Error',
-        'content': 'A server error has occurred.',
+        'name': _('Server Error'),
+        'content': _('A server error has occurred.'),
     }
     return handle_error(request, 500, **kwargs)
