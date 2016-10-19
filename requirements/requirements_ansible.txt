@@ -71,7 +71,7 @@ rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
 requests==2.11.0
 requestsexceptions==1.1.1
-shade==1.4.0
+shade==1.12.1
 simplejson==3.8.1
 six==1.9.0
 stevedore==1.10.0
