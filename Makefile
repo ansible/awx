@@ -185,7 +185,8 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release \
-	ui-test ui-test-ci ui-test-saucelabs
+	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
+
 
 # Remove setup build files
 clean-tar:
@@ -504,6 +505,8 @@ test_jenkins : test_coverage
 
 # UI TASKS
 # --------------------------------------
+
+ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE): awx/ui/package.json
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui

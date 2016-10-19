@@ -58,7 +58,7 @@ COPY awx/ui/package.json awx/ui/
 
 RUN npm set progress=false
 
-RUN make ui-deps-built
+RUN make ui-deps
 
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["bash"]
