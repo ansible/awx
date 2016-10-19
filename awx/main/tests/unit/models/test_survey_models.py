@@ -2,7 +2,11 @@ import pytest
 import json
 
 from awx.main.tasks import RunJob
-from awx.main.models import Job
+from awx.main.models import (
+    Job,
+    WorkflowJob,
+    WorkflowJobTemplate
+)
 
 
 @pytest.fixture
@@ -65,3 +69,15 @@ def test_job_args_unredacted_passwords(job):
     ev_index = args.index('-e') + 1
     extra_vars = json.loads(args[ev_index])
     assert extra_vars['secret_key'] == 'my_password'
+
+class TestWorkflowSurveys:
+    def test_update_kwargs_survey_defaults(self, survey_spec_factory):
+        "Assure that the survey default over-rides a JT variable"
+        spec = survey_spec_factory('var1')
+        spec['spec'][0]['default'] = 3
+        wfjt = WorkflowJobTemplate(
+            name="test-wfjt",
+            survey_spec=spec,
+            extra_vars="var1: 5"
+        )
+        assert json.loads(wfjt._update_unified_job_kwargs()['extra_vars'])['var1'] == 3

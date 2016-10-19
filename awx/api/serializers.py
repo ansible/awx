@@ -2609,19 +2609,20 @@ class JobLaunchSerializer(BaseSerializer):
 
 class WorkflowJobLaunchSerializer(BaseSerializer):
 
-    can_start_without_user_input = serializers.BooleanField(read_only=True)
-    variables_needed_to_start = serializers.ReadOnlyField()
-    
+    # can_start_without_user_input = serializers.BooleanField(read_only=True)
+    # variables_needed_to_start = serializers.ReadOnlyField()
+
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
-    workflow_job_template_data = serializers.SerializerMethodField()
+    # workflow_job_template_data = serializers.SerializerMethodField()
+    # warnings = 
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('can_start_without_user_input',
+        fields = ('*',#'can_start_without_user_input',
                   'extra_vars',
-                  'survey_enabled', 'variables_needed_to_start',
-                  'workflow_job_template_data')
+                  'survey_enabled')#, 'variables_needed_to_start',
+                #   'workflow_job_template_data')
 
     def get_survey_enabled(self, obj):
         if obj:

@@ -2786,12 +2786,13 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     new_in_310 = True
 
 
-# TODO:
-class WorkflowJobTemplateLaunch(GenericAPIView):
+class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobLaunchSerializer
     new_in_310 = True
+    is_job_start = True
+    always_allow_superuser = False
 
     def update_raw_data(self, data):
         obj = self.get_object()
@@ -2802,7 +2803,7 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
             if extra_vars:
                 data['extra_vars'] = extra_vars
         return data
-
+ 
     # def get(self, request, *args, **kwargs):
     #     data = {}
     #     obj = self.get_object()
