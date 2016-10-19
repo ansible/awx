@@ -2815,10 +2815,9 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-
-# serializer = self.serializer_class(instance=obj, data=request.data, context={'obj': obj, 'data': request.data, 'passwords': passwords})
-# if not serializer.is_valid():
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.serializer_class(instance=obj, data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 

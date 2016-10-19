@@ -2633,26 +2633,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
 
     def validate(self, attrs):
         errors = {}
-        obj = self.context.get('obj')
-        data = self.context.get('data')
-
-        for field in obj.resources_needed_to_start:
-            if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
-                errors[field] = "Job Template '%s' is missing or undefined." % field
-
-        if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
-            credential = obj.credential
-        else:
-            credential = attrs.get('credential', None)
-
-        # fill passwords dict with request data passwords
-        if credential and credential.passwords_needed:
-            passwords = self.context.get('passwords')
-            try:
-                for p in credential.passwords_needed:
-                    passwords[p] = data[p]
-            except KeyError:
-                errors['passwords_needed_to_start'] = credential.passwords_needed
+        obj = self.instance
 
         extra_vars = attrs.get('extra_vars', {})
 
@@ -2674,27 +2655,12 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
             if validation_errors:
                 errors['variables_needed_to_start'] = validation_errors
 
-        # Special prohibited cases for scan jobs
-        errors.update(obj._extra_job_type_errors(data))
-
         if errors:
             raise serializers.ValidationError(errors)
 
-        JT_extra_vars = obj.extra_vars
-        JT_limit = obj.limit
-        JT_job_type = obj.job_type
-        JT_job_tags = obj.job_tags
-        JT_skip_tags = obj.skip_tags
-        JT_inventory = obj.inventory
-        JT_credential = obj.credential
-        attrs = super(JobLaunchSerializer, self).validate(attrs)
-        obj.extra_vars = JT_extra_vars
-        obj.limit = JT_limit
-        obj.job_type = JT_job_type
-        obj.skip_tags = JT_skip_tags
-        obj.job_tags = JT_job_tags
-        obj.inventory = JT_inventory
-        obj.credential = JT_credential
+        WFJT_extra_vars = obj.extra_vars
+        attrs = super(WorkflowJobLaunchSerializer, self).validate(attrs)
+        obj.extra_vars = WFJT_extra_vars
         return attrs
 
 class NotificationTemplateSerializer(BaseSerializer):
