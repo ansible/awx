@@ -2,7 +2,7 @@ git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.5
 anyjson==0.3.3
 appdirs==1.4.0
-azure==2.0.0rc2
+azure==2.0.0rc5
 Babel==2.2.0
 billiard==3.3.0.16
 boto==2.40.0
@@ -113,7 +113,7 @@ rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
 redis==2.10.3
 requests-oauthlib==0.5.0
-requests==2.9.1
+requests==2.11.0
 requestsexceptions==1.1.1
 shade==1.4.0
 simplejson==3.8.1
