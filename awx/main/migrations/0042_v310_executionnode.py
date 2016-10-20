@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0040_v310_artifacts'),
+        ('main', '0041_v310_job_timeout'),
     ]
 
     operations = [
