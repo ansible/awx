@@ -10,7 +10,8 @@ from awx.main.access import (
     JobTemplateAccess,
     WorkflowJobTemplateAccess,
 )
-from awx.main.models import Credential, Inventory, Project, Role, Organization
+from awx.conf.license import LicenseForbids
+from awx.main.models import Credential, Inventory, Project, Role, Organization, Instance
 
 
 @pytest.fixture
@@ -105,6 +106,18 @@ def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
                     'inventory': inventory.pk,
                     'job_type': 'scan'
                 })
+
+def mock_raise_license_forbids(self, add_host=False, feature=None, check_expiration=True):
+    raise LicenseForbids("Feature not enabled")
+
+def mock_raise_none(self, add_host=False, feature=None, check_expiration=True):
+    return None
+    
+def test_jt_can_start_ha(job_template_with_ids):
+    with mock.patch.object(Instance.objects, 'active_count', return_value=2):
+        with mock.patch('awx.main.access.BaseAccess.check_license', new=mock_raise_license_forbids):
+            with pytest.raises(LicenseForbids):
+                JobTemplateAccess(user_unit).can_start(job_template_with_ids)
 
 def test_jt_can_add_bad_data(user_unit):
     "Assure that no server errors are returned if we call JT can_add with bad data"

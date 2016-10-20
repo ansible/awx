@@ -36,6 +36,10 @@ class InstanceManager(models.Manager):
             return node[0]
         raise RuntimeError("No instance found with the current cluster host id")
 
+    def active_count(self):
+        """Return count of active Tower nodes for licensing."""
+        return self.all().count()
+
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"

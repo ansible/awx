@@ -1044,6 +1044,8 @@ class JobTemplateAccess(BaseAccess):
                 self.check_license(feature='system_tracking')
             if obj.survey_enabled:
                 self.check_license(feature='surveys')
+            if Instance.objects.active_count() > 1:
+                self.check_license(feature='ha')
 
         # Super users can start any job
         if self.user.is_superuser:
