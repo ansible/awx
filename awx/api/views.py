@@ -2677,13 +2677,9 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
-    always_allow_superuser = True # TODO: RBAC
-    parent_model = Job
+    parent_model = WorkflowJobNode
     relationship = ''
-    '''
-    enforce_parent_relationship = 'workflow_job_template'
     new_in_310 = True
-    '''
 
     #
     #Limit the set of WorkflowJobeNodes to the related nodes of specified by
