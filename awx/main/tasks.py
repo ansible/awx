@@ -1116,7 +1116,7 @@ class RunProjectUpdate(BaseTask):
             args.append('-v')
         scm_url, extra_vars = self._build_scm_url_extra_vars(project_update,
                                                              **kwargs)
-        if project_update.project.scm_revision and project_update.job_type == 'check':
+        if project_update.project.scm_revision and project_update.job_type == 'run':
             scm_branch = project_update.project.scm_revision
         else:
             scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
