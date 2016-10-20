@@ -438,6 +438,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         editable=False,
         related_name='%(class)s_blocked_jobs+',
     )
+    execution_node = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
     notifications = models.ManyToManyField(
         'Notification',
         editable=False,
@@ -801,7 +806,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def pre_start(self, **kwargs):
         if not self.can_start:
-            self.job_explanation = u'%s is not in a startable status: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
+            self.job_explanation = u'%s is not in a startable state: %s, expecting one of %s' % (self._meta.verbose_name, self.status, str(('new', 'waiting')))
             self.save(update_fields=['job_explanation'])
             return (False, None)
 

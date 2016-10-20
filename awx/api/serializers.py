@@ -562,7 +562,7 @@ class UnifiedJobSerializer(BaseSerializer):
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'result_traceback')
+                  'execution_node', 'result_traceback')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
