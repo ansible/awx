@@ -501,7 +501,7 @@ class BaseTask(Task):
         return OrderedDict()
 
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
-                    output_replacements=None):
+                    output_replacements=None, extra_update_fields=None):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -517,9 +517,17 @@ class BaseTask(Task):
         if pexpect_sleep is not None:
             logger.info("Suspending Job Execution for QA Work")
             time.sleep(pexpect_sleep)
+        global_timeout = getattr(settings, 'DEFAULT_JOB_TIMEOUTS', {})
+        cls_name = instance.__class__.__name__
+        if cls_name in global_timeout:
+            local_timeout = getattr(instance, 'timeout', 0)
+            job_timeout = global_timeout[cls_name] if local_timeout == 0 else local_timeout
+        else:
+            job_timeout = 0
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
+        timed_out = False
         last_stdout_update = time.time()
         idle_timeout = self.get_idle_timeout()
         expect_list = []
@@ -531,6 +539,7 @@ class BaseTask(Task):
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         instance = self.update_model(instance.pk, status='running',
                                      output_replacements=output_replacements)
+        job_start = time.time()
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout)
             if result_id in expect_passwords:
@@ -541,38 +550,58 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                try:
-                    if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
-                        # NOTE: Refactor this once we get a newer psutil across the board
-                        if not psutil:
-                            os.kill(child.pid, signal.SIGKILL)
-                        else:
-                            try:
-                                main_proc = psutil.Process(pid=child.pid)
-                                if hasattr(main_proc, "children"):
-                                    child_procs = main_proc.children(recursive=True)
-                                else:
-                                    child_procs = main_proc.get_children(recursive=True)
-                                for child_proc in child_procs:
-                                    os.kill(child_proc.pid, signal.SIGKILL)
-                                os.kill(main_proc.pid, signal.SIGKILL)
-                            except TypeError:
-                                os.kill(child.pid, signal.SIGKILL)
-                    else:
-                        os.kill(child.pid, signal.SIGTERM)
-                    time.sleep(3)
-                    canceled = True
-                except OSError:
-                    logger.warn("Attempted to cancel already finished job, ignoring")
+                canceled = True
+            elif job_timeout != 0 and (time.time() - job_start) > job_timeout:
+                timed_out = True
+                if isinstance(extra_update_fields, dict):
+                    extra_update_fields['job_explanation'] = "Job terminated due to timeout"
+            if canceled or timed_out:
+                self._handle_termination(instance, child, is_cancel=canceled)
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
         if canceled:
             return 'canceled', child.exitstatus
-        elif child.exitstatus == 0:
+        elif child.exitstatus == 0 and not timed_out:
             return 'successful', child.exitstatus
         else:
             return 'failed', child.exitstatus
+
+    def _handle_termination(self, instance, job, is_cancel=True):
+        '''Helper function to properly terminate specified job.
+
+        Args:
+            instance: The corresponding model instance of this task.
+            job: The pexpect subprocess running the job.
+            is_cancel: Flag showing whether this termination is caused by instance's
+                cancel_flag.
+
+        Return:
+            None.
+        '''
+        try:
+            if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
+                # NOTE: Refactor this once we get a newer psutil across the board
+                if not psutil:
+                    os.kill(job.pid, signal.SIGKILL)
+                else:
+                    try:
+                        main_proc = psutil.Process(pid=job.pid)
+                        if hasattr(main_proc, "children"):
+                            child_procs = main_proc.children(recursive=True)
+                        else:
+                            child_procs = main_proc.get_children(recursive=True)
+                        for child_proc in child_procs:
+                            os.kill(child_proc.pid, signal.SIGKILL)
+                        os.kill(main_proc.pid, signal.SIGKILL)
+                    except TypeError:
+                        os.kill(job.pid, signal.SIGKILL)
+            else:
+                os.kill(job.pid, signal.SIGTERM)
+            time.sleep(3)
+        except OSError:
+            keyword = 'cancel' if is_cancel else 'timeout'
+            logger.warn("Attempted to %s already finished job, ignoring" % keyword)
 
     def pre_run_hook(self, instance, **kwargs):
         '''
@@ -593,6 +622,7 @@ class BaseTask(Task):
         instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
+        extra_update_fields = {}
         try:
             self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
@@ -636,7 +666,8 @@ class BaseTask(Task):
                 safe_args = self.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
-            status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
+            status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle,
+                                          extra_update_fields=extra_update_fields)
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
@@ -657,7 +688,8 @@ class BaseTask(Task):
             except Exception:
                 pass
         instance = self.update_model(pk, status=status, result_traceback=tb,
-                                     output_replacements=output_replacements)
+                                     output_replacements=output_replacements,
+                                     **extra_update_fields)
         self.post_run_hook(instance, **kwargs)
         instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
