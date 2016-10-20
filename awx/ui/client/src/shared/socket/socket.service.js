@@ -27,7 +27,7 @@ export default
 
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
                     // We have a valid session token, so attempt socket connection
-                    // url = `${url}?session=${token}`;
+                    url = `${url}?token=${token}`;
                     $log.debug('Socket connecting to: ' + url);
 
                     self.socket = new ReconnectingWebSocket(url, null, {
