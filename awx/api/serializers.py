@@ -562,7 +562,7 @@ class UnifiedJobSerializer(BaseSerializer):
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'result_traceback')
+                  'execution_node', 'result_traceback')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
@@ -914,7 +914,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'timeout') + \
+                  'scm_update_cache_timeout', 'scm_revision', 'timeout',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
 
@@ -986,7 +986,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project')
+        fields = ('*', 'project', 'job_type')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -1930,7 +1930,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'allow_simultaneous', 'artifacts',)
+                  'allow_simultaneous', 'artifacts', 'scm_revision',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

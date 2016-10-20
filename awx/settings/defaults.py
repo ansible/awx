@@ -9,7 +9,6 @@ import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
-from kombu.common import Broadcast
 
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
@@ -358,11 +357,11 @@ CELERY_QUEUES = (
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
     Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
     # Projects use a fanout queue, this isn't super well supported
-    Broadcast('projects'),
 )
 CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                                             'routing_key': 'jobs'},
-                 'awx.main.tasks.run_project_update': {'queue': 'projects'},
+                 'awx.main.tasks.run_project_update': {'queue': 'jobs',
+                                                       'routing_key': 'jobs'},
                  'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
                                                          'routing_key': 'jobs'},
                  'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
@@ -374,7 +373,7 @@ CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                  'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
                                                                'routing_key': 'scheduler.job.complete'},
                  'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
-                                                           'routing_key': 'cluster.heartbeat'},}
+                                                           'routing_key': 'cluster.heartbeat'}}
 
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {

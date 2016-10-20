@@ -559,6 +559,15 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         default={},
         editable=False,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this job, if available'),
+    )
+
 
     @classmethod
     def _get_parent_field_name(cls):

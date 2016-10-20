@@ -227,6 +227,15 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         blank=True,
     )
 
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The last revision fetched by a project update'),
+    )
+
     admin_role = ImplicitRoleField(parent_role=[
         'organization.admin_role',
         'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -391,6 +400,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         related_name='project_updates',
         on_delete=models.CASCADE,
         editable=False,
+    )
+
+    job_type = models.CharField(
+        max_length=64,
+        choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
+        default='check',
     )
 
     @classmethod
