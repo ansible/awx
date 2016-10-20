@@ -74,9 +74,6 @@ export default
                 // Function called when messages are received on by the UI from
                 // the API over the websocket. This will route each message to
                 // the appropriate controller for the current $state.
-                e.data = e.data.replace(/\\/g, '');
-                e.data = e.data.substr(0, e.data.length-1);
-                e.data = e.data.substr(1);
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
