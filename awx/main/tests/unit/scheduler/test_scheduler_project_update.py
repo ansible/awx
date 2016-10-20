@@ -17,98 +17,6 @@ from awx.main.scheduler import Scheduler
 # ProjectUpdateDict. We should instead return a ProjectUpdateLatestDict()
 # For now, this is ok since the fields on deviate that much.
 
-@pytest.fixture
-def epoch():
-    return tz_now()
-
-
-@pytest.fixture
-def scheduler_factory(mocker, epoch):
-    def fn(tasks=[], latest_project_updates=[], create_project_update=None):
-        sched = Scheduler()
-        sched.capacity_total = 999999999
-
-        sched.graph.get_now = lambda: epoch
-
-        mocker.patch.object(sched, 'get_tasks', return_value=tasks)
-        mocker.patch.object(sched, 'get_latest_project_update_tasks', return_value=latest_project_updates)
-        mocker.patch.object(sched, 'create_project_update', return_value=create_project_update)
-        mocker.patch.object(sched, 'start_task')
-        return sched
-    return fn
-
-@pytest.fixture
-def project_update_factory(epoch):
-    def fn():
-        return ProjectUpdateDict({
-            'id': 1,
-            'created': epoch - timedelta(seconds=100),
-            'project_id': 1,
-            'project__scm_update_cache_timeout': 0,
-            'celery_task_id': '',
-            'launch_type': 'dependency',
-            'project__scm_update_on_launch': True,
-        })
-    return fn
-
-@pytest.fixture
-def pending_project_update(project_update_factory):
-    project_update = project_update_factory()
-    project_update['status'] = 'pending'
-    return project_update
-
-@pytest.fixture
-def waiting_project_update(epoch, project_update_factory):
-    project_update = project_update_factory()
-    project_update['status'] = 'waiting'
-    return project_update
-
-@pytest.fixture
-def pending_job(epoch):
-    return JobDict({ 
-        'id': 1, 
-        'status': 'pending', 
-        'job_template_id': 1, 
-        'project_id': 1, 
-        'inventory_id': 1,
-        'launch_type': 'manual', 
-        'allow_simultaneous': False, 
-        'created': epoch - timedelta(seconds=99), 
-        'celery_task_id': '', 
-        'project__scm_update_on_launch': True, 
-        'forks': 5 
-    })
-
-@pytest.fixture
-def running_project_update(epoch, project_update_factory):
-    project_update = project_update_factory()
-    project_update['status'] = 'running'
-    return project_update
-
-@pytest.fixture
-def successful_project_update(epoch, project_update_factory):
-    project_update = project_update_factory()
-    project_update['finished'] = epoch - timedelta(seconds=90)
-    project_update['status'] = 'successful'
-    return project_update
-
-@pytest.fixture
-def successful_project_update_cache_expired(epoch, project_update_factory):
-    project_update = project_update_factory()
-
-    project_update['status'] = 'successful'
-    project_update['created'] = epoch - timedelta(seconds=120)
-    project_update['finished'] = epoch - timedelta(seconds=110)
-    project_update['project__scm_update_cache_timeout'] = 1
-    return project_update
-
-@pytest.fixture
-def failed_project_update(epoch, project_update_factory):
-    project_update = project_update_factory()
-    project_update['finished'] = epoch - timedelta(seconds=90)
-    project_update['status'] = 'failed'
-    return project_update
-
 class TestStartProjectUpdate():
     def test(self, scheduler_factory, pending_project_update):
         scheduler = scheduler_factory(tasks=[pending_project_update])
@@ -164,31 +72,18 @@ class TestCreateDependentProjectUpdate():
 
         scheduler.start_task.assert_called_with(waiting_project_update, [pending_job])
 
-
-class TestJobBlockedOnProjectUpdate():
-    def test(self, scheduler_factory, pending_job, waiting_project_update):
-        scheduler = scheduler_factory(tasks=[waiting_project_update, pending_job],
-                                      latest_project_updates=[waiting_project_update])
-
-        scheduler._schedule()
-
-        scheduler.start_task.assert_not_called()
-        assert scheduler.create_project_update.call_count == 0
-
-    def test_project_running(self, scheduler_factory, pending_job, running_project_update):
-        scheduler = scheduler_factory(tasks=[running_project_update, pending_job])
-
-        scheduler._schedule()
-
-        scheduler.start_task.assert_not_called()
-        assert scheduler.create_project_update.call_count == 0
-
 class TestProjectUpdateBlocked():
-    def test(self, scheduler_factory, running_project_update, pending_project_update):
-        scheduler = scheduler_factory(tasks=[running_project_update, pending_project_update],
-                                      latest_project_updates=[running_project_update])
+    def test_projct_update_running(self, scheduler_factory, running_project_update, pending_project_update):
+        scheduler = scheduler_factory(tasks=[running_project_update, pending_project_update])
         scheduler._schedule()
 
         scheduler.start_task.assert_not_called()
         assert scheduler.create_project_update.call_count == 0
+
+    def test_job_running(self, scheduler_factory, running_job, pending_project_update):
+        scheduler = scheduler_factory(tasks=[running_job, pending_project_update])
+
+        scheduler._schedule()
+
+        scheduler.start_task.assert_not_called()
 

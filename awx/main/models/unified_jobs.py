@@ -13,7 +13,7 @@ from StringIO import StringIO
 
 # Django
 from django.conf import settings
-from django.db import models
+from django.db import models, connection
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
@@ -835,6 +835,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         return (True, opts)
 
+    def start_celery_task(self, opts, error_callback, success_callback):
+        task_class = self._get_task_class()
+        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+
     def start(self, error_callback, success_callback, **kwargs):
         '''
         Start the task running via Celery.
@@ -842,7 +846,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         task_class = self._get_task_class()
         (res, opts) = self.pre_start(**kwargs)
         if res:
-            task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+            self.start_celery_task(opts, error_callback, success_callback)
         return res
 
     def signal_start(self, **kwargs):
@@ -871,7 +875,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         self.websocket_emit_status("pending")
 
         from awx.main.scheduler.tasks import run_job_launch
-        run_job_launch.delay(self.id)
+        connection.on_commit(lambda: run_job_launch.delay(self.id))
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
