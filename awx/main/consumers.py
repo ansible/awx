@@ -35,5 +35,4 @@ def ws_receive(message):
 
 
 def emit_channel_notification(group, payload):
-    payload = json.dumps(payload)
     Group(group).send({"text": json.dumps(payload)})
