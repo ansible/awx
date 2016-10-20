@@ -17,28 +17,93 @@
   tasks:
 
     - name: delete project directory before update
-      file: path={{project_path|quote}} state=absent
+      file:
+        path: "{{project_path|quote}}"
+        state: absent
       when: scm_delete_on_update|default('')
 
     - name: update project using git and accept hostkey
-      git: dest={{project_path|quote}} repo={{scm_url|quote}} version={{scm_branch|quote}} force={{scm_clean}} accept_hostkey={{scm_accept_hostkey}}
+      git:
+        dest: "{{project_path|quote}}"
+        repo: "{{scm_url|quote}}"
+        version: "{{scm_branch|quote}}"
+        force: "{{scm_clean}}"
+        accept_hostkey: "{{scm_accept_hostkey}}"
+        clone: "{{ scm_full_checkout }}"
+        update: "{{ scm_full_checkout }}"
       when: scm_type == 'git' and scm_accept_hostkey is defined
+      register: scm_result
+
+    - name: Set the git repository version
+      set_fact:
+        scm_version: "{{ scm_result['after'] }}"
+      when: "'after' in scm_result"
 
     - name: update project using git
-      git: dest={{project_path|quote}} repo={{scm_url|quote}} version={{scm_branch|quote}} force={{scm_clean}}
+      git:
+        dest: "{{project_path|quote}}"
+        repo: "{{scm_url|quote}}"
+        version: "{{scm_branch|quote}}"
+        force: "{{scm_clean}}"
+        clone: "{{ scm_full_checkout }}"
+        update: "{{ scm_full_checkout }}"        
       when: scm_type == 'git' and scm_accept_hostkey is not defined
+      register: scm_result
+
+    - name: Set the git repository version
+      set_fact:
+        scm_version: "{{ scm_result['after'] }}"
+      when: "'after' in scm_result"
 
     - name: update project using hg
-      hg: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}}
+      hg:
+        dest: "{{project_path|quote}}"
+        repo: "{{scm_url|quote}}"
+        revision: "{{scm_branch|quote}}"
+        force: "{{scm_clean}}"
+        #clone: "{{ scm_full_checkout }}"
+        #update: "{{ scm_full_checkout }}"
       when: scm_type == 'hg'
+      register: scm_result
+
+    - name: Set the hg repository version
+      set_fact:
+        scm_version: "{{ scm_result['after'] }}"
+      when: "'after' in scm_result"
 
     - name: update project using svn
-      subversion: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}}
+      subversion:
+        dest: "{{project_path|quote}}"
+        repo: "{{scm_url|quote}}"
+        revision: "{{scm_branch|quote}}"
+        force: "{{scm_clean}}"
+        #checkout: "{{ scm_full_checkout }}"
+        #update: "{{ scm_full_checkout }}"
       when: scm_type == 'svn' and not scm_username|default('')
+      register: scm_result
+
+    - name: Set the svn repository version
+      set_fact:
+        scm_version: "{{ scm_result['after'] }}"
+      when: "'after' in scm_result"
 
     - name: update project using svn with auth
-      subversion: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}} username={{scm_username|quote}} password={{scm_password|quote}}
+      subversion:
+        dest: "{{project_path|quote}}"
+        repo: "{{scm_url|quote}}"
+        revision: "{{scm_branch|quote}}"
+        force: "{{scm_clean}}"
+        username: "{{scm_username|quote}}"
+        password: "{{scm_password|quote}}"
+        #checkout: "{{ scm_full_checkout }}"
+        #update: "{{ scm_full_checkout }}"
       when: scm_type == 'svn' and scm_username|default('')
+      register: scm_result
+
+    - name: Set the svn repository version
+      set_fact:
+        scm_version: "{{ scm_result['after'] }}"
+      when: "'after' in scm_result"
 
     - name: detect requirements.yml
       stat: path={{project_path|quote}}/roles/requirements.yml
@@ -48,4 +113,14 @@
       command: ansible-galaxy install -r requirements.yml -p {{project_path|quote}}/roles/ --force
       args:
         chdir: "{{project_path|quote}}/roles"
-      when: doesRequirementsExist.stat.exists
+      when: doesRequirementsExist.stat.exists and scm_full_checkout|bool
+
+    - name: Repository Version
+      debug: msg="Repository Version {{ scm_version }}"
+      when: scm_version is defined
+
+    - name: Write Repository Version
+      copy:
+        dest: "{{ scm_revision_output }}"
+        content: "{{ scm_version }}"
+      when: scm_version is defined and scm_revision_output is defined
