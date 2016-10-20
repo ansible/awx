@@ -782,6 +782,7 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
+        env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
@@ -915,6 +916,10 @@ class RunJob(BaseTask):
             'tower_job_id': job.pk,
             'tower_job_launch_type': job.launch_type,
         }
+        if job.project:
+            extra_vars.update({
+                'tower_project_revision': job.project.scm_revision,
+                })
         if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
