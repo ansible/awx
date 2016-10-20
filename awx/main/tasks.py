@@ -919,7 +919,7 @@ class RunJob(BaseTask):
         if job.project:
             extra_vars.update({
                 'tower_project_revision': job.project.scm_revision,
-                })
+            })
         if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
@@ -1004,6 +1004,8 @@ class RunJob(BaseTask):
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
+                job.scm_revision = job.project.scm_revision
+                job.save()
             except Exception:
                 job.status = 'failed'
                 job.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \

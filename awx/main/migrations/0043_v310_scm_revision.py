@@ -21,4 +21,10 @@ class Migration(migrations.Migration):
             name='job_type',
             field=models.CharField(default=b'check', max_length=64, choices=[(b'run', 'Run'), (b'check', 'Check')]),
         ),
+        migrations.AddField(
+            model_name='job',
+            name='scm_revision',
+            field=models.CharField(default=b'', editable=False, max_length=1024, blank=True, help_text='The SCM Revision from the Project used for this job, if available', verbose_name='SCM Revision'),
+        ),
+
     ]

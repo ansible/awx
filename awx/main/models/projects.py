@@ -7,9 +7,6 @@ import os
 import re
 import urlparse
 
-# Celery
-from celery import group, chord
-
 # Django
 from django.conf import settings
 from django.db import models

@@ -9,7 +9,6 @@ import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
-from kombu.common import Broadcast
 
 # Update this module's local settings from the global settings module.
 from django.conf import global_settings
@@ -361,20 +360,20 @@ CELERY_QUEUES = (
 )
 CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                                              'routing_key': 'jobs'},
-                  'awx.main.tasks.run_project_update': {'queue': 'jobs',
-                                                        'routing_key': 'jobs'},
-                  'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
-                                                          'routing_key': 'jobs'},
-                  'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
-                                                        'routing_key': 'jobs'},
-                  'awx.main.tasks.run_system_job': {'queue': 'jobs',
-                                                    'routing_key': 'jobs'},
-                  'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
-                                                              'routing_key': 'scheduler.job.launch'},
-                  'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
-                                                                'routing_key': 'scheduler.job.complete'},
-                  'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
-                                                            'routing_key': 'cluster.heartbeat'},
+                 'awx.main.tasks.run_project_update': {'queue': 'jobs',
+                                                       'routing_key': 'jobs'},
+                 'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
+                                                         'routing_key': 'jobs'},
+                 'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
+                                                       'routing_key': 'jobs'},
+                 'awx.main.tasks.run_system_job': {'queue': 'jobs',
+                                                   'routing_key': 'jobs'},
+                 'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
+                                                             'routing_key': 'scheduler.job.launch'},
+                 'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
+                                                               'routing_key': 'scheduler.job.complete'},
+                 'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
+                                                           'routing_key': 'cluster.heartbeat'},
 }
 
 CELERYBEAT_SCHEDULE = {
