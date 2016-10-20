@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q',
-    function ($rootScope, $location, $log, $state, $q) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n',
+    function ($rootScope, $location, $log, $state, $q, i18n) {
         var needsResubscribing = false,
         socketPromise = $q.defer();
         return {

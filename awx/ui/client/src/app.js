@@ -458,6 +458,7 @@ var tower = angular.module('Tower', [
         ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
         $filter, SocketService, I18NInit) {
 
+        I18NInit();
         $stateExtender.addState({
             name: 'dashboard',
             url: '/home',
@@ -495,7 +496,7 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/jobs.html',
             controller: JobsListController,
             ncyBreadcrumb: {
-                label: N("JOBS")
+                label: N_("JOBS")
             },
             params: {
                 search: {
@@ -520,7 +521,7 @@ var tower = angular.module('Tower', [
                 activityStreamTarget: 'project'
             },
             ncyBreadcrumb: {
-                label: N("PROJECTS")
+                label: N_("PROJECTS")
             },
             socket: {
                 "groups":{
@@ -536,7 +537,7 @@ var tower = angular.module('Tower', [
             controller: ProjectsAdd,
             ncyBreadcrumb: {
                 parent: "projects",
-                label: N("CREATE PROJECT")
+                label: N_("CREATE PROJECT")
             },
             socket: {
                 "groups":{
@@ -577,8 +578,6 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/projects.html',
             controller: OrganizationsAdd
         });
-
-        I18NInit();
 
         $rootScope.addPermission = function(scope) {
             $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
