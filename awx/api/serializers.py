@@ -2417,7 +2417,9 @@ class JobEventSerializer(BaseSerializer):
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'host', 'host_name', 'parent', 'play', 'task', 'role')
+                  'changed', 'uuid', 'host', 'host_name', 'parent', 'playbook',
+                  'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
+                  'verbosity')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
@@ -2453,16 +2455,8 @@ class AdHocCommandEventSerializer(BaseSerializer):
         model = AdHocCommandEvent
         fields = ('*', '-name', '-description', 'ad_hoc_command', 'event',
                   'counter', 'event_display', 'event_data', 'failed',
-                  'changed', 'host', 'host_name')
-
-    def to_internal_value(self, data):
-        ret = super(AdHocCommandEventSerializer, self).to_internal_value(data)
-        # AdHocCommandAdHocCommandEventsList should be the only view creating
-        # AdHocCommandEvent instances, so keep the ad_hoc_command it sets, even
-        # though ad_hoc_command is a read-only field.
-        if 'ad_hoc_command' in data:
-            ret['ad_hoc_command'] = data['ad_hoc_command']
-        return ret
+                  'changed', 'uuid', 'host', 'host_name', 'stdout',
+                  'start_line', 'end_line', 'verbosity')
 
     def get_related(self, obj):
         res = super(AdHocCommandEventSerializer, self).get_related(obj)

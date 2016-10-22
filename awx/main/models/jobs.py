@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import hmac
 import json
 import yaml
@@ -11,8 +12,12 @@ from urlparse import urljoin
 
 # Django
 from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.db.models import Q, Count
+from django.utils.dateparse import parse_datetime
+from django.utils.encoding import force_text
+from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -940,7 +945,7 @@ class JobEvent(CreatedModifiedModel):
     #     - playbook_on_task_start (once for each task within a play)
     #       - runner_on_failed
     #       - runner_on_ok
-    #       - runner_on_error
+    #       - runner_on_error (not used for v2)
     #       - runner_on_skipped
     #       - runner_on_unreachable
     #       - runner_on_no_hosts
@@ -962,14 +967,14 @@ class JobEvent(CreatedModifiedModel):
         (3, 'runner_on_async_poll', _('Host Polling'), False),
         (3, 'runner_on_async_ok', _('Host Async OK'), False),
         (3, 'runner_on_async_failed', _('Host Async Failure'), True),
-        # AWX does not yet support --diff mode
+        # Tower does not yet support --diff mode
         (3, 'runner_on_file_diff', _('File Difference'), False),
         (0, 'playbook_on_start', _('Playbook Started'), False),
         (2, 'playbook_on_notify', _('Running Handlers'), False),
         (2, 'playbook_on_no_hosts_matched', _('No Hosts Matched'), False),
         (2, 'playbook_on_no_hosts_remaining', _('No Hosts Remaining'), False),
         (2, 'playbook_on_task_start', _('Task Started'), False),
-        # AWX does not yet support vars_prompt (and will probably hang :)
+        # Tower does not yet support vars_prompt (and will probably hang :)
         (1, 'playbook_on_vars_prompt', _('Variables Prompted'), False),
         (2, 'playbook_on_setup', _('Gathering Facts'), False),
         # callback will not record this
@@ -978,6 +983,15 @@ class JobEvent(CreatedModifiedModel):
         (2, 'playbook_on_not_import_for_host', _('internal: on Not Import for Host'), False),
         (1, 'playbook_on_play_start', _('Play Started'), False),
         (1, 'playbook_on_stats', _('Playbook Complete'), False),
+
+        # Additional event types for captured stdout not directly related to
+        # playbook or runner events.
+        (0, 'debug', _('Debug'), False),
+        (0, 'verbose', _('Verbose'), False),
+        (0, 'deprecated', _('Deprecated'), False),
+        (0, 'warning', _('Warning'), False),
+        (0, 'system_warning', _('System Warning'), False),
+        (0, 'error', _('Error'), True),
     ]
     FAILED_EVENTS = [x[1] for x in EVENT_TYPES if x[3]]
     EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
@@ -986,6 +1000,13 @@ class JobEvent(CreatedModifiedModel):
     class Meta:
         app_label = 'main'
         ordering = ('pk',)
+        index_together = [
+            ('job', 'event'),
+            ('job', 'uuid'),
+            ('job', 'start_line'),
+            ('job', 'end_line'),
+            ('job', 'parent'),
+        ]
 
     job = models.ForeignKey(
         'Job',
@@ -1032,12 +1053,17 @@ class JobEvent(CreatedModifiedModel):
         related_name='job_events',
         editable=False,
     )
+    playbook = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
     play = models.CharField(
         max_length=1024,
         default='',
         editable=False,
     )
-    role = models.CharField( # FIXME: Determine from callback or task name.
+    role = models.CharField(
         max_length=1024,
         default='',
         editable=False,
@@ -1057,8 +1083,24 @@ class JobEvent(CreatedModifiedModel):
     )
     counter = models.PositiveIntegerField(
         default=0,
+        editable=False,
     )
-
+    stdout = models.TextField(
+        default='',
+        editable=False,
+    )
+    verbosity = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    start_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    end_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
 
     def get_absolute_url(self):
         return reverse('api:job_event_detail', args=(self.pk,))
@@ -1119,7 +1161,8 @@ class JobEvent(CreatedModifiedModel):
                 pass
         return msg
 
-    def _find_parent(self):
+    def _find_parent_id(self):
+        # Find the (most likely) parent event for this event.
         parent_events = set()
         if self.event in ('playbook_on_play_start', 'playbook_on_stats',
                           'playbook_on_vars_prompt'):
@@ -1135,101 +1178,55 @@ class JobEvent(CreatedModifiedModel):
             parent_events.add('playbook_on_setup')
             parent_events.add('playbook_on_task_start')
         if parent_events:
-            try:
-                qs = JobEvent.objects.filter(job_id=self.job_id)
-                if self.pk:
-                    qs = qs.filter(pk__lt=self.pk, event__in=parent_events)
-                else:
-                    qs = qs.filter(event__in=parent_events)
-                return qs.order_by('-pk')[0]
-            except IndexError:
-                pass
-        return None
+            qs = JobEvent.objects.filter(job_id=self.job_id, event__in=parent_events).order_by('-pk')
+            if self.pk:
+                qs = qs.filter(pk__lt=self.pk)
+            return qs.only('id').values_list('id', flat=True).first()
 
-    def save(self, *args, **kwargs):
-        from awx.main.models.inventory import Host
-        # If update_fields has been specified, add our field names to it,
-        # if it hasn't been specified, then we're just doing a normal save.
-        update_fields = kwargs.get('update_fields', [])
-        # Skip normal checks on save if we're only updating failed/changed
-        # flags triggered from a child event.
-        from_parent_update = kwargs.pop('from_parent_update', False)
-        if not from_parent_update:
-            res = self.event_data.get('res', None)
-            # Workaround for Ansible 1.2, where the runner_on_async_ok event is
-            # created even when the async task failed. Change the event to be
-            # correct.
-            if self.event == 'runner_on_async_ok':
-                try:
-                    if res.get('failed', False) or res.get('rc', 0) != 0:
-                        self.event = 'runner_on_async_failed'
-                except (AttributeError, TypeError):
-                    pass
-            if self.event in self.FAILED_EVENTS:
-                if not self.event_data.get('ignore_errors', False):
-                    self.failed = True
-                    if 'failed' not in update_fields:
-                        update_fields.append('failed')
-            if isinstance(res, dict) and res.get('changed', False):
+    def _update_from_event_data(self):
+        # Update job event model fields from event data.
+        updated_fields = set()
+        job = self.job
+        verbosity = job.verbosity
+        event_data = self.event_data
+        res = event_data.get('res', None)
+        if self.event in self.FAILED_EVENTS and not event_data.get('ignore_errors', False):
+            self.failed = True
+            updated_fields.add('failed')
+        if isinstance(res, dict):
+            if res.get('changed', False):
                 self.changed = True
-                if 'changed' not in update_fields:
-                    update_fields.append('changed')
-            if self.event == 'playbook_on_stats':
-                try:
-                    failures_dict = self.event_data.get('failures', {})
-                    dark_dict = self.event_data.get('dark', {})
-                    self.failed = bool(sum(failures_dict.values()) +
-                                       sum(dark_dict.values()))
-                    if 'failed' not in update_fields:
-                        update_fields.append('failed')
-                    changed_dict = self.event_data.get('changed', {})
-                    self.changed = bool(sum(changed_dict.values()))
-                    if 'changed' not in update_fields:
-                        update_fields.append('changed')
-                except (AttributeError, TypeError):
-                    pass
-            self.play = self.event_data.get('play', '').strip()
-            if 'play' not in update_fields:
-                update_fields.append('play')
-            self.task = self.event_data.get('task', '').strip()
-            if 'task' not in update_fields:
-                update_fields.append('task')
-            self.role = self.event_data.get('role', '').strip()
-            if 'role' not in update_fields:
-                update_fields.append('role')
-            self.host_name = self.event_data.get('host', '').strip()
-            if 'host_name' not in update_fields:
-                update_fields.append('host_name')
-        # Only update job event hierarchy and related models during post
-        # processing (after running job).
-        post_process = kwargs.pop('post_process', False)
-        if post_process:
+                updated_fields.add('changed')
+            # If we're not in verbose mode, wipe out any module arguments.
+            invocation = res.get('invocation', None)
+            if isinstance(invocation, dict) and verbosity == 0 and 'module_args' in invocation:
+                event_data['res']['invocation']['module_args'] = ''
+                self.event_data = event_data
+                update_fields.add('event_data')
+        if self.event == 'playbook_on_stats':
             try:
-                if not self.host_id and self.host_name:
-                    host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
-                    host_id = host_qs.only('id').values_list('id', flat=True)
-                    if host_id.exists():
-                        self.host_id = host_id[0]
-                        if 'host_id' not in update_fields:
-                            update_fields.append('host_id')
-            except (IndexError, AttributeError):
+                failures_dict = event_data.get('failures', {})
+                dark_dict = event_data.get('dark', {})
+                self.failed = bool(sum(failures_dict.values()) +
+                                   sum(dark_dict.values()))
+                updated_fields.add('failed')
+                changed_dict = event_data.get('changed', {})
+                self.changed = bool(sum(changed_dict.values()))
+                updated_fields.add('changed')
+            except (AttributeError, TypeError):
                 pass
-            if self.parent is None:
-                self.parent = self._find_parent()
-            if 'parent' not in update_fields:
-                update_fields.append('parent')
-        super(JobEvent, self).save(*args, **kwargs)
-        if post_process and not from_parent_update:
-            self.update_parent_failed_and_changed()
-            # FIXME: The update_hosts() call (and its queries) are the current
-            # performance bottleneck....
-            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
-                self.update_hosts()
-            self.update_host_summary_from_stats()
+        for field in ('playbook', 'play', 'task', 'role', 'host'):
+            value = force_text(event_data.get(field, '')).strip()
+            if field == 'host':
+                field = 'host_name'
+            if value != getattr(self, field):
+                setattr(self, field, value)
+                updated_fields.add(field)
+        return updated_fields
 
-    def update_parent_failed_and_changed(self):
-        # Propagage failed and changed flags to parent events.
-        if self.parent:
+    def _update_parent_failed_and_changed(self):
+        # Propagate failed and changed flags to parent events.
+        if self.parent_id:
             parent = self.parent
             update_fields = []
             if self.failed and not parent.failed:
@@ -1240,9 +1237,10 @@ class JobEvent(CreatedModifiedModel):
                 update_fields.append('changed')
             if update_fields:
                 parent.save(update_fields=update_fields, from_parent_update=True)
-                parent.update_parent_failed_and_changed()
+                parent._update_parent_failed_and_changed()
 
-    def update_hosts(self, extra_host_pks=None):
+    def _update_hosts(self, extra_host_pks=None):
+        # Update job event hosts m2m from host_name, propagate to parent events.
         from awx.main.models.inventory import Host
         extra_host_pks = set(extra_host_pks or [])
         hostnames = set()
@@ -1256,16 +1254,14 @@ class JobEvent(CreatedModifiedModel):
                 pass
         qs = Host.objects.filter(inventory__jobs__id=self.job_id)
         qs = qs.filter(Q(name__in=hostnames) | Q(pk__in=extra_host_pks))
-        qs = qs.exclude(job_events__pk=self.id)
-        for host in qs.only('id'):
+        qs = qs.exclude(job_events__pk=self.id).only('id')
+        for host in qs:
             self.hosts.add(host)
-        if self.parent:
-            self.parent.update_hosts(self.hosts.only('id').values_list('id', flat=True))
+        if self.parent_id:
+            self.parent._update_hosts(qs.values_list('id', flat=True))
 
-    def update_host_summary_from_stats(self):
+    def _update_host_summary_from_stats(self):
         from awx.main.models.inventory import Host
-        if self.event != 'playbook_on_stats':
-            return
         hostnames = set()
         try:
             for v in self.event_data.values():
@@ -1276,7 +1272,6 @@ class JobEvent(CreatedModifiedModel):
             qs = Host.objects.filter(inventory__jobs__id=self.job_id,
                                      name__in=hostnames)
             job = self.job
-            #for host in qs.only('id', 'name'):
             for host in hostnames:
                 host_stats = {}
                 for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
@@ -1299,6 +1294,112 @@ class JobEvent(CreatedModifiedModel):
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
             emit_channel_notification('jobs-summary', dict(group_name='jobs', unified_job_id=job.id))
+
+    def save(self, *args, **kwargs):
+        from awx.main.models.inventory import Host
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
+        # Update model fields and related objects unless we're only updating
+        # failed/changed flags triggered from a child event.
+        from_parent_update = kwargs.pop('from_parent_update', False)
+        if not from_parent_update:
+            # Update model fields from event data.
+            updated_fields = self._update_from_event_data()
+            for field in updated_fields:
+                if field not in update_fields:
+                    update_fields.append(field)
+            # Update host related field from host_name.
+            if not self.host_id and self.host_name:
+                host_qs = Host.objects.filter(inventory__jobs__id=self.job_id, name=self.host_name)
+                host_id = host_qs.only('id').values_list('id', flat=True).first()
+                if host_id != self.host_id:
+                    self.host_id = host_id
+                    if 'host_id' not in update_fields:
+                        update_fields.append('host_id')
+            # Update parent related field if not set.
+            if self.parent_id is None:
+                self.parent_id = self._find_parent_id()
+                if self.parent_id and 'parent_id' not in update_fields:
+                    update_fields.append('parent_id')
+        super(JobEvent, self).save(*args, **kwargs)
+        # Update related objects after this event is saved.
+        if not from_parent_update:
+            if self.parent_id:
+                self._update_parent_failed_and_changed()
+            # FIXME: The update_hosts() call (and its queries) are the current
+            # performance bottleneck....
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self._update_hosts()
+            if self.event == 'playbook_on_stats':
+                self._update_host_summary_from_stats()
+
+    @classmethod
+    def create_from_data(self, **kwargs):
+        # Must have a job_id specified.
+        if not kwargs.get('job_id', None):
+            return
+
+        # Convert the datetime for the job event's creation appropriately,
+        # and include a time zone for it.
+        #
+        # In the event of any issue, throw it out, and Django will just save
+        # the current time.
+        try:
+            if not isinstance(kwargs['created'], datetime.datetime):
+                kwargs['created'] = parse_datetime(kwargs['created'])
+            if not kwargs['created'].tzinfo:
+                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+        except (KeyError, ValueError):
+            kwargs.pop('created', None)
+
+        # Save UUID and parent UUID for determining parent-child relationship.
+        job_event_uuid = kwargs.get('uuid', None)
+        parent_event_uuid = kwargs.get('parent_uuid', None)
+        artifact_data = kwargs.get('artifact_data', None)
+
+        # Sanity check: Don't honor keys that we don't recognize.
+        valid_keys = {'job_id', 'event', 'event_data', 'playbook', 'play',
+                      'role', 'task', 'created', 'counter', 'uuid', 'stdout',
+                      'start_line', 'end_line', 'verbosity'}
+        for key in kwargs.keys():
+            if key not in valid_keys:
+                kwargs.pop(key)
+
+        # Try to find a parent event based on UUID.
+        if parent_event_uuid:
+            cache_key = '{}_{}'.format(kwargs['job_id'], parent_event_uuid)
+            parent_id = cache.get(cache_key)
+            if parent_id is None:
+                parent_id = JobEvent.objects.filter(job_id=kwargs['job_id'], uuid=parent_event_uuid).only('id').values_list('id', flat=True).first()
+                if parent_id:
+                    print("Settings cache: {} with value {}".format(cache_key, parent_id))
+                    cache.set(cache_key, parent_id, 300)
+            if parent_id:
+                kwargs['parent_id'] = parent_id
+
+        job_event = JobEvent.objects.create(**kwargs)
+
+        # Cache this job event ID vs. UUID for future parent lookups.
+        if job_event_uuid:
+            cache_key = '{}_{}'.format(kwargs['job_id'], job_event_uuid)
+            cache.set(cache_key, job_event.id, 300)
+
+        # Save artifact data to parent job (if provided).
+        if artifact_data:
+            artifact_dict = json.loads(artifact_data)
+            event_data = kwargs.get('event_data', None)
+            if event_data and isinstance(event_data, dict):
+                res = event_data.get('res', None)
+                if res and isinstance(res, dict):
+                    if res.get('_ansible_no_log', False):
+                        artifact_dict['_ansible_no_log'] = True
+                parent_job = Job.objects.filter(pk=kwargs['job_id']).first()
+                if parent_job and parent_job.artifacts != artifact_dict:
+                    parent_job.artifacts = artifact_dict
+                    parent_job.save(update_fields=['artifacts'])
+
+        return job_event
 
     @classmethod
     def get_startevent_queryset(cls, parent_task, starting_events, ordering=None):

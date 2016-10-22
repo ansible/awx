@@ -4,6 +4,7 @@
 # Python
 import base64
 import hashlib
+import json
 import logging
 import os
 import re
@@ -36,7 +37,7 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'get_type_for_model', 'get_model_for_type', 'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
-           'get_current_apps', 'set_current_apps']
+           'get_current_apps', 'set_current_apps', 'OutputEventFilter']
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -640,3 +641,71 @@ def set_current_apps(apps):
 def get_current_apps():
     global current_apps
     return current_apps
+
+
+class OutputEventFilter(object):
+    '''
+    File-like object that looks for encoded job events in stdout data.
+    '''
+
+    EVENT_DATA_RE = re.compile(r'\x1b\[K((?:[A-Za-z0-9+/=]+\x1b\[\d+D)+)\x1b\[K')
+
+    def __init__(self, fileobj=None, event_callback=None):
+        self._fileobj = fileobj
+        self._event_callback = event_callback
+        self._counter = 1
+        self._start_line = 0
+        self._buffer = ''
+        self._current_event_data = None
+
+    def __getattr__(self, attr):
+        return getattr(self._fileobj, attr)
+
+    def write(self, data):
+        if self._fileobj:
+            self._fileobj.write(data)
+        self._buffer += data
+        while True:
+            match = self.EVENT_DATA_RE.search(self._buffer)
+            if not match:
+                break
+            try:
+                base64_data = re.sub(r'\x1b\[\d+D', '', match.group(1))
+                event_data = json.loads(base64.b64decode(base64_data))
+            except ValueError:
+                event_data = {}
+            self._emit_event(self._buffer[:match.start()], event_data)
+            self._buffer = self._buffer[match.end():]
+
+    def close(self):
+        if self._fileobj:
+            self._fileobj.close()
+        if self._buffer:
+            self._emit_event(self._buffer)
+            self._buffer = ''
+
+    def _emit_event(self, buffered_stdout, next_event_data=None):
+        if self._current_event_data:
+            event_data = self._current_event_data
+            stdout_chunks = [buffered_stdout]
+        elif buffered_stdout:
+            event_data = dict(event='verbose')
+            stdout_chunks = buffered_stdout.splitlines(True)
+        else:
+            stdout_chunks = []
+
+        for stdout_chunk in stdout_chunks:
+            event_data['counter'] = self._counter
+            self._counter += 1
+            event_data['stdout'] = stdout_chunk
+            n_lines = stdout_chunk.count('\n')
+            event_data['start_line'] = self._start_line
+            event_data['end_line'] = self._start_line + n_lines
+            self._start_line += n_lines
+            if self._event_callback:
+                self._event_callback(event_data)
+
+        if next_event_data.get('uuid', None):
+            self._current_event_data = next_event_data
+        else:
+            self._current_event_data = None

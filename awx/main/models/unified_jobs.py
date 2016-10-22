@@ -696,8 +696,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                     return StringIO(msg['missing' if self.finished else 'pending'])
 
     def _escape_ascii(self, content):
-        ansi_escape = re.compile(r'\x1b[^m]*m')
-        return ansi_escape.sub('', content)
+        # Remove ANSI escape sequences used to embed event data.
+        content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
+        # Remove ANSI color escape sequences.
+        content = re.sub(r'\x1b[^m]*m', '', content)
+        return content
 
     def _result_stdout_raw(self, redact_sensitive=False, escape_ascii=False):
         content = self.result_stdout_raw_handle().read()

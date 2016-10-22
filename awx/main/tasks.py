@@ -49,7 +49,8 @@ from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+                            check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
+                            OutputEventFilter)
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -397,6 +398,8 @@ class BaseTask(Task):
                 if os.path.isdir(os.path.join(venv_libdir, python_ver)):
                     env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
                     break
+        # Add awx/lib to PYTHONPATH.
+        env['PYTHONPATH'] = ':'.join(filter(None, [self.get_path_to('..', 'lib'), env.get('PYTHONPATH', '')]))
         return env
 
     def add_tower_venv(self, env):
@@ -493,6 +496,17 @@ class BaseTask(Task):
         from build_passwords).
         '''
         return OrderedDict()
+
+    def get_stdout_handle(self, instance):
+        '''
+        Return an open file object for capturing stdout.
+        '''
+        if not os.path.exists(settings.JOBOUTPUT_ROOT):
+            os.makedirs(settings.JOBOUTPUT_ROOT)
+        stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (instance.pk, str(uuid.uuid1())))
+        stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
+        assert stdout_handle.name == stdout_filename
+        return stdout_handle
 
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
                     output_replacements=None, extra_update_fields=None):
@@ -643,10 +657,7 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
-            if not os.path.exists(settings.JOBOUTPUT_ROOT):
-                os.makedirs(settings.JOBOUTPUT_ROOT)
-            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
-            stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
+            stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
                     raise RuntimeError('proot is not installed')
@@ -660,7 +671,7 @@ class BaseTask(Task):
                 args = self.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
                 safe_args = self.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
+                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_handle.name)
             status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle,
                                           extra_update_fields=extra_update_fields)
         except Exception:
@@ -779,6 +790,7 @@ class RunJob(BaseTask):
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
@@ -974,6 +986,16 @@ class RunJob(BaseTask):
         d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
         return d
 
+    def get_stdout_handle(self, instance):
+        '''
+        Wrap stdout file object to capture events.
+        '''
+        stdout_handle = super(RunJob, self).get_stdout_handle(instance)
+        def job_event_callback(event_data):
+            event_data.setdefault('job_id', instance.id)
+            JobEvent.create_from_data(**event_data)
+        return OutputEventFilter(stdout_handle, job_event_callback)
+
     def get_ssh_key_path(self, instance, **kwargs):
         '''
         If using an SSH key, return the path for use by ssh-agent.
@@ -1019,11 +1041,6 @@ class RunJob(BaseTask):
             pass
         else:
             update_inventory_computed_fields.delay(inventory.id, True)
-        # Update job event fields after job has completed (only when using REST
-        # API callback).
-        if not getattr(settings, 'CALLBACK_CONSUMER_PORT', None) and not getattr(settings, 'CALLBACK_QUEUE', None):
-            for job_event in job.job_events.order_by('pk'):
-                job_event.save(post_process=True)
 
 
 class RunProjectUpdate(BaseTask):
@@ -1597,6 +1614,7 @@ class RunAdHocCommand(BaseTask):
         env['INVENTORY_HOSTVARS'] = str(True)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
@@ -1692,6 +1710,16 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d
+
+    def get_stdout_handle(self, instance):
+        '''
+        Wrap stdout file object to capture events.
+        '''
+        stdout_handle = super(RunAdHocCommand, self).get_stdout_handle(instance)
+        def ad_hoc_command_event_callback(event_data):
+            event_data.setdefault('ad_hoc_command_id', instance.id)
+            AdHocCommandEvent.create_from_data(**event_data)
+        return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
