@@ -7,7 +7,7 @@ import sys
 
 def argv_ready(argv):
     if argv and os.path.basename(argv[0]) in {'ansible', 'ansible-playbook'}:
-        import tower_display_callback
+        import tower_display_callback  # noqa
 
 
 class argv_placeholder(object):

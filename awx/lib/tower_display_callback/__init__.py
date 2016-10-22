@@ -18,8 +18,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 # Tower Display Callback
-from . import cleanup  # to register control persistent cleanup.
-from . import display  # to wrap ansible.display.Display methods.
+from . import cleanup  # noqa (registers control persistent cleanup)
+from . import display  # noqa (wraps ansible.display.Display methods)
 from .module import TowerDefaultCallbackModule, TowerMinimalCallbackModule
 
 __all__ = ['TowerDefaultCallbackModule', 'TowerMinimalCallbackModule']

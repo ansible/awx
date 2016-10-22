@@ -3,7 +3,6 @@
 
 # Python
 import logging
-import json
 
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin

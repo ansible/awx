@@ -10,9 +10,8 @@ import time
 import socket
 import sys
 import logging
-from base64 import b64encode, b64decode
+from base64 import b64encode
 from collections import OrderedDict
-from HTMLParser import HTMLParser
 
 # Django
 from django.conf import settings

@@ -20,7 +20,6 @@ from __future__ import (absolute_import, division, print_function)
 # Python
 import contextlib
 import copy
-import os
 import re
 import sys
 import uuid
@@ -209,8 +208,10 @@ class BaseCallbackModule(CallbackBase):
             default=default,
         )
         with self.capture_event_data('playbook_on_vars_prompt', **event_data):
-            super(BaseCallbackModule, self).v2_playbook_on_vars_prompt(varname,
-                private, prompt, encrypt, confirm, salt_size, salt, default)
+            super(BaseCallbackModule, self).v2_playbook_on_vars_prompt(
+                varname, private, prompt, encrypt, confirm, salt_size, salt,
+                default,
+            )
 
     def v2_playbook_on_include(self, included_file):
         event_data = dict(

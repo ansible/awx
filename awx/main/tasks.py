@@ -991,9 +991,11 @@ class RunJob(BaseTask):
         Wrap stdout file object to capture events.
         '''
         stdout_handle = super(RunJob, self).get_stdout_handle(instance)
+
         def job_event_callback(event_data):
             event_data.setdefault('job_id', instance.id)
             JobEvent.create_from_data(**event_data)
+
         return OutputEventFilter(stdout_handle, job_event_callback)
 
     def get_ssh_key_path(self, instance, **kwargs):
@@ -1716,9 +1718,11 @@ class RunAdHocCommand(BaseTask):
         Wrap stdout file object to capture events.
         '''
         stdout_handle = super(RunAdHocCommand, self).get_stdout_handle(instance)
+
         def ad_hoc_command_event_callback(event_data):
             event_data.setdefault('ad_hoc_command_id', instance.id)
             AdHocCommandEvent.create_from_data(**event_data)
+
         return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
 
     def get_ssh_key_path(self, instance, **kwargs):

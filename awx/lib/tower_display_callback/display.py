@@ -18,10 +18,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 # Python
-import cgi
-import contextlib
 import functools
-import json
 import sys
 import uuid
 
@@ -36,6 +33,7 @@ __all__ = []
 
 def with_context(**context):
     global event_context
+
     def wrap(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
@@ -57,6 +55,7 @@ for attr in dir(Display):
 
 def with_verbosity(f):
     global event_context
+
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         host = args[2] if len(args) >= 3 else kwargs.get('host', None)
@@ -72,6 +71,7 @@ Display.verbose = with_verbosity(Display.verbose)
 
 
 def display_with_context(f):
+
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         log_only = args[5] if len(args) >= 6 else kwargs.get('log_only', False)
