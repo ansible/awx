@@ -7,6 +7,9 @@ import os
 import re
 import urlparse
 
+# JSONField
+from jsonfield import JSONField
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -227,6 +230,23 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         blank=True,
     )
 
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The last revision fetched by a project update'),
+    )
+
+    playbook_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Playbook Files'),
+        help_text=_('List of playbooks found in the project'),
+    )
+
     admin_role = ImplicitRoleField(parent_role=[
         'organization.admin_role',
         'singleton:' + ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -298,10 +318,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             # inherit the child job status on failure
             elif self.last_job_failed:
                 return self.last_job.status
-            # Even on a successful child run, a missing project path overides
-            # the successful status
-            elif not self.get_project_path():
-                return 'missing'
             # Return the successful status
             else:
                 return self.last_job.status
@@ -391,6 +407,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         related_name='project_updates',
         on_delete=models.CASCADE,
         editable=False,
+    )
+
+    job_type = models.CharField(
+        max_length=64,
+        choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
+        default='check',
     )
 
     @classmethod
