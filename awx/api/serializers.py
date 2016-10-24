@@ -961,11 +961,14 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
-    playbooks = serializers.ReadOnlyField(help_text='Array of playbooks available within this project.')
+    playbooks = serializers.SerializerMethodField(help_text='Array of playbooks available within this project.')
 
     class Meta:
         model = Project
         fields = ('playbooks',)
+
+    def get_playbooks(self, obj):
+        return obj.playbook_files
 
     @property
     def data(self):

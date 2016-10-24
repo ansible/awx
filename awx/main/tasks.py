@@ -160,12 +160,6 @@ def tower_periodic_scheduler(self):
     logger.debug("Last run was: %s", last_run)
     write_last_run(run_now)
 
-    # Sanity check: If this is a secondary machine, there is nothing
-    # on the schedule.
-    # TODO: Fix for clustering/ha
-    if Instance.objects.my_role() == 'secondary':
-        return
-
     old_schedules = Schedule.objects.enabled().before(last_run)
     for schedule in old_schedules:
         schedule.save()
@@ -997,7 +991,7 @@ class RunJob(BaseTask):
         return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
     def pre_run_hook(self, job, **kwargs):
-        if job.project.scm_type:
+        if job.project and job.project.scm_type:
             local_project_sync = job.project.create_project_update()
             local_project_sync.job_type = 'run'
             local_project_sync.save()
@@ -1205,12 +1199,13 @@ class RunProjectUpdate(BaseTask):
         return kwargs.get('private_data_files', {}).get('scm_credential', '')
 
     def post_run_hook(self, instance, status, **kwargs):
-        if instance.job_type == 'check':
+        if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
             fd = open('/tmp/_{}_syncrev'.format(instance.id), 'r')
             lines = fd.readlines()
             if lines:
                 p.scm_revision = lines[0].strip()
+                p.playbook_files = p.playbooks
                 p.save()
             else:
                 logger.error("Could not find scm revision in check")

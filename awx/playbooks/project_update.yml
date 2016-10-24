@@ -29,8 +29,8 @@
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
         accept_hostkey: "{{scm_accept_hostkey}}"
-        clone: "{{ scm_full_checkout }}"
-        update: "{{ scm_full_checkout }}"
+        #clone: "{{ scm_full_checkout }}"
+        #update: "{{ scm_full_checkout }}"
       when: scm_type == 'git' and scm_accept_hostkey is defined
       register: scm_result
 
@@ -45,8 +45,8 @@
         repo: "{{scm_url|quote}}"
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
-        clone: "{{ scm_full_checkout }}"
-        update: "{{ scm_full_checkout }}"        
+        #clone: "{{ scm_full_checkout }}"
+        #update: "{{ scm_full_checkout }}"
       when: scm_type == 'git' and scm_accept_hostkey is not defined
       register: scm_result
 

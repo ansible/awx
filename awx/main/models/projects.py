@@ -7,6 +7,9 @@ import os
 import re
 import urlparse
 
+# JSONField
+from jsonfield import JSONField
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -234,6 +237,14 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         editable=False,
         verbose_name=_('SCM Revision'),
         help_text=_('The last revision fetched by a project update'),
+    )
+
+    playbook_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Playbook Files'),
+        help_text=_('List of playbooks found in the project'),
     )
 
     admin_role = ImplicitRoleField(parent_role=[
