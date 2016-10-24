@@ -318,10 +318,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             # inherit the child job status on failure
             elif self.last_job_failed:
                 return self.last_job.status
-            # Even on a successful child run, a missing project path overides
-            # the successful status
-            elif not self.get_project_path():
-                return 'missing'
             # Return the successful status
             else:
                 return self.last_job.status
