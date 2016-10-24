@@ -954,15 +954,6 @@ class ProjectList(ListCreateAPIView):
         )
         return projects_qs
 
-    def get(self, request, *args, **kwargs):
-        # Not optimal, but make sure the project status and last_updated fields
-        # are up to date here...
-        projects_qs = Project.objects
-        projects_qs = projects_qs.select_related('current_job', 'last_job')
-        for project in projects_qs:
-            project._set_status_and_last_job_run()
-        return super(ProjectList, self).get(request, *args, **kwargs)
-
 class ProjectDetail(RetrieveUpdateDestroyAPIView):
 
     model = Project
