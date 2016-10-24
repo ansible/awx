@@ -24,6 +24,7 @@ from awx.main.scheduler.partial import (
     InventoryUpdateDict,
     InventoryUpdateLatestDict,
     InventorySourceDict,
+    SystemJobDict,
 )
 
 # Celery
@@ -37,16 +38,16 @@ class Scheduler():
         self.capacity_total = 200
         self.capacity_used = 0
 
-    def _get_tasks_with_status(self, status_list):
+    def get_tasks(self):
+        status_list = ('pending', 'waiting', 'running')
 
-        graph_jobs = JobDict.filter_partial(status=status_list)
+        jobs = JobDict.filter_partial(status=status_list)
         '''
         graph_ad_hoc_commands = [ahc for ahc in AdHocCommand.objects.filter(**kv)]
-        graph_inventory_updates = [iu for iu in
-                                   InventoryUpdate.objects.filter(**kv)]
         '''
-        graph_inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
-        graph_project_updates = ProjectUpdateDict.filter_partial(status=status_list)
+        inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
+        project_updates = ProjectUpdateDict.filter_partial(status=status_list)
+        system_jobs = SystemJobDict.filter_partial(status=status_list)
         '''
         graph_system_jobs = [sj for sj in
                              SystemJob.objects.filter(**kv)]
@@ -57,13 +58,9 @@ class Scheduler():
                              graph_workflow_jobs,
                              key=lambda task: task.created)
         '''
-        all_actions = sorted(graph_jobs + graph_project_updates + graph_inventory_updates,
+        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs,
                              key=lambda task: task['created'])
         return all_actions
-
-    def get_tasks(self):
-        RELEVANT_JOBS = ('pending', 'waiting', 'running')
-        return self._get_tasks_with_status(RELEVANT_JOBS)
 
     # TODO: Consider a database query for this logic
     def get_latest_project_update_tasks(self, all_sorted_tasks):
@@ -239,9 +236,7 @@ class Scheduler():
         map(lambda task: self.graph.add_latest_inventory_update(task), latest_inventory_updates)
 
     def process_inventory_sources(self, inventory_id_sources):
-        #map(lambda inventory_id, inventory_sources: self.graph.add_inventory_sources(inventory_id, inventory_sources), inventory_id_sources)
-        for inventory_id, inventory_sources in inventory_id_sources:
-            self.graph.add_inventory_sources(inventory_id, inventory_sources)
+        map(lambda inventory_id, inventory_sources: self.graph.add_inventory_sources(inventory_id, inventory_sources), inventory_id_sources)
 
     def process_dependencies(self, dependent_task, dependency_tasks):
         for task in dependency_tasks:

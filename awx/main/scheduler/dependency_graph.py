@@ -1,11 +1,17 @@
 from datetime import timedelta
 from django.utils.timezone import now as tz_now
 
-from awx.main.scheduler.partial import JobDict, ProjectUpdateDict, InventoryUpdateDict
+from awx.main.scheduler.partial import (
+    JobDict,
+    ProjectUpdateDict,
+    InventoryUpdateDict,
+    SystemJobDict,
+)
 class DependencyGraph(object):
     PROJECT_UPDATES = 'project_updates'
     INVENTORY_UPDATES = 'inventory_updates'
     JOB_TEMPLATE_JOBS = 'job_template_jobs'
+    SYSTEM_JOB = 'system_job'
     INVENTORY_SOURCE_UPDATES = 'inventory_source_updates'
 
     LATEST_PROJECT_UPDATES = 'latest_project_updates'
@@ -23,6 +29,8 @@ class DependencyGraph(object):
         self.data[self.JOB_TEMPLATE_JOBS] = {}
         # inventory_source_id -> True / False
         self.data[self.INVENTORY_SOURCE_UPDATES] = {}
+        # True / False
+        self.data[self.SYSTEM_JOB] = True
 
         # project_id -> latest ProjectUpdateLatestDict
         self.data[self.LATEST_PROJECT_UPDATES] = {}
@@ -112,6 +120,9 @@ class DependencyGraph(object):
         
         return False
 
+    def mark_system_job(self):
+        self.data[self.SYSTEM_JOB] = False
+
     def mark_project_update(self, job):
         self.data[self.PROJECT_UPDATES][job['project_id']] = False
 
@@ -141,6 +152,9 @@ class DependencyGraph(object):
                 return True
         return False
 
+    def can_system_job_run(self):
+        return self.data[self.SYSTEM_JOB]
+
     def is_job_blocked(self, job):
         if type(job) is ProjectUpdateDict:
             return not self.can_project_update_run(job)
@@ -148,6 +162,8 @@ class DependencyGraph(object):
             return not self.can_inventory_update_run(job['inventory_source_id'])
         elif type(job) is JobDict:
             return not self.can_job_run(job)
+        elif type(job) is SystemJobDict:
+            return not self.can_system_job_run()
 
     def add_job(self, job):
         if type(job) is ProjectUpdateDict:
@@ -157,8 +173,9 @@ class DependencyGraph(object):
             self.mark_inventory_source_update(job['inventory_source_id'])
         elif type(job) is JobDict:
             self.mark_job_template_job(job)
+        elif type(job) is SystemJobDict:
+            self.mark_system_job()
 
     def add_jobs(self, jobs):
-        for j in jobs:
-            self.add_job(j)
+        map(lambda j: self.add_job(j), jobs)
  

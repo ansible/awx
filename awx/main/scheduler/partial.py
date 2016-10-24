@@ -5,6 +5,7 @@ from awx.main.models import (
     ProjectUpdate,
     InventoryUpdate,
     InventorySource,
+    SystemJob,
 )
 
 class PartialModelDict(object):
@@ -171,3 +172,23 @@ class InventorySourceDict(PartialModelDict):
             'update_on_launch': True,
         }
         return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
+
+class SystemJobDict(PartialModelDict):
+    FIELDS = (
+        'id', 'created', 'status',
+    )
+    model = SystemJob
+
+    def get_job_type_str(self):
+        return 'system_job'
+
+    def task_impact(self):
+        return 20
+
+    @classmethod
+    def filter_partial(cls, status=[]):
+        kv = {
+            'status__in': status
+        }
+        return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
+
