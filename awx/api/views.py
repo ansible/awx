@@ -69,6 +69,8 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
+from awx.main.scheduler.dag_simple import SimpleDAG
+
 
 logger = logging.getLogger('awx.api.views')
 
@@ -2655,6 +2657,29 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         return getattr(parent, self.relationship).all()
+
+    def is_valid_relation(self, parent, sub):
+        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all()
+        graph = SimpleDAG()
+        for workflow_node in workflow_nodes:
+            graph.add_node(workflow_node)
+
+        find = False
+        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
+            for workflow_node in workflow_nodes:
+                related_nodes = getattr(workflow_node, node_type).all()
+                for related_node in related_nodes:
+                    graph.add_edge(workflow_node, related_node, node_type)
+                    if not find and parent == workflow_node and\
+                       sub == related_node and self.relationship == node_type:
+                        find = True
+        if not find:
+            graph.add_edge(parent, sub, self.relationship)
+
+        if graph.cycle_detected():
+            return {"Error": "cycle detected!"}
+
+        return None
 
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'

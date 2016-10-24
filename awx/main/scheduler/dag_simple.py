@@ -138,3 +138,6 @@ class SimpleDAG(object):
                 roots.append(n)
         return roots
 
+    # TODO
+    def cycle_detected(self):
+        return False
