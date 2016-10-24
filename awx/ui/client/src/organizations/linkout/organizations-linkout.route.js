@@ -23,10 +23,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "USERS"
         },
         resolve: {
@@ -45,10 +42,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "TEAMS"
         },
         resolve: {
@@ -67,10 +61,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "INVENTORIES"
         },
         resolve: {
@@ -89,10 +80,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "PROJECTS"
         },
         resolve: {
@@ -111,10 +99,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "JOB TEMPLATES"
         },
         resolve: {
@@ -133,10 +118,7 @@ export default [
             activityStreamTarget: 'organization'
         },
         ncyBreadcrumb: {
-            parent: function($scope) {
-                $scope.$parent.$emit("ReloadOrgListView");
-                return "organizations.edit";
-            },
+            parent: "organizations.edit",
             label: "ADMINS"
         },
         resolve: {

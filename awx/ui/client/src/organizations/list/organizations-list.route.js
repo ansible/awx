@@ -17,10 +17,7 @@ export default {
         activityStreamTarget: 'organization'
     },
     ncyBreadcrumb: {
-        parent: function($scope) {
-            $scope.$parent.$emit("ReloadOrgListView");
-            return "setup";
-        },
+        parent: "setup",
         label: "ORGANIZATIONS"
     }
 };
