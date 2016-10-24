@@ -776,7 +776,8 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
-        env['PROJECT_REVISION'] = job.project.scm_revision
+        if job.project:
+            env['PROJECT_REVISION'] = job.project.scm_revision
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
