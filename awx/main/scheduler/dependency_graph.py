@@ -59,7 +59,7 @@ class DependencyGraph(object):
             return True
 
         # TODO: Other finished, failed cases? i.e. error ?
-        if latest_project_update['status'] == 'failed':
+        if latest_project_update['status'] in ['failed', 'canceled']:
             return True
 
         '''
@@ -89,7 +89,7 @@ class DependencyGraph(object):
             return True
 
         # TODO: Other finished, failed cases? i.e. error ?
-        if latest_inventory_update['status'] == 'failed':
+        if latest_inventory_update['status'] in ['failed', 'canceled']:
             return True
 
         '''

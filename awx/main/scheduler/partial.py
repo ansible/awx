@@ -82,6 +82,14 @@ class ProjectUpdateDict(PartialModelDict):
     def task_impact(self):
         return 10
 
+    @classmethod
+    def filter_partial(cls, status=[]):
+        kv = {
+            'status__in': status,
+            'job_type': 'check',
+        }
+        return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
+
 class ProjectUpdateLatestDict(ProjectUpdateDict):
     FIELDS = (
         'id', 'status', 'project_id', 'created', 'finished', 
