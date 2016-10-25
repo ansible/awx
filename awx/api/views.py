@@ -2751,6 +2751,11 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
 
+    def update_raw_data(self, data):
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
+            data[fd] = None
+        return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
+
 # TODO:
 class WorkflowJobTemplateJobsList(SubListAPIView):
 
