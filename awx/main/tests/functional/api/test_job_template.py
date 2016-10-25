@@ -11,12 +11,7 @@ from awx.main.migrations import _save_password_keys as save_password_keys
 from django.core.urlresolvers import reverse
 from django.apps import apps
 
-@property
-def project_playbooks(self):
-    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
-
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 201),
@@ -38,11 +33,10 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         'project': project.id,
         'credential': machine_credential.id,
         'inventory': inventory.id,
-        'playbook': 'mocked.yml',
+        'playbook': 'helloworld.yml',
     }, alice, expect=expect)
 
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 200),
@@ -67,11 +61,10 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
         'project': objs.project.id,
         'credential': objs.credential.id,
         'inventory': objs.inventory.id,
-        'playbook': 'alt-mocked.yml',
+        'playbook': 'alt-helloworld.yml',
     }, alice, expect=expect)
 
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_edit_playbook(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     objs.job_template.admin_role.members.add(alice)
@@ -80,16 +73,15 @@ def test_edit_playbook(patch, job_template_factory, alice):
     objs.inventory.use_role.members.add(alice)
 
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'alt-mocked.yml',
+        'playbook': 'alt-helloworld.yml',
     }, alice, expect=200)
 
     objs.inventory.use_role.members.remove(alice)
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'mocked.yml',
+        'playbook': 'helloworld.yml',
     }, alice, expect=403)
 
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_edit_nonsenstive(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     jt = objs.job_template
@@ -121,10 +113,6 @@ def jt_copy_edit(job_template_factory, project):
         project=project)
     return objects.job_template
 
-@property
-def project_playbooks(self):
-    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
-
 @pytest.mark.django_db
 def test_job_template_role_user(post, organization_factory, job_template_factory):
     objects = organization_factory("org",
@@ -143,7 +131,6 @@ def test_job_template_role_user(post, organization_factory, job_template_factory
 
 
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
 
     # Grant random user JT admin access only
