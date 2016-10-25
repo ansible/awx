@@ -1,10 +1,8 @@
 import pytest
-import mock
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer, JobLaunchSerializer
 from awx.main.models.jobs import Job
-from awx.main.models.projects import ProjectOptions
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
