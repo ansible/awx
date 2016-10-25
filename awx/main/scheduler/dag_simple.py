@@ -138,6 +138,39 @@ class SimpleDAG(object):
                 roots.append(n)
         return roots
 
-    # TODO
+    def _find_cycle(self, node):
+        stack = [node]
+        node['metadata']['color'] = 'gray'
+
+        while len(stack) > 0:
+            if stack[-1]['metadata']['count'] == len(stack[-1]['metadata']['adj_list']):
+                stack[-1]['metadata']['color'] = 'black'
+                stack.pop()
+            else:
+                to_push = stack[-1]['metadata']['adj_list'][stack[-1]['metadata']['count']]
+                stack[-1]['metadata']['count'] += 1
+                if to_push['metadata']['color'] == 'gray':
+                    return True
+                elif to_push['metadata']['color'] == 'white':
+                    to_push['metadata']['color'] = 'gray'
+                    stack.append(to_push)
+
+        return False
+
+    def _clean_meta(self):
+        for node in self.nodes:
+            node['metadata'] = None
+
     def cycle_detected(self):
+        for node in self.nodes:
+            node['metadata'] = {"adj_list": [], "color": "white", "count": 0}
+        for edge in self.edges:
+            self.nodes[edge[0]]['metadata']['adj_list'].append(self.nodes[edge[1]])
+
+        for node in self.nodes:
+            if node['metadata']['color'] == 'white' and self._find_cycle(node):
+                self._clean_meta()
+                return True
+
+        self._clean_meta()
         return False
