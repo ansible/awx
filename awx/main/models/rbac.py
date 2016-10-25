@@ -389,11 +389,7 @@ class Role(models.Model):
                     )
                     ''' % sql_params]
         )
-
-        # Do not show roles that are of content_type(User)
-        # these roles are for internal only user.
-        user_type = ContentType.objects.get_for_model(User)
-        return qs.exclude(content_type__pk=user_type.id)
+        return qs
 
     @staticmethod
     @check_singleton
