@@ -43,6 +43,14 @@ module.exports = {
             dest: 'static/partials/'
         }]
     },
+    languages: {
+        files: [{
+            cwd: 'client/',
+            expand: true,
+            src: 'languages/*.json',
+            dest: 'static/'
+        }]
+    },
     config: {
         files: { 'static/config.js': ['client/src/config.js'] }
     }

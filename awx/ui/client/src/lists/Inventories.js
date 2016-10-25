@@ -7,13 +7,14 @@
 
 export default
     angular.module('InventoriesListDefinition', [])
-    .value('InventoryList', {
+    .factory('InventoryList', ['i18n', function(i18n) {
+    return {
 
         name: 'inventories',
         iterator: 'inventory',
-        selectTitle: 'Add Inventories',
-        editTitle: 'Inventories',
-        listTitle: 'Inventories',
+        selectTitle: i18n._('Add Inventories'),
+        editTitle: i18n._('Inventories'),
+        listTitle: i18n._('Inventories'),
         selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
             "button to create a new inventory.",
         index: false,
@@ -43,13 +44,13 @@ export default
             },
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-md-5 col-sm-5 col-xs-8 List-staticColumnAdjacent',
                 modalColumnClass: 'col-md-11',
                 linkTo: '/#/inventories/{{inventory.id}}/manage'
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 ngBind: 'inventory.summary_fields.organization.name',
                 linkTo: '/#/organizations/{{ inventory.organization }}',
                 sourceModel: 'organization',
@@ -58,27 +59,27 @@ export default
                 columnClass: 'col-md-5 col-sm-3 hidden-xs'
             },
             has_inventory_sources: {
-                label: 'Cloud sourced?',
+                label: i18n._('Cloud sourced?'),
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
             },
             has_active_failures: {
-                label: 'Failed hosts?',
+                label: i18n._('Failed hosts?'),
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
             },
             inventory_sources_with_failures: {
-                label: 'Sync failures?',
+                label: i18n._('Sync failures?'),
                 searchType: 'select',
                 searchOptions: [{
-                    label: 'Yes',
+                    label: i18n._('Yes'),
                     value: 'inventory_sources_with_failures__gt=0'
                 }, {
-                    label: 'No',
+                    label: i18n._('No'),
                     value: 'inventory_sources_with_failures__lte=0'
                 }],
                 searchOnly: true
@@ -89,9 +90,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addInventory()',
-                awToolTip: 'Create a new inventory',
+                awToolTip: i18n._('Create a new inventory'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD',
+                buttonContent: i18n._('&#43; ADD'),
                 ngShow: 'canAdd'
             }
         },
@@ -101,25 +102,25 @@ export default
             columnClass: 'col-md-2 col-sm-4 col-xs-4',
 
             edit: {
-                label: 'Edit',
+                label: i18n._('Edit'),
                 ngClick: 'editInventory(inventory.id)',
-                awToolTip: 'Edit inventory',
+                awToolTip: i18n._('Edit inventory'),
                 dataPlacement: 'top',
                 ngShow: 'inventory.summary_fields.user_capabilities.edit'
             },
             view: {
-                label: 'View',
+                label: i18n._('View'),
                 ngClick: 'editInventory(inventory.id)',
-                awToolTip: 'View inventory',
+                awToolTip: i18n._('View inventory'),
                 dataPlacement: 'top',
                 ngShow: '!inventory.summary_fields.user_capabilities.edit'
             },
             "delete": {
-                label: 'Delete',
+                label: i18n._('Delete'),
                 ngClick: "deleteInventory(inventory.id, inventory.name)",
-                awToolTip: 'Delete inventory',
+                awToolTip: i18n._('Delete inventory'),
                 dataPlacement: 'top',
                 ngShow: 'inventory.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

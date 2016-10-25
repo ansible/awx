@@ -1,57 +1,57 @@
 <section id="htmlTemplate" class="Container">
     <div class="SetupMenu">
         <a ui-sref="organizations" class="SetupItem">
-            <h4 class="SetupItem-title ">Organizations</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title " translate>Organizations</h4>
+            <p class="SetupItem-description" translate>
             Group all of your content to manage permissions across departments in your company.
             </p>
         </a>
         <a ui-sref="users" class="SetupItem">
-            <h4 class="SetupItem-title">Users</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Users</h4>
+            <p class="SetupItem-description" translate>
               Allow others to sign into Tower and own the content they create.
             </p>
         </a>
         <a ui-sref="teams" class="SetupItem">
-            <h4 class="SetupItem-title">Teams</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Teams</h4>
+            <p class="SetupItem-description" translate>
               Split up your organization to associate content and control permissions for groups.
             </p>
         </a>
         <a ui-sref="credentials" class="SetupItem">
-            <h4 class="SetupItem-title">Credentials</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Credentials</h4>
+            <p class="SetupItem-description" translate>
               Add passwords, SSH keys, etc. for Tower to use when launching jobs against machines, or when syncing inventories or projects.
             </p>
         </a>
         <a ui-sref="managementJobsList" class="SetupItem" ng-if="user_is_superuser || user_is_system_auditor">
-            <h4 class="SetupItem-title">Management Jobs</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Management Jobs</h4>
+            <p class="SetupItem-description" translate>
                 Manage the cleanup of old job history, activity streams, data marked for deletion, and system tracking info.
             </p>
         </a>
         <a ui-sref="inventoryScripts" class="SetupItem">
-            <h4 class="SetupItem-title">Inventory Scripts</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Inventory Scripts</h4>
+            <p class="SetupItem-description" translate>
             Create and edit scripts to dynamically load hosts from any source.
             </p>
         </a>
         <a ui-sref="notifications" class="SetupItem"
             ng-if="orgAdmin || user_is_system_auditor || user_is_superuser">
-            <h4 class="SetupItem-title">Notifications</h4>
-            <p class="SetupItem-description">
+            <h4 class="SetupItem-title" translate>Notifications</h4>
+            <p class="SetupItem-description" translate>
             Create templates for sending notifications with Email, HipChat, Slack, and SMS.
             </p>
         </a>
         <a ui-sref="license" class="SetupItem">
-          <h4 class="SetupItem-title">View Your License</h4>
-          <p class="SetupItem-description">
+          <h4 class="SetupItem-title" translate>View Your License</h4>
+          <p class="SetupItem-description" translate>
           View and edit your license information.
           </p>
         </a>
         <a ui-sref="setup.about" class="SetupItem">
-          <h4 class="SetupItem-title">About Tower</h4>
-          <p class="SetupItem-description">
+          <h4 class="SetupItem-title" translate>About Tower</h4>
+          <p class="SetupItem-description" translate>
           View information about this version of Ansible Tower.
           </p>
       </a>

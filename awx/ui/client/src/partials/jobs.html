@@ -7,17 +7,17 @@
                     <div class= "Form-tab is-selected" id="active_jobs_link"
                         ng-class="{'is-selected': jobsSelected }"
                         ng-click="toggleTab('jobs')">
-                        Jobs
+                        <translate>Jobs</translate>
                     </div>
                     <div id="scheduled_jobs_link" class="Form-tab"
                         ng-class="{'is-selected': schedulesSelected }"
                         ng-click="toggleTab('scheduled')">
-                        Schedules
+                        <translate>Schedules</translate>
                     </div>
                 </div>
                 <div class="Form-tabActions">
-                    <button id="refresh_btn" ng-show="socketStatus === 'error'" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault" ng-click="refreshJobs()" toolbar="true">
-                            <span>REFRESH</span>
+                    <button id="refresh_btn" ng-show="socketStatus === 'error'" aw-tool-tip="{{'Refresh the page'|translate}}" data-placement="top" class="btn List-buttonDefault" ng-click="refreshJobs()" toolbar="true">
+                            <span translate>REFRESH</span>
                     </button>
                 </div>
             </div>
