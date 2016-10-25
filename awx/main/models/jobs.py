@@ -143,6 +143,10 @@ class JobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False,
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0, 
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -253,7 +257,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels', 'survey_passwords', 'allow_simultaneous',]
+                'labels', 'survey_passwords', 'allow_simultaneous', 'timeout']
 
     def resource_validation_data(self):
         '''
@@ -555,6 +559,15 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         default={},
         editable=False,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this job, if available'),
+    )
+
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -1327,6 +1340,7 @@ class SystemJobOptions(BaseModel):
         blank=True,
         default='',
     )
+
 
 class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 

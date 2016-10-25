@@ -33,7 +33,7 @@ msgpack-python==0.4.7
 munch==2.0.4
 netaddr==0.7.18
 netifaces==0.10.4
-os-client-config==1.14.0
+os-client-config==1.22.0
 os-diskconfig-python-novaclient-ext==0.1.3
 os-networksv2-python-novaclient-ext==0.25
 os-virtual-interfacesv2-python-novaclient-ext==0.19
@@ -72,7 +72,7 @@ rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
 requests==2.11.0
 requestsexceptions==1.1.1
-shade==1.4.0
+shade==1.12.1
 simplejson==3.8.1
 six==1.9.0
 stevedore==1.10.0

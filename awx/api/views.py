@@ -955,15 +955,6 @@ class ProjectList(ListCreateAPIView):
         )
         return projects_qs
 
-    def get(self, request, *args, **kwargs):
-        # Not optimal, but make sure the project status and last_updated fields
-        # are up to date here...
-        projects_qs = Project.objects
-        projects_qs = projects_qs.select_related('current_job', 'last_job')
-        for project in projects_qs:
-            project._set_status_and_last_job_run()
-        return super(ProjectList, self).get(request, *args, **kwargs)
-
 class ProjectDetail(RetrieveUpdateDestroyAPIView):
 
     model = Project
@@ -2678,13 +2669,9 @@ class WorkflowJobNodeChildrenBaseList(SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
-    always_allow_superuser = True # TODO: RBAC
-    parent_model = Job
+    parent_model = WorkflowJobNode
     relationship = ''
-    '''
-    enforce_parent_relationship = 'workflow_job_template'
     new_in_310 = True
-    '''
 
     #
     #Limit the set of WorkflowJobeNodes to the related nodes of specified by
@@ -2728,6 +2715,11 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateSerializer
     always_allow_superuser = False
+
+
+class WorkflowJobTemplateLabelList(JobTemplateLabelList):
+    parent_model = WorkflowJobTemplate
+
 
 # TODO:
 class WorkflowJobTemplateLaunch(GenericAPIView):
@@ -2885,6 +2877,9 @@ class JobLabelList(SubListAPIView):
     parent_model = Job
     relationship = 'labels'
     parent_key = 'job'
+
+class WorkflowJobLabelList(JobLabelList):
+    parent_model = WorkflowJob
 
 class JobActivityStreamList(SubListAPIView):
 

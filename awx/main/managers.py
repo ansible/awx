@@ -31,13 +31,14 @@ class InstanceManager(models.Manager):
                               hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')
 
-        # If we can determine the instance we are on then return
-        # that, otherwise None which would be the standalone
-        # case
-        # TODO: Replace, this doesn't work if the hostname
-        #       is different from the Instance.name
-        # node = self.filter(hostname=socket.gethostname())
-        return self.all()[0]
+        node = self.filter(hostname=settings.CLUSTER_HOST_ID)
+        if node.exists():
+            return node[0]
+        raise RuntimeError("No instance found with the current cluster host id")
+
+    def active_count(self):
+        """Return count of active Tower nodes for licensing."""
+        return self.all().count()
 
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing

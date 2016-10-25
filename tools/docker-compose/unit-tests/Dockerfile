@@ -37,7 +37,12 @@ RUN yum install -y nodejs
 WORKDIR "/ansible-tower"
 
 # Copy requirements files
-COPY requirements/*.txt requirements/
+# NOTE: '*' is not used as it invalidates docker caching
+COPY requirements/requirements.txt requirements/
+COPY requirements/requirements_ansible.txt requirements/
+COPY requirements/requirements_dev.txt requirements/
+COPY requirements/requirements_jenkins.txt requirements/
+
 
 # Copy __init__.py so the Makefile can retrieve `awx.__version__`
 COPY awx/__init__.py awx/
@@ -58,7 +63,7 @@ COPY awx/ui/package.json awx/ui/
 
 RUN npm set progress=false
 
-RUN make ui-deps-built
+RUN make ui-deps
 
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["bash"]

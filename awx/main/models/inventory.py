@@ -860,6 +860,10 @@ class InventorySourceOptions(BaseModel):
         default=False,
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
 
     @classmethod
     def get_ec2_region_choices(cls):
@@ -1084,7 +1088,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
-                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
+                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                'timeout']
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,

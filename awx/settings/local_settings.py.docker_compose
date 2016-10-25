@@ -276,3 +276,10 @@ TEST_OPENSTACK_PROJECT = ''
 # Azure credentials.
 TEST_AZURE_USERNAME = ''
 TEST_AZURE_KEY_DATA = ''
+
+# Exemplary global job timeout settings
+# DEFAULT_JOB_TIMEOUTS = {
+#   'Job': 10,
+#   'InventoryUpdate': 15,
+#   'ProjectUpdate': 20,
+# }

@@ -185,7 +185,8 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release \
-	ui-test ui-test-ci ui-test-saucelabs
+	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
+
 
 # Remove setup build files
 clean-tar:
@@ -391,11 +392,17 @@ flower:
 	fi; \
 	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
 
-uwsgi:
+collectstatic:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-    uwsgi --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --static-map /static=/tower_devel/awx/ui/static
+	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+
+uwsgi: collectstatic
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --py-autoreload 1
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -421,7 +428,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -442,6 +449,9 @@ factcacher:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_fact_cache_receiver
+
+nginx:
+	nginx -g "daemon off;"
 
 reports:
 	mkdir -p $@
@@ -514,6 +524,8 @@ languages:
 
 # UI TASKS
 # --------------------------------------
+
+ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE): awx/ui/package.json
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
@@ -794,7 +806,7 @@ docker-auth:
 
 # Docker Compose Development environment
 docker-compose: docker-auth
-	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate nginx tower
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
 
 docker-compose-cluster: docker-auth
 	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up

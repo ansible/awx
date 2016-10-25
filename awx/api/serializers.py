@@ -562,7 +562,7 @@ class UnifiedJobSerializer(BaseSerializer):
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'result_traceback')
+                  'execution_node', 'result_traceback')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
@@ -914,7 +914,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
-                  'scm_update_cache_timeout') + \
+                  'scm_update_cache_timeout', 'scm_revision', 'timeout',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
 
@@ -961,11 +961,14 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
-    playbooks = serializers.ReadOnlyField(help_text=_('Array of playbooks available within this project.'))
+    playbooks = serializers.SerializerMethodField(help_text=_('Array of playbooks available within this project.'))
 
     class Meta:
         model = Project
         fields = ('playbooks',)
+
+    def get_playbooks(self, obj):
+        return obj.playbook_files
 
     @property
     def data(self):
@@ -986,7 +989,7 @@ class ProjectUpdateSerializer(UnifiedJobSerializer, ProjectOptionsSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('*', 'project')
+        fields = ('*', 'project', 'job_type')
 
     def get_related(self, obj):
         res = super(ProjectUpdateSerializer, self).get_related(obj)
@@ -1329,7 +1332,8 @@ class InventorySourceOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'source', 'source_path', 'source_script', 'source_vars', 'credential',
-                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars')
+                  'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                  'timeout')
 
     def get_related(self, obj):
         res = super(InventorySourceOptionsSerializer, self).get_related(obj)
@@ -1783,13 +1787,23 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
         fields = ('*', '-user', '-team')
 
 
-class JobOptionsSerializer(BaseSerializer):
+class LabelsListMixin(object):
+
+    def _summary_field_labels(self, obj):
+        return {'count': obj.labels.count(), 'results': [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]}
+
+    def get_summary_fields(self, obj):
+        res = super(LabelsListMixin, self).get_summary_fields(obj)
+        res['labels'] = self._summary_field_labels(obj)
+        return res
+
+class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
     class Meta:
         fields = ('*', 'job_type', 'inventory', 'project', 'playbook',
                   'credential', 'cloud_credential', 'network_credential', 'forks', 'limit',
                   'verbosity', 'extra_vars', 'job_tags',  'force_handlers',
-                  'skip_tags', 'start_at_task',)
+                  'skip_tags', 'start_at_task', 'timeout')
 
     def get_related(self, obj):
         res = super(JobOptionsSerializer, self).get_related(obj)
@@ -1806,14 +1820,6 @@ class JobOptionsSerializer(BaseSerializer):
         if obj.network_credential:
             res['network_credential'] = reverse('api:credential_detail',
                                                 args=(obj.network_credential.pk,))
-        return res
-
-    def _summary_field_labels(self, obj):
-        return {'count': obj.labels.count(), 'results': [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]}
-
-    def get_summary_fields(self, obj):
-        res = super(JobOptionsSerializer, self).get_summary_fields(obj)
-        res['labels'] = self._summary_field_labels(obj)
         return res
 
     def to_representation(self, obj):
@@ -1927,7 +1933,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
         fields = ('*', 'job_template', 'passwords_needed_to_start', 'ask_variables_on_launch',
                   'ask_limit_on_launch', 'ask_tags_on_launch', 'ask_skip_tags_on_launch',
                   'ask_job_type_on_launch', 'ask_inventory_on_launch', 'ask_credential_on_launch',
-                  'allow_simultaneous', 'artifacts',)
+                  'allow_simultaneous', 'artifacts', 'scm_revision',)
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -2178,7 +2184,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
     class Meta:
         fields = ('can_cancel',)
 
-class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
+class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'edit', 'delete']
 
     class Meta:
@@ -2192,6 +2198,7 @@ class WorkflowJobTemplateSerializer(UnifiedJobTemplateSerializer):
             #schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
             launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
             workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
+            labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),
             # TODO: Implement notifications
             #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
             #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
@@ -2208,7 +2215,7 @@ class WorkflowJobTemplateListSerializer(WorkflowJobTemplateSerializer):
     pass
 
 # TODO:
-class WorkflowJobSerializer(UnifiedJobSerializer):
+class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
 
     class Meta:
         model = WorkflowJob
@@ -2222,6 +2229,7 @@ class WorkflowJobSerializer(UnifiedJobSerializer):
             # TODO:
             #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
+        res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
         # TODO: Cancel job
         '''
         if obj.can_cancel or True:
