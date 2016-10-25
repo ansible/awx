@@ -154,7 +154,25 @@ def workflow_dag_finished(factory_node):
     expected = []
     return (dag, expected, True)
 
-@pytest.fixture(params=['workflow_dag_multiple_roots', 'workflow_dag_level_2', 'workflow_dag_multiple_edges_labeled', 'workflow_dag_finished'])
+@pytest.fixture
+def workflow_dag_always(factory_node):
+    dag = WorkflowDAG()
+    data = [
+        factory_node(0, 'failed'),
+        factory_node(1, 'successful'),
+        factory_node(2, None),
+    ]
+    [dag.add_node(d) for d in data]
+
+    dag.add_edge(data[0], data[1], 'always_nodes')
+    dag.add_edge(data[1], data[2], 'always_nodes')
+
+    expected = data[2:3]
+    return (dag, expected, False)
+
+@pytest.fixture(params=['workflow_dag_multiple_roots', 'workflow_dag_level_2',
+                        'workflow_dag_multiple_edges_labeled', 'workflow_dag_finished',
+                        'workflow_dag_always'])
 def workflow_dag(request):
     return request.getfuncargvalue(request.param)
 
