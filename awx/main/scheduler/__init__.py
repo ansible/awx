@@ -25,6 +25,7 @@ from awx.main.scheduler.partial import (
     InventoryUpdateLatestDict,
     InventorySourceDict,
     SystemJobDict,
+    AdHocCommandDict,
 )
 
 # Celery
@@ -42,15 +43,11 @@ class Scheduler():
         status_list = ('pending', 'waiting', 'running')
 
         jobs = JobDict.filter_partial(status=status_list)
-        '''
-        graph_ad_hoc_commands = [ahc for ahc in AdHocCommand.objects.filter(**kv)]
-        '''
         inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
         project_updates = ProjectUpdateDict.filter_partial(status=status_list)
         system_jobs = SystemJobDict.filter_partial(status=status_list)
+        ad_hoc_commands = AdHocCommandDict.filter_partial(status=status_list)
         '''
-        graph_system_jobs = [sj for sj in
-                             SystemJob.objects.filter(**kv)]
         graph_workflow_jobs = [wf for wf in
                                WorkflowJob.objects.filter(**kv)]
         all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
@@ -58,7 +55,7 @@ class Scheduler():
                              graph_workflow_jobs,
                              key=lambda task: task.created)
         '''
-        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs,
+        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands,
                              key=lambda task: task['created'])
         return all_actions
 
@@ -236,7 +233,7 @@ class Scheduler():
         map(lambda task: self.graph.add_latest_inventory_update(task), latest_inventory_updates)
 
     def process_inventory_sources(self, inventory_id_sources):
-        map(lambda inventory_id, inventory_sources: self.graph.add_inventory_sources(inventory_id, inventory_sources), inventory_id_sources)
+        map(lambda (inventory_id, inventory_sources): self.graph.add_inventory_sources(inventory_id, inventory_sources), inventory_id_sources)
 
     def process_dependencies(self, dependent_task, dependency_tasks):
         for task in dependency_tasks:

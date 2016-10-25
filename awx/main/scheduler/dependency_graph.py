@@ -6,6 +6,7 @@ from awx.main.scheduler.partial import (
     ProjectUpdateDict,
     InventoryUpdateDict,
     SystemJobDict,
+    AdHocCommandDict,
 )
 class DependencyGraph(object):
     PROJECT_UPDATES = 'project_updates'
@@ -140,8 +141,8 @@ class DependencyGraph(object):
     def can_project_update_run(self, job):
         return self.data[self.PROJECT_UPDATES].get(job['project_id'], True)
 
-    def can_inventory_update_run(self, inventory_source_id):
-        return self.data[self.INVENTORY_SOURCE_UPDATES].get(inventory_source_id, True)
+    def can_inventory_update_run(self, job):
+        return self.data[self.INVENTORY_SOURCE_UPDATES].get(job['inventory_source_id'], True)
 
     def can_job_run(self, job):
         if self.can_project_update_run(job) is True and \
@@ -155,15 +156,20 @@ class DependencyGraph(object):
     def can_system_job_run(self):
         return self.data[self.SYSTEM_JOB]
 
+    def can_ad_hoc_command_run(self, job):
+        return self.data[self.INVENTORY_UPDATES].get(job['inventory_id'], True)
+
     def is_job_blocked(self, job):
         if type(job) is ProjectUpdateDict:
             return not self.can_project_update_run(job)
         elif type(job) is InventoryUpdateDict:
-            return not self.can_inventory_update_run(job['inventory_source_id'])
+            return not self.can_inventory_update_run(job)
         elif type(job) is JobDict:
             return not self.can_job_run(job)
         elif type(job) is SystemJobDict:
             return not self.can_system_job_run()
+        elif type(job) is AdHocCommandDict:
+            return not self.can_ad_hoc_command_run(job)
 
     def add_job(self, job):
         if type(job) is ProjectUpdateDict:
@@ -175,6 +181,8 @@ class DependencyGraph(object):
             self.mark_job_template_job(job)
         elif type(job) is SystemJobDict:
             self.mark_system_job()
+        elif type(job) is AdHocCommandDict:
+            self.mark_inventory_update(job['inventory_id'])
 
     def add_jobs(self, jobs):
         map(lambda j: self.add_job(j), jobs)

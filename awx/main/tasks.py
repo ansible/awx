@@ -1756,7 +1756,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Hook for actions to run after ad hoc command has completed.
         '''
-        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, **kwargs)
+        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, status, **kwargs)
 
 
 class RunSystemJob(BaseTask):

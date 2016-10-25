@@ -6,6 +6,7 @@ from awx.main.models import (
     InventoryUpdate,
     InventorySource,
     SystemJob,
+    AdHocCommand,
 )
 
 class PartialModelDict(object):
@@ -191,4 +192,16 @@ class SystemJobDict(PartialModelDict):
             'status__in': status
         }
         return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
+
+class AdHocCommandDict(PartialModelDict):
+    FIELDS = (
+        'id', 'created', 'status', 'inventory_id',
+    )
+    model = AdHocCommand
+
+    def get_job_type_str(self):
+        return 'ad_hoc_command'
+
+    def task_impact(self):
+        return 20
 
