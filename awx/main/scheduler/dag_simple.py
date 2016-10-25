@@ -174,3 +174,16 @@ class SimpleDAG(object):
 
         self._clean_meta()
         return False
+
+    def multi_ancestor_detected(self):
+        for node in self.nodes:
+            node['metadata'] = {"ancestor": None}
+        for edge in self.edges:
+            if self.nodes[edge[1]]['metadata']['ancestor'] is None:
+                self.nodes[edge[1]]['metadata']['ancestor'] = self.nodes[edge[0]]
+            else:
+                self._clean_meta()
+                return True
+
+        self._clean_meta()
+        return False

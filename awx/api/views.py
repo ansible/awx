@@ -71,7 +71,6 @@ from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.scheduler.dag_simple import SimpleDAG
 
-
 logger = logging.getLogger('awx.api.views')
 
 def api_exception_handler(exc, context):
@@ -2677,7 +2676,10 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             graph.add_edge(parent, sub, self.relationship)
 
         if graph.cycle_detected():
-            return {"Error": "cycle detected!"}
+            return {"Error": "Cycle detected!"}
+
+        if graph.multi_ancestor_detected():
+            return {"Error": "Multiple ancestor detected!"}
 
         return None
 
