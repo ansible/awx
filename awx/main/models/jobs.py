@@ -143,6 +143,10 @@ class JobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False,
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0, 
+    )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -150,7 +154,7 @@ class JobOptions(BaseModel):
         cred = self.credential
         if cred and cred.kind != 'ssh':
             raise ValidationError(
-                'You must provide a machine / SSH credential.',
+                _('You must provide a machine / SSH credential.'),
             )
         return cred
 
@@ -158,7 +162,7 @@ class JobOptions(BaseModel):
         cred = self.network_credential
         if cred and cred.kind != 'net':
             raise ValidationError(
-                'You must provide a network credential.',
+                _('You must provide a network credential.'),
             )
         return cred
 
@@ -166,8 +170,8 @@ class JobOptions(BaseModel):
         cred = self.cloud_credential
         if cred and cred.kind not in CLOUD_PROVIDERS + ('aws',):
             raise ValidationError(
-                'Must provide a credential for a cloud provider, such as '
-                'Amazon Web Services or Rackspace.',
+                _('Must provide a credential for a cloud provider, such as '
+                  'Amazon Web Services or Rackspace.'),
             )
         return cred
 
@@ -253,7 +257,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 'playbook', 'credential', 'cloud_credential', 'network_credential', 'forks', 'schedule',
                 'limit', 'verbosity', 'job_tags', 'extra_vars', 'launch_type',
                 'force_handlers', 'skip_tags', 'start_at_task', 'become_enabled',
-                'labels', 'survey_passwords', 'allow_simultaneous',]
+                'labels', 'survey_passwords', 'allow_simultaneous', 'timeout']
 
     def resource_validation_data(self):
         '''
@@ -266,19 +270,19 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         if self.inventory is None:
             resources_needed_to_start.append('inventory')
             if not self.ask_inventory_on_launch:
-                validation_errors['inventory'] = ["Job Template must provide 'inventory' or allow prompting for it.",]
+                validation_errors['inventory'] = [_("Job Template must provide 'inventory' or allow prompting for it."),]
         if self.credential is None:
             resources_needed_to_start.append('credential')
             if not self.ask_credential_on_launch:
-                validation_errors['credential'] = ["Job Template must provide 'credential' or allow prompting for it.",]
+                validation_errors['credential'] = [_("Job Template must provide 'credential' or allow prompting for it."),]
 
         # Job type dependent checks
         if self.job_type == PERM_INVENTORY_SCAN:
             if self.inventory is None or self.ask_inventory_on_launch:
-                validation_errors['inventory'] = ["Scan jobs must be assigned a fixed inventory.",]
+                validation_errors['inventory'] = [_("Scan jobs must be assigned a fixed inventory."),]
         elif self.project is None:
             resources_needed_to_start.append('project')
-            validation_errors['project'] = ["Job types 'run' and 'check' must have assigned a project.",]
+            validation_errors['project'] = [_("Job types 'run' and 'check' must have assigned a project."),]
 
         return (validation_errors, resources_needed_to_start)
 
@@ -487,10 +491,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
         if 'job_type' in data and self.ask_job_type_on_launch:
             if ((self.job_type == PERM_INVENTORY_SCAN and not data['job_type'] == PERM_INVENTORY_SCAN) or
                     (data['job_type'] == PERM_INVENTORY_SCAN and not self.job_type == PERM_INVENTORY_SCAN)):
-                errors['job_type'] = 'Can not override job_type to or from a scan job.'
+                errors['job_type'] = _('Can not override job_type to or from a scan job.')
         if (self.job_type == PERM_INVENTORY_SCAN and ('inventory' in data) and self.ask_inventory_on_launch and
                 self.inventory != data['inventory']):
-            errors['inventory'] = 'Inventory can not be changed at runtime for scan jobs.'
+            errors['inventory'] = _('Inventory can not be changed at runtime for scan jobs.')
         return errors
 
     @property
@@ -555,6 +559,15 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         default={},
         editable=False,
     )
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The SCM Revision from the Project used for this job, if available'),
+    )
+
 
     @classmethod
     def _get_parent_field_name(cls):
@@ -1327,6 +1340,7 @@ class SystemJobOptions(BaseModel):
         blank=True,
         default='',
     )
+
 
 class SystemJobTemplate(UnifiedJobTemplate, SystemJobOptions):
 

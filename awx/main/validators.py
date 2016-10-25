@@ -188,4 +188,4 @@ def vars_validate_or_raise(vars_str):
         return vars_str
     except yaml.YAMLError:
         pass
-    raise RestValidationError('Must be valid JSON or YAML.')
+    raise RestValidationError(_('Must be valid JSON or YAML.'))

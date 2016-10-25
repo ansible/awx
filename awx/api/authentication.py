@@ -9,6 +9,7 @@ import logging
 from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.utils.encoding import smart_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import authentication
@@ -62,10 +63,10 @@ class TokenAuthentication(authentication.TokenAuthentication):
                     return None
 
         if len(auth) == 1:
-            msg = 'Invalid token header. No credentials provided.'
+            msg = _('Invalid token header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)
         elif len(auth) > 2:
-            msg = 'Invalid token header. Token string should not contain spaces.'
+            msg = _('Invalid token header. Token string should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
 
         return self.authenticate_credentials(auth[1])
@@ -100,7 +101,7 @@ class TokenAuthentication(authentication.TokenAuthentication):
 
         # If the user is inactive, then return an error.
         if not token.user.is_active:
-            raise exceptions.AuthenticationFailed('User inactive or deleted')
+            raise exceptions.AuthenticationFailed(_('User inactive or deleted'))
 
         # Refresh the token.
         # The token is extended from "right now" + configurable setting amount.
@@ -151,7 +152,7 @@ class TaskAuthentication(authentication.BaseAuthentication):
             return None
         token = unified_job.task_auth_token
         if auth[1] != token:
-            raise exceptions.AuthenticationFailed('Invalid task token')
+            raise exceptions.AuthenticationFailed(_('Invalid task token'))
         return (None, token)
 
     def authenticate_header(self, request):

@@ -860,6 +860,10 @@ class InventorySourceOptions(BaseModel):
         default=False,
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
+    timeout = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
 
     @classmethod
     def get_ec2_region_choices(cls):
@@ -886,16 +890,16 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_ec2_group_by_choices(cls):
         return [
-            ('availability_zone', 'Availability Zone'),
-            ('ami_id', 'Image ID'),
-            ('instance_id', 'Instance ID'),
-            ('instance_type', 'Instance Type'),
-            ('key_pair', 'Key Name'),
-            ('region', 'Region'),
-            ('security_group', 'Security Group'),
-            ('tag_keys', 'Tags'),
-            ('vpc_id', 'VPC ID'),
-            ('tag_none', 'Tag None'),
+            ('availability_zone', _('Availability Zone')),
+            ('ami_id', _('Image ID')),
+            ('instance_id', _('Instance ID')),
+            ('instance_type', _('Instance Type')),
+            ('key_pair', _('Key Name')),
+            ('region', _('Region')),
+            ('security_group', _('Security Group')),
+            ('tag_keys', _('Tags')),
+            ('vpc_id', _('VPC ID')),
+            ('tag_none', _('Tag None')),
         ]
 
     @classmethod
@@ -966,14 +970,14 @@ class InventorySourceOptions(BaseModel):
             # credentials; Rackspace requires Rackspace credentials; etc...)
             if self.source.replace('ec2', 'aws') != cred.kind:
                 raise ValidationError(
-                    'Cloud-based inventory sources (such as %s) require '
-                    'credentials for the matching cloud service.' % self.source
+                    _('Cloud-based inventory sources (such as %s) require '
+                      'credentials for the matching cloud service.') % self.source
                 )
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
         elif self.source in CLOUD_PROVIDERS and self.source != 'ec2':
-            raise ValidationError('Credential is required for a cloud source.')
+            raise ValidationError(_('Credential is required for a cloud source.'))
         return cred
 
     def clean_source_regions(self):
@@ -998,9 +1002,9 @@ class InventorySourceOptions(BaseModel):
             if r not in valid_regions and r not in invalid_regions:
                 invalid_regions.append(r)
         if invalid_regions:
-            raise ValidationError('Invalid %s region%s: %s' % (self.source,
-                                  '' if len(invalid_regions) == 1 else 's',
-                                  ', '.join(invalid_regions)))
+            raise ValidationError(_('Invalid %(source)s region%(plural)s: %(region)s') % {
+                'source': self.source, 'plural': '' if len(invalid_regions) == 1 else 's',
+                'region': ', '.join(invalid_regions)})
         return ','.join(regions)
 
     source_vars_dict = VarsDictProperty('source_vars')
@@ -1024,9 +1028,9 @@ class InventorySourceOptions(BaseModel):
             if instance_filter_name not in self.INSTANCE_FILTER_NAMES:
                 invalid_filters.append(instance_filter)
         if invalid_filters:
-            raise ValidationError('Invalid filter expression%s: %s' %
-                                  ('' if len(invalid_filters) == 1 else 's',
-                                   ', '.join(invalid_filters)))
+            raise ValidationError(_('Invalid filter expression%(plural)s: %(filter)s') %
+                                  {'plural': '' if len(invalid_filters) == 1 else 's',
+                                   'filter': ', '.join(invalid_filters)})
         return instance_filters
 
     def clean_group_by(self):
@@ -1043,9 +1047,9 @@ class InventorySourceOptions(BaseModel):
             if c not in valid_choices and c not in invalid_choices:
                 invalid_choices.append(c)
         if invalid_choices:
-            raise ValidationError('Invalid group by choice%s: %s' %
-                                  ('' if len(invalid_choices) == 1 else 's',
-                                   ', '.join(invalid_choices)))
+            raise ValidationError(_('Invalid group by choice%(plural)s: %(choice)s') %
+                                  {'plural': '' if len(invalid_choices) == 1 else 's',
+                                   'choice': ', '.join(invalid_choices)})
         return ','.join(choices)
 
 
@@ -1084,7 +1088,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
-                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
+                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                'timeout']
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -1190,7 +1195,7 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             existing_sources = qs.exclude(pk=self.pk)
             if existing_sources.count():
                 s = u', '.join([x.group.name for x in existing_sources])
-                raise ValidationError('Unable to configure this item for cloud sync. It is already managed by %s.' % s)
+                raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
         return source
 
 

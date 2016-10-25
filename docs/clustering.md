@@ -21,6 +21,7 @@ It's important to point out a few existing things:
   by its needs. Thus we are pretty inflexible to customization beyond what our setup playbook allows. Each Tower node has a
   deployment of RabbitMQ that will cluster with the other nodes' RabbitMQ instances.
 * Existing old-style HA deployments will be transitioned automatically to the new HA system during the upgrade process.
+* Manual projects will need to be synced to all nodes by the customer
 
 ## Important Changes
 
@@ -168,6 +169,7 @@ When verifying acceptance we should ensure the following statements are true
     can communicate with the database.
 * Crucially when network partitioning is resolved all nodes should recover into a consistent state
 * Upgrade Testing, verify behavior before and after are the same for the end user.
+* Project Updates should be thoroughly tested for all scm types (git, svn, hg) and for manual projects.
 
 ## Performance Testing
 

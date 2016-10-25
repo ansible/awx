@@ -14,6 +14,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.text import slugify
 from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
 # Tower
 from awx import MODE
@@ -36,27 +37,27 @@ class Command(BaseCommand):
             action='store_true',
             dest='dry_run',
             default=False,
-            help='Only show which settings would be commented/migrated.',
+            help=_('Only show which settings would be commented/migrated.'),
         )
         parser.add_argument(
             '--skip-errors',
             action='store_true',
             dest='skip_errors',
             default=False,
-            help='Skip over settings that would raise an error when commenting/migrating.',
+            help=_('Skip over settings that would raise an error when commenting/migrating.'),
         )
         parser.add_argument(
             '--no-comment',
             action='store_true',
             dest='no_comment',
             default=False,
-            help='Skip commenting out settings in files.',
+            help=_('Skip commenting out settings in files.'),
         )
         parser.add_argument(
             '--backup-suffix',
             dest='backup_suffix',
             default=now().strftime('.%Y%m%d%H%M%S'),
-            help='Backup existing settings files with this suffix.',
+            help=_('Backup existing settings files with this suffix.'),
         )
 
     @transaction.atomic

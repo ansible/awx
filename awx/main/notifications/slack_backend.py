@@ -5,10 +5,11 @@ import logging
 from slackclient import SlackClient
 
 from django.utils.encoding import smart_text
-
+from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.slack_backend')
+
 
 class SlackBackend(TowerBaseEmailBackend):
 
@@ -48,7 +49,7 @@ class SlackBackend(TowerBaseEmailBackend):
                     self.connection.rtm_send_message(r, m.subject)
                     sent_messages += 1
             except Exception as e:
-                logger.error(smart_text("Exception sending messages: {}".format(e)))
+                logger.error(smart_text(_("Exception sending messages: {}").format(e)))
                 if not self.fail_silently:
                     raise
         return sent_messages
