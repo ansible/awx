@@ -30,6 +30,7 @@ def scheduler_factory(mocker, epoch):
 
         def no_create_inventory_update(task, ignore):
             raise RuntimeError("create_inventory_update should not be called")
+
         def no_create_project_update(task):
             raise RuntimeError("create_project_update should not be called")
 

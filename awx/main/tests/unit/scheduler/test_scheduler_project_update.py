@@ -1,18 +1,4 @@
 
-# Python
-import pytest
-from datetime import timedelta
-
-# Django
-from django.utils.timezone import now as tz_now
-
-# awx
-from awx.main.scheduler.partial import (
-    JobDict,
-    ProjectUpdateDict,
-)
-from awx.main.scheduler import Scheduler
-
 # TODO: wherever get_latest_rpoject_update_task() is stubbed and returns a
 # ProjectUpdateDict. We should instead return a ProjectUpdateLatestDict()
 # For now, this is ok since the fields on deviate that much.

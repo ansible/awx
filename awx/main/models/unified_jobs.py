@@ -843,7 +843,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         '''
         Start the task running via Celery.
         '''
-        task_class = self._get_task_class()
         (res, opts) = self.pre_start(**kwargs)
         if res:
             self.start_celery_task(opts, error_callback, success_callback)

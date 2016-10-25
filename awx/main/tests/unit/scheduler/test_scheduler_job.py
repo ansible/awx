@@ -3,16 +3,6 @@
 import pytest
 from datetime import timedelta
 
-# awx
-from awx.main.scheduler.partial import (
-    JobDict,
-    ProjectUpdateDict,
-)
-
-# TODO: wherever get_latest_rpoject_update_task() is stubbed and returns a
-# ProjectUpdateDict. We should instead return a ProjectUpdateLatestDict()
-# For now, this is ok since the fields on deviate that much.
-
 class TestJobBlocked():
     def test_inventory_update_waiting(self, scheduler_factory, waiting_inventory_update, pending_job):
         scheduler = scheduler_factory(tasks=[waiting_inventory_update, pending_job])
