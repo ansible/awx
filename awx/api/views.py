@@ -233,29 +233,29 @@ class ApiV1ConfigView(APIView):
         if not request.user.is_superuser:
             return Response(None, status=status.HTTP_404_NOT_FOUND)
         if not isinstance(request.data, dict):
-            return Response({"error": "Invalid license data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.data:
-            return Response({"error": "Missing 'eula_accepted' property"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Missing 'eula_accepted' property")}, status=status.HTTP_400_BAD_REQUEST)
         try:
             eula_accepted = to_python_boolean(request.data["eula_accepted"])
         except ValueError:
-            return Response({"error": "'eula_accepted' value is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("'eula_accepted' value is invalid")}, status=status.HTTP_400_BAD_REQUEST)
 
         if not eula_accepted:
-            return Response({"error": "'eula_accepted' must be True"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("'eula_accepted' must be True")}, status=status.HTTP_400_BAD_REQUEST)
         request.data.pop("eula_accepted")
         try:
             data_actual = json.dumps(request.data)
         except Exception:
             # FIX: Log
-            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Invalid JSON")}, status=status.HTTP_400_BAD_REQUEST)
         try:
             from awx.main.task_engine import TaskEnhancer
             license_data = json.loads(data_actual)
             license_data_validated = TaskEnhancer(**license_data).validate_enhancements()
         except Exception:
             # FIX: Log
-            return Response({"error": "Invalid License"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Invalid License")}, status=status.HTTP_400_BAD_REQUEST)
 
         # If the license is valid, write it to the database.
         if license_data_validated['valid_key']:
@@ -263,7 +263,7 @@ class ApiV1ConfigView(APIView):
             settings.TOWER_URL_BASE = "{}://{}".format(request.scheme, request.get_host())
             return Response(license_data_validated)
 
-        return Response({"error": "Invalid license"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
         if not request.user.is_superuser:
@@ -274,7 +274,7 @@ class ApiV1ConfigView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except:
             # FIX: Log
-            return Response({"error": "Failed to remove license (%s)" % has_error}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": _("Failed to remove license (%s)") % has_error}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DashboardView(APIView):
@@ -420,7 +420,7 @@ class DashboardJobsGraphView(APIView):
             end_date = start_date - dateutil.relativedelta.relativedelta(days=1)
             interval = 'hours'
         else:
-            return Response({'error': 'Unknown period "%s"' % str(period)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': _('Unknown period "%s"') % str(period)}, status=status.HTTP_400_BAD_REQUEST)
 
         dashboard_data = {"jobs": {"successful": [], "failed": []}}
         for element in success_qss.time_series(end_date, start_date, interval=interval):
@@ -653,8 +653,8 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
         # if no organizations exist in the system.
         if (not feature_enabled('multiple_organizations') and
                 self.model.objects.exists()):
-            raise LicenseForbids('Your Tower license only permits a single '
-                                 'organization to exist.')
+            raise LicenseForbids(_('Your Tower license only permits a single '
+                                   'organization to exist.'))
 
         # Okay, create the organization as usual.
         return super(OrganizationList, self).create(request, *args, **kwargs)
@@ -764,8 +764,8 @@ class OrganizationActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
@@ -858,20 +858,20 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg=_("Role 'id' field is missing."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         role = get_object_or_400(Role, pk=sub_id)
         org_content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == org_content_type:
-            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
+            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
             if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
-                data = dict(msg="You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization")
+                data = dict(msg=_("You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(TeamRolesList, self).post(request, *args, **kwargs)
@@ -917,8 +917,8 @@ class TeamActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(TeamActivityStreamList, self).get(request, *args, **kwargs)
@@ -964,7 +964,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(Project, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete project.")
+            raise PermissionDenied(_("Cannot delete project."))
         for pu in obj.project_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(ProjectDetail, self).destroy(request, *args, **kwargs)
@@ -1011,8 +1011,8 @@ class ProjectActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(ProjectActivityStreamList, self).get(request, *args, **kwargs)
@@ -1192,26 +1192,26 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
         # Forbid implicit role creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Role 'id' field is missing.")
+            data = dict(msg=_("Role 'id' field is missing."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if sub_id == self.request.user.admin_role.pk:
-            raise PermissionDenied('You may not perform any action with your own admin_role.')
+            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
 
         user = get_object_or_400(User, pk=self.kwargs['pk'])
         role = get_object_or_400(Role, pk=sub_id)
         user_content_type = ContentType.objects.get_for_model(User)
         if role.content_type == user_content_type:
-            raise PermissionDenied('You may not change the membership of a users admin_role')
+            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
             if role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg="You cannot grant credential access to a user not in the credentials' organization")
+                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg="You cannot grant private credential access to another user")
+                data = dict(msg=_("You cannot grant private credential access to another user"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1274,8 +1274,8 @@ class UserActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(UserActivityStreamList, self).get(request, *args, **kwargs)
@@ -1315,13 +1315,13 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
             if left is not None and right is not None and left != right:
                 bad_changes[field] = (left, right)
         if bad_changes:
-            raise PermissionDenied('Cannot change %s.' % ', '.join(bad_changes.keys()))
+            raise PermissionDenied(_('Cannot change %s.') % ', '.join(bad_changes.keys()))
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         can_delete = request.user.can_access(User, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied('Cannot delete user.')
+            raise PermissionDenied(_('Cannot delete user.'))
         return super(UserDetail, self).destroy(request, *args, **kwargs)
 
 class UserAccessList(ResourceAccessList):
@@ -1433,8 +1433,8 @@ class CredentialActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(CredentialActivityStreamList, self).get(request, *args, **kwargs)
@@ -1471,7 +1471,7 @@ class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         can_delete = request.user.can_access(self.model, 'delete', instance)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory script.")
+            raise PermissionDenied(_("Cannot delete inventory script."))
         for inv_src in InventorySource.objects.filter(source_script=instance):
             inv_src.source_script = None
             inv_src.save()
@@ -1522,8 +1522,8 @@ class InventoryActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(InventoryActivityStreamList, self).get(request, *args, **kwargs)
@@ -1655,8 +1655,8 @@ class HostActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(HostActivityStreamList, self).get(request, *args, **kwargs)
@@ -1673,8 +1673,8 @@ class SystemTrackingEnforcementMixin(APIView):
     '''
     def check_permissions(self, request):
         if not feature_enabled("system_tracking"):
-            raise LicenseForbids("Your license does not permit use "
-                                 "of system tracking.")
+            raise LicenseForbids(_("Your license does not permit use "
+                                   "of system tracking."))
         return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
 
 class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
@@ -1718,7 +1718,7 @@ class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
 
         fact_entry = Fact.get_host_fact(host_obj.id, module_spec, datetime_actual)
         if not fact_entry:
-            return Response({'detail': 'Fact not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': _('Fact not found.')}, status=status.HTTP_404_NOT_FOUND)
         return Response(self.serializer_class(instance=fact_entry).data)
 
 class GroupList(ListCreateAPIView):
@@ -1840,8 +1840,8 @@ class GroupActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(GroupActivityStreamList, self).get(request, *args, **kwargs)
@@ -2056,7 +2056,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         obj = self.get_object()
         can_delete = request.user.can_access(InventorySource, 'delete', obj)
         if not can_delete:
-            raise PermissionDenied("Cannot delete inventory source.")
+            raise PermissionDenied(_("Cannot delete inventory source."))
         for pu in obj.inventory_updates.filter(status__in=['new', 'pending', 'waiting', 'running']):
             pu.cancel()
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
@@ -2084,8 +2084,8 @@ class InventorySourceActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
@@ -2100,7 +2100,7 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
         if parent.source not in CLOUD_INVENTORY_SOURCES:
-            return Response(dict(msg="Notification Templates can only be assigned when source is one of {}."
+            return Response(dict(msg=_("Notification Templates can only be assigned when source is one of {}.")
                                  .format(CLOUD_INVENTORY_SOURCES, parent.source)),
                             status=status.HTTP_400_BAD_REQUEST)
         return super(InventorySourceNotificationTemplatesAnyList, self).post(request, *args, **kwargs)
@@ -2302,8 +2302,8 @@ class JobTemplateSurveySpec(GenericAPIView):
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if not feature_enabled('surveys'):
-            raise LicenseForbids('Your license does not allow '
-                                 'adding surveys.')
+            raise LicenseForbids(_('Your license does not allow '
+                                   'adding surveys.'))
         return Response(obj.survey_spec)
 
     def post(self, request, *args, **kwargs):
@@ -2312,42 +2312,43 @@ class JobTemplateSurveySpec(GenericAPIView):
         # Sanity check: Are surveys available on this license?
         # If not, do not allow them to be used.
         if not feature_enabled('surveys'):
-            raise LicenseForbids('Your license does not allow '
-                                 'adding surveys.')
+            raise LicenseForbids(_('Your license does not allow '
+                                   'adding surveys.'))
 
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
         try:
             obj.survey_spec = json.dumps(request.data)
         except ValueError:
-            return Response(dict(error="Invalid JSON when parsing survey spec."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("Invalid JSON when parsing survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if "name" not in obj.survey_spec:
-            return Response(dict(error="'name' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if "description" not in obj.survey_spec:
-            return Response(dict(error="'description' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("'description' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if "spec" not in obj.survey_spec:
-            return Response(dict(error="'spec' missing from survey spec."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("'spec' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
         if not isinstance(obj.survey_spec["spec"], list):
-            return Response(dict(error="'spec' must be a list of items."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
         if len(obj.survey_spec["spec"]) < 1:
-            return Response(dict(error="'spec' doesn't contain any items."), status=status.HTTP_400_BAD_REQUEST)
+            return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
         variable_set = set()
         for survey_item in obj.survey_spec["spec"]:
             if not isinstance(survey_item, dict):
-                return Response(dict(error="Survey question %s is not a json object." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
-                return Response(dict(error="'type' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'type' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "question_name" not in survey_item:
-                return Response(dict(error="'question_name' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'question_name' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "variable" not in survey_item:
-                return Response(dict(error="'variable' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'variable' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if survey_item['variable'] in variable_set:
-                return Response(dict(error="'variable' '%s' duplicated in survey question %s." % (survey_item['variable'], str(idx))), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'variable' '%(item)s' duplicated in survey question %(survey)s.") %
+                                           {'item': survey_item['variable'], 'survey': str(idx)}), status=status.HTTP_400_BAD_REQUEST)
             else:
                 variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
-                return Response(dict(error="'required' missing from survey question %s." % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
         obj.save()
         return Response()
@@ -2372,8 +2373,8 @@ class JobTemplateActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
@@ -2540,22 +2541,22 @@ class JobTemplateCallback(GenericAPIView):
             matching_hosts = self.find_matching_hosts()
         # Check matching hosts.
         if not matching_hosts:
-            data = dict(msg='No matching host could be found!')
+            data = dict(msg=_('No matching host could be found!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         elif len(matching_hosts) > 1:
-            data = dict(msg='Multiple hosts matched the request!')
+            data = dict(msg=_('Multiple hosts matched the request!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
-            data = dict(msg='Cannot start automatically, user input required!')
+            data = dict(msg=_('Cannot start automatically, user input required!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = host.name
 
         # NOTE: We limit this to one job waiting per host per callblack to keep them from stacking crazily
         if Job.objects.filter(status__in=['pending', 'waiting', 'running'], job_template=job_template,
                               limit=limit).count() > 0:
-            data = dict(msg='Host callback job already pending.')
+            data = dict(msg=_('Host callback job already pending.'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Everything is fine; actually create the job.
@@ -2568,7 +2569,7 @@ class JobTemplateCallback(GenericAPIView):
             kv['extra_vars'] = extra_vars
         result = job.signal_start(**kv)
         if not result:
-            data = dict(msg='Error starting job!')
+            data = dict(msg=_('Error starting job!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Return the location of the new job.
@@ -2789,7 +2790,7 @@ class SystemJobTemplateList(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
-            raise PermissionDenied("Superuser privileges needed.")
+            raise PermissionDenied(_("Superuser privileges needed."))
         return super(SystemJobTemplateList, self).get(request, *args, **kwargs)
 
 class SystemJobTemplateDetail(RetrieveAPIView):
@@ -2893,8 +2894,8 @@ class JobActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(JobActivityStreamList, self).get(request, *args, **kwargs)
@@ -3160,15 +3161,15 @@ class JobJobTasksList(BaseJobEventsList):
         # If there's no event ID specified, this will return a 404.
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': _('Job not found.')}, -1, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         if 'event_id' not in request.query_params:
-            return ({"detail": "'event_id' not provided."}, -1, status.HTTP_400_BAD_REQUEST)
+            return ({"detail": _("'event_id' not provided.")}, -1, status.HTTP_400_BAD_REQUEST)
 
         parent_task = job.job_events.filter(pk=int(request.query_params.get('event_id', -1)))
         if not parent_task.exists():
-            return ({'detail': 'Parent event not found.'}, -1, status.HTTP_404_NOT_FOUND)
+            return ({'detail': _('Parent event not found.')}, -1, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
         STARTING_EVENTS = ('playbook_on_task_start', 'playbook_on_setup')
@@ -3488,8 +3489,8 @@ class AdHocCommandActivityStreamList(SubListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
@@ -3510,7 +3511,7 @@ class SystemJobList(ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
-            raise PermissionDenied("Superuser privileges needed.")
+            raise PermissionDenied(_("Superuser privileges needed."))
         return super(SystemJobList, self).get(request, *args, **kwargs)
 
 
@@ -3566,8 +3567,9 @@ class UnifiedJobStdout(RetrieveAPIView):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
         if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            response_message = "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                                     settings.STDOUT_MAX_BYTES_DISPLAY)
+            response_message = "Standard Output too large to display (%(text_size)d bytes), " \
+                               "only download supported for sizes over %(supported_size)d bytes" % \
+                               {'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
@@ -3610,7 +3612,7 @@ class UnifiedJobStdout(RetrieveAPIView):
                 response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
                 return response
             except Exception as e:
-                return Response({"error": "Error generating stdout download file: %s" % str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": _("Error generating stdout download file: %s") % str(e)}, status=status.HTTP_400_BAD_REQUEST)
         elif request.accepted_renderer.format == 'txt':
             return Response(unified_job.result_stdout)
         else:
@@ -3650,7 +3652,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
         if not request.user.can_access(self.model, 'delete', obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if obj.notifications.filter(status='pending').exists():
-            return Response({"error": "Delete not allowed while there are pending notifications"},
+            return Response({"error": _("Delete not allowed while there are pending notifications")},
                             status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(NotificationTemplateDetail, self).delete(request, *args, **kwargs)
 
@@ -3717,8 +3719,8 @@ class ActivityStreamList(SimpleListAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(ActivityStreamList, self).get(request, *args, **kwargs)
@@ -3734,8 +3736,8 @@ class ActivityStreamDetail(RetrieveAPIView):
         # Sanity check: Does this license allow activity streams?
         # If not, forbid this request.
         if not feature_enabled('activity_streams'):
-            raise LicenseForbids('Your license does not allow use of '
-                                 'the activity stream.')
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
 
         # Okay, let it through.
         return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
@@ -3785,26 +3787,26 @@ class RoleUsersList(SubListCreateAttachDetachAPIView):
         # Forbid implicit user creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="User 'id' field is missing.")
+            data = dict(msg=_("User 'id' field is missing."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         user = get_object_or_400(User, pk=sub_id)
         role = self.get_parent_object()
         if role == self.request.user.admin_role:
-            raise PermissionDenied('You may not perform any action with your own admin_role.')
+            raise PermissionDenied(_('You may not perform any action with your own admin_role.'))
 
         user_content_type = ContentType.objects.get_for_model(User)
         if role.content_type == user_content_type:
-            raise PermissionDenied('You may not change the membership of a users admin_role')
+            raise PermissionDenied(_('You may not change the membership of a users admin_role'))
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
             if role.content_object.organization and user not in role.content_object.organization.member_role:
-                data = dict(msg="You cannot grant credential access to a user not in the credentials' organization")
+                data = dict(msg=_("You cannot grant credential access to a user not in the credentials' organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
             if not role.content_object.organization and not request.user.is_superuser:
-                data = dict(msg="You cannot grant private credential access to another user")
+                data = dict(msg=_("You cannot grant private credential access to another user"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         return super(RoleUsersList, self).post(request, *args, **kwargs)
@@ -3828,7 +3830,7 @@ class RoleTeamsList(SubListAPIView):
         # Forbid implicit team creation here
         sub_id = request.data.get('id', None)
         if not sub_id:
-            data = dict(msg="Team 'id' field is missing.")
+            data = dict(msg=_("Team 'id' field is missing."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         team = get_object_or_400(Team, pk=sub_id)
@@ -3836,13 +3838,13 @@ class RoleTeamsList(SubListAPIView):
 
         organization_content_type = ContentType.objects.get_for_model(Organization)
         if role.content_type == organization_content_type:
-            data = dict(msg="You cannot assign an Organization role as a child role for a Team.")
+            data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
             if not role.content_object.organization or role.content_object.organization.id != team.organization.id:
-                data = dict(msg="You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization")
+                data = dict(msg=_("You cannot grant credential access to a team when the Organization field isn't set, or belongs to a different organization"))
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         action = 'attach'

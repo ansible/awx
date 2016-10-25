@@ -417,7 +417,7 @@ class OrganizationAccess(BaseAccess):
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__inventory__organization=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 
@@ -491,7 +491,7 @@ class InventoryAccess(BaseAccess):
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__inventory=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 
@@ -613,7 +613,7 @@ class GroupAccess(BaseAccess):
         active_jobs.extend([dict(type="inventory_update", id=o.id)
                             for o in InventoryUpdate.objects.filter(inventory_source__in=obj.inventory_sources.all(), status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 
@@ -890,7 +890,7 @@ class ProjectAccess(BaseAccess):
         active_jobs.extend([dict(type="project_update", id=o.id)
                             for o in ProjectUpdate.objects.filter(project=obj, status__in=ACTIVE_STATES)])
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 
@@ -1132,7 +1132,7 @@ class JobTemplateAccess(BaseAccess):
         active_jobs = [dict(type="job", id=o.id)
                        for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 
@@ -1524,7 +1524,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         active_jobs = [dict(type="job", id=o.id)
                        for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
-            raise StateConflict({"conflict": "Resource is being used by running jobs",
+            raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})
         return True
 

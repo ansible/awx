@@ -5,6 +5,8 @@ import json
 
 from django.utils.encoding import smart_text
 from django.core.mail.backends.smtp import EmailBackend
+from django.utils.translation import ugettext_lazy as _
+
 
 class CustomEmailBackend(EmailBackend):
 
@@ -23,9 +25,8 @@ class CustomEmailBackend(EmailBackend):
         if "body" in body:
             body_actual = body['body']
         else:
-            body_actual = smart_text("{} #{} had status {} on Ansible Tower, view details at {}\n\n".format(body['friendly_name'],
-                                                                                                            body['id'],
-                                                                                                            body['status'],
-                                                                                                            body['url']))
+            body_actual = smart_text(_("{} #{} had status {} on Ansible Tower, view details at {}\n\n").format(
+                body['friendly_name'], body['id'], body['status'], body['url'])
+            )
             body_actual += json.dumps(body, indent=4)
         return body_actual

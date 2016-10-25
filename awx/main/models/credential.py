@@ -278,9 +278,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         """
         host = self.host or ''
         if not host and self.kind == 'vmware':
-            raise ValidationError('Host required for VMware credential.')
+            raise ValidationError(_('Host required for VMware credential.'))
         if not host and self.kind == 'openstack':
-            raise ValidationError('Host required for OpenStack credential.')
+            raise ValidationError(_('Host required for OpenStack credential.'))
         return host
 
     def clean_domain(self):
@@ -289,32 +289,32 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
     def clean_username(self):
         username = self.username or ''
         if not username and self.kind == 'aws':
-            raise ValidationError('Access key required for AWS credential.')
+            raise ValidationError(_('Access key required for AWS credential.'))
         if not username and self.kind == 'rax':
-            raise ValidationError('Username required for Rackspace '
-                                  'credential.')
+            raise ValidationError(_('Username required for Rackspace '
+                                    'credential.'))
         if not username and self.kind == 'vmware':
-            raise ValidationError('Username required for VMware credential.')
+            raise ValidationError(_('Username required for VMware credential.'))
         if not username and self.kind == 'openstack':
-            raise ValidationError('Username required for OpenStack credential.')
+            raise ValidationError(_('Username required for OpenStack credential.'))
         return username
 
     def clean_password(self):
         password = self.password or ''
         if not password and self.kind == 'aws':
-            raise ValidationError('Secret key required for AWS credential.')
+            raise ValidationError(_('Secret key required for AWS credential.'))
         if not password and self.kind == 'rax':
-            raise ValidationError('API key required for Rackspace credential.')
+            raise ValidationError(_('API key required for Rackspace credential.'))
         if not password and self.kind == 'vmware':
-            raise ValidationError('Password required for VMware credential.')
+            raise ValidationError(_('Password required for VMware credential.'))
         if not password and self.kind == 'openstack':
-            raise ValidationError('Password or API key required for OpenStack credential.')
+            raise ValidationError(_('Password or API key required for OpenStack credential.'))
         return password
 
     def clean_project(self):
         project = self.project or ''
         if self.kind == 'openstack' and not project:
-            raise ValidationError('Project name required for OpenStack credential.')
+            raise ValidationError(_('Project name required for OpenStack credential.'))
         return project
 
     def clean_ssh_key_data(self):
@@ -341,13 +341,13 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
 
     def clean_ssh_key_unlock(self):
         if self.has_encrypted_ssh_key_data and not self.ssh_key_unlock:
-            raise ValidationError('SSH key unlock must be set when SSH key '
-                                  'is encrypted.')
+            raise ValidationError(_('SSH key unlock must be set when SSH key '
+                                    'is encrypted.'))
         return self.ssh_key_unlock
 
     def clean(self):
         if self.deprecated_user and self.deprecated_team:
-            raise ValidationError('Credential cannot be assigned to both a user and team.')
+            raise ValidationError(_('Credential cannot be assigned to both a user and team.'))
 
     def _password_field_allows_ask(self, field):
         return bool(self.kind == 'ssh' and field != 'ssh_key_data')

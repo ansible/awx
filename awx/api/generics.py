@@ -15,6 +15,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
@@ -422,7 +423,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         sub_id = request.data.get('id', None)
         res = None
         if not sub_id:
-            data = dict(msg='"id" is required to disassociate')
+            data = dict(msg=_('"id" is required to disassociate'))
             res = Response(data, status=status.HTTP_400_BAD_REQUEST)
         return (sub_id, res)
 
