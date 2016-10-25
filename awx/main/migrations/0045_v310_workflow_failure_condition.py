@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0040_v310_artifacts'),
+        ('main', '0044_v310_project_playbook_files'),
     ]
 
     operations = [
