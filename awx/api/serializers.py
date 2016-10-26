@@ -2267,7 +2267,6 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
 
     def validate(self, attrs):
         # char_prompts go through different validation, so remove them here
-        print ' attrs: ' + str(attrs)
         for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
             if fd in attrs:
                 attrs.pop(fd)
