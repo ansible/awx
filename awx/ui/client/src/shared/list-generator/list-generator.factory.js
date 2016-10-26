@@ -100,8 +100,9 @@ import {templateUrl} from '../../shared/template-url/template-url.factory';
 
 export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'getSearchHtml',
         'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'ActionButton',
+        'i18n',
     function ($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, getSearchHtml, Column, DropDown, NavigationLink,
-        SelectIcon, ActionButton) {
+        SelectIcon, ActionButton, i18n) {
             return {
 
                 setList: function (list) {
@@ -310,7 +311,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                               if (list.listTitle) {
 
-                                  html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
+                                  html += "<div class=\"List-titleText\"><translate>" + list.listTitle + "</translate></div>";
                                   // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
                                   list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge === false) ? false : true;
                                   if(list.listTitleBadge) {
@@ -411,7 +412,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                     html += "<div class=\"List-noItems\" ng-show=\"" + list.iterator + "Loading == false && " + list.iterator + "_active_search == false && " + list.iterator + "_total_rows < 1\">";
-                    html += (list.emptyListText) ? list.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
+                    html += (list.emptyListText) ? list.emptyListText : i18n._("PLEASE ADD ITEMS TO THIS LIST");
                     html += "</div>";
 
                     // Add a title and optionally a close button (used on Inventory->Groups)
@@ -580,7 +581,9 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
 
                     // Message for loading
                     innerTable += "<tr class=\"loading-info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
-                    innerTable += "<td colspan=\"" + cnt + "\" class=\"List-tableCell\"><div class=\"loading-info\">Loading...</div></td>\n";
+                    var loading = i18n._("Loading...");
+                    innerTable += "<td colspan=\"" + cnt + "\" class=\"List-tableCell\"><div class=\"loading-info\">" +
+                                  loading + "</div></td>\n";
                     innerTable += "</tr>\n";
 
                     // End List
@@ -684,7 +687,7 @@ export default ['$location', '$compile', '$rootScope', 'SearchWidget', 'Paginate
                         html += "<th class=\"List-tableHeader List-tableHeader--actions actions-column";
                         html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : "";
                         html += "\">";
-                        html += (list.fieldActions.label === undefined || list.fieldActions.label) ? "Actions" : "";
+                        html += (list.fieldActions.label === undefined || list.fieldActions.label) ? i18n._("Actions") : "";
                         html += "</th>\n";
                     }
                     html += "</tr>\n";

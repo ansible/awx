@@ -12,16 +12,17 @@
 
 export default
     angular.module('OrganizationFormDefinition', [])
-        .value('OrganizationFormObject', {
+        .factory('OrganizationFormObject', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New Organization', //Title in add mode
+            addTitle: i18n._('New Organization'), //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
             tabs: true,
 
             fields: {
                 name: {
-                    label: 'Name',
+                    label: i18n._('Name'),
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
@@ -29,7 +30,7 @@ export default
                     ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 description: {
-                    label: 'Description',
+                    label: i18n._('Description'),
                     type: 'text',
                     addRequired: false,
                     editRequired: false,
@@ -56,10 +57,10 @@ export default
             related: {
                 permissions: {
                     basePath: 'organizations/:id/access_list/',
-                    awToolTip: 'Please save before assigning permissions',
+                    awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Permissions',
+                    title: i18n._('Permissions'),
                     iterator: 'permission',
                     index: false,
                     open: false,
@@ -68,9 +69,9 @@ export default
                         add: {
                             ngClick: "addPermission",
                             label: 'Add',
-                            awToolTip: 'Add a permission',
+                            awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD',
+                            buttonContent: i18n._('&#43; ADD'),
                             ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
@@ -78,19 +79,19 @@ export default
                     fields: {
                         username: {
                             key: true,
-                            label: 'User',
+                            label: i18n._('User'),
                             linkBase: 'users',
                             class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             type: 'role',
                             noSort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                             searchable: false
                         },
                         team_roles: {
-                            label: 'Team Roles',
+                            label: i18n._('Team Roles'),
                             type: 'team_roles',
                             noSort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
@@ -116,7 +117,7 @@ export default
                     }
                 };
             }
-        })
+        };}])
 
         .factory('OrganizationForm', ['OrganizationFormObject', 'NotificationsList',
             function(OrganizationFormObject, NotificationsList) {

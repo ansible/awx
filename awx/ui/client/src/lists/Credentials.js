@@ -9,33 +9,34 @@
 
 export default
     angular.module('CredentialsListDefinition', [])
-    .value('CredentialList', {
+    .factory('CredentialList', ['i18n', function(i18n) {
+    return {
 
         name: 'credentials',
         iterator: 'credential',
-        selectTitle: 'Add Credentials',
-        editTitle: 'Credentials',
-        listTitle: 'Credentials',
+        selectTitle: i18n._('Add Credentials'),
+        editTitle: i18n._('Credentials'),
+        listTitle: i18n._('Credentials'),
         selectInstructions: "<p>Select existing credentials by clicking each credential or checking the related checkbox. When " +
             "finished, click the blue <em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking ",
         index: false,
         hover: true,
-        emptyListText: 'No Credentials Have Been Created',
+        emptyListText: i18n._('No Credentials Have Been Created'),
 
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 modalColumnClass: 'col-md-11'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 excludeModal: true,
                 columnClass: 'col-md-3 hidden-sm hidden-xs'
             },
             kind: {
-                label: 'Type',
+                label: i18n._('Type'),
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to credentials resource
                 excludeModal: true,
@@ -43,7 +44,7 @@ export default
                 columnClass: 'col-md-2 hidden-sm hidden-xs'
             },
             owners: {
-                label: 'Owners',
+                label: i18n._('Owners'),
                 type: 'owners',
                 searchable: false,
                 nosort: true,
@@ -56,9 +57,9 @@ export default
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addCredential()',
-                awToolTip: 'Create a new credential',
+                awToolTip: i18n._('Create a new credential'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: i18n._('&#43; ADD')
             }
         },
 
@@ -69,18 +70,18 @@ export default
             edit: {
                 ngClick: "editCredential(credential.id)",
                 icon: 'fa-edit',
-                label: 'Edit',
+                label: i18n._('Edit'),
                 "class": 'btn-sm',
-                awToolTip: 'Edit credential',
+                awToolTip: i18n._('Edit credential'),
                 dataPlacement: 'top',
                 ngShow: 'credential.summary_fields.user_capabilities.edit'
             },
 
             view: {
                 ngClick: "editCredential(credential.id)",
-                label: 'View',
+                label: i18n._('View'),
                 "class": 'btn-sm',
-                awToolTip: 'View credential',
+                awToolTip: i18n._('View credential'),
                 dataPlacement: 'top',
                 ngShow: '!credential.summary_fields.user_capabilities.edit'
             },
@@ -88,11 +89,11 @@ export default
             "delete": {
                 ngClick: "deleteCredential(credential.id, credential.name)",
                 icon: 'fa-trash',
-                label: 'Delete',
+                label: i18n._('Delete'),
                 "class": 'btn-sm',
-                awToolTip: 'Delete credential',
+                awToolTip: i18n._('Delete credential'),
                 dataPlacement: 'top',
                 ngShow: 'credential.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

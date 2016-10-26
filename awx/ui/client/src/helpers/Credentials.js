@@ -13,8 +13,8 @@
 export default
 angular.module('CredentialsHelper', ['Utilities'])
 
-.factory('KindChange', ['Empty',
-         function (Empty) {
+.factory('KindChange', ['Empty', 'i18n',
+         function (Empty, i18n) {
              return function (params) {
                  var scope = params.scope,
                  reset = params.reset,
@@ -29,20 +29,20 @@ angular.module('CredentialsHelper', ['Utilities'])
                      $(this).hide();
                  });
                  // Put things in a default state
-                 scope.usernameLabel = 'Username';
+                 scope.usernameLabel = i18n._('Username');
                  scope.aws_required = false;
                  scope.email_required = false;
                  scope.rackspace_required = false;
-                 scope.sshKeyDataLabel = 'Private Key';
+                 scope.sshKeyDataLabel = i18n._('Private Key');
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
                  scope.subscription_required = false;
-                 scope.key_description = "Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>";
+                 scope.key_description = i18n._("Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>");
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
-                 scope.passwordLabel = 'Password';
+                 scope.passwordLabel = i18n._('Password');
 
                  $('.popover').each(function() {
                      // remove lingering popover <div>. Seems to be a bug in TB3 RC1
@@ -53,26 +53,26 @@ angular.module('CredentialsHelper', ['Utilities'])
                      $(this).hide();
                  });
                  // Put things in a default state
-                 scope.usernameLabel = 'Username';
+                 scope.usernameLabel = i18n._('Username');
                  scope.aws_required = false;
                  scope.email_required = false;
                  scope.rackspace_required = false;
-                 scope.sshKeyDataLabel = 'Private Key';
+                 scope.sshKeyDataLabel = i18n._('Private Key');
                  scope.username_required = false;                        // JT-- added username_required b/c mutliple 'kinds' need username to be required (GCE)
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
                  scope.domain_required = false;
                  scope.subscription_required = false;
-                 scope.key_description = "Paste the contents of the SSH private key file.";
+                 scope.key_description = i18n._("Paste the contents of the SSH private key file.");
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
                  scope.projectLabel = '';
                  scope.domainLabel = '';
                  scope.project_required = false;
-                 scope.passwordLabel = 'Password (API Key)';
-                 scope.projectPopOver = "<p>The project value</p>";
-                 scope.hostPopOver = "<p>The host value</p>";
+                 scope.passwordLabel = i18n._('Password (API Key)');
+                 scope.projectPopOver = i18n._("<p>The project value</p>");
+                 scope.hostPopOver = i18n._("<p>The host value</p>");
                  scope.ssh_key_data_api_error = '';
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
@@ -85,38 +85,38 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.username_required = true;
                          break;
                          case 'ssh':
-                             scope.usernameLabel = 'Username'; //formally 'SSH Username'
-                             scope.becomeUsernameLabel = 'Privilege Escalation Username';
-                             scope.becomePasswordLabel = 'Privilege Escalation Password';
+                             scope.usernameLabel = i18n._('Username'); //formally 'SSH Username'
+                             scope.becomeUsernameLabel = i18n._('Privilege Escalation Username');
+                             scope.becomePasswordLabel = i18n._('Privilege Escalation Password');
                          break;
                          case 'scm':
-                             scope.sshKeyDataLabel = 'SCM Private Key';
-                             scope.passwordLabel = 'Password';
+                             scope.sshKeyDataLabel = i18n._('SCM Private Key');
+                             scope.passwordLabel = i18n._('Password');
                          break;
                          case 'gce':
-                             scope.usernameLabel = 'Service Account Email Address';
-                             scope.sshKeyDataLabel = 'RSA Private Key';
+                             scope.usernameLabel = i18n._('Service Account Email Address');
+                             scope.sshKeyDataLabel = i18n._('RSA Private Key');
                              scope.email_required = true;
                              scope.key_required = true;
                              scope.project_required = true;
-                             scope.key_description =  'Paste the contents of the PEM file associated with the service account email.';
-                             scope.projectLabel = "Project";
+                             scope.key_description =  i18n._('Paste the contents of the PEM file associated with the service account email.');
+                             scope.projectLabel = i18n._("Project");
                              scope.project_required = false;
-                             scope.projectPopOver = "<p>The Project ID is the " +
+                             scope.projectPopOver = i18n._("<p>The Project ID is the " +
                              "GCE assigned identification. It is constructed as " +
                              "two words followed by a three digit number.  Such " +
-                             "as: </p><p>adjective-noun-000</p>";
+                             "as: </p><p>adjective-noun-000</p>");
                          break;
                          case 'azure':
-                             scope.sshKeyDataLabel = 'Management Certificate';
+                             scope.sshKeyDataLabel = i18n._('Management Certificate');
                              scope.subscription_required = true;
                              scope.key_required = true;
-                             scope.key_description = "Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.";
+                             scope.key_description = i18n._("Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.");
                          break;
                          case 'azure_rm':
-                             scope.usernameLabel = "Username";
+                             scope.usernameLabel = i18n._("Username");
                              scope.subscription_required = true;
-                             scope.passwordLabel = 'Password';
+                             scope.passwordLabel = i18n._('Password');
                              scope.azure_rm_required = true;
                          break;
                          case 'vmware':
@@ -124,46 +124,46 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.host_required = true;
                              scope.password_required = true;
                              scope.hostLabel = "vCenter Host";
-                             scope.passwordLabel = 'Password';
-                             scope.hostPopOver = "Enter the hostname or IP address which corresponds to your VMware vCenter.";
+                             scope.passwordLabel = i18n._('Password');
+                             scope.hostPopOver = i18n._("Enter the hostname or IP address which corresponds to your VMware vCenter.");
                          break;
                          case 'openstack':
-                             scope.hostLabel = "Host (Authentication URL)";
-                             scope.projectLabel = "Project (Tenant Name)";
-                             scope.domainLabel = "Domain Name";
+                             scope.hostLabel = i18n._("Host (Authentication URL)");
+                             scope.projectLabel = i18n._("Project (Tenant Name)");
+                             scope.domainLabel = i18n._("Domain Name");
                              scope.password_required = true;
                              scope.project_required = true;
                              scope.host_required = true;
                              scope.username_required = true;
-                             scope.projectPopOver = "<p>This is the tenant name. " +
+                             scope.projectPopOver = i18n._("<p>This is the tenant name. " +
                                  " This value is usually the same " +
-                                 " as the username.</p>";
-                             scope.hostPopOver = "<p>The host to authenticate with." +
-                                 "<br />For example, https://openstack.business.com/v2.0/";
+                                 " as the username.</p>");
+                             scope.hostPopOver = i18n._("<p>The host to authenticate with." +
+                                 "<br />For example, https://openstack.business.com/v2.0/");
                          break;
                          case 'satellite6':
                             scope.username_required = true;
                             scope.password_required = true;
-                            scope.passwordLabel = 'Password';
+                            scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
-                            scope.hostLabel = "Satellite 6 Host";
-                            scope.hostPopOver = "Enter the hostname or IP address name which <br />" +
-                                "corresponds to your Red Hat Satellite 6 server.";
+                            scope.hostLabel = i18n._("Satellite 6 Host");
+                            scope.hostPopOver = i18n._("Enter the hostname or IP address name which <br />" +
+                                "corresponds to your Red Hat Satellite 6 server.");
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
                             scope.password_required = true;
-                            scope.passwordLabel = 'Password';
+                            scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
-                            scope.hostLabel = "CloudForms Host";
-                            scope.hostPopOver = "Enter the hostname or IP address for the virtual <br />" +
-                                " machine which is hosting the CloudForm appliance.";
+                            scope.hostLabel = i18n._("CloudForms Host");
+                            scope.hostPopOver = i18n._("Enter the hostname or IP address for the virtual <br />" +
+                                " machine which is hosting the CloudForm appliance.");
                          break;
                          case 'net':
                             scope.username_required = true;
                             scope.password_required = false;
-                            scope.passwordLabel = 'Password';
-                            scope.sshKeyDataLabel = 'SSH Key';
+                            scope.passwordLabel = i18n._('Password');
+                            scope.sshKeyDataLabel = i18n._('SSH Key');
                          break;
                      }
                  }

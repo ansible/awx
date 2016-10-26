@@ -10,10 +10,12 @@
  * @description This controller's the Users page
 */
 
+import {N_} from "../i18n";
+
 const user_type_options = [
-    {type: 'normal'              , label: 'Normal User'          },
-    {type: 'system_auditor'      , label: 'System Auditor'       },
-    {type: 'system_administrator', label: 'System Administrator' },
+    {type: 'normal'              , label: N_('Normal User')          },
+    {type: 'system_auditor'      , label: N_('System Auditor')       },
+    {type: 'system_administrator', label: N_('System Administrator') },
 ];
 
 function user_type_sync($scope) {
@@ -34,7 +36,12 @@ function user_type_sync($scope) {
 export function UsersList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, UserList, GenerateList, Prompt, SearchInit, PaginateInit,
     ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit,
-    Wait, $state, Refresh, $filter, rbacUiControlService) {
+    Wait, $state, Refresh, $filter, rbacUiControlService, i18n) {
+
+    for (var i = 0; i < user_type_options.length; i++) {
+        user_type_options[i].label = i18n._(user_type_options[i].label);
+    }
+
     ClearScope();
 
     $scope.canAdd = false;
@@ -142,7 +149,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'UserList', 'generateList', 'Prompt',
     'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'SelectionInit', 'Wait', '$state',
-    'Refresh', '$filter', 'rbacUiControlService'
+    'Refresh', '$filter', 'rbacUiControlService', 'i18n'
 ];
 
 
@@ -152,7 +159,11 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log',
 export function UsersAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList,
-    ResetForm, Wait, CreateSelect2, $state) {
+    ResetForm, Wait, CreateSelect2, $state, i18n) {
+
+    for (var i = 0; i < user_type_options.length; i++) {
+        user_type_options[i].label = i18n._(user_type_options[i].label);
+    }
 
     Rest.setUrl(GetBasePath('users'));
     Rest.options()
@@ -268,14 +279,19 @@ export function UsersAdd($scope, $rootScope, $compile, $location, $log,
 UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
     '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
-    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait', 'CreateSelect2', '$state'
+    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait', 'CreateSelect2', '$state',
+    'i18n'
 ];
 
 
 export function UsersEdit($scope, $rootScope, $location,
     $stateParams, UserForm, GenerateForm, Rest, ProcessErrors,
     RelatedSearchInit, RelatedPaginateInit, ClearScope,
-    GetBasePath, ResetForm, Wait, CreateSelect2 ,$state) {
+    GetBasePath, ResetForm, Wait, CreateSelect2 ,$state, i18n) {
+
+    for (var i = 0; i < user_type_options.length; i++) {
+        user_type_options[i].label = i18n._(user_type_options[i].label);
+    }
 
     ClearScope();
 
@@ -439,5 +455,5 @@ export function UsersEdit($scope, $rootScope, $location,
 UsersEdit.$inject = ['$scope', '$rootScope', '$location',
     '$stateParams', 'UserForm', 'GenerateForm', 'Rest', 'ProcessErrors',
     'RelatedSearchInit', 'RelatedPaginateInit', 'ClearScope', 'GetBasePath',
-    'ResetForm', 'Wait', 'CreateSelect2', '$state'
+    'ResetForm', 'Wait', 'CreateSelect2', '$state', 'i18n'
 ];

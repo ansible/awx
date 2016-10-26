@@ -3,18 +3,19 @@
     <div ng-cloak id="htmlTemplate" class="Panel">
         <div class="List-header">
             <div class="List-title">
-                <div class="List-titleText">
-                    organizations
+                <div class="List-titleText" translate>
+                    ORGANIZATIONS
                 </div>
                 <span class="badge List-titleBadge">
                     {{ orgCount }}
                 </span>
             </div>
             <div class="List-actions">
+                <!-- &#43; ADD -->
                 <button class="btn List-buttonSubmit"
-                    aw-tool-tip="Create a new organization"
+                    aw-tool-tip="{{'Create a new organization'|translate}}"
                     ng-show="canAdd"
-                    ng-click="addOrganization()">
+                    ng-click="addOrganization()" translate>
                     + ADD
                 </button>
             </div>
@@ -22,7 +23,7 @@
         <div class="List-well">
             <div class="OrgCards-search" ng-hide="organizationLoading == false && organization_active_search == false && organization_total_rows < 1">
             </div>
-            <div class="List-noItems" ng-show="organizationLoading == false && organization_active_search == false && organization_total_rows < 1">PLEASE ADD ITEMS TO THIS LIST</div>
+            <div class="List-noItems" ng-show="organizationLoading == false && organization_active_search == false && organization_total_rows < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
             <div class="OrgCards" id="OrgCards">
                 <div class="OrgCards-card"
                     ng-class="{'OrgCards-card--selected': activeCard === card.id || card.isActiveCard }"

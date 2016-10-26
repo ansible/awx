@@ -5,17 +5,17 @@
 *************************************************/
 
 
-export default function(){
+export default [ 'i18n', function(i18n){
     return {
         name: 'hosts',
         iterator: 'host',
-        selectTitle: 'Add Existing Hosts',
+        selectTitle: i18n._('Add Existing Hosts'),
         editTitle: 'Hosts',
         listTitle: 'Hosts',
         index: false,
         hover: true,
         well: true,
-        emptyListText: 'NO HOSTS FOUND',
+        emptyListText: i18n._('NO HOSTS FOUND'),
         fields: {
             status: {
                 basePath: 'unified_jobs',
@@ -91,4 +91,4 @@ export default function(){
 
         }
     };
-}
+}];

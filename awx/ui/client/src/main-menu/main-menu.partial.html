@@ -16,7 +16,7 @@
             href="/#/projects"
             ng-class="{'is-currentRoute' : isCurrentState('projects')}">
             <span class="MainMenu-itemText">
-                PROJECTS
+                <translate>PROJECTS</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -24,7 +24,7 @@
             href="/#/inventories"
             ng-class="{'is-currentRoute' : isCurrentState('inventories')}">
             <span class="MainMenu-itemText">
-                INVENTORIES
+                <translate>INVENTORIES</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -32,7 +32,7 @@
             href="/#/job_templates"
             ng-class="{'is-currentRoute' : isCurrentState('jobTemplates')}">
             <span class="MainMenu-itemText">
-                JOB TEMPLATES
+                <translate>JOB TEMPLATES</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -40,7 +40,7 @@
             href="/#/jobs"
             ng-class="{'is-currentRoute' : isCurrentState('jobs')}">
             <span class="MainMenu-itemText">
-                JOBS
+                <translate>JOBS</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -48,7 +48,7 @@
             ng-href="/#/users/{{ $root.current_user.id }}"
             ng-class="{'is-currentRoute' : isCurrentState('users.edit')}">
             <span class="MainMenu-itemText">
-                VIEW USER PAGE FOR {{ $root.current_user.username | uppercase }}
+                <translate>VIEW USER PAGE FOR {{ $root.current_user.username | uppercase }}</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -56,7 +56,7 @@
             ng-href="/#/setup"
             ng-class="{'is-currentRoute' : isCurrentState('setup')}">
             <span class="MainMenu-itemText">
-                SETTINGS
+                <translate>SETTINGS</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -64,7 +64,7 @@
             ui-sref="portalMode"
             ng-class="{'is-currentRoute' : isCurrentState('portalMode')}">
             <span class="MainMenu-itemText">
-                PORTAL MODE
+                <translate>PORTAL MODE</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -72,7 +72,7 @@
             ng-href="http://docs.ansible.com/ansible-tower/"
             target="_blank">
             <span class="MainMenu-itemText">
-                VIEW DOCUMENTATION
+                <translate>VIEW DOCUMENTATION</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -80,7 +80,7 @@
             ng-href="/#/logout"
             ng-class="{'is-currentRoute' : isCurrentState('logout')}">
             <span class="MainMenu-itemText">
-                LOG OUT
+                <translate>LOG OUT</translate>
             </span>
         </a>
     </span>
@@ -92,7 +92,7 @@
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('projects'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
-            PROJECTS
+            <translate>PROJECTS</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
@@ -101,7 +101,7 @@
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('inventories'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
-            INVENTORIES
+            <translate>INVENTORIES</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
@@ -110,7 +110,7 @@
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
-            JOB TEMPLATES
+            <translate>JOB TEMPLATES</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left MainMenu-item--lastLeft"
@@ -119,7 +119,7 @@
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('jobs'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
-            JOBS
+            <translate>JOBS</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--user MainMenu-item--right"
@@ -144,7 +144,7 @@
         ng-href="/#/setup"
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('setup'), 'is-loggedOut' : !current_user || !current_user.username}"
-        aw-tool-tip="Settings"
+        aw-tool-tip="{{'Settings'|translate}}"
         data-placement="bottom"
         data-trigger="hover"
         data-container="body">
@@ -157,7 +157,7 @@
         ng-href="/#/portal"
         ng-hide="licenseMissing"
         ng-class="{'is-currentRoute' : isCurrentState('portalMode'), 'is-loggedOut' : !current_user || !current_user.username}"
-        aw-tool-tip="My View"
+        aw-tool-tip="{{'My View'|translate}}"
         data-placement="bottom"
         data-trigger="hover"
         data-container="body">
@@ -170,7 +170,7 @@
         ng-href="http://docs.ansible.com/ansible-tower/"
         ng-hide="licenseMissing"
         ng-class="{'is-loggedOut' : !current_user || !current_user.username}"
-        aw-tool-tip="View Documentation"
+        aw-tool-tip="{{'View Documentation'|translate}}"
         data-placement="bottom"
         data-trigger="hover"
         data-container="body"
@@ -185,7 +185,7 @@
         ng-class="{'is-currentRoute' : isCurrentState('logout'),
             'is-loggedOut' : !current_user || !current_user.username,
             'MainMenu-item--licenseMissing' : licenseMissing}"
-        aw-tool-tip="Log Out"
+        aw-tool-tip="{{'Log Out'|translate}}"
         data-placement="bottom"
         data-trigger="hover"
         data-container="body"

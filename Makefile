@@ -81,7 +81,7 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
-DEBUILD_OPTS = 
+DEBUILD_OPTS =
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
 REPREPRO_BIN ?= reprepro
@@ -525,6 +525,43 @@ languages:
 # UI TASKS
 # --------------------------------------
 
+HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
+check-po:
+ifdef HAVE_PO
+	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
+	for po in awx/ui/po/*.po ; do \
+	    echo $$po; \
+	    mo="awx/ui/po/`basename $$po .po`.mo"; \
+	    msgfmt --check --verbose $$po -o $$mo; \
+	    if test "$$?" -ne 0 ; then \
+	        exit -1; \
+	    fi; \
+	    rm $$mo; \
+	    name=`echo "$$po" | grep '-'`; \
+	    if test "x$$name" != x ; then \
+	        right_name=`echo $$language | sed -e 's/-/_/'`; \
+	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
+	        exit -1; \
+	    fi; \
+	    language=`grep '^"Language:' "$$po" | grep '_'`; \
+	    if test "x$$language" != x ; then \
+	        right_language=`echo $$language | sed -e 's/_/-/'`; \
+	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
+	        exit -1; \
+	    fi; \
+	done;
+else
+	@echo No PO files
+endif
+
+# generate l10n .json
+languages: $(UI_DEPS_FLAG_FILE) check-po
+	$(NPM_BIN) --prefix awx/ui run languages
+
+# generate .pot
+pot: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run pot
+
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE): awx/ui/package.json
@@ -539,6 +576,7 @@ ui-docker: $(UI_DEPS_FLAG_FILE)
 
 ui-release: languages $(UI_RELEASE_FLAG_FILE)
 
+# todo: include languages target when .po deliverables are added to source control
 $(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)

@@ -1,17 +1,17 @@
 <div class="DashboardList" ng-hide="noJobs">
     <div class="DashboardList-header">
         <h3 class="DashboardList-headerText">
-            RECENT JOB RUNS
+            <translate>RECENT JOB RUNS</translate>
         </h3>
         <a href="/#/jobs" class="DashboardList-viewAll">
-            VIEW ALL
+            <translate>VIEW ALL</translate>
         </a>
     </div>
     <div class="DashboardList-container">
         <table class="List-table">
            <tr>
-              <th class="List-tableHeader DashboardList-tableHeader--name">Name</th>
-              <th class="List-tableHeader DashboardList-tableHeader--time">Time</th>
+              <th class="List-tableHeader DashboardList-tableHeader--name" translate>Name</th>
+              <th class="List-tableHeader DashboardList-tableHeader--time" translate>Time</th>
            </tr>
            <tr class="List-tableRow"
                 ng-class-odd="'List-tableRow--oddRow'"
@@ -39,10 +39,10 @@
 <div class="DashboardList" ng-show="noJobs">
     <div class="DashboardList-header">
         <h3 class="DashboardList-headerText">
-            RECENTLY RUN JOBS
+            <translate>RECENTLY RUN JOBS</translate>
         </h3>
     </div>
     <div class="DashboardList-container">
-        <p class="DashboardList-noJobs">No jobs were recently run.</p>
+        <p class="DashboardList-noJobs" translate>No jobs were recently run.</p>
     </div>
 </div>
