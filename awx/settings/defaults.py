@@ -796,7 +796,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'awx.lib.compat.RequireDebugTrue',
+            '()': 'django.utils.log.RequireDebugTrue',
         },
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',
