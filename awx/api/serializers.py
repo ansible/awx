@@ -2242,10 +2242,10 @@ class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer)
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
-    job_type = serializers.CharField(allow_blank=True, required=False, default=None)
-    job_tags = serializers.CharField(allow_blank=True, required=False, default=None)
-    limit = serializers.CharField(allow_blank=True, required=False, default=None)
-    skip_tags = serializers.CharField(allow_blank=True, required=False, default=None)
+    job_type = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
