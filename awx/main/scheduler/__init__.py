@@ -73,10 +73,12 @@ def process_finished_workflow_jobs(workflow_jobs):
         dag = WorkflowDAG(workflow_job)
         if dag.is_workflow_done():
             with transaction.atomic():
-                # TODO: detect if wfj failed
-                workflow_job.status = 'completed'
+                if workflow_job._has_failed():
+                    workflow_job.status = 'failed'
+                else:
+                    workflow_job.status = 'successful'
                 workflow_job.save()
-                workflow_job.websocket_emit_status('completed')
+                workflow_job.websocket_emit_status(workflow_job.status)
 
 def rebuild_graph():
     """Regenerate the task graph by refreshing known tasks from Tower, purging

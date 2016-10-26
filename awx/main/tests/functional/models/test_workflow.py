@@ -90,3 +90,42 @@ class TestWorkflowJobTemplate:
         assert len(parent_qs) == 1
         assert parent_qs[0] == wfjt.workflow_job_template_nodes.all()[1]
 
+@pytest.mark.django_db
+class TestWorkflowJobFailure:
+    @pytest.fixture
+    def wfj(self):
+        return WorkflowJob.objects.create(name='test-wf-job')
+
+    def test_workflow_has_failed(self, wfj):
+        """
+        Test that a single failed node with fail_on_job_failure = true
+        leads to the entire WF being marked as failed
+        """
+        job = Job.objects.create(name='test-job', status='failed')
+        # Node has a failed job connected
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
+        assert wfj._has_failed()
+
+    def test_workflow_not_failed_unran_job(self, wfj):
+        """
+        Test that an un-ran node will not mark workflow job as failed
+        """
+        WorkflowJobNode.objects.create(workflow_job=wfj)
+        assert not wfj._has_failed()
+
+    def test_workflow_not_failed_successful_job(self, wfj):
+        """
+        Test that a sucessful node will not mark workflow job as failed
+        """
+        job = Job.objects.create(name='test-job', status='successful')
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
+        assert not wfj._has_failed()
+
+    def test_workflow_not_failed_failed_job_but_okay(self, wfj):
+        """
+        Test that a failed node will not mark workflow job as failed
+        if the fail_on_job_failure is set to false
+        """
+        job = Job.objects.create(name='test-job', status='failed')
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job, fail_on_job_failure=False)
+        assert not wfj._has_failed()
