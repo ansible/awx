@@ -7,6 +7,7 @@ from awx.main.models import (
     InventorySource,
     SystemJob,
     AdHocCommand,
+    WorkflowJob,
 )
 
 class PartialModelDict(object):
@@ -204,4 +205,16 @@ class AdHocCommandDict(PartialModelDict):
 
     def task_impact(self):
         return 20
+
+class WorkflowJobDict(PartialModelDict):
+    FIELDS = (
+        'id', 'created', 'status', 'workflow_job_template_id',
+    )
+    model = WorkflowJob
+
+    def get_job_type_str(self):
+        return 'workflow_job'
+
+    def task_impact(self):
+        return 10
 

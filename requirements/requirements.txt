@@ -25,6 +25,7 @@ django-radius==1.0.0
 djangorestframework==3.3.2
 djangorestframework-yaml==1.0.2
 django-split-settings==0.1.1
+django-transaction-hooks==0.2
 django-taggit==0.17.6
 git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1

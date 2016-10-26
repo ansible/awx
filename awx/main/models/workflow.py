@@ -393,11 +393,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def _get_parent_field_name(cls):
         return 'workflow_job_template'
 
-    @classmethod
-    def _get_task_class(cls):
-        from awx.main.tasks import RunWorkflowJob
-        return RunWorkflowJob
-
     def _has_failed(self):
         return False
 
@@ -426,11 +421,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def get_notification_friendly_name(self):
         return "Workflow Job"
 
-    def start(self, *args, **kwargs):
-        (res, opts) = self.pre_start(**kwargs)
-        if res: 
-                self.status = 'running'
-                self.save()
-                self.websocket_emit_status("running")
-        return res
+    '''
+    A WorkflowJob is a virtual job. It doesn't result in a celery task.
+    '''
+    def start_celery_task(self, opts, error_callback, success_callback):
+        return None
 

@@ -26,6 +26,7 @@ from awx.main.scheduler.partial import (
     InventorySourceDict,
     SystemJobDict,
     AdHocCommandDict,
+    WorkflowJobDict,
 )
 
 # Celery
@@ -47,15 +48,9 @@ class Scheduler():
         project_updates = ProjectUpdateDict.filter_partial(status=status_list)
         system_jobs = SystemJobDict.filter_partial(status=status_list)
         ad_hoc_commands = AdHocCommandDict.filter_partial(status=status_list)
-        '''
-        graph_workflow_jobs = [wf for wf in
-                               WorkflowJob.objects.filter(**kv)]
-        all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
-                             graph_project_updates + graph_system_jobs +
-                             graph_workflow_jobs,
-                             key=lambda task: task.created)
-        '''
-        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands,
+        workflow_jobs = WorkflowJobDict.filter_partial(status=status_list)
+
+        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
                              key=lambda task: task['created'])
         return all_actions
 
@@ -111,7 +106,7 @@ class Scheduler():
                     job.status = 'failed'
                     job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
                     job.save(update_fields=['status', 'job_explanation'])
-                    job.websocket_emit_status("failed")
+                    connection.on_commit(lambda: job.websocket_emit_status('failed'))
 
                 # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
                 #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
@@ -122,12 +117,9 @@ class Scheduler():
             dag = WorkflowDAG(workflow_job)
             if dag.is_workflow_done():
                 # TODO: detect if wfj failed
-                if workflow_job._has_failed():
-                    workflow_job.status = 'failed'
-                else:
-                    workflow_job.status = 'successful'
+                workflow_job.status = 'completed'
                 workflow_job.save()
-                workflow_job.websocket_emit_status(workflow_job.status)
+                connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
 
     def get_activate_tasks(self):
         inspector = inspect()
@@ -153,6 +145,8 @@ class Scheduler():
     def start_task(self, task, dependent_tasks=[]):
         from awx.main.tasks import handle_work_error, handle_work_success
 
+        status_changed = False
+
         # TODO: spawn inventory and project updates                
         task_actual = {
             'type':task.get_job_type_str(),
@@ -164,21 +158,36 @@ class Scheduler():
         success_handler = handle_work_success.s(task_actual=task_actual)
         
         job_obj = task.get_full()
-        job_obj.status = 'waiting'
+        if job_obj.status == 'pending':
+            status_changed = True
+            job_obj.status = 'waiting'
 
         (start_status, opts) = job_obj.pre_start()
         if not start_status:
+            status_changed = True
             job_obj.status = 'failed'
             if job_obj.job_explanation:
                 job_obj.job_explanation += ' '
             job_obj.job_explanation += 'Task failed pre-start check.'
             job_obj.save()
             # TODO: run error handler to fail sub-tasks and send notifications
-            return
+        else:
+            if type(job_obj) is WorkflowJob:
+                job_obj.status = 'running'
+                status_changed = True
 
-        self.consume_capacity(task)
+            if status_changed is True:
+                job_obj.save()
 
-        connection.on_commit(lambda: job_obj.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler))
+            self.consume_capacity(task)
+
+        def post_commit():
+            if status_changed:
+                job_obj.websocket_emit_status(job_obj.status)
+            if job_obj.status != 'failed':
+                job_obj.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler)
+        
+        connection.on_commit(post_commit)
 
     def process_runnable_tasks(self, runnable_tasks):
         for i, task in enumerate(runnable_tasks):
@@ -281,7 +290,7 @@ class Scheduler():
                     'Celery, so it has been marked as failed.',
                 ))
                 task_obj.save()
-                task_obj.websocket_emit_status("failed")
+                connection.on_commit(lambda: task_obj.websocket_emit_status('failed'))
 
                 all_sorted_tasks.pop(i)
                 logger.error("Task %s appears orphaned... marking as failed" % task)
@@ -323,28 +332,6 @@ class Scheduler():
         pending_tasks = filter(lambda t: t['status'] == 'pending', all_sorted_tasks)
         self.process_pending_tasks(pending_tasks)
 
-
-        '''
-        def do_graph_things():
-            # Rebuild graph
-            graph = SimpleDAG()
-            for task in running_tasks:
-                graph.add_node(task)
-            #for wait_task in waiting_tasks[:50]:
-            for wait_task in waiting_tasks:
-                node_dependencies = []
-                for node in graph:
-                    if wait_task.is_blocked_by(node['node_object']):
-                        node_dependencies.append(node['node_object'])
-                graph.add_node(wait_task)
-                for dependency in node_dependencies:
-                    graph.add_edge(wait_task, dependency)
-            if settings.DEBUG:
-                graph.generate_graphviz_plot()
-            return graph
-        '''
-        #return do_graph_things()
-
     def _schedule(self):
         all_sorted_tasks = self.get_tasks()
         if len(all_sorted_tasks) > 0:
@@ -359,22 +346,20 @@ class Scheduler():
             inventory_id_sources = self.get_inventory_source_tasks(all_sorted_tasks)
             self.process_inventory_sources(inventory_id_sources)
 
-            self.process_tasks(all_sorted_tasks)
+            running_workflow_tasks = self.get_running_workflow_jobs()
+            self.process_finished_workflow_jobs(running_workflow_tasks)
 
-        #print("Finished schedule()")
+            self.spawn_workflow_graph_jobs(running_workflow_tasks)
+
+            self.process_tasks(all_sorted_tasks)
 
     def schedule(self):
         with transaction.atomic():
-            #t1 = datetime.now()
             # Lock
             try:
                 Instance.objects.select_for_update(nowait=True).all()[0]
             except DatabaseError:
                 return
-
-            #workflow_jobs = get_running_workflow_jobs()
-            #process_finished_workflow_jobs(workflow_jobs)
-            #spawn_workflow_graph_jobs(workflow_jobs)
 
             '''
             Get tasks known by celery
@@ -386,11 +371,5 @@ class Scheduler():
                 return None
             '''
             self._schedule()
-
-        # Unlock, due to transaction ending
-        #t2 = datetime.now()
-        #t_diff = t2 - t1
-        #print("schedule() time %s" % (t_diff.total_seconds()))
-
 
 

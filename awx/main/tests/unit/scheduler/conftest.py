@@ -35,6 +35,7 @@ def scheduler_factory(mocker, epoch):
             raise RuntimeError("create_project_update should not be called")
 
         mocker.patch.object(sched, 'get_tasks', return_value=tasks)
+        mocker.patch.object(sched, 'get_running_workflow_jobs', return_value=[])
         mocker.patch.object(sched, 'get_inventory_source_tasks', return_value=inventory_sources)
         mocker.patch.object(sched, 'get_latest_project_update_tasks', return_value=latest_project_updates)
         mocker.patch.object(sched, 'get_latest_inventory_update_tasks', return_value=latest_inventory_updates)
