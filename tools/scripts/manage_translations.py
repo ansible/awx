@@ -72,7 +72,6 @@ def pull(lang=None, both=None):
 def push(lang=None, both=None):
     """
     Push django.pot to Zanata
-    project_type should be podir at Zanata
     """
     p = Popen("zanata push --project-config %(config)s --disable-ssl-cert" %
               {'config': PROJECT_CONFIG}, stdout=PIPE, stderr=PIPE, shell=True)

@@ -3567,8 +3567,8 @@ class UnifiedJobStdout(RetrieveAPIView):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
         if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            response_message = "Standard Output too large to display (%(text_size)d bytes), " \
-                               "only download supported for sizes over %(supported_size)d bytes" % \
+            response_message = _("Standard Output too large to display (%(text_size)d bytes), "
+                                 "only download supported for sizes over %(supported_size)d bytes") % \
                                {'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
