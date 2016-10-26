@@ -5,7 +5,7 @@
             1
         </div>
         <div class="JobResultsStdOut-stdoutColumn">
-            this is some lines of stdout
+            Vault password:
         </div>
     </div>
 
@@ -14,7 +14,7 @@
             2
         </div>
         <div class="JobResultsStdOut-stdoutColumn">
-            this is some lines of stdout
+            PLAY [Create Tower Host] *******************************************************
         </div>
     </div>
 
@@ -23,7 +23,8 @@
             3
         </div>
         <div class="JobResultsStdOut-stdoutColumn">
-            this is some lines of stdout
+            TASK [create_ec2_instances : Launch Instance] **********************************
+            changed: [local]
         </div>
     </div>
 
@@ -32,7 +33,13 @@
             4
         </div>
         <div class="JobResultsStdOut-stdoutColumn">
-            this is some lines of stdout
+            TASK [create_ec2_instances : Instance Ids] *************************************
+            [DEPRECATION WARNING]: Using bare variables is deprecated. Update your
+            playbooks so that the environment value uses the full variable syntax
+            ('{{ec2.instances}}').
+            This feature will be removed in a future release.
+            Deprecation warnings can be disabled by setting deprecation_warnings=False in
+            ansible.cfg.
         </div>
     </div>
 
