@@ -1087,6 +1087,14 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
     serializer_class = ProjectUpdateSerializer
     new_in_13 = True
 
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        for unified_job_node in obj.unified_job_nodes.all():
+            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
+                                                        'running', 'updating'):
+                raise PermissionDenied()
+        return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
+
 class ProjectUpdateCancel(RetrieveAPIView):
 
     model = ProjectUpdate
@@ -2166,6 +2174,14 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
     serializer_class = InventoryUpdateSerializer
     new_in_14 = True
 
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        for unified_job_node in obj.unified_job_nodes.all():
+            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
+                                                        'running', 'updating'):
+                raise PermissionDenied()
+        return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
+
 class InventoryUpdateCancel(RetrieveAPIView):
 
     model = InventoryUpdate
@@ -2868,6 +2884,14 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        for unified_job_node in obj.unified_job_nodes.all():
+            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
+                                                        'running', 'updating'):
+                raise PermissionDenied()
+        return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 class JobLabelList(SubListAPIView):
 
