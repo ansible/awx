@@ -21,12 +21,21 @@ module.exports = function(grunt) {
     // writes environment variables for development. current manages:
     // browser-sync + websocket proxy
 
+    grunt.registerTask('sync', [
+        'browserSync:http',
+        'concurrent:watch'
+    ]);
+
     grunt.registerTask('dev', [
         'clean:tmp',
         'clean:static',
         'concurrent:dev',
-        'browserSync:http',
-        'concurrent:watch'
+    ]);
+
+    grunt.registerTask('devNoSync', [
+        'clean:tmp',
+        'clean:static',
+        'concurrent:devNoSync',
     ]);
 
     grunt.registerTask('release', [

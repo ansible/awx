@@ -16,8 +16,9 @@
     "npm": "^3.10.3"
   },
   "scripts": {
-    "build-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev",
-    "build-docker-cid": "ip=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DOCkER_CID` | npm set config ansible-tower:django_host ${ip}; grunt dev",
+    "build-docker-machine": "grunt dev; ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt sync",
+    "build-docker-cid": "grunt dev; ip=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DOCkER_CID` | npm set config ansible-tower:django_host ${ip}; grunt sync",
+    "build-devel": "grunt devNoSync",
     "pot": "grunt nggettext_extract",
     "languages": "grunt nggettext_compile",
     "build-release": "grunt release",
