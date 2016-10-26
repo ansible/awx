@@ -2322,6 +2322,8 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
                     raise serializers.ValidationError({
                         "job_type": "%s is not a valid job type. The choices are %s." % (
                             attrs['char_prompts']['job_type'], job_types)})
+        if self.instance is None and 'workflow_job_template' not in attrs:
+            raise serializers.ValidationError({"workflow_job_template": "Workflow job template is missing during creation"})
         ujt_obj = attrs.get('unified_job_template', None)
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
