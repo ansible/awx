@@ -579,7 +579,7 @@ ui-docker: $(UI_DEPS_FLAG_FILE)
 ui-devel: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-devel
 
-ui-release: languages $(UI_RELEASE_FLAG_FILE)
+ui-release: $(UI_RELEASE_FLAG_FILE)
 
 # todo: include languages target when .po deliverables are added to source control
 $(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)

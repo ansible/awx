@@ -32,7 +32,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 
-PROJECT_CONFIG = "config/zanata.xml"
+PROJECT_CONFIG = "tools/scripts/zanata_config/backend-trans-config.xml"
 MIN_TRANS_PERCENT_SETTING = False
 MIN_TRANS_PERCENT = '10'
 
