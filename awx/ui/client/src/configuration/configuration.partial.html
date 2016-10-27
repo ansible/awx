@@ -1,0 +1,22 @@
+<div class="tab-pane" id="configuration-panel">
+    <div ng-cloak id="htmlTemplate" class="Panel">
+        <div class="Form-header">
+            <div class="Form-title">Configure Tower</div>
+        </div>
+        <div class="row Form-tabRow">
+            <div class="col-lg-12">
+                <div class="Form-tabHolder">
+                    <div class="Form-tab" ng-click="vm.activeTabCheck('auth')" ng-class="{'is-selected': vm.activeTab === 'auth' }">Authorization</div>
+                    <div class="Form-tab" ng-click="vm.activeTabCheck('jobs')" ng-class="{'is-selected': vm.activeTab === 'jobs' }">Jobs</div>
+                    <div class="Form-tab" ng-click="vm.activeTabCheck('system')" ng-class="{'is-selected': vm.activeTab === 'system' }">System</div>
+                    <div class="Form-tab" ng-click="vm.activeTabCheck('ui')" ng-class="{'is-selected': vm.activeTab === 'ui' }">UI</div>
+                </div>
+            </div>
+        </div>
+        <div ui-view="auth" ng-show="vm.activeTab === 'auth'"></div>
+        <div ui-view="jobs" ng-show="vm.activeTab === 'jobs'"></div>
+        <div ui-view="system" ng-show="vm.activeTab === 'system'"></div>
+        <div ui-view="ui" ng-show="vm.activeTab === 'ui'"></div>
+        <div id="FormModal-dialog"></div>
+    </div>
+</div>

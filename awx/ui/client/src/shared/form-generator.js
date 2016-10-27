@@ -478,6 +478,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             let cls = action["class"] || "";
                             html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
+
+                        if(field.reset) {
+                            var resetValue = "'" + field.reset+ "'";
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">Reset</a>`;
+                        }
+
                         html += "\n\t</label>\n";
                     }
                     return html;
@@ -534,6 +540,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
                     html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
+
+                    // toggle switches
+                    if(field.type === 'toggleSwitch') {
+                        html += label();
+                            html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
+                            data-placement="undefined" data-tip-watch="undefined" data-original-title="" title="">
+                            <div ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</div>
+                            <div ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</div>
+                        </div>`;
+                    }
 
                     //text fields
                     if (field.type === 'text' || field.type === 'password' || field.type === 'email') {

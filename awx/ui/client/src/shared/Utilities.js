@@ -228,7 +228,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                             scope[field + '_api_error'] = data[form.fields[field]][0];
                             //scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
                             $('[name="' + form.fields[field].realName + '"]').addClass('ng-invalid');
-                            $('[name="' + form.fields[field].realName + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
+                            $('html, body').animate({scrollTop: $('[name="' + form.fields[field].realName + '"]').offset().top}, 0);
                             fieldErrors = true;
                         }
                     }
@@ -246,7 +246,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                             scope[field + '_api_error'] = data[field][0];
                             //scope[form.name + '_form'][field].$setValidity('apiError', false);
                             $('[name="' + field + '"]').addClass('ng-invalid');
-                            $('[name="' + field + '"]').ScrollTo({ "onlyIfOutside": true, "offsetTop": 100 });
+                            $('html, body').animate({scrollTop: $('[name="' + field + '"]').offset().top}, 0);
                             fieldErrors = true;
                         }
                     }
