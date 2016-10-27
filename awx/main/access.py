@@ -1221,7 +1221,8 @@ class JobAccess(BaseAccess):
         return True
 
     def can_change(self, obj, data):
-        return obj.status == 'new' and self.can_read(obj) and self.can_add(data)
+        return obj.status == 'new' and self.can_read(obj) and\
+                self.can_add(data, validate_license=False)
 
     @check_superuser
     def can_delete(self, obj):
