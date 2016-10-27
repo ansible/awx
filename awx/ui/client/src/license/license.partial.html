@@ -2,91 +2,91 @@
 	ng-class="{'License-container--missing': licenseMissing}">
 	<div class="License-details" ng-hide="licenseMissing">
 		<div class="Panel">
-			<div class="License-titleText">Details</div>
+			<div class="License-titleText" translate>Details</div>
 			<div class="License-fields">
 				<div class="License-field">
-					<div class="License-field--label">License</div>
+					<div class="License-field--label" translate>License</div>
 					<div class="License-field--content">
-					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i>Valid License</span>
-					<span class="License-redText" ng-show='!compliant'><i class="fa fa-circle License-redText"></i>Invalid License</span>
+					<span class="License-greenText" ng-show='compliant'><i class="fa fa-circle License-greenText"></i><translate>Valid License</translate></span>
+					<span class="License-redText" ng-show='!compliant'><i class="fa fa-circle License-redText"></i><translate>Invalid License</transalte></span>
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Version</div>
+					<div class="License-field--label" translate>Version</div>
 					<div class="License-field--content">
 					{{license.version}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">License Type</div>
+					<div class="License-field--label" translate>License Type</div>
 					<div class="License-field--content">
 					{{license.license_info.license_type}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Subscription</div>
+					<div class="License-field--label" translate>Subscription</div>
 					<div class="License-field--content">
 					{{license.license_info.subscription_name}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">License Key</div>
+					<div class="License-field--label" translate>License Key</div>
 					<div class="License-field--content License-field--key">
 					{{license.license_info.license_key}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Expires On</div>
+					<div class="License-field--label" translate>Expires On</div>
 					<div class="License-field--content">
 					{{time.expiresOn}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Time Remaining</div>
+					<div class="License-field--label" translate>Time Remaining</div>
 					<div class="License-field--content"
 						ng-class="{'License-redText': time.remaining=='0 Days'}">
 					{{time.remaining}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Hosts Available</div>
+					<div class="License-field--label" translate>Hosts Available</div>
 					<div class="License-field--content">
 					{{license.license_info.available_instances}}
 					</div>
 				</div>
 				<div class="License-field">
-					<div class="License-field--label">Hosts Used</div>
+					<div class="License-field--label" translate>Hosts Used</div>
 					<div class="License-field--content">
 					{{license.license_info.current_instances}}
 					</div>
 				</div>
 				<div class="License-field License-greenText">
-					<div class="License-field--label">Hosts Remaining</div>
+					<div class="License-field--label" translate>Hosts Remaining</div>
 					<div class="License-field--content">
 					{{license.license_info.free_instances}}
 					</div>
 				</div>
 			</div>
-			<div class="License-upgradeText">If you are ready to upgrade, please contact us by clicking the button below</div>
-			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-primary">Upgrade</button></a>
+			<div class="License-upgradeText" translate>If you are ready to upgrade, please contact us by clicking the button below</div>
+			<a href="https://www.ansible.com/renew" target="_blank"><button class="btn btn-primary" translate>Upgrade</button></a>
 		</div>
 	</div>
 	<div class="License-management" ng-class="{'License-management--missingLicense' : licenseMissing}">
 		<div class="Panel">
 			<div class="License-titleText">{{title}}</div>
 			<div class="License-body">
-				<div class="License-helperText" ng-if="licenseMissing">Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
+				<div class="License-helperText" ng-if="licenseMissing" translate>Welcome to Ansible Tower! Please complete the steps below to acquire a license.</div>
 				<div class="AddPermissions-directions" ng-if="licenseMissing">
 					<span class="AddPermissions-directionNumber">
 						1
 					</span>
 					<span class="License-helperText">
-						Please click the button below to visit Ansible's website to get a Tower license key.
+						<translate>Please click the button below to visit Ansible's website to get a Tower license key.</translate>
 					</span>
 				</div>
 
 					<button class="License-downloadLicenseButton btn btn-primary" ng-if="licenseMissing" ng-click="downloadLicense()">
-						Request License
+						<translate>Request License</translate>
 					</button>
 
 				<div class="AddPermissions-directions">
@@ -94,18 +94,18 @@
 						2
 					</span>
 					<span class="License-helperText">
-						Choose your license file, agree to the End User License Agreement, and click submit.
+						<translate>Choose your license file, agree to the End User License Agreement, and click submit.</translate>
 					</span>
 				</div>
 
 				<form id="License-form" name="license">
-					<div class="License-subTitleText prepend-asterisk"> License File</div>
+					<div class="License-subTitleText prepend-asterisk"> <translate>License File</translate></div>
 					<div class="input-group License-file--container">
-						<span class="btn btn-primary" ng-click="fakeClick()">Browse</span>
-						<span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName}}</span>
+						<span class="btn btn-primary" ng-click="fakeClick()" translate>Browse</span>
+                                                <span class="License-fileName" ng-class="{'License-helperText' : fileName == 'No file selected.'}">{{fileName|translate}}</span>
 						<input id="License-file" class="form-control" type="file" file-on-change="getKey"/>
 					</div>
-					<div class="License-subTitleText prepend-asterisk"> End User License Agreement
+					<div class="License-subTitleText prepend-asterisk"> <translate>End User License Agreement</translate>
 					</div>
 					<div id="eula_notice"
 						class="License-eulaNotice">{{ license.eula }}</div>
@@ -113,13 +113,13 @@
 						<div class="checkbox">
 							<label class="License-details--label">
 								<input type="checkbox" ng-model="newLicense.eula" required>
-								I agree to the End User License Agreement
+								<translate>I agree to the End User License Agreement</translate>
 							</label>
 						</div>
 					</div>
 					<div class="License-submit--container">
-						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null">Submit</button>
-						<span ng-show="success == true" class="License-greenText License-submit--success pull-right">Save successful!</span>
+						<button ng-click="submit()" class="btn btn-success pull-right" ng-disabled="newLicense.file.license_key == null || newLicense.eula == null" translate>Submit</button>
+						<span ng-show="success == true" class="License-greenText License-submit--success pull-right" translate>Save successful!</span>
 					</div>
 				</form>
 			</div>

@@ -81,7 +81,7 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
-DEBUILD_OPTS = 
+DEBUILD_OPTS =
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
 REPREPRO_BIN ?= reprepro
@@ -184,7 +184,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball \
-	ui-docker-machine ui-docker ui-release \
+	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
 
 
@@ -229,6 +229,7 @@ clean-venv:
 
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf tmp
@@ -506,6 +507,43 @@ test_jenkins : test_coverage
 # UI TASKS
 # --------------------------------------
 
+HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
+check-po:
+ifdef HAVE_PO
+	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
+	for po in awx/ui/po/*.po ; do \
+	    echo $$po; \
+	    mo="awx/ui/po/`basename $$po .po`.mo"; \
+	    msgfmt --check --verbose $$po -o $$mo; \
+	    if test "$$?" -ne 0 ; then \
+	        exit -1; \
+	    fi; \
+	    rm $$mo; \
+	    name=`echo "$$po" | grep '-'`; \
+	    if test "x$$name" != x ; then \
+	        right_name=`echo $$language | sed -e 's/-/_/'`; \
+	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
+	        exit -1; \
+	    fi; \
+	    language=`grep '^"Language:' "$$po" | grep '_'`; \
+	    if test "x$$language" != x ; then \
+	        right_language=`echo $$language | sed -e 's/_/-/'`; \
+	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
+	        exit -1; \
+	    fi; \
+	done;
+else
+	@echo No PO files
+endif
+
+# generate l10n .json
+languages: $(UI_DEPS_FLAG_FILE) check-po
+	$(NPM_BIN) --prefix awx/ui run languages
+
+# generate .pot
+pot: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run pot
+
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
 $(UI_DEPS_FLAG_FILE): awx/ui/package.json
@@ -518,8 +556,13 @@ ui-docker-machine: $(UI_DEPS_FLAG_FILE)
 ui-docker: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-docker-cid
 
+# Builds UI with development/debug settings enabled. Does not raise browser-sync or filesystem polling.
+ui-devel: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-devel
+
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
+# todo: include languages target when .po deliverables are added to source control
 $(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)

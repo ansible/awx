@@ -7,14 +7,15 @@
 
 export default
     angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
-    .value( 'ScheduledJobsList', {
+    .factory('ScheduledJobsList', ['i18n', function(i18n) {
+    return {
 
         name: 'schedules',
         iterator: 'schedule',
-        editTitle: 'Scheduled Jobs',
+        editTitle: i18n._('Scheduled Jobs'),
         hover: true,
         well: false,
-        emptyListText: 'No schedules exist',
+        emptyListText: i18n._('No schedules exist'),
 
         fields: {
             enabled: {
@@ -29,7 +30,7 @@ export default
                 dataPlacement: 'top'
             },
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
@@ -40,7 +41,7 @@ export default
                 defaultSearchField: true
             },
             type: {
-                label: 'Type',
+                label: i18n._('Type'),
                 noLink: true,
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
@@ -52,15 +53,15 @@ export default
                 searchable: true,
                 searchType: 'select',
                 searchOptions: [
-                    { value: 'inventorysource', label: 'Inventory Sync' },
-                    { value: 'jobtemplate', label: 'Playbook Run' },
-                    { value: 'project', label: 'SCM Update' },
-                    { value: 'systemjobtemplate', label: 'Management Job'}
+                    { value: 'inventorysource', label: i18n._('Inventory Sync') },
+                    { value: 'jobtemplate', label: i18n._('Playbook Run') },
+                    { value: 'project', label: i18n._('SCM Update') },
+                    { value: 'systemjobtemplate', label: i18n._('Management Job')}
 
                 ]
             },
             next_run: {
-                label: 'Next Run',
+                label: i18n._('Next Run'),
                 noLink: true,
                 searchable: false,
                 columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
@@ -77,23 +78,23 @@ export default
             "edit": {
                 mode: "all",
                 ngClick: "editSchedule(schedule)",
-                awToolTip: "Edit the schedule",
+                awToolTip: i18n._("Edit the schedule"),
                 dataPlacement: "top",
                 ngShow: 'schedule.summary_fields.user_capabilities.edit'
             },
             "view": {
                 mode: "all",
                 ngClick: "editSchedule(schedule)",
-                awToolTip: "View the schedule",
+                awToolTip: i18n._("View the schedule"),
                 dataPlacement: "top",
                 ngShow: '!schedule.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteSchedule(schedule.id)',
-                awToolTip: 'Delete the schedule',
+                awToolTip: i18n._('Delete the schedule'),
                 dataPlacement: 'top',
                 ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

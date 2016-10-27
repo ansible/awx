@@ -4,13 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
+import {N_} from "../i18n";
+
 export default
     ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
     'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
-    'ConfigService', 'FeaturesService', 'pendoService',
+    'ConfigService', 'FeaturesService', 'pendoService', 'i18n',
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
         ProcessErrors, CheckLicense, moment, $window, ConfigService,
-        FeaturesService, pendoService){
+        FeaturesService, pendoService, i18n){
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -90,8 +92,9 @@ export default
         };
 
         var init = function(){
-            $scope.fileName = "No file selected.";
-            $scope.title = $rootScope.licenseMissing ? "Tower License" : "License Management";
+            // license/license.partial.html compares fileName
+            $scope.fileName = N_("No file selected.");
+            $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
             Wait('start');
             ConfigService.getConfig().then(function(config){
                 $scope.license = config;

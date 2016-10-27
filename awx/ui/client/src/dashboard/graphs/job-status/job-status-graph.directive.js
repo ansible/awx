@@ -13,10 +13,11 @@
         'adjustGraphSize',
         'jobStatusGraphData',
         'templateUrl',
+        'i18n',
         JobStatusGraph
     ];
 
-function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService, templateUrl) {
+function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService, templateUrl, i18n) {
             return {
                 restrict: 'E',
                 scope: {
@@ -60,10 +61,10 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
 
                     var timeFormat, graphData = [
                         {   "color": "#5CB85C",
-                            "key": "SUCCESSFUL",
+                            "key": i18n._("SUCCESSFUL"),
                             "values": data.jobs.successful
                         },
-                        {   "key" : "FAILED" ,
+                        {   "key" : i18n._("FAILED") ,
                             "color" : "#D9534F",
                             "values": data.jobs.failed
                         }
@@ -102,14 +103,14 @@ function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustG
                     job_status_chart.interactiveLayer.tooltip.distance(-1); //distance from interactive line to tooltip
 
                     job_status_chart.xAxis
-                    .axisLabel("TIME")//.showMaxMin(true)
+                    .axisLabel(i18n._("TIME"))//.showMaxMin(true)
                     .tickFormat(function(d) {
                         var dx = graphData[0].values[d] && graphData[0].values[d].x || 0;
                         return dx ? d3.time.format(timeFormat)(new Date(Number(dx+'000'))) : '';
                     });
 
                     job_status_chart.yAxis     //Chart y-axis settings
-                    .axisLabel('JOBS')
+                    .axisLabel(i18n._('JOBS'))
                     .tickFormat(d3.format('.f'));
 
                     d3.select(element.find('svg')[0])

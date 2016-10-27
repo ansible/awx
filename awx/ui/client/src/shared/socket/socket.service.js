@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q', 'Authorization',
-    function ($rootScope, $location, $log, $state, $q, Authorization) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n',
+    function ($rootScope, $location, $log, $state, $q, i18n) {
         var needsResubscribing = false,
         socketPromise = $q.defer();
         return {
@@ -168,15 +168,15 @@ export default
                     if(self.socket){
                         if (self.socket.readyState === 0 ) {
                             $rootScope.socketStatus = 'connecting';
-                            $rootScope.socketTip = "Live events: attempting to connect to the Tower server.";
+                            $rootScope.socketTip = i18n._("Live events: attempting to connect to the Tower server.");
                         }
                         else if (self.socket.readyState === 1){
                             $rootScope.socketStatus = 'ok';
-                            $rootScope.socketTip = "Live events: connected. Pages containing job status information will automatically update in real-time.";
+                            $rootScope.socketTip = i18n._("Live events: connected. Pages containing job status information will automatically update in real-time.");
                         }
                         else if (self.socket.readyState === 2 || self.socket.readyState === 3 ){
                             $rootScope.socketStatus = 'error';
-                            $rootScope.socketTip = "Live events: error connecting to the Tower server.";
+                            $rootScope.socketTip = i18n._("Live events: error connecting to the Tower server.");
                         }
                         return;
                     }

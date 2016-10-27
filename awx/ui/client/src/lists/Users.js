@@ -7,13 +7,14 @@
 
 export default
     angular.module('UserListDefinition', [])
-    .value('UserList', {
+    .factory('UserList', ['i18n', function(i18n) {
+    return {
 
         name: 'users',
         iterator: 'user',
-        selectTitle: 'Add Users',
-        editTitle: 'Users',
-        listTitle: 'Users',
+        selectTitle: i18n._('Add Users'),
+        editTitle: i18n._('Users'),
+        listTitle: i18n._('Users'),
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>When available, a brand new user can be created by clicking the ' +
             '<i class=\"fa fa-plus\"></i> button.</p>',
@@ -23,15 +24,15 @@ export default
         fields: {
             username: {
                 key: true,
-                label: 'Username',
+                label: i18n._('Username'),
                 columnClass: 'col-md-3 col-sm-3 col-xs-9'
             },
             first_name: {
-                label: 'First Name',
+                label: i18n._('First Name'),
                 columnClass: 'col-md-3 col-sm-3 hidden-xs'
             },
             last_name: {
-                label: 'Last Name',
+                label: i18n._('Last Name'),
                 columnClass: 'col-md-3 col-sm-3 hidden-xs'
             }
         },
@@ -42,9 +43,9 @@ export default
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations', 'users'], // base path must be in list, or action not available
-                awToolTip: 'Create a new user',
+                awToolTip: i18n._('Create a new user'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD',
+                buttonContent: i18n._('&#43; ADD'),
                 ngShow: 'canAdd'
             }
         },
@@ -54,32 +55,32 @@ export default
             columnClass: 'col-md-3 col-sm-3 col-xs-3',
 
             edit: {
-                label: 'Edit',
+                label: i18n._('Edit'),
                 ngClick: "editUser(user.id)",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'Edit user',
+                awToolTip: i18n._('Edit user'),
                 dataPlacement: 'top',
                 ngShow: 'user.summary_fields.user_capabilities.edit'
             },
 
             view: {
-                label: 'View',
+                label: i18n._('View'),
                 ngClick: "editUser(user.id)",
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View user',
+                awToolTip: i18n._('View user'),
                 dataPlacement: 'top',
                 ngShow: '!user.summary_fields.user_capabilities.edit'
             },
 
             "delete": {
-                label: 'Delete',
+                label: i18n._('Delete'),
                 ngClick: "deleteUser(user.id, user.username)",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete user',
+                awToolTip: i18n._('Delete user'),
                 dataPlacement: 'top',
                 ngShow: 'user.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

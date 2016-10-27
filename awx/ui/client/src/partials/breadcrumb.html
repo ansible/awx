@@ -1,8 +1,8 @@
 <ol class="BreadCrumb-list">
     <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:(steps.length-1)">
-        <a href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel}}</a>
+        <a href="{{step.ncyBreadcrumbLink}}">{{step.ncyBreadcrumbLabel|translate}}</a>
     </li>
     <li class="BreadCrumb-item" ng-repeat="step in steps | limitTo:-1" class="active">
-        <span>{{step.ncyBreadcrumbLabel}}</span>
+        <span>{{step.ncyBreadcrumbLabel|translate}}</span>
     </li>
 </ol>

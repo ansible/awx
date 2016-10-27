@@ -12,9 +12,10 @@
 
 export default
     angular.module('UserFormDefinition', [])
-        .value('UserForm', {
+        .factory('UserForm', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New User',
+            addTitle: i18n._('New User'),
             editTitle: '{{ username }}',
             name: 'user',
             forceListeners: true,
@@ -22,7 +23,7 @@ export default
 
             fields: {
                 first_name: {
-                    label: 'First Name',
+                    label: i18n._('First Name'),
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
@@ -30,7 +31,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 last_name: {
-                    label: 'Last Name',
+                    label: i18n._('Last Name'),
                     type: 'text',
                     addRequired: true,
                     editRequired: true,
@@ -38,7 +39,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 email: {
-                    label: 'Email',
+                    label: i18n._('Email'),
                     type: 'email',
                     addRequired: true,
                     editRequired: true,
@@ -46,7 +47,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 username: {
-                    label: 'Username',
+                    label: i18n._('Username'),
                     type: 'text',
                     awRequiredWhen: {
                         reqExpression: "not_ldap_user && external_account === null",
@@ -56,7 +57,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
-                    label: 'Organization',
+                    label: i18n._('Organization'),
                     type: 'lookup',
                     sourceModel: 'organization',
                     sourceField: 'name',
@@ -71,7 +72,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password: {
-                    label: 'Password',
+                    label: i18n._('Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
@@ -83,7 +84,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password_confirm: {
-                    label: 'Confirm Password',
+                    label: i18n._('Confirm Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
@@ -95,7 +96,7 @@ export default
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 user_type: {
-                    label: 'User Type',
+                    label: i18n._('User Type'),
                     type: 'select',
                     ngOptions: 'item as item.label for item in user_type_options track by item.type',
                     disableChooseOption: true,
@@ -124,10 +125,10 @@ export default
             related: {
                 organizations: {
                     basePath: 'users/:id/organizations',
-                    awToolTip: 'Please save before assigning to organizations',
+                    awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Organizations',
+                    title: i18n._('Organizations'),
                     iterator: 'organization',
                     index: false,
                     open: false,
@@ -147,10 +148,10 @@ export default
                 },
                 teams: {
                     basePath: 'users/:id/teams',
-                    awToolTip: 'Please save before assigning to teams',
+                    awToolTip: i18n._('Please save before assigning to teams'),
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Teams',
+                    title: i18n._('Teams'),
                     iterator: 'team',
                     open: false,
                     index: false,
@@ -168,39 +169,39 @@ export default
                     hideOnSuperuser: true
                 },
                 roles: {
-                    awToolTip: 'Please save before assigning to organizations',
+                    awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: 'Granted permissions',
+                    title: i18n._('Granted permissions'),
                     iterator: 'permission',
                     open: false,
                     index: false,
-                    emptyListText: 'No permissions have been granted',
+                    emptyListText: i18n._('No permissions have been granted'),
                     fields: {
                         name: {
-                            label: 'Name',
+                            label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
                             linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
                             noSort: true
                         },
                         type: {
-                            label: 'Type',
+                            label: i18n._('Type'),
                             ngBind: 'permission.summary_fields.resource_type_display_name',
                             noSort: true
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             ngBind: 'permission.name',
                             noSort: true
                         },
                     },
                     fieldActions: {
                         "delete": {
-                            label: 'Remove',
+                            label: i18n._('Remove'),
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
-                            awToolTip: 'Dissasociate permission from user',
+                            awToolTip: i18n._('Dissasociate permission from user'),
                             ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
@@ -208,4 +209,4 @@ export default
                 }
             }
 
-        });
+        };}]);
