@@ -33,19 +33,19 @@ def run_scheduler():
 
 @task
 def run_fail_inconsistent_running_jobs():
-    return
-    print("run_fail_inconsistent_running_jobs() running")
     with transaction.atomic():
         # Lock
         try:
             Instance.objects.select_for_update(nowait=True).all()[0]
             scheduler = Scheduler()
-            active_tasks = scheduler.get_activate_tasks()
+            active_tasks = scheduler.get_active_tasks()
+
             if active_tasks is None:
+                # TODO: Failed to contact celery. We should surface this.
                 return None
 
-            all_sorted_tasks = scheduler.get_tasks()
-            scheduler.process_celery_tasks(active_tasks, all_sorted_tasks)
+            all_running_sorted_tasks = scheduler.get_running_tasks()
+            scheduler.process_celery_tasks(active_tasks, all_running_sorted_tasks)
         except DatabaseError:
             return
 
