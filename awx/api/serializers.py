@@ -1847,7 +1847,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
             if not project and job_type != PERM_INVENTORY_SCAN:
                 raise serializers.ValidationError({'project': 'This field is required.'})
-            if project and playbook and force_text(playbook) not in project.playbooks:
+            if project and playbook and force_text(playbook) not in project.playbook_files:
                 raise serializers.ValidationError({'playbook': 'Playbook not found for project.'})
             if project and not playbook:
                 raise serializers.ValidationError({'playbook': 'Must select playbook for project.'})

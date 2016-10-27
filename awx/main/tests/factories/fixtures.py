@@ -74,7 +74,8 @@ def mk_user(name, is_superuser=False, organization=None, team=None, persisted=Tr
 
 def mk_project(name, organization=None, description=None, persisted=True):
     description = description or '{}-description'.format(name)
-    project = Project(name=name, description=description)
+    project = Project(name=name, description=description,
+                      playbook_files=['helloworld.yml', 'alt-helloworld.yml'])
     if organization is not None:
         project.organization = organization
     if persisted:
@@ -134,7 +135,7 @@ def mk_job_template(name, job_type='run',
         extra_vars = json.dumps(extra_vars)
 
     jt = JobTemplate(name=name, job_type=job_type, extra_vars=extra_vars,
-                     playbook='mocked')
+                     playbook='helloworld.yml')
 
     jt.inventory = inventory
     if jt.inventory is None:
