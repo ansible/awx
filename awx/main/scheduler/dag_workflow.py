@@ -42,7 +42,9 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(children_all)
             elif job.status in ['successful']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
-                nodes.extend(children_success)
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_success + children_always
+                nodes.extend(children_all)
         return [n['node_object'] for n in nodes_found]
 
     def is_workflow_done(self):
@@ -67,6 +69,8 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(children_all)
             elif job.status in ['successful']:
                 children_success = self.get_dependencies(obj, 'success_nodes')
-                nodes.extend(children_success)
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_success + children_always
+                nodes.extend(children_all)
         return True
 

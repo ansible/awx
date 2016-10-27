@@ -139,6 +139,7 @@ class TestWorkflowJobCreate:
                 char_prompts=wfjt_node_no_prompts.char_prompts,
                 inventory=None, credential=None,
                 unified_job_template=wfjt_node_no_prompts.unified_job_template,
+                fail_on_job_failure=True,
                 workflow_job=workflow_job_unit)
 
     def test_create_with_prompts(self, wfjt_node_with_prompts, workflow_job_unit, mocker):
@@ -150,6 +151,7 @@ class TestWorkflowJobCreate:
                 inventory=wfjt_node_with_prompts.inventory,
                 credential=wfjt_node_with_prompts.credential,
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
+                fail_on_job_failure=True,
                 workflow_job=workflow_job_unit)
 
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
@@ -215,7 +217,7 @@ class TestWorkflowWarnings:
 
     def test_warn_scan_errors_node_prompts(self, job_node_with_prompts):
         job_node_with_prompts.unified_job_template.job_type = 'scan'
-        job_node_with_prompts.job_type = 'run'
+        job_node_with_prompts.char_prompts['job_type'] = 'run'
         job_node_with_prompts.inventory = Inventory(name='different-inventory', pk=23)
         assert 'ignored' in job_node_with_prompts.get_prompts_warnings()
         assert 'job_type' in job_node_with_prompts.get_prompts_warnings()['ignored']

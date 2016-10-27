@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config xmlns="http://zanata.org/namespace/config/">
     <url>https://translate.stage.engineering.redhat.com/</url>
-    <project>ansible-tower</project>
-    <project-version>master</project-version>
-    <project-type>gettext</project-type>
+    <project>ansible-django</project>
+    <project-version>devel</project-version>
+    <project-type>podir</project-type>
     <src-dir>awx/locale</src-dir>
     <trans-dir>awx/locale</trans-dir>
     <rules>

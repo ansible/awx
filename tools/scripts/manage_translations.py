@@ -33,6 +33,8 @@ from django.core.management import call_command
 
 
 PROJECT_CONFIG = "config/zanata.xml"
+MIN_TRANS_PERCENT_SETTING = False
+MIN_TRANS_PERCENT = '10'
 
 
 def _handle_response(output, errors):
@@ -59,7 +61,11 @@ def pull(lang=None, both=None):
     """
     Pull translations .po from Zanata
     """
+
     command = "zanata pull --project-config %(config)s --disable-ssl-cert"
+
+    if MIN_TRANS_PERCENT_SETTING:
+        command += " --min-doc-percent " + MIN_TRANS_PERCENT
     if lang:
         command += " --lang %s" % lang[0]
 
@@ -72,6 +78,9 @@ def pull(lang=None, both=None):
 def push(lang=None, both=None):
     """
     Push django.pot to Zanata
+    At Zanata:
+        (1) project_type should be podir - {locale}/{filename}.po format
+        (2) only required languages should be kept enabled
     """
     p = Popen("zanata push --project-config %(config)s --disable-ssl-cert" %
               {'config': PROJECT_CONFIG}, stdout=PIPE, stderr=PIPE, shell=True)

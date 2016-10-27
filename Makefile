@@ -184,7 +184,7 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
 	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
 	clean-bundle setup_bundle_tarball \
-	ui-docker-machine ui-docker ui-release \
+	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
 
 
@@ -573,6 +573,10 @@ ui-docker-machine: $(UI_DEPS_FLAG_FILE)
 
 ui-docker: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-docker-cid
+
+# Builds UI with development/debug settings enabled. Does not raise browser-sync or filesystem polling.
+ui-devel: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-devel
 
 ui-release: languages $(UI_RELEASE_FLAG_FILE)
 
