@@ -15,12 +15,12 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, smart_text
+from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
-from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
 from awx.main.models.jobs import Job
 from awx.main.models.notifications import (
