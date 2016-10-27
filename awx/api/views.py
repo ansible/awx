@@ -2669,8 +2669,10 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
                 related_nodes = getattr(workflow_node, node_type).all()
                 for related_node in related_nodes:
                     graph.add_edge(workflow_node, related_node, node_type)
-                    if not find and parent == workflow_node and\
-                       sub == related_node and self.relationship == node_type:
+                    if (not find and
+                        parent == workflow_node and
+                        sub == related_node and
+                        self.relationship == node_type):
                         find = True
         if not find:
             graph.add_edge(parent, sub, self.relationship)

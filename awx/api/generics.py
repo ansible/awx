@@ -412,6 +412,8 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         # Verify that the relationship to be added is valid.
         attach_errors = self.is_valid_relation(parent, sub)
         if attach_errors is not None:
+            if created:
+                sub.delete()
             return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Attach the object to the collection.
