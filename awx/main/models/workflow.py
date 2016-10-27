@@ -60,10 +60,6 @@ class WorkflowNodeBase(CreatedModifiedModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    fail_on_job_failure = models.BooleanField(
-        blank=True,
-        default=True,
-    )
     # Prompting-related fields
     inventory = models.ForeignKey(
         'Inventory',
@@ -157,7 +153,7 @@ class WorkflowNodeBase(CreatedModifiedModel):
         Return field names that should be copied from template node to job node.
         '''
         return ['workflow_job', 'unified_job_template',
-                'inventory', 'credential', 'char_prompts', 'fail_on_job_failure']
+                'inventory', 'credential', 'char_prompts']
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     # TODO: Ensure the API forces workflow_job_template being set
@@ -404,7 +400,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
         return RunWorkflowJob
 
     def _has_failed(self):
-        return self.workflow_job_nodes.filter(job__status='failed', fail_on_job_failure=True).exists()
+        return False
 
     def socketio_emit_data(self):
         return {}
