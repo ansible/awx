@@ -229,6 +229,7 @@ clean-venv:
 
 # Remove temporary build files, compiled Python files.
 clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf tmp
