@@ -51,6 +51,7 @@ def test_get_roles_list_user(organization, inventory, team, get, user):
     assert Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).id in role_hash
     assert organization.admin_role.id in role_hash
     assert organization.member_role.id in role_hash
+    assert this_user.admin_role.id in role_hash
     assert custom_role.id in role_hash
 
     assert inventory.admin_role.id not in role_hash
