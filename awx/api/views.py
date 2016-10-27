@@ -69,6 +69,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
+from awx.main.models.unified_jobs import ACTIVE_STATES
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1090,9 +1091,8 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
-                                                        'running', 'updating'):
-                raise PermissionDenied()
+            if unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -2177,9 +2177,8 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
-                                                        'running', 'updating'):
-                raise PermissionDenied()
+            if unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
 
 class InventoryUpdateCancel(RetrieveAPIView):
@@ -2888,9 +2887,8 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
         for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ('new', 'pending', 'waiting',
-                                                        'running', 'updating'):
-                raise PermissionDenied()
+            if unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 class JobLabelList(SubListAPIView):
