@@ -2404,7 +2404,6 @@ class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDeta
     serializer_class = LabelSerializer
     parent_model = JobTemplate
     relationship = 'labels'
-    new_in_300 = True
 
     def post(self, request, *args, **kwargs):
         # If a label already exists in the database, attach it instead of erroring out
@@ -2698,7 +2697,6 @@ class WorkflowJobTemplateList(ListCreateAPIView):
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateListSerializer
     always_allow_superuser = False
-    new_in_310 = True
 
     # TODO: RBAC
     '''
@@ -2716,12 +2714,10 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateSerializer
     always_allow_superuser = False
-    new_in_310 = True
 
 
 class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = WorkflowJobTemplate
-    new_in_310 = True
 
 
 # TODO:
@@ -2729,7 +2725,6 @@ class WorkflowJobTemplateLaunch(GenericAPIView):
 
     model = WorkflowJobTemplate
     serializer_class = EmptySerializer
-    new_in_310 = True
 
     def get(self, request, *args, **kwargs):
         data = {}
@@ -2755,12 +2750,6 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_job_template_nodes'
     parent_key = 'workflow_job_template'
-    new_in_310 = True
-
-    def update_raw_data(self, data):
-        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit', 'skip_tags']:
-            data[fd] = None
-        return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
 # TODO:
 class WorkflowJobTemplateJobsList(SubListAPIView):
@@ -2776,14 +2765,12 @@ class WorkflowJobList(ListCreateAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
-    new_in_310 = True
 
 # TODO:
 class WorkflowJobDetail(RetrieveDestroyAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobSerializer
-    new_in_310 = True
 
 class WorkflowJobWorkflowNodesList(SubListAPIView):
 
@@ -2793,7 +2780,6 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     parent_model = WorkflowJob
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
-    new_in_310 = True
 
 class SystemJobTemplateList(ListAPIView):
 
