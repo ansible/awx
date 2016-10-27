@@ -3,6 +3,7 @@
 .JobResultsStdOut{
     height: 100%;
     margin-top: 15px;
+    background-color: @default-no-items-bord;
 }
 
 .JobResultsStdOut-aLineOfStdOut{
@@ -10,16 +11,23 @@
 }
 
 .JobResultsStdOut-lineNumberColumn{
-    // flex: 1 0 auto;
-    background-color: @d7grey;
+    background-color: @default-list-header-bg;
     text-align: right;
-    padding-right: 10px;
-    color: @default-icon;
-    width: 100px;
+    padding: 10px 10px 10px;
+    color: @b7grey;
+    width: 75px;
+}
+
+.JobResultsStdOut-lineNumberColumn--first{
+    text-align: left;
+    padding: 0px;
 }
 
 .JobResultsStdOut-stdoutColumn{
-    background-color: @default-secondary-bg;
-    // flex: 6 0 auto;
+    padding: 10px 20px 10px 20px;
+    color: @default-interface-txt;
+}
 
+.JobResultsStdOut-stdoutColumn--first{
+    padding-top:0px;
 }

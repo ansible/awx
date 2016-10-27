@@ -4,7 +4,7 @@
 * All Rights Reserved
 *************************************************/
 
-export default ['jobResultsService', '$q', function(jobResultsService, $q){
+export default ['jobResultsService', 'parseStdoutService', '$q', function(jobResultsService, parseStdoutService, $q){
     var val = {};
 
     // Get the count of the last event
@@ -91,13 +91,15 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
             getPreviousCount(mungedEvent.counter, "play")
                 .then(count => {
                     mungedEvent.playCount = count + 1;
-                    mungedEvent.changes = ['playCount'];
+                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                    mungedEvent.changes = ['playCount', 'stdout'];
                 });
         } else if (event.event_name === 'playbook_on_task_start') {
             getPreviousCount(mungedEvent.counter, "task")
                 .then(count => {
                     mungedEvent.taskCount = count + 1;
-                    mungedEvent.changes = ['taskCount'];
+                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                    mungedEvent.changes = ['taskCount', 'stdout'];
                 });
         } else if (event.event_name === 'runner_on_ok' ||
             event.event_name === 'runner_on_async_ok') {
@@ -105,21 +107,24 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                     .then(count => {
                         mungedEvent.count = count;
                         mungedEvent.count.ok++;
-                        mungedEvent.changes = ['count'];
+                        mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                        mungedEvent.changes = ['count', 'stdout'];
                     });
         } else if (event.event_name === 'runner_on_skipped') {
             getPreviousCount(mungedEvent.counter)
                 .then(count => {
                     mungedEvent.count = count;
                     mungedEvent.count.skipped++;
-                    mungedEvent.changes = ['count'];
+                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                    mungedEvent.changes = ['count', 'stdout'];
                 });
         } else if (event.event_name === 'runner_on_unreachable') {
             getPreviousCount(mungedEvent.counter)
                 .then(count => {
                     mungedEvent.count = count;
                     mungedEvent.count.unreachable++;
-                    mungedEvent.changes = ['count'];
+                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                    mungedEvent.changes = ['count', 'stdout'];
                 });
         } else if (event.event_name === 'runner_on_error' ||
             event.event_name === 'runner_on_async_failed') {
@@ -127,15 +132,17 @@ export default ['jobResultsService', '$q', function(jobResultsService, $q){
                     .then(count => {
                         mungedEvent.count = count;
                         mungedEvent.count.failed++;
-                        mungedEvent.changes = ['count'];
+                        mungedEvent.stdout = event.stdout;
+                        mungedEvent.changes = ['count', 'stdout'];
                     });
         } else if (event.event_name === 'playbook_on_stats') {
             console.log(event.modified);
             // get the data for populating the host status bar
             mungedEvent.count = jobResultsService
                 .getCountsFromStatsEvent(event.event_data);
+            mungedEvent.stdout = event.stdout;
             mungedEvent.finishedTime = event.modified;
-            mungedEvent.changes = ['count', 'countFinished', 'finishedTime'];
+            mungedEvent.changes = ['count', 'countFinished', 'finishedTime', 'stdout'];
         } else {
         }
 

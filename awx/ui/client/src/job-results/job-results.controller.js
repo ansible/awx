@@ -79,6 +79,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     $scope.count = count.val;
     $scope.hostCount = getTotalHostCount(count.val);
     $scope.countFinished = count.countFinished;
+    $scope.stdoutArr = [];
 
     // EVENT STUFF BELOW
 
@@ -128,6 +129,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                         // look at event to update the host counts
                         // any more.
                         $scope.countFinished = true;
+                    }
+
+                    if(change === 'stdout'){
+                        $scope.stdoutArr.push(mungedEvent.stdout);
                     }
                 });
             }

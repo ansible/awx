@@ -51,8 +51,8 @@ export default {
             if (jobData.finished) {
                 // if the job is finished, grab the playbook_on_stats
                 // role to get the final count
-                Rest.setUrl(jobData.related.job_events +
-                    "?event=playbook_on_stats");
+                Rest.setUrl(jobData.related.job_events);// +
+                    // "?event=playbook_on_stats");
                 Rest.get()
                     .success(function(data) {
                         defer.resolve({

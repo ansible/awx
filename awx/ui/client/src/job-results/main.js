@@ -11,6 +11,7 @@ import route from './job-results.route.js';
 
 import jobResultsService from './job-results.service';
 import eventQueueService from './event-queue.service';
+import parseStdoutService from './parse-stdout.service';
 
 import durationFilter from './duration.filter';
 
@@ -21,4 +22,5 @@ export default
         }])
         .service('jobResultsService', jobResultsService)
         .service('eventQueue', eventQueueService)
+        .service('parseStdoutService', parseStdoutService)
         .filter('duration', durationFilter);
