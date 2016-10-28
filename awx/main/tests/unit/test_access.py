@@ -8,8 +8,16 @@ from awx.main.access import (
     BaseAccess,
     check_superuser,
     JobTemplateAccess,
+    SystemJobTemplateAccess,
 )
-from awx.main.models import Credential, Inventory, Project, Role, Organization
+
+from awx.main.models import (
+    Credential,
+    Inventory,
+    Project,
+    Role,
+    Organization,
+)
 
 
 @pytest.fixture
@@ -110,3 +118,12 @@ def test_jt_can_add_bad_data(user_unit):
     access = JobTemplateAccess(user_unit)
     assert not access.can_add({'asdf': 'asdf'})
 
+def test_system_job_template_can_start(mocker):
+    user = mocker.MagicMock(spec=User, id=1, is_system_auditor=True, is_superuser=False)
+    assert user.is_system_auditor
+    access = SystemJobTemplateAccess(user)
+    assert not access.can_start(None)
+
+    user.is_superuser = True
+    access = SystemJobTemplateAccess(user)
+    assert access.can_start(None)

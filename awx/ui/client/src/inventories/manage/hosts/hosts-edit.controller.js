@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host){
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host', 'ParseVariableString', 'ToJSON',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host, ParseVariableString, ToJSON){
         var generator = GenerateForm,
             form = HostForm;
         $scope.parseType = 'yaml';
@@ -17,9 +17,10 @@
             $scope.host.enabled = !$scope.host.enabled;
         };
         $scope.formSave = function(){
-            var host = {
+            var json_data = ToJSON($scope.parseType, $scope.variables, true),
+            host = {
                 id: $scope.host.id,
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 enabled: $scope.host.enabled
@@ -31,12 +32,12 @@
         var init = function(){
             $scope.host = host;
             generator.inject(form, {mode: 'edit', related: false, id: 'Inventory-hostManage--panel', scope: $scope});
-            $scope.variables = host.variables === '' ? '---' : host.variables;
+            $scope.variables = host.variables === '' ? '---' : ParseVariableString(host.variables);
             $scope.name = host.name;
             $scope.description = host.description;
             ParseTypeChange({
                 scope: $scope,
-                field_id: 'host_variables',
+                field_id: 'host_variables'
             });
         };
         init();

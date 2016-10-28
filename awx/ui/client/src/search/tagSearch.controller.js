@@ -72,7 +72,8 @@ export default ['$scope', 'Refresh', 'tagSearchService', '$stateParams',
                 scope: listScope,
                 set: set,
                 iterator: iterator,
-                url: url
+                url: url,
+                fromSearch: true
             });
 
             listScope.$on('PostRefresh', function() {

@@ -5,10 +5,8 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ParseTypeChange', 'GenerateForm', 'inventoryData', 'LookUpInit',
-    'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions',
-    function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ParseTypeChange, GenerateForm, inventoryData, LookUpInit,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions){
+    ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ParseTypeChange', 'GenerateForm', 'inventoryData', 'LookUpInit', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions','ToJSON',
+    function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ParseTypeChange, GenerateForm, inventoryData, LookUpInit, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, ToJSON){
         var generator = GenerateForm,
             form = GroupForm();
 
@@ -20,10 +18,11 @@
             $state.go('^');
         };
         $scope.formSave = function(){
-            var params, source;
+            var params, source,
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
             // group fields
             var group = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: inventoryData.id

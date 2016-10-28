@@ -38,7 +38,7 @@ import os
 import pwd
 import urlparse
 import re
-from copy import deepcopy
+from copy import copy
 
 # Requests
 import requests
@@ -228,7 +228,7 @@ class BaseCallbackModule(object):
 
     def _log_event(self, event, **event_data):
         if 'res' in event_data:
-            event_data['res'] = censor(deepcopy(event_data['res']))
+            event_data['res'] = censor(copy(event_data['res']))
 
         if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)

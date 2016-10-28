@@ -7,10 +7,10 @@
  export default
     ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ToggleNotification', 'ParseVariableString',
     'ParseTypeChange', 'GenerateForm', 'LookUpInit', 'RelatedSearchInit', 'RelatedPaginateInit', 'NotificationsListInit',
-    'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
+    'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData', 'ToJSON',
     function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ToggleNotification, ParseVariableString,
         ParseTypeChange, GenerateForm, LookUpInit, RelatedSearchInit, RelatedPaginateInit, NotificationsListInit,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData){
+        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData, ToJSON){
         var generator = GenerateForm,
             form = GroupForm();
 
@@ -22,15 +22,18 @@
             $state.go('^');
         };
         $scope.formSave = function(){
-            var params, source;
+            var params, source,
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
+
             // group fields
             var group = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: $scope.inventory,
                 id: groupData.id
             };
+
             if ($scope.source){
                 // inventory_source fields
                 params = {

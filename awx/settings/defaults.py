@@ -438,6 +438,9 @@ AWX_TASK_ENV = {}
 # before it recycles
 JOB_EVENT_RECYCLE_THRESHOLD = 3000
 
+# Number of workers used to proecess job events in parallel
+JOB_EVENT_WORKERS = 4
+
 # Maximum number of job events that can be waiting on a single worker queue before
 # it can be skipped as too busy
 JOB_EVENT_MAX_QUEUE_SIZE = 100
@@ -529,6 +532,7 @@ INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
 EC2_REGION_NAMES = {
     'us-east-1': 'US East (Northern Virginia)',
+    'us-east-2': 'US East (Ohio)',
     'us-west-2': 'US West (Oregon)',
     'us-west-1': 'US West (Northern California)',
     'eu-central-1': 'EU (Frankfurt)',
@@ -537,6 +541,7 @@ EC2_REGION_NAMES = {
     'ap-southeast-2': 'Asia Pacific (Sydney)',
     'ap-northeast-1': 'Asia Pacific (Tokyo)',
     'ap-northeast-2': 'Asia Pacific (Seoul)',
+    'ap-south-1': 'Asia Pacific (Mumbai)',
     'sa-east-1': 'South America (Sao Paulo)',
     'us-gov-west-1': 'US West (GovCloud)',
     'cn-north-1': 'China (Beijing)',
@@ -676,7 +681,7 @@ OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 # ----- Foreman -----
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'
-SATELLITE6_ENABLED_VALUE = 'true'
+SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_GROUP_FILTER = r'^.+$'
 SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
