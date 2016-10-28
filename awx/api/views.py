@@ -1090,9 +1090,8 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 class ProjectUpdateCancel(RetrieveAPIView):
@@ -2176,9 +2175,8 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
 
 class InventoryUpdateCancel(RetrieveAPIView):
@@ -2886,9 +2884,8 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        for unified_job_node in obj.unified_job_nodes.all():
-            if unified_job_node.workflow_job.status in ACTIVE_STATES:
-                raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail='Can not delete job resource when associated workflow job is running.')
         return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 class JobLabelList(SubListAPIView):
