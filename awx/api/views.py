@@ -69,7 +69,6 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
-from awx.main.scheduler.dag_simple import SimpleDAG
 
 logger = logging.getLogger('awx.api.views')
 
@@ -2657,31 +2656,36 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         self.check_parent_access(parent)
         return getattr(parent, self.relationship).all()
 
-    def is_valid_relation(self, parent, sub):
-        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all()
-        graph = SimpleDAG()
+    def is_valid_relation(self, parent, sub, created=False):
+        if created:
+            return None
+
+        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all().\
+            prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
+        graph = {}
         for workflow_node in workflow_nodes:
-            graph.add_node(workflow_node)
+            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None})
 
         find = False
         for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
             for workflow_node in workflow_nodes:
-                related_nodes = getattr(workflow_node, node_type).all()
+                parent_node = graph[workflow_node.pk]
+                related_nodes = getattr(parent_node['node_object'], node_type).all()
                 for related_node in related_nodes:
-                    graph.add_edge(workflow_node, related_node, node_type)
-                    if (not find and
-                        parent == workflow_node and
-                        sub == related_node and
-                        self.relationship == node_type):
+                    sub_node = graph[related_node.pk]
+                    sub_node['metadata']['parent'] = parent_node
+                    if not find and parent == workflow_node and sub == related_node and self.relationship == node_type:
                         find = True
         if not find:
-            graph.add_edge(parent, sub, self.relationship)
-
-        if graph.cycle_detected():
-            return {"Error": "Cycle detected!"}
-
-        if graph.multi_ancestor_detected():
-            return {"Error": "Multiple ancestor detected!"}
+            sub_node = graph[sub.pk]
+            parent_node = graph[parent.pk]
+            if sub_node['metadata']['parent'] is not None:
+                return {"Error": "Multiple ancestor detected!"}
+            iter_node = parent_node
+            while iter_node is not None:
+                if iter_node == sub_node:
+                    return {"Error": "Cycle detected!"}
+                iter_node = iter_node['metadata']['parent']
 
         return None
 
