@@ -26,8 +26,7 @@ export default
                     type: 'select',
                     multiple: true,
                     ngOptions: 'group.name for group in inventory_groups track by group.value',
-                    addRequired: true,
-                    editRequired: true,
+                    required: true,
                     awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
                          "<blockquote>myserver.domain.com<br/>" +
                          "127.0.0.1<br />" +

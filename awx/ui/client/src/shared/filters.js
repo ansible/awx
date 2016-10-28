@@ -18,6 +18,19 @@
 export default
 angular.module('AWFilters', [])
 
+    // Object is empty / undefined / null
+    .filter('isEmpty', function () {
+        var key;
+        return function (obj) {
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    })
+
     //
     // capitalize -capitalize the first letter of each word
     //

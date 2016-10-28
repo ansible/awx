@@ -26,23 +26,16 @@ export default
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                searchable: true,
-                nosort: true,
-                searchType: 'select',
-                searchOptions: [],
-                searchLabel: 'Status'
+                nosort: true
             },
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 List-staticColumnAdjacent',
-                defaultSearchField: true,
                 linkTo: '/#/jobs/{{job.id}}',
-                searchDefault: true
             },
             finished: {
                 label: i18n._('Finished'),
                 noLink: true,
-                searchable: false,
                 filter: "longDate",
                 key: true,
                 desc: true,

@@ -18,8 +18,7 @@
 import listGenerator from '../shared/list-generator/main';
 
 
-angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
-    'RefreshHelper', listGenerator.name, 'StreamWidget',
+angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', listGenerator.name, 'StreamWidget',
 ])
 
 .factory('BuildAnchor', [ '$log', '$filter',
@@ -222,12 +221,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 .factory('ShowDetail', ['$filter', '$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate',
     'ActivityDetailForm', 'Empty', 'Find',
     function ($filter, $rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
-        return function (params) {
+        return function (params, scope) {
 
             var activity_id = params.activity_id,
-                parent_scope = params.scope,
-                activity = Find({ list: parent_scope.activities, key: 'id', val: activity_id }),
-                scope, element;
+                activity = Find({ list: params.scope.activities, key: 'id', val: activity_id }),
+                element;
 
             if (activity) {
 
@@ -259,19 +257,16 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 ])
 
 .factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
-    'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 'PaginateInit',
-    'generateList', 'FormatDate', 'BuildDescription',
+    'ProcessErrors', 'Wait', 'StreamList', 'generateList', 'FormatDate', 'BuildDescription',
     'ShowDetail',
     function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
-        Wait, StreamList, SearchInit, PaginateInit, GenerateList, FormatDate,
+        Wait, StreamList, GenerateList, FormatDate,
         BuildDescription, ShowDetail) {
         return function (params) {
 
             var list = _.cloneDeep(StreamList),
                 defaultUrl = GetBasePath('activity_stream'),
-                view = GenerateList,
-                parent_scope = params.scope,
-                scope = parent_scope.$new(),
+                scope = params.scope,
                 url = (params && params.url) ? params.url : null;
 
             $rootScope.flashMessage = null;
@@ -391,13 +386,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             list.basePath = defaultUrl;
 
             // Generate the list
-            view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });
+            //view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;
 
             scope.refreshStream = function () {
-                scope.search(list.iterator);
+                $state.go('.', null, {reload: true});
             };
 
             scope.showDetail = function (id) {
@@ -407,37 +402,18 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 });
             };
 
-            if (scope.removeStreamPostRefresh) {
-                scope.removeStreamPostRefresh();
-            }
-            scope.removeStreamPostRefresh = scope.$on('PostRefresh', function () {
-                scope.activities.forEach(function(activity, i) {
-                    // build activity.user
-                    if (scope.activities[i].summary_fields.actor) {
-                        scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
-                            scope.activities[i].summary_fields.actor.username + "</a>";
-                    } else {
-                        scope.activities[i].user = 'system';
-                    }
-                    // build description column / action text
-                    BuildDescription(scope.activities[i]);
+            scope.activities.forEach(function(activity, i) {
+                // build activity.user
+                if (scope.activities[i].summary_fields.actor) {
+                    scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
+                        scope.activities[i].summary_fields.actor.username + "</a>";
+                } else {
+                    scope.activities[i].user = 'system';
+                }
+                // build description column / action text
+                BuildDescription(scope.activities[i]);
 
-                });
             });
-
-            // Initialize search and paginate pieces and load data
-            SearchInit({
-                scope: scope,
-                set: list.name,
-                list: list,
-                url: defaultUrl
-            });
-            PaginateInit({
-                scope: scope,
-                list: list,
-                url: defaultUrl
-            });
-            scope.search(list.iterator);
         };
     }
 ]);

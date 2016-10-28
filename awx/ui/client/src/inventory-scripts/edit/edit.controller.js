@@ -4,27 +4,26 @@
  * All Rights Reserved
  *************************************************/
 
-export default
-    [   'Rest', 'Wait',
-        'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath',
-        'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', 'inventory_script',
-        '$scope', '$state',
-        function(
-            Rest, Wait,
-            inventoryScriptsFormObject, ProcessErrors, GetBasePath,
-            GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, inventory_script,
-            $scope, $state
-        ) {
+export default ['Rest', 'Wait',
+    'InventoryScriptsForm', 'ProcessErrors', 'GetBasePath',
+    'GenerateForm', 'OrganizationList', 'inventory_scriptData',
+    '$scope', '$state',
+    function(
+        Rest, Wait, InventoryScriptsForm, ProcessErrors, GetBasePath,
+        GenerateForm, OrganizationList, inventory_scriptData,
+        $scope, $state
+    ) {
+        var generator = GenerateForm,
+            data = inventory_scriptData,
+            id = inventory_scriptData.id,
+            form = InventoryScriptsForm,
+            master = {},
+            url = GetBasePath('inventory_scripts');
 
-            var generator = GenerateForm,
-                id = inventory_script.id,
-                form = inventoryScriptsFormObject,
-                master = {},
-                url = GetBasePath('inventory_scripts');
+        init();
 
-            $scope.inventory_script = inventory_script;
+        function init() {
+            $scope.inventory_script = inventory_scriptData;
 
             $scope.$watch('inventory_script_obj.summary_fields.user_capabilities.edit', function(val) {
                 if (val === false) {
@@ -32,78 +31,49 @@ export default
                 }
             });
 
-            generator.inject(form, {
-                    mode: 'edit' ,
-                    scope:$scope,
-                    related: false,
-                    activityStream: false
-                });
-            generator.reset();
-            LookUpInit({
-                    url: GetBasePath('organization'),
-                    scope: $scope,
-                    form: form,
-                    // hdr: "Select Custom Inventory",
-                    list: OrganizationList,
-                    field: 'organization',
-                    input_type: 'radio'
-                });
+            var fld;
+            for (fld in form.fields) {
+                if (data[fld]) {
+                    $scope[fld] = data[fld];
+                    master[fld] = data[fld];
+                }
 
-            // Retrieve detail record and prepopulate the form
+                if (form.fields[fld].sourceModel && data.summary_fields &&
+                    data.summary_fields[form.fields[fld].sourceModel]) {
+                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                    master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                }
+            }
+
+        }
+
+        $scope.formSave = function() {
+            generator.clearApiErrors();
             Wait('start');
-            Rest.setUrl(url + id+'/');
-            Rest.get()
-                .success(function (data) {
-                    var fld;
-                    for (fld in form.fields) {
-                        if (data[fld]) {
-                            $scope[fld] = data[fld];
-                            master[fld] = data[fld];
-                        }
-
-                        if (form.fields[fld].sourceModel && data.summary_fields &&
-                            data.summary_fields[form.fields[fld].sourceModel]) {
-                            $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                                data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                            master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                                data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                        }
-                    }
-                    $scope.canEdit = data.script !== null;
-                    if (!$scope.canEdit) {
-                        $scope.script = "Script contents hidden";
-                    }
-                    $scope.inventory_script_obj = data;
-                    Wait('stop');
-                })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to retrieve inventory script: ' + id + '. GET status: ' + status });
-                });
-
-            $scope.formSave = function () {
-                generator.clearApiErrors();
-                Wait('start');
-                Rest.setUrl(url+ id+'/');
-                Rest.put({
+            Rest.setUrl(url + id + '/');
+            Rest.put({
                     name: $scope.name,
                     description: $scope.description,
                     organization: $scope.organization,
                     script: $scope.script
                 })
-                    .success(function () {
-                        $state.go($state.current, null, {reload: true});
-                        Wait('stop');
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                            msg: 'Failed to add new inventory script. PUT returned status: ' + status });
+                .success(function() {
+                    $state.go($state.current, null, { reload: true });
+                    Wait('stop');
+                })
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to add new inventory script. PUT returned status: ' + status
                     });
-            };
+                });
+        };
 
-            $scope.formCancel = function () {
-                $state.transitionTo('inventoryScripts');
-            };
+        $scope.formCancel = function() {
+            $state.go('inventoryScripts');
+        };
 
-        }
-    ];
+    }
+];

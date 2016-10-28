@@ -22,12 +22,6 @@ export default {
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
     },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed", "summary"],
-            "job_events": []
-        }
-    },
     resolve: {
         hosts: ['JobDetailService','$stateParams', function(JobDetailService, $stateParams) {
              return JobDetailService.getRelatedJobEvents($stateParams.id, {

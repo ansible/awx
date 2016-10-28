@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
+import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 // TODO: figure out what this route should be - should it be scm_update?
 
@@ -17,12 +17,12 @@ export default {
         parent: "jobs",
         label: "{{ project_name }}"
     },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed"]
-        }
-    },
     data: {
-        jobType: 'project_updates'
+        jobType: 'project_updates',
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"]
+            }
+        },
     }
 };

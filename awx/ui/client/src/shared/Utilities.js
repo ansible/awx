@@ -33,7 +33,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
 
         $rootScope.flashMessage = null;
 
-        $('#form-modal .modal-body').empty();
+        //$('#form-modal .modal-body').empty();
         $('#form-modal2 .modal-body').empty();
 
         $('.tooltip').each(function() {
@@ -515,7 +515,9 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  */
 .factory('Wait', ['$rootScope',
     function($rootScope) {
+
         return function(directive) {
+            /* @todo re-enable
             var docw, doch, spinnyw, spinnyh;
             if (directive === 'start' && !$rootScope.waiting) {
                 $rootScope.waiting = true;
@@ -536,6 +538,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     $rootScope.waiting = false;
                 });
             }
+            */
         };
     }
 ])

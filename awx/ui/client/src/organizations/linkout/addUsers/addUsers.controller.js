@@ -11,12 +11,13 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateList', 'GetBasePath', 'SelectionInit', 'SearchInit', 'templateUrl', 'PaginateInit', '$state', 'Rest', '$q', 'Wait', function($scope, $rootScope, ProcessErrors, UserList, generateList, GetBasePath, SelectionInit, SearchInit, templateUrl, PaginateInit, $state, Rest, $q, Wait) {
+export default ['$scope', '$rootScope', 'ProcessErrors',  'generateList', 'GetBasePath',
+'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait',
+function($scope, $rootScope, ProcessErrors, generateList, GetBasePath,
+    SelectionInit, templateUrl, $state, Rest, $q, Wait) {
     $scope.$on("linkLists", function() {
         var generator = generateList,
-            list = _.cloneDeep(UserList),
-            url = GetBasePath("users"),
-            set = "users",
+            //list = AddUserList,
             id = "addUsersList",
             mode = "add";
 
@@ -26,33 +27,29 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
             $scope.addType = "Administrators";
         }
 
+        init();
 
+        function init(){
+            // search init
+            $scope.list = $scope.$parent.add_user_list;
+            $scope.add_user_dataset =  $scope.$parent.add_user_dataset;
+            $scope.add_users = $scope.$parent.add_user_dataset.results;
 
-        list.multiSelect = true;
-
-        generator.inject(list, { id: id,
-            title: false, mode: mode, scope: $scope });
-
-        SearchInit({ scope: $scope, set: set,
-            list: list, url: url });
-
-        PaginateInit({ scope: $scope,
-            list: list, url: url, pageSize: 5 });
-
-        $scope.search(list.iterator);
+            $scope.selectedItems = [];
+            $scope.$on('selectedOrDeselected', (item)=>{
+                throw {name: 'NotYetImplemented'};
+            });
+        }
 
         $scope.updateUsers = function() {
+
             var url, listToClose,
+
             payloads = $scope.selectedItems.map(function(val) {
                 return {id: val.id};
             });
-            if ($scope.addType === 'Users') {
-                url = $scope.$parent.orgRelatedUrls.users;
-                listToClose = 'user';
-            } else {
-                url = $scope.$parent.orgRelatedUrls.admins;
-                listToClose = 'admin';
-            }
+
+            url = $scope.$parent.orgRelatedUrls[$scope.addUsersType];
 
             Wait('start');
 
@@ -64,10 +61,8 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
 
             $q.all(requests)
                 .then(function () {
-                    Wait('stop');
-                    $scope.$parent.search('user');
                     $scope.closeModal();
-                    $scope.$parent.$emit('ReloadOrgListView');
+                    $state.reload();
                 }, function (error) {
                     Wait('stop');
                     $rootScope.$broadcast("refreshList", listToClose);

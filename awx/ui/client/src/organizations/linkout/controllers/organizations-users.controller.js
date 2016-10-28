@@ -4,101 +4,77 @@
  * All Rights Reserved
  *************************************************/
 
- export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
-        'generateList', '$compile', 'SearchInit', 'PaginateInit', 'Wait',
-        'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
-        function($stateParams, $scope, UserList, Rest, $state, GenerateList,
-        $compile,SearchInit, PaginateInit, Wait, Prompt, ProcessErrors,
+export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '$state',
+    'generateList', '$compile', 'Wait', 'OrgUsersDataset', 'AddUsersDataset',
+    'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
+    function($stateParams, $scope, OrgUserList, AddUserList, Rest, $state, GenerateList,
+        $compile, Wait, OrgUsersDataset, AddUsersDataset, Prompt, ProcessErrors,
         GetBasePath, $filter) {
 
-             var list,
-                 url,
-                 generator = GenerateList,
-                 orgBase = GetBasePath('organizations');
+        var orgBase = GetBasePath('organizations');
 
-             Rest.setUrl(orgBase + $stateParams.organization_id);
-             Rest.get()
-                 .success(function (data) {
-                     // include name of item in listTitle
-                     var listTitle = data.name + "<div class='List-titleLockup'></div>USERS";
+        init();
 
-                     $scope.$parent.activeCard = parseInt($stateParams.organization_id);
-                     $scope.$parent.activeMode = 'users';
-                     $scope.organization_name = data.name;
-                     $scope.org_id = data.id;
+        function init() {
+            // search init
+            $scope.list = OrgUserList;
+            $scope.add_user_list = AddUserList;
+            $scope.user_dataset = OrgUsersDataset.data;
+            $scope.users = $scope.user_dataset.results;
+            $scope.add_user_dataset = AddUsersDataset.data;
+            $scope.add_users = $scope.add_user_dataset.results;
 
-                     list = _.cloneDeep(UserList);
-                     delete list.actions.add;
-                     list.searchRowActions = {
-                         add: {
-                             buttonContent: '&#43; ADD user',
-                             awToolTip: 'Add existing user to organization',
-                             actionClass: 'btn List-buttonSubmit',
-                             ngClick: 'addUsers()'
-                         }
-                     };
-                     url = data.related.users;
-                     list.listTitle = listTitle;
-                     list.basePath = url;
-                     list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
 
-                     $scope.orgRelatedUrls = data.related;
+            Rest.setUrl(orgBase + $stateParams.organization_id);
+            Rest.get()
+                .success(function(data) {
+                    $scope.organization_name = data.name;
+                    $scope.org_id = data.id;
 
-                     generator.inject(list, { mode: 'edit', scope: $scope, cancelButton: true });
+                    $scope.orgRelatedUrls = data.related;
 
-                     SearchInit({
-                         scope: $scope,
-                         set: 'users',
-                         list: list,
-                         url: url
-                     });
-                     PaginateInit({
-                         scope: $scope,
-                         list: list,
-                         url: url
-                     });
-                     $scope.search(list.iterator);
-                 });
+                });
+        }
 
-             $scope.addUsers = function () {
-                 $compile("<add-users class='AddUsers'></add-users>")($scope);
-             };
+        $scope.addUsers = function() {
+            $compile("<add-users add-users-type='user' class='AddUsers'></add-users>")($scope);
+        };
 
-             $scope.editUser = function (id) {
-                 $state.transitionTo('users.edit', {user_id: id});
-             };
+        $scope.editUser = function(id) {
+            $state.go('users.edit', { user_id: id });
+        };
 
-             $scope.deleteUser = function (id, name) {
-                 var action = function () {
-                     $('#prompt-modal').modal('hide');
-                     Wait('start');
-                     var url = orgBase + $stateParams.organization_id + '/users/';
-                     Rest.setUrl(url);
-                     Rest.post({
-                         id: id,
-                         disassociate: true
-                     }).success(function () {
-                         $scope.search(list.iterator);
-                         $scope.$emit('ReloadOrgListView');
-                     })
-                     .error(function (data, status) {
-                         ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                     });
-                 };
+        $scope.deleteUser = function(id, name) {
+            var action = function() {
+                $('#prompt-modal').modal('hide');
+                Wait('start');
+                var url = orgBase + $stateParams.organization_id + '/users/';
+                Rest.setUrl(url);
+                Rest.post({
+                        id: id,
+                        disassociate: true
+                    }).success(function() {
+                        $state.go('.', null, { reload: true });
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
+                        });
+                    });
+            };
 
-                 Prompt({
-                     hdr: 'Delete',
-                     body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the following user from this organization?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
-                     action: action,
-                     actionText: 'DELETE'
-                 });
-             };
+            Prompt({
+                hdr: 'Delete',
+                body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the following user from this organization?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                action: action,
+                actionText: 'DELETE'
+            });
+        };
 
-             $scope.formCancel = function(){
-                 $scope.$parent.activeCard = null;
-                 $state.go('organizations');
-             };
+        $scope.formCancel = function() {
+            $state.go('organizations');
+        };
 
-         }
+    }
 ];

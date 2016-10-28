@@ -1,0 +1,57 @@
+<div class="SmartSearch row">
+    <!-- input -->
+    <div class="SmartSearch-bar">
+        <div class="SmartSearch-searchTermContainer">
+            <!-- string search input -->
+            <form class="SmartSearch-form" ng-submit="add(searchTerm)" novalidate>
+                <input class="SmartSearch-input" ng-model="searchTerm" placeholder="Search">
+            </form>
+            <div class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="add(searchTerm)">
+                <i class="fa fa-search"></i>
+            </div>
+        </div>
+        <div class="SmartSearch-keyToggle btn" ng-class="{'is-active': showKeyPane}" ng-click="toggleKeyPane()">
+            Key
+        </div>
+    </div>
+    <span ng-transclude="actions" class="List-actionHolder"></span>
+    <!-- tags -->
+    <div class="SmartSearch-tags">
+        <div class="SmartSearch-tagSection">
+            <div class="SmartSearch-flexContainer">
+                <div class="SmartSearch-tagContainer" ng-repeat="(key, value) in searchTags track by $index">
+                    <div class="SmartSearch-deleteContainer" ng-click="remove(key)">
+                        <i class="fa fa-times SmartSearch-tagDelete"></i>
+                    </div>
+                    <div class="SmartSearch-tag SmartSearch-tag--deletable">
+                        <span class="SmartSearch-name">{{decodeParam(key, value)}}</span>
+                    </div>
+                </div>
+                <a href class="SmartSearch-clearAll" ng-click="clearAll()" ng-show="!(searchTags | isEmpty)">CLEAR ALL</a>
+            </div>
+        </div>
+    </div>
+    <!-- hint key -->
+    <div class="SmartSearch-keyPane row" ng-repeat="model in models" ng-show="showKeyPane">
+        <div class="SmartSearch-keyPane--exit">
+            <button class="Form-exit" ng-click="toggleKeyPane()">
+                <i class="fa fa-times-circle"></i>
+            </button>
+        </div>
+        <div class="SmartSearch-keyRow" ng-repeat="(key,value) in model.base">
+            <div class="SmartSearch-keyName">
+                {{ key }}
+            </div>
+            <div class="SmartSearch-keyInfo">
+                <div>Type: {{ value.type }}</div>
+                <div>Description: {{value.help_text}}</div>
+                <div ng-if="value.choices">
+                    Enumerated: <span ng-repeat="choice in value.choices"> {{ choice[0] }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="SmartSearch-keyRow SmartSearch-relations">
+            <b>Searchable relationships:</b> <span ng-repeat="relation in model.related track by $index">{{ relation }}<span ng-if="$index !== Object.keys(model.related).length -1">, </span></span>
+        </div>
+    </div>
+</div>

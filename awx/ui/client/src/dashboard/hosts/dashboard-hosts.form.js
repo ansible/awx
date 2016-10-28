@@ -18,7 +18,7 @@ export default function(){
                 class: 'Form-header-field',
                 ngClick: 'toggleHostEnabled()',
                 type: 'toggle',
-                editRequired: false,
+
                 awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
                 "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
                 dataTitle: 'Host Enabled'
@@ -28,7 +28,7 @@ export default function(){
             name: {
                 label: 'Host Name',
                 type: 'text',
-                editRequired: true,
+
                 value: '{{name}}',
                 awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
                 "<blockquote>myserver.domain.com<br/>" +
@@ -43,12 +43,10 @@ export default function(){
             description: {
                 label: 'Description',
                 type: 'text',
-                editRequired: false
             },
             variables: {
                 label: 'Variables',
                 type: 'textarea',
-                editRequired: false,
                 rows: 6,
                 class: 'modal-input-xlarge Form-textArea Form-formGroup--fullWidth',
                 dataTitle: 'Host Variables',

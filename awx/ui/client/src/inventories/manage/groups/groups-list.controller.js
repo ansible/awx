@@ -4,15 +4,18 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate', 'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus',
-    'InventoryManageService', 'groupsUrl', 'SearchInit', 'PaginateInit', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'Find', 'Rest', 'GetBasePath', 'rbacUiControlService',
-    function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate, GroupManageService, GroupsCancelUpdate, ViewUpdateStatus,
-        InventoryManageService, groupsUrl, SearchInit, PaginateInit, GetSyncStatusMsg, GetHostsStatusMsg, Find, Rest, GetBasePath, rbacUiControlService){
-        var list = InventoryGroups,
-            view = generateList,
-            pageSize = 20;
+    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate',
+    'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
+    'InventoryManageService', 'groupsUrl', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'groupsDataset',
+    function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate,
+        GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
+        InventoryManageService, groupsUrl, GetSyncStatusMsg, GetHostsStatusMsg, groupsDataset){
 
+        let list = InventoryGroups;
 
+        init();
+
+        function init(){
         $scope.inventory_id = $stateParams.inventory_id;
 
         $scope.canAdd = false;
@@ -22,16 +25,52 @@
                 $scope.canAdd = canAdd;
             });
 
+            // Search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = groupsDataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-        // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
-        // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
-        // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
-        // problem that this solves.
-        $scope.ncyBreadcrumbIgnore = true;
-        if($state.current.name === "inventoryManage.editGroup") {
-            $scope.rowBeingEdited = $state.params.group_id;
-            $scope.listBeingEdited = "groups";
+            // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
+            // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
+            // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
+            // problem that this solves.
+            $scope.ncyBreadcrumbIgnore = true;
+            if($state.current.name === "inventoryManage.editGroup") {
+                $scope.rowBeingEdited = $state.params.group_id;
+                $scope.listBeingEdited = "groups";
+            }
+
+            $scope.inventory_id = $stateParams.inventory_id;
+            _.forEach($scope[list.name], buildStatusIndicators);
+
         }
+
+        function buildStatusIndicators(group){
+            let group_status, hosts_status;
+
+            group_status = GetSyncStatusMsg({
+                status: group.summary_fields.inventory_source.status,
+                has_inventory_sources: group.has_inventory_sources,
+                source: ( (group.summary_fields.inventory_source) ? group.summary_fields.inventory_source.source : null )
+            });
+            hosts_status = GetHostsStatusMsg({
+                active_failures: group.hosts_with_active_failures,
+                total_hosts: group.total_hosts,
+                inventory_id: $scope.inventory_id,
+                group_id: group.id
+            });
+            _.assign(group,
+                {status_class: group_status.class},
+                {status_tooltip: group_status.tooltip},
+                {launch_tooltip: group_status.launch_tip},
+                {launch_class: group_status.launch_class},
+                {group_schedule_tooltip: group_status.schedule_tip},
+                {hosts_status_tip: hosts_status.tooltip},
+                {hosts_status_class: hosts_status.class},
+                {source: group.summary_fields.inventory_source ? group.summary_fields.inventory_source.source : null},
+                {status: group.summary_fields.inventory_source ? group.summary_fields.inventory_source.status : null});
+        }
+
         $scope.groupSelect = function(id){
             var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
             $state.go('inventoryManage', {inventory_id: $stateParams.inventory_id, group: group}, {reload: true});
@@ -137,39 +176,14 @@
             // added to the breadcrumb trail
             var groupsArr = $stateParams.group ? $stateParams.group : [];
             groupsArr.push(id);
-            $state.go('inventoryManage.schedules', {id: id, group: groupsArr}, {reload: true});
+            $state.go('inventoryManage.editGroup.schedules', {group_id: id, group: groupsArr}, {reload: true});
         };
         // $scope.$parent governed by InventoryManageController, for unified multiSelect options
         $scope.$on('multiSelectList.selectionChanged', (event, selection) => {
             $scope.$parent.groupsSelected = selection.length > 0 ? true : false;
             $scope.$parent.groupsSelectedItems = selection.selectedItems;
         });
-        $scope.$on('PostRefresh', () => {
-            $scope.groups.forEach( (group, index) => {
-                var group_status, hosts_status;
-                group_status = GetSyncStatusMsg({
-                    status: group.summary_fields.inventory_source.status,
-                    has_inventory_sources: group.has_inventory_sources,
-                    source: ( (group.summary_fields.inventory_source) ? group.summary_fields.inventory_source.source : null )
-                });
-                hosts_status = GetHostsStatusMsg({
-                    active_failures: group.hosts_with_active_failures,
-                    total_hosts: group.total_hosts,
-                    inventory_id: $scope.inventory_id,
-                    group_id: group.id
-                });
-                _.assign($scope.groups[index],
-                    {status_class: group_status.class},
-                    {status_tooltip: group_status.tooltip},
-                    {launch_tooltip: group_status.launch_tip},
-                    {launch_class: group_status.launch_class},
-                    {group_schedule_tooltip: group_status.schedule_tip},
-                    {hosts_status_tip: hosts_status.tooltip},
-                    {hosts_status_class: hosts_status.class},
-                    {source: group.summary_fields.inventory_source ? group.summary_fields.inventory_source.source : null},
-                    {status: group.summary_fields.inventory_source ? group.summary_fields.inventory_source.status : null});
-            });
-        });
+
         $scope.copyMoveGroup = function(id){
             $state.go('inventoryManage.copyMoveGroup', {group_id: id, groups: $stateParams.groups});
         };
@@ -190,26 +204,4 @@
             cleanUpStateChangeListener();
         });
 
-        var init = function(){
-            list.basePath = groupsUrl;
-            view.inject(list,{
-                id: 'groups-list',
-                $scope: $scope,
-                mode: 'edit'
-            });
-            SearchInit({
-                scope: $scope,
-                list: list,
-                url: groupsUrl,
-                set: 'groups'
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url: groupsUrl,
-                pageSize: pageSize
-            });
-            $scope.search(list.iterator);
-        };
-        init();
     }];

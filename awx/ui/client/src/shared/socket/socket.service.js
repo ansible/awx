@@ -30,8 +30,7 @@ export default
 
                     self.socket = new ReconnectingWebSocket(url, null, {
                         timeoutInterval: 3000,
-                        maxReconnectAttempts: 10
-                    });
+                        maxReconnectAttempts: 10                    });
 
                     self.socket.onopen = function () {
                         $log.debug("Websocket connection opened.");
@@ -127,7 +126,7 @@ export default
                 // listen for specific messages. A subscription object could
                 // look like {"groups":{"jobs": ["status_changed", "summary"]}.
                 // This is used by all socket-enabled $states
-                this.emit(JSON.stringify(state.socket));
+                this.emit(JSON.stringify(state.data.socket));
                 this.setLast(state);
             },
             unsubscribe: function(state){
@@ -136,7 +135,7 @@ export default
                 // to the API: {"groups": {}}.
                 // This is used for all pages that are socket-disabled
                 if(this.requiresNewSubscribe(state)){
-                    this.emit(JSON.stringify(state.socket));
+                    this.emit(JSON.stringify(state.data.socket));
                 }
                 this.setLast(state);
             },
@@ -151,7 +150,7 @@ export default
                 // required an "unsubscribe", then we don't need to unsubscribe
                 // again, b/c the UI is already unsubscribed from all groups
                 if (this.getLast() !== undefined){
-                    if( _.isEmpty(state.socket.groups) && _.isEmpty(this.getLast().socket.groups)){
+                    if( _.isEmpty(state.data.socket.groups) && _.isEmpty(this.getLast().data.socket.groups)){
                         return false;
                     }
                     else {
@@ -206,16 +205,16 @@ export default
                 // requires a subscribe or an unsubscribe
                 var self = this;
                 socketPromise.promise.then(function(){
-                    if(!state.socket){
-                        state.socket = {groups: {}};
+                    if(!state.data && !state.data.socket){
+                        state.data.socket = {groups: {}};
                         self.unsubscribe(state);
                     }
                     else{
-                        if(state.socket.groups.hasOwnProperty( "job_events")){
-                            state.socket.groups.job_events = [id];
+                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "job_events")){
+                            state.data.socket.groups.job_events = [id];
                         }
-                        if(state.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
-                            state.socket.groups.ad_hoc_command_events = [id];
+                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
+                            state.data.socket.groups.ad_hoc_command_events = [id];
                         }
                         self.subscribe(state);
                     }

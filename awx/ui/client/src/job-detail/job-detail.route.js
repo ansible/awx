@@ -4,19 +4,21 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../shared/template-url/template-url.factory';
+import { templateUrl } from '../shared/template-url/template-url.factory';
 
 export default {
     name: 'jobDetail',
-    url: '/jobs/:id',
+    url: '/jobs/{id: int}',
     ncyBreadcrumb: {
         parent: 'jobs',
         label: "{{ job.id }} - {{ job.name }}"
     },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed", "summary"],
-            "job_events": []
+    data: {
+        socket: {
+            "groups": {
+                "jobs": ["status_changed", "summary"],
+                "job_events": []
+            }
         }
     },
     templateUrl: templateUrl('job-detail/job-detail'),

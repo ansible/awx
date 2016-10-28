@@ -41,7 +41,7 @@
 
 export default
     angular.module('AdhocHelper', ['RestServices', 'Utilities',
-        'CredentialFormDefinition', 'CredentialsListDefinition', 'LookUpHelper',
+        'CredentialFormDefinition', 'CredentialsListDefinition',
         'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog',
         'FormGenerator', 'JobVarsPromptFormDefinition'])
 

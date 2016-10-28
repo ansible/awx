@@ -4,13 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 'Wait',
-    '$state',
-    function($scope, $rootScope, $compile, $location, $log,
-        $stateParams, OrganizationForm, GenerateForm, Rest, Alert, ProcessErrors,
-        ClearScope, GetBasePath, ReturnToCaller, Wait, $state) {
+export default ['$scope', '$rootScope', '$location', '$stateParams',
+    'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait','$state',
+    function($scope, $rootScope, $location, $stateParams, OrganizationForm,
+        GenerateForm, Rest, Alert, ProcessErrors,
+        ClearScope, GetBasePath, Wait, $state) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()
@@ -23,23 +22,21 @@ export default ['$scope', '$rootScope', '$compile', '$location',
 
         ClearScope();
 
-        // Inject dynamic view
-        var generator = GenerateForm,
-            form = OrganizationForm(),
+        var form = OrganizationForm(),
             base = $location.path().replace(/^\//, '').split('/')[0];
 
-        generator.inject(form, {
-            mode: 'add',
-            related: false,
-            scope: $scope
-        });
-        generator.reset();
+        init();
 
-        $scope.$emit("HideOrgListHeader");
+        function init(){
+            // @issue What is this doing, why
+            $scope.$emit("HideOrgListHeader");
+
+            // apply form definition's default field values
+            GenerateForm.applyDefaults(form, $scope);
+        }
 
         // Save
         $scope.formSave = function() {
-            generator.clearApiErrors();
             Wait('start');
             var url = GetBasePath(base);
             url += (base !== 'organizations') ? $stateParams.project_id + '/organizations/' : '';
@@ -63,7 +60,7 @@ export default ['$scope', '$rootScope', '$compile', '$location',
 
         $scope.formCancel = function() {
             $scope.$emit("ShowOrgListHeader");
-            $state.transitionTo('organizations');
+            $state.go('organizations');
         };
     }
 ];

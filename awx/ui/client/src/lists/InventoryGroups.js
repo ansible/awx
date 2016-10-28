@@ -25,7 +25,6 @@ export default
             sync_status: {
                 label: '',
                 nosort: true,
-                searchable: false,
                 mode: 'all',
                 iconOnly: true,
                 ngClick: 'viewUpdateStatus(group.id)',
@@ -39,7 +38,6 @@ export default
             failed_hosts: {
                 label: '',
                 nosort: true,
-                searchable: false,
                 mode: 'all',
                 iconOnly: true,
                 awToolTip: "{{ group.hosts_status_tip }}",
@@ -54,7 +52,6 @@ export default
                 ngClick: "groupSelect(group.id)",
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
                 class: 'InventoryManage-breakWord',
-                searchLabel: 'name'
             },
             total_groups: {
                 nosort: true,
@@ -62,65 +59,7 @@ export default
                 type: 'badgeCount',
                 ngHide: 'group.total_groups == 0',
                 noLink: true,
-                awToolTip: "{{group.name | sanitize}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
-                searchable: false,
-            },
-            source: {
-                label: 'Source',
-                searchType: 'select',
-                searchOptions: [{
-                    label: "Amazon Web Services",
-                    value: "ec2"
-                }, {
-                    label: "none",
-                    value: ""
-                }, {
-                    label: "Rackspace",
-                    value: "rax"
-                },{
-                    label: "VMware",
-                    value: "vmware"
-                },{
-                    label: "Google Compute Engine",
-                    value: "gce"
-                },{
-                    label: "Microsoft Azure",
-                    value: "azure"
-                },{
-                    label: "OpenStack",
-                    value: "openstack"
-                }],
-                sourceModel: 'inventory_source',
-                sourceField: 'source',
-                searchOnly: true
-            },
-            has_external_source: {
-                label: 'Has external source?',
-                searchType: 'select',
-                searchOptions: [{
-                    label: 'Yes',
-                    value: 'inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
-                }, {
-                    label: 'No',
-                    value: 'not__inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
-                }],
-                searchOnly: true
-            },
-            has_active_failures: {
-                label: 'Has failed hosts?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-            },
-            last_update_failed: {
-                label: 'Update failed?',
-                searchType: 'boolean',
-                searchSingleValue: true,
-                searchValue: 'failed',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'status'
+                awToolTip: "{{group.name | sanitize}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}"
             }
         },
 

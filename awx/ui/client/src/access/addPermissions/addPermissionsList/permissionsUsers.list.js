@@ -7,9 +7,14 @@
 
  export default function() {
     return {
-        searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         name: 'users',
         iterator: 'user',
+        defaultSearchParams: function(term){
+            return {or__username__icontains: term,
+                    or__first_name__icontains: term,
+                    or__last_name__icontains: term
+                };
+        },
         title: false,
         listTitleBadge: false,
         multiSelect: true,
@@ -17,7 +22,6 @@
         index: false,
         hover: true,
         emptyListText : 'No Users exist',
-
         fields: {
             first_name: {
                 label: 'First Name',

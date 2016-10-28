@@ -23,35 +23,23 @@ export default
                 ngClick:"viewJobDetails(job)",
                 key: true,
                 desc: true,
-                searchType: 'int',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
                 awToolTip: "{{ job.status_tip }}",
                 awTipPlacement: "top",
             },
             status: {
                 label: '',
-                searchLabel: 'Status',
                 columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2',
                 awToolTip: "{{ job.status_tip }}",
                 awTipPlacement: "top",
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobDetails(job)",
-                searchable: true,
-                nosort: true,
-                searchType: 'select',
-                searchOptions: [
-                    { name: "Success", value: "successful" },
-                    { name: "Error", value: "error" },
-                    { name: "Failed", value: "failed" },
-                    { name: "Canceled", value: "canceled" }
-                ]
+                ngClick:"viewJobDetails(job)"
             },
             started: {
                 label: 'Started',
                 noLink: true,
-                searchable: false,
                 filter: "longDate",
                 columnClass: "col-lg-2 col-md-2 hidden-xs"
             },
@@ -59,16 +47,12 @@ export default
                 label: 'Type',
                 ngBind: 'job.type_label',
                 link: false,
-                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
-                searchable: true,
-                searchType: 'select',
-                searchOptions: []    // populated via GetChoices() in controller
+                columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs"
             },
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
                 ngClick: "viewJobDetails(job)",
-                defaultSearchField: true
             }
         },
 

@@ -63,9 +63,9 @@
 
 export default
     [   '$scope', '$location', 'GetBasePath', 'Empty', 'Wait', 'Rest', 'ProcessErrors',
-        'LaunchJob', '$state', 'generateList', 'InventoryList', 'SearchInit', 'PaginateInit', 'CredentialList', 'ParseTypeChange', 'GetSurveyQuestions',
+        'LaunchJob', '$state', 'generateList', 'InventoryList', 'CredentialList', 'ParseTypeChange', 'GetSurveyQuestions',
         function($scope, $location, GetBasePath, Empty, Wait, Rest, ProcessErrors,
-            LaunchJob, $state, GenerateList, InventoryList, SearchInit, PaginateInit, CredentialList, ParseTypeChange, GetSurveyQuestions) {
+            LaunchJob, $state, GenerateList, InventoryList, CredentialList, ParseTypeChange, GetSurveyQuestions) {
 
             var launch_url;
 
@@ -285,7 +285,8 @@ export default
 
             $scope.getListsAndSurvey = function() {
                 if($scope.ask_inventory_on_launch) {
-                    var inventory_url = GetBasePath('inventory');
+                    // @issue: OLD SEARCH
+                    // var inventory_url = GetBasePath('inventory');
 
                     var invList = _.cloneDeep(InventoryList);
                     invList.fields.status.searchable = false;
@@ -301,21 +302,22 @@ export default
                         input_type: 'radio'
                     });
 
-                    SearchInit({
-                        scope: $scope,
-                        set: InventoryList.name,
-                        list: InventoryList,
-                        url: inventory_url
-                    });
-
-                    PaginateInit({
-                        scope: $scope,
-                        list: InventoryList,
-                        url: inventory_url,
-                        mode: 'lookup'
-                    });
-
-                    $scope.search(InventoryList.iterator);
+                    // @issue: OLD SEARCH
+                    // SearchInit({
+                    //     scope: $scope,
+                    //     set: InventoryList.name,
+                    //     list: InventoryList,
+                    //     url: inventory_url
+                    // });
+                    //
+                    // PaginateInit({
+                    //     scope: $scope,
+                    //     list: InventoryList,
+                    //     url: inventory_url,
+                    //     mode: 'lookup'
+                    // });
+                    //
+                    // $scope.search(InventoryList.iterator);
 
                     $scope.$watchCollection('inventories', function () {
                         if($scope.selected_inventory) {
@@ -332,7 +334,8 @@ export default
                     });
                 }
                 if($scope.ask_credential_on_launch) {
-                    var credential_url = GetBasePath('credentials') + '?kind=ssh';
+                    // @issue: OLD SEARCH
+                    // var credential_url = GetBasePath('credentials') + '?kind=ssh';
 
                     var credList = _.cloneDeep(CredentialList);
                     credList.basePath = GetBasePath('credentials') + '?kind=ssh';
@@ -346,21 +349,22 @@ export default
                         input_type: 'radio'
                     });
 
-                    SearchInit({
-                        scope: $scope,
-                        set: CredentialList.name,
-                        list: CredentialList,
-                        url: credential_url
-                    });
-
-                    PaginateInit({
-                        scope: $scope,
-                        list: CredentialList,
-                        url: credential_url,
-                        mode: 'lookup'
-                    });
-
-                    $scope.search(CredentialList.iterator);
+                    // @issue: OLD SEARCH
+                    // SearchInit({
+                    //     scope: $scope,
+                    //     set: CredentialList.name,
+                    //     list: CredentialList,
+                    //     url: credential_url
+                    // });
+                    //
+                    // PaginateInit({
+                    //     scope: $scope,
+                    //     list: CredentialList,
+                    //     url: credential_url,
+                    //     mode: 'lookup'
+                    // });
+                    //
+                    // $scope.search(CredentialList.iterator);
 
                     $scope.$watchCollection('credentials', function () {
                         if($scope.selected_credential) {

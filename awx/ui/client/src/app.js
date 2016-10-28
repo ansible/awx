@@ -15,6 +15,12 @@ import 'jquery.resize';
 import 'codemirror';
 import 'js-yaml';
 import 'select2';
+import uiRouter from 'angular-ui-router';
+// backwards compatibility for $stateChange* events
+import 'angular-ui-router/release/stateEvents';
+// ui-router debugging
+//import { trace } from 'angular-ui-router';
+//trace.enable();
 
 // Configuration dependencies
 global.$AnsibleConfig = null;
@@ -27,7 +33,7 @@ if ($basePath) {
 
 // Modules
 import './helpers';
-import './forms';
+import * as forms from './forms';
 import './lists';
 import './widgets';
 import './filters';
@@ -40,12 +46,10 @@ import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
-import permissions from './permissions/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
 import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
-import access from './access/main';
 import about from './about/main';
 import license from './license/main';
 import setupMenu from './setup-menu/main';
@@ -54,23 +58,17 @@ import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
-import templateUrl from './shared/template-url/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import JobTemplates from './job-templates/main';
-import search from './search/main';
 import credentials from './credentials/main';
 import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
-import OrganizationsList from './organizations/list/organizations-list.controller';
-import OrganizationsAdd from './organizations/add/organizations-add.controller';
 import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
 import { TeamsList, TeamsAdd, TeamsEdit } from './controllers/Teams';
 
 import RestServices from './rest/main';
-import './lookup/main';
-import './shared/api-loader';
-import './shared/form-generator';
+import access from './access/main';
 import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
@@ -80,7 +78,7 @@ import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
-import {N_} from './i18n';
+import { N_ } from './i18n';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -88,17 +86,17 @@ var tower = angular.module('Tower', [
     // 2. add package name to ./grunt-tasks/webpack.vendorFiles
     require('angular-breadcrumb'),
     require('angular-codemirror'),
-    require('angular-cookies'),
     require('angular-drag-and-drop-lists'),
-    require('angular-ui-router'),
     require('angular-sanitize'),
     require('angular-scheduler').name,
     require('angular-tz-extensions'),
     require('lr-infinite-scroll'),
     require('ng-toast'),
-
+    uiRouter,
+    'ui.router.state.events',
 
     about.name,
+    access.name,
     license.name,
     RestServices.name,
     browserData.name,
@@ -106,14 +104,13 @@ var tower = angular.module('Tower', [
     inventories.name,
     inventoryScripts.name,
     organizations.name,
-    permissions.name,
+    //permissions.name,
     managementJobs.name,
     setupMenu.name,
     mainMenu.name,
     breadCrumb.name,
     dashboard.name,
     moment.name,
-    templateUrl.name,
     login.name,
     activityStream.name,
     footer.name,
@@ -121,27 +118,19 @@ var tower = angular.module('Tower', [
     jobSubmission.name,
     notifications.name,
     standardOut.name,
-    access.name,
     JobTemplates.name,
     portalMode.name,
-    search.name,
     config.name,
     credentials.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
     'UserFormDefinition',
-    'FormGenerator',
     'OrganizationListDefinition',
     'jobTemplates',
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',
-    'ApiLoader',
-    'RelatedSearchHelper',
-    'SearchHelper',
-    'PaginationHelpers',
-    'RefreshHelper',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
@@ -161,7 +150,6 @@ var tower = angular.module('Tower', [
     'TeamHelper',
     'CredentialsListDefinition',
     'CredentialFormDefinition',
-    'LookUpHelper',
     'JobTemplatesListDefinition',
     'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',
@@ -223,10 +211,12 @@ var tower = angular.module('Tower', [
             timeout: 4000
         });
     }])
-    .config(['$stateProvider', '$urlRouterProvider', '$breadcrumbProvider',
-        '$urlMatcherFactoryProvider',
-        function($stateProvider, $urlRouterProvider, $breadcrumbProvider,
-            $urlMatcherFactoryProvider) {
+    .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
+        '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider', '$stateExtenderProvider',
+        function($urlRouterProvider, $breadcrumbProvider, QuerySet,
+            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider, $stateExtenderProvider) {
+            let $stateExtender = $stateExtenderProvider.$get(),
+                stateDefinitions = stateDefinitionsProvider.$get();
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -234,202 +224,133 @@ var tower = angular.module('Tower', [
 
             // route to the details pane of /job/:id/host-event/:eventId if no other child specified
             $urlRouterProvider.when('/jobs/*/host-event/*', '/jobs/*/host-event/*/details');
+            $urlRouterProvider.otherwise('/home');
 
-            // $urlRouterProvider.otherwise("/home");
-            $urlRouterProvider.otherwise(function($injector) {
-                var $state = $injector.get("$state");
-                $state.go('dashboard');
+            $urlMatcherFactoryProvider.type('queryset', {
+                // encoding
+                // from {operator__key1__comparator=value, ... }
+                // to "_search=operator:key:compator=value& ... "
+                encode: function(item) {
+                    return QuerySet.$get().encodeArr(item);
+                },
+                // decoding
+                // from "_search=operator:key:compator=value& ... "
+                // to "_search=operator:key:compator=value& ... "
+                decode: function(item) {
+                    return QuerySet.$get().decodeArr(item);
+                },
+                // directionality - are we encoding or decoding?
+                is: function(item) {
+                    // true: encode to uri
+                    // false: decode to $stateParam
+                    return angular.isObject(item);
+                }
             });
 
-            /* Mark translatable strings with N_() and
-             * extract them by 'grunt nggettext_extract'
-             * but angular.config() cannot get gettextCatalog.
-             */
-            $stateProvider.
-            state('teams', {
-                url: '/teams',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'team'
-                },
-                ncyBreadcrumb: {
-                    parent: 'setup',
-                    label: N_("TEAMS")
-                }
-            }).
 
-            state('teams.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsAdd,
-                ncyBreadcrumb: {
-                    parent: "teams",
-                    label: N_("CREATE TEAM")
-                }
-            }).
+            // Handy hook for debugging register/deregister of lazyLoad'd states
+            // $stateProvider.stateRegistry.onStatesChanged((event, states) =>{
+            //     console.log(event, states)
+            // })
 
-            state('teams.edit', {
-                url: '/:team_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: TeamsEdit,
-                data: {
-                    activityStreamId: 'team_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "teams",
-                    label: "{{team_obj.name}}"
-                }
-            }).
 
-            state('teamUsers', {
-                url: '/teams/:team_id/users',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList
-            }).
+            // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
+            // see: stateDefinition.factory for usage documentation
+            $stateProvider.state({
+                name: 'projects',
+                url: '/projects',
+                lazyLoad: () => stateDefinitions.generateTree({
+                    parent: 'projects', // top-most node in the generated tree (will replace this state definition)
+                    modes: ['add', 'edit'],
+                    list: 'ProjectList',
+                    form: 'ProjectsForm',
+                    controllers: {
+                        list: ProjectsList, // DI strings or objects
+                        add: ProjectsAdd,
+                        edit: ProjectsEdit
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'project',
+                        socket: {
+                            "groups": {
+                                "jobs": ["status_changed"]
+                            }
+                        }
+                    }
+                })
+            });
 
-            state('teamUserEdit', {
-                url: '/teams/:team_id/users/:user_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersEdit
-            }).
-
-            state('teamProjects', {
-                url: '/teams/:team_id/projects',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsList
-            }).
-
-            state('teamProjectAdd', {
-                url: '/teams/:team_id/projects/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsAdd
-            }).
-
-            state('teamProjectEdit', {
-                url: '/teams/:team_id/projects/:project_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: ProjectsEdit
-            }).
-
-            state('teamCredentials', {
-                url: '/teams/:team_id/credentials',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsList
-            }).
-
-            state('teamCredentialAdd', {
-                url: '/teams/:team_id/credentials/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
-            }).
-
-            state('teamCredentialEdit', {
-                url: '/teams/:team_id/credentials/:credential_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
-            }).
-
-            state('credentials', {
+            $stateProvider.state({
+                name: 'credentials',
                 url: '/credentials',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'credential'
-                },
-                ncyBreadcrumb: {
-                    parent: 'setup',
-                    label: N_("CREDENTIALS")
-                }
-            }).
+                lazyLoad: () => stateDefinitions.generateTree({
+                    parent: 'credentials',
+                    modes: ['add', 'edit'],
+                    list: 'CredentialList',
+                    form: 'CredentialForm',
+                    controllers: {
+                        list: CredentialsList,
+                        add: CredentialsAdd,
+                        edit: CredentialsEdit
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'credential'
+                    },
+                    ncyBreadcrumb: {
+                        parent: 'setup',
+                        label: 'CREDENTIALS'
+                    }
+                })
+            });
 
-            state('credentials.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsAdd,
-                ncyBreadcrumb: {
-                    parent: "credentials",
-                    label: N_("CREATE CREDENTIAL")
-                }
-            }).
+            $stateProvider.state({
+                name: 'teams',
+                url: '/teams',
+                lazyLoad: () => stateDefinitions.generateTree({
+                    parent: 'teams',
+                    modes: ['add', 'edit'],
+                    list: 'TeamList',
+                    form: 'TeamForm',
+                    controllers: {
+                        list: TeamsList,
+                        add: TeamsAdd,
+                        edit: TeamsEdit
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'team'
+                    },
+                    ncyBreadcrumb: {
+                        parent: 'setup',
+                        label: 'TEAMS'
+                    }
+                })
+            });
 
-            state('credentials.edit', {
-                url: '/:credential_id',
-                templateUrl: urlPrefix + 'partials/credentials.html',
-                controller: CredentialsEdit,
-                data: {
-                    activityStreamId: 'credential_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "credentials",
-                    label: "{{credential_obj.name}}"
-                }
-            }).
-
-            state('users', {
+            $stateProvider.state({
+                name: 'users',
                 url: '/users',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersList,
-                data: {
-                    activityStream: true,
-                    activityStreamTarget: 'user'
-                },
-                ncyBreadcrumb: {
-                    parent: 'setup',
-                    label: N_("USERS")
-                }
-            }).
-
-            state('users.add', {
-                url: '/add',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersAdd,
-                ncyBreadcrumb: {
-                    parent: "users",
-                    label: N_("CREATE USER")
-                }
-            }).
-
-            state('users.edit', {
-                url: '/:user_id',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: UsersEdit,
-                data: {
-                    activityStreamId: 'user_id'
-                },
-                ncyBreadcrumb: {
-                    parent: "users",
-                    label: "{{user_obj.username}}"
-                }
-            }).
-
-            state('userCredentials', {
-                url: '/users/:user_id/credentials',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList
-            }).
-
-            state('userCredentialAdd', {
-                url: '/users/:user_id/credentials/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
-            }).
-
-            state('teamUserCredentialEdit', {
-                url: '/teams/:user_id/credentials/:credential_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
-            }).
-
-            state('sockets', {
-                url: '/sockets',
-                templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController,
-                ncyBreadcrumb: {
-                    label: N_("SOCKETS")
-                }
+                lazyLoad: () => stateDefinitions.generateTree({
+                    parent: 'users',
+                    modes: ['add', 'edit'],
+                    list: 'UserList',
+                    form: 'UserForm',
+                    controllers: {
+                        list: UsersList,
+                        add: UsersAdd,
+                        edit: UsersEdit
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'user'
+                    },
+                    ncyBreadcrumb: {
+                        parent: 'setup',
+                        label: 'USERS'
+                    }
+                })
             });
         }
     ])
@@ -447,16 +368,22 @@ var tower = angular.module('Tower', [
     }]);
 }])
 
-.run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log',
+.run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
     'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
     'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
     'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
     'FeaturesService', '$filter', 'SocketService', 'I18NInit',
-    function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log,
+    function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
         CheckLicense, $location, Authorization, LoadBasePaths, Timer,
         ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
         ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
         $filter, SocketService, I18NInit) {
+
+        $rootScope.$state = $state;
+        $rootScope.$state.matches = function(stateName) {
+            return $state.current.name.search(stateName) > 0;
+        };
+        $rootScope.$stateParams = $stateParams;
 
         I18NInit();
         $stateExtender.addState({
@@ -465,14 +392,14 @@ var tower = angular.module('Tower', [
             templateUrl: urlPrefix + 'partials/home.html',
             controller: Home,
             params: { licenseMissing: null },
-            socket: {
-                "groups":{
-                    "jobs": ["status_changed"]
-                }
-            },
             data: {
                 activityStream: true,
-                refreshButton: true
+                refreshButton: true,
+                socket: {
+                    "groups": {
+                        "jobs": ["status_changed"]
+                    }
+                },
             },
             ncyBreadcrumb: {
                 label: N_("DASHBOARD")
@@ -491,92 +418,92 @@ var tower = angular.module('Tower', [
         });
 
         $stateExtender.addState({
+            searchPrefix: 'job',
             name: 'jobs',
             url: '/jobs',
-            templateUrl: urlPrefix + 'partials/jobs.html',
-            controller: JobsListController,
             ncyBreadcrumb: {
                 label: N_("JOBS")
             },
             params: {
-                search: {
-                    value: {order_by:'-finished'}
+                job_search: {
+                    value: { order_by: '-finished' }
                 }
             },
-            socket: {
-                "groups":{
-                    "jobs": ["status_changed"],
-                    "schedules": ["changed"]
-                }
-            }
-        });
-
-        $stateExtender.addState({
-            name: 'projects',
-            url: '/projects?{status}',
-            templateUrl: urlPrefix + 'partials/projects.html',
-            controller: ProjectsList,
             data: {
-                activityStream: true,
-                activityStreamTarget: 'project'
+                socket: {
+                    "groups": {
+                        "jobs": ["status_changed"],
+                        "schedules": ["changed"]
+                    }
+                }
             },
-            ncyBreadcrumb: {
-                label: N_("PROJECTS")
+            resolve: {
+                Dataset: ['AllJobsList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
+                    let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                }]
             },
-            socket: {
-                "groups":{
-                    "jobs": ["status_changed"]
+            views: {
+                'list@': {
+                    templateUrl: urlPrefix + 'partials/jobs.html',
+                },
+                'list@jobs': {
+                    templateProvider: function(AllJobsList, generateList) {
+                        let html = generateList.build({
+                            list: AllJobsList,
+                            mode: 'edit'
+                        });
+                        return html;
+                    },
+                    controller: JobsListController
                 }
             }
         });
 
+
         $stateExtender.addState({
-            name: 'projects.add',
-            url: '/add',
-            templateUrl: urlPrefix + 'partials/projects.html',
-            controller: ProjectsAdd,
-            ncyBreadcrumb: {
-                parent: "projects",
-                label: N_("CREATE PROJECT")
-            },
-            socket: {
-                "groups":{
-                    "jobs": ["status_changed"]
-                }
+            name: 'teamUsers',
+            url: '/teams/:team_id/users',
+            templateUrl: urlPrefix + 'partials/teams.html',
+            controller: UsersList,
+            resolve: {
+                Users: ['UsersList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
+                    let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                }]
             }
         });
 
+
         $stateExtender.addState({
-            name: 'projects.edit',
-            url: '/:id',
-            templateUrl: urlPrefix + 'partials/projects.html',
-            controller: ProjectsEdit,
-            data: {
-                activityStreamId: 'id'
-            },
+            name: 'userCredentials',
+            url: '/users/:user_id/credentials',
+            templateUrl: urlPrefix + 'partials/users.html',
+            controller: CredentialsList
+        });
+
+        $stateExtender.addState({
+            name: 'userCredentialAdd',
+            url: '/users/:user_id/credentials/add',
+            templateUrl: urlPrefix + 'partials/teams.html',
+            controller: CredentialsAdd
+        });
+
+        $stateExtender.addState({
+            name: 'teamUserCredentialEdit',
+            url: '/teams/:user_id/credentials/:credential_id',
+            templateUrl: urlPrefix + 'partials/teams.html',
+            controller: CredentialsEdit
+        });
+
+        $stateExtender.addState({
+            name: 'sockets',
+            url: '/sockets',
+            templateUrl: urlPrefix + 'partials/sockets.html',
+            controller: SocketsController,
             ncyBreadcrumb: {
-                parent: 'projects',
-                label: '{{name}}'
-            },
-            socket: {
-                "groups":{
-                    "jobs": ["status_changed"]
-                }
+                label: 'SOCKETS'
             }
-        });
-
-        $stateExtender.addState({
-            name: 'projectOrganizations',
-            url: '/projects/:project_id/organizations',
-            templateUrl: urlPrefix + 'partials/projects.html',
-            controller: OrganizationsList
-        });
-
-        $stateExtender.addState({
-            name: 'projectOrganizationAdd',
-            url: '/projects/:project_id/organizations/add',
-            templateUrl: urlPrefix + 'partials/projects.html',
-            controller: OrganizationsAdd
         });
 
         $rootScope.addPermission = function(scope) {
@@ -604,7 +531,7 @@ var tower = angular.module('Tower', [
                 Rest.post({ "disassociate": true, "id": entry.id })
                     .success(function() {
                         Wait('stop');
-                        $rootScope.$broadcast("refreshList", "permission");
+                        $state.go('.', null, { reload: true });
                     })
                     .error(function(data, status) {
                         ProcessErrors($rootScope, data, status, null, {

@@ -1,11 +1,27 @@
-<div class="tab-pane PortalMode" >
-        <div ng-cloak id="portal-landing">
-                <div class="PortalMode-container">
-                        <div ui-view="job-templates" class="PortalMode-panel--left">
+<div class="tab-pane PortalMode">
+    <div ng-cloak id="portal-landing">
+        <div class="PortalMode-container">
+            <div ui-view="job-templates" class="PortalMode-panel--left Panel">
+            </div>
+            <div class="PortalMode-panel--right">
+                <div id="portal-container-jobs" class="Panel">
+                    <div class="PortalMode-filterHolder">
+                        <div class="btn-group PortalMode-filter">
+                            <button ng-class="{'btn-primary ': activeFilter == 'user',
+            'btn-default' : activeFilter != 'user' }" ng-click='filterUser()' class="btn btn-xs">My Jobs</button>
+                            <button ng-class="{'btn-primary' : activeFilter == 'all',
+            'btn-default' : activeFilter != 'all'}" ng-click='filterAll()' class="btn btn-xs">All Jobs</button>
                         </div>
-                        <div ui-view="jobs" class="PortalMode-panel--right">
+                        <div class="PortalMode-refresh">
+                            <button id="refresh_btn" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault" ng-click="refresh()" ng-show="socketStatus == 'error'">
+                                <span>REFRESH</span>
+                            </button>
                         </div>
+                    </div>
+                    <div ui-view="jobs">
+                    </div>
                 </div>
+            </div>
         </div>
+    </div>
 </div>
-<div id="LookupModal-dialog" style="display:none"> </div>

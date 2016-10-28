@@ -6,13 +6,13 @@
 
 export default
     [   '$rootScope','Wait', 'generateList', 'NotificationsList',
-        'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' ,
+        'GetBasePath' , 'Rest' ,
         'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
         'ngToast', '$compile', '$filter','ToggleNotification',
         'NotificationsListInit', '$stateParams', 'management_job',
         function(
             $rootScope,Wait, GenerateList, NotificationsList,
-            GetBasePath, SearchInit, PaginateInit, Rest,
+            GetBasePath, Rest,
             ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
             $compile, $filter, ToggleNotification, NotificationsListInit,
             $stateParams, management_job) {
@@ -84,24 +84,27 @@ export default
             scope.removeChoicesHere = scope.$on('choicesReadyNotifierList', function () {
                 list.fields.notification_type.searchOptions = scope.notification_type_options;
 
-                SearchInit({
-                    scope: scope,
-                    set: 'notifications',
-                    list: list,
-                    url: url
-                });
+                // @issue: OLD SEARCH
+                // SearchInit({
+                //     scope: scope,
+                //     set: 'notifications',
+                //     list: list,
+                //     url: url
+                // });
 
                 if ($rootScope.addedItem) {
                     scope.addedItem = $rootScope.addedItem;
                     delete $rootScope.addedItem;
                 }
-                PaginateInit({
-                    scope: scope,
-                    list: list,
-                    url: url
-                });
 
-                scope.search(list.iterator);
+                // @issue: OLD SEARCH
+                // PaginateInit({
+                //     scope: scope,
+                //     list: list,
+                //     url: url
+                // });
+                //
+                // scope.search(list.iterator);
 
             });
 

@@ -14,92 +14,7 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
     angular.module('JobsHelper', ['Utilities', 'RestServices', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper', 'GeneratorHelpers',
-        'JobSubmissionHelper', 'StandardOutHelper', 'SearchHelper', 'PaginationHelpers', 'AdhocHelper', listGenerator.name])
-
-    /**
-     *  JobsControllerInit({ scope: $scope });
-     *
-     *  Initialize calling scope with all the bits required to support a jobs list
-     *
-     */
-    .factory('JobsControllerInit', ['$state', 'Find', 'DeleteJob', 'RelaunchJob',
-        function($state, Find, DeleteJob, RelaunchJob) {
-            return function(params) {
-                var scope = params.scope,
-                    iterator = (params.iterator) ? params.iterator : scope.iterator;
-
-                scope.deleteJob = function(id) {
-                    DeleteJob({ scope: scope, id: id });
-                };
-
-                scope.relaunchJob = function(event, id) {
-                    var list, job, typeId;
-                    try {
-                        $(event.target).tooltip('hide');
-                    }
-                    catch(e) {
-                        //ignore
-                    }
-                    if (scope.completed_jobs) {
-                        list = scope.completed_jobs;
-                    }
-                    else if (scope.running_jobs) {
-                        list = scope.running_jobs;
-                    }
-                    else if (scope.queued_jobs) {
-                        list = scope.queued_jobs;
-                    }
-                    else if (scope.jobs) {
-                        list = scope.jobs;
-                    }
-                    else if(scope.all_jobs){
-                        list = scope.all_jobs;
-                    }
-                    job = Find({ list: list, key: 'id', val: id });
-                    if (job.type === 'inventory_update') {
-                        typeId = job.inventory_source;
-                    }
-                    else if (job.type === 'project_update') {
-                        typeId = job.project;
-                    }
-                    else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
-                        typeId = job.id;
-                    }
-                    RelaunchJob({ scope: scope, id: typeId, type: job.type, name: job.name });
-                };
-
-                scope.refreshJobs = function() {
-                    scope.search(iterator);
-                };
-
-                scope.viewJobDetails = function(job) {
-
-                    var goToJobDetails = function(state) {
-                        $state.go(state, {id: job.id}, {reload:true});
-                    };
-
-                    switch(job.type) {
-                        case 'job':
-                            goToJobDetails('jobDetail');
-                            break;
-                        case 'ad_hoc_command':
-                            goToJobDetails('adHocJobStdout');
-                            break;
-                        case 'system_job':
-                            goToJobDetails('managementJobStdout');
-                            break;
-                        case 'project_update':
-                            goToJobDetails('scmUpdateStdout');
-                            break;
-                        case 'inventory_update':
-                            goToJobDetails('inventorySyncStdout');
-                            break;
-                    }
-
-                };
-            };
-        }
-    ])
+        'JobSubmissionHelper', 'StandardOutHelper', 'AdhocHelper', listGenerator.name])
 
     .factory('RelaunchJob', ['RelaunchInventory', 'RelaunchPlaybook', 'RelaunchSCM', 'RelaunchAdhoc',
         function(RelaunchInventory, RelaunchPlaybook, RelaunchSCM, RelaunchAdhoc) {
@@ -210,83 +125,6 @@ export default
         };
     }])
 
-    /**
-     *
-     *  Called from JobsList controller to load each section or list on the page
-     *
-     */
-    .factory('LoadJobsScope', ['$stateParams', '$location', '$compile',
-    'SearchInit', 'PaginateInit', 'generateList', 'JobsControllerInit',
-    'JobsListUpdate',
-        function($stateParams, $location, $compile, SearchInit, PaginateInit,
-            GenerateList, JobsControllerInit, JobsListUpdate) {
-        return function(params) {
-            var parent_scope = params.parent_scope,
-                scope = params.scope,
-                list = params.list,
-                id = params.id,
-                url = params.url,
-                pageSize = params.pageSize || 10,
-                base = $location.path().replace(/^\//, '').split('/')[0],
-                search_params = params.searchParams,
-                spinner = (params.spinner === undefined) ? true : params.spinner, key;
-
-            var buildTooltips = function(data){
-                data.forEach((val) => {
-                    val.status_tip = 'Job ' + val.status + ". Click for details.";
-                });
-            };
-
-            GenerateList.inject(list, {
-                mode: 'edit',
-                id: id,
-                scope: scope,
-                title: false
-            });
-
-            SearchInit({
-                scope: scope,
-                set: list.name,
-                list: list,
-                url: url
-            });
-
-            PaginateInit({
-                scope: scope,
-                list: list,
-                url: url,
-                pageSize: pageSize
-            });
-
-            scope.iterator = list.iterator;
-
-            if (scope.removePostRefresh) {
-                scope.removePostRefresh();
-            }
-            scope.$on('PostRefresh', function(){
-                JobsControllerInit({ scope: scope, parent_scope: parent_scope });
-                JobsListUpdate({ scope: scope, parent_scope: parent_scope, list: list });
-                buildTooltips(scope.jobs);
-                parent_scope.$emit('listLoaded');
-            });
-
-            if (base === 'jobs' && list.name === 'all_jobs') {
-                if ($stateParams.id__int) {
-                    scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
-                    scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
-                }
-            }
-
-            if (search_params) {
-                for (key in search_params) {
-                    scope[key] = search_params[key];
-                }
-            }
-            scope.search(list.iterator, null, null, null, null, spinner);
-        };
-    }])
-
     .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait',
     'ProcessErrors', 'Prompt', 'Alert', '$filter',
     function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
@@ -338,7 +176,8 @@ export default
                                 scope.$emit(callback, action_label);
                             }
                             else {
-                                scope.search(scope.iterator);
+                                // @issue: OLD SEARCH
+                                // scope.search(scope.iterator);
                             }
                         })
                         .error(function(obj, status) {
@@ -359,7 +198,8 @@ export default
                                 scope.$emit(callback, action_label);
                             }
                             else {
-                                scope.search(scope.iterator);
+                                // @issue: OLD SEARCH
+                                // scope.search(scope.iterator);
                             }
                         })
                         .error(function (obj, status) {

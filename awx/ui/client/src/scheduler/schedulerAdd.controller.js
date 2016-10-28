@@ -6,9 +6,9 @@
 
 export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
-    'Rest', 'ParamPass',
+    'Rest', 'ParamPass', 'ParentObject',
     function($compile, $filter, $state, $stateParams, AddSchedule, Wait, $scope,
-        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass) {
+        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass, ParentObject) {
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
@@ -23,6 +23,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
     $scope.schedulerEndHour = "00";
     $scope.schedulerEndMinute = "00";
     $scope.schedulerEndSecond = "00";
+    $scope.parentObject = ParentObject;
 
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
@@ -68,7 +69,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
 
     $scope.hideForm = true;
 
-    var schedule_url = ParamPass.get();
+    var schedule_url = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
 
     $scope.formCancel = function() {
         $state.go("^");
@@ -101,7 +102,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
                 field_id: 'SchedulerForm-extraVars'
             });
     }
-    else if ($state.current.name === 'inventoryManage.schedules.add'){
+    else if ($state.current.name === 'inventoryManage.editGroup.schedules.add'){
         $scope.extraVars = '---';
         $scope.parseType = 'yaml';
         ParseTypeChange({

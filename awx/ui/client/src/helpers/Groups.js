@@ -15,9 +15,8 @@
 import listGenerator from '../shared/list-generator/main';
 
 export default
-angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', 'SearchHelper',
-               'PaginationHelpers', listGenerator.name, 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
-               'JobSubmissionHelper', 'RefreshHelper', 'PromptDialog', 'CredentialsListDefinition',
+angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'GroupListDefinition', listGenerator.name, 'GroupsHelper', 'InventoryHelper', 'SelectionHelper',
+               'JobSubmissionHelper', 'PromptDialog', 'CredentialsListDefinition',
                 'InventoryStatusDefinition', 'VariablesHelper', 'SchedulesListDefinition', 'StandardOutHelper',
                'SchedulesHelper'
 ])
@@ -325,10 +324,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
  */
 .factory('GroupsEdit', ['$filter', '$rootScope', '$location', '$log', '$stateParams', '$compile', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
          'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-         'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
+         'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
          'ParseVariableString', 'ToJSON', 'GroupsScheduleListInit', 'SetSchedulesInnerDialogSize', 'CreateSelect2',
          function ($filter, $rootScope, $location, $log, $stateParams, $compile, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-                   GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
+                   GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, Empty, Wait,
                    GetChoices, UpdateGroup, SourceChange, Find, ParseVariableString, ToJSON, GroupsScheduleListInit,
                    SetSchedulesInnerDialogSize, CreateSelect2) {
                        return function (params) {
@@ -842,9 +841,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                // Clean up
                                Wait('stop');
 
-                               if (modal_scope.searchCleanUp) {
-                                   modal_scope.searchCleanup();
-                               }
+                                // @issue: OLD SEARCH
+                                //    if (modal_scope.searchCleanUp) {
+                                //        modal_scope.searchCleanup();
+                                //    }
+
                                try {
                                    $('#group-modal-dialog').dialog('close');
                                }
@@ -947,15 +948,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                catch(e) {
                                    //ignore
                                }
-                               if (modal_scope.searchCleanup) {
-                                   modal_scope.searchCleanup();
-                               }
-                               if (parent_scope.restoreSearch) {
-                                   parent_scope.restoreSearch();
-                               }
-                               else {
-                                   Wait('stop');
-                               }
+
+                                // @issue: OLD SEARCH
+                                //    if (modal_scope.searchCleanup) {
+                                //        modal_scope.searchCleanup();
+                                //    }
+                                //    if (parent_scope.restoreSearch) {
+                                //        parent_scope.restoreSearch();
+                                //    }
+                                //    else {
+                                //        Wait('stop');
+                                //    }
+
+                                Wait('stop');
                            };
 
                            // Save

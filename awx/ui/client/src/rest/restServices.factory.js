@@ -242,8 +242,9 @@ export default
                         }, 401);
                     }
                 },
-                options: function () {
-                    var token = Authorization.getToken(),
+                options: function (cache) {
+                    var params,
+                        token = Authorization.getToken(),
                         expired = this.checkExpired();
                     if (expired) {
                         return this.createResponse({
@@ -256,12 +257,14 @@ export default
                         this.setHeader({
                             "X-Auth-Token": 'Token ' + token
                         });
-                        return $http({
+                        params = {
                             method: 'OPTIONS',
                             url: this.url,
                             headers: this.headers,
-                            data: ''
-                        });
+                            data: '',
+                            cache: (cache ? true : false)
+                        };
+                        return $http(params);
                     } else {
                         return this.createResponse({
                             detail: 'Invalid token'

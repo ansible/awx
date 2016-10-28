@@ -4,11 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-import {copyMoveGroup, copyMoveHost} from './copy-move.route';
+import CopyMoveGroupsController from './copy-move-groups.controller';
+import CopyMoveHostsController from './copy-move-hosts.controller';
 
 export default
 angular.module('manageCopyMove', [])
-    .run(['$stateExtender', function($stateExtender) {
-        $stateExtender.addState(copyMoveGroup);
-        $stateExtender.addState(copyMoveHost);
-    }]);
+    .controller('CopyMoveGroupsController', CopyMoveGroupsController)
+    .controller('CopyMoveHostsController', CopyMoveHostsController);

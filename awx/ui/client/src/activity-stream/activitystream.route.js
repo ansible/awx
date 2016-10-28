@@ -4,49 +4,73 @@
  * All Rights Reserved
  *************************************************/
 
- import {templateUrl} from '../shared/template-url/template-url.factory';
-
 export default {
     name: 'activityStream',
     route: '/activity_stream?target&id',
-    templateUrl: templateUrl('activity-stream/activitystream'),
-    controller: 'activityStreamController',
+    searchPrefix: 'activity',
     data: {
         activityStream: true
+    },
+    params: {
+        activity_search: {
+            value: {
+                // default params will not generate search tags
+                order_by: '-timestamp',
+                or__object1: null,
+                or__object2: null
+            }
+        }
     },
     ncyBreadcrumb: {
         label: "ACTIVITY STREAM"
     },
-    onExit: function(){
+    onExit: function() {
         $('#stream-detail-modal').modal('hide');
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
     },
-    resolve: {
-        features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',
-        function(FeaturesService, ProcessErrors, $state, $rootScope) {
-            var features = FeaturesService.get();
-            if(features){
-                if(FeaturesService.featureEnabled('activity_streams')) {
-                    return features;
-                }
-                else {
-                    $state.go('dashboard');
-                }
+    views: {
+        'list@': {
+            controller: 'activityStreamController',
+            templateProvider: function(StreamList, generateList) {
+                let html = generateList.build({
+                    list: StreamList,
+                    mode: 'edit'
+                });
+                html = generateList.wrapPanel(html);
+                return html;
             }
-            $rootScope.featuresConfigured.promise.then(function(features){
-                if(features){
-                    if(FeaturesService.featureEnabled('activity_streams')) {
+        }
+    },
+    resolve: {
+        Dataset: ['StreamList', 'QuerySet', '$stateParams', 'GetBasePath',
+            function(list, qs, $stateParams, GetBasePath) {
+                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+            }
+        ],
+        features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',
+            function(FeaturesService, ProcessErrors, $state, $rootScope) {
+                var features = FeaturesService.get();
+                if (features) {
+                    if (FeaturesService.featureEnabled('activity_streams')) {
                         return features;
-                    }
-                    else {
+                    } else {
                         $state.go('dashboard');
                     }
                 }
-            });
-        }],
-        subTitle:
-        [   '$stateParams',
+                $rootScope.featuresConfigured.promise.then(function(features) {
+                    if (features) {
+                        if (FeaturesService.featureEnabled('activity_streams')) {
+                            return features;
+                        } else {
+                            $state.go('dashboard');
+                        }
+                    }
+                });
+            }
+        ],
+        subTitle: ['$stateParams',
             'Rest',
             'ModelToBasePathKey',
             'GetBasePath',
@@ -65,15 +89,14 @@ export default {
                         .then(function(data) {
                             // Return the name or the username depending on which is available.
                             return (data.data.name || data.data.username);
-                        }).catch(function (response) {
-                        ProcessErrors(null, response.data, response.status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get title info. GET returned status: ' +
-                            response.status
+                        }).catch(function(response) {
+                            ProcessErrors(null, response.data, response.status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to get title info. GET returned status: ' +
+                                    response.status
+                            });
                         });
-                    });
-                }
-                else {
+                } else {
                     return null;
                 }
             }

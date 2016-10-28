@@ -86,7 +86,7 @@
     "angular-sanitize": "^1.4.3",
     "angular-scheduler": "chouseknecht/angular-scheduler#0.1.0",
     "angular-tz-extensions": "chouseknecht/angular-tz-extensions#0.3.11",
-    "angular-ui-router": "^0.2.15",
+    "angular-ui-router": "^1.0.0-beta.3",
     "bootstrap": "^3.1.1",
     "bootstrap-datepicker": "^1.4.0",
     "codemirror": "^5.17.0",

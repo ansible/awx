@@ -8,108 +8,62 @@
  * @ngdoc function
  * @name controllers.function:Teams
  * @description This controller's for teams
-*/
+ */
 
+export function TeamsList($scope, $rootScope, $log, $stateParams,
+    Rest, Alert, TeamList, Prompt, ClearScope, ProcessErrors,
+    GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
 
-export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
-    Rest, Alert, TeamList, GenerateList, Prompt, SearchInit, PaginateInit,
-    ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath,
-    SelectionInit, Wait, $state, Refresh, $filter, rbacUiControlService) {
     ClearScope();
 
-    $scope.canAdd = false;
-
-    rbacUiControlService.canAdd('teams')
-        .then(function(canAdd) {
-            $scope.canAdd = canAdd;
-        });
-
     var list = TeamList,
-        defaultUrl = GetBasePath('teams'),
-        generator = GenerateList,
-        paths = $location.path().replace(/^\//, '').split('/'),
-        mode = (paths[0] === 'teams') ? 'edit' : 'select',
-        url;
+        defaultUrl = GetBasePath('teams');
 
-    var injectForm = function() {
-        generator.inject(list, { mode: mode, scope: $scope });
-    };
+    init();
 
-    injectForm();
+    function init() {
+        $scope.canAdd = false;
 
-    $scope.$on("RefreshTeamsList", function() {
-        injectForm();
-        Refresh({
-            scope: $scope,
-            set: 'teams',
-            iterator: 'team',
-            url: GetBasePath('teams') + "?order_by=name&page_size=" + $scope.team_page_size
+        rbacUiControlService.canAdd('teams')
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
+        // search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        _.forEach($scope[list.name], (team) => {
+            team.organization_name = team.summary_fields.organization.name;
         });
-    });
 
-    $scope.selected = [];
-
-    url = GetBasePath('base') + $location.path() + '/';
-    SelectionInit({
-        scope: $scope,
-        list: list,
-        url: url,
-        returnToCaller: 1
-    });
-
-    if ($scope.removePostRefresh) {
-        $scope.removePostRefresh();
+        $scope.selected = [];
     }
-    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        // After a refresh, populate the organization name on each row
-        var i;
-        if ($scope.teams) {
-            for (i = 0; i < $scope.teams.length; i++) {
-                if ($scope.teams[i].summary_fields.organization) {
-                    $scope.teams[i].organization_name = $scope.teams[i].summary_fields.organization.name;
-                }
-            }
-        }
-    });
 
-    SearchInit({
-        scope: $scope,
-        set: 'teams',
-        list: list,
-        url: defaultUrl
-    });
-    PaginateInit({
-        scope: $scope,
-        list: list,
-        url: defaultUrl
-    });
-    $scope.search(list.iterator);
-
-    $scope.addTeam = function () {
-        $state.transitionTo('teams.add');
+    $scope.addTeam = function() {
+        $state.go('teams.add');
     };
 
-    $scope.editTeam = function (id) {
-        $state.transitionTo('teams.edit', {team_id: id});
+    $scope.editTeam = function(id) {
+        $state.go('teams.edit', { team_id: id });
     };
 
-    $scope.deleteTeam = function (id, name) {
+    $scope.deleteTeam = function(id, name) {
 
-        var action = function () {
+        var action = function() {
             Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
-                .success(function () {
+                .success(function() {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
                     if (parseInt($state.params.team_id) === id) {
-                        $state.go("^", null, {reload: true});
+                        $state.go('^', null, { reload: true });
                     } else {
-                        $scope.search(list.iterator);
+                        $state.go('.', null, { reload: true });
                     }
                 })
-                .error(function (data, status) {
+                .error(function(data, status) {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
                     ProcessErrors($scope, data, status, null, {
@@ -128,18 +82,15 @@ export function TeamsList($scope, $rootScope, $location, $log, $stateParams,
     };
 }
 
-TeamsList.$inject = ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'TeamList', 'generateList', 'Prompt',
-    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait',
-    '$state', 'Refresh', '$filter', 'rbacUiControlService'
+
+TeamsList.$inject = ['$scope', '$rootScope', '$log',
+    '$stateParams', 'Rest', 'Alert', 'TeamList', 'Prompt', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset'
 ];
 
 
-export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
-    $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ReturnToCaller, ClearScope, GenerateList, OrganizationList, SearchInit,
-    PaginateInit, GetBasePath, LookUpInit, Wait, $state) {
+export function TeamsAdd($scope, $rootScope, $stateParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+    ClearScope, GetBasePath, Wait, $state) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //$scope.
 
@@ -155,176 +106,128 @@ export function TeamsAdd($scope, $rootScope, $compile, $location, $log,
     // Inject dynamic view
     var defaultUrl = GetBasePath('teams'),
         form = TeamForm,
-        generator = GenerateForm,
-        scope = generator.inject(form, { mode: 'add', related: false });
+        generator = GenerateForm;
 
-    $rootScope.flashMessage = null;
-    generator.reset();
+    init();
 
-    LookUpInit({
-        scope: $scope,
-        form: form,
-        current_item: null,
-        list: OrganizationList,
-        field: 'organization',
-        input_type: 'radio'
-    });
+    function init() {
+        // apply form definition's default field values
+        GenerateForm.applyDefaults(form, $scope);
+
+        $rootScope.flashMessage = null;
+    }
 
     // Save
-    $scope.formSave = function () {
+    $scope.formSave = function() {
         var fld, data;
         generator.clearApiErrors();
         Wait('start');
         Rest.setUrl(defaultUrl);
         data = {};
         for (fld in form.fields) {
-            data[fld] = scope[fld];
+            data[fld] = $scope[fld];
         }
         Rest.post(data)
-            .success(function (data) {
+            .success(function(data) {
                 Wait('stop');
                 $rootScope.flashMessage = "New team successfully created!";
                 $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
-                $state.go('teams.edit', {team_id: data.id}, {reload: true});
+                $state.go('teams.edit', { team_id: data.id }, { reload: true });
             })
-            .error(function (data, status) {
+            .error(function(data, status) {
                 Wait('stop');
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new team. Post returned status: ' +
-                    status });
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to add new team. Post returned status: ' +
+                        status
+                });
             });
     };
 
-    $scope.formCancel = function () {
-        $state.transitionTo('teams');
+    $scope.formCancel = function() {
+        $state.go('teams');
     };
 }
 
-TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
-    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
-    'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath',
-    'LookUpInit', 'Wait', '$state'
+TeamsAdd.$inject = ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', '$state'
 ];
 
 
-export function TeamsEdit($scope, $rootScope, $location,
-    $stateParams, TeamForm, GenerateForm, Rest, ProcessErrors,
-    RelatedSearchInit, RelatedPaginateInit, ClearScope,
-    LookUpInit, GetBasePath, OrganizationList, Wait, $state) {
+export function TeamsEdit($scope, $rootScope, $stateParams,
+    TeamForm, Rest, ProcessErrors, ClearScope, GetBasePath, Wait, $state) {
 
     ClearScope();
 
-    var defaultUrl = GetBasePath('teams'),
-        generator = GenerateForm,
-        form = TeamForm,
+    var form = TeamForm,
         id = $stateParams.team_id,
-        relatedSets = {},
-        set;
+        defaultUrl = GetBasePath('teams') + id;
 
-    $scope.team_id = id;
+    init();
 
-    $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
-        if (val === false) {
-            $scope.canAdd = false;
-        }
-    });
+    function init() {
+        $scope.team_id = id;
+        Rest.setUrl(defaultUrl);
+        Wait('start');
+        Rest.get(defaultUrl).success(function(data) {
+            setScopeFields(data);
+            $scope.organization_name = data.summary_fields.organization.name;
+
+            $scope.team_obj = data;
+        });
+
+        $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
 
 
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    generator.reset();
+    }
 
-    var setScopeFields = function(data){
+    // @issue I think all this really want to do is _.forEach(form.fields, (field) =>{ $scope[field] = data[field]})
+    function setScopeFields(data) {
         _(data)
-        .pick(function(value, key){
-            return form.fields.hasOwnProperty(key) === true;
-        })
-        .forEach(function(value, key){
-            $scope[key] = value;
-        })
-        .value();
+            .pick(function(value, key) {
+                return form.fields.hasOwnProperty(key) === true;
+            })
+            .forEach(function(value, key) {
+                $scope[key] = value;
+            })
+            .value();
         return;
-    };
-    var setScopeRelated = function(data, related){
-        _(related)
-        .pick(function(value, key){
-            return data.related.hasOwnProperty(key) === true;
-        })
-        .forEach(function(value, key){
-            relatedSets[key] = {
-                url: data.related[key],
-                iterator: value.iterator
-            };
-        })
-        .value();
-    };
+    }
 
     // prepares a data payload for a PUT request to the API
-    var processNewData = function(fields){
+    function processNewData(fields) {
         var data = {};
-        _.forEach(fields, function(value, key){
-            if ($scope[key] !== '' && $scope[key]  !== null && $scope[key] !== undefined){
-             data[key] = $scope[key];
+        _.forEach(fields, function(value, key) {
+            if ($scope[key] !== '' && $scope[key] !== null && $scope[key] !== undefined) {
+                data[key] = $scope[key];
             }
         });
         return data;
+    }
+
+    $scope.formCancel = function() {
+        $state.go('teams', null, { reload: true });
     };
 
-    var init = function(){
-        var url = defaultUrl + id;
-        Rest.setUrl(url);
-        Wait('start');
-        Rest.get(url).success(function(data){
-            setScopeFields(data);
-            setScopeRelated(data, form.related);
-            $scope.organization_name = data.summary_fields.organization.name;
-
-            RelatedSearchInit({
-                scope: $scope,
-                form: form,
-                relatedSets: relatedSets
-            });
-
-            RelatedPaginateInit({
-                scope: $scope,
-                relatedSets: relatedSets
-            });
-
-            for (set in relatedSets) {
-                $scope.search(relatedSets[set].iterator);
-            }
-
-            $scope.team_obj = data;
-
-            LookUpInit({
-                url: GetBasePath('organizations'),
-                scope: $scope,
-                form: form,
-                current_item: $scope.organization,
-                list: OrganizationList,
-                field: 'organization',
-                input_type: 'radio'
-            });
-        });
-    };
-
-    $scope.formCancel = function(){
-        $state.go('teams', null, {reload: true});
-    };
-
-    $scope.formSave = function(){
-        generator.clearApiErrors();
-        generator.checkAutoFill();
+    $scope.formSave = function() {
         $rootScope.flashMessage = null;
-        if ($scope[form.name + '_form'].$valid){
+        if ($scope[form.name + '_form'].$valid) {
             Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
-            Rest.put(data).success(function(){
-                $state.go($state.current, null, {reload: true});
-            })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
-                $stateParams.id + '. GET status: ' + status });
-            });
+            Rest.put(data).success(function() {
+                    $state.go($state.current, null, { reload: true });
+                })
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: 'Error!',
+                        msg: 'Failed to retrieve user: ' +
+                            $stateParams.id + '. GET status: ' + status
+                    });
+                });
         }
     };
 
@@ -337,13 +240,8 @@ export function TeamsEdit($scope, $rootScope, $location,
             return null;
         }
     };
-
-    /* Related Set implementation TDB */
 }
 
-TeamsEdit.$inject = ['$scope', '$rootScope',  '$location',
-    '$stateParams', 'TeamForm', 'GenerateForm', 'Rest',
-    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-     'ClearScope', 'LookUpInit', 'GetBasePath',
-     'OrganizationList', 'Wait', '$state'
+TeamsEdit.$inject = ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', '$state'
 ];

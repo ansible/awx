@@ -39,7 +39,7 @@ export default
                                 label: i18n._("Hosts")
                             },
                             {
-                                url: "/#/home/hosts?active-failures=true",
+                                url: "/#/home/hosts?host_search=has_active_failures:true",
                                 number: scope.data.hosts.failed,
                                 label: i18n._("Failed Hosts"),
                                 isFailureCount: true
@@ -50,7 +50,7 @@ export default
                                 label: i18n._("Inventories"),
                             },
                             {
-                                url: "/#/inventories?status=sync-failed",
+                                url: "/#/inventories?inventory_search=inventory_sources_with_failures__gt:0",
                                 number: scope.data.inventories.inventory_failed,
                                 label: i18n._("Inventory Sync Failures"),
                                 isFailureCount: true
@@ -61,7 +61,7 @@ export default
                                 label: i18n._("Projects")
                             },
                             {
-                                url: "/#/projects?status=failed,canceled",
+                                url: "/#/projects?project_search=status__in:failed,canceled",
                                 number: scope.data.projects.failed,
                                 label: i18n._("Project Sync Failures"),
                                 isFailureCount: true

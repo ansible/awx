@@ -29,23 +29,15 @@ export default
                 dataPlacement: 'right',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "List-staticColumn--smallStatus",
-                nosort: true,
-                searchLabel: 'Status',
-                searchType: 'select',
-                searchOptions: [],  //set in the controller
-                excludeModal: true
+                nosort: true
             },
             name: {
-                key: true,
-                searchDefault: true,
                 label: i18n._('Name'),
                 columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
                 modalColumnClass: 'col-md-8'
             },
             scm_type: {
                 label: i18n._('Type'),
-                searchType: 'select',
-                searchOptions: [], // will be set by Options call to projects resource
                 excludeModal: true,
                 columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs'
             },
@@ -54,7 +46,6 @@ export default
                 filter: "longDate",
                 columnClass: "col-lg-3 col-md-3 hidden-sm hidden-xs",
                 excludeModal: true,
-                searchable: false,
                 nosort: true
             }
         },

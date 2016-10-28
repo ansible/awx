@@ -11,6 +11,7 @@ export default
 
         name: 'activities',
         iterator: 'activity',
+        basePath: 'activity_stream',
         editTitle: 'Activity Stream',
         listTitle: 'Activity Stream<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
         listTitleBadge: false,
@@ -19,7 +20,6 @@ export default
         index: false,
         hover: true,
         "class": "table-condensed",
-        searchWidgets: 3,
         toolbarAuxAction: "<stream-dropdown-nav></stream-dropdown-nav>",
 
         fields: {
@@ -28,32 +28,21 @@ export default
                 key: true,
                 desc: true,
                 noLink: true,
-                searchable: false,
                 filter: "longDate",
                 columnClass: 'col-lg-3 col-md-2 col-sm-3 col-xs-3'
             },
             user: {
                 label: 'Initiated by',
-                ngBindHtml: 'activity.user',
+                ngBindHtml: 'activity.user', // @todo punch monkey
                 sourceModel: 'actor',
                 sourceField: 'username',
-                searchPlaceholder: 'Username',
-                searchWidget: 1,
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
             },
             description: {
                 label: 'Event',
-                ngBindHtml: 'activity.description',
+                ngBindHtml: 'activity.description', // @todo punch monkey
                 nosort: true,
-                searchable: false,
                 columnClass: 'ActivityStream-eventColumnHeader col-lg-5 col-md-6 col-sm-4 col-xs-4'
-            },
-            actor: {
-                label: 'System event',
-                searchOnly: true,
-                searchType: 'boolean',
-                sourceModel: 'actor',
-                sourceField: 'isnull'
             }
         },
 

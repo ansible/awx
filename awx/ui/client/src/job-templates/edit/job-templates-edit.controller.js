@@ -13,25 +13,18 @@
 export default
     [   '$filter', '$scope', '$rootScope', '$compile',
         '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
-        'Rest', 'Alert',  'ProcessErrors', 'RelatedSearchInit',
-        'RelatedPaginateInit','ReturnToCaller', 'ClearScope', 'InventoryList',
-        'CredentialList', 'ProjectList', 'LookUpInit', 'GetBasePath', 'md5Setup',
+        'Rest', 'Alert',  'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'md5Setup',
         'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait',
-        'Empty', 'Prompt', 'ParseVariableString', 'ToJSON',
-        'SchedulesControllerInit', 'JobsControllerInit', 'JobsListUpdate',
-        'GetChoices', 'SchedulesListInit', 'SchedulesList', 'CallbackHelpInit',
+        'Empty', 'Prompt', 'ParseVariableString', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
-        'ToggleNotification', 'NotificationsListInit', '$q',
+        'ToggleNotification','$q',
         function(
             $filter, $scope, $rootScope, $compile,
             $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-            ProcessErrors, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller,
-            ClearScope, InventoryList, CredentialList, ProjectList, LookUpInit,
-            GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
-            Empty, Prompt, ParseVariableString, ToJSON, SchedulesControllerInit,
-            JobsControllerInit, JobsListUpdate, GetChoices, SchedulesListInit,
-            SchedulesList, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
-            CreateSelect2, ToggleNotification, NotificationsListInit, $q
+            ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, md5Setup,
+            ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
+            Empty, Prompt, ParseVariableString, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
+            CreateSelect2, ToggleNotification, $q
         ) {
 
             ClearScope();
@@ -47,43 +40,30 @@ export default
                 form = JobTemplateForm(),
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 master = {},
-                id = $stateParams.id,
-                relatedSets = {},
+                id = $stateParams.job_template_id,
                 checkSCMStatus, getPlaybooks, callback,
                 choicesCount = 0;
 
-            // remove "type" field from search options
-            CredentialList = _.cloneDeep(CredentialList);
-            CredentialList.fields.kind.noSearch = true;
+            init();
+            function init(){
+                CallbackHelpInit({ scope: $scope });
+                $scope.playbook_options = null;
+                $scope.playbook = null;
+                $scope.mode = 'edit';
+                $scope.parseType = 'yaml';
+                $scope.showJobType = false;
 
-            CallbackHelpInit({ scope: $scope });
-
-            SchedulesList.well = false;
-            generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-            $scope.mode = 'edit';
-            $scope.parseType = 'yaml';
-            $scope.showJobType = false;
-
-            SurveyControllerInit({
-                scope: $scope,
-                parent_scope: $scope,
-                id: id
-            });
-
-            NotificationsListInit({
-                scope: $scope,
-                url: GetBasePath('job_templates'),
-                id: id
-            });
+                SurveyControllerInit({
+                    scope: $scope,
+                    parent_scope: $scope,
+                    id: id
+                });
+            }
 
             callback = function() {
                 // Make sure the form controller knows there was a change
                 $scope[form.name + '_form'].$setDirty();
             };
-
-            $scope.playbook_options = null;
-            $scope.playbook = null;
-            generator.reset();
 
             function sync_playbook_select2() {
                 CreateSelect2({
@@ -94,7 +74,7 @@ export default
 
             function sync_verbosity_select2() {
                 CreateSelect2({
-                    element:'#job_templates_verbosity',
+                    element:'#job_template_verbosity',
                     multiple: false
                 });
             }
@@ -122,7 +102,7 @@ export default
                             for (var i = 0; i < data.length; i++) {
                                 $scope.playbook_options.push(data[i]);
                                 if (data[i] === $scope.playbook) {
-                                    $scope.job_templates_form.playbook.$setValidity('required', true);
+                                    $scope.job_template_form.playbook.$setValidity('required', true);
                                     playbookNotFound = false;
                                 }
                             }
@@ -170,7 +150,7 @@ export default
                         $scope.project_name = last_non_scan_project_name;
                         $scope.playbook_options = last_non_scan_playbook_options;
                         $scope.playbook = last_non_scan_playbook;
-                        $scope.job_templates_form.playbook.$setPristine();
+                        $scope.job_template_form.playbook.$setPristine();
                     }
                 }
                 sync_playbook_select2();
@@ -207,6 +187,7 @@ export default
                     Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                     Rest.get()
                         .success(function (data) {
+                            console.log(data)
                             var msg;
                             switch (data.status) {
                             case 'failed':
@@ -236,18 +217,6 @@ export default
                 }
             };
 
-            if ($scope.removerelatedschedules) {
-                $scope.removerelatedschedules();
-            }
-            $scope.removerelatedschedules = $scope.$on('relatedschedules', function() {
-                SchedulesListInit({
-                    scope: $scope,
-                    list: SchedulesList,
-                    choices: null,
-                    related: true
-                });
-            });
-
             // Register a watcher on project_name. Refresh the playbook list on change.
             if ($scope.watchProjectUnregister) {
                 $scope.watchProjectUnregister();
@@ -269,7 +238,7 @@ export default
             }
             $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
                 CreateSelect2({
-                    element:'#job_templates_job_type',
+                    element:'#job_template_job_type',
                     multiple: false
                 });
 
@@ -278,57 +247,12 @@ export default
                     multiple: false
                 });
 
-                for (var set in relatedSets) {
-                    $scope.search(relatedSets[set].iterator);
-                }
-                SchedulesControllerInit({
-                    scope: $scope,
-                    parent_scope: $scope,
-                    iterator: 'schedule'
-                });
-
-            });
-
-            // Set the status/badge for each related job
-            if ($scope.removeRelatedCompletedJobs) {
-                $scope.removeRelatedCompletedJobs();
-            }
-            $scope.removeRelatedCompletedJobs = $scope.$on('relatedcompleted_jobs', function () {
-                JobsControllerInit({
-                    scope: $scope,
-                    parent_scope: $scope,
-                    iterator: form.related.completed_jobs.iterator
-                });
-                JobsListUpdate({
-                    scope: $scope,
-                    parent_scope: $scope,
-                    list: form.related.completed_jobs
-                });
             });
 
             if ($scope.cloudCredentialReadyRemove) {
                 $scope.cloudCredentialReadyRemove();
             }
             $scope.cloudCredentialReadyRemove = $scope.$on('cloudCredentialReady', function (e, name) {
-                var CloudCredentialList = {};
-                $scope.cloud_credential_name = name;
-                master.cloud_credential_name = name;
-                // Clone the CredentialList object for use with cloud_credential. Cloning
-                // and changing properties to avoid collision.
-                jQuery.extend(true, CloudCredentialList, CredentialList);
-                CloudCredentialList.name = 'cloudcredentials';
-                CloudCredentialList.iterator = 'cloudcredential';
-                CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
-                LookUpInit({
-                    url: GetBasePath('credentials') + '?cloud=true',
-                    scope: $scope,
-                    form: form,
-                    current_item: $scope.cloud_credential,
-                    list: CloudCredentialList,
-                    field: 'cloud_credential',
-                    hdr: 'Select Cloud Credential',
-                    input_type: "radio"
-                });
                 $scope.$emit('jobTemplateLoadFinished');
             });
 
@@ -338,13 +262,10 @@ export default
                 $scope.jobTemplateLoadedRemove();
             }
             $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject, relatedSets) {
-                var dft, set;
+                var dft;
+
                 master = masterObject;
                 getPlaybooks($scope.project);
-
-                for (set in relatedSets) {
-                    $scope.search(relatedSets[set].iterator);
-                }
 
                 dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
                 md5Setup({
@@ -354,7 +275,7 @@ export default
                     default_val: dft
                 });
 
-                ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
+                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
 
                 if($scope.job_template_obj.summary_fields.cloud_credential && related_cloud_credential) {
                     $scope.$emit('cloudCredentialReady', $scope.job_template_obj.summary_fields.cloud_credential.name);
@@ -448,8 +369,8 @@ export default
                                 }
                             });
                     };
-                    if($state.params.id !== "null"){
-                        Rest.setUrl(defaultUrl + $state.params.id +
+                    if($state.params.job_template_id !== "null"){
+                        Rest.setUrl(defaultUrl + $state.params.job_template_id +
                              "/labels");
                         Rest.get()
                             .success(function(data) {
@@ -465,7 +386,7 @@ export default
                                         .map(i => ({id: i.id + "",
                                             test: i.name}));
                                     CreateSelect2({
-                                        element:'#job_templates_labels',
+                                        element:'#job_template_labels',
                                         multiple: true,
                                         addNew: true,
                                         opts: opts
@@ -670,8 +591,8 @@ export default
                         $scope.survey_exists) ? $scope.survey_enabled : false;
 
                     // The idea here is that we want to find the new option elements that also have a label that exists in the dom
-                    $("#job_templates_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
-                        $("#job_templates_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
+                    $("#job_template_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
+                        $("#job_template_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
                             if($(option).text() === $(label).attr('title')) {
                                 // Mark that the option has a label present so that we can filter by that down below
                                 $(option).attr('data-label-is-present', true);
@@ -679,12 +600,12 @@ export default
                         });
                     });
 
-                    $scope.newLabels = $("#job_templates_labels > option")
+                    $scope.newLabels = $("#job_template_labels > option")
                         .filter("[data-select2-tag=true]")
                         .filter("[data-label-is-present=true]")
                         .map((i, val) => ({name: $(val).text()}));
 
-                    Rest.setUrl(defaultUrl + $state.params.id);
+                    Rest.setUrl(defaultUrl + $state.params.job_template_id);
                     Rest.put(data)
                         .success(function (data) {
                             $scope.$emit('templateSaveSuccess', data);
@@ -707,7 +628,7 @@ export default
             // Related set: Add button
             $scope.add = function (set) {
                 $rootScope.flashMessage = null;
-                $location.path('/' + base + '/' + $stateParams.id + '/' + set);
+                $location.path('/' + base + '/' + $stateParams.job_template_id + '/' + set);
             };
 
             // Related set: Edit button

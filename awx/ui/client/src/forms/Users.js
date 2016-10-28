@@ -18,6 +18,8 @@ export default
             addTitle: i18n._('New User'),
             editTitle: '{{ username }}',
             name: 'user',
+            // the top-most node of generated state tree
+            stateTree: 'users',
             forceListeners: true,
             tabs: true,
 
@@ -25,26 +27,23 @@ export default
                 first_name: {
                     label: i18n._('First Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
-                    capitalize: true,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    capitalize: true
                 },
                 last_name: {
                     label: i18n._('Last Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
-                    capitalize: true,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    capitalize: true
                 },
                 email: {
                     label: i18n._('Email'),
                     type: 'email',
-                    addRequired: true,
-                    editRequired: true,
-                    autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    autocomplete: false
                 },
                 username: {
                     label: i18n._('Username'),
@@ -54,46 +53,42 @@ export default
                         init: true
                     },
                     autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 organization: {
                     label: i18n._('Organization'),
                     type: 'lookup',
+                    list: 'OrganizationList',
+                    basePath: 'organizations',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    addRequired: true,
-                    editRequired: false,
+                    required: true,
                     excludeMode: 'edit',
-                    ngClick: 'lookUpOrganization()',
-                    awRequiredWhen: {
-                        reqExpression: "orgrequired",
-                        init: true
-                    },
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 password: {
                     label: i18n._('Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    addRequired: true,
-                    editRequired: false,
+                    ngRequired: "$state.match('add')",
+                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
                     chkPass: true,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 password_confirm: {
                     label: i18n._('Confirm Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    addRequired: true,
-                    editRequired: false,
+                    ngRequired: "$state.match('add')",
+                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
                     awPassMatch: true,
                     associated: 'password',
                     autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 user_type: {
                     label: i18n._('User Type'),
@@ -102,30 +97,33 @@ export default
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
 
             related: {
                 organizations: {
-                    basePath: 'users/:id/organizations',
                     awToolTip: i18n._('Please save before assigning to organizations'),
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
+                    search: {
+                        page_size: '10'
+                    },
                     dataPlacement: 'top',
                     type: 'collection',
                     title: i18n._('Organizations'),
@@ -144,11 +142,14 @@ export default
                             label: 'Description'
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 },
                 teams: {
-                    basePath: 'users/:id/teams',
                     awToolTip: i18n._('Please save before assigning to teams'),
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/teams',
+                    search: {
+                        page_size: '10'
+                    },
                     dataPlacement: 'top',
                     type: 'collection',
                     title: i18n._('Teams'),
@@ -166,9 +167,15 @@ export default
                             label: 'Description'
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 },
-                roles: {
+                permissions: {
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
+                    search: {
+                        page_size: '10',
+                        // @todo ask about name field / serializer on this endpoint
+                        order_by: 'id'
+                    },
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
@@ -196,6 +203,12 @@ export default
                             noSort: true
                         },
                     },
+                    // @issue https://github.com/ansible/ansible-tower/issues/3487
+                    // actions: {
+                    //     add: {
+
+                    //     }
+                    // }
                     fieldActions: {
                         "delete": {
                             label: i18n._('Remove'),
@@ -205,7 +218,7 @@ export default
                             ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 }
             }
 
