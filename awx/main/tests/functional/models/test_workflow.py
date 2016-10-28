@@ -6,6 +6,34 @@ import pytest
 from awx.main.models.workflow import WorkflowJob, WorkflowJobNode, WorkflowJobTemplateNode
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
+from awx.main.scheduler.dag_workflow import WorkflowDAG
+
+# Django
+from django.test import TransactionTestCase
+
+
+@pytest.mark.django_db
+class TestWorkflowDAGFunctional(TransactionTestCase):
+
+    def workflow_job(self):
+        wfj = WorkflowJob.objects.create()
+        nodes = [WorkflowJobNode.objects.create(workflow_job=wfj) for i in range(0, 5)]
+        nodes[0].success_nodes.add(nodes[1])
+        nodes[1].success_nodes.add(nodes[2])
+        nodes[0].failure_nodes.add(nodes[3])
+        nodes[3].failure_nodes.add(nodes[4])
+        return wfj
+
+    def test_build_WFJT_dag(self):
+        '''
+        Test that building the graph uses 4 queries
+         1 to get the nodes
+         3 to get the related success, failure, and always connections
+        '''
+        dag = WorkflowDAG()
+        wfj = self.workflow_job()
+        with self.assertNumQueries(4):
+            dag._init_graph(wfj)
 
 @pytest.mark.django_db
 class TestWorkflowJob:
