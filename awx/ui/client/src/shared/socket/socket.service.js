@@ -135,7 +135,7 @@ export default
                 // to the API: {"groups": {}}.
                 // This is used for all pages that are socket-disabled
                 if(this.requiresNewSubscribe(state)){
-                    this.emit(JSON.stringify(state.data.socket));
+                    this.emit(JSON.stringify(state.data.socket) || JSON.stringify({"groups": {}}));
                 }
                 this.setLast(state);
             },
@@ -205,8 +205,8 @@ export default
                 // requires a subscribe or an unsubscribe
                 var self = this;
                 socketPromise.promise.then(function(){
-                    if(!state.data && !state.data.socket){
-                        state.data.socket = {groups: {}};
+                    if(!state.data || !state.data.socket){
+                        _.merge(state.data, {socket: {groups: {}}});
                         self.unsubscribe(state);
                     }
                     else{
