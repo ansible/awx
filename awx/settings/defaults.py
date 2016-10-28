@@ -10,15 +10,16 @@ from datetime import timedelta
 
 from kombu import Queue, Exchange
 
-# Update this module's local settings from the global settings module.
+# global settings
 from django.conf import global_settings
+# ugettext lazy
+from django.utils.translation import ugettext_lazy as _
+
+# Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
 for setting in dir(global_settings):
     if setting == setting.upper():
         setattr(this_module, setting, getattr(global_settings, setting))
-
-# gettext
-from django.utils.translation import ugettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -805,7 +806,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'awx.lib.compat.RequireDebugTrue',
+            '()': 'django.utils.log.RequireDebugTrue',
         },
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',

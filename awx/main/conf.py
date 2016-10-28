@@ -173,3 +173,21 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
 )
+
+register(
+    'DEFAULT_JOB_TIMEOUTS',
+    field_class=fields.DictField,
+    default={
+        'Job': 0,
+        'InventoryUpdate': 0,
+        'ProjectUpdate': 0,
+    },
+    label=_('Default Job Timeouts'),
+    help_text=_('Maximum time to allow jobs to run. Use sub-keys of Job, '
+                'InventoryUpdate, and ProjectUpdate to configure this value '
+                'for each job type. Use value of 0 to indicate that no '
+                'timeout should be imposed. A timeout set on an individual '
+                'job template will override this.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)

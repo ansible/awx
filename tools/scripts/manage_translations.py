@@ -25,24 +25,42 @@
 
 import os
 from argparse import ArgumentParser
-from subprocess import PIPE, Popen, call
+from subprocess import PIPE, Popen
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import ParseError
 
 import django
 from django.conf import settings
 from django.core.management import call_command
 
 
-PROJECT_CONFIG = "tools/scripts/zanata_config/backend-trans-config.xml"
+PROJECT_CONFIG = "tools/scripts/zanata_config/backend-translations.xml"
 MIN_TRANS_PERCENT_SETTING = False
 MIN_TRANS_PERCENT = '10'
+
+
+def _get_zanata_project_url():
+    project_url = ''
+    try:
+        zanata_config = ET.parse(PROJECT_CONFIG).getroot()
+        server_url = zanata_config.getchildren()[0].text
+        project_id = zanata_config.getchildren()[1].text
+        version_id = zanata_config.getchildren()[2].text
+        middle_url = "iteration/view/" if server_url[-1:] == '/' else "/iteration/view/"
+        project_url = server_url + middle_url + project_id + "/" + version_id + "/documents"
+    except (ParseError, IndexError):
+        print("Please re-check zanata project configuration.")
+    return project_url
 
 
 def _handle_response(output, errors):
     if not errors and '\n' in output:
         for response in output.split('\n'):
             print(response)
+        return True
     else:
         print(errors.strip())
+        return False
 
 
 def _check_diff(base_path):
@@ -82,10 +100,11 @@ def push(lang=None, both=None):
         (1) project_type should be podir - {locale}/{filename}.po format
         (2) only required languages should be kept enabled
     """
-    p = Popen("zanata push --project-config %(config)s --disable-ssl-cert" %
+    p = Popen("zanata push --project-config %(config)s --push-type source --disable-ssl-cert" %
               {'config': PROJECT_CONFIG}, stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
-    _handle_response(output, errors)
+    if _handle_response(output, errors):
+        print("Zanata URL: %s\n" % _get_zanata_project_url())
 
 
 def stats(lang=None, both=None):
@@ -104,7 +123,8 @@ def stats(lang=None, both=None):
 
 def update(lang=None, both=None):
     """
-    Update the awx/locale/django.pot files with
+    Update (1) awx/locale/django.pot and/or
+     (2) awx/ui/po/ansible-tower.pot files with
     new/updated translatable strings.
     """
     settings.configure()

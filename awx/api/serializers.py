@@ -624,8 +624,8 @@ class UnifiedJobSerializer(BaseSerializer):
         obj_size = obj.result_stdout_size
         if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             return _("Standard Output too large to display (%(text_size)d bytes), "
-                     "only download supported for sizes over %(supported_size)d bytes") \
-                   % {'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
+                     "only download supported for sizes over %(supported_size)d bytes") % {
+                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
         return obj.result_stdout
 
 
@@ -682,8 +682,8 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
         obj_size = obj.result_stdout_size
         if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             return _("Standard Output too large to display (%(text_size)d bytes), "
-                     "only download supported for sizes over %(supported_size)d bytes") \
-                   % {'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
+                     "only download supported for sizes over %(supported_size)d bytes") % {
+                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
         return obj.result_stdout
 
     def get_types(self):
@@ -1849,7 +1849,7 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
             if not project and job_type != PERM_INVENTORY_SCAN:
                 raise serializers.ValidationError({'project': _('This field is required.')})
-            if project and playbook and force_text(playbook) not in project.playbooks:
+            if project and playbook and force_text(playbook) not in project.playbook_files:
                 raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not playbook:
                 raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
@@ -2324,6 +2324,11 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
                     raise serializers.ValidationError({
                         "job_type": _("%(job_type)s is not a valid job type. The choices are %(choices)s.") % {
                             'job_type': attrs['char_prompts']['job_type'], 'choices': job_types}})
+        if self.instance is None and ('workflow_job_template' not in attrs or
+                                      attrs['workflow_job_template'] is None):
+            raise serializers.ValidationError({
+                "workflow_job_template": _("Workflow job template is missing during creation")
+            })
         ujt_obj = attrs.get('unified_job_template', None)
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
@@ -2832,7 +2837,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, _ in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).distinct()

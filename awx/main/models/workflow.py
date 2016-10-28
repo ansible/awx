@@ -140,7 +140,6 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 'inventory', 'credential', 'char_prompts']
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
-    # TODO: Ensure the API forces workflow_job_template being set
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
         related_name='workflow_job_template_nodes',
@@ -149,7 +148,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         default=None,
         on_delete=models.CASCADE,
     )
-    
+
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_node_detail', args=(self.pk,))
 

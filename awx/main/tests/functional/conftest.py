@@ -110,7 +110,8 @@ def team_member(user, team):
 def project(instance, organization):
     prj = Project.objects.create(name="test-proj",
                                  description="test-proj-desc",
-                                 organization=organization
+                                 organization=organization,
+                                 playbook_files=['helloworld.yml', 'alt-helloworld.yml']
                                  )
     return prj
 

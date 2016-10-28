@@ -2343,8 +2343,8 @@ class JobTemplateSurveySpec(GenericAPIView):
             if "variable" not in survey_item:
                 return Response(dict(error=_("'variable' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if survey_item['variable'] in variable_set:
-                return Response(dict(error=_("'variable' '%(item)s' duplicated in survey question %(survey)s.") %
-                                           {'item': survey_item['variable'], 'survey': str(idx)}), status=status.HTTP_400_BAD_REQUEST)
+                return Response(dict(error=_("'variable' '%(item)s' duplicated in survey question %(survey)s.") % {
+                    'item': survey_item['variable'], 'survey': str(idx)}), status=status.HTTP_400_BAD_REQUEST)
             else:
                 variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
@@ -3568,8 +3568,8 @@ class UnifiedJobStdout(RetrieveAPIView):
         obj_size = unified_job.result_stdout_size
         if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             response_message = _("Standard Output too large to display (%(text_size)d bytes), "
-                                 "only download supported for sizes over %(supported_size)d bytes") % \
-                               {'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
+                                 "only download supported for sizes over %(supported_size)d bytes") % {
+                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
             if request.accepted_renderer.format == 'json':
                 return Response({'range': {'start': 0, 'end': 1, 'absolute_end': 1}, 'content': response_message})
             else:
