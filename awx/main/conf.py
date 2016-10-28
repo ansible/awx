@@ -112,7 +112,7 @@ register(
 register(
     'AWX_PROOT_ENABLED',
     field_class=fields.BooleanField,
-    label=_('Enable PRoot for Job Execution'),
+    label=_('Enable job isloation'),
     help_text=_('Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information.'),
     category=_('Jobs'),
     category_slug='jobs',
@@ -121,8 +121,8 @@ register(
 register(
     'AWX_PROOT_BASE_PATH',
     field_class=fields.CharField,
-    label=_('Base PRoot execution path'),
-    help_text=_('The location that PRoot will create its temporary working directory.'),
+    label=_('Job isolation execution path'),
+    help_text=_('Create temporary working directories for isolated jobs in this location.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -130,8 +130,8 @@ register(
 register(
     'AWX_PROOT_HIDE_PATHS',
     field_class=fields.StringListField,
-    label=_('Paths to hide from PRoot jobs'),
-    help_text=_('Extra paths to hide from PRoot isolated processes.'),
+    label=_('Paths to hide from isolated jobs'),
+    help_text=_('Additional paths to hide from isolated processes.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
@@ -139,8 +139,8 @@ register(
 register(
     'AWX_PROOT_SHOW_PATHS',
     field_class=fields.StringListField,
-    label=_('Paths to expose to PRoot jobs'),
-    help_text=_('Explicit whitelist of paths to expose to PRoot jobs.'),
+    label=_('Paths to expose to isolated jobs'),
+    help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
