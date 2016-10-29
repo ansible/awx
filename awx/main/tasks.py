@@ -47,6 +47,7 @@ from django.contrib.auth.models import User
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
+from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
@@ -991,10 +992,17 @@ class RunJob(BaseTask):
         Wrap stdout file object to capture events.
         '''
         stdout_handle = super(RunJob, self).get_stdout_handle(instance)
+        
+        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
+            dispatcher = CallbackQueueDispatcher()
 
-        def job_event_callback(event_data):
-            event_data.setdefault('job_id', instance.id)
-            JobEvent.create_from_data(**event_data)
+            def job_event_callback(event_data):
+                event_data.setdefault('job_id', instance.id)
+                dispatcher.dispatch(event_data)
+        else:
+            def job_event_callback(event_data):
+                event_data.setdefault('job_id', instance.id)
+                JobEvent.create_from_data(**event_data)
 
         return OutputEventFilter(stdout_handle, job_event_callback)
 
@@ -1719,9 +1727,16 @@ class RunAdHocCommand(BaseTask):
         '''
         stdout_handle = super(RunAdHocCommand, self).get_stdout_handle(instance)
 
-        def ad_hoc_command_event_callback(event_data):
-            event_data.setdefault('ad_hoc_command_id', instance.id)
-            AdHocCommandEvent.create_from_data(**event_data)
+        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
+            dispatcher = CallbackQueueDispatcher()
+
+            def ad_hoc_command_event_callback(event_data):
+                event_data.setdefault('ad_hoc_command_id', instance.id)
+                dispatcher.dispatch(event_data)
+        else:
+            def ad_hoc_command_event_callback(event_data):
+                event_data.setdefault('ad_hoc_command_id', instance.id)
+                AdHocCommandEvent.create_from_data(**event_data)
 
         return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
 
