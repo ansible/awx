@@ -3050,21 +3050,6 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
-    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (TaskPermission,)
-
-    # Post allowed for job event callback only.
-    def post(self, request, *args, **kwargs):
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.data.copy()
-        data['job'] = parent_obj.pk
-        serializer = self.get_serializer(data=data)
-        if serializer.is_valid():
-            self.instance = serializer.save()
-            headers = {'Location': serializer.data['url']}
-            return Response(serializer.data, status=status.HTTP_201_CREATED,
-                            headers=headers)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JobJobPlaysList(BaseJobEventsList):
 
@@ -3455,24 +3440,7 @@ class HostAdHocCommandEventsList(BaseAdHocCommandEventsList):
 class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
 
     parent_model = AdHocCommand
-    authentication_classes = [TaskAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (TaskPermission,)
     new_in_220 = True
-
-    # Post allowed for ad hoc event callback only.
-    def post(self, request, *args, **kwargs):
-        if request.user:
-            raise PermissionDenied()
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        data = request.data.copy()
-        data['ad_hoc_command'] = parent_obj
-        serializer = self.get_serializer(data=data)
-        if serializer.is_valid():
-            self.instance = serializer.save()
-            headers = {'Location': serializer.data['url']}
-            return Response(serializer.data, status=status.HTTP_201_CREATED,
-                            headers=headers)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdHocCommandActivityStreamList(SubListAPIView):
@@ -3583,7 +3551,11 @@ class UnifiedJobStdout(RetrieveAPIView):
             dark_bg = (content_only and dark) or (not content_only and (dark or not dark_val))
             content, start, end, absolute_end = unified_job.result_stdout_raw_limited(start_line, end_line)
 
+            # Remove any ANSI escape sequences containing job event data.
+            content = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', content)
+
             body = ansiconv.to_html(cgi.escape(content))
+
             context = {
                 'title': get_view_name(self.__class__),
                 'body': mark_safe(body),

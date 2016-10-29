@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import hmac
 import json
 import logging
@@ -10,7 +11,9 @@ from urlparse import urljoin
 # Django
 from django.conf import settings
 from django.db import models
+from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
+from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -257,24 +260,38 @@ class AdHocCommandEvent(CreatedModifiedModel):
         ('runner_on_ok', _('Host OK'), False),
         ('runner_on_unreachable', _('Host Unreachable'), True),
         # Tower won't see no_hosts (check is done earlier without callback).
-        #('runner_on_no_hosts', _('No Hosts Matched'), False),
+        # ('runner_on_no_hosts', _('No Hosts Matched'), False),
         # Tower will see skipped (when running in check mode for a module that
         # does not support check mode).
         ('runner_on_skipped', _('Host Skipped'), False),
-        # Tower does not support async for ad hoc commands.
-        #('runner_on_async_poll', _('Host Polling'), False),
-        #('runner_on_async_ok', _('Host Async OK'), False),
-        #('runner_on_async_failed', _('Host Async Failure'), True),
-        # Tower does not yet support --diff mode
-        #('runner_on_file_diff', _('File Difference'), False),
+        # Tower does not support async for ad hoc commands (not used in v2).
+        # ('runner_on_async_poll', _('Host Polling'), False),
+        # ('runner_on_async_ok', _('Host Async OK'), False),
+        # ('runner_on_async_failed', _('Host Async Failure'), True),
+        # Tower does not yet support --diff mode.
+        # ('runner_on_file_diff', _('File Difference'), False),
+
+        # Additional event types for captured stdout not directly related to
+        # runner events.
+        ('debug', _('Debug'), False),
+        ('verbose', _('Verbose'), False),
+        ('deprecated', _('Deprecated'), False),
+        ('warning', _('Warning'), False),
+        ('system_warning', _('System Warning'), False),
+        ('error', _('Error'), False),
     ]
     FAILED_EVENTS = [x[0] for x in EVENT_TYPES if x[2]]
     EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
 
     class Meta:
         app_label = 'main'
-        unique_together = [('ad_hoc_command', 'host_name')]
         ordering = ('-pk',)
+        index_together = [
+            ('ad_hoc_command', 'event'),
+            ('ad_hoc_command', 'uuid'),
+            ('ad_hoc_command', 'start_line'),
+            ('ad_hoc_command', 'end_line'),
+        ]
 
     ad_hoc_command = models.ForeignKey(
         'AdHocCommand',
@@ -311,8 +328,30 @@ class AdHocCommandEvent(CreatedModifiedModel):
         default=False,
         editable=False,
     )
+    uuid = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
     counter = models.PositiveIntegerField(
         default=0,
+        editable=False,
+    )
+    stdout = models.TextField(
+        default='',
+        editable=False,
+    )
+    verbosity = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    start_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    end_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
     )
 
     def get_absolute_url(self):
@@ -350,3 +389,28 @@ class AdHocCommandEvent(CreatedModifiedModel):
         except (IndexError, AttributeError):
             pass
         super(AdHocCommandEvent, self).save(*args, **kwargs)
+
+    @classmethod
+    def create_from_data(self, **kwargs):
+        # Convert the datetime for the ad hoc command event's creation
+        # appropriately, and include a time zone for it.
+        #
+        # In the event of any issue, throw it out, and Django will just save
+        # the current time.
+        try:
+            if not isinstance(kwargs['created'], datetime.datetime):
+                kwargs['created'] = parse_datetime(kwargs['created'])
+            if not kwargs['created'].tzinfo:
+                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+        except (KeyError, ValueError):
+            kwargs.pop('created', None)
+
+        # Sanity check: Don't honor keys that we don't recognize.
+        valid_keys = {'ad_hoc_command_id', 'event', 'event_data', 'created',
+                      'counter', 'uuid', 'stdout', 'start_line', 'end_line',
+                      'verbosity'}
+        for key in kwargs.keys():
+            if key not in valid_keys:
+                kwargs.pop(key)
+
+        return AdHocCommandEvent.objects.create(**kwargs)
