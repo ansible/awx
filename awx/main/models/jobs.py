@@ -936,11 +936,12 @@ class JobEvent(CreatedModifiedModel):
     #   - playbook_on_vars_prompt (for each play, but before play starts, we
     #     currently don't handle responding to these prompts)
     #   - playbook_on_play_start (once for each play)
-    #     - playbook_on_import_for_host
-    #     - playbook_on_not_import_for_host
+    #     - playbook_on_import_for_host (not logged, not used for v2)
+    #     - playbook_on_not_import_for_host (not logged, not used for v2)
     #     - playbook_on_no_hosts_matched
     #     - playbook_on_no_hosts_remaining
-    #     - playbook_on_setup
+    #     - playbook_on_include (only v2 - only used for handlers?)
+    #     - playbook_on_setup (not used for v2)
     #       - runner_on*
     #     - playbook_on_task_start (once for each task within a play)
     #       - runner_on_failed
@@ -948,12 +949,16 @@ class JobEvent(CreatedModifiedModel):
     #       - runner_on_error (not used for v2)
     #       - runner_on_skipped
     #       - runner_on_unreachable
-    #       - runner_on_no_hosts
-    #       - runner_on_async_poll
-    #       - runner_on_async_ok
-    #       - runner_on_async_failed
-    #       - runner_on_file_diff
-    #     - playbook_on_notify (once for each notification from the play)
+    #       - runner_on_no_hosts (not used for v2)
+    #       - runner_on_async_poll (not used for v2)
+    #       - runner_on_async_ok (not used for v2)
+    #       - runner_on_async_failed (not used for v2)
+    #       - runner_on_file_diff (v2 event is v2_on_file_diff)
+    #       - runner_item_on_ok (v2 only)
+    #       - runner_item_on_failed (v2 only)
+    #       - runner_item_on_skipped (v2 only)
+    #       - runner_retry (v2 only)
+    #     - playbook_on_notify (once for each notification from the play, not used for v2)
     #   - playbook_on_stats
 
     EVENT_TYPES = [
@@ -967,19 +972,22 @@ class JobEvent(CreatedModifiedModel):
         (3, 'runner_on_async_poll', _('Host Polling'), False),
         (3, 'runner_on_async_ok', _('Host Async OK'), False),
         (3, 'runner_on_async_failed', _('Host Async Failure'), True),
-        # Tower does not yet support --diff mode
+        (3, 'runner_item_on_ok', _('Item OK'), False),
+        (3, 'runner_item_on_failed', _('Item Failed'), True),
+        (3, 'runner_item_on_skipped', _('Item Skipped'), False),
+        (3, 'runner_retry', _('Host Retry'), False),
+        # Tower does not yet support --diff mode.
         (3, 'runner_on_file_diff', _('File Difference'), False),
         (0, 'playbook_on_start', _('Playbook Started'), False),
         (2, 'playbook_on_notify', _('Running Handlers'), False),
+        (2, 'playbook_on_include', _('Including File'), False),
         (2, 'playbook_on_no_hosts_matched', _('No Hosts Matched'), False),
         (2, 'playbook_on_no_hosts_remaining', _('No Hosts Remaining'), False),
         (2, 'playbook_on_task_start', _('Task Started'), False),
         # Tower does not yet support vars_prompt (and will probably hang :)
         (1, 'playbook_on_vars_prompt', _('Variables Prompted'), False),
         (2, 'playbook_on_setup', _('Gathering Facts'), False),
-        # callback will not record this
         (2, 'playbook_on_import_for_host', _('internal: on Import for Host'), False),
-        # callback will not record this
         (2, 'playbook_on_not_import_for_host', _('internal: on Not Import for Host'), False),
         (1, 'playbook_on_play_start', _('Play Started'), False),
         (1, 'playbook_on_stats', _('Playbook Complete'), False),
