@@ -90,6 +90,17 @@ class TestWorkflowJobTemplate:
         assert len(parent_qs) == 1
         assert parent_qs[0] == wfjt.workflow_job_template_nodes.all()[1]
 
+    def test_topology_validator(self, wfjt):
+        from awx.api.views import WorkflowJobTemplateNodeChildrenBaseList
+        test_view = WorkflowJobTemplateNodeChildrenBaseList()
+        nodes = wfjt.workflow_job_template_nodes.all()
+        node_assoc = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
+        nodes[2].always_nodes.add(node_assoc)
+        # test cycle validation
+        assert test_view.is_valid_relation(node_assoc, nodes[0]) == {'Error': 'Cycle detected!'}
+        # test multi-ancestor validation
+        assert test_view.is_valid_relation(node_assoc, nodes[1]) == {'Error': 'Multiple ancestor detected!'}
+
 @pytest.mark.django_db
 class TestWorkflowJobFailure:
     """
