@@ -175,19 +175,31 @@ register(
 )
 
 register(
-    'DEFAULT_JOB_TIMEOUTS',
-    field_class=fields.DictField,
-    default={
-        'Job': 0,
-        'InventoryUpdate': 0,
-        'ProjectUpdate': 0,
-    },
-    label=_('Default Job Timeouts'),
-    help_text=_('Maximum time to allow jobs to run. Use sub-keys of Job, '
-                'InventoryUpdate, and ProjectUpdate to configure this value '
-                'for each job type. Use value of 0 to indicate that no '
-                'timeout should be imposed. A timeout set on an individual '
-                'job template will override this.'),
+    'DEFAULT_JOB_TIMEOUT',
+    field_class=fields.IntegerField,
+    label=_('Default Job Timeout'),
+    help_text=_('Maximum time to allow jobs to run. Use value of 0 to indicate that no '
+                'timeout should be imposed. A timeout set on an individual job template will override this.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
+    field_class=fields.IntegerField,
+    label=_('Default Inventory Update Timeout'),
+    help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
+                'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
+    category=_('Jobs'),
+    category_slug='jobs',
+)
+
+register(
+    'DEFAULT_PROJECT_UPDATE_TIMEOUT',
+    field_class=fields.IntegerField,
+    label=_('Default Project Update Timeout'),
+    help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
+                'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
 )

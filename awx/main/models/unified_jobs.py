@@ -554,6 +554,10 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
+    def _global_timeout_setting(self):
+        "Override in child classes, None value indicates this is not configurable"
+        return None
+
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 

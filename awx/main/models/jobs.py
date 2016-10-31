@@ -583,6 +583,9 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         from awx.main.tasks import RunJob
         return RunJob
 
+    def _global_timeout_setting(self):
+        return 'DEFAULT_JOB_TIMEOUT'
+
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
 

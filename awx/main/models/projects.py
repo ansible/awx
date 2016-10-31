@@ -423,6 +423,18 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
 
+    def _global_timeout_setting(self):
+        return 'DEFAULT_PROJECT_UPDATE_TIMEOUT'
+
+    def is_blocked_by(self, obj):
+        if type(obj) == ProjectUpdate:
+            if self.project == obj.project:
+                return True
+        if type(obj) == Job:
+            if self.project == obj.project:
+                return True
+        return False
+
     def websocket_emit_data(self):
         return dict(project_id=self.project.id)
 
