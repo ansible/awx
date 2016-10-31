@@ -93,6 +93,22 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 data[fd] = self.char_prompts[fd]
         return data
 
+    @property
+    def job_type(self):
+        return self.char_prompts.get('job_type', None)
+
+    @property
+    def job_tags(self):
+        return self.char_prompts.get('job_tags', None)
+
+    @property
+    def skip_tags(self):
+        return self.char_prompts.get('skip_tags', None)
+
+    @property
+    def limit(self):
+        return self.char_prompts.get('limit', None)
+
     def get_prompts_warnings(self):
         ujt_obj = self.unified_job_template
         if ujt_obj is None:
@@ -381,6 +397,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def _get_task_class(cls):
         from awx.main.tasks import RunWorkflowJob
         return RunWorkflowJob
+
+    def _has_failed(self):
+        return False
 
     def socketio_emit_data(self):
         return {}

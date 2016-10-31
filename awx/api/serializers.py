@@ -2242,10 +2242,10 @@ class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer)
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
-    job_type = serializers.SerializerMethodField()
-    job_tags = serializers.SerializerMethodField()
-    limit = serializers.SerializerMethodField()
-    skip_tags = serializers.SerializerMethodField()
+    job_type = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -2261,17 +2261,12 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
-    def get_job_type(self, obj):
-        return obj.char_prompts.get('job_type', None)
-
-    def get_job_tags(self, obj):
-        return obj.char_prompts.get('job_tags', None)
-
-    def get_skip_tags(self, obj):
-        return obj.char_prompts.get('skip_tags', None)
-
-    def get_limit(self, obj):
-        return obj.char_prompts.get('limit', None)
+    def validate(self, attrs):
+        # char_prompts go through different validation, so remove them here
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
+            if fd in attrs:
+                attrs.pop(fd)
+        return super(WorkflowNodeBaseSerializer, self).validate(attrs)
 
 
 class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
