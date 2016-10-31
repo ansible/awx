@@ -1210,7 +1210,7 @@ class JobEvent(CreatedModifiedModel):
             if isinstance(invocation, dict) and verbosity == 0 and 'module_args' in invocation:
                 event_data['res']['invocation']['module_args'] = ''
                 self.event_data = event_data
-                update_fields.add('event_data')
+                updated_fields.add('event_data')
         if self.event == 'playbook_on_stats':
             try:
                 failures_dict = event_data.get('failures', {})
