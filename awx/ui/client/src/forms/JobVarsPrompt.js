@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name forms.function:JobVarsPrompt
@@ -27,8 +27,8 @@ export default
                     label: null,
                     type: 'textarea',
                     rows: 6,
-                    addRequired: false,
-                    editRequired: false,
+
+
                     "default": "---"
                 }
             },

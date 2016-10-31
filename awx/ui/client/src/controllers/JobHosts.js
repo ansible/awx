@@ -12,13 +12,14 @@
 
 
 export function JobHostSummaryList($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobHostList, GenerateList,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, Refresh,
+    Prompt, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
     JobStatusToolTip) {
 
     ClearScope();
 
     var list = JobHostList,
-        defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_host_summaries/',
+        // @issue: OLD SEARCH
+        // defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_host_summaries/',
         view = GenerateList,
         inventory;
 
@@ -58,26 +59,27 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $statePa
     $scope.removeJobReady = $scope.$on('JobReady', function() {
         view.inject(list, { mode: 'edit', scope: $scope });
 
-        SearchInit({
-            scope: $scope,
-            set: 'jobhosts',
-            list: list,
-            url: defaultUrl
-        });
-
-        PaginateInit({
-            scope: $scope,
-            list: list,
-            url: defaultUrl
-        });
-
-        // Called from Inventories tab, host failed events link:
-        if ($stateParams.host_name) {
-            $scope[list.iterator + 'SearchField'] = 'host';
-            $scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
-            $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
-        }
-        $scope.search(list.iterator);
+        // @issue: OLD SEARCH
+        // SearchInit({
+        //     scope: $scope,
+        //     set: 'jobhosts',
+        //     list: list,
+        //     url: defaultUrl
+        // });
+        //
+        // PaginateInit({
+        //     scope: $scope,
+        //     list: list,
+        //     url: defaultUrl
+        // });
+        //
+        // // Called from Inventories tab, host failed events link:
+        // if ($stateParams.host_name) {
+        //     $scope[list.iterator + 'SearchField'] = 'host';
+        //     $scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
+        //     $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
+        // }
+        // $scope.search(list.iterator);
     });
 
     Rest.setUrl(GetBasePath('jobs') + $scope.job_id);
@@ -107,12 +109,13 @@ export function JobHostSummaryList($scope, $rootScope, $location, $log, $statePa
     };
 
     $scope.refresh = function () {
-        $scope.search(list.iterator);
+        // @issue: OLD SEARCH
+        // $scope.search(list.iterator);
     };
 
 }
 
 JobHostSummaryList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobHostList',
-    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'Refresh', 'JobStatusToolTip', 'Wait'
+    'generateList', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'JobStatusToolTip', 'Wait'
 ];

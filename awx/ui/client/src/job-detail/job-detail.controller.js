@@ -149,16 +149,17 @@ export default
             scope.job_id = job_id;
             scope.auto_scroll = false;
 
-            scope.searchPlaysEnabled = true;
-            scope.searchTasksEnabled = true;
-            scope.searchHostsEnabled = true;
-            scope.search_play_status = 'all';
-            scope.search_task_status = 'all';
-            scope.search_host_status = 'all';
-
-            scope.search_play_name = '';
-            scope.search_task_name = '';
-            scope.search_host_name = '';
+            // @issue: OLD SEARCH
+            // scope.searchPlaysEnabled = true;
+            // scope.searchTasksEnabled = true;
+            // scope.searchHostsEnabled = true;
+            // scope.search_play_status = 'all';
+            // scope.search_task_status = 'all';
+            // scope.search_host_status = 'all';
+            //
+            // scope.search_play_name = '';
+            // scope.search_task_name = '';
+            // scope.search_host_name = '';
 
             scope.haltEventQueue = false;
             scope.processing = false;
@@ -767,123 +768,116 @@ export default
                 }
             };
 
-            scope.filterTaskStatus = function() {
-                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterPlayStatus = function() {
-                scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadPlays({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterHostStatus = function(){
-                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents){
-                    if (scope.selectedTask !== null && scope.selectedPlay !== null){
-                        var params = {
-                            parent: scope.selectedTask,
-                            page_size: scope.hostResultsMaxRows,
-                            order: 'host_name,counter',
-                        };
-                        if (scope.search_host_status === 'failed'){
-                            params.failed = true;
-                        }
-                        JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                            scope.hostResults = JobDetailService.processHostEvents(res.results);
-                            scope.hostResultsLoading = false;
-                        });
-                    }
-                }
-            };
-
-            scope.searchPlays = function() {
-                if (scope.search_play_name) {
-                    scope.searchPlaysEnabled = false;
-                }
-                else {
-                    scope.searchPlaysEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadPlays({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchPlaysKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchPlays();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchTasks = function() {
-                var params = {};
-                if (scope.search_task_name) {
-                    scope.searchTasksEnabled = false;
-                }
-                else {
-                    scope.searchTasksEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    if (scope.search_task_status === 'failed'){
-                        params.failed = true;
-                    }
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchTasksKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchTasks();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchHosts = function() {
-                var params = {};
-                if (scope.search_host_name) {
-                    scope.searchHostsEnabled = false;
-                }
-                else {
-                    scope.searchHostsEnabled = true;
-                }
-                if ((!scope.liveEventProcessing || scope.pauseLiveEvents) && scope.selectedTask) {
-                    scope.hostResultsLoading = true;
-                    params = {
-                        parent: scope.selectedTask,
-                        event__startswith: 'runner',
-                        page_size: scope.hostResultsMaxRows,
-                        order: 'host_name,counter',
-                        host_name__icontains: scope.search_host_name
-                    };
-                    if (scope.search_host_status === 'failed'){
-                        params.failed = true;
-                    }
-                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                        scope.hostResults = JobDetailService.processHostEvents(res.results);
-                        scope.hostResultsLoading = false;
-                    });
-                }
-            };
-
-            scope.searchHostsKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHosts();
-                    e.stopPropagation();
-                }
-            };
+            // @issue: OLD SEARCH
+            // scope.filterTaskStatus = function() {
+            //     scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadTasks({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.filterPlayStatus = function() {
+            //     scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadPlays({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.filterHostStatus = function(){
+            //     scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents){
+            //         if (scope.selectedTask !== null && scope.selectedPlay !== null){
+            //             var params = {
+            //                 parent: scope.selectedTask,
+            //                 page_size: scope.hostResultsMaxRows,
+            //                 order: 'host_name,counter',
+            //             };
+            //             if (scope.search_host_status === 'failed'){
+            //                 params.failed = true;
+            //             }
+            //             JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+            //                 scope.hostResults = JobDetailService.processHostEvents(res.results);
+            //                 scope.hostResultsLoading = false;
+            //             });
+            //         }
+            //     }
+            // };
+            // scope.searchPlays = function() {
+            //     if (scope.search_play_name) {
+            //         scope.searchPlaysEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchPlaysEnabled = true;
+            //     }
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadPlays({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.searchPlaysKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchPlays();
+            //         e.stopPropagation();
+            //     }
+            // };
+            // scope.searchTasks = function() {
+            //     var params = {};
+            //     if (scope.search_task_name) {
+            //         scope.searchTasksEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchTasksEnabled = true;
+            //     }
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         if (scope.search_task_status === 'failed'){
+            //             params.failed = true;
+            //         }
+            //         LoadTasks({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.searchTasksKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchTasks();
+            //         e.stopPropagation();
+            //     }
+            // };
+            // scope.searchHosts = function() {
+            //     var params = {};
+            //     if (scope.search_host_name) {
+            //         scope.searchHostsEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchHostsEnabled = true;
+            //     }
+            //     if ((!scope.liveEventProcessing || scope.pauseLiveEvents) && scope.selectedTask) {
+            //         scope.hostResultsLoading = true;
+            //         params = {
+            //             parent: scope.selectedTask,
+            //             event__startswith: 'runner',
+            //             page_size: scope.hostResultsMaxRows,
+            //             order: 'host_name,counter',
+            //             host_name__icontains: scope.search_host_name
+            //         };
+            //         if (scope.search_host_status === 'failed'){
+            //             params.failed = true;
+            //         }
+            //         JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+            //             scope.hostResults = JobDetailService.processHostEvents(res.results);
+            //             scope.hostResultsLoading = false;
+            //         });
+            //     }
+            // };
+            // scope.searchHostsKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchHosts();
+            //         e.stopPropagation();
+            //     }
+            // };
 
             if (scope.removeDeleteFinished) {
                 scope.removeDeleteFinished();

@@ -23,7 +23,6 @@ export default
                 columnClass: 'List-staticColumn--toggle',
                 type: 'toggle',
                 ngClick: "toggleSchedule($event, schedule.id)",
-                searchable: false,
                 nosort: true,
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
@@ -38,7 +37,6 @@ export default
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataTipWatch: 'schedule.nameTip',
                 dataPlacement: "top",
-                defaultSearchField: true
             },
             type: {
                 label: i18n._('Type'),
@@ -46,24 +44,11 @@ export default
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
-                ngBind: 'schedule.type_label',
-                searchField: 'unified_job_template__polymorphic_ctype__model',
-                filterBySearchField: true,
-                searchLabel: 'Type',
-                searchable: true,
-                searchType: 'select',
-                searchOptions: [
-                    { value: 'inventorysource', label: i18n._('Inventory Sync') },
-                    { value: 'jobtemplate', label: i18n._('Playbook Run') },
-                    { value: 'project', label: i18n._('SCM Update') },
-                    { value: 'systemjobtemplate', label: i18n._('Management Job')}
-
-                ]
+                ngBind: 'schedule.type_label'
             },
             next_run: {
                 label: i18n._('Next Run'),
                 noLink: true,
-                searchable: false,
                 columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
                 filter: "longDate",
                 key: true

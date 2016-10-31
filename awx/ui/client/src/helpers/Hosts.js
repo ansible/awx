@@ -18,8 +18,8 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name, 'HostListDefinition',
-               'SearchHelper', 'PaginationHelpers', listGenerator.name, 'HostsHelper',
-               'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
+               listGenerator.name, 'HostsHelper',
+               'InventoryHelper', 'InventoryFormDefinition', 'SelectionHelper',
                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog', 'StandardOutHelper',
                'GroupListDefinition'
 ])
@@ -160,23 +160,26 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
     };
 }])
 
-.factory('HostsReload', [ '$stateParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait',
+.factory('HostsReload', [ '$stateParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'Wait',
          'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
-         function($stateParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
+         function($stateParams, Empty, InventoryHosts, GetBasePath, Wait, SetHostStatus, SetStatus,
                   ApplyEllipsis) {
                       return function(params) {
 
                           var scope = params.scope,
-                          parent_scope = params.parent_scope,
-                          group_id = params.group_id,
-                          inventory_id = params.inventory_id,
-                          list = InventoryHosts,
-                          pageSize = (params.pageSize) ? params.pageSize : 20,
+                          parent_scope = params.parent_scope;
 
-                          url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
-                              GetBasePath('inventory') + inventory_id + '/hosts/';
+                          // @issue: OLD SEARCH
+                        //   var list = InventoryHosts,
+                        // group_id = params.group_id,
+                        // inventory_id = params.inventory_id;
+                        //   pageSize = (params.pageSize) ? params.pageSize : 20,
+                          //
+                        //   url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
+                        //       GetBasePath('inventory') + inventory_id + '/hosts/';
 
-                          scope.search_place_holder='Search ' + scope.selected_group_name;
+                            // @issue: OLD SEARCH
+                            //   scope.search_place_holder='Search ' + scope.selected_group_name;
 
                           if (scope.removeHostsReloadPostRefresh) {
                               scope.removeHostsReloadPostRefresh();
@@ -196,31 +199,31 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                               }
                           });
 
-                          SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
-                          PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
-
-                          if ($stateParams.host_name) {
-                              scope[list.iterator + 'InputDisable'] = false;
-                              scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
-                              scope[list.iterator + 'SearchField'] = 'name';
-                              scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
-                              scope[list.iterator + 'SearchSelectValue'] = null;
-                          }
-
-                          if (scope.show_failures) {
-                              scope[list.iterator + 'InputDisable'] = true;
-                              scope[list.iterator + 'SearchValue'] = 'true';
-                              scope[list.iterator + 'SearchField'] = 'has_active_failures';
-                              scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_active_failures.label;
-                              scope[list.iterator + 'SearchSelectValue'] = { value: 1 };
-                          }
-                          scope.search(list.iterator, null, true);
+                        // @issue: OLD SEARCH
+                        //   SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
+                        //   PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
+                          //
+                        //   if ($stateParams.host_name) {
+                        //       scope[list.iterator + 'InputDisable'] = false;
+                        //       scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
+                        //       scope[list.iterator + 'SearchField'] = 'name';
+                        //       scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
+                        //       scope[list.iterator + 'SearchSelectValue'] = null;
+                        //   }
+                          //
+                        //   if (scope.show_failures) {
+                        //       scope[list.iterator + 'InputDisable'] = true;
+                        //       scope[list.iterator + 'SearchValue'] = 'true';
+                        //       scope[list.iterator + 'SearchField'] = 'has_active_failures';
+                        //       scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_active_failures.label;
+                        //       scope[list.iterator + 'SearchSelectValue'] = { value: 1 };
+                        //   }
+                        //   scope.search(list.iterator, null, true);
                       };
                   }])
 
-.factory('HostsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList', 'SearchInit',
-'PaginateInit',
-function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList, SearchInit, PaginateInit) {
+.factory('HostsCopy', ['$compile', 'Rest', 'ProcessErrors', 'CreateDialog', 'GetBasePath', 'Wait', 'generateList', 'GroupList',
+function($compile, Rest, ProcessErrors, CreateDialog, GetBasePath, Wait, GenerateList, GroupList) {
 return function(params) {
 
     var host_id = params.host_id,
@@ -271,7 +274,9 @@ return function(params) {
         scope.removeHostCopyDialogReady();
     }
     scope.removeCopyDialogReady = scope.$on('HostCopyDialogReady', function() {
-        var url = GetBasePath('inventory') + group_scope.inventory.id + '/groups/';
+        // @issue: OLD SEARCH
+        // var url = GetBasePath('inventory') + group_scope.inventory.id + '/groups/';
+
         GenerateList.inject(GroupList, {
             mode: 'lookup',
             id: 'copy-host-select-container',
@@ -279,19 +284,21 @@ return function(params) {
             //,
             //instructions: instructions
         });
-        SearchInit({
-            scope: scope,
-            set: GroupList.name,
-            list: GroupList,
-            url: url
-        });
-        PaginateInit({
-            scope: scope,
-            list: GroupList,
-            url: url,
-            mode: 'lookup'
-        });
-        scope.search(GroupList.iterator, null, true, false);
+
+        // @issue: OLD SEARCH
+        // SearchInit({
+        //     scope: scope,
+        //     set: GroupList.name,
+        //     list: GroupList,
+        //     url: url
+        // });
+        // PaginateInit({
+        //     scope: scope,
+        //     list: GroupList,
+        //     url: url,
+        //     mode: 'lookup'
+        // });
+        // scope.search(GroupList.iterator, null, true, false);
     });
 
     if (scope.removeShowDialog) {
@@ -341,8 +348,12 @@ return function(params) {
         catch(e) {
             // ignore
         }
-        scope.searchCleanup();
-        group_scope.restoreSearch();  // Restore all parent search stuff and refresh hosts and groups lists
+
+        // @issue: OLD SEARCH
+        // scope.searchCleanup();
+
+        // @issue: OLD SEARCH
+        // group_scope.restoreSearch();  // Restore all parent search stuff and refresh hosts and groups lists
         scope.$destroy();
     };
 

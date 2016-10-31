@@ -8,11 +8,11 @@
 
 export default
     [   'Wait', '$compile',  'CreateDialog', 'GetBasePath' ,
-        'SearchInit' , 'PaginateInit', 'SchedulesList', 'Rest' ,
+        'SchedulesList', 'Rest' ,
         'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
         '$scope', 'CreateSelect2',
         function( Wait, $compile, CreateDialog, GetBasePath,
-            SearchInit, PaginateInit, SchedulesList, Rest, ProcessErrors,
+            SchedulesList, Rest, ProcessErrors,
             managementJobsListObject, $rootScope, $state, $scope,
             CreateSelect2) {
 
@@ -50,12 +50,16 @@ export default
                     catch(e) {
                         //ignore
                     }
-                    if (scope.searchCleanup) {
-                        scope.searchCleanup();
-                    }
-                    else {
-                        Wait('stop');
-                    }
+
+                    // @issue: OLD SEARCH
+                    // if (scope.searchCleanup) {
+                    //     scope.searchCleanup();
+                    // }
+                    // else {
+                    //     Wait('stop');
+                    // }
+
+                    Wait('stop');
                 };
 
                 $scope.submitCleanupJob = function(id, name){
@@ -266,7 +270,8 @@ export default
                 };
 
                 parent_scope.refreshJobs = function(){
-                    scope.search(SchedulesList.iterator);
+                    // @issue: OLD SEARCH
+                    // scope.search(SchedulesList.iterator);
                 };
 
                 var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {

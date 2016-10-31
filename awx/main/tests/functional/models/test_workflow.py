@@ -90,3 +90,35 @@ class TestWorkflowJobTemplate:
         assert len(parent_qs) == 1
         assert parent_qs[0] == wfjt.workflow_job_template_nodes.all()[1]
 
+@pytest.mark.django_db
+class TestWorkflowJobFailure:
+    """
+    Tests to re-implement if workflow failure status is introduced in
+    a future Tower version.
+    """
+    @pytest.fixture
+    def wfj(self):
+        return WorkflowJob.objects.create(name='test-wf-job')
+
+    def test_workflow_not_failed_unran_job(self, wfj):
+        """
+        Test that an un-ran node will not mark workflow job as failed
+        """
+        WorkflowJobNode.objects.create(workflow_job=wfj)
+        assert not wfj._has_failed()
+
+    def test_workflow_not_failed_successful_job(self, wfj):
+        """
+        Test that a sucessful node will not mark workflow job as failed
+        """
+        job = Job.objects.create(name='test-job', status='successful')
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
+        assert not wfj._has_failed()
+
+    def test_workflow_not_failed_failed_job_but_okay(self, wfj):
+        """
+        Test that a failed node will not mark workflow job as failed
+        """
+        job = Job.objects.create(name='test-job', status='failed')
+        WorkflowJobNode.objects.create(workflow_job=wfj, job=job)
+        assert not wfj._has_failed()

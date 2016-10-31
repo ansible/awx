@@ -40,24 +40,20 @@
                     .error(this.error.bind(this))
                     .finally(Wait('stop'));
             },
-            // these methods generate a query string to pass to PaginateInit(), SearchInit()
-            // always supply trailing slashes and ? prefix
-            rootHostsUrl: function(id, failed){
-                var url = GetBasePath('inventory') + id + '/hosts' +
-                    (failed === 'true' ? '?has_active_failures=true' : '?');
+            rootHostsUrl: function(id){
+                var url = GetBasePath('inventory') + id + '/hosts';
                 return url;
             },
-            childHostsUrl: function(id, failed){
-                var url = GetBasePath('groups') + id + '/all_hosts' +
-                    (failed === 'true' ? '?has_active_failures=true' : '?');
+            childHostsUrl: function(id){
+                var url = GetBasePath('groups') + id + '/all_hosts';
                 return url;
             },
             childGroupsUrl: function(id){
-                var url = GetBasePath('groups') + id + '/children?';
+                var url = GetBasePath('groups') + id + '/children';
                 return url;
             },
             rootGroupsUrl: function(id){
-                var url = GetBasePath('inventory') + id+ '/root_groups/';
+                var url = GetBasePath('inventory') + id+ '/root_groups';
                 return url;
             }
         };

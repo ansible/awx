@@ -55,49 +55,22 @@ export default
                 badgeTipPlacement: 'top',
                 ngHref: "{{ jobhost.statusLinkTo }}",
                 awToolTip: "{{ jobhost.statusBadgeToolTip }}",
-                dataPlacement: 'top',
-                searchField: 'failed',
-                searchType: 'boolean',
-                showValue: false,
-                searchOptions: [{
-                    name: "success",
-                    value: 0
-                }, {
-                    name: "error",
-                    value: 1
-                }]
-            },
-            failed: {
-                label: 'Job failed?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true,
-                nosort: true
+                dataPlacement: 'top'
             },
             ok: {
                 label: 'Success',
-                searchable: false
             },
             changed: {
                 label: 'Changed',
-                searchable: false
             },
             failures: {
                 label: 'Failure',
-                searchable: true,
-                searchLabel: 'Contains failed events?',
-                searchType: 'gtzero'
             },
             dark: {
                 label: 'Unreachable',
-                searchable: true,
-                searchType: 'gtzero',
-                searchLabel: 'Contains unreachable hosts?'
             },
             skipped: {
                 label: 'Skipped',
-                searchable: false
             }
         },
 

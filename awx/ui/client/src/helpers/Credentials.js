@@ -223,8 +223,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', 'Refresh', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
-         function ($rootScope, Refresh, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
+.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
+         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -279,12 +279,13 @@ angular.module('CredentialsHelper', ['Utilities'])
                      .success(function (data) {
                          scope.addedItem = data.id;
 
-                         Refresh({
-                             scope: scope,
-                             set: 'credentials',
-                             iterator: 'credential',
-                             url: url
-                         });
+                         // @issue: OLD SEARCH
+                        //  Refresh({
+                        //      scope: scope,
+                        //      set: 'credentials',
+                        //      iterator: 'credential',
+                        //      url: url
+                        //  });
 
                          Wait('stop');
                          var base = $location.path().replace(/^\//, '').split('/')[0];

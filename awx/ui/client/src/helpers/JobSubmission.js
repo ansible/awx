@@ -8,7 +8,7 @@
 
 export default
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
+'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
 .factory('CreateLaunchDialog', ['$compile', 'CreateDialog', 'Wait', 'ParseTypeChange',
 function($compile, CreateDialog, Wait, ParseTypeChange) {

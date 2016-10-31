@@ -19,12 +19,12 @@ export default
             "button to create a new inventory.",
         index: false,
         hover: true,
+        basePath: 'inventory',
 
         fields: {
             status: {
                 label: '',
                 columnClass: 'List-staticColumn--mediumStatus',
-                searchable: false,
                 nosort: true,
                 ngClick: "null",
                 iconOnly: true,
@@ -57,32 +57,6 @@ export default
                 sourceField: 'name',
                 excludeModal: true,
                 columnClass: 'col-md-5 col-sm-3 hidden-xs'
-            },
-            has_inventory_sources: {
-                label: i18n._('Cloud sourced?'),
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-            },
-            has_active_failures: {
-                label: i18n._('Failed hosts?'),
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-            },
-            inventory_sources_with_failures: {
-                label: i18n._('Sync failures?'),
-                searchType: 'select',
-                searchOptions: [{
-                    label: i18n._('Yes'),
-                    value: 'inventory_sources_with_failures__gt=0'
-                }, {
-                    label: i18n._('No'),
-                    value: 'inventory_sources_with_failures__lte=0'
-                }],
-                searchOnly: true
             }
         },
 

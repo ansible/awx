@@ -63,7 +63,8 @@ export default
                             Rest.setUrl(url);
                             Rest.post({"disassociate": true, "id": labelId})
                                 .success(function () {
-                                    scope.search("job_template", scope.$parent.job_template_page);
+                                    // @issue: OLD SEARCH
+                                    // scope.search("job_template", scope.$parent.job_template_page);
                                     Wait('stop');
                                 })
                                 .error(function (data, status) {

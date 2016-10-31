@@ -1,5 +1,4 @@
 <div class="tab-pane" id="organizations">
-    <div ui-view></div>
     <div ng-cloak id="htmlTemplate" class="Panel">
         <div class="List-header">
             <div class="List-title">
@@ -20,13 +19,32 @@
                 </button>
             </div>
         </div>
+        <!-- smart-search directive bindings:
+            djangoModel: '@', // one-way, interpolated
+            searchSize: '@',
+            basePath: '@',
+            iterator: '@',
+            dataset: '=', // two-way
+            list: '=',
+            collection: '=',
+            searchTags: '=',
+        -->
+        <smart-search
+            django-model="organization"
+            base-path="organizations"
+            iterator="organization"
+            list="list"
+            dataset="organization_dataset"
+            collection="organizations"
+            search-tags="searchTags">
+        </smart-search>
         <div class="List-well">
-            <div class="OrgCards-search" ng-hide="organizationLoading == false && organization_active_search == false && organization_total_rows < 1">
-            </div>
-            <div class="List-noItems" ng-show="organizationLoading == false && organization_active_search == false && organization_total_rows < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
+
+            <div class="List-noItems" ng-show="organizations.length < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
+
             <div class="OrgCards" id="OrgCards">
                 <div class="OrgCards-card"
-                    ng-class="{'OrgCards-card--selected': activeCard === card.id || card.isActiveCard }"
+                    ng-class="{'OrgCards-card--selected': $stateParams.organization_id == card.id}"
                     ng-repeat="card in orgCards track by card.id">
                     <div class="OrgCards-header">
                         <h3 class="OrgCards-label">{{ card.name }}</h3>
@@ -34,7 +52,7 @@
                             <button class="OrgCards-actionItem
                                 List-actionButton"
                                 ng-show="card.user_capabilities.edit"
-                                ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
+                                ng-class="{'List-editButton--selected': $stateParams.organization_id == card.id}"
                                 ng-click="editOrganization(card.id)">
                                 <i class="OrgCards-actionItemIcon fa fa-pencil">
                                 </i>
@@ -42,7 +60,7 @@
                             <button class="OrgCards-actionItem
                                 List-actionButton"
                                 ng-show="!card.user_capabilities.edit"
-                                ng-class="{'List-editButton--selected': (activeCard === card.id || card.isActiveCard) && activeMode === 'edit' }"
+                                ng-class="{'List-editButton--selected': $stateParams.organization_id == card.id}"
                                 ng-click="editOrganization(card.id)">
                                 <i class="OrgCards-actionItemIcon fa fa-search-plus">
                                 </i>
@@ -62,7 +80,7 @@
                         <div class="OrgCards-link" ng-repeat="link in card.links">
                             <span class="badge List-titleBadge
                                 OrgCards-linkBadge"
-                                ng-class="{'List-titleBadge--selected': (activeCard === card.id || card.isActiveCard) && activeMode === link.activeMode }">
+                                ng-class="{'List-titleBadge--selected': $state.matches(link.activeMode) && $stateParams.organization_id == card.id}">
                                 {{ link.count }}
                             </span>
                             <a class="OrgCards-linkName"
@@ -73,7 +91,18 @@
                     </div>
                 </div>
             </div>
-            <div id='organizations-list'></div>
+            <!-- paginate directive bindings
+                collection: '=', // two-way
+                dataset: '=',
+                iterator: '@', // one-way, interpolated
+                basePath: '@'
+            -->
+            <paginate
+                    base-path="organizations"
+                    iterator="organization"
+                    dataset="organization_dataset"
+                    collection="organization">
+            </paginate>
         </div>
     </div>
 </div>

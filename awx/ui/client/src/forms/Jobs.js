@@ -17,6 +17,7 @@ export default
             addTitle: 'Create Job',
             editTitle: '{{ id }} - {{ name }}',
             name: 'jobs',
+            stateTree: 'jobs',
             well: true,
             base: 'jobs',
             tabs: true,

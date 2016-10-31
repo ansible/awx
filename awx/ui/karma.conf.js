@@ -20,10 +20,12 @@ module.exports = function(config) {
             './client/src/app.js',
             './node_modules/angular-mocks/angular-mocks.js',
             { pattern: './tests/**/*-test.js' },
+            'client/src/**/*.html'
         ],
         preprocessors: {
             './client/src/app.js': ['webpack', 'sourcemap'],
             './tests/**/*-test.js': ['webpack', 'sourcemap'],
+            'client/src/**/*.html': ['html2js']
         },
         webpack: {
             plugins: [

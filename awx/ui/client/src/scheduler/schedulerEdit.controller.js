@@ -1,5 +1,5 @@
-export default ['$filter', '$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange',
-function($filter, $compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange) {
+export default ['$filter', '$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'ParentObject',
+function($filter, $compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, ParentObject) {
 
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
@@ -14,6 +14,8 @@ function($filter, $compile, $state, $stateParams, EditSchedule, Wait, $scope, $r
     $scope.schedulerEndHour = "00";
     $scope.schedulerEndMinute = "00";
     $scope.schedulerEndSecond = "00";
+    $scope.parentObject = ParentObject;
+
 
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;

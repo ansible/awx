@@ -13,7 +13,7 @@ export default
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        listTitle: 'Schedules',
+        listTitle: '{{parentObject}} || Schedules',
         index: false,
         hover: true,
 
@@ -26,7 +26,6 @@ export default
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
                 nosort: true,
             },
             name: {
@@ -38,19 +37,16 @@ export default
             dtstart: {
                 label: 'First Run',
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-sm hidden-xs"
             },
             next_run: {
                 label: 'Next Run',
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-xs"
             },
             dtend: {
                 label: 'Final Run',
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-xs"
             },
         },

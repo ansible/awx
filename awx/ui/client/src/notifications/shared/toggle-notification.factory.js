@@ -19,11 +19,10 @@ export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
     return function(params) {
         var scope = params.scope,
             notifier = params.notifier,
-            id = params.id,
             notifier_id = params.notifier.id,
             callback = params.callback,
             column = params.column, // notification_template_success/notification_template__error
-            url = params.url+ id+ "/"+ column + '/';
+            url = params.url + "/"+ column + '/';
 
         if(!notifier[column]){
             params = {

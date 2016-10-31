@@ -189,8 +189,6 @@ class TaskPermission(ModelAccessPermission):
         # token.
         if view.model == Inventory and request.method.lower() in ('head', 'get'):
             return bool(not obj or obj.pk == unified_job.inventory_id)
-        elif view.model in (JobEvent, AdHocCommandEvent) and request.method.lower() == 'post':
-            return bool(not obj or obj.pk == unified_job.pk)
         else:
             return False
 

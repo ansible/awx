@@ -26,7 +26,6 @@ export default
             active_failures: {
                 label: '',
                 iconOnly: true,
-                searchable: false,
                 nosort: true,
                 // do not remove this ng-click directive
                 // the list generator case to handle fields without ng-click
@@ -43,31 +42,12 @@ export default
             name: {
                 key: true,
                 label: 'Hosts',
-                searchLabel: 'Name',
                 ngClick: "editHost(host.id)",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
-            },
-            enabled: {
-                label: 'Disabled?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                typeOptions: [
-                    {label: "Yes", value: false},
-                    {label: "No", value: true}
-                ],
-                searchValue: 'false',
-                searchOnly: true
-            },
-            has_active_failures: {
-                label: 'Failed jobs?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
             }
         },
 

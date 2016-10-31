@@ -11,6 +11,16 @@ export default
     return {
 
         name: 'users',
+        stateTree: 'users',
+        search: {
+            order_by: 'username'
+        },
+        defaultSearchParams: function(term){
+            return {or__username__icontains: term,
+                    or__first_name__icontains: term,
+                    or__last_name__icontains: term
+                };
+        },
         iterator: 'user',
         selectTitle: i18n._('Add Users'),
         editTitle: i18n._('Users'),
@@ -23,7 +33,6 @@ export default
 
         fields: {
             username: {
-                key: true,
                 label: i18n._('Username'),
                 columnClass: 'col-md-3 col-sm-3 col-xs-9'
             },

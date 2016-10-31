@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'generateList', 'SearchInit', 'PaginateInit', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host',
-    function($scope, $state, $stateParams, GenerateList, SearchInit, PaginateInit, HostManageService, GetBasePath, CopyMoveGroupList, host){
+    ['$scope', '$state', '$stateParams', 'generateList', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host',
+    function($scope, $state, $stateParams, GenerateList, HostManageService, GetBasePath, CopyMoveGroupList, host){
         var list = CopyMoveGroupList,
             view = GenerateList;
         $scope.item = host;
@@ -48,19 +48,21 @@
                 scope: $scope,
                 input_type: 'radio'
             });
-            SearchInit({
-                scope: $scope,
-                set: list.name,
-                list: list,
-                url: url
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url : url,
-                mode: 'lookup'
-            });
-            $scope.search(list.iterator, null, true, false);
+
+            // @issue: OLD SEARCH
+            // SearchInit({
+            //     scope: $scope,
+            //     set: list.name,
+            //     list: list,
+            //     url: url
+            // });
+            // PaginateInit({
+            //     scope: $scope,
+            //     list: list,
+            //     url : url,
+            //     mode: 'lookup'
+            // });
+            // $scope.search(list.iterator, null, true, false);
         };
         init();
     }];

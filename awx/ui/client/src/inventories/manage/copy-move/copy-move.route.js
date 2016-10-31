@@ -8,9 +8,9 @@ import {templateUrl} from '../../../shared/template-url/template-url.factory';
 import CopyMoveGroupsController from './copy-move-groups.controller';
 import CopyMoveHostsController from './copy-move-hosts.controller';
 
-var copyMoveGroup = {
+var copyMoveGroupRoute = {
     name: 'inventoryManage.copyMoveGroup',
-    route: '/copy-move-group/{group_id}',
+    url: '/copy-move-group/{group_id}',
     data: {
         group_id: 'group_id',
     },
@@ -22,11 +22,6 @@ var copyMoveGroup = {
             return GroupManageService.get({id: $stateParams.group_id}).then(res => res.data.results[0]);
         }]
     },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed"]
-        }
-    },
     views: {
         'form@inventoryManage' : {
             controller: CopyMoveGroupsController,
@@ -34,9 +29,9 @@ var copyMoveGroup = {
         }
     }
 };
-var copyMoveHost = {
+var copyMoveHostRoute = {
     name: 'inventoryManage.copyMoveHost',
-    route: '/copy-move-host/{host_id}',
+    url: '/copy-move-host/{host_id}',
     ncyBreadcrumb: {
         label: "COPY OR MOVE {{item.name}}"
     },
@@ -44,11 +39,6 @@ var copyMoveHost = {
         host: ['HostManageService', '$stateParams', function(HostManageService, $stateParams){
             return HostManageService.get({id: $stateParams.host_id}).then(res => res.data.results[0]);
         }]
-    },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed"]
-        }
     },
     views: {
         'form@inventoryManage': {
@@ -58,4 +48,4 @@ var copyMoveHost = {
     }
 };
 
-export {copyMoveGroup, copyMoveHost};
+export {copyMoveGroupRoute, copyMoveHostRoute};

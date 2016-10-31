@@ -1,0 +1,44 @@
+<div class="Paginate page-row" ng-hide="dataset.count < 1">
+    <div class="Paginate-wrapper" ng-hide="dataset.count < pageSize">
+        <ul class="Paginate-controls pagination">
+            <!-- first -->
+            <li class="Paginate-controls--first Paginate-controls--item" ng-hide="pageRange.length < 10 || {{current()}} === 1">
+                <a href ng-click="toPage(1)">
+                    <i class="fa fa-angle-double-left"></i>
+                </a>
+            </li>
+            <!-- previous -->
+            <li class="Paginate-controls--previous Paginate-controls--item" ng-class="{disabled: current() == 1}">
+                <a href ng-click="toPage(current() - 1)">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            </li>
+            <!-- range -->
+            <li class="Paginate-controls--item" ng-repeat="page in pageRange">
+                <a href ng-class="{'Paginate-controls--active': page == current()}" ng-click="toPage(page)">{{ page }}</a>
+            </li>
+            <!-- next -->
+            <li class="Paginate-controls--next Paginate-controls--item" ng-hide="current() === last()">
+                <a href ng-click="toPage(current() + 1)">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+            <!-- last -->
+            <li class="Paginate-controls--item Paginate-controls--last" ng-hide="(pageRange.length < 10 || current() === last())">
+                <a href id="last-page-set" ng-click="toPage(last())">
+                    <i class="fa fa-angle-double-right"></i>
+                </a>
+            </li>
+        </ul>
+        <span class="Paginate-pager--pageof">Page
+                <span id="current-page">{{current()}}</span> of
+        <span id="total-pages">{{last()}}</span>
+        </span>
+    </div>
+    <div class="Paginate-total page-label" ng-hide="dataCount === 0">
+        <span>ITEMS&nbsp;
+            <span>{{dataRange}}</span>
+            <span>of {{dataCount()}}</span>
+        </span>
+    </div>
+</div>

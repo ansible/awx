@@ -4,43 +4,23 @@
  * All Rights Reserved
  *************************************************/
 
-export function PortalModeJobTemplatesController($scope, $rootScope,  GetBasePath, GenerateList, PortalJobTemplateList, SearchInit, PaginateInit, InitiatePlaybookRun){
+export function PortalModeJobTemplatesController($scope, PortalJobTemplateList, InitiatePlaybookRun, Dataset) {
 
+    var list = PortalJobTemplateList;
 
-        var list = PortalJobTemplateList,
-        view= GenerateList,
-        defaultUrl = GetBasePath('job_templates'),
-        pageSize = 12;
+    init();
 
-        $scope.submitJob = function (id) {
-            InitiatePlaybookRun({ scope: $scope, id: id });
-        };
-
-        var init = function(){
-            view.inject( list, {
-                id : 'portal-job-templates',
-                mode: 'edit',
-                scope: $scope,
-                searchSize: 'col-md-10 col-xs-12'
-            });
-
-            SearchInit({
-                scope: $scope,
-                set: 'job_templates',
-                list: list,
-                url: defaultUrl
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url: defaultUrl,
-                pageSize: pageSize
-            });
-
-            $scope.search(list.iterator);
-        };
-        init();
+    function init() {
+        // search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
     }
 
-PortalModeJobTemplatesController.$inject = ['$scope', '$rootScope', 'GetBasePath', 'generateList', 'PortalJobTemplateList', 'SearchInit', 'PaginateInit', 'InitiatePlaybookRun'
-];
+    $scope.submitJob = function(id) {
+        InitiatePlaybookRun({ scope: $scope, id: id });
+    };
+
+}
+
+PortalModeJobTemplatesController.$inject = ['$scope','PortalJobTemplateList', 'InitiatePlaybookRun', 'job_templatesDataset'];

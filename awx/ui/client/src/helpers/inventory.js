@@ -17,12 +17,12 @@ import listGenerator from '../shared/list-generator/main';
 
 export default
     angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name,
-        'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
+        'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'VariablesHelper',
     ])
 
-    .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
+    .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'OrganizationList',
         'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON',
-        function (InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait,
+        function (InventoryForm, Rest, Alert, ProcessErrors, OrganizationList, GetBasePath, ParseTypeChange, Wait,
             ToJSON) {
             return function (params) {
 

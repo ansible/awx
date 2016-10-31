@@ -94,25 +94,30 @@
                 });
             }
         };
-        $scope.search = function(){
-            if($scope.searchTerm && $scope.searchTerm !== '') {
-                $scope.searchActive = true;
-                Wait('start');
-                JobDetailService.getJobHostSummaries($stateParams.id, {
-                    page_size: page_size,
-                    host_name__icontains: encodeURIComponent($scope.searchTerm),
-                }).success(function(res){
-                    $scope.hosts = res.results;
-                    $scope.next = res.next;
-                    Wait('stop');
-                });
-            }
-        };
-        $scope.clearSearch = function(){
-            $scope.searchActive = false;
-            $scope.searchTerm = null;
-            init();
-        };
+
+        // @issue: OLD SEARCH
+        // $scope.search = function(){
+        //     if($scope.searchTerm && $scope.searchTerm !== '') {
+        //         $scope.searchActive = true;
+        //         Wait('start');
+        //         JobDetailService.getJobHostSummaries($stateParams.id, {
+        //             page_size: page_size,
+        //             host_name__icontains: encodeURIComponent($scope.searchTerm),
+        //         }).success(function(res){
+        //             $scope.hosts = res.results;
+        //             $scope.next = res.next;
+        //             Wait('stop');
+        //         });
+        //     }
+        // };
+
+        // @issue: OLD SEARCH
+        // $scope.clearSearch = function(){
+        //     $scope.searchActive = false;
+        //     $scope.searchTerm = null;
+        //     init();
+        // };
+        
         $scope.setFilter = function(filter){
             $scope.filter = filter;
             var getAll = function(){

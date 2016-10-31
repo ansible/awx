@@ -19,9 +19,9 @@ angular.module('JobTemplatesHelper', ['Utilities'])
  */
 
 .factory('CallbackHelpInit', ['$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm', '$stateParams', 'ProcessErrors', 'ParseTypeChange',
-         'ParseVariableString', 'Empty', 'LookUpInit', 'InventoryList', 'CredentialList','ProjectList', 'RelatedSearchInit', 'RelatedPaginateInit', 'Wait',
-         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors,ParseTypeChange,
-                  ParseVariableString, Empty, LookUpInit, InventoryList, CredentialList, ProjectList, RelatedSearchInit, RelatedPaginateInit, Wait) {
+         'ParseVariableString', 'Empty', 'InventoryList', 'CredentialList','ProjectList', 'Wait',
+         function($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors, ParseTypeChange,
+                  ParseVariableString, Empty, InventoryList, CredentialList, ProjectList, Wait) {
                       return function(params) {
 
                           var scope = params.scope,
@@ -31,7 +31,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $stateParams.id,
+                          id = $stateParams.job_template_id,
                           relatedSets = {};
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
@@ -158,73 +158,10 @@ angular.module('JobTemplatesHelper', ['Utilities'])
 
                                   scope.can_edit = data.summary_fields.can_edit;
 
-                                  LookUpInit({
-                                      scope: scope,
-                                      form: form,
-                                      current_item: data.inventory,
-                                      list: InventoryList,
-                                      field: 'inventory',
-                                      input_type: "radio"
-                                  });
-
-                                  CredentialList.basePath = GetBasePath('credentials') + '?kind=ssh';
-                                  // remove "type" field from search options
-                                  CredentialList.fields.kind.noSearch = true;
-
-                                  LookUpInit({
-                                      url: GetBasePath('credentials') + '?kind=ssh',
-                                      scope: scope,
-                                      form: form,
-                                      current_item: data.credential,
-                                      list: CredentialList,
-                                      field: 'credential',
-                                      hdr: 'Select Machine Credential',
-                                      input_type: "radio"
-                                  });
-
-                                  var NetworkCredentialList = {};
-                                  // Clone the CredentialList object for use with network_credential. Cloning
-                                  // and changing properties to avoid collision.
-                                  jQuery.extend(true, NetworkCredentialList, CredentialList);
-                                  NetworkCredentialList.name = 'networkcredentials';
-                                  NetworkCredentialList.iterator = 'networkcredential';
-                                  NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
-
-                                  LookUpInit({
-                                      url: GetBasePath('credentials') + '?kind=net',
-                                      scope: scope,
-                                      form: form,
-                                      current_item: data.network_credential,
-                                      list: NetworkCredentialList,
-                                      field: 'network_credential',
-                                      hdr: 'Select Network Credential',
-                                      input_type: "radio"
-                                  });
-
-                                  LookUpInit({
-                                      scope: scope,
-                                      form: form,
-                                      current_item: data.project,
-                                      list: ProjectList,
-                                      field: 'project',
-                                      input_type: "radio"
-                                  });
-
 
                                   if (scope.project === "" && scope.playbook === "") {
                                       scope.resetProjectToDefault();
                                   }
-
-                                  RelatedSearchInit({
-                                      scope: scope,
-                                      form: form,
-                                      relatedSets: relatedSets
-                                  });
-
-                                  RelatedPaginateInit({
-                                      scope: scope,
-                                      relatedSets: relatedSets
-                                  });
 
                                   scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master, relatedSets);
                               })

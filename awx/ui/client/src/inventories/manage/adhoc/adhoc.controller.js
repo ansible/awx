@@ -12,7 +12,7 @@
 function adhocController($q, $scope, $location, $stateParams,
     $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
-    KindChange, LookUpInit, CredentialList, Empty, Wait) {
+    KindChange, CredentialList, Empty, Wait) {
 
     ClearScope();
 
@@ -118,17 +118,6 @@ function adhocController($q, $scope, $location, $stateParams,
     // call helpers to initialize lookup and select fields through get
     // requests
     privateFn.initializeFields = function(machineCredentialUrl, adhocUrl) {
-        // setup machine credential lookup
-        LookUpInit({
-            url: machineCredentialUrl,
-            scope: $scope,
-            form: adhocForm,
-            current_item: (!Empty($scope.credential_id)) ?
-                $scope.credential_id : null,
-            list: CredentialList,
-            field: 'credential',
-            input_type: 'radio'
-        });
 
         // setup module name select
         GetChoices({
@@ -308,5 +297,5 @@ function adhocController($q, $scope, $location, $stateParams,
 export default ['$q', '$scope', '$location', '$stateParams',
     '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
      'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
-    'GetChoices', 'KindChange', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',
+    'GetChoices', 'KindChange', 'CredentialList', 'Empty', 'Wait',
     adhocController];

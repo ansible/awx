@@ -12,15 +12,17 @@
 
 
 export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log, $stateParams, Rest, Alert, JobEventList, GenerateList,
-    Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
-    FormatDate, EventView, Refresh, Wait) {
+    Prompt, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
+    FormatDate, EventView, Wait) {
 
     ClearScope();
 
     var list = JobEventList,
-        defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_events/', //?parent__isnull=1';
-        generator = GenerateList,
-        page;
+        generator = GenerateList;
+
+    // @issue: OLD SEARCH
+    // var defaultUrl = GetBasePath('jobs') + $stateParams.id + '/job_events/', //?parent__isnull=1';
+    //     page;
 
     list.base = $location.path();
     $scope.job_id = $stateParams.id;
@@ -191,30 +193,31 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
             });
     });
 
-    SearchInit({
-        scope: $scope,
-        set: 'jobevents',
-        list: list,
-        url: defaultUrl
-    });
-
-    page = ($stateParams.page) ? parseInt($stateParams.page,10) - 1 : null;
-
-    PaginateInit({
-        scope: $scope,
-        list: list,
-        url: defaultUrl,
-        page: page
-    });
-
-    // Called from Inventories tab, host failed events link:
-    if ($stateParams.host) {
-        $scope[list.iterator + 'SearchField'] = 'host';
-        $scope[list.iterator + 'SearchValue'] = $stateParams.host;
-        $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
-    }
-
-    $scope.search(list.iterator, $stateParams.page);
+    // @issue: OLD SEARCH
+    // SearchInit({
+    //     scope: $scope,
+    //     set: 'jobevents',
+    //     list: list,
+    //     url: defaultUrl
+    // });
+    //
+    // page = ($stateParams.page) ? parseInt($stateParams.page,10) - 1 : null;
+    //
+    // PaginateInit({
+    //     scope: $scope,
+    //     list: list,
+    //     url: defaultUrl,
+    //     page: page
+    // });
+    //
+    // // Called from Inventories tab, host failed events link:
+    // if ($stateParams.host) {
+    //     $scope[list.iterator + 'SearchField'] = 'host';
+    //     $scope[list.iterator + 'SearchValue'] = $stateParams.host;
+    //     $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
+    // }
+    //
+    // $scope.search(list.iterator, $stateParams.page);
 
     $scope.toggle = function (id) {
         ToggleChildren({
@@ -231,21 +234,24 @@ export function JobEventsList($sce, $filter, $scope, $rootScope, $location, $log
     };
 
     $scope.refresh = function () {
-        $scope.jobSearchSpin = true;
+        // @issue: OLD SEARCH
+        // $scope.jobSearchSpin = true;
         $scope.jobLoading = true;
         Wait('start');
-        Refresh({
-            scope: $scope,
-            set: 'jobevents',
-            iterator: 'jobevent',
-            url: $scope.current_url
-        });
+
+        // @issue: OLD SEARCH
+        // Refresh({
+        //     scope: $scope,
+        //     set: 'jobevents',
+        //     iterator: 'jobevent',
+        //     url: $scope.current_url
+        // });
     };
 }
 
 JobEventsList.$inject = ['$sce', '$filter', '$scope', '$rootScope', '$location', '$log', '$stateParams', 'Rest', 'Alert', 'JobEventList',
-    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
+    'generateList', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Wait'
 ];
 
 export function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $stateParams, JobEventsForm, GenerateForm,

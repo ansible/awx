@@ -11,11 +11,15 @@
  */
 
 function InventoriesList($scope, $rootScope, $location, $log,
-    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
-    generateList, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-    ClearScope, ProcessErrors, GetBasePath, Wait,
-    Find, Empty, $state, rbacUiControlService) {
+    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, Prompt,
+    ClearScope, ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
+    let list = InventoryList,
+        defaultUrl = GetBasePath('inventory');
+
+    init();
+
+    function init(){
         $scope.canAdd = false;
 
         rbacUiControlService.canAdd('inventory')
@@ -23,11 +27,49 @@ function InventoriesList($scope, $rootScope, $location, $log,
                 $scope.canAdd = canAdd;
             });
 
-    var list = InventoryList,
-        defaultUrl = GetBasePath('inventory') + ($stateParams.status === 'sync-failed' ? '?not__inventory_sources_with_failures=0' : ''),
-        view = generateList,
-        paths = $location.path().replace(/^\//, '').split('/'),
-        mode = (paths[0] === 'inventories') ? 'edit' : 'select';
+        $scope.$watchCollection(list.name, function(){
+            _.forEach($scope[list.name], buildStatusIndicators);
+        });
+
+        // Search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+        $rootScope.flashMessage = null;
+
+    }
+
+    function buildStatusIndicators(inventory){
+            inventory.launch_class = "";
+            if (inventory.has_inventory_sources) {
+                if (inventory.inventory_sources_with_failures > 0) {
+                    inventory.syncStatus = 'error';
+                    inventory.syncTip = inventory.inventory_sources_with_failures + ' groups with sync failures. Click for details';
+                }
+                else {
+                    inventory.syncStatus = 'successful';
+                    inventory.syncTip = 'No inventory sync failures. Click for details.';
+                }
+            }
+            else {
+                inventory.syncStatus = 'na';
+                inventory.syncTip = 'Not configured for inventory sync.';
+                inventory.launch_class = "btn-disabled";
+            }
+            if (inventory.has_active_failures) {
+                inventory.hostsStatus = 'error';
+                inventory.hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
+            }
+            else if (inventory.total_hosts) {
+                inventory.hostsStatus = 'successful';
+                inventory.hostsTip = 'No hosts with failures. Click for details.';
+            }
+            else {
+                inventory.hostsStatus = 'none';
+                inventory.hostsTip = 'Inventory contains 0 hosts.';
+            }
+    }
 
     function ellipsis(a) {
         if (a.length > 20) {
@@ -61,117 +103,6 @@ function InventoriesList($scope, $rootScope, $location, $log,
         $compile(elem)($scope);
         $scope.triggerPopover(event);
     }
-
-    view.inject(InventoryList, { mode: mode, scope: $scope });
-    $rootScope.flashMessage = null;
-
-    SearchInit({
-        scope: $scope,
-        set: 'inventories',
-        list: list,
-        url: defaultUrl
-    });
-
-    PaginateInit({
-        scope: $scope,
-        list: list,
-        url: defaultUrl
-    });
-
-    if ($stateParams.name) {
-        $scope[InventoryList.iterator + 'InputDisable'] = false;
-        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.name;
-        $scope[InventoryList.iterator + 'SearchField'] = 'name';
-        $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.name.label;
-        $scope[InventoryList.iterator + 'SearchSelectValue'] = null;
-    }
-
-    if ($stateParams.has_active_failures) {
-        $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.has_active_failures;
-        $scope[InventoryList.iterator + 'SearchField'] = 'has_active_failures';
-        $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.has_active_failures.label;
-        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($stateParams.has_active_failures === 'true') ? {
-            value: 1
-        } : {
-            value: 0
-        };
-    }
-
-    if ($stateParams.has_inventory_sources) {
-        $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.has_inventory_sources;
-        $scope[InventoryList.iterator + 'SearchField'] = 'has_inventory_sources';
-        $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.has_inventory_sources.label;
-        $scope[InventoryList.iterator + 'SearchSelectValue'] = ($stateParams.has_inventory_sources === 'true') ? {
-            value: 1
-        } : {
-            value: 0
-        };
-    }
-
-    if ($stateParams.inventory_sources_with_failures) {
-        // pass a value of true, however this field actually contains an integer value
-        $scope[InventoryList.iterator + 'InputDisable'] = true;
-        $scope[InventoryList.iterator + 'SearchValue'] = $stateParams.inventory_sources_with_failures;
-        $scope[InventoryList.iterator + 'SearchField'] = 'inventory_sources_with_failures';
-        $scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields.inventory_sources_with_failures.label;
-        $scope[InventoryList.iterator + 'SearchType'] = 'gtzero';
-    }
-
-    $scope.search(list.iterator);
-
-    if ($scope.removePostRefresh) {
-        $scope.removePostRefresh();
-    }
-    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        //If we got here by deleting an inventory, stop the spinner and cleanup events
-        Wait('stop');
-        try {
-            $('#prompt-modal').modal('hide');
-        }
-        catch(e) {
-            // ignore
-        }
-        $scope.inventories.forEach(function(inventory, idx) {
-            $scope.inventories[idx].launch_class = "";
-            if (inventory.has_inventory_sources) {
-                if (inventory.inventory_sources_with_failures > 0) {
-                    $scope.inventories[idx].syncStatus = 'error';
-                    $scope.inventories[idx].syncTip = inventory.inventory_sources_with_failures + ' groups with sync failures. Click for details';
-                }
-                else {
-                    $scope.inventories[idx].syncStatus = 'successful';
-                    $scope.inventories[idx].syncTip = 'No inventory sync failures. Click for details.';
-                }
-            }
-            else {
-                $scope.inventories[idx].syncStatus = 'na';
-                $scope.inventories[idx].syncTip = 'Not configured for inventory sync.';
-                $scope.inventories[idx].launch_class = "btn-disabled";
-            }
-            if (inventory.has_active_failures) {
-                $scope.inventories[idx].hostsStatus = 'error';
-                $scope.inventories[idx].hostsTip = inventory.hosts_with_active_failures + ' hosts with failures. Click for details.';
-            }
-            else if (inventory.total_hosts) {
-                $scope.inventories[idx].hostsStatus = 'successful';
-                $scope.inventories[idx].hostsTip = 'No hosts with failures. Click for details.';
-            }
-            else {
-                $scope.inventories[idx].hostsStatus = 'none';
-                $scope.inventories[idx].hostsTip = 'Inventory contains 0 hosts.';
-            }
-        });
-    });
-
-    if ($scope.removeRefreshInventories) {
-        $scope.removeRefreshInventories();
-    }
-    $scope.removeRefreshInventories = $scope.$on('RefreshInventories', function () {
-        // Reflect changes after inventory properties edit completes
-        $scope.search(list.iterator);
-    });
 
     if ($scope.removeHostSummaryReady) {
         $scope.removeHostSummaryReady();
@@ -343,7 +274,8 @@ function InventoriesList($scope, $rootScope, $location, $log,
                     if (parseInt($state.params.inventory_id) === id) {
                         $state.go("^", null, {reload: true});
                     } else {
-                        $scope.search(list.iterator);
+                        // @issue: OLD SEARCH
+                        // $scope.search(list.iterator);
                     }
                 })
                 .error(function (data, status) {
@@ -361,15 +293,6 @@ function InventoriesList($scope, $rootScope, $location, $log,
         });
     };
 
-    $scope.lookupOrganization = function (organization_id) {
-        Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
-        Rest.get()
-            .success(function (data) {
-                return data.name;
-            });
-    };
-
-
     // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
     $scope.viewJobs = function (id) {
         $location.url('/jobs/?inventory__int=' + id);
@@ -382,5 +305,5 @@ function InventoriesList($scope, $rootScope, $location, $log,
 
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList',
-    'generateList', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
-    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', InventoriesList];
+    'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
+];

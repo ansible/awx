@@ -5,18 +5,28 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'GenerateForm', 'HostManageService', 'host',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, GenerateForm, HostManageService, host){
-        var generator = GenerateForm,
-            form = HostForm;
+    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'HostManageService', 'host',
+    function($state, $stateParams, $scope, HostForm, ParseTypeChange, HostManageService, host){
 
-        $scope.$watch('host.summary_fields.user_capabilities.edit', function(val) {
-            if (val === false) {
-                $scope.canAdd = false;
-            }
-        });
+        init();
 
-        $scope.parseType = 'yaml';
+        function init(){
+            $scope.$watch('host.summary_fields.user_capabilities.edit', function(val) {
+                if (val === false) {
+                    $scope.canAdd = false;
+                }
+            });
+
+            $scope.parseType = 'yaml';
+            $scope.host = host;
+            $scope.variables = host.variables === '' ? '---' : host.variables;
+            $scope.name = host.name;
+            $scope.description = host.description;
+            ParseTypeChange({
+                scope: $scope,
+                field_id: 'host_variables',
+            });
+        }
         $scope.formCancel = function(){
             $state.go('^');
         };
@@ -35,16 +45,4 @@
                 $state.go($state.current, null, {reload: true});
             });
         };
-        var init = function(){
-            $scope.host = host;
-            generator.inject(form, {mode: 'edit', related: false, id: 'Inventory-hostManage--panel', scope: $scope});
-            $scope.variables = host.variables === '' ? '---' : host.variables;
-            $scope.name = host.name;
-            $scope.description = host.description;
-            ParseTypeChange({
-                scope: $scope,
-                field_id: 'host_variables',
-            });
-        };
-        init();
     }];

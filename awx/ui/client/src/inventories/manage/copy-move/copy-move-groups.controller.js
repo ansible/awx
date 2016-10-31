@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'generateList', 'SearchInit', 'PaginateInit', 'GroupManageService', 'GetBasePath', 'CopyMoveGroupList', 'group',
-    function($scope, $state, $stateParams, GenerateList, SearchInit, PaginateInit, GroupManageService, GetBasePath, CopyMoveGroupList, group){
+    ['$scope', '$state', '$stateParams', 'generateList', 'GroupManageService', 'GetBasePath', 'CopyMoveGroupList', 'group',
+    function($scope, $state, $stateParams, GenerateList, GroupManageService, GetBasePath, CopyMoveGroupList, group){
         var list = CopyMoveGroupList,
             view = GenerateList;
         $scope.item = group;
@@ -69,19 +69,21 @@
                 scope: $scope,
                 input_type: 'radio'
             });
-            SearchInit({
-                scope: $scope,
-                set: list.name,
-                list: list,
-                url: url
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url : url,
-                mode: 'lookup'
-            });
-            $scope.search(list.iterator, null, true, false);
+
+            // @issue: OLD SEARCH
+            // SearchInit({
+            //     scope: $scope,
+            //     set: list.name,
+            //     list: list,
+            //     url: url
+            // });
+            // PaginateInit({
+            //     scope: $scope,
+            //     list: list,
+            //     url : url,
+            //     mode: 'lookup'
+            // });
+            // $scope.search(list.iterator, null, true, false);
             // remove the current group from list
         };
         init();

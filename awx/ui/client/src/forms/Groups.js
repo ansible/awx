@@ -18,31 +18,31 @@ export default
             editTitle: '{{ name }}',
             showTitle: true,
             name: 'group',
+            basePath: 'groups',
+            // the parent node this generated state definition tree expects to attach to
+            stateTree: 'inventoryManage',
+            // form generator inspects the current state name to determine whether or not to set an active (.is-selected) class on a form tab
+            // this setting is optional on most forms, except where the form's edit state name is not parentStateName.edit
+            activeEditState: 'inventoryManage.editGroup',
             well: false,
-
             fields: {
                 name: {
                     label: 'Name',
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
-                    tab: 'properties',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    tab: 'properties'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
-                    tab: 'properties',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    tab: 'properties'
                 },
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    addRequired: false,
-                    editRequird: false,
                     rows: 12,
                     'default': '---',
                     dataTitle: 'Group Variables',
@@ -65,23 +65,23 @@ export default
                     type: 'select',
                     ngOptions: 'source.label for source in source_type_options track by source.value',
                     ngChange: 'sourceChange(source)',
-                    addRequired: false,
-                    editRequired: false,
-                    ngModel: 'source',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngModel: 'source'
                 },
                 credential: {
                     label: 'Cloud Credential',
                     type: 'lookup',
+                    list: 'CredentialList',
+                    basePath: 'credentials',
                     ngShow: "source && source.value !== '' && source.value !== 'custom'",
                     sourceModel: 'credential',
                     sourceField: 'name',
-                    ngClick: 'lookUpCredential()',
+                    ngClick: 'lookupCredential()',
                     awRequiredWhen: {
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
                     },
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 source_regions: {
                     label: 'Regions',
@@ -89,22 +89,20 @@ export default
                     ngOptions: 'source.label for source in source_region_choices track by source.value',
                     multiSelect: true,
                     ngShow: "source && (source.value == 'rax' || source.value == 'ec2' || source.value == 'gce' || source.value == 'azure' || source.value == 'azure_rm')",
-                    addRequired: false,
-                    editRequired: false,
+
+
                     dataTitle: 'Source Regions',
                     dataPlacement: 'right',
                     awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
                         "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                         "</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 instance_filters: {
                     label: 'Instance Filters',
                     type: 'text',
                     ngShow: "source && source.value == 'ec2'",
-                    addRequired: false,
-                    editRequired: false,
                     dataTitle: 'Instance Filters',
                     dataPlacement: 'right',
                     awPopOver: "<p>Provide a comma-separated list of filter expressions. " +
@@ -118,15 +116,13 @@ export default
                         "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                         "for a complete list of supported filters.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 group_by: {
                     label: 'Only Group By',
                     type: 'select',
                     ngShow: "source && source.value == 'ec2'",
                     ngOptions: 'source.label for source in group_by_choices track by source.value',
-                    addRequired: false,
-                    editRequired: false,
                     multiSelect: true,
                     dataTitle: 'Only Group By',
                     dataPlacement: 'right',
@@ -144,19 +140,19 @@ export default
                         "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
                     type: 'lookup',
+                    basePath: 'inventory_scripts',
+                    list: 'InventoryScriptList',
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'inventory_script',
                     sourceField: 'name',
                     ngClick: 'lookUpInventory_script()' ,
-                    addRequired: true,
-                    editRequired: true,
                     ngRequired: "source && source.value === 'custom'",
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)',
                 },
                 custom_variables: {
                     id: 'custom_variables',
@@ -164,8 +160,6 @@ export default
                     ngShow: "source && source.value=='custom' ",
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    addRequired: false,
-                    editRequired: false,
                     rows: 6,
                     'default': '---',
                     parseTypeName: 'envParseType',
@@ -187,8 +181,6 @@ export default
                     ngShow: "source && source.value == 'ec2'",
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    addRequired: false,
-                    editRequird: false,
                     rows: 6,
                     'default': '---',
                     parseTypeName: 'envParseType',
@@ -209,12 +201,9 @@ export default
                 vmware_variables: {
                     id: 'vmware_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
-
                     ngShow: "source && source.value == 'vmware'",
                     type: 'textarea',
-                    addRequired: false,
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    editRequird: false,
                     rows: 6,
                     'default': '---',
                     parseTypeName: 'envParseType',
@@ -235,12 +224,9 @@ export default
                 openstack_variables: {
                     id: 'openstack_variables',
                     label: 'Source Variables', //"{{vars_label}}" ,
-
                     ngShow: "source && source.value == 'openstack'",
                     type: 'textarea',
-                    addRequired: false,
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    editRequird: false,
                     rows: 6,
                     'default': '---',
                     parseTypeName: 'envParseType',
@@ -263,14 +249,13 @@ export default
                     type: 'checkbox_group',
                     ngShow: "source && (source.value !== '' && source.value !== null)",
                     class: 'Form-checkbox--stacked',
-
                     fields: [{
                         name: 'overwrite',
                         label: 'Overwrite',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
+
+
                         awPopOver: '<p>If checked, all child groups and hosts not found on the external source will be deleted from ' +
                             'the local inventory.</p><p>When not checked, local child hosts and groups not found on the external source will ' +
                             'remain untouched by the inventory update process.</p>',
@@ -278,14 +263,14 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                     }, {
                         name: 'overwrite_vars',
                         label: 'Overwrite Variables',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
+
+
                         awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
                             'found on the external source.</p><p>When not checked, a merge will be performed, combining local variables with ' +
                             'those found on the external source.</p>',
@@ -293,21 +278,19 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                     }, {
                         name: 'update_on_launch',
                         label: 'Update on Launch',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
                         awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
                             'executing job tasks.</p>',
                         dataTitle: 'Update on Launch',
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                     }]
                 },
                 update_cache_timeout: {
@@ -319,8 +302,6 @@ export default
                     ngShow: "source && source.value !== '' && update_on_launch",
                     spinner: true,
                     "default": 0,
-                    addRequired: false,
-                    editRequired: false,
                     awPopOver: '<p>Time in seconds to consider an inventory sync to be current. During job runs and callbacks the task system will ' +
                         'evaluate the timestamp of the latest sync. If it is older than Cache Timeout, it is not considered current, ' +
                         'and a new inventory sync will be performed.</p>',
@@ -333,16 +314,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
 

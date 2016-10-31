@@ -7,7 +7,7 @@
  import {templateUrl} from '../../../shared/template-url/template-url.factory';
 
 export default {
-    route: '/adhoc',
+    url: '/adhoc',
     params:{
         pattern: {
             value: 'all',
@@ -23,10 +23,5 @@ export default {
     },
     ncyBreadcrumb: {
         label: "RUN COMMAND"
-    },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed"]
-        }
     }
 };

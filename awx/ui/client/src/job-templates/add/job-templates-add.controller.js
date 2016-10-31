@@ -5,18 +5,15 @@
  *************************************************/
 
  export default
-     [   'Refresh', '$filter', '$scope', '$rootScope', '$compile',
-         '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
-         'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope',
-         'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList',
-         'LookUpInit', 'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON',
-         'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state',
+     [   '$filter', '$scope', '$rootScope', '$compile', '$location', '$log',
+        '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
+        'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
+        'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state',
          'CreateSelect2', '$q',
          function(
-             Refresh, $filter, $scope, $rootScope, $compile,
+             $filter, $scope, $rootScope, $compile,
              $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-             ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, InventoryList,
-             CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait,
+             ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices,
              $state, CreateSelect2, $q
          ) {
@@ -36,106 +33,38 @@
                 form = JobTemplateForm(),
                 generator = GenerateForm,
                 master = {},
-                CloudCredentialList = {},
-                NetworkCredentialList = {},
                 selectPlaybook, checkSCMStatus,
-                callback,
-                base = $location.path().replace(/^\//, '').split('/')[0],
-                context = (base === 'job_templates') ? 'job_template' : 'inv';
+                callback;
 
-            // remove "type" field from search options
-            CredentialList.fields.kind.noSearch = true;
+            init();
+            function init(){
+                // apply form definition's default field values
+                GenerateForm.applyDefaults(form, $scope);
 
-            CallbackHelpInit({ scope: $scope });
-            $scope.can_edit = true;
-            generator.inject(form, { mode: 'add', related: false, scope: $scope });
+                $scope.can_edit = true;
+                $scope.allow_callbacks = false;
+                $scope.playbook_options = [];
+                $scope.mode = "add";
+                $scope.parseType = 'yaml';
+
+                md5Setup({
+                    scope: $scope,
+                    master: master,
+                    check_field: 'allow_callbacks',
+                    default_val: false
+                });
+                CallbackHelpInit({ scope: $scope });
+                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
+            }
 
             callback = function() {
                 // Make sure the form controller knows there was a change
                 $scope[form.name + '_form'].$setDirty();
             };
-            $scope.mode = "add";
-            $scope.parseType = 'yaml';
-            ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
-
-            $scope.playbook_options = [];
-            $scope.allow_callbacks = false;
-
-            generator.reset();
-
-            md5Setup({
-                scope: $scope,
-                master: master,
-                check_field: 'allow_callbacks',
-                default_val: false
-            });
-
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: ($stateParams.inventory_id !== undefined) ? $stateParams.inventory_id : null,
-                list: InventoryList,
-                field: 'inventory',
-                input_type: "radio"
-            });
-
-
-            // Clone the CredentialList object for use with cloud_credential. Cloning
-            // and changing properties to avoid collision.
-            jQuery.extend(true, CloudCredentialList, CredentialList);
-            CloudCredentialList.name = 'cloudcredentials';
-            CloudCredentialList.iterator = 'cloudcredential';
-            CloudCredentialList.basePath = '/api/v1/credentials?cloud=true';
-
-            // Clone the CredentialList object for use with network_credential. Cloning
-            // and changing properties to avoid collision.
-            jQuery.extend(true, NetworkCredentialList, CredentialList);
-            NetworkCredentialList.name = 'networkcredentials';
-            NetworkCredentialList.iterator = 'networkcredential';
-            NetworkCredentialList.basePath = '/api/v1/credentials?kind=net';
-
 
             SurveyControllerInit({
                 scope: $scope,
                 parent_scope: $scope
-            });
-
-            if ($scope.removeLookUpInitialize) {
-                $scope.removeLookUpInitialize();
-            }
-            $scope.removeLookUpInitialize = $scope.$on('lookUpInitialize', function () {
-                LookUpInit({
-                    url: GetBasePath('credentials') + '?cloud=true',
-                    scope: $scope,
-                    form: form,
-                    current_item: null,
-                    list: CloudCredentialList,
-                    field: 'cloud_credential',
-                    hdr: 'Select Cloud Credential',
-                    input_type: 'radio'
-                });
-
-                LookUpInit({
-                    url: GetBasePath('credentials') + '?kind=net',
-                    scope: $scope,
-                    form: form,
-                    current_item: null,
-                    list: NetworkCredentialList,
-                    field: 'network_credential',
-                    hdr: 'Select Network Credential',
-                    input_type: 'radio'
-                });
-
-                LookUpInit({
-                    url: GetBasePath('credentials') + '?kind=ssh',
-                    scope: $scope,
-                    form: form,
-                    current_item: null,
-                    list: CredentialList,
-                    field: 'credential',
-                    hdr: 'Select Machine Credential',
-                    input_type: "radio"
-                });
             });
 
             var selectCount = 0;
@@ -153,7 +82,7 @@
                             $scope.verbosity = $scope.verbosity_options[verbosity];
                         }
                     }
-                    $scope.job_type = $scope.job_type_options[$scope.job_type_field.default];
+                    $scope.job_type = $scope.job_type_options[form.fields.job_type.default];
 
                     // if you're getting to the form from the scan job section on inventories,
                     // set the job type select to be scan
@@ -174,11 +103,11 @@
                             });
                     }
                     CreateSelect2({
-                        element:'#job_templates_job_type',
+                        element:'#job_template_job_type',
                         multiple: false
                     });
                     CreateSelect2({
-                        element:'#job_templates_labels',
+                        element:'#job_template_labels',
                         multiple: true,
                         addNew: true
                     });
@@ -188,7 +117,7 @@
                     });
 
                     CreateSelect2({
-                        element:'#job_templates_verbosity',
+                        element:'#job_template_verbosity',
                         multiple: false
                     });
 
@@ -289,7 +218,7 @@
                         $scope.project_name = last_non_scan_project_name;
                         $scope.playbook_options = last_non_scan_playbook_options;
                         $scope.playbook = last_non_scan_playbook;
-                        $scope.job_templates_form.playbook.$setPristine();
+                        $scope.job_template_form.playbook.$setPristine();
                     }
                 }
                 sync_playbook_select2();
@@ -340,16 +269,6 @@
                     selectPlaybook(oldValue, newValue);
                     checkSCMStatus();
                 }
-            });
-
-            LookUpInit({
-                scope: $scope,
-                form: form,
-                current_item: null,
-                list: ProjectList,
-                field: 'project',
-                input_type: "radio",
-                autopopulateLookup: (context === 'inv') ? false : true
             });
 
             if ($scope.removeSurveySaved) {
@@ -551,8 +470,8 @@
                         $scope.survey_exists) ? $scope.survey_enabled : false;
 
                     // The idea here is that we want to find the new option elements that also have a label that exists in the dom
-                    $("#job_templates_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
-                        $("#job_templates_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
+                    $("#job_template_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
+                        $("#job_template_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
                             if($(option).text() === $(label).attr('title')) {
                                 // Mark that the option has a label present so that we can filter by that down below
                                 $(option).attr('data-label-is-present', true);
@@ -560,7 +479,7 @@
                         });
                     });
 
-                    $scope.newLabels = $("#job_templates_labels > option")
+                    $scope.newLabels = $("#job_template_labels > option")
                         .filter("[data-select2-tag=true]")
                         .filter("[data-label-is-present=true]")
                         .map((i, val) => ({name: $(val).text()}));
@@ -590,7 +509,7 @@
             };
 
             $scope.formCancel = function () {
-                $state.transitionTo('jobTemplates');
+                $state.go('jobTemplates');
             };
         }
     ];

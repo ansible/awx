@@ -2244,10 +2244,10 @@ class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer)
     pass
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
-    job_type = serializers.SerializerMethodField()
-    job_tags = serializers.SerializerMethodField()
-    limit = serializers.SerializerMethodField()
-    skip_tags = serializers.SerializerMethodField()
+    job_type = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    job_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    limit = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
+    skip_tags = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)
     success_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     failure_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     always_nodes = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
@@ -2263,17 +2263,12 @@ class WorkflowNodeBaseSerializer(BaseSerializer):
             res['unified_job_template'] = obj.unified_job_template.get_absolute_url()
         return res
 
-    def get_job_type(self, obj):
-        return obj.char_prompts.get('job_type', None)
-
-    def get_job_tags(self, obj):
-        return obj.char_prompts.get('job_tags', None)
-
-    def get_skip_tags(self, obj):
-        return obj.char_prompts.get('skip_tags', None)
-
-    def get_limit(self, obj):
-        return obj.char_prompts.get('limit', None)
+    def validate(self, attrs):
+        # char_prompts go through different validation, so remove them here
+        for fd in ['job_type', 'job_tags', 'skip_tags', 'limit']:
+            if fd in attrs:
+                attrs.pop(fd)
+        return super(WorkflowNodeBaseSerializer, self).validate(attrs)
 
 
 class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
@@ -2421,7 +2416,9 @@ class JobEventSerializer(BaseSerializer):
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'host', 'host_name', 'parent', 'play', 'task', 'role')
+                  'changed', 'uuid', 'host', 'host_name', 'parent', 'playbook',
+                  'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
+                  'verbosity')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
@@ -2457,16 +2454,8 @@ class AdHocCommandEventSerializer(BaseSerializer):
         model = AdHocCommandEvent
         fields = ('*', '-name', '-description', 'ad_hoc_command', 'event',
                   'counter', 'event_display', 'event_data', 'failed',
-                  'changed', 'host', 'host_name')
-
-    def to_internal_value(self, data):
-        ret = super(AdHocCommandEventSerializer, self).to_internal_value(data)
-        # AdHocCommandAdHocCommandEventsList should be the only view creating
-        # AdHocCommandEvent instances, so keep the ad_hoc_command it sets, even
-        # though ad_hoc_command is a read-only field.
-        if 'ad_hoc_command' in data:
-            ret['ad_hoc_command'] = data['ad_hoc_command']
-        return ret
+                  'changed', 'uuid', 'host', 'host_name', 'stdout',
+                  'start_line', 'end_line', 'verbosity')
 
     def get_related(self, obj):
         res = super(AdHocCommandEventSerializer, self).get_related(obj)

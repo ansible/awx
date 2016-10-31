@@ -686,9 +686,11 @@ export default
 
             scope.plays = [];
 
-            url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order=id';
-            url += (scope.search_play_name) ? '&play__icontains=' + encodeURIComponent(scope.search_play_name) : '';
-            url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
+            // @issue: OLD SEARCH - factory needs refactoring!  will be completely rehauled for job details 3.1 update
+            // url = scope.job.url + 'job_plays/?page_size=' + scope.playsMaxRows + '&order=id';
+            // url += (scope.search_play_name) ? '&play__icontains=' + encodeURIComponent(scope.search_play_name) : '';
+            // url += (scope.search_play_status === 'failed') ? '&failed=true' : '';
+
             scope.playsLoading = true;
             Rest.setUrl(url);
             Rest.get()
@@ -786,9 +788,12 @@ export default
             scope.tasks = [];
             if (scope.selectedPlay) {
                 url = scope.job.url + 'job_tasks/?event_id=' + scope.selectedPlay;
-                url += (scope.search_task_name) ? '&task__icontains=' + encodeURIComponent(scope.search_task_name) : '';
-                url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
-                url += '&page_size=' + scope.tasksMaxRows + '&order=id';
+
+                // @issue: OLD SEARCH
+                // url += (scope.search_task_name) ? '&task__icontains=' + encodeURIComponent(scope.search_task_name) : '';
+                // url += (scope.search_task_status === 'failed') ? '&failed=true' : '';
+                // url += '&page_size=' + scope.tasksMaxRows + '&order=id';
+
                 scope.plays.every(function(p, idx) {
                     if (p.id === scope.selectedPlay) {
                         play = scope.plays[idx];
@@ -918,9 +923,12 @@ export default
                     page_size: scope.hostResultsMaxRows,
                     order: 'host_name,counter',
                 };
-                if (scope.search_host_status === 'failed'){
-                    params.failed = true;
-                }
+
+                // @issue: OLD SEARCH
+                // if (scope.search_host_status === 'failed'){
+                //     params.failed = true;
+                // }
+
                 JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
                     scope.hostResults = JobDetailService.processHostEvents(res.results);
                     scope.hostResultsLoading = false;
@@ -1052,27 +1060,30 @@ export default
                     filteredListX[key] = plays[key];
                 }
             }
-            if (scope.search_play_name) {
-                for (key in plays) {
-                    if (filteredListX[key].name.indexOf(scope.search_play_name) > 0) {
-                        filteredListA[key] = filteredListX[key];
-                    }
-                }
-            }
-            else {
-                filteredListA = filteredListX;
-            }
 
-            if (scope.search_play_status === 'failed') {
-                for (key in filteredListA) {
-                    if (filteredListA[key].status === 'failed') {
-                        filteredListB[key] = plays[key];
-                    }
-                }
-            }
-            else {
-                filteredListB = filteredListA;
-            }
+            // @issue: OLD SEARCH
+            // if (scope.search_play_name) {
+            //     for (key in plays) {
+            //         if (filteredListX[key].name.indexOf(scope.search_play_name) > 0) {
+            //             filteredListA[key] = filteredListX[key];
+            //         }
+            //     }
+            // }
+            // else {
+            //     filteredListA = filteredListX;
+            // }
+
+            // @issue: OLD SEARCH
+            // if (scope.search_play_status === 'failed') {
+            //     for (key in filteredListA) {
+            //         if (filteredListA[key].status === 'failed') {
+            //             filteredListB[key] = plays[key];
+            //         }
+            //     }
+            // }
+            // else {
+            //     filteredListB = filteredListA;
+            // }
 
             keys = Object.keys(filteredListB);
             keys.sort(function(a,b) { return listSort(a,b); }).reverse();
@@ -1130,27 +1141,29 @@ export default
                     }
                 }
 
-                if (scope.search_task_name) {
-                    for (key in filteredListX) {
-                        if (filteredListX[key].name.indexOf(scope.search_task_name) > 0) {
-                            filteredListA[key] = filteredListX[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListA = filteredListX;
-                }
+                // @issue: OLD SEARCH
+                // if (scope.search_task_name) {
+                //     for (key in filteredListX) {
+                //         if (filteredListX[key].name.indexOf(scope.search_task_name) > 0) {
+                //             filteredListA[key] = filteredListX[key];
+                //         }
+                //     }
+                // }
+                // else {
+                //     filteredListA = filteredListX;
+                // }
 
-                if (scope.search_task_status === 'failed') {
-                    for (key in filteredListA) {
-                        if (filteredListA[key].status === 'failed') {
-                            filteredListB[key] = tasks[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListB = filteredListA;
-                }
+                // @issue: OLD SEARCH
+                // if (scope.search_task_status === 'failed') {
+                //     for (key in filteredListA) {
+                //         if (filteredListA[key].status === 'failed') {
+                //             filteredListB[key] = tasks[key];
+                //         }
+                //     }
+                // }
+                // else {
+                //     filteredListB = filteredListA;
+                // }
 
                 keys = Object.keys(filteredListB);
                 keys.sort(function(a,b) { return listSort(a,b); }).reverse();
@@ -1196,27 +1209,30 @@ export default
                 //hostResults = JSON.parse(JSON.stringify(scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults));
                 hostResults = scope.jobData.plays[scope.activePlay].tasks[scope.activeTask].hostResults;
 
-                if (scope.search_host_name) {
-                    for (key in hostResults) {
-                        if (hostResults[key].name.indexOf(scope.search_host_name) > 0) {
-                            filteredListA[key] = hostResults[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListA = hostResults;
-                }
+                // @issue: OLD SEARCH
+                // if (scope.search_host_name) {
+                //     for (key in hostResults) {
+                //         if (hostResults[key].name.indexOf(scope.search_host_name) > 0) {
+                //             filteredListA[key] = hostResults[key];
+                //         }
+                //     }
+                // }
+                // else {
+                //     filteredListA = hostResults;
+                // }
 
-                if (scope.search_host_status === 'failed' || scope.search_host_status === 'unreachable') {
-                    for (key in filteredListA) {
-                        if (filteredListA[key].status === 'failed') {
-                            filteredListB[key] = filteredListA[key];
-                        }
-                    }
-                }
-                else {
-                    filteredListB = filteredListA;
-                }
+                // @issue: OLD SEARCH
+                // if (scope.search_host_status === 'failed' || scope.search_host_status === 'unreachable') {
+                //     for (key in filteredListA) {
+                //         if (filteredListA[key].status === 'failed') {
+                //             filteredListB[key] = filteredListA[key];
+                //         }
+                //     }
+                // }
+                // else {
+                //     filteredListB = filteredListA;
+                // }
+                
                 keys = Object.keys(filteredListB);
                 keys.sort(function compare(a, b) {
                     if (filteredListB[a].name === filteredListB[b].name) {

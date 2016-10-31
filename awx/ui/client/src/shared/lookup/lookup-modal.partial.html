@@ -1,0 +1,24 @@
+<div id="form-modal" class="Lookup modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header Form-header">
+                <div class="Form-title">Select {{list.iterator}}</div>
+                <!-- optional: transclude header fields -->
+                <div class="Form-header--fields"></div>
+                <div class="Form-exitHolder">
+                    <button type="button" class="Form-exit" data-dismiss="modal" aria-hidden="true" ng-click="$state.go('^')">
+                        <i class="fa fa-times-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" id="form-modal-body">
+                <!-- required: transclude generated list html -->
+                <!-- see: lookup-modal.directive.js -->
+            </div>
+            <div class="modal-footer">
+                <button data-target="#form-modal" ng-click="$state.go('^')" data-dismiss="modal" class="Lookup-cancel btn btn-default">Cancel</button>
+                <button ng-click="saveForm()" class="Lookup-save btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

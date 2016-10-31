@@ -26,8 +26,7 @@ export default
             realName: 'question_text',
             label: 'Prompt',
             type: 'text',
-            addRequired: true,
-            editRequired: true,
+            required: true,
             column: 1,
             awSurveyQuestion: true,
             class: 'Form-formGroup--singleColumn'
@@ -36,8 +35,8 @@ export default
             realName: 'question_description',
             label: 'Description',
             type: 'text',
-            addRequired: false,
-            editRequired: false,
+
+
             column: 1,
             class: 'Form-formGroup--singleColumn'
         },
@@ -54,8 +53,8 @@ export default
                 '<div class="error ng-hide" id="survey_question-variable-duplicate-error" ng-show="duplicate">This question variable is already in use.  Please enter a different variable name.</div>' +
                 '<div class="error api-error ng-binding" id="survey_question-variable-api-error" ng-bind="variable_api_error"></div>'+
                 '</div>',
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             column: 1,
             class: 'Form-formGroup--singleColumn'
         },
@@ -65,8 +64,8 @@ export default
             type: 'select',
             defaultText: 'Choose an answer type',
             ngOptions: 'answer_types.name for answer_types in answer_types track by answer_types.type',
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             column: 2,
             ngChange: 'typeChange()',
             class: 'Form-formGroup--singleColumn'
@@ -76,8 +75,8 @@ export default
             label: 'Multiple Choice Options',
             type: 'textarea',
             rows: 3,
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             ngRequired: "type.type=== 'multiselect' || type.type=== 'multiplechoice' " ,
             ngShow: 'type.type=== "multiselect" || type.type=== "multiplechoice" ',
             awPopOver: '<p>Type an option on each line.</p>'+
@@ -106,8 +105,8 @@ export default
                             '</div>'+
                         '</div>',
             ngShow: 'type.type==="text" ',
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },
@@ -128,8 +127,8 @@ export default
                             '</div>'+
                         '</div>',
             ngShow: 'type.type==="textarea" ',
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },
@@ -150,8 +149,8 @@ export default
                             '</div>'+
                         '</div>',
             ngShow: 'type.type==="password" ',
-            addRequired: true,
-            editRequired: true,
+            required: true,
+
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },
@@ -171,8 +170,7 @@ export default
                             '</div>'+
                         '</div>',
             ngShow: 'type.type==="integer" ',
-            addRequired: true,
-            editRequired: true,
+            required: true,
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },
@@ -193,8 +191,7 @@ export default
                             '</div>'+
                         '</div>',
             ngShow: 'type.type==="float" ',
-            addRequired: true,
-            editRequired: true,
+            required: true,
             column: 2,
             class: 'Form-formGroup--singleColumn'
         },
@@ -297,8 +294,6 @@ export default
             realName: 'required_answer',
             label: 'Required',
             type: 'checkbox',
-            addRequired: false,
-            editRequired: false,
             column: 2,
             class: 'Form-formGroup--singleColumn'
         }

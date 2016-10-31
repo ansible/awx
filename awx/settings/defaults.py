@@ -511,25 +511,25 @@ JOB_EVENT_MAX_QUEUE_SIZE = 100
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
-# Enable proot support for running jobs (playbook runs only).
+# Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = False
 
-# Command/path to proot.
-AWX_PROOT_CMD = 'proot'
+# Command/path to bubblewrap.
+AWX_PROOT_CMD = 'bwrap'
 
-# Additional paths to hide from jobs using proot.
+# Additional paths to hide from jobs using bubblewrap.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_HIDE_PATHS = []
 
-# Additional paths to show for jobs using proot.
+# Additional paths to show for jobs using bubbelwrap.
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_SHOW_PATHS = []
 
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
-# The directory in which proot will create new temporary directories for its root
+# The directory in which bubblewrap will create new temporary directories for its root
 # Note: This setting may be overridden by database settings.
 AWX_PROOT_BASE_PATH = "/tmp"
 

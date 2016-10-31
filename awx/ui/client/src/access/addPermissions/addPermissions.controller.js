@@ -11,23 +11,12 @@
  * Controller for handling permissions adding
  */
 
-export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', function (rootScope, scope, GetBasePath, Rest, $q, Wait, ProcessErrors) {
-    var manuallyUpdateChecklists = function(list, id, isSelected) {
-        var elemScope = angular
-            .element("#" +
-                list + "s_table #" + id + ".List-tableRow input")
-            .scope();
-        if (elemScope) {
-            elemScope.isSelected = !!isSelected;
-        }
-    };
+export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', function(rootScope, scope, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
     scope.allSelected = [];
 
     // the object permissions are being added to
-    scope.object = scope[scope.$parent.list
-        .iterator + "_obj"];
-
+    scope.object = scope.resourceData.data;
     // array for all possible roles for the object
     scope.roles = Object
         .keys(scope.object.summary_fields.object_roles)
@@ -36,7 +25,8 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                 value: scope.object.summary_fields
                     .object_roles[key].id,
                 label: scope.object.summary_fields
-                    .object_roles[key].name };
+                    .object_roles[key].name
+            };
         });
 
     // TODO: get working with api
@@ -48,7 +38,8 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                 name: scope.object.summary_fields
                     .object_roles[key].name,
                 description: scope.object.summary_fields
-                    .object_roles[key].description };
+                    .object_roles[key].description
+            };
         });
 
     scope.showKeyPane = false;
@@ -63,90 +54,44 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         scope.teamsSelected = !scope.usersSelected;
     };
 
-    // manually handle selection/deselection of user/team checkboxes
-    scope.$on("selectedOrDeselected", function(e, val) {
-        val = val.value;
-        if (val.isSelected) {
-            // deselected, so remove from the allSelected list
-            scope.allSelected = scope.allSelected.filter(function(i) {
-                // return all but the object who has the id and type
-                // of the element to deselect
-                return (!(val.id === i.id && val.type === i.type));
-            });
+    // pop/push into unified collection of selected users & teams
+    scope.$on("selectedOrDeselected", function(e, value) {
+        let item = value.value;
+
+        function buildName(user) {
+            return (user.first_name &&
+                user.last_name) ?
+                user.first_name + " " +
+                user.last_name :
+                user.username;
+        }
+
+        if (item.isSelected) {
+            if (item.type === 'user') {
+                item.name = buildName(item);
+            }
+            scope.allSelected.push(item);
         } else {
-            // selected, so add to the allSelected list
-            var getName = function(val) {
-                if (val.type === "user") {
-                    return (val.first_name &&
-                        val.last_name) ?
-                        val.first_name + " " +
-                        val.last_name :
-                        val.username;
-                } else {
-                    return val.name;
-                }
-            };
-            scope.allSelected.push({
-                name: getName(val),
-                type: val.type,
-                roles: [],
-                id: val.id
-            });
+            scope.allSelected = _.remove(scope.allSelected, { id: item.id });
         }
     });
-
-    // used to handle changes to the itemsSelected scope var on "next page",
-    // "sorting etc."
-    scope.$on("itemsSelected", function(e, inList) {
-        // compile a list of objects that needed to be checked in the lists
-        scope.updateLists = scope.allSelected.filter(function(inMemory) {
-            var notInList = true;
-            inList.forEach(function(val) {
-                // if the object is part of the allSelected list and is
-                // selected,
-                // you don't need to add it updateLists
-                if (inMemory.id === val.id &&
-                    inMemory.type === val.type) {
-                    notInList = false;
-                }
-            });
-            return notInList;
-        });
-    });
-
-    // handle changes to the updatedLists by manually selected those values in
-    // the UI
-    scope.$watch("updateLists", function(toUpdate) {
-        (toUpdate || []).forEach(function(obj) {
-            manuallyUpdateChecklists(obj.type, obj.id, true);
-        });
-
-        delete scope.updateLists;
-    });
-
-    // remove selected user/team
-    scope.removeObject = function(obj) {
-        manuallyUpdateChecklists(obj.type, obj.id, false);
-
-        scope.allSelected = scope.allSelected.filter(function(i) {
-            return (!(obj.id === i.id && obj.type === i.type));
-        });
-    };
 
     // update post url list
     scope.$watch("allSelected", function(val) {
         scope.posts = _
             .flatten((val || [])
-            .map(function (owner) {
-                var url = GetBasePath(owner.type + "s") + owner.id +
-                    "/roles/";
+                .map(function(owner) {
+                    var url = GetBasePath(owner.type + "s") + owner.id +
+                        "/roles/";
 
-                return (owner.roles || [])
-                    .map(function (role) {
-                        return {url: url,
-                            id: role.value};
-                });
-        }));
+                    return (owner.roles || [])
+                        .map(function(role) {
+                            return {
+                                url: url,
+                                id: role.value
+                            };
+                        });
+                }));
     }, true);
 
     // post roles to api
@@ -156,22 +101,22 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         var requests = scope.posts
             .map(function(post) {
                 Rest.setUrl(post.url);
-                return Rest.post({"id": post.id});
+                return Rest.post({ "id": post.id });
             });
 
         $q.all(requests)
-            .then(function () {
+            .then(function() {
                 Wait('stop');
                 rootScope.$broadcast("refreshList", "permission");
                 scope.closeModal();
-            }, function (error) {
+            }, function(error) {
                 Wait('stop');
                 rootScope.$broadcast("refreshList", "permission");
                 scope.closeModal();
                 ProcessErrors(null, error.data, error.status, null, {
                     hdr: 'Error!',
                     msg: 'Failed to post role(s): POST returned status' +
-                    error.status
+                        error.status
                 });
             });
     };

@@ -7,13 +7,16 @@
 /* jshint unused: vars */
 import addUsers from './addUsers.controller';
 export default
-    ['Wait', 'templateUrl', function(Wait, templateUrl) {
+    ['Wait', 'templateUrl', '$state', '$view', function(Wait, templateUrl, $state, $view) {
             return {
                 restrict: 'E',
-                scope: {},
+                scope: {
+                    addUsersType: '@'
+                },
                 controller: addUsers,
                 templateUrl: templateUrl('organizations/linkout/addUsers/addUsers'),
                 link: function(scope, element, attrs, ctrl) {
+
                     $("body").addClass("is-modalOpen");
 
                     $("body").append(element);

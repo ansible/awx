@@ -19,26 +19,27 @@ export default
 
             addTitle: i18n._('New Job Template'),
             editTitle: '{{ name }}',
-            name: 'job_templates',
-            base: 'job_templates',
+            name: 'job_template',
+            basePath: 'job_templates',
+            // the top-most node of generated state tree
+            stateTree: 'jobTemplates',
             tabs: true,
+            // (optional) array of supporting templates to ng-include inside generated html
+            include: ['/static/partials/survey-maker-modal.html'],
 
             fields: {
                 name: {
                     label: i18n._('Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
-                    column: 1,
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    column: 1
                 },
                 description: {
                     label: i18n._('Description'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
                     column: 1,
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 job_type: {
                     label: i18n._('Job Type'),
@@ -46,8 +47,7 @@ export default
                     ngOptions: 'type.label for type in job_type_options track by type.value',
                     ngChange: 'jobTypeChange()',
                     "default": 0,
-                    addRequired: true,
-                    editRequired: true,
+                    required: true,
                     column: 1,
                     awPopOver: i18n._("<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
                         " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
@@ -61,14 +61,15 @@ export default
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 inventory: {
                     label: i18n._('Inventory'),
                     type: 'lookup',
+                    basePath: 'inventory',
+                    list: 'InventoryList',
                     sourceModel: 'inventory',
                     sourceField: 'name',
-                    ngClick: 'lookUpInventory()',
                     awRequiredWhen: {
                         reqExpression: '!ask_inventory_on_launch',
                         alwaysShowAsterisk: true
@@ -84,7 +85,7 @@ export default
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 project: {
                     label: i18n._('Project'),
@@ -94,9 +95,10 @@ export default
                         'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
                     },
                     type: 'lookup',
+                    list: 'ProjectList',
+                    basePath: 'projects',
                     sourceModel: 'project',
                     sourceField: 'name',
-                    ngClick: 'lookUpProject()',
                     awRequiredWhen: {
                         reqExpression: "projectrequired",
                         init: "true"
@@ -106,7 +108,7 @@ export default
                     dataTitle: i18n._('Project'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 playbook: {
                     label: i18n._('Playbook'),
@@ -128,9 +130,13 @@ export default
                 credential: {
                     label: i18n._('Machine Credential'),
                     type: 'lookup',
+                    list: 'CredentialList',
+                    basePath: 'credentials',
+                    search: {
+                        kind: 'ssh'
+                    },
                     sourceModel: 'credential',
                     sourceField: 'name',
-                    ngClick: 'lookUpCredential()',
                     awRequiredWhen: {
                         reqExpression: '!ask_credential_on_launch',
                         alwaysShowAsterisk: true
@@ -146,38 +152,42 @@ export default
                         variable: 'ask_credential_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 cloud_credential: {
                     label: i18n._('Cloud Credential'),
                     type: 'lookup',
+                    list: 'CredentialList',
+                    basePath: 'credentials',
+                    search: {
+                        cloud: 'true'
+                    },
                     sourceModel: 'cloud_credential',
                     sourceField: 'name',
-                    ngClick: 'lookUpCloudcredential()',
-                    addRequired: false,
-                    editRequired: false,
                     column: 1,
                     awPopOver: i18n._("<p>Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
                         "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.</p>"),
                     dataTitle: i18n._('Cloud Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 network_credential: {
                     label: i18n._('Network Credential'),
                     type: 'lookup',
+                    list: 'CredentialList',
+                    basePath: 'credentials',
+                    search: {
+                        kind: 'net'
+                    },
                     sourceModel: 'network_credential',
                     sourceField: 'name',
-                    ngClick: 'lookUpNetworkcredential()',
-                    addRequired: false,
-                    editRequired: false,
                     column: 1,
                     awPopOver: i18n._("<p>Network credentials are used by Ansible networking modules to connect to and manage networking devices.</p>"),
                     dataTitle: i18n._('Network Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 forks: {
                     label: i18n._('Forks'),
@@ -187,8 +197,6 @@ export default
                     min: 0,
                     spinner: true,
                     "default": '0',
-                    addRequired: false,
-                    editRequired: false,
                     'class': "input-small",
                     column: 1,
                     awPopOver: i18n._('<p>The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
@@ -197,13 +205,11 @@ export default
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)' // TODO: get working
                 },
                 limit: {
                     label: i18n._('Limit'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
                     column: 1,
                     awPopOver: i18n._("<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                         "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
@@ -215,28 +221,25 @@ export default
                         variable: 'ask_limit_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 verbosity: {
                     label: i18n._('Verbosity'),
                     type: 'select',
                     ngOptions: 'v.label for v in verbosity_options track by v.value',
                     "default": 1,
-                    addRequired: true,
-                    editRequired: true,
+                    required: true,
                     column: 1,
                     awPopOver: i18n._("<p>Control the level of output ansible will produce as the playbook executes.</p>"),
                     dataTitle: i18n._('Verbosity'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 job_tags: {
                     label: i18n._('Job Tags'),
                     type: 'textarea',
                     rows: 5,
-                    addRequired: false,
-                    editRequired: false,
                     'elementClass': 'Form-textInput',
                     column: 2,
                     awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
@@ -249,14 +252,12 @@ export default
                         variable: 'ask_tags_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 skip_tags: {
                     label: i18n._('Skip Tags'),
                     type: 'textarea',
                     rows: 5,
-                    addRequired: false,
-                    editRequired: false,
                     'elementClass': 'Form-textInput',
                     column: 2,
                     awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
@@ -269,7 +270,7 @@ export default
                         variable: 'ask_skip_tags_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 checkbox_group: {
                     label: i18n._('Options'),
@@ -278,21 +279,17 @@ export default
                         name: 'become_enabled',
                         label: i18n._('Enable Privilege Escalation'),
                         type: 'checkbox',
-                        addRequired: false,
-                        editRequird: false,
                         column: 2,
                         awPopOver: i18n._("<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>"),
                         dataPlacement: 'right',
                         dataTitle: i18n._('Become Privilege Escalation'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
-                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                     }, {
                         name: 'allow_callbacks',
                         label: i18n._('Allow Provisioning Callbacks'),
                         type: 'checkbox',
-                        addRequired: false,
-                        editRequird: false,
                         ngChange: "toggleCallback('host_config_key')",
                         column: 2,
                         awPopOver: i18n._("<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
@@ -301,14 +298,12 @@ export default
                         dataTitle: i18n._('Allow Provisioning Callbacks'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
-                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                     }]
                 },
                 callback_url: {
                     label: i18n._('Provisioning Callback URL'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
                     readonly: true,
                     ngShow: "allow_callbacks && allow_callbacks !== 'false'",
                     column: 2,
@@ -317,7 +312,7 @@ export default
                     dataPlacement: 'top',
                     dataTitle: i18n._('Provisioning Callback URL'),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 host_config_key: {
                     label: i18n._('Host Config Key'),
@@ -331,7 +326,7 @@ export default
                     dataPlacement: 'right',
                     dataTitle: i18n._("Host Config Key"),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 labels: {
                     label: i18n._('Labels'),
@@ -339,21 +334,17 @@ export default
                     class: 'Form-formGroup--fullWidth',
                     ngOptions: 'label.label for label in labelOptions track by label.value',
                     multiSelect: true,
-                    addRequired: false,
-                    editRequired: false,
                     dataTitle: i18n._('Labels'),
                     dataPlacement: 'right',
                     awPopOver: i18n._("<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>"),
                     dataContainer: 'body',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 variables: {
                     label: i18n._('Extra Variables'),
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     rows: 6,
-                    addRequired: false,
-                    editRequired: false,
                     "default": "---",
                     column: 2,
                     awPopOver: i18n._("<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
@@ -369,14 +360,14 @@ export default
                         variable: 'ask_variables_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)' // TODO: get working
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || !canAdd)',
                     awFeature: 'surveys',
                     awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top'
@@ -384,25 +375,25 @@ export default
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 view_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
 
@@ -413,21 +404,23 @@ export default
                 permissions: {
                     awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
-                    basePath: 'job_templates/:id/access_list/',
+                    basePath: 'api/v1/job_templates/{{$stateParams.job_template_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
                     type: 'collection',
                     title: i18n._('Permissions'),
                     iterator: 'permission',
                     index: false,
                     open: false,
-                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addPermission",
+                            ngClick: "$state.go('.add')",
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
                         }
                     },
 
@@ -443,14 +436,12 @@ export default
                             type: 'role',
                             noSort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
                         }
                     }
                 },

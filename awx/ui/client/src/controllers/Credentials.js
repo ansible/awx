@@ -8,114 +8,63 @@
  * @ngdoc function
  * @name controllers.function:Credentials
  * @description This controller's for the credentials page
-*/
+ */
 
 
 export function CredentialsList($scope, $rootScope, $location, $log,
-    $stateParams, Rest, Alert, CredentialList, GenerateList, Prompt, SearchInit,
-    PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath,
-    SelectionInit, GetChoices, Wait, $state, $filter, rbacUiControlService) {
+    $stateParams, Rest, Alert, CredentialList, Prompt, ClearScope,
+    ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
+
     ClearScope();
 
-    rbacUiControlService.canAdd('credentials')
-        .then(function(canAdd) {
-            $scope.canAdd = canAdd;
-        });
-
-    Wait('start');
-
     var list = CredentialList,
-        defaultUrl = GetBasePath('credentials'),
-        view = GenerateList,
-        base = $location.path().replace(/^\//, '').split('/')[0],
-        mode = (base === 'credentials') ? 'edit' : 'select',
-        url;
+        defaultUrl = GetBasePath('credentials');
 
-    view.inject(list, { mode: mode, scope: $scope });
+    init();
 
-    $scope.selected = [];
-    $scope.credentialLoading = true;
+    function init() {
+        rbacUiControlService.canAdd('credentials')
+            .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
 
-    url = GetBasePath(base) + ( (base === 'users') ? $stateParams.user_id + '/credentials/' : $stateParams.team_id + '/credentials/' );
-    if (mode === 'select') {
-        SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
+        // search init
+        $scope.list = list;
+        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+        $scope.selected = [];
     }
 
-    if ($scope.removePostRefresh) {
-        $scope.removePostRefresh();
-    }
-    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        var i, j;
-
-        // Cleanup after a delete
-        Wait('stop');
-        $('#prompt-modal').modal('hide');
-
-        list.fields.kind.searchOptions = $scope.credential_kind_options_list;
-
-        // Translate the kind value
-        for (i = 0; i < $scope.credentials.length; i++) {
-            for (j = 0; j < $scope.credential_kind_options_list.length; j++) {
-                if ($scope.credential_kind_options_list[j].value === $scope.credentials[i].kind) {
-                    $scope.credentials[i].kind = $scope.credential_kind_options_list[j].label;
-                    break;
-                }
-            }
-        }
-    });
-
-    if ($scope.removeChoicesReady) {
-        $scope.removeChoicesReady();
-    }
-    $scope.removeChoicesReady = $scope.$on('choicesReadyCredential', function () {
-        SearchInit({
-            scope: $scope,
-            set: 'credentials',
-            list: list,
-            url: defaultUrl
-        });
-        PaginateInit({
-            scope: $scope,
-            list: list,
-            url: defaultUrl
-        });
-        $scope.search(list.iterator);
-    });
-
-    // Load the list of options for Kind
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'kind',
-        variable: 'credential_kind_options_list',
-        callback: 'choicesReadyCredential'
-    });
-
-    $scope.addCredential = function () {
-        $state.transitionTo('credentials.add');
+    $scope.addCredential = function() {
+        $state.go('credentials.add');
     };
 
-    $scope.editCredential = function (id) {
-        $state.transitionTo('credentials.edit', {credential_id: id});
+    $scope.editCredential = function(id) {
+        $state.go('credentials.edit', { credential_id: id });
     };
 
-    $scope.deleteCredential = function (id, name) {
-        var action = function () {
+    $scope.deleteCredential = function(id, name) {
+        var action = function() {
             $('#prompt-modal').modal('hide');
             Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
-                .success(function () {
+                .success(function() {
+
                     if (parseInt($state.params.credential_id) === id) {
-                        $state.go("^", null, {reload: true});
+                        $state.go("^", null, { reload: true });
                     } else {
-                        $scope.search(list.iterator);
+                        // @issue: OLD SEARCH
+                        // $scope.search(list.iterator);
                     }
                 })
-                .error(function (data, status) {
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
+                    });
                 });
         };
 
@@ -126,97 +75,74 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             actionText: 'DELETE'
         });
     };
-
-    $scope.$emit('choicesReadyCredential');
 }
 
 CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'CredentialList', 'generateList', 'Prompt',
-    'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait',
-    '$state', '$filter', 'rbacUiControlService'
+    '$stateParams', 'Rest', 'Alert', 'CredentialList', 'Prompt', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset'
 ];
 
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ReturnToCaller, ClearScope, GenerateList, SearchInit, PaginateInit,
-    LookUpInit, OrganizationList, GetBasePath, GetChoices, Empty, KindChange,
+    ClearScope, GetBasePath, GetChoices, Empty, KindChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
     ClearScope();
 
     // Inject dynamic view
     var form = CredentialForm,
-        generator = GenerateForm,
         defaultUrl = GetBasePath('credentials'),
         url;
 
-    $scope.keyEntered = false;
-    $scope.permissionsTooltip = 'Please save before assigning permissions';
-    generator.inject(form, { mode: 'add', related: false, scope: $scope });
-    generator.reset();
+    init();
 
-    // Load the list of options for Kind
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'kind',
-        variable: 'credential_kind_options'
-    });
+    function init() {
+        // Load the list of options for Kind
+        GetChoices({
+            scope: $scope,
+            url: defaultUrl,
+            field: 'kind',
+            variable: 'credential_kind_options'
+        });
 
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'become_method',
-        variable: 'become_options'
-    });
+        GetChoices({
+            scope: $scope,
+            url: defaultUrl,
+            field: 'become_method',
+            variable: 'become_options'
+        });
 
-    CreateSelect2({
-        element: '#credential_become_method',
-        multiple: false
-    });
+        CreateSelect2({
+            element: '#credential_become_method',
+            multiple: false
+        });
 
-    CreateSelect2({
-        element: '#credential_kind',
-        multiple: false
-    });
+        CreateSelect2({
+            element: '#credential_kind',
+            multiple: false
+        });
 
-    $scope.canShareCredential = false;
+        // apply form definition's default field values
+        GenerateForm.applyDefaults(form, $scope);
 
-    $rootScope.$watch('current_user', function(){
-        try {
-            if ($rootScope.current_user.is_superuser) {
-                $scope.canShareCredential = true;
-            } else {
-                Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
-                Rest.get()
-                    .success(function(data) {
-                        $scope.canShareCredential = (data.count) ? true : false;
-                    }).error(function (data, status) {
-                        ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
-                    });
-            }
+        $scope.keyEntered = false;
+        $scope.permissionsTooltip = 'Please save before assigning permissions';
 
-
-            var orgUrl = ($rootScope.current_user.is_superuser) ?
-                GetBasePath("organizations") :
-                $rootScope.current_user.url + "admin_of_organizations?";
-
-            // Create LookUpInit for organizations
-            LookUpInit({
-                scope: $scope,
-                url: orgUrl,
-                form: form,
-                list: OrganizationList,
-                field: 'organization',
-                input_type: 'radio',
-                autopopulateLookup: false
-            });
+        // determine if the currently logged-in user may share this credential
+        // previous commentary said: "$rootScope.current_user isn't available because a call to the config endpoint hasn't finished resolving yet"
+        // I'm 99% sure this state's will never resolve block will be rejected if setup surrounding config endpoint hasn't completed
+        if ($rootScope.current_user && $rootScope.current_user.is_superuser) {
+            $scope.canShareCredential = true;
+        } else {
+            Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+            Rest.get()
+                .success(function(data) {
+                    $scope.canShareCredential = (data.count) ? true : false;
+                }).error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+                });
         }
-        catch(err){
-            // $rootScope.current_user isn't available because a call to the config endpoint hasn't finished resolving yet
-        }
-    });
+    }
 
     if (!Empty($stateParams.user_id)) {
         // Get the username based on incoming route
@@ -226,10 +152,10 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         url = GetBasePath('users') + $stateParams.user_id + '/';
         Rest.setUrl(url);
         Rest.get()
-            .success(function (data) {
+            .success(function(data) {
                 $scope.user_username = data.username;
             })
-            .error(function (data, status) {
+            .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user. GET status: ' + status });
             });
     } else if (!Empty($stateParams.team_id)) {
@@ -240,10 +166,10 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         url = GetBasePath('teams') + $stateParams.team_id + '/';
         Rest.setUrl(url);
         Rest.get()
-            .success(function (data) {
+            .success(function(data) {
                 $scope.team_name = data.name;
             })
-            .error(function (data, status) {
+            .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status });
             });
     } else {
@@ -263,32 +189,30 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     });
 
     // Handle Kind change
-    $scope.kindChange = function () {
+    $scope.kindChange = function() {
         KindChange({ scope: $scope, form: form, reset: true });
     };
 
     // Save
-    $scope.formSave = function () {
-        generator.clearApiErrors();
-        generator.checkAutoFill();
+    $scope.formSave = function() {
         if ($scope[form.name + '_form'].$valid) {
             FormSave({ scope: $scope, mode: 'add' });
         }
     };
 
-    $scope.formCancel = function () {
-        $state.transitionTo('credentials');
+    $scope.formCancel = function() {
+        $state.go('credentials');
     };
 
     // Password change
-    $scope.clearPWConfirm = function (fld) {
+    $scope.clearPWConfirm = function(fld) {
         // If password value changes, make sure password_confirm must be re-entered
         $scope[fld] = '';
         $scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
     };
 
     // Respond to 'Ask at runtime?' checkbox
-    $scope.ask = function (fld, associated) {
+    $scope.ask = function(fld, associated) {
         if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
             $("#" + form.name + "_" + fld + "_input").attr("type", "text");
@@ -313,7 +237,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     };
 
     // Click clear button
-    $scope.clear = function (fld, associated) {
+    $scope.clear = function(fld, associated) {
         $scope[fld] = '';
         $scope[associated] = '';
         $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
@@ -324,54 +248,88 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'generateList',
-    'SearchInit', 'PaginateInit', 'LookUpInit', 'OrganizationList',
-    'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'OwnerChange',
-    'FormSave', '$state', 'CreateSelect2'
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange',
+    'OwnerChange', 'FormSave', '$state', 'CreateSelect2'
 ];
 
-
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
-    $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
-    RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt,
-    GetBasePath, GetChoices, KindChange, OrganizationList, LookUpInit, Empty,
-    OwnerChange, FormSave, Wait, $state, CreateSelect2, Authorization) {
-    if (!$rootScope.current_user) {
-        Authorization.restoreUserInfo();
-    }
+    $stateParams, CredentialForm, Rest, Alert, ProcessErrors, ClearScope, Prompt,
+    GetBasePath, GetChoices, KindChange, Empty, OwnerChange, FormSave, Wait,
+    $state, CreateSelect2, Authorization) {
 
     ClearScope();
 
     var defaultUrl = GetBasePath('credentials'),
-        generator = GenerateForm,
         form = CredentialForm,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
-        id = $stateParams.credential_id,
-        relatedSets = {};
+        id = $stateParams.credential_id;
 
-    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
-    generator.reset();
-    $scope.id = id;
+    init();
 
-    $scope.$watch('credential_obj.summary_fields.user_capabilities.edit', function(val) {
-        if (val === false) {
-            $scope.canAdd = false;
+    function init() {
+        $scope.id = id;
+        $scope.$watch('credential_obj.summary_fields.user_capabilities.edit', function(val) {
+            if (val === false) {
+                $scope.canAdd = false;
+            }
+        });
+
+        $scope.canShareCredential = false;
+        Wait('start');
+        if (!$rootScope.current_user) {
+            Authorization.restoreUserInfo();
         }
-    });
+        GetChoices({
+            scope: $scope,
+            url: defaultUrl,
+            field: 'kind',
+            variable: 'credential_kind_options',
+            callback: 'choicesReadyCredential'
+        });
 
-    $scope.canShareCredential = false;
+        GetChoices({
+            scope: $scope,
+            url: defaultUrl,
+            field: 'become_method',
+            variable: 'become_options'
+        });
 
-    if ($rootScope.current_user.is_superuser) {
-        $scope.canShareCredential = true;
-    } else {
-        Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
-        Rest.get()
-            .success(function(data) {
-                $scope.canShareCredential = (data.count) ? true : false;
-            }).error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
-            });
+        if ($rootScope.current_user && $rootScope.current_user.is_superuser) {
+            $scope.canShareCredential = true;
+        } else {
+            Rest.setUrl(`/api/v1/users/${$rootScope.current_user.id}/admin_of_organizations`);
+            Rest.get()
+                .success(function(data) {
+                    $scope.canShareCredential = (data.count) ? true : false;
+                }).error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
+                });
+        }
+
+        // if the credential is assigned to an organization, allow permission delegation
+        // do NOT use $scope.organization in a view directive to determine if a credential is associated with an org
+        // @todo why not? ^ and what is this type check for a number doing - should this be a type check for undefined?
+        $scope.disablePermissionAssignment = typeof($scope.organization) === 'number' ? false : true;
+        if ($scope.disablePermissionAssignment) {
+            $scope.permissionsTooltip = 'Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.';
+        }
+        setAskCheckboxes();
+        KindChange({
+            scope: $scope,
+            form: form,
+            reset: false
+        });
+        OwnerChange({ scope: $scope });
+        $scope.$watch("ssh_key_data", function(val) {
+            if (val === "" || val === null || val === undefined) {
+                $scope.keyEntered = false;
+                $scope.ssh_key_unlock_ask = false;
+                $scope.ssh_key_unlock = "";
+            } else {
+                $scope.keyEntered = true;
+            }
+        });
     }
 
     function setAskCheckboxes() {
@@ -398,64 +356,14 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
             }
         }
     }
-
-    if ($scope.removeCredentialLoaded) {
-        $scope.removeCredentialLoaded();
-    }
-    $scope.removeCredentialLoaded = $scope.$on('credentialLoaded', function () {
-        // if the credential is assigned to an organization, allow permission delegation
-        // do NOT use $scope.organization in a view directive to determine if a credential is associated with an org
-        $scope.disablePermissionAssignment = typeof($scope.organization) === 'number' ? false : true;
-        if ($scope.disablePermissionAssignment){
-            $scope.permissionsTooltip = 'Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.';
-        }
-        var set;
-        for (set in relatedSets) {
-            $scope.search(relatedSets[set].iterator);
-        }
-        var orgUrl = ($rootScope.current_user.is_superuser) ?
-            GetBasePath("organizations") :
-            $rootScope.current_user.url + "admin_of_organizations?";
-
-        // create LookUpInit for organizations
-        LookUpInit({
-            scope: $scope,
-            url: orgUrl,
-            form: form,
-            current_item: $scope.organization,
-            list: OrganizationList,
-            field: 'organization',
-            input_type: 'radio',
-            autopopulateLookup: false
-        });
-
-        setAskCheckboxes();
-        KindChange({
-            scope: $scope,
-            form: form,
-            reset: false
-        });
-        OwnerChange({ scope: $scope });
-        $scope.$watch("ssh_key_data", function(val) {
-            if (val === "" || val === null || val === undefined) {
-                $scope.keyEntered = false;
-                $scope.ssh_key_unlock_ask = false;
-                $scope.ssh_key_unlock = "";
-            } else {
-                $scope.keyEntered = true;
-            }
-        });
-        Wait('stop');
-    });
-
     if ($scope.removeChoicesReady) {
         $scope.removeChoicesReady();
     }
-    $scope.removeChoicesReady = $scope.$on('choicesReadyCredential', function () {
+    $scope.removeChoicesReady = $scope.$on('choicesReadyCredential', function() {
         // Retrieve detail record and prepopulate the form
         Rest.setUrl(defaultUrl + ':id/');
         Rest.get({ params: { id: id } })
-            .success(function (data) {
+            .success(function(data) {
                 if (data && data.summary_fields &&
                     data.summary_fields.organization &&
                     data.summary_fields.organization.id) {
@@ -481,7 +389,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                             $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                     }
                 }
-                relatedSets = form.relatedSets(data.related);
 
                 if (!Empty($scope.user)) {
                     $scope.owner = 'user';
@@ -530,118 +437,93 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                 });
 
                 switch (data.kind) {
-                case 'aws':
-                    $scope.access_key = data.username;
-                    $scope.secret_key  = data.password;
-                    master.access_key = $scope.access_key;
-                    master.secret_key = $scope.secret_key;
-                    break;
-                case 'ssh':
-                    $scope.ssh_password = data.password;
-                    master.ssh_password = $scope.ssh_password;
-                    break;
-                case 'rax':
-                    $scope.api_key = data.password;
-                    master.api_key = $scope.api_key;
-                    break;
-                case 'gce':
-                    $scope.email_address = data.username;
-                    $scope.project = data.project;
-                    break;
-                case 'azure':
-                    $scope.subscription = data.username;
-                    break;
+                    case 'aws':
+                        $scope.access_key = data.username;
+                        $scope.secret_key = data.password;
+                        master.access_key = $scope.access_key;
+                        master.secret_key = $scope.secret_key;
+                        break;
+                    case 'ssh':
+                        $scope.ssh_password = data.password;
+                        master.ssh_password = $scope.ssh_password;
+                        break;
+                    case 'rax':
+                        $scope.api_key = data.password;
+                        master.api_key = $scope.api_key;
+                        break;
+                    case 'gce':
+                        $scope.email_address = data.username;
+                        $scope.project = data.project;
+                        break;
+                    case 'azure':
+                        $scope.subscription = data.username;
+                        break;
                 }
                 $scope.credential_obj = data;
 
-                RelatedSearchInit({
-                    scope: $scope,
-                    form: form,
-                    relatedSets: relatedSets
-                });
-                RelatedPaginateInit({
-                    scope: $scope,
-                    relatedSets: relatedSets
-                });
-
                 $scope.$emit('credentialLoaded');
             })
-            .error(function (data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
-                    msg: 'Failed to retrieve Credential: ' + $stateParams.id + '. GET status: ' + status });
+            .error(function(data, status) {
+                ProcessErrors($scope, data, status, form, {
+                    hdr: 'Error!',
+                    msg: 'Failed to retrieve Credential: ' + $stateParams.id + '. GET status: ' + status
+                });
             });
     });
 
-    Wait('start');
-
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'kind',
-        variable: 'credential_kind_options',
-        callback: 'choicesReadyCredential'
-    });
-
-    GetChoices({
-        scope: $scope,
-        url: defaultUrl,
-        field: 'become_method',
-        variable: 'become_options'
-    });
-
     // Save changes to the parent
-    $scope.formSave = function () {
-        generator.clearApiErrors();
-        generator.checkAutoFill({ scope: $scope });
+    $scope.formSave = function() {
         if ($scope[form.name + '_form'].$valid) {
             FormSave({ scope: $scope, mode: 'edit' });
         }
     };
 
     // Handle Owner change
-    $scope.ownerChange = function () {
+    $scope.ownerChange = function() {
         OwnerChange({ scope: $scope });
     };
 
     // Handle Kind change
-    $scope.kindChange = function () {
+    $scope.kindChange = function() {
         KindChange({ scope: $scope, form: form, reset: true });
     };
 
-    $scope.formCancel = function () {
+    $scope.formCancel = function() {
         $state.transitionTo('credentials');
     };
 
     // Related set: Add button
-    $scope.add = function (set) {
+    $scope.add = function(set) {
         $rootScope.flashMessage = null;
         $location.path('/' + base + '/' + $stateParams.id + '/' + set + '/add');
     };
 
     // Related set: Edit button
-    $scope.edit = function (set, id) {
+    $scope.edit = function(set, id) {
         $rootScope.flashMessage = null;
         $location.path('/' + base + '/' + $stateParams.id + '/' + set + '/' + id);
     };
 
     // Related set: Delete button
-    $scope['delete'] = function (set, itm_id, name, title) {
+    $scope['delete'] = function(set, itm_id, name, title) {
         $rootScope.flashMessage = null;
 
-        var action = function () {
+        var action = function() {
             var url = defaultUrl + id + '/' + set + '/';
             Rest.setUrl(url);
             Rest.post({
-                id: itm_id,
-                disassociate: 1
-            })
-                .success(function () {
-                    $('#prompt-modal').modal('hide');
-                    $scope.search(form.related[set].iterator);
+                    id: itm_id,
+                    disassociate: 1
                 })
-                .error(function (data, status) {
+                .success(function() {
                     $('#prompt-modal').modal('hide');
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    // @issue: OLD SEARCH
+                    // $scope.search(form.related[set].iterator);
+                })
+                .error(function(data, status) {
+                    $('#prompt-modal').modal('hide');
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. POST returned status: ' + status
                     });
                 });
@@ -657,14 +539,14 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     };
 
     // Password change
-    $scope.clearPWConfirm = function (fld) {
+    $scope.clearPWConfirm = function(fld) {
         // If password value changes, make sure password_confirm must be re-entered
         $scope[fld] = '';
         $scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
     };
 
     // Respond to 'Ask at runtime?' checkbox
-    $scope.ask = function (fld, associated) {
+    $scope.ask = function(fld, associated) {
         if ($scope[fld + '_ask']) {
             $scope[fld] = 'ASK';
             $("#" + form.name + "_" + fld + "_input").attr("type", "text");
@@ -688,7 +570,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         }
     };
 
-    $scope.clear = function (fld, associated) {
+    $scope.clear = function(fld, associated) {
         $scope[fld] = '';
         $scope[associated] = '';
         $scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
@@ -698,9 +580,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 }
 
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'RelatedSearchInit', 'RelatedPaginateInit',
-    'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-    'KindChange', 'OrganizationList', 'LookUpInit', 'Empty', 'OwnerChange',
+    '$log', '$stateParams', 'CredentialForm', 'Rest', 'Alert',
+    'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
+    'KindChange', 'Empty', 'OwnerChange',
     'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization'
 ];

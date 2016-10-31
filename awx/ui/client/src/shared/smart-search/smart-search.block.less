@@ -1,0 +1,234 @@
+@import "../branding/colors.default.less";
+.SmartSearch {
+    margin-bottom: 10px;
+    min-height: 45px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.SmartSearch-form {
+    width: 100%;
+}
+
+.SmartSearch-bar {
+    display: flex;
+    padding: 0;
+    font-size: 12px;
+    height: 35px;
+    align-items: stretch;
+    margin-bottom: 10px;
+    line-height: 20px;
+}
+// `.${list.name}List` class can be used to set add custom class overrides
+.groupsList .SmartSearch-bar, .hostsList .SmartSearch-bar, .PortalMode .SmartSearch-bar{
+    width: 100%;
+}
+
+.SmartSearch-tags{
+    padding-left: 0px;
+}
+
+.SmartSearch-bar i {
+    font-size: 16px;
+    color: @default-icon;
+}
+
+.SmartSearch-searchTermContainer {
+    flex: initial;
+    width: ~"calc(100% - 100px)";
+    border: 1px solid @d7grey;
+    border-radius: 4px;
+    display: flex;
+    background-color: @default-bg;
+    position: relative;
+}
+
+.SmartSearch-searchTermContainer.is-open {
+    border-bottom-right-radius: 0;
+}
+
+.SmartSearch-input {
+    flex: 1 0 auto;
+    margin: 0 10px;
+    border: none;
+    font-size: 14px;
+    height: 100%;
+    width: 100%;
+}
+
+.SmartSearch-input:focus,
+.SmartSearch-input:active {
+    outline: 0;
+}
+
+.SmartSearch-searchTermContainer input:placeholder-shown {
+    color: @default-icon !important;
+    text-transform: uppercase;
+}
+
+.SmartSearch-searchButton {
+    flex: initial;
+    margin-left: auto;
+    padding: 8px 10px;
+    border-left: 1px solid @d7grey;
+    background-color: @default-bg;
+    cursor: pointer;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.SmartSearch-searchButton:hover {
+    background-color: @default-tertiary-bg;
+}
+
+.SmartSearch-flexContainer {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.SmartSearch-tagContainer {
+    display: flex;
+    max-width: 100%;
+    margin-bottom: 10px;
+}
+
+.SmartSearch-tag {
+    border-radius: 5px;
+    padding: 2px 10px;
+    margin: 4px 0px;
+    font-size: 12px;
+    color: @default-interface-txt;
+    background-color: @default-bg;
+    margin-right: 5px;
+    max-width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.SmartSearch-tag--deletable {
+    margin-right: 0px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-right: 0;
+    max-width: ~"calc(100% - 23px)";
+    background-color: @default-link;
+    color: @default-bg;
+    margin-right: 5px;
+}
+
+.SmartSearch-deleteContainer {
+    background-color: @default-link!important;
+    color: white;
+    background-color: @default-bg;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    padding: 0 5px;
+    margin: 4px 0px;
+    align-items: center;
+    display: flex;
+    cursor: pointer;
+}
+
+.SmartSearch-tagDelete {
+    font-size: 13px;
+}
+
+.SmartSearch-name {
+    flex: initial;
+    max-width: 100%;
+}
+
+.SmartSearch-tag--deletable > .SmartSearch-name {
+    max-width: ~"calc(100% - 23px)";
+}
+
+.SmartSearch-deleteContainer:hover,
+{
+    border-color: @default-err;
+    background-color: @default-err!important;
+}
+
+.SmartSearch-deleteContainer:hover > .SmartSearch-tagDelete {
+    color: @default-bg;
+}
+.SmartSearch-clearAll{
+    font-size: 12px;
+    padding-top: 5px;
+}
+.SmartSearch-keyToggle {
+    margin-left: auto;
+    text-transform: uppercase;
+    background-color: @default-bg;
+    border-radius: 5px;
+    color: @default-interface-txt;
+    border: 1px solid @d7grey;
+    cursor: pointer;
+    width: 70px;
+    height: 34px;
+    line-height: 20px;
+}
+
+.SmartSearch-keyToggle:hover {
+    background-color: @default-tertiary-bg;
+}
+
+.SmartSearch-keyToggle.is-active {
+    background-color: @default-link;
+    border-color: @default-link;
+    color: @default-bg;
+    &:hover{
+     background-color: @default-link-hov;
+    }
+}
+
+.SmartSearch-keyPane {
+    max-height: 200px;
+    overflow: auto;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0px 0px 20px 0px;
+    font-size: 12px;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid @login-notice-border;
+    background-color: @login-notice-bg;
+    color: @login-notice-text;
+}
+
+.SmartSearch-relations{
+    margin-top: 15px;
+}
+
+.SmartSearch-keyRow {
+    width: 33%;
+    flex: 1 1 auto;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding-right: 50px;
+}
+// 100% rows in a modal
+.modal-body .SmartSearch-keyRow{
+    width: 100%;
+}
+// `.${list.name}List` class can be used to set add custom class overrides
+.groupsList .SmartSearch-keyRow, .hostsList .SmartSearch-keyRow, .PortalMode .SmartSearch-keyRow{
+    width: 100%;
+}
+.SmartSearch-keyRow:nth-child(3){
+    padding-right: 0px;
+}
+
+.SmartSearch-keyName {
+    flex: 1 0 auto;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding-bottom: 3px;
+}
+
+.SmartSearch-keyComparators {
+    flex: 1 0 auto;
+}

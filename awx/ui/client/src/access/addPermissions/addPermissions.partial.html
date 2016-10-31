@@ -45,13 +45,11 @@
                     </div>
                 </div>
 
-                <div class="AddPermissions-list" ng-show="usersSelected">
-                    <add-permissions-list all-selected="allSelected" type="users">
-                    </add-permissions-list>
+                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="usersSelected">
+                    <add-permissions-list view="Users" all-selected="allSelected" dataset="usersDataset"></add-permissions-list>
                 </div>
-                <div class="AddPermissions-list" ng-show="teamsSelected">
-                    <add-permissions-list all-selected="allSelected" type="teams">
-                    </add-permissions-list>
+                <div id="AddPermissions-teams" class="AddPermissions-list" ng-show="teamsSelected">
+                    <add-permissions-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></add-permissions-list>
                 </div>
 
                 <div class="AddPermissions-separator"

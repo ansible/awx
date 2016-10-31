@@ -40,5 +40,7 @@ make version_file
 make migrate
 make init
 
+mkdir -p /tower_devel/awx/public/static
+
 # Start the service
 make honcho

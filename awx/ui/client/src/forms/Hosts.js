@@ -17,6 +17,7 @@ export default
             addTitle: 'Create Host',
             editTitle: '{{ host.name }}',
             name: 'host',
+            basePath: 'hosts',
             well: false,
             formLabelSize: 'col-lg-3',
             formFieldSize: 'col-lg-9',
@@ -26,7 +27,6 @@ export default
                     class: 'Form-header-field',
                     ngClick: 'toggleHostEnabled(host)',
                     type: 'toggle',
-                    editRequired: false,
                     awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
                     "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
                     dataTitle: 'Host Enabled',
@@ -36,8 +36,7 @@ export default
                 name: {
                     label: 'Host Name',
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    required: true,
                     awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
                         "<blockquote>myserver.domain.com<br/>" +
                         "127.0.0.1<br />" +
@@ -47,22 +46,18 @@ export default
                     dataTitle: 'Host Name',
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 description: {
                     label: 'Description',
-                    type: 'text',
-                    addRequired: false,
-                    editRequired: false,
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || !canAdd)',
+                    type: 'text'
                 },
                 variables: {
                     label: 'Variables',
                     type: 'textarea',
-                    addRequired: false,
-                    editRequird: false,
                     rows: 6,
-                    "class": "modal-input-xlarge Form-textArea Form-formGroup--fullWidth",
+                    class: 'Form-formGroup--fullWidth',
                     "default": "---",
                     awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
@@ -85,19 +80,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(host.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
-
-            related: {}
-
         });

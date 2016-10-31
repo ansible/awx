@@ -1,10 +1,7 @@
 <div class="tab-pane InventoryManage-container" id="inventory_edit">
-    <div ui-view="form"></div>
-    <div ng-cloak id="htmlTemplate">
-        <div class="row">
-            <div ui-view="groupsList" class="col-lg-6"></div>
-            <div ui-view="hostsList" class="col-lg-6"></div>
-        </div>
-        <div ng-include="'/static/partials/logviewer.html'"></div>
+    <div class="row">
+        <div ui-view="groupsList" class="col-lg-6"></div>
+        <div ui-view="hostsList" class="col-lg-6"></div>
     </div>
+    <div ng-include="'/static/partials/logviewer.html'"></div>
 </div>

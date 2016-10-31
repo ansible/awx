@@ -150,7 +150,7 @@ TEST_ASYNC_NOWAIT_PLAYBOOK = '''
 '''
 
 TEST_PROOT_PLAYBOOK = '''
-- name: test proot environment
+- name: test bubblewrap environment
   hosts: test-group
   gather_facts: false
   connection: local
@@ -1177,19 +1177,19 @@ class RunJobTest(BaseJobExecutionTest):
 
     @unittest.skipUnless(settings.BROKER_URL == 'redis://localhost/',
                          'Non-default Redis setup.')
-    def test_run_job_with_proot(self):
-        # Only run test if proot is installed
-        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'proot'), '--version']
+    def test_run_job_with_bubblewrap(self):
+        # Only run test if bubblewrap is installed
+        cmd = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--version']
         try:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             proc.communicate()
-            has_proot = bool(proc.returncode == 0)
+            has_bubblewrap = bool(proc.returncode == 0)
         except (OSError, ValueError):
-            has_proot = False
-        if not has_proot:
-            self.skipTest('proot is not installed')
-        # Enable proot for this test.
+            has_bubblewrap = False
+        if not has_bubblewrap:
+            self.skipTest('bubblewrap is not installed')
+        # Enable bubblewrap for this test.
         settings.AWX_PROOT_ENABLED = True
         # Hide local settings path.
         settings.AWX_PROOT_HIDE_PATHS = [os.path.join(settings.BASE_DIR, 'settings')]
@@ -1227,8 +1227,8 @@ class RunJobTest(BaseJobExecutionTest):
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
 
-    def test_run_job_with_proot_not_installed(self):
-        # Enable proot for this test, specify invalid proot cmd.
+    def test_run_job_with_bubblewrap_not_installed(self):
+        # Enable bubblewrap for this test, specify invalid bubblewrap cmd.
         settings.AWX_PROOT_ENABLED = True
         settings.AWX_PROOT_CMD = 'PR00T'
         self.create_test_credential()

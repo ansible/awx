@@ -25,18 +25,29 @@ export default
                             if(streamConfig && streamConfig.activityStream) {
                                 if(streamConfig.activityStreamTarget) {
                                     stateGoParams.target = streamConfig.activityStreamTarget;
+                                    stateGoParams.activity_search = {
+                                        or__object1: streamConfig.activityStreamTarget,
+                                        or__object2: streamConfig.activityStreamTarget,
+                                        order_by: '-timestamp',
+                                        page_size: '20',
+                                    };
+                                }
+                                else {
+                                    stateGoParams.activity_search = {
+                                        order_by: '-timestamp',
+                                        page_size: '20',
+                                    };
                                 }
                                 if(streamConfig.activityStreamId) {
                                     stateGoParams.id = $state.params[streamConfig.activityStreamId];
                                 }
+
                             }
                             originalRoute = $state.current;
                             $state.go('activityStream', stateGoParams);
                         }
                         // The user is navigating away from the activity stream - take them back from whence they came
                         else {
-                            // Pull the previous state out of local storage
-
                             if(originalRoute) {
                                 $state.go(originalRoute.name, originalRoute.fromParams);
                             }
@@ -51,14 +62,13 @@ export default
                     };
 
                 scope.$on("$stateChangeStart", function updateActivityStreamButton(event, toState, toParams, fromState, fromParams) {
-
                     if(fromState && !Empty(fromState.name)) {
                         // Go ahead and attach the from params to the state object so that it can all be stored together
                         fromState.fromParams = fromParams ? fromParams : {};
 
                         // Store the state that we're coming from in local storage to be accessed when navigating away from the
                         // activity stream
-                        Store('previous_state', fromState);
+                        //Store('previous_state', fromState);
                     }
 
                     streamConfig = (toState && toState.data) ? toState.data : {};

@@ -21,11 +21,7 @@ export default [ 'i18n', function(i18n){
                 basePath: 'unified_jobs',
                 label: '',
                 iconOnly: true,
-                searchable: false,
-                searchType: 'select',
                 nosort: true,
-                searchOptions: [],
-                searchLabel: 'Job Status',
                 icon: 'icon-job-{{ host.active_failures }}',
                 awToolTip: '{{ host.badgeToolTip }}',
                 awTipPlacement: 'right',
@@ -54,24 +50,9 @@ export default [ 'i18n', function(i18n){
                 columnClass: 'List-staticColumn--toggle',
                 type: 'toggle',
                 ngClick: 'toggleHostEnabled(host)',
-                searchable: false,
                 nosort: true,
                 awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
                 dataTitle: 'Host Enabled',
-            },
-            has_active_failures: {
-                label: 'Has failed jobs?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-            },
-            has_inventory_sources: {
-                label: 'Has external source?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
             }
         },
 

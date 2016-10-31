@@ -10,7 +10,7 @@ export default ['templateUrl', function(templateUrl) {
         scope: true,
         replace: true,
         templateUrl: templateUrl('activity-stream/streamDropdownNav/stream-dropdown-nav'),
-        controller: ['$scope', '$state', 'CreateSelect2', function($scope, $state, CreateSelect2) {
+        controller: ['$scope', '$state', '$stateParams','CreateSelect2', function($scope, $state, $stateParams, CreateSelect2) {
 
             $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
 
@@ -35,14 +35,17 @@ export default ['templateUrl', function(templateUrl) {
             });
 
             $scope.changeStreamTarget = function(){
-
                 if($scope.streamTarget && $scope.streamTarget === 'dashboard') {
                     // Just navigate to the base activity stream
-                    $state.go('activityStream', {}, {inherit: false});
+                    $state.go('activityStream');
                 }
                 else {
+                    let search =  _.merge($stateParams.activity_search, {
+                        or__object1: $scope.streamTarget,
+                        or__object2: $scope.streamTarget
+                    });
                     // Attach the taget to the query parameters
-                    $state.go('activityStream', {target: $scope.streamTarget}, {inherit: false});
+                    $state.go('activityStream', {target: $scope.streamTarget, activity_search: search});
                 }
 
             };

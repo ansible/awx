@@ -18,46 +18,47 @@ export default
             addTitle: i18n._('New Organization'), //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
+            stateTree: 'organizations',
             tabs: true,
 
             fields: {
                 name: {
                     label: i18n._('Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
-                    capitalize: false,
-                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    required: true,
+                    capitalize: false
                 },
                 description: {
                     label: i18n._('Description'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
-                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
-                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
                 }
             },
 
             related: {
                 permissions: {
-                    basePath: 'organizations/:id/access_list/',
                     awToolTip: i18n._('Please save before assigning permissions'),
+                    basePath: 'api/v1/organizations/{{$stateParams.organization_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
                     dataPlacement: 'top',
                     type: 'collection',
                     title: i18n._('Permissions'),
@@ -68,11 +69,11 @@ export default
                     actions: {
                         add: {
                             ngClick: "addPermission",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: i18n._('&#43; ADD'),
-                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
                         }
                     },
 

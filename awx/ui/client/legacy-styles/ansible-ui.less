@@ -729,64 +729,7 @@ legend {
 .navigation {
   margin: 15px 0 15px 0;
 }
-
-.page-number {
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-}
-
-.page-number-small {
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 11px;
-}
-
-/* Pagination */
-  .page-label {
-    font-size: 12px;
-    margin-top: 0;
-    text-align: right;
-  }
-
-  .pagination {
-    margin-top: 0;
-    margin-bottom: 7px;
-  }
-
-  .pagination>li>a,
-  .pagination>li>span {
-    border: 1px solid @grey-border;
-    padding: 3px 6px;
-    font-size: 10px;
-  }
-
-  .pagination li {
-    a#next-page {
-      border-radius: 0 4px 4px 0;
-    }
-
-    a#previous-page {
-      border-radius: 4px 0 0 4px;
-    }
-  }
-
   .modal-body {
-      .pagination {
-          margin-top: 15px;
-          margin-bottom: 0;
-      }
-      .pagination > li > a {
-          border: none;
-          padding-top: 0;
-          padding-bottom: 0;
-      }
-      .pagination > .active > a {
-          background-color: @default-bg;
-          color: #428bca;
-          border-color: none;
-          border: 1px solid @default-link;
-      }
       .alert {
           padding: 0;
           border: none;
@@ -1622,6 +1565,10 @@ a.btn-disabled:hover {
 }
 
 /* Sort link styles */
+
+.list-header-noSort:hover.list-header:hover{
+  cursor: default;
+}
 
 .list-header:hover {
   cursor: pointer;

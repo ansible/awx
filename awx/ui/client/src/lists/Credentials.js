@@ -37,8 +37,6 @@ export default
             },
             kind: {
                 label: i18n._('Type'),
-                searchType: 'select',
-                searchOptions: [], // will be set by Options call to credentials resource
                 excludeModal: true,
                 nosort: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'
@@ -46,7 +44,6 @@ export default
             owners: {
                 label: i18n._('Owners'),
                 type: 'owners',
-                searchable: false,
                 nosort: true,
                 excludeModal: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'

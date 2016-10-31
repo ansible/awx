@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name helpers.function:teams
@@ -15,8 +15,7 @@
 import listGenerator from '../shared/list-generator/main';
 
 export default
-    angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'SearchHelper',
-        'PaginationHelpers', listGenerator.name
+    angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name
     ])
         .factory('SetTeamListeners', ['Alert', 'Rest',
             function (Alert, Rest) {
@@ -40,7 +39,10 @@ export default
                                     }
                                 }
                             }
-                            scope[iterator + 'SearchSpin'] = false;
+
+                            // @issue: OLD SEARCH
+                            // scope[iterator + 'SearchSpin'] = false;
+
                             scope[set] = results;
                         }
                     });
@@ -74,8 +76,8 @@ export default
             }
         ])
 
-    .factory('TeamLookUpOrganizationInit', ['Alert', 'Rest', 'OrganizationList', 'generateList', 'SearchInit', 'PaginateInit',
-        function (Alert, Rest, OrganizationList, GenerateList, SearchInit, PaginateInit) {
+    .factory('TeamLookUpOrganizationInit', ['Alert', 'Rest', 'OrganizationList', 'generateList',
+        function (Alert, Rest, OrganizationList, GenerateList) {
             return function (params) {
 
                 var scope = params.scope;
@@ -115,19 +117,21 @@ export default
                         }
                     };
 
-                    SearchInit({
-                        scope: listScope,
-                        set: list.name,
-                        list: list,
-                        url: defaultUrl
-                    });
-                    PaginateInit({
-                        scope: listScope,
-                        list: list,
-                        url: defaultUrl,
-                        mode: 'lookup'
-                    });
-                    scope.search(list.iterator);
+                    // @issue: OLD SEARCH
+                    // SearchInit({
+                    //     scope: listScope,
+                    //     set: list.name,
+                    //     list: list,
+                    //     url: defaultUrl
+                    // });
+                    // PaginateInit({
+                    //     scope: listScope,
+                    //     list: list,
+                    //     url: defaultUrl,
+                    //     mode: 'lookup'
+                    // });
+                    // scope.search(list.iterator);
+
                     listScope.toggle_organization(scope.organization);
                 };
             };
