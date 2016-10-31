@@ -131,8 +131,10 @@ class Scheduler():
         for workflow_job in workflow_jobs:
             dag = WorkflowDAG(workflow_job)
             if dag.is_workflow_done():
-                # TODO: detect if wfj failed
-                workflow_job.status = 'completed'
+                if workflow_job._has_failed():
+                    workflow_job.status = 'failed'
+                else:
+                    workflow_job.status = 'successful'
                 workflow_job.save()
                 connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
 
