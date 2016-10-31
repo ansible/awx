@@ -177,6 +177,7 @@ register(
 register(
     'DEFAULT_JOB_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Default Job Timeout'),
     help_text=_('Maximum time to allow jobs to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual job template will override this.'),
@@ -187,6 +188,7 @@ register(
 register(
     'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Default Inventory Update Timeout'),
     help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
@@ -197,6 +199,7 @@ register(
 register(
     'DEFAULT_PROJECT_UPDATE_TIMEOUT',
     field_class=fields.IntegerField,
+    min_value=0,
     label=_('Default Project Update Timeout'),
     help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
                 'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
