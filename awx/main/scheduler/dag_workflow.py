@@ -60,6 +60,8 @@ class WorkflowDAG(SimpleDAG):
             # Job is about to run or is running. Hold our horses and wait for
             # the job to finish. We can't proceed down the graph path until we
             # have the job result.
+            elif job.status == 'canceled':
+                continue
             elif job.status not in ['failed', 'error', 'successful']:
                 return False
             elif job.status in ['failed', 'error']:
