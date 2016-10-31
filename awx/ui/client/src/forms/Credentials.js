@@ -51,7 +51,6 @@ export default
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    ngClick: 'lookUpOrganization()',
                     awPopOver: i18n._("<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>"),
                     dataTitle: i18n._('Organization') + ' ',
                     dataPlacement: 'bottom',

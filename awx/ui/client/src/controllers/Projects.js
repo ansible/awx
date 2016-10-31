@@ -267,7 +267,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$statePara
 
 export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, GenerateForm, ProjectsForm, Rest, Alert, ProcessErrors,
-    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2) {
+    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2, i18n) {
 
     var form = ProjectsForm(),
         base = $location.path().replace(/^\//, '').split('/')[0],

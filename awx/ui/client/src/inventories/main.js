@@ -182,11 +182,13 @@ angular.module('inventory', [
                         edit: 'HostEditController'
                     },
                     resolve: {
-                        host: ['$stateParams', 'HostManageService', function($stateParams, HostManageService) {
-                            return HostManageService.get({ id: $stateParams.host_id }).then(function(res) {
-                                return res.data.results[0];
-                            });
-                        }]
+                        edit: {
+                            host: ['$stateParams', 'HostManageService', function($stateParams, HostManageService) {
+                                return HostManageService.get({ id: $stateParams.host_id }).then(function(res) {
+                                    return res.data.results[0];
+                                });
+                            }]
+                        }
                     },
                     ncyBreadcrumb: {
                         label: "{{host.name}}",
