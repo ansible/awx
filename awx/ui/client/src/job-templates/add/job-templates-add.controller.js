@@ -54,7 +54,10 @@
                     default_val: false
                 });
                 CallbackHelpInit({ scope: $scope });
-                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
+                SurveyControllerInit({
+                    scope: $scope,
+                    parent_scope: $scope
+                });
             }
 
             callback = function() {
@@ -62,10 +65,6 @@
                 $scope[form.name + '_form'].$setDirty();
             };
 
-            SurveyControllerInit({
-                scope: $scope,
-                parent_scope: $scope
-            });
 
             var selectCount = 0;
 
@@ -73,6 +72,7 @@
                 $scope.removeChoicesReady();
             }
             $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
+                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
                 selectCount++;
                 if (selectCount === 3) {
                     var verbosity;
@@ -120,8 +120,6 @@
                         element:'#job_template_verbosity',
                         multiple: false
                     });
-
-                    $scope.$emit('lookUpInitialize');
                 }
             });
 

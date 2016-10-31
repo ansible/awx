@@ -363,7 +363,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
             function buildFieldDefinition(field) {
                 let state = $stateExtender.buildDefinition({
                     searchPrefix: field.sourceModel,
-                    squashSearchUrl: true,
+                    //squashSearchUrl: true, @issue enable
                     name: `${formStateDefinition.name}.${field.sourceModel}`,
                     url: `/${field.sourceModel}`,
                     // a lookup field's basePath takes precedence over generic list definition's basePath, if supplied
@@ -391,6 +391,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     resolve: {
                         ListDefinition: [field.list, function(list) {
+                            list.iterator = field.sourceModel;
                             return list;
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state',
