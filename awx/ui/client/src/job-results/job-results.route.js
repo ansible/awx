@@ -15,10 +15,12 @@ export default {
         parent: 'jobs',
         label: '{{ job.id }} - {{ job.name }}'
     },
-    socket: {
-        "groups":{
-            "jobs": ["status_changed", "summary"],
-            "job_events": []
+    data: {
+        socket: {
+            "groups":{
+                "jobs": ["status_changed", "summary"],
+                "job_events": []
+            }
         }
     },
     resolve: {

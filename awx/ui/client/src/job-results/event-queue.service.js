@@ -132,7 +132,7 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                     .then(count => {
                         mungedEvent.count = count;
                         mungedEvent.count.failed++;
-                        mungedEvent.stdout = event.stdout;
+                        mungedEvent.stdout = parseStdoutService.parseStdout(event);
                         mungedEvent.changes = ['count', 'stdout'];
                     });
         } else if (event.event_name === 'playbook_on_stats') {
@@ -140,7 +140,7 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
             // get the data for populating the host status bar
             mungedEvent.count = jobResultsService
                 .getCountsFromStatsEvent(event.event_data);
-            mungedEvent.stdout = event.stdout;
+            mungedEvent.stdout = parseStdoutService.parseStdout(event);
             mungedEvent.finishedTime = event.modified;
             mungedEvent.changes = ['count', 'countFinished', 'finishedTime', 'stdout'];
         } else {
