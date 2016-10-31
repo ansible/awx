@@ -13,8 +13,8 @@
             <div class="JobResultsStdOut-lineNumberColumn">
                 {{line.end_line}}
             </div>
-            <div class="JobResultsStdOut-stdoutColumn">
-                {{line.stdout}}
+            <div class="JobResultsStdOut-stdoutColumn" ng-bind-html="line.stdout">
+                <!-- {{line.stdout}} -->
             </div>
         </div>
     </div>
