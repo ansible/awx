@@ -406,9 +406,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     #def get_ui_url(self):
     #    return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
 
-    def is_blocked_by(self, obj):
-        return True
-
     @property
     def task_impact(self):
         return 0

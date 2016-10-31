@@ -778,10 +778,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def task_impact(self):
         raise NotImplementedError # Implement in subclass.
 
-    def is_blocked_by(self, task_object):
-        ''' Given another task object determine if this task would be blocked by it '''
-        raise NotImplementedError # Implement in subclass.
-
     def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
         return {}
@@ -791,11 +787,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         status_data.update(self.websocket_emit_data())
         status_data['group_name'] = 'jobs'
         emit_channel_notification('jobs-status_changed', status_data)
-
-    def generate_dependencies(self, active_tasks):
-        ''' Generate any tasks that the current task might be dependent on given a list of active
-            tasks that might preclude creating one'''
-        return []
 
     def notification_data(self):
         return dict(id=self.id,

@@ -22,7 +22,6 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
-from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.notifications import (
@@ -1249,15 +1248,6 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
-
-    def is_blocked_by(self, obj):
-        if type(obj) == InventoryUpdate:
-            if self.inventory_source.inventory == obj.inventory_source.inventory:
-                return True
-        if type(obj) == Job:
-            if self.inventory_source.inventory == obj.inventory:
-                return True
-        return False
 
     @property
     def task_impact(self):
