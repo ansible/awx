@@ -55,11 +55,22 @@ export default {
                     // "?event=playbook_on_stats");
                 Rest.get()
                     .success(function(data) {
-                        defer.resolve({
-                            val: jobResultsService
-                                .getCountsFromStatsEvent(data
-                                    .results[0].event_data),
-                            countFinished: true});
+                        if(!data.results[0]){
+                            defer.resolve({val: {
+                                ok: 0,
+                                skipped: 0,
+                                unreachable: 0,
+                                failures: 0,
+                                changed: 0
+                            }, countFinished: false});
+                        }
+                        else {
+                            defer.resolve({
+                                val: jobResultsService
+                                    .getCountsFromStatsEvent(data
+                                        .results[0].event_data),
+                                countFinished: true});
+                        }
                     })
                     .error(function() {
                         defer.resolve({val: {
