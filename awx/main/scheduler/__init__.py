@@ -108,7 +108,6 @@ class Scheduler():
         return results
 
     def spawn_workflow_graph_jobs(self, workflow_jobs):
-        # TODO: Consider using transaction.atomic
         for workflow_job in workflow_jobs:
             dag = WorkflowDAG(workflow_job)
             spawn_nodes = dag.bfs_nodes_to_run()
@@ -150,9 +149,6 @@ class Scheduler():
             for queue in active_task_queues:
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
         else:
-            logger.error("Could not communicate with celery!")
-            # TODO: Something needs to be done here to signal to the system
-            #       as a whole that celery appears to be down.
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return None
 
@@ -163,7 +159,6 @@ class Scheduler():
 
         status_changed = False
 
-        # TODO: spawn inventory and project updates                
         task_actual = {
             'type':task.get_job_type_str(),
             'id': task['id'],
@@ -214,7 +209,6 @@ class Scheduler():
     def create_project_update(self, task):
         dep = Project.objects.get(id=task['project_id']).create_project_update(launch_type='dependency')
 
-        # TODO: Consider using milliseconds or microseconds
         # Project created 1 seconds behind
         dep.created = task['created'] - timedelta(seconds=1)
         dep.status = 'waiting'
@@ -329,7 +323,6 @@ class Scheduler():
 
     def process_tasks(self, all_sorted_tasks):
 
-        # TODO: Process new tasks
         running_tasks = filter(lambda t: t['status'] == 'running', all_sorted_tasks)
         runnable_tasks = filter(lambda t: t['status'] in ['waiting', 'running'], all_sorted_tasks)
 
