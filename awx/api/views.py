@@ -2660,7 +2660,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
         for relation in mutex_list:
             if getattr(parent, relation).all().exists():
-                return {'Error': 'Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation)}
+                return {'Error': _('Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation))}
 
         if created:
             return None
@@ -2685,11 +2685,11 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             sub_node = graph[sub.pk]
             parent_node = graph[parent.pk]
             if sub_node['metadata']['parent'] is not None:
-                return {"Error": "Multiple parent relationship not allowed."}
+                return {"Error": _("Multiple parent relationship not allowed.")}
             iter_node = parent_node
             while iter_node is not None:
                 if iter_node == sub_node:
-                    return {"Error": "Cycle detected."}
+                    return {"Error": _("Cycle detected.")}
                 iter_node = iter_node['metadata']['parent']
 
         return None
