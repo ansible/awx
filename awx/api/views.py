@@ -2862,6 +2862,13 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     parent_key = 'workflow_job'
     new_in_310 = True
 
+class WorkflowJobCancel(RetrieveAPIView):
+
+    model = WorkflowJob
+    serializer_class = WorkflowJobCancelSerializer
+    is_job_cancel = True
+    new_in_310 = True
+
 class SystemJobTemplateList(ListAPIView):
 
     model = SystemJobTemplate
