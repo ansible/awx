@@ -11,7 +11,7 @@ from celery import task
 
 # AWX
 from awx.main.models import Instance
-from awx.main.scheduler import Scheduler
+from awx.main.scheduler import TaskManager 
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -21,15 +21,15 @@ logger = logging.getLogger('awx.main.scheduler')
 
 @task
 def run_job_launch(job_id):
-    Scheduler().schedule()
+    TaskManager().schedule()
 
 @task
 def run_job_complete(job_id):
-    Scheduler().schedule()
+    TaskManager().schedule()
 
 @task
 def run_scheduler():
-    Scheduler().schedule()
+    TaskManager().schedule()
 
 @task
 def run_fail_inconsistent_running_jobs():
@@ -37,7 +37,7 @@ def run_fail_inconsistent_running_jobs():
         # Lock
         try:
             Instance.objects.select_for_update(nowait=True).all()[0]
-            scheduler = Scheduler()
+            scheduler = TaskManager()
             active_tasks = scheduler.get_active_tasks()
 
             if active_tasks is None:

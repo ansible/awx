@@ -34,7 +34,7 @@ from celery.task.control import inspect
 
 logger = logging.getLogger('awx.main.scheduler')
 
-class Scheduler():
+class TaskManager():
     def __init__(self):
         self.graph = DependencyGraph()
         self.capacity_total = 200

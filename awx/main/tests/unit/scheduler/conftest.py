@@ -13,7 +13,7 @@ from awx.main.scheduler.partial import (
     InventoryUpdateDict,
     InventorySourceDict,
 )
-from awx.main.scheduler import Scheduler
+from awx.main.scheduler import TaskManager
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def epoch():
 @pytest.fixture
 def scheduler_factory(mocker, epoch):
     def fn(tasks=[], inventory_sources=[], latest_project_updates=[], latest_inventory_updates=[], create_project_update=None, create_inventory_update=None):
-        sched = Scheduler()
+        sched = TaskManager()
         sched.capacity_total = 999999999
 
         sched.graph.get_now = lambda: epoch
