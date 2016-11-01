@@ -157,7 +157,7 @@ export default
                     open: false,
                     index: false,
                     actions: {},
-
+                    emptyListText: 'This user is not a member of any teams',
                     fields: {
                         name: {
                             key: true,

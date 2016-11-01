@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange',
-    'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange,
-        GenerateForm, HostManageService, rbacUiControlService, GetBasePath) {
+                'GenerateForm', 'HostManageService', 'rbacUiControlService', 'GetBasePath', 'ToJSON',
+                function($state, $stateParams, $scope, HostForm, ParseTypeChange,
+                         GenerateForm, HostManageService, rbacUiControlService, GetBasePath, ToJSON) {
 
         init();
 
@@ -36,9 +36,10 @@ export default ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange
         $scope.toggleHostEnabled = function() {
             $scope.host.enabled = !$scope.host.enabled;
         };
-        $scope.formSave = function() {
-            var params = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+        $scope.formSave = function(){
+            var json_data = ToJSON($scope.parseType, $scope.variables, true),
+            params = {
+                variables: json_data,// $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
                 name: $scope.name,
                 description: $scope.description,
                 enabled: $scope.host.enabled,

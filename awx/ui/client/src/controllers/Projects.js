@@ -438,6 +438,16 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         }
     });
 
+    if ($scope.pathsReadyRemove) {
+        $scope.pathsReadyRemove();
+    }
+    $scope.pathsReadyRemove = $scope.$on('pathsReady', function () {
+        CreateSelect2({
+            element: '#local-path-select',
+            multiple: false
+        });
+    });
+
     // After the project is loaded, retrieve each related set
     if ($scope.projectLoadedRemove) {
         $scope.projectLoadedRemove();
@@ -455,6 +465,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             $scope.project_local_paths = opts;
             $scope.local_path = $scope.project_local_paths[0];
             $scope.base_dir = 'You do not have access to view this property';
+            $scope.$emit('pathsReady');
         }
 
         $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
@@ -521,11 +532,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 master.scm_type = $scope.scm_type;
                 CreateSelect2({
                     element: '#project_scm_type',
-                    multiple: false
-                });
-
-                CreateSelect2({
-                    element: '#local-path-select',
                     multiple: false
                 });
 

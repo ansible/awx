@@ -51,7 +51,6 @@ class CallbackBrokerWorker(ConsumerMixin):
             logger.error('Callback Task Processor Raised Exception: %r', exc)
         message.ack()
 
-
 class Command(NoArgsCommand):
     '''
     Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)

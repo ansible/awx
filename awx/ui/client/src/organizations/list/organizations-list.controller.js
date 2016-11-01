@@ -12,7 +12,6 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         $log, $compile, Rest, OrganizationList, Alert, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset) {
 
-
         ClearScope();
 
         var defaultUrl = GetBasePath('organizations'),
@@ -85,6 +84,27 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 });
                 return val;
             });
+        };
+
+        $scope.$on("ReloadOrgListView", function() {
+            Rest.setUrl($scope.current_url);
+            Rest.get()
+                .success((data) => $scope.organizations = data.results)
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, null, {
+                        hdr: 'Error!',
+                        msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
+                    });
+            });
+        });
+
+
+        $scope.$watchCollection('organizations', function(value){
+            $scope.orgCards = parseCardData(value);
+        });
+
+        if ($scope.removePostRefresh) {
+            $scope.removePostRefresh();
         }
 
         $scope.$watchCollection(`${list.iterator}_dataset`, function(data) {
@@ -129,5 +149,50 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 actionText: 'DELETE'
             });
         };
+        var init = function(){
+            // Pagination depends on html appended by list generator
+            view.inject(list, {
+                id: 'organizations-list',
+                scope: $scope,
+                mode: 'edit'
+            });
+            // grab the pagination elements, move, destroy list generator elements
+            $('#organization-pagination').appendTo('#OrgCards');
+            $('#organizations tag-search').appendTo('.OrgCards-search');
+            $('#organizations-list').remove();
+
+            PaginateInit({
+                scope: $scope,
+                list: list,
+                url: defaultUrl,
+                pageSize: pageSize,
+            });
+            SearchInit({
+                scope: $scope,
+                list: list,
+                url: defaultUrl,
+                set: 'organizations'
+            });
+
+            $scope.list = list;
+            $rootScope.flashMessage = null;
+
+            $scope.search(list.iterator);
+            var getOrgCount = function() {
+                Rest.setUrl(defaultUrl);
+                Rest.get()
+                    .success(function(data) {
+                        $scope.orgCount = data.count;
+                    })
+                    .error(function(data, status) {
+                        ProcessErrors($scope, data, status, null, {
+                            hdr: 'Error!',
+                            msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
+                        });
+                    });
+            };
+            getOrgCount();
+        };
+        init();
     }
 ];

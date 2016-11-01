@@ -80,6 +80,7 @@ export default
                                 // trigger display of alert block when scm_type == manual
                                 scope.showMissingPlaybooksAlert = true;
                             }
+                            scope.$emit('pathsReady');
                         })
                         .error(function (data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',

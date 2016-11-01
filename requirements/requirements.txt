@@ -2,11 +2,11 @@ git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.0
-azure==2.0.0rc2
+azure==2.0.0rc5
 Babel==2.2.0
 baron==0.6.2
 billiard==3.3.0.16
-boto==2.40.0
+boto==2.43.0
 celery==3.1.23
 cliff==1.15.0
 cmd2==0.6.8
@@ -116,7 +116,7 @@ rax-default-network-flags-python-novaclient-ext==0.3.2
 rax-scheduled-images-python-novaclient-ext==0.3.1
 redbaron==0.6.1
 requests-oauthlib==0.5.0
-requests==2.9.1
+requests==2.11.0
 requestsexceptions==1.1.1
 rply==0.7.4
 shade==1.4.0
