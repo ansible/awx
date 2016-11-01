@@ -2685,11 +2685,11 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             sub_node = graph[sub.pk]
             parent_node = graph[parent.pk]
             if sub_node['metadata']['parent'] is not None:
-                return {"Error": "Multiple ancestor detected!"}
+                return {"Error": "Multiple parent relationship not allowed."}
             iter_node = parent_node
             while iter_node is not None:
                 if iter_node == sub_node:
-                    return {"Error": "Cycle detected!"}
+                    return {"Error": "Cycle detected."}
                 iter_node = iter_node['metadata']['parent']
 
         return None
