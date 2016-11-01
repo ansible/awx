@@ -5,13 +5,15 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from solo.models import SingletonModel
+
 from awx.main.managers import InstanceManager
 from awx.main.models.inventory import InventoryUpdate
 from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
 
-__all__ = ('Instance', 'JobOrigin')
+__all__ = ('Instance', 'JobOrigin', 'TowerState',)
 
 
 class Instance(models.Model):
@@ -33,6 +35,8 @@ class Instance(models.Model):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
+class TowerState(SingletonModel):
+    schedule_last_run = models.DateTimeField(auto_now_add=True)
 
 class JobOrigin(models.Model):
     """A model representing the relationship between a unified job and

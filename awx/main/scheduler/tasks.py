@@ -28,7 +28,7 @@ def run_job_complete(job_id):
     TaskManager().schedule()
 
 @task
-def run_scheduler():
+def run_task_manager():
     TaskManager().schedule()
 
 @task

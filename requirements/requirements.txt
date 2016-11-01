@@ -24,6 +24,7 @@ django-polymorphic==0.7.2
 django-radius==1.0.0
 djangorestframework==3.3.2
 djangorestframework-yaml==1.0.2
+django-solo==1.1.2
 django-split-settings==0.1.1
 django-transaction-hooks==0.2
 django-taggit==0.17.6

@@ -201,6 +201,7 @@ INSTALLED_APPS = (
     'awx.ui',
     'awx.fact',
     'awx.sso',
+    'solo',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -392,9 +393,9 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
         'schedule': timedelta(seconds=60)
     },
-    'task_scheduler': {
-        'task': 'awx.main.scheduler.tasks.run_scheduler',
-        'schedule': timedelta(seconds=10)
+    'task_manager': {
+        'task': 'awx.main.scheduler.tasks.run_task_manager',
+        'schedule': timedelta(seconds=20)
     },
     'task_fail_inconsistent_running_jobs': {
         'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
