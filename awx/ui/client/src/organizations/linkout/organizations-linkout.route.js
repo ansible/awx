@@ -44,6 +44,7 @@ export default [{
             value: {
                 order_by: 'username'
             }
+        },
         add_user_search: {
             value: {
                 order_by: 'username',
