@@ -21,7 +21,6 @@ import traceback
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
-import dateutil.parser
 import yaml
 try:
     import psutil
@@ -137,30 +136,12 @@ def cluster_node_heartbeat(self):
 
 @task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
-    def get_last_run():
-        if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
-            return None
-        fd = open(settings.SCHEDULE_METADATA_LOCATION)
-        try:
-            last_run = dateutil.parser.parse(fd.read())
-            return last_run
-        except Exception as exc:
-            logger.error("get_last_run failed: {}".format(exc))
-            return None
-
-    def write_last_run(last_run):
-        fd = open(settings.SCHEDULE_METADATA_LOCATION, 'w')
-        fd.write(last_run.isoformat())
-        fd.close()
-
     run_now = now()
-    last_run = get_last_run()
-    if not last_run:
-        logger.debug("First run time")
-        write_last_run(run_now)
-        return
+    state = TowerScheduleState.get_solo()
+    last_run = state.schedule_last_run
     logger.debug("Last run was: %s", last_run)
-    write_last_run(run_now)
+    state.schedule_last_run = run_now
+    state.save()
 
     old_schedules = Schedule.objects.enabled().before(last_run)
     for schedule in old_schedules:
@@ -180,6 +161,7 @@ def tower_periodic_scheduler(self):
             new_unified_job.save(update_fields=['status', 'job_explanation'])
             new_unified_job.websocket_emit_status("failed")
         emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
+    state.save()
 
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
@@ -1756,7 +1738,7 @@ class RunAdHocCommand(BaseTask):
         '''
         Hook for actions to run after ad hoc command has completed.
         '''
-        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, **kwargs)
+        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, status, **kwargs)
 
 
 class RunSystemJob(BaseTask):

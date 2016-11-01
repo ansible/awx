@@ -22,7 +22,6 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
 from awx.main.models.base import * # noqa
-from awx.main.models.jobs import Job
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
@@ -275,7 +274,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'local_path', 'scm_type', 'scm_url',
                 'scm_branch', 'scm_clean', 'scm_delete_on_update',
-                'credential', 'schedule', 'timeout']
+                'credential', 'schedule', 'timeout', 'launch_type',]
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -423,15 +422,6 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
     def _get_task_class(cls):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
-
-    def is_blocked_by(self, obj):
-        if type(obj) == ProjectUpdate:
-            if self.project == obj.project:
-                return True
-        if type(obj) == Job:
-            if self.project == obj.project:
-                return True
-        return False
 
     def websocket_emit_data(self):
         return dict(project_id=self.project.id)

@@ -4,7 +4,6 @@
 # Python
 import datetime
 import hmac
-import json
 import logging
 from urlparse import urljoin
 
@@ -24,7 +23,6 @@ from jsonfield import JSONField
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.utils import decrypt_field
 from awx.main.models.notifications import JobNotificationMixin
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
@@ -181,48 +179,12 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
-    def is_blocked_by(self, obj):
-        from awx.main.models import InventoryUpdate
-        if type(obj) == InventoryUpdate:
-            if self.inventory == obj.inventory_source.inventory:
-                return True
-        return False
-
     @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
         count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
-
-    def generate_dependencies(self, active_tasks):
-        from awx.main.models import InventoryUpdate
-        if not self.inventory:
-            return []
-        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
-        inventory_sources_found = []
-        dependencies = []
-        for obj in active_tasks:
-            if type(obj) == InventoryUpdate:
-                if obj.inventory_source in inventory_sources:
-                    inventory_sources_found.append(obj.inventory_source)
-        # Skip updating any inventory sources that were already updated before
-        # running this job (via callback inventory refresh).
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
-        start_args = start_args or {}
-        inventory_sources_already_updated = start_args.get('inventory_sources_already_updated', [])
-        if inventory_sources_already_updated:
-            for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
-                if source not in inventory_sources_found:
-                    inventory_sources_found.append(source)
-        if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
-            for source in inventory_sources:
-                if source not in inventory_sources_found and source.needs_update_on_launch:
-                    dependencies.append(source.create_inventory_update(launch_type='dependency'))
-        return dependencies
 
     def copy(self):
         data = {}

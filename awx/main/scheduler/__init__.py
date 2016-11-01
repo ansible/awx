@@ -2,256 +2,356 @@
 # All Rights Reserved
 
 # Python
-import datetime
+from datetime import timedelta
 import logging
+from sets import Set
 
 # Django
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, connection
+from django.db.utils import DatabaseError
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.utils import get_system_task_capacity
-from awx.main.scheduler.dag_simple import SimpleDAG
+#from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
+
+from awx.main.scheduler.dependency_graph import DependencyGraph
+from awx.main.scheduler.partial import (
+    JobDict, 
+    ProjectUpdateDict, 
+    ProjectUpdateLatestDict,
+    InventoryUpdateDict,
+    InventoryUpdateLatestDict,
+    InventorySourceDict,
+    SystemJobDict,
+    AdHocCommandDict,
+    WorkflowJobDict,
+)
 
 # Celery
 from celery.task.control import inspect
 
 logger = logging.getLogger('awx.main.scheduler')
 
-def get_tasks():
-    """Fetch all Tower tasks that are relevant to the task management
-    system.
-    """
-    RELEVANT_JOBS = ('pending', 'waiting', 'running')
-    # TODO: Replace this when we can grab all objects in a sane way.
-    graph_jobs = [j for j in Job.objects.filter(status__in=RELEVANT_JOBS)]
-    graph_ad_hoc_commands = [ahc for ahc in AdHocCommand.objects.filter(status__in=RELEVANT_JOBS)]
-    graph_inventory_updates = [iu for iu in
-                               InventoryUpdate.objects.filter(status__in=RELEVANT_JOBS)]
-    graph_project_updates = [pu for pu in
-                             ProjectUpdate.objects.filter(status__in=RELEVANT_JOBS)]
-    graph_system_jobs = [sj for sj in
-                         SystemJob.objects.filter(status__in=RELEVANT_JOBS)]
-    graph_workflow_jobs = [wf for wf in
-                           WorkflowJob.objects.filter(status__in=RELEVANT_JOBS)]
-    all_actions = sorted(graph_jobs + graph_ad_hoc_commands + graph_inventory_updates +
-                         graph_project_updates + graph_system_jobs +
-                         graph_workflow_jobs,
-                         key=lambda task: task.created)
-    return all_actions
+class TaskManager():
+    def __init__(self):
+        self.graph = DependencyGraph()
+        self.capacity_total = 200
+        self.capacity_used = 0
 
-def get_running_workflow_jobs():
-    graph_workflow_jobs = [wf for wf in
-                           WorkflowJob.objects.filter(status='running')]
-    return graph_workflow_jobs
+    def get_tasks(self):
+        status_list = ('pending', 'waiting', 'running')
 
-def spawn_workflow_graph_jobs(workflow_jobs):
-    # TODO: Consider using transaction.atomic
-    for workflow_job in workflow_jobs:
-        dag = WorkflowDAG(workflow_job)
-        spawn_nodes = dag.bfs_nodes_to_run()
-        for spawn_node in spawn_nodes:
-            kv = spawn_node.get_job_kwargs()
-            job = spawn_node.unified_job_template.create_unified_job(**kv)
-            spawn_node.job = job
-            spawn_node.save()
-            can_start = job.signal_start(**kv)
-            if not can_start:
-                job.status = 'failed'
-                job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
-                job.save(update_fields=['status', 'job_explanation'])
-                job.websocket_emit_status("failed")
+        jobs = JobDict.filter_partial(status=status_list)
+        inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
+        project_updates = ProjectUpdateDict.filter_partial(status=status_list)
+        system_jobs = SystemJobDict.filter_partial(status=status_list)
+        ad_hoc_commands = AdHocCommandDict.filter_partial(status=status_list)
+        workflow_jobs = WorkflowJobDict.filter_partial(status=status_list)
 
-            # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
-            #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands + workflow_jobs,
+                             key=lambda task: task['created'])
+        return all_actions
 
-# See comment in tasks.py::RunWorkflowJob::run()
-def process_finished_workflow_jobs(workflow_jobs):
-    for workflow_job in workflow_jobs:
-        dag = WorkflowDAG(workflow_job)
-        if dag.is_workflow_done():
-            with transaction.atomic():
+    '''
+    Tasks that are running and SHOULD have a celery task.
+    '''
+    def get_running_tasks(self):
+        status_list = ('running',)
+
+        jobs = JobDict.filter_partial(status=status_list)
+        inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
+        project_updates = ProjectUpdateDict.filter_partial(status=status_list)
+        system_jobs = SystemJobDict.filter_partial(status=status_list)
+        ad_hoc_commands = AdHocCommandDict.filter_partial(status=status_list)
+
+        all_actions = sorted(jobs + project_updates + inventory_updates + system_jobs + ad_hoc_commands,
+                             key=lambda task: task['created'])
+        return all_actions
+
+    # TODO: Consider a database query for this logic
+    def get_latest_project_update_tasks(self, all_sorted_tasks):
+        project_ids = Set()
+        for task in all_sorted_tasks:
+            if type(task) == JobDict:
+                project_ids.add(task['project_id'])
+
+        return ProjectUpdateLatestDict.filter_partial(list(project_ids))
+
+    # TODO: Consider a database query for this logic
+    def get_latest_inventory_update_tasks(self, all_sorted_tasks):
+        inventory_ids = Set()
+        for task in all_sorted_tasks:
+            if type(task) == JobDict:
+                inventory_ids.add(task['inventory_id'])
+
+        return InventoryUpdateLatestDict.filter_partial(list(inventory_ids))
+
+
+    def get_running_workflow_jobs(self):
+        graph_workflow_jobs = [wf for wf in
+                               WorkflowJob.objects.filter(status='running')]
+        return graph_workflow_jobs
+
+    # TODO: Consider a database query for this logic
+    def get_inventory_source_tasks(self, all_sorted_tasks):
+        inventory_ids = Set()
+        results = []
+        for task in all_sorted_tasks:
+            if type(task) is JobDict:
+                inventory_ids.add(task['inventory_id'])
+        
+        for inventory_id in inventory_ids:
+            results.append((inventory_id, InventorySourceDict.filter_partial(inventory_id)))
+
+        return results
+
+    def spawn_workflow_graph_jobs(self, workflow_jobs):
+        for workflow_job in workflow_jobs:
+            dag = WorkflowDAG(workflow_job)
+            spawn_nodes = dag.bfs_nodes_to_run()
+            for spawn_node in spawn_nodes:
+                kv = spawn_node.get_job_kwargs()
+                job = spawn_node.unified_job_template.create_unified_job(**kv)
+                spawn_node.job = job
+                spawn_node.save()
+                can_start = job.signal_start(**kv)
+                if not can_start:
+                    job.status = 'failed'
+                    job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
+                    job.save(update_fields=['status', 'job_explanation'])
+                    connection.on_commit(lambda: job.websocket_emit_status('failed'))
+
+                # TODO: should we emit a status on the socket here similar to tasks.py tower_periodic_scheduler() ?
+                #emit_websocket_notification('/socket.io/jobs', '', dict(id=))
+
+    # See comment in tasks.py::RunWorkflowJob::run()
+    def process_finished_workflow_jobs(self, workflow_jobs):
+        for workflow_job in workflow_jobs:
+            dag = WorkflowDAG(workflow_job)
+            if dag.is_workflow_done():
                 if workflow_job._has_failed():
                     workflow_job.status = 'failed'
                 else:
                     workflow_job.status = 'successful'
                 workflow_job.save()
-                workflow_job.websocket_emit_status(workflow_job.status)
+                connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
 
-def rebuild_graph():
-    """Regenerate the task graph by refreshing known tasks from Tower, purging
-    orphaned running tasks, and creating dependencies for new tasks before
-    generating directed edge relationships between those tasks.
-    """
-    '''
-    # Sanity check: Only do this on the primary node.
-    if Instance.objects.my_role() == 'secondary':
-        return None
-    '''
+    def get_active_tasks(self):
+        inspector = inspect()
+        if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
+            active_task_queues = inspector.active()
+        else:
+            logger.warn("Ignoring celery task inspector")
+            active_task_queues = None
 
-    inspector = inspect()
-    if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
-        active_task_queues = inspector.active()
-    else:
-        logger.warn("Ignoring celery task inspector")
-        active_task_queues = None
+        active_tasks = set()
+        if active_task_queues is not None:
+            for queue in active_task_queues:
+                map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
+        else:
+            if not hasattr(settings, 'CELERY_UNIT_TEST'):
+                return None
 
-    all_sorted_tasks = get_tasks()
-    if not len(all_sorted_tasks):
-        return None
+        return active_tasks
 
-    active_tasks = []
-    if active_task_queues is not None:
-        for queue in active_task_queues:
-            active_tasks += [at['id'] for at in active_task_queues[queue]]
-    else:
-        logger.error("Could not communicate with celery!")
-        # TODO: Something needs to be done here to signal to the system
-        #       as a whole that celery appears to be down.
-        if not hasattr(settings, 'CELERY_UNIT_TEST'):
-            return None
+    def start_task(self, task, dependent_tasks=[]):
+        from awx.main.tasks import handle_work_error, handle_work_success
 
-    running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
-    running_celery_tasks = filter(lambda t: type(t) != WorkflowJob, running_tasks)
-    waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
-    new_tasks = filter(lambda t: t.status == 'pending', all_sorted_tasks)
+        task_actual = {
+            'type':task.get_job_type_str(),
+            'id': task['id'],
+        }
+        dependencies = [{'type': t.get_job_type_str(), 'id': t['id']} for t in dependent_tasks]
+        
+        error_handler = handle_work_error.s(subtasks=[task_actual] + dependencies)
+        success_handler = handle_work_success.s(task_actual=task_actual)
+        
+        job_obj = task.get_full()
+        job_obj.status = 'waiting'
 
-    # Check running tasks and make sure they are active in celery
-    logger.debug("Active celery tasks: " + str(active_tasks))
-    for task in list(running_celery_tasks):
-        if (task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-            # NOTE: Pull status again and make sure it didn't finish in
-            #       the meantime?
-            task.status = 'failed'
-            task.job_explanation += ' '.join((
-                'Task was marked as running in Tower but was not present in',
-                'Celery, so it has been marked as failed.',
-            ))
-            task.save()
-            task.websocket_emit_status("failed")
-            running_tasks.pop(running_tasks.index(task))
-            logger.error("Task %s appears orphaned... marking as failed" % task)
+        (start_status, opts) = job_obj.pre_start()
+        if not start_status:
+            job_obj.status = 'failed'
+            if job_obj.job_explanation:
+                job_obj.job_explanation += ' '
+            job_obj.job_explanation += 'Task failed pre-start check.'
+            job_obj.save()
+            # TODO: run error handler to fail sub-tasks and send notifications
+        else:
+            if type(job_obj) is WorkflowJob:
+                job_obj.status = 'running'
 
-    # Create and process dependencies for new tasks
-    for task in new_tasks:
-        logger.debug("Checking dependencies for: %s" % str(task))
-        try:
-            task_dependencies = task.generate_dependencies(running_tasks + waiting_tasks)
-        except Exception, e:
-            logger.error("Failed processing dependencies for {}: {}".format(task, e))
-            task.status = 'failed'
-            task.job_explanation += 'Task failed to generate dependencies: {}'.format(e)
-            task.save()
-            task.websocket_emit_status("failed")
-            continue
-        logger.debug("New dependencies: %s" % str(task_dependencies))
-        for dep in task_dependencies:
-            # We recalculate the created time for the moment to ensure the
-            # dependencies are always sorted in the right order relative to
-            # the dependent task.
-            time_delt = len(task_dependencies) - task_dependencies.index(dep)
-            dep.created = task.created - datetime.timedelta(seconds=1 + time_delt)
-            dep.status = 'waiting'
-            dep.save()
-            waiting_tasks.insert(waiting_tasks.index(task), dep)
-        if not hasattr(settings, 'UNIT_TEST_IGNORE_TASK_WAIT'):
-            task.status = 'waiting'
-            task.save()
+            job_obj.save()
 
-    # Rebuild graph
-    graph = SimpleDAG()
-    for task in running_tasks:
-        graph.add_node(task)
-    for wait_task in waiting_tasks[:50]:
-        node_dependencies = []
-        for node in graph:
-            if wait_task.is_blocked_by(node['node_object']):
-                node_dependencies.append(node['node_object'])
-        graph.add_node(wait_task)
-        for dependency in node_dependencies:
-            graph.add_edge(wait_task, dependency)
-    if settings.DEBUG:
-        graph.generate_graphviz_plot()
-    return graph
+            self.consume_capacity(task)
 
-def process_graph(graph, task_capacity):
-    """Given a task dependency graph, start and manage tasks given their
-    priority and weight.
-    """
-    from awx.main.tasks import handle_work_error, handle_work_success
+        def post_commit():
+            job_obj.websocket_emit_status(job_obj.status)
+            if job_obj.status != 'failed':
+                job_obj.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler)
+        
+        connection.on_commit(post_commit)
 
-    leaf_nodes = graph.get_leaf_nodes()
-    running_nodes = filter(lambda x: x['node_object'].status == 'running', leaf_nodes)
-    running_impact = sum([t['node_object'].task_impact for t in running_nodes])
-    ready_nodes = filter(lambda x: x['node_object'].status != 'running', leaf_nodes)
-    remaining_volume = task_capacity - running_impact
-    logger.info('Running Nodes: %s; Capacity: %s; Running Impact: %s; '
-                'Remaining Capacity: %s' %
-                (str(running_nodes), str(task_capacity),
-                 str(running_impact), str(remaining_volume)))
-    logger.info("Ready Nodes: %s" % str(ready_nodes))
-    for task_node in ready_nodes:
-        node_obj = task_node['node_object']
-        # NOTE: This could be used to pass metadata through the task system
-        # node_args = task_node['metadata']
-        impact = node_obj.task_impact
-        if impact <= remaining_volume or running_impact == 0:
-            node_dependencies = graph.get_dependents(node_obj)
-            # Allow other tasks to continue if a job fails, even if they are
-            # other jobs.
+    def process_runnable_tasks(self, runnable_tasks):
+        map(lambda task: self.graph.add_job(task), runnable_tasks)
 
-            node_type = graph.get_node_type(node_obj)
-            if node_type == 'job':
-                # clear dependencies because a job can block (not necessarily
-                # depend) on other jobs that share the same job template
-                node_dependencies = []
+    def create_project_update(self, task):
+        dep = Project.objects.get(id=task['project_id']).create_project_update(launch_type='dependency')
 
-            # Make the workflow_job look like it's started by setting status to
-            # running, but don't make a celery Task for it.
-            # Introduce jobs from the workflow so they are candidates to run.
-            # Call process_graph() again to allow choosing for run, the
-            # created candidate jobs.
-            elif node_type == 'workflow_job':
-                node_obj.start()
-                spawn_workflow_graph_jobs([node_obj])
-                return process_graph(graph, task_capacity)
+        # Project created 1 seconds behind
+        dep.created = task['created'] - timedelta(seconds=1)
+        dep.status = 'pending'
+        dep.save()
 
-            dependent_nodes = [{'type': graph.get_node_type(node_obj), 'id': node_obj.id}] + \
-                              [{'type': graph.get_node_type(n['node_object']),
-                                'id': n['node_object'].id} for n in node_dependencies]
-            error_handler = handle_work_error.s(subtasks=dependent_nodes)
-            success_handler = handle_work_success.s(task_actual={'type': graph.get_node_type(node_obj),
-                                                                 'id': node_obj.id})
-            with transaction.atomic():
-                start_status = node_obj.start(error_callback=error_handler, success_callback=success_handler)
-                if not start_status:
-                    node_obj.status = 'failed'
-                    if node_obj.job_explanation:
-                        node_obj.job_explanation += ' '
-                    node_obj.job_explanation += 'Task failed pre-start check.'
-                    node_obj.save()
-                    continue
-            remaining_volume -= impact
-            running_impact += impact
-            logger.info('Started Node: %s (capacity hit: %s) '
-                        'Remaining Capacity: %s' %
-                        (str(node_obj), str(impact), str(remaining_volume)))
+        project_task = ProjectUpdateDict.get_partial(dep.id)
 
-def schedule():
-    with transaction.atomic():
-        # Lock
-        Instance.objects.select_for_update().all()[0]
+        return project_task
 
-        task_capacity = get_system_task_capacity()
+    def create_inventory_update(self, task, inventory_source_task):
+        dep = InventorySource.objects.get(id=inventory_source_task['id']).create_inventory_update(launch_type='dependency')
 
-        workflow_jobs = get_running_workflow_jobs()
-        process_finished_workflow_jobs(workflow_jobs)
-        spawn_workflow_graph_jobs(workflow_jobs)
+        dep.created = task['created'] - timedelta(seconds=2)
+        dep.status = 'pending'
+        dep.save()
 
-        graph = rebuild_graph()
-        if graph:
-            process_graph(graph, task_capacity)
+        inventory_task = InventoryUpdateDict.get_partial(dep.id)
 
-        # Unlock, due to transaction ending
+        return inventory_task
+
+    def generate_dependencies(self, task):
+        dependencies = []
+        # TODO: What if the project is null ?
+        if type(task) is JobDict:
+            if task['project__scm_update_on_launch'] is True and \
+                    self.graph.should_update_related_project(task):
+                project_task = self.create_project_update(task)
+                dependencies.append(project_task)
+                # Inventory created 2 seconds behind job
+
+            for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
+                if self.graph.should_update_related_inventory_source(task, inventory_source_task['id']):
+                    inventory_task = self.create_inventory_update(task, inventory_source_task)
+                    dependencies.append(inventory_task)
+        return dependencies
+
+    def process_latest_project_updates(self, latest_project_updates):
+        map(lambda task: self.graph.add_latest_project_update(task), latest_project_updates)
+
+    def process_latest_inventory_updates(self, latest_inventory_updates):
+        map(lambda task: self.graph.add_latest_inventory_update(task), latest_inventory_updates)
+
+    def process_inventory_sources(self, inventory_id_sources):
+        map(lambda (inventory_id, inventory_sources): self.graph.add_inventory_sources(inventory_id, inventory_sources), inventory_id_sources)
+
+    def process_dependencies(self, dependent_task, dependency_tasks):
+        for task in dependency_tasks:
+            # ProjectUpdate or InventoryUpdate may be blocked by another of
+            # the same type.
+            if not self.graph.is_job_blocked(task):
+                self.graph.add_job(task)
+                if not self.would_exceed_capacity(task):
+                    self.start_task(task, [dependent_task])
+            else:
+                self.graph.add_job(task)
+
+    def process_pending_tasks(self, pending_tasks):
+        for task in pending_tasks:
+            # Stop processing tasks if we know we are out of capacity
+            if self.get_remaining_capacity() <= 0:
+                return
+
+            if not self.graph.is_job_blocked(task):
+                dependencies = self.generate_dependencies(task)
+                self.process_dependencies(task, dependencies)
+                
+                # Spawning deps might have blocked us
+                if not self.graph.is_job_blocked(task):
+                    self.graph.add_job(task)
+                    if not self.would_exceed_capacity(task):
+                        self.start_task(task)
+                else:
+                    self.graph.add_job(task)
+
+    def process_celery_tasks(self, active_tasks, all_running_sorted_tasks):
+        '''
+        Rectify tower db <-> celery inconsistent view of jobs state
+        '''
+        for task in all_running_sorted_tasks:
+
+            if (task['celery_task_id'] not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
+                # NOTE: Pull status again and make sure it didn't finish in 
+                #       the meantime?
+                # TODO: try catch the getting of the job. The job COULD have been deleted
+                task_obj = task.get_full()
+                task_obj.status = 'failed'
+                task_obj.job_explanation += ' '.join((
+                    'Task was marked as running in Tower but was not present in',
+                    'Celery, so it has been marked as failed.',
+                ))
+                task_obj.save()
+                print("Going to fail %s" % task_obj.id)
+                connection.on_commit(lambda: task_obj.websocket_emit_status('failed'))
+
+                logger.error("Task %s appears orphaned... marking as failed" % task)
+
+
+    def calculate_capacity_used(self, tasks):
+        self.capacity_used = 0
+        for t in tasks:
+            self.capacity_used += t.task_impact()
+
+    def would_exceed_capacity(self, task):
+        return (task.task_impact() + self.capacity_used > self.capacity_total)
+
+    def consume_capacity(self, task):
+        self.capacity_used += task.task_impact()
+
+    def get_remaining_capacity(self):
+        return (self.capacity_total - self.capacity_used)
+
+    def process_tasks(self, all_sorted_tasks):
+
+        running_tasks = filter(lambda t: t['status'] == 'running', all_sorted_tasks)
+        runnable_tasks = filter(lambda t: t['status'] in ['waiting', 'running'], all_sorted_tasks)
+
+        self.calculate_capacity_used(running_tasks)
+
+        self.process_runnable_tasks(runnable_tasks)
+
+        pending_tasks = filter(lambda t: t['status'] in 'pending', all_sorted_tasks)
+        self.process_pending_tasks(pending_tasks)
+
+    def _schedule(self):
+        all_sorted_tasks = self.get_tasks()
+        if len(all_sorted_tasks) > 0:
+            #self.process_celery_tasks(active_tasks, all_sorted_tasks)
+
+            latest_project_updates = self.get_latest_project_update_tasks(all_sorted_tasks)
+            self.process_latest_project_updates(latest_project_updates)
+
+            latest_inventory_updates = self.get_latest_inventory_update_tasks(all_sorted_tasks)
+            self.process_latest_inventory_updates(latest_inventory_updates)
+            
+            inventory_id_sources = self.get_inventory_source_tasks(all_sorted_tasks)
+            self.process_inventory_sources(inventory_id_sources)
+
+            running_workflow_tasks = self.get_running_workflow_jobs()
+            self.process_finished_workflow_jobs(running_workflow_tasks)
+
+            self.spawn_workflow_graph_jobs(running_workflow_tasks)
+
+            self.process_tasks(all_sorted_tasks)
+
+    def schedule(self):
+        with transaction.atomic():
+            # Lock
+            try:
+                Instance.objects.select_for_update(nowait=True).all()[0]
+            except DatabaseError:
+                return
+
+            self._schedule()
+
+
