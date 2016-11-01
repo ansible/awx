@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0045_v310_job_event_stdout'),
+        ('main', '0046_v310_job_event_stdout'),
     ]
 
     operations = [
