@@ -8,7 +8,7 @@ import jsonfield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0039_v310_channelgroup'),
+        ('main', '0040_v310_channelgroup'),
     ]
 
     operations = [

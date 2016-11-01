@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0038_v310_workflow_rbac_prompts'),
+        ('main', '0039_v310_workflow_rbac_prompts'),
     ]
 
     operations = [
