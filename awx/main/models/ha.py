@@ -13,7 +13,7 @@ from awx.main.models.jobs import Job
 from awx.main.models.projects import ProjectUpdate
 from awx.main.models.unified_jobs import UnifiedJob
 
-__all__ = ('Instance', 'JobOrigin', 'TowerState',)
+__all__ = ('Instance', 'JobOrigin', 'TowerScheduleState',)
 
 
 class Instance(models.Model):
@@ -35,7 +35,7 @@ class Instance(models.Model):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
-class TowerState(SingletonModel):
+class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
 
 class JobOrigin(models.Model):
