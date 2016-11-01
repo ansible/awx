@@ -12,7 +12,7 @@ cliff==1.15.0
 cmd2==0.6.8
 d2to1==0.2.11   # TODO: Still needed?
 defusedxml==0.4.1
-Django==1.8.15
+Django==1.8.16
 debtcollector==1.2.0
 decorator==4.0.6
 django-auth-ldap==1.2.6
