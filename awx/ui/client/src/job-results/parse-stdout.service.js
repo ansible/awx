@@ -11,11 +11,20 @@ export default [function(){
             // that i'm currently seeing on this branch on the beginning
             // and end of each event string. In the future it could be
             // used to add styling classes to the actual lines of stdout
-            line = line.replace(/rn/g, '\r\n');
+            line = line.replace(/rn/g, '');
             line = line.replace(/u001b/g, '');
+
+            // ok
             line = line.replace(/\[0;32m/g, '<span class="ansi33">');
+
+            //unreachable
+            line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
+            line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
+
             line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
             line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
+
+            //end span
             line = line.replace(/\[0m/g, '</span>');
             return line;
         },
