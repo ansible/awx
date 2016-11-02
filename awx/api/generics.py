@@ -370,6 +370,9 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
 
+    def is_valid_relation(self, parent, sub, created=False):
+        return None
+
     def get_description_context(self):
         d = super(SubListCreateAttachDetachAPIView, self).get_description_context()
         d.update({
@@ -405,6 +408,13 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
                                        self.relationship, data,
                                        skip_sub_obj_read_check=created):
             raise PermissionDenied()
+
+        # Verify that the relationship to be added is valid.
+        attach_errors = self.is_valid_relation(parent, sub, created=created)
+        if attach_errors is not None:
+            if created:
+                sub.delete()
+            return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
 
         # Attach the object to the collection.
         if sub not in relationship.all():

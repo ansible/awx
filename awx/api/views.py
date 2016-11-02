@@ -2655,6 +2655,46 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         self.check_parent_access(parent)
         return getattr(parent, self.relationship).all()
 
+    def is_valid_relation(self, parent, sub, created=False):
+        mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
+        for relation in mutex_list:
+            if getattr(parent, relation).all().exists():
+                return {'Error': 'Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation)}
+
+        if created:
+            return None
+
+        workflow_nodes = parent.workflow_job_template.workflow_job_template_nodes.all().\
+            prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
+        graph = {}
+        for workflow_node in workflow_nodes:
+            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None, 'traversed': False})
+
+        find = False
+        for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
+            for workflow_node in workflow_nodes:
+                parent_node = graph[workflow_node.pk]
+                related_nodes = getattr(parent_node['node_object'], node_type).all()
+                for related_node in related_nodes:
+                    sub_node = graph[related_node.pk]
+                    sub_node['metadata']['parent'] = parent_node
+                    if not find and parent == workflow_node and sub == related_node and self.relationship == node_type:
+                        find = True
+        if not find:
+            sub_node = graph[sub.pk]
+            parent_node = graph[parent.pk]
+            if sub_node['metadata']['parent'] is not None:
+                return {"Error": "Multiple parent relationship not allowed."}
+            sub_node['metadata']['parent'] = parent_node
+            iter_node = sub_node
+            while iter_node is not None:
+                if iter_node['metadata']['traversed']:
+                    return {"Error": "Cycle detected."}
+                iter_node['metadata']['traversed'] = True
+                iter_node = iter_node['metadata']['parent']
+
+        return None
+
 class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
 

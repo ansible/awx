@@ -137,4 +137,3 @@ class SimpleDAG(object):
             if len(self.get_dependents(n['node_object'])) < 1:
                 roots.append(n)
         return roots
-
