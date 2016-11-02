@@ -76,6 +76,7 @@ export default
                     ngShow: "source && source.value !== '' && source.value !== 'custom'",
                     sourceModel: 'credential',
                     sourceField: 'name',
+                    ngClick: 'lookupCredential()',
                     awRequiredWhen: {
                         reqExpression: "cloudCredentialRequired",
                         init: "false"

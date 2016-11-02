@@ -31,7 +31,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
         }
 
         $scope.lookupCredential = function(){
-            $state.go('.lookup.credential', {
+            $state.go('.credential', {
                 credential_search: {
                     kind: $scope.source.value,
                     page_size: '5',

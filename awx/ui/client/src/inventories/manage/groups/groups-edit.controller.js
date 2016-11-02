@@ -57,6 +57,16 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
             });
         };
 
+        $scope.lookupCredential = function(){
+            $state.go('.credential', {
+                credential_search: {
+                    kind: $scope.source.value,
+                    page_size: '5',
+                    page: '1'
+                }
+            });
+        };
+
         $scope.formCancel = function() {
             $state.go('^');
         };
