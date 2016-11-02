@@ -2660,7 +2660,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
         mutex_list = ('success_nodes', 'failure_nodes') if self.relationship == 'always_nodes' else ('always_nodes',)
         for relation in mutex_list:
             if getattr(parent, relation).all().exists():
-                return {'Error': _('Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation))}
+                return {'Error': 'Cannot associate {0} when {1} have been associated.'.format(self.relationship, relation)}
 
         if created:
             return None
@@ -2669,7 +2669,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
         graph = {}
         for workflow_node in workflow_nodes:
-            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None})
+            graph[workflow_node.pk] = dict(node_object=workflow_node, metadata={'parent': None, 'traversed': False})
 
         find = False
         for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
@@ -2685,11 +2685,13 @@ class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, Su
             sub_node = graph[sub.pk]
             parent_node = graph[parent.pk]
             if sub_node['metadata']['parent'] is not None:
-                return {"Error": _("Multiple parent relationship not allowed.")}
-            iter_node = parent_node
+                return {"Error": "Multiple parent relationship not allowed."}
+            sub_node['metadata']['parent'] = parent_node
+            iter_node = sub_node
             while iter_node is not None:
-                if iter_node == sub_node:
-                    return {"Error": _("Cycle detected.")}
+                if iter_node['metadata']['traversed']:
+                    return {"Error": "Cycle detected."}
+                iter_node['metadata']['traversed'] = True
                 iter_node = iter_node['metadata']['parent']
 
         return None
