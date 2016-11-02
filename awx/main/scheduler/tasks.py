@@ -1,14 +1,17 @@
 
 # Python
 import logging
-import time
+
+# Django
+from django.db import transaction
+from django.db.utils import DatabaseError
 
 # Celery
 from celery import task
 
 # AWX
-from awx.main.models import UnifiedJob
-from awx.main.scheduler import schedule
+from awx.main.models import Instance
+from awx.main.scheduler import TaskManager 
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -18,62 +21,31 @@ logger = logging.getLogger('awx.main.scheduler')
 
 @task
 def run_job_launch(job_id):
-    # Wait for job to exist.
-    # The job is created in a transaction then the message is created, but
-    # the transaction may not have completed.
-
-    # FIXME: We could generate the message in a Django signal handler.
-    # OR, we could call an explicit commit in the view and then send the 
-    # message.
-
-    retries = 10
-    retry = 0
-    while not UnifiedJob.objects.filter(id=job_id).exists():
-        time.sleep(0.3)
-        
-        if retry >= retries:
-            logger.error("Failed to process 'job_launch' message for job %d" % job_id)
-            # ack the message so we don't build up the queue.
-            #
-            # The job can still be chosen to run during tower startup or 
-            # when another job is started or completes
-            return
-        retry += 1
-
-    # "Safe" to get the job now since it exists.
-    # Really, there is a race condition from exists to get
-
-    # TODO: while not loop should call get wrapped in a try except
-    #job = UnifiedJob.objects.get(id=job_id)
-
-    schedule()
+    TaskManager().schedule()
 
 @task
 def run_job_complete(job_id):
-    # TODO: use list of finished status from jobs.py or unified_jobs.py
-    finished_status = ['successful', 'error', 'failed', 'completed']
-    q = UnifiedJob.objects.filter(id=job_id)
+    TaskManager().schedule()
 
-    # Ensure that the job is updated in the database before we call to
-    # schedule the next job.
-    retries = 10
-    retry = 0
-    while True:
-        # Job not found, most likely deleted. That's fine
-        if not q.exists():
-            logger.warn("Failed to find job '%d' while processing 'job_complete' message. Presume that it was deleted." % job_id)
-            break
+@task
+def run_task_manager():
+    TaskManager().schedule()
 
-        job = q[0]
-        if job.status in finished_status:
-            break
+@task
+def run_fail_inconsistent_running_jobs():
+    with transaction.atomic():
+        # Lock
+        try:
+            Instance.objects.select_for_update(nowait=True).all()[0]
+            scheduler = TaskManager()
+            active_tasks = scheduler.get_active_tasks()
 
-        time.sleep(0.3)
-        
-        if retry >= retries:
-            logger.error("Expected job status '%s' to be one of '%s' while processing 'job_complete' message." % (job.status, finished_status))
+            if active_tasks is None:
+                # TODO: Failed to contact celery. We should surface this.
+                return None
+
+            all_running_sorted_tasks = scheduler.get_running_tasks()
+            scheduler.process_celery_tasks(active_tasks, all_running_sorted_tasks)
+        except DatabaseError:
             return
-        retry += 1
-
-    schedule()
 

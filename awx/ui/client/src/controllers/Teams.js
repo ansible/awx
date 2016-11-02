@@ -105,8 +105,7 @@ export function TeamsAdd($scope, $rootScope, $stateParams, TeamForm, GenerateFor
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('teams'),
-        form = TeamForm,
-        generator = GenerateForm;
+        form = TeamForm;
 
     init();
 
@@ -120,7 +119,7 @@ export function TeamsAdd($scope, $rootScope, $stateParams, TeamForm, GenerateFor
     // Save
     $scope.formSave = function() {
         var fld, data;
-        generator.clearApiErrors();
+        GenerateForm.clearApiErrors($scope);
         Wait('start');
         Rest.setUrl(defaultUrl);
         data = {};
@@ -216,7 +215,6 @@ export function TeamsEdit($scope, $rootScope, $stateParams,
     $scope.formSave = function() {
         $rootScope.flashMessage = null;
         if ($scope[form.name + '_form'].$valid) {
-            Rest.setUrl(defaultUrl + id + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function() {
                     $state.go($state.current, null, { reload: true });

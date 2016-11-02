@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0036_v310_remove_tower_settings'),
+        ('main', '0037_v310_remove_tower_settings'),
     ]
 
     operations = [

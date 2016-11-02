@@ -211,6 +211,7 @@ INSTALLED_APPS = (
     'awx.ui',
     'awx.fact',
     'awx.sso',
+    'solo',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -402,6 +403,14 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
         'schedule': timedelta(seconds=60)
     },
+    'task_manager': {
+        'task': 'awx.main.scheduler.tasks.run_task_manager',
+        'schedule': timedelta(seconds=20)
+    },
+    'task_fail_inconsistent_running_jobs': {
+        'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
+        'schedule': timedelta(seconds=30)
+    },
 }
 
 # Django Caching Configuration
@@ -504,6 +513,9 @@ AWX_TASK_ENV = {}
 # before it recycles
 JOB_EVENT_RECYCLE_THRESHOLD = 3000
 
+# Number of workers used to proecess job events in parallel
+JOB_EVENT_WORKERS = 4
+
 # Maximum number of job events that can be waiting on a single worker queue before
 # it can be skipped as too busy
 JOB_EVENT_MAX_QUEUE_SIZE = 100
@@ -602,6 +614,7 @@ INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
 EC2_REGION_NAMES = {
     'us-east-1': _('US East (Northern Virginia)'),
+    'us-east-2': _('US East (Ohio)'),
     'us-west-2': _('US West (Oregon)'),
     'us-west-1': _('US West (Northern California)'),
     'eu-central-1': _('EU (Frankfurt)'),
@@ -610,6 +623,7 @@ EC2_REGION_NAMES = {
     'ap-southeast-2': _('Asia Pacific (Sydney)'),
     'ap-northeast-1': _('Asia Pacific (Tokyo)'),
     'ap-northeast-2': _('Asia Pacific (Seoul)'),
+    'ap-south-1': _('Asia Pacific (Mumbai)'),
     'sa-east-1': _('South America (Sao Paulo)'),
     'us-gov-west-1': _('US West (GovCloud)'),
     'cn-north-1': _('China (Beijing)'),
@@ -749,7 +763,7 @@ OPENSTACK_INSTANCE_ID_VAR = 'openstack.id'
 # ----- Foreman -----
 # ---------------------
 SATELLITE6_ENABLED_VAR = 'foreman.enabled'
-SATELLITE6_ENABLED_VALUE = 'true'
+SATELLITE6_ENABLED_VALUE = 'True'
 SATELLITE6_GROUP_FILTER = r'^.+$'
 SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True

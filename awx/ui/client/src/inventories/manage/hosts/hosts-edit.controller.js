@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'HostManageService', 'host',
-    function($state, $stateParams, $scope, HostForm, ParseTypeChange, HostManageService, host){
+     ['$state', '$stateParams', '$scope', 'HostForm', 'ParseTypeChange', 'HostManageService', 'host', 'ToJSON',
+     function($state, $stateParams, $scope, HostForm, ParseTypeChange, HostManageService, host, ToJSON){
 
         init();
 
@@ -34,9 +34,10 @@
             $scope.host.enabled = !$scope.host.enabled;
         };
         $scope.formSave = function(){
-            var host = {
+            var json_data = ToJSON($scope.parseType, $scope.variables, true),
+            host = {
                 id: $scope.host.id,
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 enabled: $scope.host.enabled

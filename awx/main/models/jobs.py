@@ -33,7 +33,7 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import decrypt_field, ignore_inventory_computed_fields
+from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin
@@ -646,29 +646,6 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         kwargs['job_host_summaries__job__pk'] = self.pk
         return Host.objects.filter(**kwargs)
 
-    def is_blocked_by(self, obj):
-        from awx.main.models import InventoryUpdate, ProjectUpdate
-        if type(obj) == Job:
-            if obj.job_template is not None and obj.inventory is not None:
-                if obj.job_template == self.job_template and \
-                   obj.inventory == self.inventory:
-                    if self.allow_simultaneous:
-                        return False
-                    if obj.launch_type == 'callback' and self.launch_type == 'callback' and \
-                       obj.limit != self.limit:
-                        return False
-                    return True
-            return False
-        if type(obj) == InventoryUpdate:
-            if self.inventory == obj.inventory_source.inventory:
-                return True
-            return False
-        if type(obj) == ProjectUpdate:
-            if obj.project == self.project:
-                return True
-            return False
-        return False
-
     @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
@@ -706,39 +683,6 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
     @property
     def processed_hosts(self):
         return self._get_hosts(job_host_summaries__processed__gt=0)
-
-    def generate_dependencies(self, active_tasks):
-        from awx.main.models import InventoryUpdate, ProjectUpdate
-        inventory_sources = self.inventory.inventory_sources.filter(update_on_launch=True)
-        project_found = False
-        inventory_sources_found = []
-        dependencies = []
-        for obj in active_tasks:
-            if type(obj) == ProjectUpdate and self.project is not None:
-                if obj.project == self.project:
-                    project_found = True
-            if type(obj) == InventoryUpdate:
-                if obj.inventory_source in inventory_sources:
-                    inventory_sources_found.append(obj.inventory_source)
-        # Skip updating any inventory sources that were already updated before
-        # running this job (via callback inventory refresh).
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
-        start_args = start_args or {}
-        inventory_sources_already_updated = start_args.get('inventory_sources_already_updated', [])
-        if inventory_sources_already_updated:
-            for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
-                if source not in inventory_sources_found:
-                    inventory_sources_found.append(source)
-        if not project_found and self.project is not None and self.project.needs_update_on_launch:
-            dependencies.append(self.project.create_project_update(launch_type='dependency'))
-        if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
-            for source in inventory_sources:
-                if source not in inventory_sources_found and source.needs_update_on_launch:
-                    dependencies.append(source.create_inventory_update(launch_type='dependency'))
-        return dependencies
 
     def notification_data(self, block=5):
         data = super(Job, self).notification_data()
@@ -1210,7 +1154,7 @@ class JobEvent(CreatedModifiedModel):
             if isinstance(invocation, dict) and verbosity == 0 and 'module_args' in invocation:
                 event_data['res']['invocation']['module_args'] = ''
                 self.event_data = event_data
-                update_fields.add('event_data')
+                updated_fields.add('event_data')
         if self.event == 'playbook_on_stats':
             try:
                 failures_dict = event_data.get('failures', {})
@@ -1525,9 +1469,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
-
-    def is_blocked_by(self, obj):
-        return True
 
     def handle_extra_data(self, extra_data):
         extra_vars = {}

@@ -267,7 +267,7 @@ ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$statePara
 
 export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, GenerateForm, ProjectsForm, Rest, Alert, ProcessErrors,
-    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2) {
+    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2, i18n) {
 
     var form = ProjectsForm(),
         base = $location.path().replace(/^\//, '').split('/')[0],
@@ -414,7 +414,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 
 
 export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
-    $stateParams, ProjectsForm, Rest, Alert, ProcessErrors,
+    $stateParams, ProjectsForm, Rest, Alert, ProcessErrors, GenerateForm,
     Prompt, ClearScope, GetBasePath, GetProjectPath, Authorization,
     GetChoices, Empty, DebugForm, Wait, ProjectUpdate, $state, CreateSelect2, ToggleNotification, i18n) {
 
@@ -438,6 +438,16 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         }
     });
 
+    if ($scope.pathsReadyRemove) {
+        $scope.pathsReadyRemove();
+    }
+    $scope.pathsReadyRemove = $scope.$on('pathsReady', function () {
+        CreateSelect2({
+            element: '#local-path-select',
+            multiple: false
+        });
+    });
+
     // After the project is loaded, retrieve each related set
     if ($scope.projectLoadedRemove) {
         $scope.projectLoadedRemove();
@@ -455,6 +465,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             $scope.project_local_paths = opts;
             $scope.local_path = $scope.project_local_paths[0];
             $scope.base_dir = 'You do not have access to view this property';
+            $scope.$emit('pathsReady');
         }
 
         $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
@@ -524,11 +535,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                     multiple: false
                 });
 
-                CreateSelect2({
-                    element: '#local-path-select',
-                    multiple: false
-                });
-
                 $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
                 $scope.scm_update_tooltip = "Start an SCM update";
                 $scope.scm_type_class = "";
@@ -581,7 +587,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     // Save changes to the parent
     $scope.formSave = function() {
         var fld, i, params;
-        //generator.clearApiErrors();
+        GenerateForm.clearApiErrors($scope);
         Wait('start');
         $rootScope.flashMessage = null;
         params = {};

@@ -517,7 +517,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
     function($rootScope) {
 
         return function(directive) {
-            /* @todo re-enable
             var docw, doch, spinnyw, spinnyh;
             if (directive === 'start' && !$rootScope.waiting) {
                 $rootScope.waiting = true;
@@ -538,7 +537,6 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
                     $rootScope.waiting = false;
                 });
             }
-            */
         };
     }
 ])

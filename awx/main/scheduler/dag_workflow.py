@@ -33,14 +33,14 @@ class WorkflowDAG(SimpleDAG):
             # Job is about to run or is running. Hold our horses and wait for
             # the job to finish. We can't proceed down the graph path until we
             # have the job result.
-            elif job.status not in ['failed', 'error', 'successful']:
+            elif job.status not in ['failed', 'successful']:
                 continue
-            elif job.status in ['failed', 'error']:
+            elif job.status == 'failed':
                 children_failed = self.get_dependencies(obj, 'failure_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
-            elif job.status in ['successful']:
+            elif job.status == 'successful':
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_success + children_always
@@ -60,14 +60,16 @@ class WorkflowDAG(SimpleDAG):
             # Job is about to run or is running. Hold our horses and wait for
             # the job to finish. We can't proceed down the graph path until we
             # have the job result.
-            elif job.status not in ['failed', 'error', 'successful']:
+            elif job.status in ['canceled', 'error']:
+                continue
+            elif job.status not in ['failed', 'successful']:
                 return False
-            elif job.status in ['failed', 'error']:
+            elif job.status == 'failed':
                 children_failed = self.get_dependencies(obj, 'failure_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_failed + children_always
                 nodes.extend(children_all)
-            elif job.status in ['successful']:
+            elif job.status == 'successful':
                 children_success = self.get_dependencies(obj, 'success_nodes')
                 children_always = self.get_dependencies(obj, 'always_nodes')
                 children_all = children_success + children_always

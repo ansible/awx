@@ -54,7 +54,10 @@
                     default_val: false
                 });
                 CallbackHelpInit({ scope: $scope });
-                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
+                SurveyControllerInit({
+                    scope: $scope,
+                    parent_scope: $scope
+                });
             }
 
             callback = function() {
@@ -62,10 +65,6 @@
                 $scope[form.name + '_form'].$setDirty();
             };
 
-            SurveyControllerInit({
-                scope: $scope,
-                parent_scope: $scope
-            });
 
             var selectCount = 0;
 
@@ -73,6 +72,7 @@
                 $scope.removeChoicesReady();
             }
             $scope.removeChoicesReady = $scope.$on('choicesReadyVerbosity', function () {
+                ParseTypeChange({ scope: $scope, field_id: 'job_template_variables', onChange: callback });
                 selectCount++;
                 if (selectCount === 3) {
                     var verbosity;
@@ -120,8 +120,6 @@
                         element:'#job_template_verbosity',
                         multiple: false
                     });
-
-                    $scope.$emit('lookUpInitialize');
                 }
             });
 
@@ -282,7 +280,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {id: id}, {reload: true});
+                $state.go('jobTemplates.edit', {job_template_id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -421,7 +419,7 @@
                     $scope.survey_enabled = false;
                 }
 
-                generator.clearApiErrors();
+                generator.clearApiErrors($scope);
 
                 Wait('start');
 
@@ -503,6 +501,7 @@
 
                 } catch (err) {
                     Wait('stop');
+                    console.log(err)
                     Alert("Error", "Error parsing extra variables. " +
                         "Parser returned: " + err);
                 }

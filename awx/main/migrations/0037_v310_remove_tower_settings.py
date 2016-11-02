@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0035_v310_jobevent_uuid'),
+        ('main', '0036_v310_jobevent_uuid'),
     ]
 
     # These settings are now in the separate awx.conf app.

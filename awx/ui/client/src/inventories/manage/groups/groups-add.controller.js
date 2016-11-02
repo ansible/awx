@@ -5,14 +5,14 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'ParseTypeChange', 'GenerateForm', 'inventoryData',
-    'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'rbacUiControlService',
-    function($state, $stateParams, $scope, GroupForm, CredentialList,  ParseTypeChange, GenerateForm, inventoryData,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService) {
-        var form = GroupForm();
-
+                'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'rbacUiControlService', 'ToJSON',
+                function($state, $stateParams, $scope, GroupForm, CredentialList,  ParseTypeChange, GenerateForm, inventoryData,
+                         GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService, ToJSON) {
+                    var generator = GenerateForm,
+                        form = GroupForm();
         init();
 
-        function init() {
+        function init() {n
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
@@ -46,9 +46,10 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
 
         $scope.formSave = function() {
             var params, source;
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
             // group fields
             var group = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: inventoryData.id

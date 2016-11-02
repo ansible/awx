@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'ParseVariableString',
-    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
-    function($state, $stateParams, $scope, ToggleNotification, ParseVariableString,
-        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData) {
+                'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData', 'ToJSON',
+                function($state, $stateParams, $scope, ToggleNotification, ParseVariableString,
+                         ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData, ToJSON) {
 
         init();
 
@@ -58,9 +58,10 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
         };
         $scope.formSave = function() {
             var params, source;
+            json_data = ToJSON($scope.parseType, $scope.variables, true);
             // group fields
             var group = {
-                variables: $scope.variables === '---' || $scope.variables === '{}' ? null : $scope.variables,
+                variables: json_data,
                 name: $scope.name,
                 description: $scope.description,
                 inventory: $scope.inventory,

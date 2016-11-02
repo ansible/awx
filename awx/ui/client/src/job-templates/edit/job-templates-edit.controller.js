@@ -542,7 +542,7 @@ export default
                     $scope.survey_enabled = false;
                 }
 
-                generator.clearApiErrors();
+                generator.clearApiErrors($scope);
 
                 Wait('start');
 

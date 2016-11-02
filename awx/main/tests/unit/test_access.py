@@ -9,6 +9,15 @@ from awx.main.access import (
     check_superuser,
     JobTemplateAccess,
     WorkflowJobTemplateAccess,
+    SystemJobTemplateAccess,
+)
+
+from awx.main.models import (
+    Credential,
+    Inventory,
+    Project,
+    Role,
+    Organization,
 )
 from awx.conf.license import LicenseForbids
 from awx.main.models import Credential, Inventory, Project, Role, Organization, Instance
@@ -124,7 +133,6 @@ def test_jt_can_add_bad_data(user_unit):
     access = JobTemplateAccess(user_unit)
     assert not access.can_add({'asdf': 'asdf'})
 
-
 class TestWorkflowAccessMethods:
     @pytest.fixture
     def workflow(self, workflow_job_template_factory):
@@ -172,3 +180,12 @@ def test_user_capabilities_method():
         'copy': 'foobar'
     }
 
+def test_system_job_template_can_start(mocker):
+    user = mocker.MagicMock(spec=User, id=1, is_system_auditor=True, is_superuser=False)
+    assert user.is_system_auditor
+    access = SystemJobTemplateAccess(user)
+    assert not access.can_start(None)
+
+    user.is_superuser = True
+    access = SystemJobTemplateAccess(user)
+    assert access.can_start(None)

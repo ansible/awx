@@ -202,7 +202,7 @@ function adhocController($q, $scope, $location, $stateParams,
             "privilege_escalation": ""
         };
 
-        GenerateForm.clearApiErrors();
+        GenerateForm.clearApiErrors($scope);
 
         // populate data with the relevant form values
         for (fld in adhocForm.fields) {

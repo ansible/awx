@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q', 'i18n',
-    function ($rootScope, $location, $log, $state, $q, i18n) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n', 'Authorization',
+    function ($rootScope, $location, $log, $state, $q, i18n, Authorization) {
         var needsResubscribing = false,
         socketPromise = $q.defer();
         return {
@@ -14,7 +14,8 @@ export default
                 var self = this,
                     host = window.location.host,
                     protocol,
-                    url;
+                    url,
+                    token = Authorization.getToken();
 
                 if($location.protocol() === 'http'){
                     protocol = 'ws';
@@ -26,6 +27,7 @@ export default
 
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
                     // We have a valid session token, so attempt socket connection
+                    url = `${url}?token=${token}`;
                     $log.debug('Socket connecting to: ' + url);
 
                     self.socket = new ReconnectingWebSocket(url, null, {
@@ -73,9 +75,6 @@ export default
                 // Function called when messages are received on by the UI from
                 // the API over the websocket. This will route each message to
                 // the appropriate controller for the current $state.
-                e.data = e.data.replace(/\\/g, '');
-                e.data = e.data.substr(0, e.data.length-1);
-                e.data = e.data.substr(1);
                 $log.debug('Received From Server: ' + e.data);
 
                 var data = JSON.parse(e.data), str = "";
