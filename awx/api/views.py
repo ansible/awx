@@ -1131,7 +1131,6 @@ class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
-    capabilities_prefetch = ['admin']
     permission_classes = (UserPermission,)
 
     def post(self, request, *args, **kwargs):
