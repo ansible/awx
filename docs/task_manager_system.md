@@ -38,20 +38,34 @@ The `schedule()` function is ran (a) periodically by a celery task and (b) on jo
 | failed     | Job finished with ansible-playbook return code other than 0.                                                       |
 | error      | System failure.                                                                                                    |
 
-## todo
- 
 ## Code Composition
-* partials
-* 
+The main goal of the new task manager is to run in our HA environment. This translates to making the task manager logic run on any tower node. To support this we need to remove any reliance on state between task manager schedule logic runs. We had a secondary goal in mind of designing the task manager to have limited/no access to the database for the future federation feature. This secondary requirement combined with performance needs led us to create partial models that wrap dict database model data.
+
+### Partials
+Partials wrap a subset of Django model dict data, provide a simple static query method that is purpose built to support the populating of the task manager hash tables,  have a link back to the model which they are wrapping so that the original Django ORM model for which the partial is wrapping can be easily gotten, and can be made serializable via `<type, self.data>` since `self.data` is a `dict` of the database record. 
+
+### Blocking Logic
+The blocking logic has been moved from the respective ORM model to the code that manages the dependency hash tables. The blocking logic could easily be moved to the partials or evne the ORM models. However, the per-model blocking logic code would be operating on the dependency hash tables; not on ORM models as in the previous design. The blocking logic is kept close to the data-structures required to operate on. 
 
 ## Acceptance Tests
-* assemelate with .md and trim the fat https://docs.google.com/a/redhat.com/document/d/1AOvKiTMSV0A2RHykHW66BZKBuaJ_l0SJ-VbMwvu-5Gk/edit?usp=sharing
 
+The new task manager should, basically, work like the old one. Old task manager features were identified and new ones discovered in the process of creating the new task manager. Rules for the new task manager behavior are iterated below. Testing should ensure that those rules are followed.
 
+### Task Manager Rules
+* Groups of blocked tasks run in chronological order
+* Tasks that are not blocked run whenever there is capacity available
+* Only 1 Project Updates for a Project may be running
+* Only 1 Inventory Update for an Inventory Source may be running
+* For a related Project, only a Job xor Project Update may be running
+* For a related Inventory, only a Job xor Inventory Update(s) may be running
+* Only 1 Job for a Job Template may be running**
+  * **allow_simultaneous feature relaxes this condition
+* Only 1 System Job may be running
 
+### Update on Launch Logic
+Feature in Tower where dynamic inventory and projects associated with Job Templates may be set to invoke and update when related Job Templates are launch. Related to this feature is a cache feature on dynamic inventory updates and project updates. The rules for these two intertwined features are below.
+* projects marked as update on launch should trigger a project update when a related job template is launched
+* inventory sources marked as update on launch should trigger an inventory update when a related job template is launched
+* spawning of project update and/or inventory updates should **not** be triggered when a related job template is launched **IF** there is an update && the last update finished successfully && the finished time puts the update within the configured cache window.
 
-
-
-
-
-
+Example permutations of blocking: https://docs.google.com/a/redhat.com/document/d/1AOvKiTMSV0A2RHykHW66BZKBuaJ_l0SJ-VbMwvu-5Gk/edit?usp=sharing
