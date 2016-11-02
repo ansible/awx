@@ -4,14 +4,18 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'ParseVariableString',
-                'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData', 'ToJSON',
-                function($state, $stateParams, $scope, ToggleNotification, ParseVariableString,
-                         ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData, ToJSON) {
+export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
+    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
+    function($state, $stateParams, $scope, ToggleNotification, ParseVariableString, rbacUiControlService, ToJSON,
+        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData) {
 
         init();
 
         function init() {
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+                .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
             // instantiate expected $scope values from inventorySourceData & groupData
             _.assign($scope, { credential: inventorySourceData.credential }, { overwrite: inventorySourceData.overwrite }, { overwrite_vars: inventorySourceData.overwrite_vars }, { update_on_launch: inventorySourceData.update_on_launch }, { update_cache_timeout: inventorySourceData.update_cache_timeout }, { instance_filters: inventorySourceData.instance_filters }, { inventory_script: inventorySourceData.source_script });
             if (inventorySourceData.credential) {

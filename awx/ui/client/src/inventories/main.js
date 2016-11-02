@@ -70,10 +70,11 @@ angular.module('inventory', [
                     },
                     views: {
                         // clear form template when views render in this substate
-                        'form@': {
+                        'form': {
                             templateProvider: () => ''
                         },
-                        'list@': {
+                        // target the un-named ui-view @ root level
+                        '@': {
                             templateProvider: function(SchedulesList, generateList, ParentObject) {
                                 // include name of parent resource in listTitle
                                 SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
@@ -96,7 +97,7 @@ angular.module('inventory', [
                         label: "CREATE SCHEDULE"
                     },
                     views: {
-                        'form@': {
+                        'form': {
                             controller: 'schedulerAddController',
                             templateUrl: templateUrl("scheduler/schedulerForm")
                         }
@@ -110,7 +111,7 @@ angular.module('inventory', [
                         label: "{{schedule_obj.name}}"
                     },
                     views: {
-                        'form@': {
+                        'form': {
                             templateUrl: templateUrl("scheduler/schedulerForm"),
                             controller: 'schedulerEditController',
                         }
@@ -129,7 +130,6 @@ angular.module('inventory', [
                 });
 
                 editGroup = stateDefinitions.generateTree({
-                    //parent: 'inventoryManage', // top-most node in the generated tree (tree will replace this node)
                     url: '/edit-group/:group_id',
                     name: 'inventoryManage.editGroup',
                     modes: ['edit'],

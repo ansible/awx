@@ -29,14 +29,14 @@ export default
                 name: {
                     label: 'Name',
                     type: 'text',
-                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     tab: 'properties'
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
-                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                     tab: 'properties'
                 },
                 variables: {
@@ -65,7 +65,7 @@ export default
                     type: 'select',
                     ngOptions: 'source.label for source in source_type_options track by source.value',
                     ngChange: 'sourceChange(source)',
-                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                     ngModel: 'source'
                 },
                 credential: {
@@ -81,7 +81,7 @@ export default
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
                     },
-                    ngDisabled: '(!group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 source_regions: {
                     label: 'Regions',
@@ -97,7 +97,7 @@ export default
                         "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                         "</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 instance_filters: {
                     label: 'Instance Filters',
@@ -116,7 +116,7 @@ export default
                         "<p>View the <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeInstances.html\" target=\"_blank\">Describe Instances documentation</a> " +
                         "for a complete list of supported filters.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 group_by: {
                     label: 'Only Group By',
@@ -140,7 +140,7 @@ export default
                         "<li>Tag None: <strong>tags &raquo; tag_none</strong></li>" +
                         "</ul><p>If blank, all groups above are created except <em>Instance ID</em>.</p>",
                     dataContainer: 'body',
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 inventory_script: {
                     label :  "Custom Inventory Script",
@@ -152,7 +152,7 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpInventory_script()' ,
                     ngRequired: "source && source.value === 'custom'",
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 },
                 custom_variables: {
                     id: 'custom_variables',
@@ -263,7 +263,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }, {
                         name: 'overwrite_vars',
                         label: 'Overwrite Variables',
@@ -278,7 +278,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }, {
                         name: 'update_on_launch',
                         label: 'Update on Launch',
@@ -290,7 +290,7 @@ export default
                         dataContainer: 'body',
                         dataPlacement: 'right',
                         labelClass: 'checkbox-options',
-                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }]
                 },
                 update_cache_timeout: {
@@ -314,16 +314,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(group_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 

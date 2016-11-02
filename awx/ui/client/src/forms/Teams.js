@@ -26,14 +26,14 @@ export default
                 name: {
                     label: i18n._('Name'),
                     type: 'text',
-                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     capitalize: false
                 },
                 description: {
                     label: i18n._('Description'),
                     type: 'text',
-                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
                     label: i18n._('Organization'),
@@ -42,7 +42,7 @@ export default
                     sourceModel: 'organization',
                     basePath: 'organizations',
                     sourceField: 'name',
-                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                 }
             },
@@ -50,16 +50,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(team_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -84,7 +84,7 @@ export default
                             awToolTip: i18n._('Add user to team'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: i18n._('&#43; ADD'),
-                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

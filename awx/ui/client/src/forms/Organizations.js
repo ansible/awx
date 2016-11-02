@@ -25,30 +25,30 @@ export default
                 name: {
                     label: i18n._('Name'),
                     type: 'text',
-                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     capitalize: false
                 },
                 description: {
                     label: i18n._('Description'),
                     type: 'text',
-                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
                     ngDisabled: true,
-                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -73,7 +73,7 @@ export default
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: i18n._('&#43; ADD'),
-                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

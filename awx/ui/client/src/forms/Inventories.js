@@ -30,13 +30,13 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                 type: 'text',
                 required: true,
                 capitalize: false,
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             inventory_description: {
                 realName: 'description',
                 label: i18n._('Description'),
                 type: 'text',
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
                 label: i18n._('Organization'),
@@ -49,7 +49,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             variables: {
                 label: i18n._('Variables'),
@@ -67,23 +67,23 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                 dataTitle: 'Inventory Variables',
                 dataPlacement: 'right',
                 dataContainer: 'body',
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)' // TODO: get working
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
             }
         },
 
         buttons: {
             cancel: {
                 ngClick: 'formCancel()',
-                ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             close: {
                 ngClick: 'formCancel()',
-                ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()',
                 ngDisabled: true,
-                ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             }
         },
         related: {
@@ -106,7 +106,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                         awToolTip: 'Add a permission',
                         actionClass: 'btn List-buttonSubmit',
                         buttonContent: '&#43; ADD',
-                        ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
 
                     }
                 },

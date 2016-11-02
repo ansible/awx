@@ -56,7 +56,8 @@ export default
                 ngClick: 'addCredential()',
                 awToolTip: i18n._('Create a new credential'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD')
+                buttonContent: i18n._('&#43; ADD'),
+                ngShow: "true"
             }
         },
 

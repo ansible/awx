@@ -444,7 +444,7 @@ var tower = angular.module('Tower', [
                 }]
             },
             views: {
-                'list@': {
+                '@': {
                     templateUrl: urlPrefix + 'partials/jobs.html',
                 },
                 'list@jobs': {

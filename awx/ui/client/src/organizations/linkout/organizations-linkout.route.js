@@ -17,7 +17,7 @@ export default [{
     url: '/:organization_id/users',
     searchPrefix: 'user',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsUsers,
             templateProvider: function(OrgUserList, generateList) {
                 let html = generateList.build({
@@ -110,7 +110,7 @@ export default [{
     url: '/:organization_id/teams',
     searchPrefix: 'team',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsTeams,
             templateProvider: function(OrgTeamList, generateList) {
                 let html = generateList.build({
@@ -253,7 +253,7 @@ export default [{
     url: '/:organization_id/job_templates',
     searchPrefix: 'job_template',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsJobTemplates,
             templateProvider: function(OrgJobTemplateList, generateList) {
                 let html = generateList.build({
@@ -326,7 +326,7 @@ export default [{
         }
     },
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsAdmins,
             templateProvider: function(OrgAdminList, generateList) {
                 let html = generateList.build({

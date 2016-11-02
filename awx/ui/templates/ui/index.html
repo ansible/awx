@@ -33,25 +33,13 @@
 </head>
 
 <body data-user-agent="{{userAgent}}">
-    <div ui-view class="col-lg-12"></div>
     <main-menu></main-menu>
     <bread-crumb ng-show="!includesCurrentState('inventoryManage')"></bread-crumb>
     <div ui-view="groupBreadcrumbs" ng-show="includesCurrentState('inventoryManage')"></div>
     <toast></toast>
     <div class="container-fluid" id="content-container">
         <div class="row">
-            <div class="col-lg-12">
-                <div id="main-view" ng-if="configReady">
-                    <!-- form views -->
-                    <div class="tab-pane">
-                        <div ui-view="form"></div>
-                    </div>
-                    <!-- list views -->
-                    <div class="tab-pane">
-                        <div ui-view="list">
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-12" ui-view>
             </div>
         </div>
         <!-- Password Dialog -->

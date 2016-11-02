@@ -46,11 +46,11 @@ export default
                     dataTitle: 'Host Name',
                     dataPlacement: 'right',
                     dataContainer: 'body',
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 description: {
                     label: 'Description',
-                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(host.summary_fields.user_capabilities.edit || canAdd)',
                     type: 'text'
                 },
                 variables: {
@@ -80,16 +80,16 @@ export default
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(host.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(host.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(host.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(host.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(host.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
         });

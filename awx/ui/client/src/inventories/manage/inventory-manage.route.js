@@ -89,8 +89,8 @@ export default {
             controller: BreadcrumbsController,
             templateUrl: templateUrl('inventories/manage/breadcrumbs/breadcrumbs')
         },
-        // target the ui-view with name "list" at the root view
-        'list@': {
+        // target the un-named ui-view @ root level
+        '@': {
             templateUrl: templateUrl('inventories/manage/inventory-manage'),
             controller: InventoriesManage
         },
@@ -102,8 +102,7 @@ export default {
                     mode: 'edit'
                 });
                 html = generateList.wrapPanel(html);
-                // I'm so sorry
-                // group delete modal
+                // Include the custom group delete modal template
                 return $templateRequest(templateUrl('inventories/manage/groups/groups-list')).then((template) => {
                     return html.concat(template);
                 });

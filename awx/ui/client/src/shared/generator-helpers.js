@@ -680,9 +680,6 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     return function (options) {
 
         var html = '';
-
-        console.log(options)
-
         html += '<button ';
         html += (options.mode) ? "mode=\"" + options.mode + "\" " : "";
         html += (options.awToolTip) ? "aw-tool-tip=\"" + options.awToolTip + "\" " : "";

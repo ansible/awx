@@ -85,7 +85,7 @@ export default
                     }]
                 },
                 views: {
-                    'list@': {
+                    '@': {
                         templateProvider: function(SchedulesList, generateList, ParentObject){
                             // include name of parent resource in listTitle
                             SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
@@ -94,7 +94,7 @@ export default
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
-                            return html;
+                            return generateList.insertFormView() + html;
                         },
                         controller: 'schedulerListController'
                     }
@@ -108,7 +108,7 @@ export default
                     label: 'CREATE SCHEDULE'
                 },
                 views: {
-                    'form@': {
+                    'form': {
                         controller: 'schedulerAddController',
                         templateUrl: templateUrl("scheduler/schedulerForm"),
                     }
@@ -121,7 +121,7 @@ export default
                     label: '{{schedule_obj.name}}'
                 },
                 views: {
-                    'form@': {
+                    'form': {
                         controller: 'schedulerEditController',
                         templateUrl: templateUrl("scheduler/schedulerForm"),
                     }

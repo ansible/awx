@@ -25,7 +25,7 @@ angular.module('managementJobScheduler', [])
                 label: 'SCHEDULES'
             },
             views: {
-                'list@': {
+                '@': {
                     templateProvider: function(SchedulesList, generateList, ParentObject) {
                         // include name of parent resource in listTitle
                         SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
@@ -34,7 +34,7 @@ angular.module('managementJobScheduler', [])
                             mode: 'edit'
                         });
                         html = generateList.wrapPanel(html);
-                        return html;
+                        return generateList.insertFormView() + html;
                     },
                     controller: 'managementJobController',
                 }
@@ -61,7 +61,7 @@ angular.module('managementJobScheduler', [])
                 label: 'CREATE SCHEDULED JOB'
             },
             views: {
-                'form@': {
+                'form': {
                     templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
                     controller: 'managementJobAddController',
                 }
@@ -75,8 +75,10 @@ angular.module('managementJobScheduler', [])
                 label: 'EDIT SCHEDULED JOB'
             },
             views: {
-                templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
-                controller: 'managementJobEditController',
+                'form': {
+                    templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
+                    controller: 'managementJobEditController'
+                }
             }
         });
     }]);

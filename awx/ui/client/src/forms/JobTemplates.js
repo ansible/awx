@@ -31,7 +31,7 @@ export default
                 name: {
                     label: i18n._('Name'),
                     type: 'text',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     column: 1
                 },
@@ -39,7 +39,7 @@ export default
                     label: i18n._('Description'),
                     type: 'text',
                     column: 1,
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 job_type: {
                     label: i18n._('Job Type'),
@@ -61,7 +61,7 @@ export default
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 inventory: {
                     label: i18n._('Inventory'),
@@ -85,7 +85,7 @@ export default
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 project: {
                     label: i18n._('Project'),
@@ -108,7 +108,7 @@ export default
                     dataTitle: i18n._('Project'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 playbook: {
                     label: i18n._('Playbook'),
@@ -152,7 +152,7 @@ export default
                         variable: 'ask_credential_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 cloud_credential: {
                     label: i18n._('Cloud Credential'),
@@ -170,7 +170,7 @@ export default
                     dataTitle: i18n._('Cloud Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 network_credential: {
                     label: i18n._('Network Credential'),
@@ -187,7 +187,7 @@ export default
                     dataTitle: i18n._('Network Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 forks: {
                     label: i18n._('Forks'),
@@ -205,7 +205,7 @@ export default
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
                 },
                 limit: {
                     label: i18n._('Limit'),
@@ -221,7 +221,7 @@ export default
                         variable: 'ask_limit_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 verbosity: {
                     label: i18n._('Verbosity'),
@@ -234,7 +234,7 @@ export default
                     dataTitle: i18n._('Verbosity'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 job_tags: {
                     label: i18n._('Job Tags'),
@@ -252,7 +252,7 @@ export default
                         variable: 'ask_tags_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 skip_tags: {
                     label: i18n._('Skip Tags'),
@@ -270,7 +270,7 @@ export default
                         variable: 'ask_skip_tags_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 checkbox_group: {
                     label: i18n._('Options'),
@@ -285,7 +285,7 @@ export default
                         dataTitle: i18n._('Become Privilege Escalation'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
-                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }, {
                         name: 'allow_callbacks',
                         label: i18n._('Allow Provisioning Callbacks'),
@@ -298,7 +298,7 @@ export default
                         dataTitle: i18n._('Allow Provisioning Callbacks'),
                         dataContainer: "body",
                         labelClass: 'stack-inline',
-                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }]
                 },
                 callback_url: {
@@ -312,7 +312,7 @@ export default
                     dataPlacement: 'top',
                     dataTitle: i18n._('Provisioning Callback URL'),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 host_config_key: {
                     label: i18n._('Host Config Key'),
@@ -326,7 +326,7 @@ export default
                     dataPlacement: 'right',
                     dataTitle: i18n._("Host Config Key"),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 labels: {
                     label: i18n._('Labels'),
@@ -338,7 +338,7 @@ export default
                     dataPlacement: 'right',
                     awPopOver: i18n._("<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>"),
                     dataContainer: 'body',
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 variables: {
                     label: i18n._('Extra Variables'),
@@ -360,14 +360,14 @@ export default
                         variable: 'ask_variables_on_launch',
                         text: i18n._('Prompt on launch')
                     },
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)',
                     awFeature: 'surveys',
                     awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top'
@@ -375,25 +375,25 @@ export default
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 view_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
                     ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
-                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
@@ -420,7 +420,7 @@ export default
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 

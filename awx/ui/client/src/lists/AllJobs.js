@@ -27,6 +27,7 @@ export default
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
                 ngClick:"viewJobDetails(job)",
+                nosort: true
             },
             id: {
                 label: 'ID',

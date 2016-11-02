@@ -508,7 +508,11 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
             },
 
             wrapPanel: function(html){
-                return`<div class="Panel">${html}</div>`;
+                return `<div class="Panel">${html}</div>`;
+            },
+
+            insertFormView: function(){
+                return `<div ui-view="form"></div>`;
             }
         };
     }

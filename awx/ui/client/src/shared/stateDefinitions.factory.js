@@ -84,7 +84,8 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             mode: 'edit'
                         });
                         html = generateList.wrapPanel(html);
-                        return html;
+                        // generateList.formView() inserts a ui-view="form" inside the list view's hierarchy
+                        return generateList.insertFormView() + html;
                     };
                 }
             }
@@ -106,7 +107,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     ListDefinition: () => list
                 },
                 views: {
-                    'list@': {
+                    '@': {
                         // resolves to a variable property name:
                         // 'templateUrl' OR 'templateProvider'
                         [params.templates && params.templates.list ? 'templateUrl' : 'templateProvider']: generateTemplateBlock(),
@@ -147,7 +148,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             label: `CREATE ${form.name}`
                         },
                         views: {
-                            'form@': {
+                            'form': {
                                 templateProvider: function(FormDefinition, GenerateForm) {
                                     let form = typeof(FormDefinition) === 'function' ?
                                         FormDefinition() : FormDefinition;
@@ -178,7 +179,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             label: '{{parentObject.name || name}}'
                         },
                         views: {
-                            'form@': {
+                            'form': {
                                 templateProvider: function(FormDefinition, GenerateForm) {
                                     let form = typeof(FormDefinition) === 'function' ?
                                         FormDefinition() : FormDefinition;
