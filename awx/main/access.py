@@ -206,6 +206,7 @@ class BaseAccess(object):
         '''
         new = None
         new_pk = None
+        changed = True
         if data and 'reference_obj' in data:
             # Use reference object's related fields, if given
             new = getattr(data['reference_obj'], field)
@@ -219,21 +220,22 @@ class BaseAccess(object):
                 if type(raw_value) == Model:
                     new = raw_value
                     new_pk = getattr(new, 'pk', None)
+        elif data is None or field not in data:
+            changed = False
 
         # Obtain existing related resource
         current = None
         current_pk = None
-        if obj:
+        if obj and (changed or mandatory):
             current = getattr(obj, field)
             current_pk = getattr(obj, '%s_id' % field, None)
 
-        # Define special case where resource is not changed
-        changed = True
-        if (new_pk is None or new_pk == current_pk) and (new is None or new == current):
+        # Define special case where resource is not changed, for example, a PUT request
+        if (current_pk and new_pk == current_pk) or (obj is None and new_pk is None):
             changed = False
 
         # Get the new resource from the database
-        if new is None and new_pk is not None:
+        if (new is None and changed) or (obj is None and mandatory):
             if fail_on_missing:
                 new = get_object_or_400(Model, pk=new_pk)
             else:
@@ -916,7 +918,7 @@ class ProjectAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data, mandatory=True)
+        return self.check_related('organization', Organization, data, mandatory=True, fail_on_missing=False)
 
     @check_superuser
     def can_change(self, obj, data):
@@ -1978,17 +1980,13 @@ class LabelAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return True
-
-        org_pk = get_pk_from_dict(data, 'organization')
-        org = get_object_or_400(Organization, pk=org_pk)
-        return self.user in org.member_role
+        return self.check_related('organization', Organization, data, role_field='member_role', mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
         if self.can_add(data) is False:
             return False
-
-        return self.user in obj.organization.admin_role
+        return self.check_related('organization', Organization, data, obj=obj, mandatory=True)
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
