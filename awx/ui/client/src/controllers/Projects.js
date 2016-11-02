@@ -700,6 +700,6 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 }
 
 ProjectsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
-    '$stateParams', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'Prompt',
-    'ClearScope', 'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
+    '$stateParams', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GenerateForm',
+    'Prompt', 'ClearScope', 'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
     'DebugForm', 'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification', 'i18n'];
