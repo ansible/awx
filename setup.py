@@ -121,6 +121,7 @@ setup(
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
+                         "tools/scripts/failure-event-handler",
                          "tools/scripts/tower-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {
