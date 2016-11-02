@@ -42,6 +42,8 @@ export default ['i18n', function(i18n) {
                     reqExpression: "orgrequired",
                     init: true
                 },
+                sourceModel: 'organization',
+                sourceField: 'name',
                 ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             script: {
