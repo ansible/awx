@@ -33,6 +33,7 @@ RUN yum install -y \
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 
 RUN yum install -y nodejs
+RUN npm install -g npm@3.10.7
 
 WORKDIR "/ansible-tower"
 
