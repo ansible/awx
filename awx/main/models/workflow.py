@@ -424,3 +424,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     def start_celery_task(self, opts, error_callback, success_callback):
         return None
 
+    def cancel(self):
+        if self.can_cancel:
+            self.status = 'canceled'
+            self.save(update_fields=['status'])

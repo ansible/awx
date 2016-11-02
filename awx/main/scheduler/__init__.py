@@ -130,7 +130,9 @@ class TaskManager():
     def process_finished_workflow_jobs(self, workflow_jobs):
         for workflow_job in workflow_jobs:
             dag = WorkflowDAG(workflow_job)
-            if dag.is_workflow_done():
+            if workflow_job.status == 'canceled':
+                dag.bfs_nodes_to_cancel()
+            elif dag.is_workflow_done():
                 if workflow_job._has_failed():
                     workflow_job.status = 'failed'
                 else:

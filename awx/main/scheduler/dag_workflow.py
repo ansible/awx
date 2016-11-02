@@ -48,6 +48,29 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(children_all)
         return [n['node_object'] for n in nodes_found]
 
+    def bfs_nodes_to_cancel(self):
+        root_nodes = self.get_root_nodes()
+        nodes = root_nodes
+
+        for index, n in enumerate(nodes):
+            obj = n['node_object']
+            job = obj.job
+
+            if not job:
+                continue
+            elif job.can_cancel:
+                job.cancel()
+            elif job.status == 'failed':
+                children_failed = self.get_dependencies(obj, 'failure_nodes')
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_failed + children_always
+                nodes.extend(children_all)
+            elif job.status == 'successful':
+                children_success = self.get_dependencies(obj, 'success_nodes')
+                children_always = self.get_dependencies(obj, 'always_nodes')
+                children_all = children_success + children_always
+                nodes.extend(children_all)
+
     def is_workflow_done(self):
         root_nodes = self.get_root_nodes()
         nodes = root_nodes
