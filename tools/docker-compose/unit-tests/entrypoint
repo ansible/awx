@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+mkdir -p /ansible-tower/awx/ui/
+mv -n /tmp/ansible-tower/awx/ui/node_modules /ansible-tower/awx/ui
+
+exec $@

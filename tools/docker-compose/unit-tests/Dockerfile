@@ -41,7 +41,10 @@ RUN cd $(npm root -g)/npm \
 
 RUN npm install -g npm@3.10.7
 
-WORKDIR "/ansible-tower"
+# We need to install dependencies somewhere other than /ansible-tower.
+# Anything in /ansible-tower will be overwritten by the bind-mount.
+# We switch the WORKDIR to /ansible-tower further down.
+WORKDIR "/tmp/ansible-tower"
 
 # Copy requirements files
 # NOTE: '*' is not used as it invalidates docker caching
@@ -72,5 +75,12 @@ RUN npm set progress=false
 
 RUN make ui-deps
 
-ENTRYPOINT ["/bin/bash", "-c"]
+WORKDIR "/ansible-tower"
+
+# This entrypoint script takes care of moving the node_modules
+# into the bind-mount, then exec's to whatever was passed as the CMD.
+ADD tools/docker-compose/unit-tests/entrypoint /usr/bin/
+RUN chmod +x /usr/bin/entrypoint
+
+ENTRYPOINT ["entrypoint"]
 CMD ["bash"]
