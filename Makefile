@@ -239,7 +239,7 @@ clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
 
 # convenience target to assert environment variables are defined
 guard-%:
-	@if [ "${${*}}" == "" ]; then \
+	@if [ "$${$*}" = "" ]; then \
 	    echo "The required environment variable '$*' is not set"; \
 	    exit 1; \
 	fi
