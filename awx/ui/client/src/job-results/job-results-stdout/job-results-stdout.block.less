@@ -4,28 +4,45 @@
     height: 100%;
     margin-top: 15px;
     background-color: @default-no-items-bord;
+    border-radius: 5px;
+    margin-bottom: 10px;
 }
 
-.JobResultsStdOut-aLineOfStdOut{
+.JobResultsStdOut-aLineOfStdOut,
+.JobResultsStdOut-expandLine {
     display: flex;
 }
 
 .JobResultsStdOut-lineNumberColumn{
+    display: flex;
     background-color: @default-list-header-bg;
     text-align: right;
-    padding: 10px 10px 10px;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     color: @b7grey;
     width: 75px;
     white-space: pre-line;
 }
 
+.JobResultsStdOut-lineExpander {
+    text-align: left;
+    padding-left: 10px;
+    margin-right: auto;
+}
+
 .JobResultsStdOut-lineNumberColumn--first{
     text-align: left;
     padding: 0px;
+    padding-left: 11px;
+    padding-top: 10px;
+    white-space: normal;
 }
 
 .JobResultsStdOut-stdoutColumn{
-    padding: 10px 20px 10px 20px;
+    padding-left: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     color: @default-interface-txt;
     display: inline-block;
     white-space: pre-wrap;

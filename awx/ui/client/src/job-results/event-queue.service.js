@@ -73,8 +73,17 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
             counter: event.counter,
             id: event.id,
             processed: false,
-            name: event.event_name
+            name: event.event_name,
+            changes: []
         };
+
+        // the interface for grabbing standard out is generalized and
+        // present across many types of events, so go ahead and check for
+        // updates to it
+        if (event.stdout) {
+            mungedEvent.stdout = parseStdoutService.parseStdout(event);
+            mungedEvent.changes.push('stdout');
+        }
 
         // for different types of events, you need different types of data
         if (event.event_name === 'playbook_on_start') {
@@ -86,20 +95,19 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 changed: 0
             };
             mungedEvent.startTime = event.modified;
-            mungedEvent.changes = ['count', 'startTime'];
+            mungedEvent.changes.push('count');
+            mungedEvent.changes.push('startTime');
         } else if (event.event_name === 'playbook_on_play_start') {
             getPreviousCount(mungedEvent.counter, "play")
                 .then(count => {
                     mungedEvent.playCount = count + 1;
-                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                    mungedEvent.changes = ['playCount', 'stdout'];
+                    mungedEvent.changes.push('playCount');
                 });
         } else if (event.event_name === 'playbook_on_task_start') {
             getPreviousCount(mungedEvent.counter, "task")
                 .then(count => {
                     mungedEvent.taskCount = count + 1;
-                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                    mungedEvent.changes = ['taskCount', 'stdout'];
+                    mungedEvent.changes.push('taskCount');
                 });
         } else if (event.event_name === 'runner_on_ok' ||
             event.event_name === 'runner_on_async_ok') {
@@ -107,24 +115,21 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                     .then(count => {
                         mungedEvent.count = count;
                         mungedEvent.count.ok++;
-                        mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                        mungedEvent.changes = ['count', 'stdout'];
+                        mungedEvent.changes.push('count');
                     });
         } else if (event.event_name === 'runner_on_skipped') {
             getPreviousCount(mungedEvent.counter)
                 .then(count => {
                     mungedEvent.count = count;
                     mungedEvent.count.skipped++;
-                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                    mungedEvent.changes = ['count', 'stdout'];
+                    mungedEvent.changes.push('count');
                 });
         } else if (event.event_name === 'runner_on_unreachable') {
             getPreviousCount(mungedEvent.counter)
                 .then(count => {
                     mungedEvent.count = count;
                     mungedEvent.count.unreachable++;
-                    mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                    mungedEvent.changes = ['count', 'stdout'];
+                    mungedEvent.changes.push('count');
                 });
         } else if (event.event_name === 'runner_on_error' ||
             event.event_name === 'runner_on_async_failed') {
@@ -132,18 +137,16 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                     .then(count => {
                         mungedEvent.count = count;
                         mungedEvent.count.failed++;
-                        mungedEvent.stdout = parseStdoutService.parseStdout(event);
-                        mungedEvent.changes = ['count', 'stdout'];
+                        mungedEvent.changes.push('count');
                     });
         } else if (event.event_name === 'playbook_on_stats') {
-            console.log(event.modified);
             // get the data for populating the host status bar
             mungedEvent.count = jobResultsService
                 .getCountsFromStatsEvent(event.event_data);
-            mungedEvent.stdout = parseStdoutService.parseStdout(event);
             mungedEvent.finishedTime = event.modified;
-            mungedEvent.changes = ['count', 'countFinished', 'finishedTime', 'stdout'];
-        } else {
+            mungedEvent.changes.push('count');
+            mungedEvent.changes.push('countFinished');
+            mungedEvent.changes.push('finishedTime');
         }
 
         mungedEventDefer.resolve(mungedEvent);

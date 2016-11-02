@@ -132,7 +132,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                     }
 
                     if(change === 'stdout'){
-                        $scope.stdoutArr.push(mungedEvent.stdout);
+                        $(".JobResultsStdOut").append(mungedEvent.stdout);
                     }
                 });
             }

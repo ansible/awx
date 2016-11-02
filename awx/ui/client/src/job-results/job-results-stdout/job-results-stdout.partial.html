@@ -1,21 +1,11 @@
 <div class="JobResultsStdOut">
-    <div class="JobResultsStdOut-aLineOfStdOut">
+    <div class="JobResultsStdOut-expandLine">
         <div class="JobResultsStdOut-lineNumberColumn
             JobResultsStdOut-lineNumberColumn--first">
                 <i class="fa fa-plus"></i>
         </div>
         <div class="JobResultsStdOut-stdoutColumn
             JobResultsStdOut-stdoutColumn--first">
-        </div>
-    </div>
-    <div ng-repeat="line in stdoutArr">
-        <div class="JobResultsStdOut-aLineOfStdOut">
-            <div class="JobResultsStdOut-lineNumberColumn">
-                {{line.end_line}}
-            </div>
-            <div class="JobResultsStdOut-stdoutColumn" ng-bind-html="line.stdout">
-                <!-- {{line.stdout}} -->
-            </div>
         </div>
     </div>
 </div>
