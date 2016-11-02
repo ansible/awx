@@ -357,7 +357,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         Rest.post(data)
             .success(function(data) {
                 $scope.addedItem = data.id;
-                $state.go('projects.edit', { id: data.id }, { reload: true });
+                $state.go('projects.edit', { project_id: data.id }, { reload: true });
             })
             .error(function(data, status) {
                 Wait('stop');

@@ -1140,6 +1140,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "class=\"form-control\" ";
+                        html += (field.required) ? 'required ' : '';
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "" ;
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
@@ -1156,6 +1157,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `data-basePath="${field.basePath}"`;
                         html += `data-source="${field.sourceModel}"`;
                         html += `data-query="?${field.sourceField}__iexact=:value"`;
+                        html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
                         html += " awlookup >\n";
                         html += "</div>\n";
 

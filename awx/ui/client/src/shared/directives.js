@@ -391,7 +391,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 .directive('awlookup', ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q) {
     return {
         require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
+        link: function(scope, elm, attrs, fieldCtrl) {
 
             let query,
                 basePath,
@@ -399,8 +399,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 
             // query the API to see if field value corresponds to a valid resource
             // .ng-pending will be applied to the directive element while the request is outstanding
-            ctrl.$asyncValidators.validResource = function(modelValue, viewValue) {
-                if (viewValue) {
+            // form.$pending will contain object reference to any ngModelControllers with outstanding requests
+            fieldCtrl.$asyncValidators.validResource = function(modelValue, viewValue) {
+
+                applyValidationStrategy(viewValue, fieldCtrl);
+
+                return defer.promise;
+            };
+
+            function applyValidationStrategy(viewValue, ctrl) {
+
+                // use supplied data attributes to build an endpoint, query, resolve outstanding promise
+                function applyValidation(viewValue) {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
                     query = query.replace(/\:value/, encodeURI(viewValue));
@@ -412,17 +422,34 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                         .then((res) => {
                             if (res.data.results.length > 0) {
                                 scope[elm.attr('data-source')] = res.data.results[0].id;
-                                ctrl.$setValidity('awlookup', true);
-                                defer.resolve(true);
+                                return setValidity(ctrl, true);
                             } else {
                                 scope[elm.attr('data-source')] = null;
-                                ctrl.$setValidity('awlookup', false);
-                                defer.resolve(false);
+                                return setValidity(ctrl, false);
                             }
                         });
                 }
-                return defer.promise;
-            };
+
+                function setValidity(ctrl, validity){
+                    ctrl.$setValidity('awlookup', validity);
+                    return defer.resolve(validity);
+                }
+
+                // Three common cases for clarity:
+
+                // 1) Field is not required & pristine. Pass validation & skip async $pending state
+                // 2) Field is required. Always validate & use async $pending state
+                // 3) Field is not required, but is not $pristine. Always validate & use async $pending state
+
+                // case 1
+                if (!ctrl.$validators.required && ctrl.$pristine) {
+                    return setValidity(ctrl, true);
+                }
+                // case 2 & 3
+                else {
+                    return applyValidation(viewValue);
+                }
+            }
         }
     };
 }])
