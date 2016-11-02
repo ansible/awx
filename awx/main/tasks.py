@@ -508,11 +508,11 @@ class BaseTask(Task):
         if pexpect_sleep is not None:
             logger.info("Suspending Job Execution for QA Work")
             time.sleep(pexpect_sleep)
-        global_timeout = getattr(settings, 'DEFAULT_JOB_TIMEOUTS', {})
-        cls_name = instance.__class__.__name__
-        if cls_name in global_timeout:
+        global_timeout_setting_name = instance._global_timeout_setting()
+        if global_timeout_setting_name:
+            global_timeout = getattr(settings, global_timeout_setting_name, 0)
             local_timeout = getattr(instance, 'timeout', 0)
-            job_timeout = global_timeout[cls_name] if local_timeout == 0 else local_timeout
+            job_timeout = global_timeout if local_timeout == 0 else local_timeout
         else:
             job_timeout = 0
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)

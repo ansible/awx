@@ -1226,6 +1226,9 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
 
+    def _global_timeout_setting(self):
+        return 'DEFAULT_INVENTORY_UPDATE_TIMEOUT'
+
     def websocket_emit_data(self):
         if self.inventory_source.group is not None:
             return dict(group_id=self.inventory_source.group.id)
