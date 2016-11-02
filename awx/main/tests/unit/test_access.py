@@ -12,13 +12,6 @@ from awx.main.access import (
     SystemJobTemplateAccess,
 )
 
-from awx.main.models import (
-    Credential,
-    Inventory,
-    Project,
-    Role,
-    Organization,
-)
 from awx.conf.license import LicenseForbids
 from awx.main.models import Credential, Inventory, Project, Role, Organization, Instance
 
