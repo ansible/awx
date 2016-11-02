@@ -31,7 +31,8 @@ export default {
                 page: '1',
                 order_by: 'name',
             },
-            squash: true
+            squash: true,
+            dynamic: true
         },
         host_search: {
             value: {
@@ -39,7 +40,8 @@ export default {
                 page: '1',
                 order_by: 'name',
             },
-            squash: true
+            squash: true,
+            dynamic: true
         }
     },
     ncyBreadcrumb: {

@@ -76,7 +76,6 @@ export default
                     ngShow: "source && source.value !== '' && source.value !== 'custom'",
                     sourceModel: 'credential',
                     sourceField: 'name',
-                    ngClick: 'lookupCredential()',
                     awRequiredWhen: {
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
@@ -146,12 +145,14 @@ export default
                     label :  "Custom Inventory Script",
                     type: 'lookup',
                     basePath: 'inventory_scripts',
-                    list: 'InventoryScriptList',
+                    list: 'InventoryScriptsList',
                     ngShow: "source && source.value === 'custom'",
                     sourceModel: 'inventory_script',
                     sourceField: 'name',
-                    ngClick: 'lookUpInventory_script()' ,
-                    ngRequired: "source && source.value === 'custom'",
+                    awRequiredWhen: {
+                        reqExpression: "source && source.value === 'custom'",
+                        init: "false"
+                    },
                     ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                 },
                 custom_variables: {

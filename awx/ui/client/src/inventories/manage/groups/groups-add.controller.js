@@ -12,7 +12,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
                         form = GroupForm();
         init();
 
-        function init() {n
+        function init() {
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
@@ -45,7 +45,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
         };
 
         $scope.formSave = function() {
-            var params, source;
+            var params, source, json_data;
             json_data = ToJSON($scope.parseType, $scope.variables, true);
             // group fields
             var group = {

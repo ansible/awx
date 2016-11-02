@@ -61,7 +61,7 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
             $state.go('^');
         };
         $scope.formSave = function() {
-            var params, source;
+            var params, source, json_data;
             json_data = ToJSON($scope.parseType, $scope.variables, true);
             // group fields
             var group = {
