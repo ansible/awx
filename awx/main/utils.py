@@ -155,16 +155,19 @@ def get_awx_version():
         return __version__
 
 
-def get_encryption_key(instance, field_name):
+def get_encryption_key_for_pk(pk, field_name):
     '''
     Generate key for encrypted password based on instance pk and field name.
     '''
     from django.conf import settings
     h = hashlib.sha1()
     h.update(settings.SECRET_KEY)
-    h.update(str(instance.pk))
+    h.update(str(pk))
     h.update(field_name)
     return h.digest()[:16]
+
+def get_encryption_key(instance, field_name):
+    return get_encryption_key_for_pk(instance.pk, field_name)
 
 def encrypt_field(instance, field_name, ask=False, subfield=None):
     '''
@@ -184,6 +187,14 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
     b64data = base64.b64encode(encrypted)
     return '$encrypted$%s$%s' % ('AES', b64data)
 
+def decrypt_value(encryption_key, value):
+    algo, b64data = value[len('$encrypted$'):].split('$', 1)
+    if algo != 'AES':
+        raise ValueError('unsupported algorithm: %s' % algo)
+    encrypted = base64.b64decode(b64data)
+    cipher = AES.new(encryption_key, AES.MODE_ECB)
+    value = cipher.decrypt(encrypted)
+    return value.rstrip('\x00')
 
 def decrypt_field(instance, field_name, subfield=None):
     '''
@@ -194,15 +205,13 @@ def decrypt_field(instance, field_name, subfield=None):
         value = value[subfield]
     if not value or not value.startswith('$encrypted$'):
         return value
-    algo, b64data = value[len('$encrypted$'):].split('$', 1)
-    if algo != 'AES':
-        raise ValueError(_('unsupported algorithm: %s') % algo)
-    encrypted = base64.b64decode(b64data)
     key = get_encryption_key(instance, field_name)
-    cipher = AES.new(key, AES.MODE_ECB)
-    value = cipher.decrypt(encrypted)
-    return value.rstrip('\x00')
 
+    return decrypt_value(key, value)
+
+def decrypt_field_value(pk, field_name, value):
+    key = get_encryption_key_for_pk(pk, field_name)
+    return decrypt_value(key, value)
 
 def update_scm_url(scm_type, url, username=True, password=True,
                    check_special_cases=True, scp_format=False):

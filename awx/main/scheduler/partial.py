@@ -1,5 +1,9 @@
 
+# Python
+import json
+
 # AWX
+from awx.main.utils import decrypt_field_value
 from awx.main.models import (
     Job,
     ProjectUpdate,
@@ -61,7 +65,7 @@ class JobDict(PartialModelDict):
         'id', 'status', 'job_template_id', 'inventory_id', 'project_id', 
         'launch_type', 'limit', 'allow_simultaneous', 'created', 
         'job_type', 'celery_task_id', 'project__scm_update_on_launch',
-        'forks',
+        'forks', 'start_args',
     )
     model = Job
 
@@ -70,6 +74,14 @@ class JobDict(PartialModelDict):
 
     def task_impact(self):
         return (5 if self.data['forks'] == 0 else self.data['forks']) * 10
+
+    def get_inventory_sources_already_updated(self):
+        try:
+            start_args = json.loads(decrypt_field_value(self.data['id'], 'start_args', self.data['start_args']))
+        except Exception:
+            return []
+        start_args = start_args or {}
+        return start_args.get('inventory_sources_already_updated', [])
 
 class ProjectUpdateDict(PartialModelDict):
     FIELDS = (
