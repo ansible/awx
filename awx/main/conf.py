@@ -201,8 +201,8 @@ register(
     field_class=fields.IntegerField,
     min_value=0,
     label=_('Default Project Update Timeout'),
-    help_text=_('Maximum time to allow inventory updates to run. Use value of 0 to indicate that no '
-                'timeout should be imposed. A timeout set on an individual inventory source will override this.'),
+    help_text=_('Maximum time to allow project updates to run. Use value of 0 to indicate that no '
+                'timeout should be imposed. A timeout set on an individual project will override this.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
