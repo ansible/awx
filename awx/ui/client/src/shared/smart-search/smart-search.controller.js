@@ -41,7 +41,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
         };
 
         $scope.clearAll = function(){
-            let cleared = defaults;
+            let cleared = _.cloneDeep(defaults);
             delete cleared.page;
             queryset = cleared;
             $state.go('.', {[$scope.iterator + '_search']: queryset});
