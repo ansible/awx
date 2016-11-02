@@ -576,8 +576,8 @@ ui-test-ci: $(UI_DEPS_FLAG_FILE)
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
-jshint: $(UI_DEPS_FLAG_FILE)
-	grunt --gruntfile awx/ui/Gruntfile.js jshint #Depends on node 6.x and npm 3.x installed on Jenkins slave
+jshint:
+	$(GRUNT) --gruntfile awx/ui/Gruntfile.js jshint #Depends on node 6.x and npm 3.x installed on Jenkins slave
 
 ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs
