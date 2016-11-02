@@ -303,21 +303,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return html;
             },
 
-            clearApiErrors: function () {
+            clearApiErrors: function (scope) {
                 for (var fld in this.form.fields) {
                     if (this.form.fields[fld].sourceModel) {
-                        this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+                        scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
                         $('[name="' + this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '"]').removeClass('ng-invalid');
                     } else if (this.form.fields[fld].realName) {
                         this.scope[this.form.fields[fld].realName + '_api_error'] = '';
                         $('[name="' + this.form.fields[fld].realName + '"]').removeClass('ng-invalid');
                     } else {
-                        this.scope[fld + '_api_error'] = '';
+                        scope[fld + '_api_error'] = '';
                         $('[name="' + fld + '"]').removeClass('ng-invalid');
                     }
                 }
-                if (!this.scope.$$phase) {
-                    this.scope.$digest();
+                if (!scope.$$phase) {
+                    scope.$digest();
                 }
             },
 

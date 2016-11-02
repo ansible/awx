@@ -50,7 +50,7 @@ export default ['Rest', 'Wait',
         }
 
         $scope.formSave = function() {
-            generator.clearApiErrors();
+            generator.clearApiErrors($scope);
             Wait('start');
             Rest.setUrl(url + id + '/');
             Rest.put({

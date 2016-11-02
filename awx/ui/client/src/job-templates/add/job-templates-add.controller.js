@@ -280,7 +280,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {id: id}, {reload: true});
+                $state.go('jobTemplates.edit', {job_template_id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -419,7 +419,7 @@
                     $scope.survey_enabled = false;
                 }
 
-                generator.clearApiErrors();
+                generator.clearApiErrors($scope);
 
                 Wait('start');
 
@@ -501,6 +501,7 @@
 
                 } catch (err) {
                     Wait('stop');
+                    console.log(err)
                     Alert("Error", "Error parsing extra variables. " +
                         "Parser returned: " + err);
                 }

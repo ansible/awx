@@ -414,7 +414,7 @@ ProjectsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log',
 
 
 export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
-    $stateParams, ProjectsForm, Rest, Alert, ProcessErrors,
+    $stateParams, ProjectsForm, Rest, Alert, ProcessErrors, GenerateForm,
     Prompt, ClearScope, GetBasePath, GetProjectPath, Authorization,
     GetChoices, Empty, DebugForm, Wait, ProjectUpdate, $state, CreateSelect2, ToggleNotification, i18n) {
 
@@ -587,7 +587,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
     // Save changes to the parent
     $scope.formSave = function() {
         var fld, i, params;
-        //generator.clearApiErrors();
+        GenerateForm.clearApiErrors($scope);
         Wait('start');
         $rootScope.flashMessage = null;
         params = {};

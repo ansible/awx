@@ -197,7 +197,7 @@ export default ['Rest', 'Wait',
             var params,
                 v = $scope.notification_type.value;
 
-            generator.clearApiErrors();
+            generator.clearApiErrors($scope);
             params = {
                 "name": $scope.name,
                 "description": $scope.description,
