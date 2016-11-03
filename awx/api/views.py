@@ -16,6 +16,7 @@ from collections import OrderedDict
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count
@@ -165,11 +166,12 @@ class ApiV1PingView(APIView):
         Everything returned here should be considered public / insecure, as
         this requires no auth and is intended for use by the installer process.
         """
-        # Most of this response is canned; just build the dictionary.
+        active_tasks = cache.get("active_celery_tasks", None)
         response = {
             'ha': is_ha_environment(),
             'version': get_awx_version(),
             'active_node': settings.CLUSTER_HOST_ID,
+            'celery_active_tasks': json.loads(active_tasks) if active_tasks is not None else None
         }
 
         response['instances'] = []

@@ -1,6 +1,7 @@
 
 # Python
 import logging
+import json
 
 # Django
 from django.db import transaction
@@ -12,6 +13,7 @@ from celery import task
 # AWX
 from awx.main.models import Instance
 from awx.main.scheduler import TaskManager 
+from django.core.cache import cache
 
 logger = logging.getLogger('awx.main.scheduler')
 
@@ -38,8 +40,8 @@ def run_fail_inconsistent_running_jobs():
         try:
             Instance.objects.select_for_update(nowait=True).all()[0]
             scheduler = TaskManager()
-            active_tasks = scheduler.get_active_tasks()
-
+            active_task_queues, active_tasks = scheduler.get_active_tasks()
+            cache.set("active_celery_tasks", json.dumps(active_task_queues))
             if active_tasks is None:
                 # TODO: Failed to contact celery. We should surface this.
                 return None

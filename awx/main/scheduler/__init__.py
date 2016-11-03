@@ -154,7 +154,7 @@ class TaskManager():
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
                 return None
 
-        return active_tasks
+        return (active_task_queues, active_tasks)
 
     def start_task(self, task, dependent_tasks=[]):
         from awx.main.tasks import handle_work_error, handle_work_success
@@ -326,8 +326,6 @@ class TaskManager():
     def _schedule(self):
         all_sorted_tasks = self.get_tasks()
         if len(all_sorted_tasks) > 0:
-            #self.process_celery_tasks(active_tasks, all_sorted_tasks)
-
             latest_project_updates = self.get_latest_project_update_tasks(all_sorted_tasks)
             self.process_latest_project_updates(latest_project_updates)
 
