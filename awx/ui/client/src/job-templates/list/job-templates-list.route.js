@@ -10,6 +10,13 @@ export default {
     ncyBreadcrumb: {
         label: "TEMPLATES"
     },
+    data: {
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"]
+            }
+        }
+    },
     params: {
         unified_job_templates_search: {
             value: {

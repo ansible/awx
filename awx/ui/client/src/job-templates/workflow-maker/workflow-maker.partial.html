@@ -60,21 +60,23 @@
                     <span class="badge List-titleBadge" ng-bind="treeData.data.totalNodes"></span>
                 </div>
             </div>
+            <!--
             <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" class="WorkflowMaker-chart"></workflow-chart>
+            -->
         </div>
         <div class="WorkflowMaker-contentRight">
             <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited && nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "ADD A TEMPLATE"}}</div>
             <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'">Please hover over a template and click the Add button.</div>
-            <div class="WorkflowMaker-form" ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'">
+            <div class="WorkflowMaker-form" > <!-- ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'" -->
                 <div class="Form-tabHolder">
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'jobs'}" ng-click="toggleFormTab('jobs')">JOBS</div>
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'project_sync'}" ng-click="toggleFormTab('project_sync')">PROJECT SYNC</div>
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'inventory_sync'}" ng-click="toggleFormTab('inventory_sync')">INVENTORY SYNC</div>
                 </div>
                 <div class="WorkflowMaker-formLists">
-                    <div id="workflow-jobs-list" ng-show="workflowMakerFormConfig.activeTab === 'jobs'"></div>
-                    <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'"></div>
-                    <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'"></div>
+                    <div id="workflow-jobs-list"  ui-view="jobsTemplateList"></div> <!-- ng-show="workflowMakerFormConfig.activeTab === 'jobs'" -->
+                    <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'" ui-view="projectSyncList"></div>
+                    <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'" ui-view="inventorySyncList"></div>
                 </div>
                 <div ng-show="showTypeOptions" class="WorkflowMaker-formElement">
                     <label class="Form-inputLabelContainer">
@@ -95,7 +97,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="workflow-maker-form"></div>
+                <div id="workflow-maker-form" ui-view="workflowForm"></div>
             </div>
         </div>
     </div>

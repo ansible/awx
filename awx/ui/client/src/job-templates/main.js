@@ -4,6 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
+import { templateUrl } from '../shared/template-url/template-url.factory';
+
 import jobTemplateService from './job-template.service';
 
 import surveyMaker from './survey-maker/main';
@@ -25,8 +27,9 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
     ])
     .service('JobTemplateService', jobTemplateService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
-        function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider ) {
+        function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
+                workflowMaker, inventoryLookup, credentialLookup,
                 stateDefinitions = stateDefinitionsProvider.$get(),
                 stateExtender = $stateExtenderProvider.$get();
 
@@ -72,6 +75,103 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                     }
                 });
 
+                workflowMaker = stateExtender.buildDefinition({
+                    name: 'templates.editWorkflowJobTemplate.workflowMaker',
+                    url: '/workflow-maker',
+                    views: {
+                        'modal': {
+                            template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree"></workflow-maker>`
+                        },
+                        // 'jobsTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
+                        //     templateProvider: function(JobTemplateList, generateList) {
+                        //         let html = generateList.build({
+                        //             list: JobTemplateList,
+                        //             mode: 'edit'
+                        //         });
+                        //         return html;
+                        //     }
+                        // },
+                        // 'inventorySyncList@templates.editWorkflowJobTemplate.workflowMaker': {
+                        //     templateProvider: function(InventoryList, generateList) {
+                        //         let html = generateList.build({
+                        //             list: InventoryList,
+                        //             mode: 'edit'
+                        //         });
+                        //         return html;
+                        //     }
+                        // },
+                        // 'projectList@templates.editWorkflowJobTemplate.workflowMaker': {
+                        //     templateProvider: function(ProjectList, generateList) {
+                        //         let html = generateList.build({
+                        //             list: ProjectList,
+                        //             mode: 'edit'
+                        //         });
+                        //         return html;
+                        //     }
+                        // },
+                        'workflowForm@templates.editWorkflowJobTemplate.workflowMaker': {
+                            templateProvider: function(WorkflowMakerForm, GenerateForm) {
+                                let form = WorkflowMakerForm();
+                                let html = GenerateForm.buildHTML(form, {
+                                    mode: 'add',
+                                    related: false,
+                                });
+                                return html;
+                            }
+                        }
+                    }
+                });
+
+                inventoryLookup = stateExtender.buildDefinition({
+                    searchPrefix: 'inventory',
+                    //squashSearchUrl: true, @issue enable
+                    name: 'templates.editWorkflowJobTemplate.workflowMaker.inventory',
+                    url: '/inventory',
+                    data: {
+                        lookup: true
+                    },
+                    params: {
+                        inventory_search: {
+                            value: { page_size: '5'}
+                        }
+                    },
+                    views: {
+                        'modal@templates.editWorkflowJobTemplate.workflowMaker': {
+                            templateProvider: function(ListDefinition, generateList) {
+                                let list_html = generateList.build({
+                                    mode: 'lookup',
+                                    list: ListDefinition,
+                                    input_type: 'radio'
+                                });
+                                return `<lookup-modal>${list_html}</lookup-modal>`;
+
+                            }
+                        }
+                    },
+                    resolve: {
+                        // ListDefinition: [InventoryList, function(list) {
+                        //     list.iterator = field.sourceModel;
+                        //     return list;
+                        // }],
+                        Dataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            (list, qs, $stateParams, GetBasePath) => {
+                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ]
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#form-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                });
+
+
+
+
                 return Promise.all([
                     addJobTemplate,
                     editJobTemplate,
@@ -82,8 +182,9 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         states: _.reduce(generated, (result, definition) => {
                             return result.concat(definition.states);
                         }, [
-                            stateExtender.buildDefinition(jobTemplatesListRoute)
-
+                            stateExtender.buildDefinition(jobTemplatesListRoute),
+                            workflowMaker,
+                            //inventoryLookup
                         ])
                     };
                 });

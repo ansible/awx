@@ -14,6 +14,7 @@ export default ['CreateDialog', 'Wait', '$q', function(CreateDialog, Wait, $q){
                 deferred.resolve();
             });
             Wait('start');
+            debugger;
             CreateDialog({
                 id: 'workflow-modal-dialog',
                 scope: params.scope,

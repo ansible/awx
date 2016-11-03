@@ -480,7 +480,7 @@
     }
 
     $scope.openWorkflowMaker = function() {
-        $scope.$broadcast("showWorkflowMaker");
+        $state.go('.workflowMaker');
     };
 
     $scope.formSave = function () {

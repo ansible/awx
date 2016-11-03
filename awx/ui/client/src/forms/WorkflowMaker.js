@@ -18,7 +18,7 @@ export default
             addTitle: '',
             editTitle: '',
             name: 'workflow_maker',
-            base: 'job_templates',
+            basePath: 'job_templates',
             tabs: false,
             cancelButton: false,
             showHeader: false,
@@ -48,7 +48,9 @@ export default
                     type: 'lookup',
                     sourceModel: 'inventory',
                     sourceField: 'name',
-                    ngClick: 'lookUpInventory()',
+                    list: 'OrganizationList',
+                    basePath: 'organization',
+                    //ngClick: 'lookUpInventory()',
                     requiredErrorMsg: "Please select an Inventory.",
                     column: 1,
                     class: 'Form-formGroup--fullWidth',
@@ -56,10 +58,10 @@ export default
                     dataTitle: 'Inventory',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngShow: "selectedTemplate.ask_inventory_on_launch",
-                    awRequiredWhen: {
-                        reqExpression: 'selectedTemplate.ask_inventory_on_launch'
-                    }
+                    //ngShow: "selectedTemplate.ask_inventory_on_launch",
+                    // awRequiredWhen: {
+                    //     reqExpression: 'selectedTemplate.ask_inventory_on_launch'
+                    // }
                 },
                 job_type: {
                     label: 'Job Type',

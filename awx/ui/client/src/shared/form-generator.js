@@ -178,7 +178,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //   html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
 
                 this.mode = options.mode;
-                this.modal = (options.modal) ? true : false;
+                //this.modal = (options.modal) ? true : false;
                 this.setForm(form);
                 return this.build(options);
             },

@@ -14,7 +14,7 @@ export default [ 'templateUrl',
             },
             restrict: 'E',
             templateUrl: templateUrl('job-templates/workflow-maker/workflow-maker'),
-            controller: workflowMakerController
+            controller: workflowMakerController,
         };
     }
 ];
