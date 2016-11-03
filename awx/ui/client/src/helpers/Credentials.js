@@ -245,7 +245,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  }
 
                  data.kind = scope.kind.value;
-                 if (scope.become_method === null) {
+                 if (scope.become_method === null || typeof scope.become_method === 'undefined') {
                     data.become_method = "";
                     data.become_username = "";
                     data.become_password = "";
