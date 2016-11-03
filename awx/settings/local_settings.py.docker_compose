@@ -67,7 +67,7 @@ DATABASES = {
 if is_testing(sys.argv):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
+            'ENGINE': 'transaction_hooks.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
             'TEST': {
                 # Test database cannot be :memory: for celery/inventory tests.
