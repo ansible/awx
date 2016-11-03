@@ -50,7 +50,7 @@ export default
                     sourceField: 'name',
                     list: 'OrganizationList',
                     basePath: 'organization',
-                    //ngClick: 'lookUpInventory()',
+                    ngClick: 'lookUpInventory()',
                     requiredErrorMsg: "Please select an Inventory.",
                     column: 1,
                     class: 'Form-formGroup--fullWidth',

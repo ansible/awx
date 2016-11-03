@@ -5,11 +5,11 @@
  *************************************************/
 
 export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateList', 'ProjectList',
-    'GetBasePath', 'Wait', 'JobTemplateService',
+    'GetBasePath', 'Wait', 'JobTemplateService', '$state',
     'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
     'GenerateForm', 'InventoryList', 'CredentialList', '$q', '$timeout',
     function($scope, WorkflowHelpService, GenerateList, JobTemplateList, ProjectList,
-        GetBasePath, Wait, JobTemplateService,
+        GetBasePath, Wait, JobTemplateService, $state,
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
         GenerateForm, InventoryList, CredentialList, $q, $timeout) {
 
@@ -64,14 +64,8 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
         function init() {
             $scope.treeDataMaster = angular.copy($scope.treeData.data);
-            WorkflowHelpService.openDialog({
-                    scope: $scope
-                })
-                .then(function() {
+            $scope.$broadcast("refreshWorkflowChart");
 
-                    //$scope.$broadcast("refreshWorkflowChart");
-
-            });
             $scope.$watchCollection('workflow_job_templates', function() {
                 if ($scope.selectedTemplate) {
                     // Loop across the inventories and see if one of them should be "checked"
@@ -148,6 +142,12 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             resetPromptFields();
 
         }
+
+
+        $scope.lookUpInventory = function(){
+            console.log($state)
+            $state.go('.inventory')
+        };
 
         $scope.closeWorkflowMaker = function() {
             // Revert the data to the master which was created when the dialog was opened

@@ -3,44 +3,44 @@ export default ['CreateDialog', 'Wait', '$q', function(CreateDialog, Wait, $q){
         openDialog: function(params){
             // params.scope
 
-            let deferred = $q.defer();
+            // let deferred = $q.defer();
 
-            if (params.scope.removeWorkflowDialogReady) {
-                params.scope.removeWorkflowDialogReady();
-            }
-            params.scope.removeWorkflowDialogReady = params.scope.$on('WorkflowDialogReady', function() {
-                $('#workflow-modal-dialog').dialog('open');
+            // if (params.scope.removeWorkflowDialogReady) {
+            //     params.scope.removeWorkflowDialogReady();
+            // }
+            // params.scope.removeWorkflowDialogReady = params.scope.$on('WorkflowDialogReady', function() {
+            //     $('#workflow-modal-dialog').dialog('open');
 
-                deferred.resolve();
-            });
-            Wait('start');
-            debugger;
-            CreateDialog({
-                id: 'workflow-modal-dialog',
-                scope: params.scope,
-                width: 1400,
-                height: 720,
-                draggable: false,
-                dialogClass: 'SurveyMaker-dialog',
-                position: ['center',20],
-                onClose: function() {
-                    $('#workflow-modal-dialog').empty();
-                },
-                onOpen: function() {
-                    Wait('stop');
+            //     deferred.resolve();
+            // });
+            // Wait('start');
+            // debugger;
+            // CreateDialog({
+            //     id: 'workflow-modal-dialog',
+            //     scope: params.scope,
+            //     width: 1400,
+            //     height: 720,
+            //     draggable: false,
+            //     dialogClass: 'SurveyMaker-dialog',
+            //     position: ['center',20],
+            //     onClose: function() {
+            //         $('#workflow-modal-dialog').empty();
+            //     },
+            //     onOpen: function() {
+            //         Wait('stop');
 
-                    // Let the modal height be variable based on the content
-                    // and set a uniform padding
-                    $('#workflow-modal-dialog').css({'padding': '20px'});
+            //         // Let the modal height be variable based on the content
+            //         // and set a uniform padding
+            //         $('#workflow-modal-dialog').css({'padding': '20px'});
 
-                },
-                _allowInteraction: function(e) {
-                    return !!$(e.target).is('.select2-input') || this._super(e);
-                },
-                callback: 'WorkflowDialogReady'
-            });
+            //     },
+            //     _allowInteraction: function(e) {
+            //         return !!$(e.target).is('.select2-input') || this._super(e);
+            //     },
+            //     callback: 'WorkflowDialogReady'
+            // });
 
-            return deferred.promise;
+            // return deferred.promise;
         },
         closeDialog: function() {
             $('#workflow-modal-dialog').dialog('destroy');

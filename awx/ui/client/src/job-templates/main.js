@@ -136,11 +136,11 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         }
                     },
                     views: {
-                        'modal@templates.editWorkflowJobTemplate.workflowMaker': {
-                            templateProvider: function(ListDefinition, generateList) {
+                        'related': {
+                            templateProvider: function(InventoryList, generateList) {
                                 let list_html = generateList.build({
                                     mode: 'lookup',
-                                    list: ListDefinition,
+                                    list: InventoryList,
                                     input_type: 'radio'
                                 });
                                 return `<lookup-modal>${list_html}</lookup-modal>`;
@@ -149,10 +149,9 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         }
                     },
                     resolve: {
-                        // ListDefinition: [InventoryList, function(list) {
-                        //     list.iterator = field.sourceModel;
-                        //     return list;
-                        // }],
+                        ListDefinition: ['InventoryList', function(list) {
+                            return list;
+                        }],
                         Dataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
                             (list, qs, $stateParams, GetBasePath) => {
                                 let path = GetBasePath(list.name) || GetBasePath(list.basePath);
@@ -184,7 +183,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         }, [
                             stateExtender.buildDefinition(jobTemplatesListRoute),
                             workflowMaker,
-                            //inventoryLookup
+                            inventoryLookup
                         ])
                     };
                 });
