@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from './job-templates-list.controller';
+import controller from './job-template-edit.controller';
 
 export default
-    angular.module('jobTemplatesList', [])
-        .controller('JobTemplatesListController', controller);
+    angular.module('jobTemplateEdit', [])
+        .controller('JobTemplateEdit', controller);

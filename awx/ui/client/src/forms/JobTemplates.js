@@ -20,10 +20,12 @@ export default
             addTitle: i18n._('New Job Template'),
             editTitle: '{{ name }}',
             name: 'job_template',
+            breadcrumbName: 'JOB TEMPLATE',
             basePath: 'job_templates',
             // the top-most node of generated state tree
-            stateTree: 'jobTemplates',
+            stateTree: 'templates',
             tabs: true,
+            activeEditState: 'templates.editJobTemplate',
             // (optional) array of supporting templates to ng-include inside generated html
             include: ['/static/partials/survey-maker-modal.html'],
 

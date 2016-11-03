@@ -24,6 +24,8 @@ import ProjectStatus from "./forms/ProjectStatus";
 import Projects from "./forms/Projects";
 import Teams from "./forms/Teams";
 import Users from "./forms/Users";
+import WorkflowMaker from "./forms/WorkflowMaker";
+import Workflows from "./forms/Workflows";
 
 
 export
@@ -46,5 +48,7 @@ export
         ProjectStatus,
         Projects,
         Teams,
-        Users
+        Users,
+        WorkflowMaker,
+        Workflows
     };

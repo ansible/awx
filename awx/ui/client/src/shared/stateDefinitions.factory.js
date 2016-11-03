@@ -140,12 +140,14 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
             let formNode, states = [];
             switch (mode) {
                 case 'add':
+                    // breadcrumbName necessary for resources that are more than one word like
+                    // job templates.  form.name can't have spaces in it or it busts form gen
                     formNode = $stateExtender.buildDefinition({
                         name: params.name || `${params.parent}.add`,
                         url: params.url || '/add',
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: `CREATE ${form.name}`
+                            label: `CREATE ${form.breadcrumbName || form.name}`
                         },
                         views: {
                             'form': {

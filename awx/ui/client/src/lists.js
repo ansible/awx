@@ -13,6 +13,7 @@ import Hosts from "./lists/Hosts";
 import Inventories from "./lists/Inventories";
 import InventoryGroups from "./lists/InventoryGroups";
 import InventoryHosts from "./lists/InventoryHosts";
+import InventorySources from "./lists/InventorySources";
 import JobEvents from "./lists/JobEvents";
 import JobHosts from "./lists/JobHosts";
 import JobTemplates from "./lists/JobTemplates";
@@ -38,6 +39,7 @@ export
         Inventories,
         InventoryGroups,
         InventoryHosts,
+        InventorySources,
         JobEvents,
         JobHosts,
         JobTemplates,

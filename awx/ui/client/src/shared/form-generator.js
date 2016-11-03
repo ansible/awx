@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
     'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', '$log', 'i18n',
+    'Store', 'ActionButton', '$log', 'i18n', '$timeout',
     function ($rootScope, $location, $compile, GenerateList,
         Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n) {
+        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n, $timeout) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -523,7 +523,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
-                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock') {
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock' && field.type !== 'workflow-chart') {
 
 
                     html += "<div class='form-group Form-formGroup ";
@@ -1258,9 +1258,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "</div>"; //end of Form-header
                 }
 
-                if (!_.isEmpty(this.form.related)) {
+                if (!_.isEmpty(this.form.related) || !_.isEmpty(this.form.relatedButtons)) {
                     var collection, details = i18n._('Details');
-                    html += `<div class="Form-tabHolder">`;
+                    html += "<div class=\"Form-tabHolder\">";
 
                     if(this.mode === "edit"){
                         html += `<div id="${this.form.name}_tab" class="Form-tab" ` +
@@ -1284,6 +1284,45 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             }
                             html +=  `}">${(collection.title || collection.editTitle)}</div>`;
                         }
+
+                        for (itm in this.form.relatedButtons) {
+                            button = this.form.relatedButtons[itm];
+
+                            // Build button HTML
+                            html += "<button type=\"button\" ";
+                            html += "class=\"btn btn-sm";
+                            html += (button['class']) ? " " + button['class'] : "";
+                            html += "\" ";
+                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                            if(button.ngShow){
+                                html += this.attr(button, 'ngShow');
+                            }
+                            if (button.ngClick) {
+                                html += this.attr(button, 'ngClick');
+                            }
+                            if (button.awFeature) {
+                                html += this.attr(button, 'awFeature');
+                            }
+                            if (button.ngDisabled) {
+                                ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
+                                if (btn !== 'reset') {
+                                    //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+                                    html += "ng-disabled=\"" + ngDisabled;
+                                    //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                    html += "\" ";
+                                } else {
+                                    //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                                    //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                    //html += "\" ";
+                                }
+                            }
+                            if(button.awToolTip) {
+                                html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                            }
+                            html += ">";
+                            html += " " + button.label + "</button>\n";
+                        }
                     }
                     else if(this.mode === "add"){
                         html += "<div id=\"" + this.form.name + "_tab\""+
@@ -1296,6 +1335,29 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 "data-container=\"body\" tooltipinnerclass=\"StartStatus-tooltip\" data-trigger=\"hover\"" +
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
                                 "</div>\n";
+                        }
+
+                        for (itm in this.form.relatedButtons) {
+                            button = this.form.relatedButtons[itm];
+
+                            // Build button HTML
+                            html += "<button type=\"button\" ";
+                            html += "class=\"btn btn-sm Form-tab--disabled";
+                            html += (button['class']) ? " " + button['class'] : "";
+                            html += "\" ";
+                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                            if(button.ngShow){
+                                html += this.attr(button, 'ngShow');
+                            }
+                            if (button.awFeature) {
+                                html += this.attr(button, 'awFeature');
+                            }
+                            if(button.awToolTip) {
+                                html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                            }
+                            html += ">";
+                            html += " " + button.label + "</button>\n";
                         }
                     }
                     html += "</div>";//tabHolder
@@ -1429,6 +1491,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 if (btn === 'view_survey') {
                                     button.label = i18n._('View Survey');
                                     button['class'] = 'Form-surveyButton';
+                                }
+                                if (btn === 'workflow_editor') {
+                                    button.label = i18n._('Workflow Editor');
+                                    button['class'] = 'Form-primaryButton';
                                 }
 
                                 // Build button HTML

@@ -6,7 +6,7 @@
 
 
 export default {
-	name: 'jobTemplates.copy',
+	name: 'templates.copy',
 	route: '/:id/copy',
 	controller: 'jobTemplateCopyController'
 };

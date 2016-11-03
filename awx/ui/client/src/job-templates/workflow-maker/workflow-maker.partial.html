@@ -1,0 +1,106 @@
+<div id="workflow-modal-dialog" style="display: none;">
+    <div class="WorkflowMaker-deleteOverlay" ng-show="deleteOverlayVisible">
+            <div class="Modal-content modal-content">
+                <div class="Modal-header">
+                    <div class="Modal-title">REMOVE</div>
+                    <div class="Modal-exitHolder">
+                        <button class="close Modal-exit" ng-click="cancelDeleteNode()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="Modal-body ng-binding">
+                    <div class="Prompt-bodyQuery">Are you sure you want to remove the template below?</div>
+                    <div class="Prompt-bodyTarget">{{nodeToBeDeleted.unifiedJobTemplate.name}}</div>
+                </div>
+                <div class="Modal-footer">
+                    <button ng-click="cancelDeleteNode()" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
+                    <button ng-click="confirmDeleteNode()" class="btn Modal-footerButton ng-binding Modal-errorButton">DELETE</a>
+                </div>
+            </div>
+    </div>
+    <div class="WorkflowMaker-header">
+        <div class="WorkflowMaker-title">
+            <div class="WorkflowMaker-titleText">EDIT WORKFLOW</div>
+        </div>
+        <div class="WorkflowMaker-exitHolder">
+            <button class="WorkflowMaker-exit" ng-click="closeWorkflowMaker()">
+                <i class="fa fa-times-circle"></i>
+            </button>
+        </div>
+    </div>
+    <div class="WorkflowMaker-contentHolder">
+        <div class="WorkflowMaker-contentLeft">
+            <div class="WorkflowMaker-legend">
+                <div class="WorkflowMaker-legendLeft">
+                    <div class="WorkflowMaker-legendItem">KEY:</div>
+                    <div class="WorkflowMaker-legendItem">
+                        <div class="WorkflowMaker-onSuccessLegend"></div>
+                        <div>On Success</div>
+                    </div>
+                    <div class="WorkflowMaker-legendItem">
+                        <div class="WorkflowMaker-onFailLegend"></div>
+                        <div>On Fail</div>
+                    </div>
+                    <div class="WorkflowMaker-legendItem">
+                        <div class="WorkflowMaker-alwaysLegend"></div>
+                        <div>Always</div>
+                    </div>
+                    <div class="WorkflowMaker-legendItem">
+                        <div class="WorkflowMaker-letterCircle">P</div>
+                        <div>Project Sync</div>
+                    </div>
+                    <div class="WorkflowMaker-legendItem">
+                        <div class="WorkflowMaker-letterCircle">I</div>
+                        <div>Inventory Sync</div>
+                    </div>
+                </div>
+                <div class="WorkflowMaker-legendRight">
+                    <span class="WorkflowMaker-totalJobs">TOTAL JOBS</span>
+                    <span class="badge List-titleBadge" ng-bind="treeData.data.totalNodes"></span>
+                </div>
+            </div>
+            <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" class="WorkflowMaker-chart"></workflow-chart>
+        </div>
+        <div class="WorkflowMaker-contentRight">
+            <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited && nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "ADD A TEMPLATE"}}</div>
+            <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'">Please hover over a template and click the Add button.</div>
+            <div class="WorkflowMaker-form" ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'">
+                <div class="Form-tabHolder">
+                    <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'jobs'}" ng-click="toggleFormTab('jobs')">JOBS</div>
+                    <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'project_sync'}" ng-click="toggleFormTab('project_sync')">PROJECT SYNC</div>
+                    <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'inventory_sync'}" ng-click="toggleFormTab('inventory_sync')">INVENTORY SYNC</div>
+                </div>
+                <div class="WorkflowMaker-formLists">
+                    <div id="workflow-jobs-list" ng-show="workflowMakerFormConfig.activeTab === 'jobs'"></div>
+                    <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'"></div>
+                    <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'"></div>
+                </div>
+                <div ng-show="showTypeOptions" class="WorkflowMaker-formElement">
+                    <label class="Form-inputLabelContainer">
+                        <span class="Form-inputLabel prepend-asterisk"> TYPE</span>
+                    </label>
+                    <div>
+                        <div ng-hide="edgeTypeRestriction ==='always'">
+                            <input type="radio" ng-model="edgeType" id="workflow-type-success" value="success">
+                            <label class="WorkflowMaker-formLabel" for="workflow-type-success">On Success</label>
+                        </div>
+                        <div ng-hide="edgeTypeRestriction ==='always'">
+                            <input type="radio" ng-model="edgeType" id="workflow-type-failure" value="failure">
+                            <label class="WorkflowMaker-formLabel" for="workflow-type-failure">On Failure</label>
+                        </div>
+                        <div ng-hide="edgeTypeRestriction ==='successFailure'">
+                            <input type="radio" ng-model="edgeType" id="workflow-type-always" value="always">
+                            <label class="WorkflowMaker-formLabel" for="workflow-type-always">Always</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="workflow-maker-form"></div>
+            </div>
+        </div>
+    </div>
+    <div class="WorkflowMaker-buttonHolder">
+        <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> Close</button>
+        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()"> Save</button>
+    </div>
+</div>

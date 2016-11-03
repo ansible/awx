@@ -195,6 +195,9 @@ var tower = angular.module('Tower', [
     'ActivityStreamHelper',
     'gettext',
     'I18N',
+    'WorkflowFormDefinition',
+    'InventorySourcesListDefinition',
+    'WorkflowMakerFormDefinition'
 ])
 
 .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

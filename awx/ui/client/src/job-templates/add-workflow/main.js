@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from './job-templates-add.controller';
+import controller from './workflow-add.controller';
 
 export default
-    angular.module('jobTemplatesAdd', [])
-        .controller('JobTemplatesAdd', controller);
+    angular.module('workflowAdd', [])
+        .controller('WorkflowAdd', controller);

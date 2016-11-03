@@ -136,7 +136,12 @@ export default
                 // jobs, and jobDetails $states.
 
                 if (!$scope.submitJobRelaunch) {
-                    launch_url = GetBasePath('job_templates') + $scope.submitJobId + '/launch/';
+                    if($scope.submitJobType && $scope.submitJobType === 'job_template') {
+                        launch_url = GetBasePath('job_templates') + $scope.submitJobId + '/launch/';
+                    }
+                    else if($scope.submitJobType && $scope.submitJobType === 'workflow_job_template') {
+                        launch_url = GetBasePath('workflow_job_templates') + $scope.submitJobId + '/launch/';
+                    }
                 }
                 else {
                     launch_url = GetBasePath('jobs') + $scope.submitJobId + '/relaunch/';
@@ -191,7 +196,7 @@ export default
                         updateRequiredPasswords();
                     }
 
-                    if( ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
+                    if( ($scope.submitJobType === 'workflow_job_template' && !$scope.survey_enabled) || ($scope.submitJobRelaunch && !$scope.password_needed) || (!$scope.submitJobRelaunch && $scope.can_start_without_user_input && !$scope.ask_inventory_on_launch && !$scope.ask_credential_on_launch && !$scope.has_other_prompts && !$scope.survey_enabled)) {
                         // The job can be launched if
                         // a) It's a relaunch and no passwords are needed
                         // or

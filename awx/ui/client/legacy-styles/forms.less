@@ -184,6 +184,7 @@
 .Form-formGroup--fullWidth {
     max-width: none !important;
     width: 100% !important;
+    padding-right: 0px !important;
 }
 
 .Form-formGroup--checkbox{
@@ -553,17 +554,22 @@ input[type='radio']:checked:before {
     color: @btn-txt;
 }
 
-.Form-surveyButton {
+.Form-primaryButton {
     background-color: @default-link;
     color: @default-bg;
     text-transform: uppercase;
     padding-left:15px;
     padding-right: 15px;
+    margin-right: 20px;
 }
 
-.Form-surveyButton:hover{
+.Form-primaryButton:hover {
     background-color: @default-link-hov;
     color: @default-bg;
+}
+
+.Form-primaryButton.Form-tab--disabled:hover {
+    background-color: @default-link;
 }
 
 .Form-formGroup--singleColumn {
