@@ -133,7 +133,7 @@ class TaskManager():
             if workflow_job.cancel_flag:
                 workflow_job.status = 'canceled'
                 workflow_job.save()
-                dag.bfs_nodes_to_cancel()
+                dag.cancel_node_jobs()
                 connection.on_commit(lambda: workflow_job.websocket_emit_status(workflow_job.status))
             elif dag.is_workflow_done():
                 if workflow_job._has_failed():
