@@ -35,6 +35,11 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
 
             $scope.orgCards = parseCardData($scope[list.name]);
             $rootScope.flashMessage = null;
+
+            // grab the pagination elements, move, destroy list generator elements
+            $('#organization-pagination').appendTo('#OrgCards');
+            $('#organizations tag-search').appendTo('.OrgCards-search');
+            $('#organizations-list').remove();
         }
 
         function parseCardData(cards) {
@@ -84,7 +89,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 });
                 return val;
             });
-        };
+        }
 
         $scope.$on("ReloadOrgListView", function() {
             Rest.setUrl($scope.current_url);
@@ -149,50 +154,5 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 actionText: 'DELETE'
             });
         };
-        var init = function(){
-            // Pagination depends on html appended by list generator
-            view.inject(list, {
-                id: 'organizations-list',
-                scope: $scope,
-                mode: 'edit'
-            });
-            // grab the pagination elements, move, destroy list generator elements
-            $('#organization-pagination').appendTo('#OrgCards');
-            $('#organizations tag-search').appendTo('.OrgCards-search');
-            $('#organizations-list').remove();
-
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url: defaultUrl,
-                pageSize: pageSize,
-            });
-            SearchInit({
-                scope: $scope,
-                list: list,
-                url: defaultUrl,
-                set: 'organizations'
-            });
-
-            $scope.list = list;
-            $rootScope.flashMessage = null;
-
-            $scope.search(list.iterator);
-            var getOrgCount = function() {
-                Rest.setUrl(defaultUrl);
-                Rest.get()
-                    .success(function(data) {
-                        $scope.orgCount = data.count;
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors($scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
-                        });
-                    });
-            };
-            getOrgCount();
-        };
-        init();
     }
 ];
