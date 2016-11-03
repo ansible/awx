@@ -125,9 +125,9 @@ class TestWorkflowJobTemplate:
         node_assoc = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
         nodes[2].always_nodes.add(node_assoc)
         # test cycle validation
-        assert test_view.is_valid_relation(node_assoc, nodes[0]) == {'Error': 'Cycle detected!'}
+        assert test_view.is_valid_relation(node_assoc, nodes[0]) == {'Error': 'Cycle detected.'}
         # test multi-ancestor validation
-        assert test_view.is_valid_relation(node_assoc, nodes[1]) == {'Error': 'Multiple ancestor detected!'}
+        assert test_view.is_valid_relation(node_assoc, nodes[1]) == {'Error': 'Multiple parent relationship not allowed.'}
         # test mutex validation
         test_view.relationship = 'failure_nodes'
         node_assoc_1 = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
