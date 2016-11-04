@@ -110,10 +110,12 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 delete list.fields.description;
                                 delete list.fields.smart_status;
                                 delete list.fields.labels;
+                                delete list.fieldActions;
                                 list.fields.name.columnClass = "col-md-11";
                                 let html = generateList.build({
                                     list: list,
-                                    mode: 'edit'
+                                    input_type: 'radio',
+                                    mode: 'lookup'
                                 });
                                 return html;
                             },
@@ -133,7 +135,8 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 // mutate list definition here!
                                 let html = generateList.build({
                                     list: list,
-                                    mode: 'edit'
+                                    input_type: 'radio',
+                                    mode: 'lookup'
                                 });
                                 return html;
                             },
@@ -147,7 +150,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 }
                             ]
                         },
-                        'projectList@templates.editWorkflowJobTemplate.workflowMaker': {
+                        'projectSyncList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(ProjectList, generateList) {
                                 let list = _.cloneDeep(ProjectList);
                                 delete list.fields.status;
@@ -156,7 +159,8 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 list.fields.name.columnClass = "col-md-11";
                                 let html = generateList.build({
                                     list: list,
-                                    mode: 'edit'
+                                    input_type: 'radio',
+                                    mode: 'lookup'
                                 });
                                 return html;
                             },
@@ -175,6 +179,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 let html = GenerateForm.buildHTML(form, {
                                     mode: 'add',
                                     related: false,
+                                    noPanel: true
                                 });
                                 return html;
                             }

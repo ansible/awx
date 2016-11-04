@@ -82,7 +82,7 @@ export default
             submit: {
                 label: i18n._('Launch'),
                 mode: 'all',
-                ngClick: 'submitJob(unified_job_templates)',
+                ngClick: 'submitJob(template)',
                 awToolTip: i18n._('Start a job using this template'),
                 dataPlacement: 'top',
                 ngShow: 'template.summary_fields.user_capabilities.start'
@@ -90,14 +90,14 @@ export default
             schedule: {
                 label: i18n._('Schedule'),
                 mode: 'all',
-                ngClick: 'scheduleJob(unified_job_templates)',
+                ngClick: 'scheduleJob(template)',
                 awToolTip: i18n._('Schedule future job template runs'),
                 dataPlacement: 'top',
                 ngShow: 'template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: i18n._('Copy'),
-                'ui-sref': 'templates.copy({id: unified_job_templates.id})',
+                'ui-sref': 'templates.copy({id: template.id})',
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy template'),
                 dataPlacement: 'top',
@@ -105,7 +105,7 @@ export default
             },
             edit: {
                 label: i18n._('Edit'),
-                ngClick: "editJobTemplate(unified_job_templates)",
+                ngClick: "editJobTemplate(template)",
                 awToolTip: i18n._('Edit template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
@@ -113,7 +113,7 @@ export default
             },
             view: {
                 label: i18n._('View'),
-                ngClick: "editJobTemplate(unified_job_templates.id)",
+                ngClick: "editJobTemplate(template.id)",
                 awToolTip: i18n._('View template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
@@ -121,7 +121,7 @@ export default
             },
             "delete": {
                 label: i18n._('Delete'),
-                ngClick: "deleteJobTemplate(unified_job_templates)",
+                ngClick: "deleteJobTemplate(template)",
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Delete template'),
                 dataPlacement: 'top',

@@ -13,8 +13,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
         GenerateForm, InventoryList, CredentialList, $q, $timeout) {
 
-        let form = WorkflowMakerForm(),
-            generator = GenerateForm;
+        let form = WorkflowMakerForm();
 
         $scope.workflowMakerFormConfig = {
             nodeMode: "idle",
@@ -143,9 +142,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
         }
 
-
         $scope.lookUpInventory = function(){
-            console.log($state)
             $state.go('.inventory')
         };
 

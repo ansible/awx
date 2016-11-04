@@ -58,10 +58,10 @@ export default
                     dataTitle: 'Inventory',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    //ngShow: "selectedTemplate.ask_inventory_on_launch",
-                    // awRequiredWhen: {
-                    //     reqExpression: 'selectedTemplate.ask_inventory_on_launch'
-                    // }
+                    ngShow: "selectedTemplate.ask_inventory_on_launch",
+                    awRequiredWhen: {
+                        reqExpression: 'selectedTemplate.ask_inventory_on_launch'
+                    }
                 },
                 job_type: {
                     label: 'Job Type',

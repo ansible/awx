@@ -19,8 +19,8 @@ import uiRouter from 'angular-ui-router';
 // backwards compatibility for $stateChange* events
 import 'angular-ui-router/release/stateEvents';
 // ui-router debugging
-import { trace } from 'angular-ui-router';
-trace.enable();
+//import { trace } from 'angular-ui-router';
+//trace.enable();
 
 // Configuration dependencies
 global.$AnsibleConfig = null;

@@ -164,12 +164,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             // Not a very good way to do this
             // Form sub-states expect to target ui-views related@stateName & modal@stateName
             // Also wraps mess of generated HTML in a .Panel
-            wrapPanel(html){
-                return `<div class="Panel">
-                ${html}
-                <div ui-view="related"></div>
-                <div ui-view="modal"></div>
-                </div>`;
+            wrapPanel(html, ignorePanel){
+                if(ignorePanel) {
+                    return `<div>
+                    ${html}
+                    <div ui-view="related"></div>
+                    <div ui-view="modal"></div>
+                    </div>`;
+                }
+                else {
+                    return `<div class="Panel">
+                    ${html}
+                    <div ui-view="related"></div>
+                    <div ui-view="modal"></div>
+                    </div>`;
+                }
             },
 
             buildHTML: function(form, options) {
@@ -1548,7 +1557,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     });
                 }
                // console.log(html)
-                return this.wrapPanel(html);
+                return this.wrapPanel(html, options.noPanel);
             },
 
             buildCollection: function (params) {

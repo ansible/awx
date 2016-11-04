@@ -45,6 +45,8 @@ export default ['templateUrl', 'CreateDialog', 'Wait',
                 }
                 scope.removeWorkflowDialogReady = scope.$on('WorkflowDialogReady', function() {
                     $('#workflow-modal-dialog').dialog('open');
+
+                    scope.$broadcast("refreshWorkflowChart");
                 });
             }
         };
