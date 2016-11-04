@@ -11,3 +11,4 @@ pytest-django
 pytest-pythonpath
 pytest-mock
 flower
+uwsgitop
