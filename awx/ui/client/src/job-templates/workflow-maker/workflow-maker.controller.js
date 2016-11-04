@@ -540,6 +540,8 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         };
 
         $scope.toggleFormTab = function(tab) {
+            // a dictionary of settings required by each encapsulated tab
+            $scope.$broadcast('resetWorkflowList', tab);
             if ($scope.workflowMakerFormConfig.activeTab !== tab) {
                 $scope.workflowMakerFormConfig.activeTab = tab;
             }
@@ -547,13 +549,13 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
         $scope.toggle_job_template = function(id) {
 
-            $scope.workflow_projects.forEach(function(row, i) {
-                $scope.workflow_projects[i].checked = 0;
-            });
+            // $scope.workflow_projects.forEach(function(row, i) {
+            //     $scope.workflow_projects[i].checked = 0;
+            // });
 
-            $scope.workflow_inventory_sources.forEach(function(row, i) {
-                $scope.workflow_inventory_sources[i].checked = 0;
-            });
+            // $scope.workflow_inventory_sources.forEach(function(row, i) {
+            //     $scope.workflow_inventory_sources[i].checked = 0;
+            // });
 
             $scope.workflow_job_templates.forEach(function(row, i) {
                 if (row.id === id) {
@@ -614,13 +616,13 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
             resetPromptFields();
 
-            $scope.workflow_job_templates.forEach(function(row, i) {
-                $scope.workflow_job_templates[i].checked = 0;
-            });
+            // $scope.workflow_job_templates.forEach(function(row, i) {
+            //     $scope.workflow_job_templates[i].checked = 0;
+            // });
 
-            $scope.workflow_inventory_sources.forEach(function(row, i) {
-                $scope.workflow_inventory_sources[i].checked = 0;
-            });
+            // $scope.workflow_inventory_sources.forEach(function(row, i) {
+            //     $scope.workflow_inventory_sources[i].checked = 0;
+            // });
 
             $scope.workflow_projects.forEach(function(row, i) {
                 if (row.id === id) {
@@ -637,13 +639,13 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
             resetPromptFields();
 
-            $scope.workflow_job_templates.forEach(function(row, i) {
-                $scope.workflow_job_templates[i].checked = 0;
-            });
+            // $scope.workflow_job_templates.forEach(function(row, i) {
+            //     $scope.workflow_job_templates[i].checked = 0;
+            // });
 
-            $scope.workflow_projects.forEach(function(row, i) {
-                $scope.workflow_projects[i].checked = 0;
-            });
+            // $scope.workflow_projects.forEach(function(row, i) {
+            //     $scope.workflow_projects[i].checked = 0;
+            // });
 
             $scope.workflow_inventory_sources.forEach(function(row, i) {
                 if (row.id === id) {

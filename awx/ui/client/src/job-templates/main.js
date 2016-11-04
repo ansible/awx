@@ -120,12 +120,29 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 return html;
                             },
                             // $scope encapsulated in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
-                            controller: ['$scope', 'JobTemplateList', 'JobTemplateDataset',
-                                function($scope, list, Dataset) {
-                                    $scope.list = list;
-                                    $scope[`${list.iterator}_dataset`] = Dataset.data;
-                                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                            controller: ['$scope', 'JobTemplateList', 'JobTemplateDataset', '$log',
+                                function($scope, list, Dataset, $log) {
+                                    // name of this tab
+                                    let tab = 'jobs';
 
+                                    init();
+
+                                    function init() {
+                                        $scope.list = list;
+                                        $scope[`${list.iterator}_dataset`] = Dataset.data;
+                                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                                    }
+
+                                    // resets any selected list items, if this tab is not active
+                                    $scope.$on('resetWorkflowList', function(e, active) {
+                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
+
+                                        // a reference to the currently-selected radio is stored in $scope.selection[list.iterator]
+                                        // clear it out!
+                                        if (active !== tab) {
+                                            $scope.selection[list.iterator] = null;
+                                        }
+                                    });
                                 }
                             ]
                         },
@@ -143,10 +160,25 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                             // encapsulated $scope in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
                             controller: ['$scope', 'InventorySourcesList', 'InventorySourcesDataset',
                                 function($scope, list, Dataset) {
-                                    $scope.list = list;
-                                    $scope[`${list.iterator}_dataset`] = Dataset.data;
-                                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                                    let tab = 'inventory_sync';
 
+                                    init();
+
+                                    function init() {
+                                        $scope.list = list;
+                                        $scope[`${list.iterator}_dataset`] = Dataset.data;
+                                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+                                    }
+
+                                    // resets any selected list items, if this tab is not active
+                                    $scope.$on('resetWorkflowList', function(e, active) {
+                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
+
+                                        if (active !== tab) {
+                                            $scope.selection[list.iterator] = null;
+                                        }
+                                    });
                                 }
                             ]
                         },
@@ -167,9 +199,24 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                             // encapsulated $scope in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
                             controller: ['$scope', 'ProjectList', 'ProjectDataset',
                                 function($scope, list, Dataset) {
-                                    $scope.list = list;
-                                    $scope[`${list.iterator}_dataset`] = Dataset.data;
-                                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                                    let tab = 'project_sync';
+
+                                    init();
+
+                                    function init() {
+                                        $scope.list = list;
+                                        $scope[`${list.iterator}_dataset`] = Dataset.data;
+                                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+                                    }
+                                    // resets any selected list items, if this tab is not active
+                                    $scope.$on('resetWorkflowList', function(e, active) {
+                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
+
+                                        if (active !== tab) {
+                                            $scope.selection[list.iterator] = null;
+                                        }
+                                    });
                                 }
                             ]
                         },
