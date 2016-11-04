@@ -41,6 +41,7 @@ from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
@@ -112,12 +113,12 @@ def run_administrative_checks(self):
     tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
     if (used_percentage * 100) > 90:
         send_mail("Ansible Tower host usage over 90%",
-                  "Ansible Tower host usage over 90%",
+                  _("Ansible Tower host usage over 90%"),
                   tower_admin_emails,
                   fail_silently=True)
     if validation_info.get('date_warning', False):
         send_mail("Ansible Tower license will expire soon",
-                  "Ansible Tower license will expire soon",
+                  _("Ansible Tower license will expire soon"),
                   tower_admin_emails,
                   fail_silently=True)
 
@@ -165,7 +166,7 @@ def tower_periodic_scheduler(self):
 
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
-        raise ValueError("status_str must be either succeeded or failed")
+        raise ValueError(_("status_str must be either succeeded or failed"))
     notification_templates = instance.get_notification_templates()
     if notification_templates:
         all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))

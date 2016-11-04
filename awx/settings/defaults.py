@@ -10,8 +10,12 @@ from datetime import timedelta
 
 from kombu import Queue, Exchange
 
-# Update this module's local settings from the global settings module.
+# global settings
 from django.conf import global_settings
+# ugettext lazy
+from django.utils.translation import ugettext_lazy as _
+
+# Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
 for setting in dir(global_settings):
     if setting == setting.upper():
@@ -117,6 +121,11 @@ LOG_ROOT = os.path.join(BASE_DIR)
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
+# Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 # Maximum number of the same job that can be waiting to run when launching from scheduler
 # Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
@@ -154,8 +163,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
 )
 
 MIDDLEWARE_CLASSES = (  # NOQA
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -571,12 +581,12 @@ AD_HOC_COMMANDS = [
 # instead (based on docs from:
 # http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)
 RAX_REGION_CHOICES = [
-    ('ORD', 'Chicago'),
-    ('DFW', 'Dallas/Ft. Worth'),
-    ('IAD', 'Northern Virginia'),
-    ('LON', 'London'),
-    ('SYD', 'Sydney'),
-    ('HKG', 'Hong Kong'),
+    ('ORD', _('Chicago')),
+    ('DFW', _('Dallas/Ft. Worth')),
+    ('IAD', _('Northern Virginia')),
+    ('LON', _('London')),
+    ('SYD', _('Sydney')),
+    ('HKG', _('Hong Kong')),
 ]
 
 # Inventory variable name/values for determining if host is active/enabled.
@@ -603,20 +613,20 @@ INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 # list of names here.  The available region IDs will be pulled from boto.
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
 EC2_REGION_NAMES = {
-    'us-east-1': 'US East (Northern Virginia)',
-    'us-east-2': 'US East (Ohio)',
-    'us-west-2': 'US West (Oregon)',
-    'us-west-1': 'US West (Northern California)',
-    'eu-central-1': 'EU (Frankfurt)',
-    'eu-west-1': 'EU (Ireland)',
-    'ap-southeast-1': 'Asia Pacific (Singapore)',
-    'ap-southeast-2': 'Asia Pacific (Sydney)',
-    'ap-northeast-1': 'Asia Pacific (Tokyo)',
-    'ap-northeast-2': 'Asia Pacific (Seoul)',
-    'ap-south-1': 'Asia Pacific (Mumbai)',
-    'sa-east-1': 'South America (Sao Paulo)',
-    'us-gov-west-1': 'US West (GovCloud)',
-    'cn-north-1': 'China (Beijing)',
+    'us-east-1': _('US East (Northern Virginia)'),
+    'us-east-2': _('US East (Ohio)'),
+    'us-west-2': _('US West (Oregon)'),
+    'us-west-1': _('US West (Northern California)'),
+    'eu-central-1': _('EU (Frankfurt)'),
+    'eu-west-1': _('EU (Ireland)'),
+    'ap-southeast-1': _('Asia Pacific (Singapore)'),
+    'ap-southeast-2': _('Asia Pacific (Sydney)'),
+    'ap-northeast-1': _('Asia Pacific (Tokyo)'),
+    'ap-northeast-2': _('Asia Pacific (Seoul)'),
+    'ap-south-1': _('Asia Pacific (Mumbai)'),
+    'sa-east-1': _('South America (Sao Paulo)'),
+    'us-gov-west-1': _('US West (GovCloud)'),
+    'cn-north-1': _('China (Beijing)'),
 }
 
 EC2_REGIONS_BLACKLIST = [
@@ -665,19 +675,19 @@ VMWARE_EXCLUDE_EMPTY_GROUPS = True
 # provide a list here.
 # Source: https://developers.google.com/compute/docs/zones
 GCE_REGION_CHOICES = [
-    ('us-east1-b', 'US East (B)'),
-    ('us-east1-c', 'US East (C)'),
-    ('us-east1-d', 'US East (D)'),
-    ('us-central1-a', 'US Central (A)'),
-    ('us-central1-b', 'US Central (B)'),
-    ('us-central1-c', 'US Central (C)'),
-    ('us-central1-f', 'US Central (F)'),
-    ('europe-west1-b', 'Europe West (B)'),
-    ('europe-west1-c', 'Europe West (C)'),
-    ('europe-west1-d', 'Europe West (D)'),
-    ('asia-east1-a', 'Asia East (A)'),
-    ('asia-east1-b', 'Asia East (B)'),
-    ('asia-east1-c', 'Asia East (C)'),
+    ('us-east1-b', _('US East (B)')),
+    ('us-east1-c', _('US East (C)')),
+    ('us-east1-d', _('US East (D)')),
+    ('us-central1-a', _('US Central (A)')),
+    ('us-central1-b', _('US Central (B)')),
+    ('us-central1-c', _('US Central (C)')),
+    ('us-central1-f', _('US Central (F)')),
+    ('europe-west1-b', _('Europe West (B)')),
+    ('europe-west1-c', _('Europe West (C)')),
+    ('europe-west1-d', _('Europe West (D)')),
+    ('asia-east1-a', _('Asia East (A)')),
+    ('asia-east1-b', _('Asia East (B)')),
+    ('asia-east1-c', _('Asia East (C)')),
 ]
 GCE_REGIONS_BLACKLIST = []
 
@@ -701,19 +711,19 @@ GCE_INSTANCE_ID_VAR = None
 # It's not possible to get zones in Azure without authenticating, so we
 # provide a list here.
 AZURE_REGION_CHOICES = [
-    ('Central_US', 'US Central'),
-    ('East_US_1', 'US East'),
-    ('East_US_2', 'US East 2'),
-    ('North_Central_US', 'US North Central'),
-    ('South_Central_US', 'US South Central'),
-    ('West_US', 'US West'),
-    ('North_Europe', 'Europe North'),
-    ('West_Europe', 'Europe West'),
-    ('East_Asia_Pacific', 'Asia Pacific East'),
-    ('Southest_Asia_Pacific', 'Asia Pacific Southeast'),
-    ('East_Japan', 'Japan East'),
-    ('West_Japan', 'Japan West'),
-    ('South_Brazil', 'Brazil South'),
+    ('Central_US', _('US Central')),
+    ('East_US_1', _('US East')),
+    ('East_US_2', _('US East 2')),
+    ('North_Central_US', _('US North Central')),
+    ('South_Central_US', _('US South Central')),
+    ('West_US', _('US West')),
+    ('North_Europe', _('Europe North')),
+    ('West_Europe', _('Europe West')),
+    ('East_Asia_Pacific', _('Asia Pacific East')),
+    ('Southest_Asia_Pacific', _('Asia Pacific Southeast')),
+    ('East_Japan', _('Japan East')),
+    ('West_Japan', _('Japan West')),
+    ('South_Brazil', _('Brazil South')),
 ]
 AZURE_REGIONS_BLACKLIST = []
 

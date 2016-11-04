@@ -95,14 +95,14 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def clean_inventory(self):
         inv = self.inventory
         if not inv:
-            raise ValidationError('No valid inventory.')
+            raise ValidationError(_('No valid inventory.'))
         return inv
 
     def clean_credential(self):
         cred = self.credential
         if cred and cred.kind != 'ssh':
             raise ValidationError(
-                'You must provide a machine / SSH credential.',
+                _('You must provide a machine / SSH credential.'),
             )
         return cred
 
@@ -113,18 +113,18 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def clean_module_name(self):
         if type(self.module_name) not in (str, unicode):
-            raise ValidationError("Invalid type for ad hoc command")
+            raise ValidationError(_("Invalid type for ad hoc command"))
         module_name = self.module_name.strip() or 'command'
         if module_name not in settings.AD_HOC_COMMANDS:
-            raise ValidationError('Unsupported module for ad hoc commands.')
+            raise ValidationError(_('Unsupported module for ad hoc commands.'))
         return module_name
 
     def clean_module_args(self):
         if type(self.module_args) not in (str, unicode):
-            raise ValidationError("Invalid type for ad hoc command")
+            raise ValidationError(_("Invalid type for ad hoc command"))
         module_args = self.module_args
         if self.module_name in ('command', 'shell') and not module_args:
-            raise ValidationError('No argument passed to %s module.' % self.module_name)
+            raise ValidationError(_('No argument passed to %s module.') % self.module_name)
         return module_args
 
     @property

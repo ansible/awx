@@ -267,7 +267,7 @@ class AuthToken(BaseModel):
 
     def invalidate(self, reason='timeout_reached', save=True):
         if not AuthToken.reason_long(reason):
-            raise ValueError('Invalid reason specified')
+            raise ValueError(_('Invalid reason specified'))
         self.reason = reason
         if save:
             self.save()

@@ -7,6 +7,7 @@ from collections import OrderedDict
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.utils.encoding import force_text, smart_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import exceptions
@@ -46,15 +47,15 @@ class Metadata(metadata.SimpleMetadata):
         serializer = getattr(field, 'parent', None)
         if serializer:
             field_help_text = {
-                'id': 'Database ID for this {}.',
-                'name': 'Name of this {}.',
-                'description': 'Optional description of this {}.',
-                'type': 'Data type for this {}.',
-                'url': 'URL for this {}.',
-                'related': 'Data structure with URLs of related resources.',
-                'summary_fields': 'Data structure with name/description for related resources.',
-                'created': 'Timestamp when this {} was created.',
-                'modified': 'Timestamp when this {} was last modified.',
+                'id': _('Database ID for this {}.'),
+                'name': _('Name of this {}.'),
+                'description': _('Optional description of this {}.'),
+                'type': _('Data type for this {}.'),
+                'url': _('URL for this {}.'),
+                'related': _('Data structure with URLs of related resources.'),
+                'summary_fields': _('Data structure with name/description for related resources.'),
+                'created': _('Timestamp when this {} was created.'),
+                'modified': _('Timestamp when this {} was last modified.'),
             }
             if field.field_name in field_help_text:
                 if hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):

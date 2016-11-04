@@ -20,7 +20,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import models
-# from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
 
@@ -242,11 +242,11 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def get_type_choices(self):
         type_name_map = {
-            'job': 'Playbook Run',
-            'ad_hoc_command': 'Command',
-            'project_update': 'SCM Update',
-            'inventory_update': 'Inventory Sync',
-            'system_job': 'Management Job',
+            'job': _('Playbook Run'),
+            'ad_hoc_command': _('Command'),
+            'project_update': _('SCM Update'),
+            'inventory_update': _('Inventory Sync'),
+            'system_job': _('Management Job'),
         }
         choices = []
         for t in self.get_types():
@@ -623,8 +623,9 @@ class UnifiedJobSerializer(BaseSerializer):
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
         if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                         settings.STDOUT_MAX_BYTES_DISPLAY)
+            return _("Standard Output too large to display (%(text_size)d bytes), "
+                     "only download supported for sizes over %(supported_size)d bytes") % {
+                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
         return obj.result_stdout
 
 
@@ -680,8 +681,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
     def get_result_stdout(self, obj):
         obj_size = obj.result_stdout_size
         if obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
-            return "Standard Output too large to display (%d bytes), only download supported for sizes over %d bytes" % (obj_size,
-                                                                                                                         settings.STDOUT_MAX_BYTES_DISPLAY)
+            return _("Standard Output too large to display (%(text_size)d bytes), "
+                     "only download supported for sizes over %(supported_size)d bytes") % {
+                'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
         return obj.result_stdout
 
     def get_types(self):
@@ -694,9 +696,9 @@ class UnifiedJobStdoutSerializer(UnifiedJobSerializer):
 class UserSerializer(BaseSerializer):
 
     password = serializers.CharField(required=False, default='', write_only=True,
-                                     help_text='Write-only field used to change the password.')
+                                     help_text=_('Write-only field used to change the password.'))
     ldap_dn = serializers.CharField(source='profile.ldap_dn', read_only=True)
-    external_account = serializers.SerializerMethodField(help_text='Set if the account is managed by an external service')
+    external_account = serializers.SerializerMethodField(help_text=_('Set if the account is managed by an external service'))
     is_system_auditor = serializers.BooleanField(default=False)
     show_capabilities = ['edit', 'delete']
 
@@ -720,7 +722,7 @@ class UserSerializer(BaseSerializer):
 
     def validate_password(self, value):
         if not self.instance and value in (None, ''):
-            raise serializers.ValidationError('Password required for new User.')
+            raise serializers.ValidationError(_('Password required for new User.'))
         return value
 
     def _update_password(self, obj, new_password):
@@ -804,7 +806,7 @@ class UserSerializer(BaseSerializer):
             ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
             if field_name in ldap_managed_fields:
                 if value != getattr(self.instance, field_name):
-                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP.' % field_name)
+                    raise serializers.ValidationError(_('Unable to change %s on user managed by LDAP.') % field_name)
         return value
 
     def validate_username(self, value):
@@ -955,13 +957,13 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         view = self.context.get('view', None)
         if not organization and not view.request.user.is_superuser:
             # Only allow super users to create orgless projects
-            raise serializers.ValidationError('Organization is missing')
+            raise serializers.ValidationError(_('Organization is missing'))
         return super(ProjectSerializer, self).validate(attrs)
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
-    playbooks = serializers.SerializerMethodField(help_text='Array of playbooks available within this project.')
+    playbooks = serializers.SerializerMethodField(help_text=_('Array of playbooks available within this project.'))
 
     class Meta:
         model = Project
@@ -1143,7 +1145,7 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError(u'Invalid port specification: %s' % force_text(port))
+                raise serializers.ValidationError(_(u'Invalid port specification: %s') % force_text(port))
         return name, port
 
     def validate_name(self, value):
@@ -1171,7 +1173,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     vars_dict['ansible_ssh_port'] = port
                     attrs['variables'] = yaml.dump(vars_dict)
                 except (yaml.YAMLError, TypeError):
-                    raise serializers.ValidationError('Must be valid JSON or YAML.')
+                    raise serializers.ValidationError(_('Must be valid JSON or YAML.'))
 
         return super(HostSerializer, self).validate(attrs)
 
@@ -1228,7 +1230,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def validate_name(self, value):
         if value in ('all', '_meta'):
-            raise serializers.ValidationError('Invalid group name.')
+            raise serializers.ValidationError(_('Invalid group name.'))
         return value
 
     def to_representation(self, obj):
@@ -1302,7 +1304,7 @@ class CustomInventoryScriptSerializer(BaseSerializer):
 
     def validate_script(self, value):
         if not value.startswith("#!"):
-            raise serializers.ValidationError('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python')
+            raise serializers.ValidationError(_('Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python'))
         return value
 
     def to_representation(self, obj):
@@ -1355,13 +1357,13 @@ class InventorySourceOptionsSerializer(BaseSerializer):
         source_script = attrs.get('source_script', self.instance and self.instance.source_script or '')
         if source == 'custom':
             if source_script is None or source_script == '':
-                errors['source_script'] = "If 'source' is 'custom', 'source_script' must be provided."
+                errors['source_script'] = _("If 'source' is 'custom', 'source_script' must be provided.")
             else:
                 try:
                     if source_script.organization != self.instance.inventory.organization:
-                        errors['source_script'] = "The 'source_script' does not belong to the same organization as the inventory."
+                        errors['source_script'] = _("The 'source_script' does not belong to the same organization as the inventory.")
                 except Exception as exc:
-                    errors['source_script'] = "'source_script' doesn't exist."
+                    errors['source_script'] = _("'source_script' doesn't exist.")
                     logger.error(str(exc))
 
         if errors:
@@ -1721,18 +1723,18 @@ class CredentialSerializerCreate(CredentialSerializer):
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add user to owner role. If provided, '
-                  'do not give either team or organization. Only valid for creation.')
+        help_text=_('Write-only field used to add user to owner role. If provided, '
+                    'do not give either team or organization. Only valid for creation.'))
     team = serializers.PrimaryKeyRelatedField(
         queryset=Team.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add team to owner role. If provided, '
-                  'do not give either user or organization. Only valid for creation.')
+        help_text=_('Write-only field used to add team to owner role. If provided, '
+                    'do not give either user or organization. Only valid for creation.'))
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         required=False, default=None, write_only=True, allow_null=True,
-        help_text='Write-only field used to add organization to owner role. If provided, '
-                  'do not give either team or team. Only valid for creation.')
+        help_text=_('Write-only field used to add organization to owner role. If provided, '
+                    'do not give either team or team. Only valid for creation.'))
 
     class Meta:
         model = Credential
@@ -1747,7 +1749,7 @@ class CredentialSerializerCreate(CredentialSerializer):
                 else:
                     attrs.pop(field)
         if not owner_fields:
-            raise serializers.ValidationError({"detail": "Missing 'user', 'team', or 'organization'."})
+            raise serializers.ValidationError({"detail": _("Missing 'user', 'team', or 'organization'.")})
         return super(CredentialSerializerCreate, self).validate(attrs)
 
     def create(self, validated_data):
@@ -1760,7 +1762,7 @@ class CredentialSerializerCreate(CredentialSerializer):
             credential.admin_role.members.add(user)
         if team:
             if not credential.organization or team.organization.id != credential.organization.id:
-                raise serializers.ValidationError({"detail": "Credential organization must be set and match before assigning to a team"})
+                raise serializers.ValidationError({"detail": _("Credential organization must be set and match before assigning to a team")})
             credential.admin_role.parents.add(team.admin_role)
             credential.use_role.parents.add(team.member_role)
         return credential
@@ -1846,11 +1848,11 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
             playbook = attrs.get('playbook', self.instance and self.instance.playbook or '')
             job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
             if not project and job_type != PERM_INVENTORY_SCAN:
-                raise serializers.ValidationError({'project': 'This field is required.'})
+                raise serializers.ValidationError({'project': _('This field is required.')})
             if project and playbook and force_text(playbook) not in project.playbook_files:
-                raise serializers.ValidationError({'playbook': 'Playbook not found for project.'})
+                raise serializers.ValidationError({'playbook': _('Playbook not found for project.')})
             if project and not playbook:
-                raise serializers.ValidationError({'playbook': 'Must select playbook for project.'})
+                raise serializers.ValidationError({'playbook': _('Must select playbook for project.')})
 
         return super(JobOptionsSerializer, self).validate(attrs)
 
@@ -1903,12 +1905,12 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
 
         if job_type == "scan":
             if inventory is None or attrs.get('ask_inventory_on_launch', False):
-                raise serializers.ValidationError({'inventory': 'Scan jobs must be assigned a fixed inventory.'})
+                raise serializers.ValidationError({'inventory': _('Scan jobs must be assigned a fixed inventory.')})
         elif project is None:
-            raise serializers.ValidationError({'project': "Job types 'run' and 'check' must have assigned a project."})
+            raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
 
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': 'Survey Enabled can not be used with scan jobs.'})
+            raise serializers.ValidationError({'survey_enabled': _('Survey Enabled can not be used with scan jobs.')})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 
@@ -1968,7 +1970,7 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             try:
                 job_template = JobTemplate.objects.get(pk=data['job_template'])
             except JobTemplate.DoesNotExist:
-                raise serializers.ValidationError({'job_template': 'Invalid job template.'})
+                raise serializers.ValidationError({'job_template': _('Invalid job template.')})
             data.setdefault('name', job_template.name)
             data.setdefault('description', job_template.description)
             data.setdefault('job_type', job_template.job_type)
@@ -2053,11 +2055,11 @@ class JobRelaunchSerializer(JobSerializer):
     def validate(self, attrs):
         obj = self.context.get('obj')
         if not obj.credential:
-            raise serializers.ValidationError(dict(credential=["Credential not found or deleted."]))
+            raise serializers.ValidationError(dict(credential=[_("Credential not found or deleted.")]))
         if obj.job_type != PERM_INVENTORY_SCAN and obj.project is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Project is missing or undefined."]))
+            raise serializers.ValidationError(dict(errors=[_("Job Template Project is missing or undefined.")]))
         if obj.inventory is None:
-            raise serializers.ValidationError(dict(errors=["Job Template Inventory is missing or undefined."]))
+            raise serializers.ValidationError(dict(errors=[_("Job Template Inventory is missing or undefined.")]))
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
@@ -2315,15 +2317,17 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
                 job_types = [t for t, v in JOB_TYPE_CHOICES]
                 if attrs['char_prompts']['job_type'] not in job_types:
                     raise serializers.ValidationError({
-                        "job_type": "%s is not a valid job type. The choices are %s." % (
-                            attrs['char_prompts']['job_type'], job_types)})
+                        "job_type": _("%(job_type)s is not a valid job type. The choices are %(choices)s.") % {
+                            'job_type': attrs['char_prompts']['job_type'], 'choices': job_types}})
         if self.instance is None and ('workflow_job_template' not in attrs or
                                       attrs['workflow_job_template'] is None):
-            raise serializers.ValidationError({"workflow_job_template": "Workflow job template is missing during creation"})
+            raise serializers.ValidationError({
+                "workflow_job_template": _("Workflow job template is missing during creation")
+            })
         ujt_obj = attrs.get('unified_job_template', None)
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
             raise serializers.ValidationError({
-                "unified_job_template": "Can not nest a %s inside a WorkflowJobTemplate" % ujt_obj.__class__.__name__})
+                "unified_job_template": _("Can not nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
 
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
@@ -2531,7 +2535,7 @@ class JobLaunchSerializer(BaseSerializer):
 
         for field in obj.resources_needed_to_start:
             if not (attrs.get(field, False) and obj._ask_for_vars_dict().get(field, False)):
-                errors[field] = "Job Template '%s' is missing or undefined." % field
+                errors[field] = _("Job Template '%s' is missing or undefined.") % field
 
         if (not obj.ask_credential_on_launch) or (not attrs.get('credential', None)):
             credential = obj.credential
@@ -2557,7 +2561,7 @@ class JobLaunchSerializer(BaseSerializer):
                     extra_vars = yaml.safe_load(extra_vars)
                     assert isinstance(extra_vars, dict)
                 except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary.'
+                    errors['extra_vars'] = _('Must be a valid JSON or YAML dictionary.')
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
@@ -2641,7 +2645,7 @@ class NotificationTemplateSerializer(BaseSerializer):
         else:
             notification_type = None
         if not notification_type:
-            raise serializers.ValidationError('Missing required fields for Notification Configuration: notification_type')
+            raise serializers.ValidationError(_('Missing required fields for Notification Configuration: notification_type'))
 
         notification_class = NotificationTemplate.CLASS_FOR_NOTIFICATION_TYPE[notification_type]
         missing_fields = []
@@ -2664,16 +2668,16 @@ class NotificationTemplateSerializer(BaseSerializer):
                 incorrect_type_fields.append((field, field_type))
                 continue
             if field_type == "list" and len(field_val) < 1:
-                error_list.append("No values specified for field '{}'".format(field))
+                error_list.append(_("No values specified for field '{}'").format(field))
                 continue
             if field_type == "password" and field_val == "$encrypted$" and object_actual is not None:
                 attrs['notification_configuration'][field] = object_actual.notification_configuration[field]
         if missing_fields:
-            error_list.append("Missing required fields for Notification Configuration: {}.".format(missing_fields))
+            error_list.append(_("Missing required fields for Notification Configuration: {}.").format(missing_fields))
         if incorrect_type_fields:
             for type_field_error in incorrect_type_fields:
-                error_list.append("Configuration field '{}' incorrect type, expected {}.".format(type_field_error[0],
-                                                                                                 type_field_error[1]))
+                error_list.append(_("Configuration field '{}' incorrect type, expected {}.").format(type_field_error[0],
+                                                                                                    type_field_error[1]))
         if error_list:
             raise serializers.ValidationError(error_list)
         return attrs
@@ -2722,7 +2726,7 @@ class ScheduleSerializer(BaseSerializer):
 
     def validate_unified_job_template(self, value):
         if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
-            raise serializers.ValidationError('Inventory Source must be a cloud resource.')
+            raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
         return value
 
     # We reject rrules if:
@@ -2744,37 +2748,37 @@ class ScheduleSerializer(BaseSerializer):
         match_multiple_dtstart = re.findall(".*?(DTSTART\:[0-9]+T[0-9]+Z)", rrule_value)
         match_multiple_rrule = re.findall(".*?(RRULE\:)", rrule_value)
         if not len(match_multiple_dtstart):
-            raise serializers.ValidationError('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ')
+            raise serializers.ValidationError(_('DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ'))
         if len(match_multiple_dtstart) > 1:
-            raise serializers.ValidationError('Multiple DTSTART is not supported.')
+            raise serializers.ValidationError(_('Multiple DTSTART is not supported.'))
         if not len(match_multiple_rrule):
-            raise serializers.ValidationError('RRULE require in rrule.')
+            raise serializers.ValidationError(_('RRULE require in rrule.'))
         if len(match_multiple_rrule) > 1:
-            raise serializers.ValidationError('Multiple RRULE is not supported.')
+            raise serializers.ValidationError(_('Multiple RRULE is not supported.'))
         if 'interval' not in rrule_value.lower():
-            raise serializers.ValidationError('INTERVAL required in rrule.')
+            raise serializers.ValidationError(_('INTERVAL required in rrule.'))
         if 'tzid' in rrule_value.lower():
-            raise serializers.ValidationError('TZID is not supported.')
+            raise serializers.ValidationError(_('TZID is not supported.'))
         if 'secondly' in rrule_value.lower():
-            raise serializers.ValidationError('SECONDLY is not supported.')
+            raise serializers.ValidationError(_('SECONDLY is not supported.'))
         if re.match(multi_by_month_day, rrule_value):
-            raise serializers.ValidationError('Multiple BYMONTHDAYs not supported.')
+            raise serializers.ValidationError(_('Multiple BYMONTHDAYs not supported.'))
         if re.match(multi_by_month, rrule_value):
-            raise serializers.ValidationError('Multiple BYMONTHs not supported.')
+            raise serializers.ValidationError(_('Multiple BYMONTHs not supported.'))
         if re.match(by_day_with_numeric_prefix, rrule_value):
-            raise serializers.ValidationError("BYDAY with numeric prefix not supported.")
+            raise serializers.ValidationError(_("BYDAY with numeric prefix not supported."))
         if 'byyearday' in rrule_value.lower():
-            raise serializers.ValidationError("BYYEARDAY not supported.")
+            raise serializers.ValidationError(_("BYYEARDAY not supported."))
         if 'byweekno' in rrule_value.lower():
-            raise serializers.ValidationError("BYWEEKNO not supported.")
+            raise serializers.ValidationError(_("BYWEEKNO not supported."))
         if match_count:
             count_val = match_count.groups()[0].strip().split("=")
             if int(count_val[1]) > 999:
-                raise serializers.ValidationError("COUNT > 999 is unsupported.")
+                raise serializers.ValidationError(_("COUNT > 999 is unsupported."))
         try:
             rrule.rrulestr(rrule_value)
         except Exception:
-            raise serializers.ValidationError("rrule parsing failed validation.")
+            raise serializers.ValidationError(_("rrule parsing failed validation."))
         return value
 
 class ActivityStreamSerializer(BaseSerializer):
@@ -2791,15 +2795,15 @@ class ActivityStreamSerializer(BaseSerializer):
         ret = super(ActivityStreamSerializer, self).get_fields()
         for key, field in ret.items():
             if key == 'changes':
-                field.help_text = 'A summary of the new and changed values when an object is created, updated, or deleted'
+                field.help_text = _('A summary of the new and changed values when an object is created, updated, or deleted')
             if key == 'object1':
-                field.help_text = ('For create, update, and delete events this is the object type that was affected. '
-                                   'For associate and disassociate events this is the object type associated or disassociated with object2.')
+                field.help_text = _('For create, update, and delete events this is the object type that was affected. '
+                                    'For associate and disassociate events this is the object type associated or disassociated with object2.')
             if key == 'object2':
-                field.help_text = ('Unpopulated for create, update, and delete events. For associate and disassociate '
-                                   'events this is the object type that object1 is being associated with.')
+                field.help_text = _('Unpopulated for create, update, and delete events. For associate and disassociate '
+                                    'events this is the object type that object1 is being associated with.')
             if key == 'operation':
-                field.help_text = 'The action taken with respect to the given object(s).'
+                field.help_text = _('The action taken with respect to the given object(s).')
         return ret
 
     def get_changes(self, obj):
@@ -2822,7 +2826,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, _ in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).distinct()
@@ -2899,9 +2903,9 @@ class AuthTokenSerializer(serializers.Serializer):
                 attrs['user'] = user
                 return attrs
             else:
-                raise serializers.ValidationError('Unable to login with provided credentials.')
+                raise serializers.ValidationError(_('Unable to login with provided credentials.'))
         else:
-            raise serializers.ValidationError('Must include "username" and "password".')
+            raise serializers.ValidationError(_('Must include "username" and "password".'))
 
 
 class FactVersionSerializer(BaseFactSerializer):

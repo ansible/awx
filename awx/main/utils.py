@@ -20,6 +20,9 @@ import tempfile
 # Decorator
 from decorator import decorator
 
+# Django
+from django.utils.translation import ugettext_lazy as _
+
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 from django.utils.encoding import smart_str
@@ -78,7 +81,7 @@ def to_python_boolean(value, allow_none=False):
     elif allow_none and value.lower() in ('none', 'null'):
         return None
     else:
-        raise ValueError(u'Unable to convert "%s" to boolean' % unicode(value))
+        raise ValueError(_(u'Unable to convert "%s" to boolean') % unicode(value))
 
 def camelcase_to_underscore(s):
     '''
@@ -193,7 +196,7 @@ def decrypt_field(instance, field_name, subfield=None):
         return value
     algo, b64data = value[len('$encrypted$'):].split('$', 1)
     if algo != 'AES':
-        raise ValueError('unsupported algorithm: %s' % algo)
+        raise ValueError(_('unsupported algorithm: %s') % algo)
     encrypted = base64.b64decode(b64data)
     key = get_encryption_key(instance, field_name)
     cipher = AES.new(key, AES.MODE_ECB)
@@ -214,16 +217,16 @@ def update_scm_url(scm_type, url, username=True, password=True,
     # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
     if scm_type not in ('git', 'hg', 'svn'):
-        raise ValueError('Unsupported SCM type "%s"' % str(scm_type))
+        raise ValueError(_('Unsupported SCM type "%s"') % str(scm_type))
     if not url.strip():
         return ''
     parts = urlparse.urlsplit(url)
     try:
         parts.port
     except ValueError:
-        raise ValueError('Invalid %s URL' % scm_type)
+        raise ValueError(_('Invalid %s URL') % scm_type)
     if parts.scheme == 'git+ssh' and not scp_format:
-        raise ValueError('Unsupported %s URL' % scm_type)
+        raise ValueError(_('Unsupported %s URL') % scm_type)
 
     if '://' not in url:
         # Handle SCP-style URLs for git (e.g. [user@]host.xz:path/to/repo.git/).
@@ -233,7 +236,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             else:
                 userpass, hostpath = '', url
             if hostpath.count(':') > 1:
-                raise ValueError('Invalid %s URL' % scm_type)
+                raise ValueError(_('Invalid %s URL') % scm_type)
             host, path = hostpath.split(':', 1)
             #if not path.startswith('/') and not path.startswith('~/'):
             #    path = '~/%s' % path
@@ -252,7 +255,7 @@ def update_scm_url(scm_type, url, username=True, password=True,
             else:
                 parts = urlparse.urlsplit('file://%s' % url)
         else:
-            raise ValueError('Invalid %s URL' % scm_type)
+            raise ValueError(_('Invalid %s URL') % scm_type)
 
     # Validate that scheme is valid for given scm_type.
     scm_type_schemes = {
@@ -261,11 +264,11 @@ def update_scm_url(scm_type, url, username=True, password=True,
         'svn': ('http', 'https', 'svn', 'svn+ssh', 'file'),
     }
     if parts.scheme not in scm_type_schemes.get(scm_type, ()):
-        raise ValueError('Unsupported %s URL' % scm_type)
+        raise ValueError(_('Unsupported %s URL') % scm_type)
     if parts.scheme == 'file' and parts.netloc not in ('', 'localhost'):
-        raise ValueError('Unsupported host "%s" for file:// URL' % (parts.netloc))
+        raise ValueError(_('Unsupported host "%s" for file:// URL') % (parts.netloc))
     elif parts.scheme != 'file' and not parts.netloc:
-        raise ValueError('Host is required for %s URL' % parts.scheme)
+        raise ValueError(_('Host is required for %s URL') % parts.scheme)
     if username is True:
         netloc_username = parts.username or ''
     elif username:
@@ -283,13 +286,13 @@ def update_scm_url(scm_type, url, username=True, password=True,
     if check_special_cases:
         special_git_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
         if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_username != 'git':
-            raise ValueError('Username must be "git" for SSH access to %s.' % parts.hostname)
+            raise ValueError(_('Username must be "git" for SSH access to %s.') % parts.hostname)
         if scm_type == 'git' and parts.scheme.endswith('ssh') and parts.hostname in special_git_hosts and netloc_password:
             #raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
             netloc_password = ''
         special_hg_hosts = ('bitbucket.org', 'altssh.bitbucket.org')
         if scm_type == 'hg' and parts.scheme == 'ssh' and parts.hostname in special_hg_hosts and netloc_username != 'hg':
-            raise ValueError('Username must be "hg" for SSH access to %s.' % parts.hostname)
+            raise ValueError(_('Username must be "hg" for SSH access to %s.') % parts.hostname)
         if scm_type == 'hg' and parts.scheme == 'ssh' and netloc_password:
             #raise ValueError('Password not supported for SSH with Mercurial.')
             netloc_password = ''

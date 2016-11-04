@@ -7,6 +7,9 @@ import re
 # Python Social Auth
 from social.exceptions import AuthException
 
+# Django
+from django.utils.translation import ugettext_lazy as _
+
 # Tower
 from awx.conf.license import feature_enabled
 
@@ -18,13 +21,13 @@ class AuthNotFound(AuthException):
         super(AuthNotFound, self).__init__(backend, *args, **kwargs)
 
     def __str__(self):
-        return 'An account cannot be found for {0}'.format(self.email_or_uid)
+        return _('An account cannot be found for {0}').format(self.email_or_uid)
 
 
 class AuthInactive(AuthException):
 
     def __str__(self):
-        return 'Your account is inactive'
+        return _('Your account is inactive')
 
 
 def check_user_found_or_created(backend, details, user=None, *args, **kwargs):

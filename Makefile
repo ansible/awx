@@ -505,9 +505,10 @@ test_tox:
 # Alias existing make target so old versions run against Jekins the same way
 test_jenkins : test_coverage
 
-# UI TASKS
+# l10n TASKS
 # --------------------------------------
 
+# check for UI po files
 HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
 check-po:
 ifdef HAVE_PO
@@ -537,13 +538,31 @@ else
 	@echo No PO files
 endif
 
-# generate l10n .json
-languages: $(UI_DEPS_FLAG_FILE) check-po
-	$(NPM_BIN) --prefix awx/ui run languages
-
-# generate .pot
+# generate UI .pot
 pot: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run pot
+
+# generate django .pot .po
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+
+# generate l10n .json .mo
+languages: $(UI_DEPS_FLAG_FILE) check-po
+	$(NPM_BIN) --prefix awx/ui run languages
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py compilemessages
+
+# End l10n TASKS
+# --------------------------------------
+
+# UI TASKS
+# --------------------------------------
 
 ui-deps: $(UI_DEPS_FLAG_FILE)
 

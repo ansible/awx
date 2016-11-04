@@ -62,12 +62,12 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
     ]
 
     COMMON_STATUS_CHOICES = JOB_STATUS_CHOICES + [
-        ('never updated', 'Never Updated'),     # A job has never been run using this template.
+        ('never updated', _('Never Updated')),     # A job has never been run using this template.
     ]
 
     PROJECT_STATUS_CHOICES = COMMON_STATUS_CHOICES + [
-        ('ok', 'OK'),                           # Project is not configured for SCM and path exists.
-        ('missing', 'Missing'),                 # Project path does not exist.
+        ('ok', _('OK')),                           # Project is not configured for SCM and path exists.
+        ('missing', _('Missing')),                 # Project path does not exist.
     ]
 
     INVENTORY_SOURCE_STATUS_CHOICES = COMMON_STATUS_CHOICES + [
