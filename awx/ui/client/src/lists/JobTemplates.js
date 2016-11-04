@@ -11,7 +11,7 @@ export default
     return {
 
         name: 'templates',
-        iterator: 'unified_job_templates',
+        iterator: 'template',
         basePath: 'unified_job_templates',
         selectTitle: i18n._('Template'),
         editTitle: i18n._('Templates'),
@@ -85,7 +85,7 @@ export default
                 ngClick: 'submitJob(unified_job_templates)',
                 awToolTip: i18n._('Start a job using this template'),
                 dataPlacement: 'top',
-                ngShow: 'unified_job_templates.summary_fields.user_capabilities.start'
+                ngShow: 'template.summary_fields.user_capabilities.start'
             },
             schedule: {
                 label: i18n._('Schedule'),
@@ -93,7 +93,7 @@ export default
                 ngClick: 'scheduleJob(unified_job_templates)',
                 awToolTip: i18n._('Schedule future job template runs'),
                 dataPlacement: 'top',
-                ngShow: 'unified_job_templates.summary_fields.user_capabilities.schedule'
+                ngShow: 'template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: i18n._('Copy'),
@@ -101,7 +101,7 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy template'),
                 dataPlacement: 'top',
-                ngShow: 'unified_job_templates.summary_fields.user_capabilities.copy'
+                ngShow: 'template.summary_fields.user_capabilities.copy'
             },
             edit: {
                 label: i18n._('Edit'),
@@ -109,7 +109,7 @@ export default
                 awToolTip: i18n._('Edit template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngShow: 'unified_job_templates.summary_fields.user_capabilities.edit'
+                ngShow: 'template.summary_fields.user_capabilities.edit'
             },
             view: {
                 label: i18n._('View'),
@@ -117,7 +117,7 @@ export default
                 awToolTip: i18n._('View template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngShow: '!unified_job_templates.summary_fields.user_capabilities.edit'
+                ngShow: '!template.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 label: i18n._('Delete'),
@@ -125,7 +125,7 @@ export default
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Delete template'),
                 dataPlacement: 'top',
-                ngShow: 'unified_job_templates.summary_fields.user_capabilities.delete'
+                ngShow: 'template.summary_fields.user_capabilities.delete'
             }
         }
     };}]);

@@ -74,7 +74,7 @@
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'inventory_sync'}" ng-click="toggleFormTab('inventory_sync')">INVENTORY SYNC</div>
                 </div>
                 <div class="WorkflowMaker-formLists">
-                    <div id="workflow-jobs-list"  ui-view="jobsTemplateList"></div> <!-- ng-show="workflowMakerFormConfig.activeTab === 'jobs'" -->
+                    <div id="workflow-jobs-list"  ui-view="jobTemplateList"></div> <!-- ng-show="workflowMakerFormConfig.activeTab === 'jobs'" -->
                     <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'" ui-view="projectSyncList"></div>
                     <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'" ui-view="inventorySyncList"></div>
                 </div>

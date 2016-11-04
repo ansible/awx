@@ -18,13 +18,13 @@ export default {
         }
     },
     params: {
-        unified_job_templates_search: {
+        template_search: {
             value: {
                 type: 'workflow_job_template,job_template'
             }
         }
     },
-    searchPrefix: 'unified_job_templates',
+    searchPrefix: 'template',
     views: {
         '@': {
             controller: 'JobTemplatesListController',

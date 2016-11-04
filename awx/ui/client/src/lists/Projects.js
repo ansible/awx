@@ -11,6 +11,7 @@ export default
 
         name: 'projects',
         iterator: 'project',
+        basePath: 'projects',
         selectTitle: i18n._('Add Project'),
         editTitle: i18n._('Projects'),
         listTitle: i18n._('Projects'),

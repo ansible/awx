@@ -11,6 +11,7 @@ export default
 
         name: 'workflow_inventory_sources',
         iterator: 'inventory_source',
+        basePath: 'inventory_sources',
         listTitle: 'Inventory Sources',
         index: false,
         hover: true,
