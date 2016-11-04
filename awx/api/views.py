@@ -70,6 +70,7 @@ from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
+from awx.main.models.unified_jobs import ACTIVE_STATES
 
 logger = logging.getLogger('awx.api.views')
 
@@ -1088,6 +1089,12 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
     model = ProjectUpdate
     serializer_class = ProjectUpdateSerializer
     new_in_13 = True
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail=_('Can not delete job resource when associated workflow job is running.'))
+        return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 class ProjectUpdateCancel(RetrieveAPIView):
 
@@ -2167,6 +2174,12 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
     serializer_class = InventoryUpdateSerializer
     new_in_14 = True
 
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail=_('Can not delete job resource when associated workflow job is running.'))
+        return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
+
 class InventoryUpdateCancel(RetrieveAPIView):
 
     model = InventoryUpdate
@@ -2923,6 +2936,12 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.unified_job_nodes.filter(workflow_job__status__in=ACTIVE_STATES).exists():
+            raise PermissionDenied(detail=_('Can not delete job resource when associated workflow job is running.'))
+        return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 class JobLabelList(SubListAPIView):
 
