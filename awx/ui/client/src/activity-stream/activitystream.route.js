@@ -30,7 +30,7 @@ export default {
         $('body').removeClass('modal-open');
     },
     views: {
-        'list@': {
+        '@': {
             controller: 'activityStreamController',
             templateProvider: function(StreamList, generateList) {
                 let html = generateList.build({

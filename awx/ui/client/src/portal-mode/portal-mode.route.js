@@ -32,10 +32,10 @@ export default {
         }
     },
     views: {
-        'list@': {
+        '@': {
             templateUrl: templateUrl('portal-mode/portal-mode-layout'),
-            controller: ['$scope', '$rootScope', '$state', '$stateParams', 'GetBasePath', 'QuerySet', 'jobsDataset',
-                function($scope, $rootScope, $state, $stateParams, GetBasePath, qs, Dataset) {
+            controller: ['$scope', '$rootScope', '$state', '$stateParams', 'GetBasePath', 'QuerySet',
+                function($scope, $rootScope, $state, $stateParams, GetBasePath, qs) {
                     let path;
                     init();
 
