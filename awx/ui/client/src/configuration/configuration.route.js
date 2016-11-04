@@ -16,7 +16,9 @@
  export default {
      name: 'configuration',
      route: '/configuration/:currentTab',
-
+     params: {
+         currentTab: ''
+     },
      ncyBreadcrumb: {
          label: "Edit Configuration"
      },
