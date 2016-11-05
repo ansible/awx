@@ -101,6 +101,14 @@ class TestRelatedFieldAccess:
         assert not access.check_related(
             'related', mocker.MagicMock, data, obj=resource_bad)
 
+    def test_existing_not_null_null(self, access, bad_role, mocker):
+        resource = mocker.MagicMock(related=None)
+        data = {'related': None}
+        # Not changing anything by giving null when it is already-null
+        # important for PUT requests
+        assert access.check_related(
+            'related', mocker.MagicMock, data, obj=resource, mandatory=True)
+
 @pytest.fixture
 def job_template_with_ids(job_template_factory):
     # Create non-persisted objects with IDs to send to job_template_factory

@@ -207,7 +207,6 @@ class BaseAccess(object):
         '''
         new = None
         changed = True
-        is_removal = False
         if data and 'reference_obj' in data:
             # Use reference object's related fields, if given
             new = getattr(data['reference_obj'], field)
@@ -218,7 +217,6 @@ class BaseAccess(object):
                 new = raw_value
             elif raw_value is None:
                 new = None
-                is_removal = True
             else:
                 try:
                     new_pk = int(raw_value)
@@ -238,7 +236,7 @@ class BaseAccess(object):
         if obj and (changed or mandatory):
             current = getattr(obj, field)
 
-        if obj and new == current and (not is_removal):
+        if obj and new == current:
             # Resource not changed, like a PUT request
             changed = False
 
