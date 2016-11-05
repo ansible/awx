@@ -4,8 +4,6 @@ from awx.main.access import (
     LabelAccess,
 )
 
-from rest_framework.exceptions import ParseError
-
 @pytest.mark.django_db
 def test_label_get_queryset_user(label, user):
     access = LabelAccess(user('user', False))
