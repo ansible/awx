@@ -557,7 +557,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
      - /tmp (except for own tmp files)
     '''
     from django.conf import settings
-    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--dev-bind', '/', '/']
+    new_args = [getattr(settings, 'AWX_PROOT_CMD', 'bwrap'), '--unshare-pid', '--dev-bind', '/', '/']
     hide_paths = ['/etc/tower', '/var/lib/awx', '/var/log',
                   tempfile.gettempdir(), settings.PROJECTS_ROOT,
                   settings.JOBOUTPUT_ROOT]
