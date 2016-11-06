@@ -492,7 +492,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 .directive('awToolTip', [function() {
     return {
         link: function(scope, element, attrs) {
-            var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : ($AnsibleConfig) ? $AnsibleConfig.tooltip_delay : { show: 500, hide: 100 },
+            // if (attrs.class.indexOf("JobResultsStdOut") > -1) {
+            //     debugger;
+            // }
+            var delay = { show: 200, hide: 0 },
                 placement,
                 stateChangeWatcher;
             if (attrs.awTipPlacement) {
