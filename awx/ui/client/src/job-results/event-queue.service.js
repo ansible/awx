@@ -175,6 +175,12 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 val.populateDefers[event.counter] = $q.defer();
             }
 
+            if (val.queue[event.counter] &&
+                val.queue[event.counter].processed) {
+                    val.populateDefers.reject("duplicate event: " +
+                        event);
+            }
+
             if (!val.queue[event.counter]) {
                 var resolvePopulation = function(event) {
                     // to resolve, put the event on the queue and

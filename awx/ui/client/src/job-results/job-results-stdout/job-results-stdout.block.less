@@ -1,19 +1,128 @@
 @import '../../shared/branding/colors.default.less';
 
-.JobResultsStdOut{
+.JobResultsStdOut {
     height: 100%;
-    margin-top: 15px;
-    background-color: @default-no-items-bord;
-    border-radius: 5px;
-    margin-bottom: 10px;
 }
 
-.JobResultsStdOut-aLineOfStdOut,
-.JobResultsStdOut-expandLine {
+.JobResultsStdOut-toolbar {
     display: flex;
+    height: 38px;
+    margin-top: 15px;
+    border: 1px solid @default-list-header-bg;
+    border-bottom: 0px;
+    border-radius: 5px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
-.JobResultsStdOut-lineNumberColumn{
+.JobResultsStdOut-toolbarNumberColumn {
+    background-color: @default-list-header-bg;
+    color: @b7grey;
+    flex: initial;
+    display: flex;
+    justify-content: space-between;
+    width: 70px;
+    padding-bottom: 0px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+    border-top-left-radius: 5px;
+}
+
+.JobResultsStdOut-expandAllButton {
+    height: 18px;
+    width: 18px;
+    padding-left: 4px;
+    padding-top: 1px;
+    border-radius: 50%;
+    background-color: @default-bg;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.JobResultsStdOut-expandAllButton:hover .JobResultsStdOut-expandAllIcon,
+.JobResultsStdOut-expandAllIcon:hover {
+    color: @default-data-txt;
+}
+
+.JobResultsStdOut-toolbarStdoutColumn {
+    white-space: normal;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    background-color: @default-no-items-bord;
+}
+
+.JobResultsStdOut-followButton {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    width: 18px;
+    padding-left: 3.8px;
+    border-radius: 50%;
+    margin-top: 10px;
+    font-size: 12px;
+    background-color: @default-icon;
+    color: @default-border;
+}
+
+.JobResultsStdOut-followIcon {
+    color: @default-border;
+}
+
+.JobResultsStdOut-followButton:hover {
+    background-color: @default-icon-hov;
+}
+
+.JobResultsStdOut-followButton:hover .JobResultsStdOut-followIcon,
+.JobResultsStdOut-followIcon:hover {
+    color: @default-interface-txt;
+}
+
+.JobResultsStdOut-stdoutContainer {
+    height: ~"calc(100% - 108px)";
+    background-color: @default-no-items-bord;
+    border: 1px solid @default-list-header-bg;
+    border-top: 0px;
+    border-radius: 5px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    margin-bottom: 10px;
+    overflow: scroll;
+}
+
+.JobResultsStdOut-numberColumnPreload {
+    background-color: #EBEBEB;
+    width: 70px;
+    position: fixed;
+}
+
+.JobResultsStdOut-aLineOfStdOut {
+    display: flex;
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+}
+
+.JobResultsStdOut-lineExpander {
+    text-align: left;
+    padding-left: 11px;
+    margin-right: auto;
+}
+
+.JobResultsStdOut-lineExpanderIcon {
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.JobResultsStdOut-lineExpanderIcon:hover {
+    color: @default-data-txt;
+}
+
+.JobResultsStdOut-lineNumberColumn {
     display: flex;
     background-color: @default-list-header-bg;
     text-align: right;
@@ -22,28 +131,16 @@
     padding-bottom: 2px;
     color: @b7grey;
     width: 75px;
+    flex: initial;
     white-space: pre-line;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    z-index: 1;
 }
 
-.JobResultsStdOut-lineExpander {
-    text-align: left;
-    padding-left: 10px;
-    margin-right: auto;
-}
-
-.JobResultsStdOut-lineNumberColumn--first{
-    text-align: left;
-    padding: 0px;
-    padding-left: 11px;
-    padding-top: 10px;
-    white-space: normal;
-}
-
-.JobResultsStdOut-stdoutColumn{
+.JobResultsStdOut-stdoutColumn {
     padding-left: 20px;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -54,6 +151,8 @@
     width:100%;
 }
 
-.JobResultsStdOut-stdoutColumn--first{
-    padding-top:0px;
+
+// TODO: needs to be set based on height of browser window
+.JobResultsStdOut-numberColumnPreload {
+    height: 720px;
 }

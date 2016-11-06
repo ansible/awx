@@ -1,11 +1,31 @@
 <div class="JobResultsStdOut">
-    <div class="JobResultsStdOut-expandLine">
-        <div class="JobResultsStdOut-lineNumberColumn
-            JobResultsStdOut-lineNumberColumn--first">
-                <i class="fa fa-plus"></i>
+    <div class="JobResultsStdOut-toolbar">
+        <div class="JobResultsStdOut-toolbarNumberColumn">
+            <div class="JobResultsStdOut-expandAllButton"
+                ng-click="toggleAllStdout('expand')"
+                aw-tool-tip="Expand all lines of standard out."
+                data-placement="top">
+                <i class ="JobResultsStdOut-expandAllIcon fa fa-plus">
+                </i>
+            </div>
+            <div class="JobResultsStdOut-expandAllButton"
+                ng-click="toggleAllStdout('collapse')"
+                aw-tool-tip="Collapse all lines of standard out except play and task headers."
+                data-placement="top">
+                <i class ="JobResultsStdOut-expandAllIcon fa fa-minus">
+                </i>
+            </div>
         </div>
-        <div class="JobResultsStdOut-stdoutColumn
-            JobResultsStdOut-stdoutColumn--first">
+        <div class="JobResultsStdOut-toolbarStdoutColumn">
+            <div class="JobResultsStdOut-followButton"
+                aw-tool-tip="Follow standard out."
+                data-placement="left">
+                <i class="JobResultsStdOut-followIcon fa fa-arrow-down">
+                </i>
+            </div>
         </div>
+    </div>
+    <div class="JobResultsStdOut-stdoutContainer">
+        <div class="JobResultsStdOut-numberColumnPreload"></div>
     </div>
 </div>

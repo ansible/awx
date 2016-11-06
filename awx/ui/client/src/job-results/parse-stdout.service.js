@@ -7,21 +7,13 @@
 export default [function(){
     var val = {
         prettify: function(line){
-
-            // this function right now just removes the 'rn' strings
-            // that i'm currently seeing on this branch on the beginning
-            // and end of each event string. In the future it could be
-            // used to add styling classes to the actual lines of stdout
-            // line = line.replace(/rn/g, '\n');
+            // TODO: figure out from Jared what this is
             line = line.replace(/u001b/g, '');
 
-            // ok
+            // ansi classes
             line = line.replace(/\[0;32m/g, '<span class="ansi32">');
-
-            //unreachable
             line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
             line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
-
             line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
             line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
             line = line.replace(/\[0;33m/g, '<span class="ansi33">');
@@ -34,12 +26,12 @@ export default [function(){
         getCollapseClasses: function(event) {
             var string = "";
             if (event.event_name === "playbook_on_play_start") {
-                return string;
+                string += " header_play";
             } else if (event.event_name === "playbook_on_task_start") {
+                string += " header_task";
                 if (event.event_data.play_uuid) {
                     string += " play_" + event.event_data.play_uuid;
                 }
-                return string;
             } else {
                 if (event.event_data.play_uuid) {
                     string += " play_" + event.event_data.play_uuid;
@@ -47,18 +39,48 @@ export default [function(){
                 if (event.event_data.task_uuid) {
                     string += " task_" + event.event_data.task_uuid;
                 }
-                return string;
             }
+
+            return string;
         },
         getCollapseIcon: function(event, line) {
-            if ((event.event_name === "playbook_on_play_start" || event.event_name === "playbook_on_task_start") && line !== "") {
-                return `<span class="JobResultsStdOut-lineExpander"><i class="fa fa-caret-down"></i></span>`;
+            var clickClass,
+                expanderizerSpecifier;
+
+            var emptySpan = `
+<span class="JobResultsStdOut-lineExpander"></span>`;
+
+            if ((event.event_name === "playbook_on_play_start" ||
+                event.event_name === "playbook_on_task_start") &&
+                line !== "") {
+                    if (event.event_name === "playbook_on_play_start" &&
+                        line.indexOf("PLAY") > -1) {
+                            expanderizerSpecifier = "play";
+                            clickClass = "play_" +
+                                event.event_data.play_uuid;
+                    } else if (line.indexOf("TASK") > -1 ||
+                        line.indexOf("RUNNING HANDLER") > -1) {
+                            expanderizerSpecifier = "task";
+                            clickClass = "task_" +
+                                event.event_data.task_uuid;
+                    } else {
+                        return emptySpan;
+                    }
+
+                return `
+<span class="JobResultsStdOut-lineExpander">
+    <i class="JobResultsStdOut-lineExpanderIcon fa fa-caret-down expanderizer
+        expanderizer--${expanderizerSpecifier} expanded"
+        ng-click="toggleLine($event, '.${clickClass}')"
+        data-uuid="${clickClass}">
+    </i>
+</span>`;
             } else {
-                return `<span class="JobResultsStdOut-lineExpander"></span>`;
+                return emptySpan;
             }
         },
         parseStdout: function(event){
-            var stdoutStrings = _
+            return _
                 .zip(_.range(event.start_line + 1,
                     event.end_line + 1),
                     event.stdout.split("\r\n").slice(0, -1))
@@ -69,10 +91,6 @@ export default [function(){
     <div class="JobResultsStdOut-stdoutColumn">${this.prettify(lineArr[1])}</div>
 </div>`;
                 }).join("");
-            // this object will be used by the ng-repeat in the
-            // job-results-stdout.partial.html. probably need to add the
-            // elapsed time in here too
-            return stdoutStrings;
         }
     };
     return val;

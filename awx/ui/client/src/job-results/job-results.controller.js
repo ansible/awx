@@ -1,4 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', function(jobData, jobDataOptions, jobLabels, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', '$compile', function(jobData, jobDataOptions, jobLabels, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue, $compile) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -132,7 +132,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                     }
 
                     if(change === 'stdout'){
-                        $(".JobResultsStdOut").append(mungedEvent.stdout);
+                        angular
+                            .element(".JobResultsStdOut-stdoutContainer")
+                            .append($compile(mungedEvent
+                                .stdout)($scope));
                     }
                 });
             }

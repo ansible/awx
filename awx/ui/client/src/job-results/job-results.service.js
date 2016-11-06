@@ -81,7 +81,8 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
             Rest.setUrl(url);
             Rest.get()
                 .success(function(data) {
-                    val.resolve({results: data.results, next: data.next});
+                    val.resolve({results: data.results,
+                        next: data.next});
                 })
                 .error(function(obj, status) {
                     ProcessErrors(null, obj, status, null, {
