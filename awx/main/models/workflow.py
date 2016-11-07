@@ -290,7 +290,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin)
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'job_type', 'extra_vars', 'labels', 'schedule']
+        return ['name', 'description', 'extra_vars', 'labels', 'schedule', 'launch_type']
 
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_detail', args=(self.pk,))
