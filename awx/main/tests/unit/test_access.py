@@ -24,20 +24,14 @@ def user_unit():
 class TestRelatedFieldAccess:
 
     @pytest.fixture
-    def good_role(self, mocker):
-        return mocker.MagicMock(__contains__=lambda self, user: True)
-
-    @pytest.fixture
-    def bad_role(self, mocker):
-        return mocker.MagicMock(__contains__=lambda self, user: False)
-
-    @pytest.fixture
-    def resource_good(self, mocker, good_role):
+    def resource_good(self, mocker):
+        good_role = mocker.MagicMock(__contains__=lambda self, user: True)
         return mocker.MagicMock(related=mocker.MagicMock(admin_role=good_role),
                                 admin_role=good_role)
 
     @pytest.fixture
-    def resource_bad(self, mocker, bad_role):
+    def resource_bad(self, mocker):
+        bad_role = mocker.MagicMock(__contains__=lambda self, user: False)
         return mocker.MagicMock(related=mocker.MagicMock(admin_role=bad_role),
                                 admin_role=bad_role)
 
@@ -73,27 +67,31 @@ class TestRelatedFieldAccess:
         data = {'related': resource_bad.related}
         assert access.check_related(
             'related', mocker.MagicMock, data, obj=resource_bad)
+        assert access.check_related(
+            'related', mocker.MagicMock, {}, obj=resource_bad)
 
     def test_existing_required_access(self, access, resource_bad, mocker):
+        # no-op actions, but mandatory kwarg requires check to pass
         assert not access.check_related(
             'related', mocker.MagicMock, {}, obj=resource_bad, mandatory=True)
+        assert not access.check_related(
+            'related', mocker.MagicMock, {'related': resource_bad.related},
+            obj=resource_bad, mandatory=True)
 
     def test_existing_no_access_to_current(
-            self, access, resource_good, bad_role, mocker):
+            self, access, resource_good, resource_bad, mocker):
         """
         User gives a valid related resource (like organization), but does
         not have access to _existing_ related resource, so deny action
         """
-        resource_good.admin_role = bad_role
-        data = {'related': resource_good.related}
-        assert access.check_related(
-            'related', mocker.MagicMock, data, obj=resource_good)
+        data = {'related': resource_good}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
 
     def test_existing_no_access_to_new(
-            self, access, resource_good, bad_role, mocker):
-        resource_good.related.admin_role = bad_role
-        data = {'related': resource_good.related}
-        assert access.check_related(
+            self, access, resource_good, resource_bad, mocker):
+        data = {'related': resource_bad}
+        assert not access.check_related(
             'related', mocker.MagicMock, data, obj=resource_good)
 
     def test_existing_not_allowed_to_remove(self, access, resource_bad, mocker):
