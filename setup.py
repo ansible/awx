@@ -117,7 +117,7 @@ setup(
         ("%s" % homedir,        ["config/wsgi.py",
                                  "awx/static/favicon.ico"]),
         ("%s" % siteconfig,      ["config/awx-nginx.conf"]),
-        ("%s" % webconfig,      ["config/uwsgi_params"]),
+#        ("%s" % webconfig,      ["config/uwsgi_params"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
