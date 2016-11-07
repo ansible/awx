@@ -232,12 +232,15 @@ class WorkflowJobNode(WorkflowNodeBase):
         if aa_dict:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
+        password_dict = {}
         if '_ansible_no_log' in aa_dict:
-            # TODO: merge Workflow Job survey passwords into this
-            password_dict = {}
             for key in aa_dict:
                 if key != '_ansible_no_log':
                     password_dict[key] = REPLACE_STR
+        workflow_job_survey_passwords = self.workflow_job.survey_passwords
+        if workflow_job_survey_passwords:
+            password_dict.update(workflow_job_survey_passwords)
+        if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
         # TODO: still lack consensus about variable precedence
