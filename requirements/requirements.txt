@@ -2,14 +2,18 @@ git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.0
+asgi_amqp==0.3.1
 azure==2.0.0rc5
 Babel==2.2.0
 baron==0.6.2
 billiard==3.3.0.16
 boto==2.43.0
 celery==3.1.23
+cffi==1.7.0
+channels==0.17.2
 cliff==1.15.0
 cmd2==0.6.8
+daphne==0.15.0
 d2to1==0.2.11   # TODO: Still needed?
 defusedxml==0.4.1
 Django==1.8.16
@@ -88,7 +92,6 @@ pygerduty==0.32.1
 PyJWT==1.4.0
 pymongo==2.8
 pyOpenSSL==16.0.0
-cffi==1.7.0
 pyparsing==2.0.7
 pyrad==2.0
 pyrax==1.9.7
@@ -130,11 +133,8 @@ suds==0.4
 unicodecsv==0.14.1
 warlock==1.2.0
 twilio==4.9.1
+uwsgi==2.0.14
 wheel==0.24.0
 wrapt==1.10.6
 wsgiref==0.1.2
 xmltodict==0.9.2
-channels==0.17.2
-asgi_amqp==0.3.1
-uwsgi==2.0.14
-daphne==0.15.0
