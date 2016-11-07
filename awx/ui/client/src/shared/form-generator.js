@@ -1274,7 +1274,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if(this.mode === "edit"){
                         html += `<div id="${this.form.name}_tab" class="Form-tab" ` +
                             `ng-click="$state.go('${this.form.stateTree}.edit')" ` +
-                            `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$curruent.data.lookup }">` +
+                            `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">` +
                             `${details}</div>`;
 
                         for (itm in this.form.related) {
@@ -1372,8 +1372,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>";//tabHolder
                 }
 
-                if(!_.isEmpty(this.form.related) && this.mode === "edit"){
-                    html += `<div class="Form-tabSection" ng-class="{'is-selected' : $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.lookup }">`;
+                if(!_.isEmpty(this.form.related) && this.mode === "edit"){// TODO: either include $state.is('templates.editWorkflowJobTemplate') or figure out something else to do here
+                    html += `<div class="Form-tabSection" ng-class="{'is-selected' : $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">`;
                 }
 
                 html += "<form class=\"Form";

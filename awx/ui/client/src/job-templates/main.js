@@ -76,10 +76,17 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                 workflowMaker = {
                     name: 'templates.editWorkflowJobTemplate.workflowMaker',
                     url: '/workflow-maker',
+                    // ncyBreadcrumb: {
+                    //     label: 'WORKFLOW MAKER'
+                    // },
+                    data: {
+                        formChildState: true
+                    },
                     params: {
-                        template_search: {
+                        job_template_search: {
                             value: {
-                                page_size: '5'
+                                page_size: '5',
+                                type: 'job_template'
                             },
                             squash: true,
                             dynamic: true
@@ -104,26 +111,18 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                             template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree"></workflow-maker>`
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
-                            templateProvider: function(JobTemplateList, generateList) {
-                                let list = _.cloneDeep(JobTemplateList);
-                                delete list.fields.type;
-                                delete list.fields.description;
-                                delete list.fields.smart_status;
-                                delete list.fields.labels;
-                                delete list.fieldActions;
-                                list.fields.name.columnClass = "col-md-11";
+                            templateProvider: function(WorkflowMakerJobTemplateList, generateList) {
+                                //debugger;
                                 let html = generateList.build({
-                                    list: list,
+                                    list: WorkflowMakerJobTemplateList,
                                     input_type: 'radio',
                                     mode: 'lookup'
                                 });
                                 return html;
                             },
                             // $scope encapsulated in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
-                            controller: ['$scope', 'JobTemplateList', 'JobTemplateDataset', '$log',
-                                function($scope, list, Dataset, $log) {
-                                    // name of this tab
-                                    let tab = 'jobs';
+                            controller: ['$scope', 'WorkflowMakerJobTemplateList', 'JobTemplateDataset',
+                                function($scope, list, Dataset) {
 
                                     init();
 
@@ -133,14 +132,25 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
                                     }
 
-                                    // resets any selected list items, if this tab is not active
-                                    $scope.$on('resetWorkflowList', function(e, active) {
-                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
+                                    $scope.toggle_job_template = function(id) {
 
-                                        // a reference to the currently-selected radio is stored in $scope.selection[list.iterator]
-                                        // clear it out!
-                                        if (active !== tab) {
-                                            $scope.selection[list.iterator] = null;
+                                        $scope.job_templates.forEach(function(row, i) {
+                                            if (row.id === id) {
+                                                $scope.job_templates[i].checked = 1;
+                                                $scope.selection[list.iterator] = {
+                                                    id: row.id,
+                                                    name: row.name
+                                                };
+
+                                                $scope.$emit('templateSelected', row);
+                                            }
+                                        });
+
+                                    };
+
+                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
+                                        if(tab !== 'jobs') {
+                                            // Clear out any selected job
                                         }
                                     });
                                 }
@@ -160,7 +170,6 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                             // encapsulated $scope in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
                             controller: ['$scope', 'InventorySourcesList', 'InventorySourcesDataset',
                                 function($scope, list, Dataset) {
-                                    let tab = 'inventory_sync';
 
                                     init();
 
@@ -171,35 +180,42 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
 
                                     }
 
-                                    // resets any selected list items, if this tab is not active
-                                    $scope.$on('resetWorkflowList', function(e, active) {
-                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
+                                    $scope.toggle_inventory_source = function(id) {
 
-                                        if (active !== tab) {
-                                            $scope.selection[list.iterator] = null;
+                                        $scope.inventory_sources.forEach(function(row, i) {
+                                            if (row.id === id) {
+                                                $scope.inventory_sources[i].checked = 1;
+                                                $scope.selection[list.iterator] = {
+                                                    id: row.id,
+                                                    name: row.name
+                                                };
+
+                                                $scope.$emit('templateSelected', row);
+                                            }
+                                        });
+
+                                    };
+
+                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
+                                        if(tab !== 'project_sync') {
+
                                         }
                                     });
                                 }
                             ]
                         },
                         'projectSyncList@templates.editWorkflowJobTemplate.workflowMaker': {
-                            templateProvider: function(ProjectList, generateList) {
-                                let list = _.cloneDeep(ProjectList);
-                                delete list.fields.status;
-                                delete list.fields.scm_type;
-                                delete list.fields.last_updated;
-                                list.fields.name.columnClass = "col-md-11";
+                            templateProvider: function(WorkflowProjectList, generateList) {
                                 let html = generateList.build({
-                                    list: list,
+                                    list: WorkflowProjectList,
                                     input_type: 'radio',
                                     mode: 'lookup'
                                 });
                                 return html;
                             },
                             // encapsulated $scope in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
-                            controller: ['$scope', 'ProjectList', 'ProjectDataset',
+                            controller: ['$scope', 'WorkflowProjectList', 'ProjectDataset',
                                 function($scope, list, Dataset) {
-                                    let tab = 'project_sync';
 
                                     init();
 
@@ -209,12 +225,26 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
                                     }
-                                    // resets any selected list items, if this tab is not active
-                                    $scope.$on('resetWorkflowList', function(e, active) {
-                                        // e.targetScope is a reference to the outer scope if you need to manipulate it!
 
-                                        if (active !== tab) {
-                                            $scope.selection[list.iterator] = null;
+                                    $scope.toggle_project = function(id) {
+
+                                        $scope.projects.forEach(function(row, i) {
+                                            if (row.id === id) {
+                                                $scope.projects[i].checked = 1;
+                                                $scope.selection[list.iterator] = {
+                                                    id: row.id,
+                                                    name: row.name
+                                                };
+
+                                                $scope.$emit('templateSelected', row);
+                                            }
+                                        });
+
+                                    };
+
+                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
+                                        if(tab !== 'inventory_sync') {
+
                                         }
                                     });
                                 }
@@ -233,7 +263,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         }
                     },
                     resolve: {
-                        JobTemplateDataset: ['JobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        JobTemplateDataset: ['WorkflowMakerJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
                             (list, qs, $stateParams, GetBasePath) => {
                                 let path = GetBasePath(list.basePath);
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -250,6 +280,32 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 let path = GetBasePath(list.basePath);
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
+                        ],
+                        WorkflowMakerJobTemplateList: ['JobTemplateList',
+                            (JobTemplateList) => {
+                                let list = _.cloneDeep(JobTemplateList);
+                                delete list.fields.type;
+                                delete list.fields.description;
+                                delete list.fields.smart_status;
+                                delete list.fields.labels;
+                                delete list.fieldActions;
+                                list.fields.name.columnClass = "col-md-11";
+                                list.iterator = 'job_template';
+                                list.name = 'job_templates';
+
+                                return list;
+                            }
+                        ],
+                        WorkflowProjectList: ['ProjectList',
+                            (ProjectList) => {
+                                let list = _.cloneDeep(ProjectList);
+                                delete list.fields.status;
+                                delete list.fields.scm_type;
+                                delete list.fields.last_updated;
+                                list.fields.name.columnClass = "col-md-11";
+
+                                return list;
+                            }
                         ]
                     }
                 };
@@ -259,7 +315,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                     name: 'templates.editWorkflowJobTemplate.workflowMaker.inventory',
                     url: '/inventory',
                     data: {
-                        lookup: true
+                        formChildState: true
                     },
                     params: {
                         inventory_search: {
@@ -309,7 +365,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                     name: 'templates.editWorkflowJobTemplate.workflowMaker.credential',
                     url: '/credential',
                     data: {
-                        lookup: true
+                        formChildState: true
                     },
                     params: {
                         credential_search: {
@@ -334,7 +390,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         }
                     },
                     resolve: {
-                        ListDefinition: ['ListDefinition', function(list) {
+                        ListDefinition: ['CredentialList', function(list) {
                             // mutate the provided list definition here
                             return list;
                         }],

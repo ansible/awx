@@ -32,77 +32,9 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             value: "check"
         }];
 
-        let job_template_url = GetBasePath('job_templates');
-        // TODO: we won't be able to rely on this in the future for security purposes.  Will need to come up
-        // with another way to get the list of job templates that have credentials that don't require passwords
-        // on launch
-        job_template_url += "?not__credential__vault_password=ASK&not__credential__password=ASK";
-        //http://localhost:3000/api/v1/job_templates/?not__credential__vault_password=ASK&not__credential__password=ASK
-
-        // Set up the lists for the add/edit node form
-        // let jobTemplatesList = _.cloneDeep(JobTemplateList);
-        // delete jobTemplatesList.fields.type;
-        // delete jobTemplatesList.fields.description;
-        // delete jobTemplatesList.fields.smart_status;
-        // delete jobTemplatesList.fields.labels;
-        // jobTemplatesList.fields.name.columnClass = "col-md-11";
-        // jobTemplatesList.name = "workflow_job_templates";
-
-        // let project_url = GetBasePath('projects');
-
-        // let projectList = _.cloneDeep(ProjectList);
-        // delete projectList.fields.status;
-        // delete projectList.fields.scm_type;
-        // delete projectList.fields.last_updated;
-        // projectList.fields.name.columnClass = "col-md-11";
-        // projectList.name = "workflow_projects";
-
-        //let inventory_sources_url = GetBasePath('inventory_sources');
-
-        //let inventorySourcesList = _.cloneDeep(InventorySourcesList);
-
         function init() {
             $scope.treeDataMaster = angular.copy($scope.treeData.data);
             $scope.$broadcast("refreshWorkflowChart");
-
-            $scope.$watchCollection('workflow_job_templates', function() {
-                if ($scope.selectedTemplate) {
-                    // Loop across the inventories and see if one of them should be "checked"
-                    $scope.workflow_job_templates.forEach(function(row, i) {
-                        if (row.id === $scope.selectedTemplate.id) {
-                            $scope.workflow_job_templates[i].checked = 1;
-                        } else {
-                            $scope.workflow_job_templates[i].checked = 0;
-                        }
-                    });
-                }
-            });
-
-            $scope.$watchCollection('workflow_projects', function() {
-                if ($scope.selectedTemplate) {
-                    // Loop across the inventories and see if one of them should be "checked"
-                    $scope.workflow_projects.forEach(function(row, i) {
-                        if (row.id === $scope.selectedTemplate.id) {
-                            $scope.workflow_projects[i].checked = 1;
-                        } else {
-                            $scope.workflow_projects[i].checked = 0;
-                        }
-                    });
-                }
-            });
-
-            $scope.$watchCollection('workflow_inventory_sources', function() {
-                if ($scope.selectedTemplate) {
-                    // Loop across the inventories and see if one of them should be "checked"
-                    $scope.workflow_inventory_sources.forEach(function(row, i) {
-                        if (row.id === $scope.selectedTemplate.id) {
-                            $scope.workflow_inventory_sources[i].checked = 1;
-                        } else {
-                            $scope.workflow_inventory_sources[i].checked = 0;
-                        }
-                    });
-                }
-            });
 
             $scope.$watchGroup(['selectedTemplate', 'edgeType'], function() {
                 if ($scope.selectedTemplate && $scope.edgeType) {
@@ -143,7 +75,11 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         }
 
         $scope.lookUpInventory = function(){
-            $state.go('.inventory')
+            $state.go('.inventory');
+        };
+
+        $scope.lookUpCredential = function(){
+            $state.go('.credential');
         };
 
         $scope.closeWorkflowMaker = function() {
@@ -540,123 +476,63 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         };
 
         $scope.toggleFormTab = function(tab) {
-            // a dictionary of settings required by each encapsulated tab
-            $scope.$broadcast('resetWorkflowList', tab);
             if ($scope.workflowMakerFormConfig.activeTab !== tab) {
                 $scope.workflowMakerFormConfig.activeTab = tab;
             }
         };
 
-        $scope.toggle_job_template = function(id) {
-
-            // $scope.workflow_projects.forEach(function(row, i) {
-            //     $scope.workflow_projects[i].checked = 0;
-            // });
-
-            // $scope.workflow_inventory_sources.forEach(function(row, i) {
-            //     $scope.workflow_inventory_sources[i].checked = 0;
-            // });
-
-            $scope.workflow_job_templates.forEach(function(row, i) {
-                if (row.id === id) {
-                    $scope.selectedTemplate = angular.copy(row);
-                    if ($scope.selectedTemplate.ask_credential_on_launch) {
-                        if ($scope.selectedTemplate.summary_fields.credential) {
-                            $scope.credential_name = $scope.selectedTemplate.summary_fields.credential.name ? $scope.selectedTemplate.summary_fields.credential.name : null;
-                            $scope.credential = $scope.selectedTemplate.summary_fields.credential.id ? $scope.selectedTemplate.summary_fields.credential.id : null;
-                        } else {
-                            $scope.credential_name = null;
-                            $scope.credential = null;
-                        }
-                    }
-
-                    if ($scope.selectedTemplate.ask_inventory_on_launch) {
-                        if ($scope.selectedTemplate.summary_fields.inventory) {
-                            $scope.inventory_name = $scope.selectedTemplate.summary_fields.inventory.name ? $scope.selectedTemplate.summary_fields.inventory.name : null;
-                            $scope.inventory = $scope.selectedTemplate.summary_fields.inventory.id ? $scope.selectedTemplate.summary_fields.inventory.id : null;
-                        } else {
-                            $scope.inventory_name = null;
-                            $scope.inventory = null;
-                        }
-                    }
-
-                    if ($scope.selectedTemplate.ask_job_type_on_launch) {
-                        $scope.job_type = {
-                            value: $scope.selectedTemplate.job_type ? $scope.selectedTemplate.job_type : null
-                        };
-
-                        // The default needs to be in place before we can select2-ify the dropdown
-                        CreateSelect2({
-                            element: '#workflow_maker_job_type',
-                            multiple: false
-                        });
-                    }
-
-                    if ($scope.selectedTemplate.ask_limit_on_launch) {
-                        $scope.limit = $scope.selectedTemplate.limit ? $scope.selectedTemplate.limit : null;
-                    }
-
-                    if ($scope.selectedTemplate.ask_skip_tags_on_launch) {
-                        $scope.skip_tags = $scope.selectedTemplate.skip_tags ? $scope.selectedTemplate.skip_tags : null;
-                    }
-
-                    if ($scope.selectedTemplate.ask_tags_on_launch) {
-                        $scope.job_tags = $scope.selectedTemplate.job_tags ? $scope.selectedTemplate.job_tags : null;
-                    }
-
-                    $scope.workflow_job_templates[i].checked = 1;
-                } else {
-                    $scope.workflow_job_templates[i].checked = 0;
-                }
-            });
-
-        };
-
-        $scope.toggle_project = function(id) {
+        $scope.$on('templateSelected', function(e, selectedTemplate) {
 
             resetPromptFields();
 
-            // $scope.workflow_job_templates.forEach(function(row, i) {
-            //     $scope.workflow_job_templates[i].checked = 0;
-            // });
+            $scope.selectedTemplate = angular.copy(selectedTemplate);
 
-            // $scope.workflow_inventory_sources.forEach(function(row, i) {
-            //     $scope.workflow_inventory_sources[i].checked = 0;
-            // });
-
-            $scope.workflow_projects.forEach(function(row, i) {
-                if (row.id === id) {
-                    $scope.selectedTemplate = angular.copy(row);
-                    $scope.workflow_projects[i].checked = 1;
+            if ($scope.selectedTemplate.ask_credential_on_launch) {
+                if ($scope.selectedTemplate.summary_fields.credential) {
+                    $scope.credential_name = $scope.selectedTemplate.summary_fields.credential.name ? $scope.selectedTemplate.summary_fields.credential.name : null;
+                    $scope.credential = $scope.selectedTemplate.summary_fields.credential.id ? $scope.selectedTemplate.summary_fields.credential.id : null;
                 } else {
-                    $scope.workflow_projects[i].checked = 0;
+                    $scope.credential_name = null;
+                    $scope.credential = null;
                 }
-            });
+            }
 
-        };
-
-        $scope.toggle_inventory_source = function(id) {
-
-            resetPromptFields();
-
-            // $scope.workflow_job_templates.forEach(function(row, i) {
-            //     $scope.workflow_job_templates[i].checked = 0;
-            // });
-
-            // $scope.workflow_projects.forEach(function(row, i) {
-            //     $scope.workflow_projects[i].checked = 0;
-            // });
-
-            $scope.workflow_inventory_sources.forEach(function(row, i) {
-                if (row.id === id) {
-                    $scope.selectedTemplate = angular.copy(row);
-                    $scope.workflow_inventory_sources[i].checked = 1;
+            if ($scope.selectedTemplate.ask_inventory_on_launch) {
+                if ($scope.selectedTemplate.summary_fields.inventory) {
+                    $scope.inventory_name = $scope.selectedTemplate.summary_fields.inventory.name ? $scope.selectedTemplate.summary_fields.inventory.name : null;
+                    $scope.inventory = $scope.selectedTemplate.summary_fields.inventory.id ? $scope.selectedTemplate.summary_fields.inventory.id : null;
                 } else {
-                    $scope.workflow_inventory_sources[i].checked = 0;
+                    $scope.inventory_name = null;
+                    $scope.inventory = null;
                 }
-            });
+            }
 
-        };
+            if ($scope.selectedTemplate.ask_job_type_on_launch) {
+                $scope.job_type = {
+                    value: $scope.selectedTemplate.job_type ? $scope.selectedTemplate.job_type : null
+                };
+
+                // The default needs to be in place before we can select2-ify the dropdown
+                CreateSelect2({
+                    element: '#workflow_maker_job_type',
+                    multiple: false
+                });
+            }
+
+            if ($scope.selectedTemplate.ask_limit_on_launch) {
+                $scope.limit = $scope.selectedTemplate.limit ? $scope.selectedTemplate.limit : null;
+            }
+
+            if ($scope.selectedTemplate.ask_skip_tags_on_launch) {
+                $scope.skip_tags = $scope.selectedTemplate.skip_tags ? $scope.selectedTemplate.skip_tags : null;
+            }
+
+            if ($scope.selectedTemplate.ask_tags_on_launch) {
+                $scope.job_tags = $scope.selectedTemplate.job_tags ? $scope.selectedTemplate.job_tags : null;
+            }
+
+            $scope.$broadcast('clearOtherTemplateLists', $scope.workflowMakerFormConfig.activeTab);
+        });
 
         init();
 

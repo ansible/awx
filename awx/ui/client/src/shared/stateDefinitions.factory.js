@@ -372,7 +372,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     // a lookup field's basePath takes precedence over generic list definition's basePath, if supplied
                     data: {
                         basePath: field.basePath || null,
-                        lookup: true
+                        formChildState: true
                     },
                     params: {
                         [field.sourceModel + '_search']: {

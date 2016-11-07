@@ -14,7 +14,7 @@
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
          JobTemplateService, OrganizationList, Rest
-     ) {
+     ) {window.state = $state;
 
         ClearScope();
 

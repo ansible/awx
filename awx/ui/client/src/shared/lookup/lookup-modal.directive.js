@@ -29,6 +29,9 @@ export default ['templateUrl', '$compile', function(templateUrl, $compile) {
                 $scope.$parent[list.iterator] = $scope.selection[list.iterator].id;
                 $state.go('^');
             };
+            $scope.cancelForm = function() {
+                $state.go('^');
+            };
         }]
     };
 }];
