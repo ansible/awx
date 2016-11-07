@@ -51,7 +51,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
-                            OutputEventFilter)
+                            get_system_task_capacity, OutputEventFilter) 
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -131,6 +131,7 @@ def cluster_node_heartbeat(self):
     inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
     if inst.exists():
         inst = inst[0]
+        inst.capacity = get_system_task_capacity()
         inst.save()
         return
     raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))

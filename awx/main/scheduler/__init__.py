@@ -37,7 +37,7 @@ logger = logging.getLogger('awx.main.scheduler')
 class TaskManager():
     def __init__(self):
         self.graph = DependencyGraph()
-        self.capacity_total = 200
+        self.capacity_total = Instance.objects.total_capacity()
         self.capacity_used = 0
 
     def get_tasks(self):
@@ -152,7 +152,7 @@ class TaskManager():
                 map(lambda at: active_tasks.add(at['id']), active_task_queues[queue])
         else:
             if not hasattr(settings, 'CELERY_UNIT_TEST'):
-                return None
+                return (None, None)
 
         return (active_task_queues, active_tasks)
 

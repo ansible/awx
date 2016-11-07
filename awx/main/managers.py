@@ -4,6 +4,7 @@
 import sys
 
 from django.db import models
+from django.db.models import Sum
 from django.conf import settings
 
 
@@ -39,6 +40,9 @@ class InstanceManager(models.Manager):
     def active_count(self):
         """Return count of active Tower nodes for licensing."""
         return self.all().count()
+
+    def total_capacity(self):
+        return self.aggregate(total_capacity=Sum('capacity'))['total_capacity']
 
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
