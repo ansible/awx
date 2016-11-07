@@ -6,7 +6,7 @@ Our channels/websocket implementation handles the communication between Tower AP
 
 Tower enlists the help of the `django-channels` library to create our communications layer. `django-channels` provides us with per-client messaging integration in to our application by implementing the Asynchronous Server Gateway Interface or ASGI.
 
-To communicate between our different services we use RabbitMQ to exchange messages. Traditionally, `django-channels` uses Reddis, but Tower uses a custom `asgi_amqp` library that allows use to RabbitMQ for the same purpose.
+To communicate between our different services we use RabbitMQ to exchange messages. Traditionally, `django-channels` uses Redis, but Tower uses a custom `asgi_amqp` library that allows use to RabbitMQ for the same purpose.
 
 Inside Tower we use the emit_channel_notification which places messages on to the queue. The messages are given an explicit
 event group and event type which we later use in our wire protocol to control message delivery to the client.
