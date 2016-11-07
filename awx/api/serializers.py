@@ -868,7 +868,7 @@ class ProjectOptionsSerializer(BaseSerializer):
 
     class Meta:
         fields = ('*', 'local_path', 'scm_type', 'scm_url', 'scm_branch',
-                  'scm_clean', 'scm_delete_on_update', 'credential')
+                  'scm_clean', 'scm_delete_on_update', 'credential', 'timeout',)
 
     def get_related(self, obj):
         res = super(ProjectOptionsSerializer, self).get_related(obj)
@@ -916,7 +916,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
     class Meta:
         model = Project
         fields = ('*', 'organization', 'scm_delete_on_next_update', 'scm_update_on_launch',
-                  'scm_update_cache_timeout', 'scm_revision', 'timeout',) + \
+                  'scm_update_cache_timeout', 'scm_revision',) + \
                  ('last_update_failed', 'last_updated')  # Backwards compatibility
         read_only_fields = ('scm_delete_on_next_update',)
 
