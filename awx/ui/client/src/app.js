@@ -56,6 +56,7 @@ import setupMenu from './setup-menu/main';
 import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
+import configuration from './configuration/main';
 import dashboard from './dashboard/main';
 import moment from './shared/moment/main';
 import login from './login/main';
@@ -100,6 +101,7 @@ var tower = angular.module('Tower', [
     license.name,
     RestServices.name,
     browserData.name,
+    configuration.name,
     systemTracking.name,
     inventories.name,
     inventoryScripts.name,

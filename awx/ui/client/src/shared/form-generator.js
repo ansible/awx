@@ -172,6 +172,205 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 </div>`;
             },
 
+            inject: function (form, options) {
+                //
+                // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.
+                // Returns scope of form.
+                //
+
+                var element, fld, set, show, self = this;
+
+                if (options.modal) {
+                    if (options.modal_body_id) {
+                        element = angular.element(document.getElementById(options.modal_body_id));
+                    } else {
+                        // use default dialog
+                        element = angular.element(document.getElementById('form-modal-body'));
+                    }
+                } else {
+                    if (options.id) {
+                        element = angular.element(document.getElementById(options.id));
+                    } else {
+                        element = angular.element(document.getElementById('htmlTemplate'));
+                    }
+                }
+
+                this.mode = options.mode;
+                this.modal = (options.modal) ? true : false;
+                this.setForm(form);
+
+                if (options.html) {
+                    element.html(options.html);
+                } else {
+                    element.html(this.build(options));
+                }
+
+                if (options.scope) {
+                    this.scope = options.scope;
+                } else {
+                    this.scope = element.scope();
+                }
+
+                if (options.mode) {
+                    this.scope.mode = options.mode;
+                }
+
+                if(options.mode === 'edit' && this.form.related &&
+                    !_.isEmpty(this.form.related)){
+                    var tabs = [this.form.name], that = this;
+                    tabs.push(Object.keys(this.form.related));
+                    tabs = _.flatten(tabs);
+                    _.map(tabs, function(itm){
+                        that.scope.$parent[itm+"Selected"] = false;
+                    });
+                    this.scope.$parent[this.form.name+"Selected"] = true;
+
+
+                    this.scope.$parent.toggleFormTabs = function($event){
+                        _.map(tabs, function(itm){
+                            that.scope.$parent[itm+"Selected"] = false;
+                        });
+                        that.scope.$parent[$event.target.id.split('_tab')[0]+"Selected"] = true;
+                    };
+
+                }
+
+                for (fld in form.fields) {
+                    this.scope[fld + '_field'] = form.fields[fld];
+                    this.scope[fld + '_field'].name = fld;
+                }
+
+                for (fld in form.headerFields){
+                    this.scope[fld + '_field'] = form.headerFields[fld];
+                    this.scope[fld + '_field'].name = fld;
+                }
+
+                $compile(element)(this.scope);
+
+                if (!options.html) {
+                    // Reset the scope to prevent displaying old data from our last visit to this form
+                    for (fld in form.fields) {
+                        this.scope[fld] = null;
+                    }
+                    for (set in form.related) {
+                        this.scope[set] = null;
+                    }
+                    // if (((!options.modal) && options.related) || this.form.forceListeners) {
+                    //     this.addListeners();
+                    // }
+                    if (options.mode === 'add') {
+                        this.applyDefaults();
+                    }
+                }
+
+                // Remove any lingering tooltip and popover <div> elements
+                $('.tooltip').each(function () {
+                    $(this).remove();
+                });
+
+                $('.popover').each(function () {
+                    // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                    $(this).remove();
+                });
+
+                // Prepend an asterisk to required field label
+                $('.form-control[required], input[type="radio"][required]').each(function () {
+                    var label, span;
+                    if (Empty($(this).attr('aw-required-when'))) {
+                        label = $(this).closest('.form-group').find('label').first();
+                        if (label.length > 0) {
+                            span = label.children('span');
+                            if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
+                                span.first().addClass('prepend-asterisk');
+                            } else if (span.length <= 0 && !label.first().hasClass('prepend-asterisk')) {
+                                label.first().addClass('prepend-asterisk');
+                            }
+                        }
+                    }
+                });
+
+                try {
+                    $('#help-modal').empty().dialog('destroy');
+                } catch (e) {
+                    //ignore any errors should the dialog not be initialized
+                }
+
+                if (options.modal) {
+                    $rootScope.flashMessage = null;
+                    this.scope.formModalActionDisabled = false;
+                    this.scope.formModalInfo = false; //Disable info button for default modal
+                    if (form) {
+                        if (options.modal_title_id) {
+                            this.scope[options.modal_title_id] = (options.mode === 'add') ? form.addTitle : form.editTitle;
+                        } else {
+                            this.scope.formModalHeader = (options.mode === 'add') ? form.addTitle : form.editTitle; //Default title for default modal
+                        }
+                    }
+                    if (options.modal_selector) {
+                        $(options.modal_selector).modal({
+                            show: true,
+                            backdrop: 'static',
+                            keyboard: true
+                        });
+                        $(options.modal_selector).on('shown.bs.modal', function () {
+                            $(options.modal_select + ' input:first').focus();
+                        });
+                        $(options.modal_selector).on('hidden.bs.modal', function () {
+                            $('.tooltip').each(function () {
+                                // Remove any lingering tooltip and popover <div> elements
+                                $(this).remove();
+                            });
+
+                            $('.popover').each(function () {
+                                // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                                $(this).remove();
+                            });
+                        });
+                    } else {
+                        show = (options.show_modal === false) ? false : true;
+                        $('#form-modal').modal({
+                            show: show,
+                            backdrop: 'static',
+                            keyboard: true
+                        });
+                        $('#form-modal').on('shown.bs.modal', function () {
+                            $('#form-modal input:first').focus();
+                        });
+                        $('#form-modal').on('hidden.bs.modal', function () {
+                            $('.tooltip').each(function () {
+                                // Remove any lingering tooltip and popover <div> elements
+                                $(this).remove();
+                            });
+
+                            $('.popover').each(function () {
+                                // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                                $(this).remove();
+                            });
+                        });
+                    }
+                    $(document).bind('keydown', function (e) {
+                        if (e.keyCode === 27) {
+                            if (options.modal_selector) {
+                                $(options.modal_selector).modal('hide');
+                            }
+                            $('#prompt-modal').modal('hide');
+                            $('#form-modal').modal('hide');
+                        }
+                    });
+                }
+
+                if (self.scope && !self.scope.$$phase) {
+                    setTimeout(function() {
+                        if (self.scope) {
+                            self.scope.$digest();
+                        }
+                    }, 100);
+                }
+
+                return self.scope;
+
+            },
+
             buildHTML: function(form, options) {
                 // Get HTML without actually injecting into DOM. Caller is responsible for any injection.
                 // Example:
@@ -478,6 +677,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             let cls = action["class"] || "";
                             html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
+
+                        if(field.reset) {
+                            var resetValue = "'" + field.reset+ "'";
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">Reset</a>`;
+                        }
+
                         html += "\n\t</label>\n";
                     }
                     return html;
@@ -534,6 +739,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
                     html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
+
+                    // toggle switches
+                    if(field.type === 'toggleSwitch') {
+                        html += label();
+                            html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
+                            data-placement="undefined" data-tip-watch="undefined" data-original-title="" title="">
+                            <div ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</div>
+                            <div ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</div>
+                        </div>`;
+                    }
 
                     //text fields
                     if (field.type === 'text' || field.type === 'password' || field.type === 'email') {
