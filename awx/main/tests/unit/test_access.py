@@ -53,12 +53,12 @@ class TestRelatedFieldAccess:
         data = {'related': resource_bad}
         assert not access.check_related('related', mocker.MagicMock, data)
 
-    def test_new_with_bad_data(self, access, resource_bad, mocker):
+    def test_new_with_bad_data(self, access, mocker):
         data = {'related': 3.1415}
         with pytest.raises(ParseError):
             access.check_related('related', mocker.MagicMock, data)
 
-    def test_new_mandatory_fail(self, access, resource_bad, mocker):
+    def test_new_mandatory_fail(self, access, mocker):
         access.user.is_superuser = False
         assert not access.check_related(
             'related', mocker.MagicMock, {}, mandatory=True)
@@ -101,7 +101,7 @@ class TestRelatedFieldAccess:
         assert not access.check_related(
             'related', mocker.MagicMock, data, obj=resource_bad)
 
-    def test_existing_not_null_null(self, access, bad_role, mocker):
+    def test_existing_not_null_null(self, access, mocker):
         resource = mocker.MagicMock(related=None)
         data = {'related': None}
         # Not changing anything by giving null when it is already-null

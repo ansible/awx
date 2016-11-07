@@ -201,7 +201,6 @@ class BaseAccess(object):
          - editing an existing resource, user must have permission to resource
            in `data`, as well as existing related resource on `obj`
 
-        If obj.field is null, this does not block the action
         If `mandatory` is set, new resources require the field and
                                existing field will always be checked
         '''
@@ -242,7 +241,6 @@ class BaseAccess(object):
 
         if (not new) and (not obj) and mandatory:
             # Restrict ability to create resource without required field
-            print ' superuser '
             return self.user.is_superuser
 
         def user_has_resource_access(resource):
@@ -253,13 +251,11 @@ class BaseAccess(object):
                 return self.user.can_access(type(resource), access_method_type, resource, None)
             return self.user in role
 
-        if new and changed:
-            if not user_has_resource_access(new):
-                return False  # User lacks access to provided resource
+        if new and changed and (not user_has_resource_access(new)):
+            return False  # User lacks access to provided resource
 
-        if current and (changed or mandatory):
-            if not user_has_resource_access(current):
-                return False  # User lacks access to existing resource
+        if current and (changed or mandatory) and (not user_has_resource_access(current)):
+            return False  # User lacks access to existing resource
 
         return True  # User has access to both, permission check passed
 
