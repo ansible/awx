@@ -1541,7 +1541,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
 
     def can_change(self, obj, data):
         # Check survey license if surveys are added to WFJTs
-        if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
+        if (data and 'survey_enabled' in data and
+                obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']):
             self.check_license(feature='surveys')
 
         if self.user.is_superuser:

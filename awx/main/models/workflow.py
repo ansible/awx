@@ -332,9 +332,9 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
             survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
             for key in extra_vars:
                 if key in survey_vars:
-                    prompted_fields[field][key] = extra_vars[key]
+                    prompted_fields['extra_vars'][key] = extra_vars[key]
                 else:
-                    ignored_fields[field][key] = extra_vars[key]
+                    ignored_fields['extra_vars'][key] = extra_vars[key]
         else:
             prompted_fields['extra_vars'] = extra_vars
 

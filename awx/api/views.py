@@ -2803,13 +2803,6 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
             if extra_vars:
                 data['extra_vars'] = extra_vars
         return data
- 
-    # def get(self, request, *args, **kwargs):
-    #     data = {}
-    #     obj = self.get_object()
-    #     data['warnings'] = obj.get_warnings()
-    #     data['variables_needed_to_start'] = obj.variables_needed_to_start
-    #     return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2824,8 +2817,11 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
         new_job = obj.create_unified_job(**prompted_fields)
         new_job.signal_start(**prompted_fields)
-        data = dict(workflow_job=new_job.id)
+
+        data = OrderedDict()
         data['ignored_fields'] = ignored_fields
+        data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
+        data['workflow_job'] = new_job.id
         return Response(data, status=status.HTTP_201_CREATED)
 
 # TODO:
