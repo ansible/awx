@@ -12,7 +12,7 @@ The task manager has a single entry point, `Scheduler().schedule()`. The method 
 The `schedule()` function is ran (a) periodically by a celery task and (b) on job creation or completion. The task manager system would behave correctly if ran, exclusively, via (a) or (b). We chose to trigger `schedule()` via both mechanisms because of the nice properties I will now mention. (b) reduces the time from launch to running, resulting a better user experience. (a) is a fail-safe in case we miss code-paths, in the present and future, that change the 3 scheduling considerations for which we should call `schedule()` (i.e. adding new nodes to tower changes the capacity, obscure job error handling that fails a job)
  Emperically, the periodic task manager has served us well in the past and we will continue to rely on it with the added event-triggered `schedule()`.
  
- ### Scheduler Algorithm
+### Scheduler Algorithm
  * Get all non-completed jobs, `all_tasks`
  * Generate the hash tables from `all_tasks`:
    * `<job_template_id, True/False>` indicates a job is running
@@ -45,7 +45,7 @@ The main goal of the new task manager is to run in our HA environment. This tran
 Partials wrap a subset of Django model dict data, provide a simple static query method that is purpose built to support the populating of the task manager hash tables,  have a link back to the model which they are wrapping so that the original Django ORM model for which the partial is wrapping can be easily gotten, and can be made serializable via `<type, self.data>` since `self.data` is a `dict` of the database record. 
 
 ### Blocking Logic
-The blocking logic has been moved from the respective ORM model to the code that manages the dependency hash tables. The blocking logic could easily be moved to the partials or evne the ORM models. However, the per-model blocking logic code would be operating on the dependency hash tables; not on ORM models as in the previous design. The blocking logic is kept close to the data-structures required to operate on. 
+The blocking logic has been moved from the respective ORM model to the code that manages the dependency hash tables. The blocking logic could easily be moved to the partials or even the ORM models. However, the per-model blocking logic code would be operating on the dependency hash tables; not on ORM models as in the previous design. The blocking logic is kept close to the data-structures required to operate on. 
 
 ## Acceptance Tests
 
