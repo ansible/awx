@@ -2197,7 +2197,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
         res.update(dict(
             jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
-            #schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
+            schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
             launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
             workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
             labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),

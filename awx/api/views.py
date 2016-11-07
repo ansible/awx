@@ -2827,6 +2827,17 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     relationship = 'jobs'
     parent_key = 'workflow_job_template'
 
+class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+
+    view_name = _("Workflow Job Template Schedules")
+
+    model = Schedule
+    serializer_class = ScheduleSerializer
+    parent_model = WorkflowJobTemplate
+    relationship = 'schedules'
+    parent_key = 'unified_job_template'
+    new_in_310 = True
+
 # TODO:
 class WorkflowJobList(ListCreateAPIView):
 
