@@ -537,11 +537,8 @@ class InventoryAccess(BaseAccess):
     @check_superuser
     def can_admin(self, obj, data):
         # Verify that the user has access to the new organization if moving an
-        # inventory to a new organization.
-        if not self.check_related('organization', Organization, data, obj=obj):
-            return False
-        # Otherwise, just check for admin permission.
-        return self.user in obj.admin_role
+        # inventory to a new organization.  Otherwise, just check for admin permission.
+        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
 
     def can_delete(self, obj):
         is_can_admin = self.can_admin(obj, None)
