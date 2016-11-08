@@ -160,10 +160,13 @@ class BaseCallbackModule(CallbackBase):
         # FIXME: Task is "global" unless using free strategy!
         task_ctx = dict(
             task=(task.name or task.action),
-            task_path=task.get_path(),
             task_uuid=str(task._uuid),
             task_action=task.action,
         )
+        try:
+            task_ctx['task_path'] = task.get_path()
+        except AttributeError:
+            pass
         if not task.no_log:
             task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
             task_ctx['task_args'] = task_args
