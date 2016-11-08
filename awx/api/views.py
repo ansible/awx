@@ -2857,6 +2857,29 @@ class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
     parent_model = WorkflowJobTemplate
     relationship = 'schedules'
     parent_key = 'unified_job_template'
+
+class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = WorkflowJobTemplate
+    relationship = 'notification_templates_any'
+    new_in_310 = True
+
+class WorkflowJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = WorkflowJobTemplate
+    relationship = 'notification_templates_error'
+    new_in_310 = True
+
+class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+
+    model = NotificationTemplate
+    serializer_class = NotificationTemplateSerializer
+    parent_model = WorkflowJobTemplate
+    relationship = 'notification_templates_success'
     new_in_310 = True
 
 # TODO:
@@ -2899,6 +2922,14 @@ class WorkflowJobCancel(RetrieveAPIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
+
+class WorkflowJobNotificationsList(SubListAPIView):
+
+    model = Notification
+    serializer_class = NotificationSerializer
+    parent_model = WorkflowJob
+    relationship = 'notifications'
+    new_in_310 = True
 
 class SystemJobTemplateList(ListAPIView):
 

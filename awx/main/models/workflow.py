@@ -13,7 +13,10 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
-from awx.main.models.notifications import JobNotificationMixin
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin
+)
 from awx.main.models.base import BaseModel, CreatedModifiedModel, VarsDictProperty
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
@@ -306,7 +309,18 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         # TODO: don't allow running of job template if same workflow template running
         return False
 
-    # TODO: Notifications
+    @property
+    def notification_templates(self):
+        base_notification_templates = NotificationTemplate.objects.all()
+        error_notification_templates = list(base_notification_templates
+                                            .filter(unifiedjobtemplate_notification_templates_for_errors__in=[self]))
+        success_notification_templates = list(base_notification_templates
+                                              .filter(unifiedjobtemplate_notification_templates_for_success__in=[self]))
+        any_notification_templates = list(base_notification_templates
+                                          .filter(unifiedjobtemplate_notification_templates_for_any__in=[self]))
+        return dict(error=list(error_notification_templates),
+                    success=list(success_notification_templates),
+                    any=list(any_notification_templates))
     # TODO: Surveys
 
     #def create_job(self, **kwargs):
@@ -437,11 +451,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def task_impact(self):
         return 0
 
-    # TODO: workflow job notifications
     def get_notification_templates(self):
-        return []
+        return self.workflow_job_template.notification_templates
 
-    # TODO: workflow job notifications
     def get_notification_friendly_name(self):
         return "Workflow Job"
 

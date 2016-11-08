@@ -2201,10 +2201,9 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
             workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
             labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),
-            # TODO: Implement notifications
-            #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
-            #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
-            #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
+            notification_templates_any = reverse('api:workflow_job_template_notification_templates_any_list', args=(obj.pk,)),
+            notification_templates_success = reverse('api:workflow_job_template_notification_templates_success_list', args=(obj.pk,)),
+            notification_templates_error = reverse('api:workflow_job_template_notification_templates_error_list', args=(obj.pk,)),
             survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
         return res
@@ -2228,8 +2227,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
         if obj.workflow_job_template:
             res['workflow_job_template'] = reverse('api:workflow_job_template_detail',
                                                    args=(obj.workflow_job_template.pk,))
-            # TODO:
-            #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
+            res['notifications'] = reverse('api:workflow_job_notifications_list', args=(obj.pk,))
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
         res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
         if obj.can_cancel or True:
