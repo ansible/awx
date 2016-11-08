@@ -72,6 +72,7 @@ from awx.api.serializers import * # noqa
 from awx.api.metadata import RoleMetadata
 from awx.main.consumers import emit_channel_notification
 from awx.main.models.unified_jobs import ACTIVE_STATES
+from awx.main.scheduler.tasks import run_job_complete
 
 logger = logging.getLogger('awx.api.views')
 
@@ -2861,6 +2862,23 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     new_in_310 = True
+
+class WorkflowJobCancel(RetrieveAPIView):
+
+    model = WorkflowJob
+    serializer_class = WorkflowJobCancelSerializer
+    is_job_cancel = True
+    new_in_310 = True
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            obj.cancel()
+            #TODO: Figure out whether an immediate schedule is needed.
+            run_job_complete.delay(obj.id)
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
 
 class SystemJobTemplateList(ListAPIView):
 

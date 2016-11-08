@@ -2232,16 +2232,21 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             #res['notifications'] = reverse('api:system_job_notifications_list', args=(obj.pk,))
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
         res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
-        # TODO: Cancel job
-        '''
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
-        '''
         return res
 
 # TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
     pass
+
+class WorkflowJobCancelSerializer(WorkflowJobSerializer):
+
+    can_cancel = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        fields = ('can_cancel',)
+
 
 class WorkflowNodeBaseSerializer(BaseSerializer):
     job_type = serializers.CharField(allow_blank=True, allow_null=True, required=False, default=None)

@@ -423,4 +423,3 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
     '''
     def start_celery_task(self, opts, error_callback, success_callback):
         return None
-

@@ -48,6 +48,16 @@ class WorkflowDAG(SimpleDAG):
                 nodes.extend(children_all)
         return [n['node_object'] for n in nodes_found]
 
+    def cancel_node_jobs(self):
+        for n in self.nodes:
+            obj = n['node_object']
+            job = obj.job
+
+            if not job:
+                continue
+            elif job.can_cancel:
+                job.cancel()
+
     def is_workflow_done(self):
         root_nodes = self.get_root_nodes()
         nodes = root_nodes
