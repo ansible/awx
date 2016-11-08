@@ -22,9 +22,10 @@ def epoch():
 
 @pytest.fixture
 def scheduler_factory(mocker, epoch):
+    mocker.patch('awx.main.models.Instance.objects.total_capacity', return_value=999999999)
+
     def fn(tasks=[], inventory_sources=[], latest_project_updates=[], latest_inventory_updates=[], create_project_update=None, create_inventory_update=None):
         sched = TaskManager()
-        sched.capacity_total = 999999999
 
         sched.graph.get_now = lambda: epoch
 
