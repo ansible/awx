@@ -4,7 +4,6 @@ import json
 from awx.main.tasks import RunJob
 from awx.main.models import (
     Job,
-    WorkflowJob,
     WorkflowJobTemplate
 )
 

@@ -33,7 +33,6 @@ from awx.main.models.notifications import (
     JobNotificationMixin,
 )
 from awx.main.utils import (
-    decrypt_field,
     ignore_inventory_computed_fields,
     parse_yaml_or_json,
 )

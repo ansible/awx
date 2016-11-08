@@ -11,6 +11,7 @@ from jsonfield import JSONField
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
+from awx.main.utils import parse_yaml_or_json
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin']

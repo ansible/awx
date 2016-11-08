@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import json
+import yaml
 import logging
 import os
 import re
@@ -490,7 +491,7 @@ def parse_yaml_or_json(vars_str):
     except (ValueError, TypeError):
         try:
             vars_dict = yaml.safe_load(vars_str)
-            assert isinstance(extra_vars, dict)
+            assert isinstance(vars_dict, dict)
         except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
             vars_dict = {}
     return vars_dict
