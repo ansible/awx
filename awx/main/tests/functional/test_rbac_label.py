@@ -4,8 +4,6 @@ from awx.main.access import (
     LabelAccess,
 )
 
-from rest_framework.exceptions import ParseError
-
 @pytest.mark.django_db
 def test_label_get_queryset_user(label, user):
     access = LabelAccess(user('user', False))
@@ -54,8 +52,7 @@ def test_label_access_user(label, user):
     access = LabelAccess(user('user', False))
     label.organization.member_role.members.add(user('user', False))
 
-    with pytest.raises(ParseError):
-        access.can_add({'organization': None})
+    assert not access.can_add({'organization': None})
     assert not access.can_change(label, None)
     assert not access.can_delete(label)
 

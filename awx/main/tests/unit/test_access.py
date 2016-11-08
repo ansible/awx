@@ -3,6 +3,7 @@ import mock
 
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+from rest_framework.exceptions import ParseError
 
 from awx.main.access import (
     BaseAccess,
@@ -15,6 +16,96 @@ from awx.main.access import (
 from awx.conf.license import LicenseForbids
 from awx.main.models import Credential, Inventory, Project, Role, Organization, Instance
 
+
+@pytest.fixture
+def user_unit():
+    return User(username='rando', password='raginrando', email='rando@redhat.com')
+
+class TestRelatedFieldAccess:
+
+    @pytest.fixture
+    def resource_good(self, mocker):
+        good_role = mocker.MagicMock(__contains__=lambda self, user: True)
+        return mocker.MagicMock(related=mocker.MagicMock(admin_role=good_role),
+                                admin_role=good_role)
+
+    @pytest.fixture
+    def resource_bad(self, mocker):
+        bad_role = mocker.MagicMock(__contains__=lambda self, user: False)
+        return mocker.MagicMock(related=mocker.MagicMock(admin_role=bad_role),
+                                admin_role=bad_role)
+
+    @pytest.fixture
+    def access(self, user_unit):
+        return BaseAccess(user_unit)
+
+    def test_new_optional_fail(self, access, resource_bad, mocker):
+        """
+        User tries to create a new resource, but lacks permission
+        to the related resource they provided
+        """
+        data = {'related': resource_bad}
+        assert not access.check_related('related', mocker.MagicMock, data)
+
+    def test_new_with_bad_data(self, access, mocker):
+        data = {'related': 3.1415}
+        with pytest.raises(ParseError):
+            access.check_related('related', mocker.MagicMock, data)
+
+    def test_new_mandatory_fail(self, access, mocker):
+        access.user.is_superuser = False
+        assert not access.check_related(
+            'related', mocker.MagicMock, {}, mandatory=True)
+        assert not access.check_related(
+            'related', mocker.MagicMock, {'resource': None}, mandatory=True)
+
+    def test_existing_no_op(self, access, resource_bad, mocker):
+        """
+        User edits a resource, but does not change related field
+        lack of access to related field does not block action
+        """
+        data = {'related': resource_bad.related}
+        assert access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+        assert access.check_related(
+            'related', mocker.MagicMock, {}, obj=resource_bad)
+
+    def test_existing_required_access(self, access, resource_bad, mocker):
+        # no-op actions, but mandatory kwarg requires check to pass
+        assert not access.check_related(
+            'related', mocker.MagicMock, {}, obj=resource_bad, mandatory=True)
+        assert not access.check_related(
+            'related', mocker.MagicMock, {'related': resource_bad.related},
+            obj=resource_bad, mandatory=True)
+
+    def test_existing_no_access_to_current(
+            self, access, resource_good, resource_bad, mocker):
+        """
+        User gives a valid related resource (like organization), but does
+        not have access to _existing_ related resource, so deny action
+        """
+        data = {'related': resource_good}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+
+    def test_existing_no_access_to_new(
+            self, access, resource_good, resource_bad, mocker):
+        data = {'related': resource_bad}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_good)
+
+    def test_existing_not_allowed_to_remove(self, access, resource_bad, mocker):
+        data = {'related': None}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+
+    def test_existing_not_null_null(self, access, mocker):
+        resource = mocker.MagicMock(related=None)
+        data = {'related': None}
+        # Not changing anything by giving null when it is already-null
+        # important for PUT requests
+        assert access.check_related(
+            'related', mocker.MagicMock, data, obj=resource, mandatory=True)
 
 @pytest.fixture
 def job_template_with_ids(job_template_factory):
@@ -30,10 +121,6 @@ def job_template_with_ids(job_template_factory):
         cloud_credential=cloud_cred, network_credential=net_cred,
         persisted=False)
     return jt_objects.job_template
-
-@pytest.fixture
-def user_unit():
-    return User(username='rando', password='raginrando', email='rando@redhat.com')
 
 def test_superuser(mocker):
     user = mocker.MagicMock(spec=User, id=1, is_superuser=True)

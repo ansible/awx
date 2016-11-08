@@ -4,10 +4,12 @@ import pytest
 from awx.main.access import (
     BaseAccess,
     JobTemplateAccess,
+    ScheduleAccess
 )
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
 from awx.main.models.jobs import JobTemplate
+from awx.main.models.schedules import Schedule
 from django.apps import apps
 
 from django.core.urlresolvers import reverse
@@ -247,3 +249,23 @@ def test_associate_label(label, user, job_template):
     job_template.admin_role.members.add(user('joe', False))
     label.organization.read_role.members.add(user('joe', False))
     assert access.can_attach(job_template, label, 'labels', None)
+
+@pytest.mark.django_db
+def test_move_schedule_to_JT_no_access(job_template, rando):
+    schedule = Schedule.objects.create(
+        unified_job_template=job_template,
+        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
+    job_template.admin_role.members.add(rando)
+    jt2 = JobTemplate.objects.create(name="other-jt")
+    access = ScheduleAccess(rando)
+    assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+
+@pytest.mark.django_db
+def test_move_schedule_from_JT_no_access(job_template, rando):
+    schedule = Schedule.objects.create(
+        unified_job_template=job_template,
+        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
+    jt2 = JobTemplate.objects.create(name="other-jt")
+    jt2.admin_role.members.add(rando)
+    access = ScheduleAccess(rando)
+    assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
