@@ -291,7 +291,6 @@ class TaskManager():
                     'Celery, so it has been marked as failed.',
                 ))
                 task_obj.save()
-                print("Going to fail %s" % task_obj.id)
                 connection.on_commit(lambda: task_obj.websocket_emit_status('failed'))
 
                 logger.error("Task %s appears orphaned... marking as failed" % task)
@@ -312,7 +311,6 @@ class TaskManager():
         return (self.capacity_total - self.capacity_used)
 
     def process_tasks(self, all_sorted_tasks):
-
         running_tasks = filter(lambda t: t['status'] == 'running', all_sorted_tasks)
         runnable_tasks = filter(lambda t: t['status'] in ['waiting', 'running'], all_sorted_tasks)
 
