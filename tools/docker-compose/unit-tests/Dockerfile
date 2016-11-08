@@ -20,8 +20,9 @@ RUN yum install -y \
 	/usr/bin/pg_config \
 	openldap-devel \
 	postgresql-devel \
-    rabbitmq-server \
-	libtool-ltdl-devel
+	rabbitmq-server \
+	libtool-ltdl-devel \
+	fontconfig
 
 # NOTE: The following steps work for tower-3.0.0
 # RUN curl -LO https://rpm.nodesource.com/pub_0.12/el/7/x86_64/nodejs-0.12.9-1nodesource.el7.centos.x86_64.rpm
