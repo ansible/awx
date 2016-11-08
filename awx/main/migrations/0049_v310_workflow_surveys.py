@@ -8,7 +8,7 @@ import jsonfield.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0047_v310_tower_state'),
+        ('main', '0048_v310_instance_capacity'),
     ]
 
     operations = [
