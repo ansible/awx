@@ -84,6 +84,9 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
             case 'inventory_update':
                 goToJobDetails('inventorySyncStdout');
                 break;
+            case 'workflow_job':
+                goToJobDetails('workflowResults');
+                break;
         }
 
     };
