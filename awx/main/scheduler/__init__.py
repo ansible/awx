@@ -235,7 +235,12 @@ class TaskManager():
                 dependencies.append(project_task)
                 # Inventory created 2 seconds behind job
 
+            inventory_sources_already_updated = task.get_inventory_sources_already_updated()
+
             for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
+                if inventory_source_task['id'] in inventory_sources_already_updated:
+                    print("Inventory already updated")
+                    continue
                 if self.graph.should_update_related_inventory_source(task, inventory_source_task['id']):
                     inventory_task = self.create_inventory_update(task, inventory_source_task)
                     dependencies.append(inventory_task)
