@@ -236,7 +236,6 @@ class TestWorkflowAccessMethods:
                 assert access.can_add({'organization': 1})
 
 
-@pytest.mark.django_db
 def test_user_capabilities_method():
     """Unit test to verify that the user_capabilities method will defer
     to the appropriate sub-class methods of the access classes.
