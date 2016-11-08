@@ -5,10 +5,13 @@
  *************************************************/
 
 
-import route from './job-results.route.js';
+import route from './workflow-results.route.js';
+
+import workflowResultsService from './workflow-results.service';
 
 export default
     angular.module('workflowResults', [])
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route);
-        }]);
+        }])
+        .service('workflowResultsService', workflowResultsService);
