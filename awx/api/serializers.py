@@ -2191,7 +2191,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('*', 'extra_vars', 'organization')
+        fields = ('*', 'extra_vars', 'organization', 'survey_enabled',)
 
     def get_related(self, obj):
         res = super(WorkflowJobTemplateSerializer, self).get_related(obj)
@@ -2205,7 +2205,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             #notification_templates_any = reverse('api:system_job_template_notification_templates_any_list', args=(obj.pk,)),
             #notification_templates_success = reverse('api:system_job_template_notification_templates_success_list', args=(obj.pk,)),
             #notification_templates_error = reverse('api:system_job_template_notification_templates_error_list', args=(obj.pk,)),
-
+            survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
         return res
 
@@ -2235,6 +2235,14 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
         return res
+
+    def to_representation(self, obj):
+        ret = super(WorkflowJobSerializer, self).to_representation(obj)
+        if obj is None:
+            return ret
+        if 'extra_vars' in ret:
+            ret['extra_vars'] = obj.display_extra_vars()
+        return ret
 
 # TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
@@ -2597,6 +2605,64 @@ class JobLaunchSerializer(BaseSerializer):
         obj.job_tags = JT_job_tags
         obj.inventory = JT_inventory
         obj.credential = JT_credential
+        return attrs
+
+class WorkflowJobLaunchSerializer(BaseSerializer):
+
+    can_start_without_user_input = serializers.BooleanField(read_only=True)
+    variables_needed_to_start = serializers.ReadOnlyField()
+    survey_enabled = serializers.SerializerMethodField()
+    extra_vars = VerbatimField(required=False, write_only=True)
+    warnings = serializers.SerializerMethodField()
+    workflow_job_template_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkflowJobTemplate
+        fields = ('can_start_without_user_input', 'extra_vars', 'warnings',
+                  'survey_enabled', 'variables_needed_to_start',
+                  'workflow_job_template_data')
+
+    def get_warnings(self, obj):
+        return obj.get_warnings()
+
+    def get_survey_enabled(self, obj):
+        if obj:
+            return obj.survey_enabled and 'spec' in obj.survey_spec
+        return False
+
+    def get_workflow_job_template_data(self, obj):
+        return dict(name=obj.name, id=obj.id, description=obj.description)
+
+    def validate(self, attrs):
+        errors = {}
+        obj = self.instance
+
+        extra_vars = attrs.get('extra_vars', {})
+
+        if isinstance(extra_vars, basestring):
+            try:
+                extra_vars = json.loads(extra_vars)
+            except (ValueError, TypeError):
+                try:
+                    extra_vars = yaml.safe_load(extra_vars)
+                    assert isinstance(extra_vars, dict)
+                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary.'
+
+        if not isinstance(extra_vars, dict):
+            extra_vars = {}
+
+        if self.get_survey_enabled(obj):
+            validation_errors = obj.survey_variable_validation(extra_vars)
+            if validation_errors:
+                errors['variables_needed_to_start'] = validation_errors
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+        WFJT_extra_vars = obj.extra_vars
+        attrs = super(WorkflowJobLaunchSerializer, self).validate(attrs)
+        obj.extra_vars = WFJT_extra_vars
         return attrs
 
 class NotificationTemplateSerializer(BaseSerializer):

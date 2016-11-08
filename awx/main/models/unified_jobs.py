@@ -292,12 +292,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         '''
         raise NotImplementedError # Implement in subclass.
 
-    def _update_unified_job_kwargs(self, **kwargs):
-        '''
-        Hook for subclasses to update kwargs.
-        '''
-        return kwargs   # Override if needed in subclass.
-
     @property
     def notification_templates(self):
         '''
@@ -346,7 +340,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                     m2m_fields[field_name] = getattr(self, field_name)
                 else:
                     create_kwargs[field_name] = getattr(self, field_name)
-        new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
+        if hasattr(self, '_update_unified_job_kwargs'):
+            new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
+        else:
+            new_kwargs = create_kwargs
         unified_job = unified_job_class(**new_kwargs)
         # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):

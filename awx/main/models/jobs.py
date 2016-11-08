@@ -5,7 +5,6 @@
 import datetime
 import hmac
 import json
-import yaml
 import logging
 import time
 from urlparse import urljoin
@@ -33,10 +32,13 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin,
 )
-from awx.main.utils import ignore_inventory_computed_fields
+from awx.main.utils import (
+    ignore_inventory_computed_fields,
+    parse_yaml_or_json,
+)
 from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
 
 from awx.main.consumers import emit_channel_notification
@@ -188,7 +190,7 @@ class JobOptions(BaseModel):
         else:
             return []
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -231,15 +233,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
     ask_credential_on_launch = models.BooleanField(
         blank=True,
         default=False,
-    )
-
-    survey_enabled = models.BooleanField(
-        default=False,
-    )
-
-    survey_spec = JSONField(
-        blank=True,
-        default={},
     )
     admin_role = ImplicitRoleField(
         parent_role=['project.organization.admin_role', 'inventory.organization.admin_role']
@@ -318,125 +311,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                 not self.passwords_needed_to_start and
                 not self.variables_needed_to_start)
 
-    @property
-    def variables_needed_to_start(self):
-        vars = []
-        if self.survey_enabled and 'spec' in self.survey_spec:
-            for survey_element in self.survey_spec['spec']:
-                if survey_element['required']:
-                    vars.append(survey_element['variable'])
-        return vars
-
-    def survey_password_variables(self):
-        vars = []
-        if self.survey_enabled and 'spec' in self.survey_spec:
-            # Get variables that are type password
-            for survey_element in self.survey_spec['spec']:
-                if survey_element['type'] == 'password':
-                    vars.append(survey_element['variable'])
-        return vars
-
-    def survey_variable_validation(self, data):
-        errors = []
-        if not self.survey_enabled:
-            return errors
-        if 'name' not in self.survey_spec:
-            errors.append("'name' missing from survey spec.")
-        if 'description' not in self.survey_spec:
-            errors.append("'description' missing from survey spec.")
-        for survey_element in self.survey_spec.get("spec", []):
-            if survey_element['variable'] not in data and \
-               survey_element['required']:
-                errors.append("'%s' value missing" % survey_element['variable'])
-            elif survey_element['type'] in ["textarea", "text", "password"]:
-                if survey_element['variable'] in data:
-                    if type(data[survey_element['variable']]) not in (str, unicode):
-                        errors.append("Value %s for '%s' expected to be a string." % (data[survey_element['variable']],
-                                                                                      survey_element['variable']))
-                        continue
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and len(data[survey_element['variable']]) < int(survey_element['min']):
-                        errors.append("'%s' value %s is too small (length is %s must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], len(data[survey_element['variable']]), survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
-                        errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-            elif survey_element['type'] == 'integer':
-                if survey_element['variable'] in data:
-                    if type(data[survey_element['variable']]) != int:
-                        errors.append("Value %s for '%s' expected to be an integer." % (data[survey_element['variable']],
-                                                                                        survey_element['variable']))
-                        continue
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] < int(survey_element['min']):
-                        errors.append("'%s' value %s is too small (must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and survey_element['variable'] in data and \
-                       data[survey_element['variable']] > int(survey_element['max']):
-                        errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-            elif survey_element['type'] == 'float':
-                if survey_element['variable'] in data:
-                    if type(data[survey_element['variable']]) not in (float, int):
-                        errors.append("Value %s for '%s' expected to be a numeric type." % (data[survey_element['variable']],
-                                                                                            survey_element['variable']))
-                        continue
-                    if 'min' in survey_element and survey_element['min'] not in ["", None] and data[survey_element['variable']] < float(survey_element['min']):
-                        errors.append("'%s' value %s is too small (must be at least %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['min']))
-                    if 'max' in survey_element and survey_element['max'] not in ["", None] and data[survey_element['variable']] > float(survey_element['max']):
-                        errors.append("'%s' value %s is too large (must be no more than %s)." %
-                                      (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-            elif survey_element['type'] == 'multiselect':
-                if survey_element['variable'] in data:
-                    if type(data[survey_element['variable']]) != list:
-                        errors.append("'%s' value is expected to be a list." % survey_element['variable'])
-                    else:
-                        for val in data[survey_element['variable']]:
-                            if val not in survey_element['choices']:
-                                errors.append("Value %s for '%s' expected to be one of %s." % (val, survey_element['variable'],
-                                                                                               survey_element['choices']))
-            elif survey_element['type'] == 'multiplechoice':
-                if survey_element['variable'] in data:
-                    if data[survey_element['variable']] not in survey_element['choices']:
-                        errors.append("Value %s for '%s' expected to be one of %s." % (data[survey_element['variable']],
-                                                                                       survey_element['variable'],
-                                                                                       survey_element['choices']))
-        return errors
-
-    def _update_unified_job_kwargs(self, **kwargs):
-        if 'launch_type' in kwargs and kwargs['launch_type'] == 'relaunch':
-            return kwargs
-
-        # Job Template extra_vars
-        extra_vars = self.extra_vars_dict
-
-        # Overwrite with job template extra vars with survey default vars
-        if self.survey_enabled and 'spec' in self.survey_spec:
-            for survey_element in self.survey_spec.get("spec", []):
-                if 'default' in survey_element and survey_element['default']:
-                    extra_vars[survey_element['variable']] = survey_element['default']
-
-        # transform to dict
-        if 'extra_vars' in kwargs:
-            kwargs_extra_vars = kwargs['extra_vars']
-            if not isinstance(kwargs_extra_vars, dict):
-                try:
-                    kwargs_extra_vars = json.loads(kwargs_extra_vars)
-                except Exception:
-                    try:
-                        kwargs_extra_vars = yaml.safe_load(kwargs_extra_vars)
-                        assert isinstance(kwargs_extra_vars, dict)
-                    except:
-                        kwargs_extra_vars = {}
-        else:
-            kwargs_extra_vars = {}
-
-        # Overwrite job template extra vars with explicit job extra vars
-        # and add on job extra vars
-        extra_vars.update(kwargs_extra_vars)
-        kwargs['extra_vars'] = json.dumps(extra_vars)
-        return kwargs
-
     def _ask_for_vars_dict(self):
         return dict(
             extra_vars=self.ask_variables_on_launch,
@@ -466,16 +340,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
                     if field == 'extra_vars' and self.survey_enabled and self.survey_spec:
                         # Accept vars defined in the survey and no others
                         survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
-                        extra_vars = kwargs[field]
-                        if isinstance(extra_vars, basestring):
-                            try:
-                                extra_vars = json.loads(extra_vars)
-                            except (ValueError, TypeError):
-                                try:
-                                    extra_vars = yaml.safe_load(extra_vars)
-                                    assert isinstance(extra_vars, dict)
-                                except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                                    extra_vars = {}
+                        extra_vars = parse_yaml_or_json(kwargs[field])
                         for key in extra_vars:
                             if key in survey_vars:
                                 prompted_fields[field][key] = extra_vars[key]
@@ -529,7 +394,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, ResourceMixin):
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
-class Job(UnifiedJob, JobOptions, JobNotificationMixin):
+class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -553,11 +418,6 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         related_name='jobs',
         editable=False,
         through='JobHostSummary',
-    )
-    survey_passwords = JSONField(
-        blank=True,
-        default={},
-        editable=False,
     )
     artifacts = JSONField(
         blank=True,
@@ -731,19 +591,6 @@ class Job(UnifiedJob, JobOptions, JobNotificationMixin):
         evars = self.extra_vars_dict
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
-
-    def display_extra_vars(self):
-        '''
-        Hides fields marked as passwords in survey.
-        '''
-        if self.survey_passwords:
-            extra_vars = json.loads(self.extra_vars)
-            for key, value in self.survey_passwords.items():
-                if key in extra_vars:
-                    extra_vars[key] = value
-            return json.dumps(extra_vars)
-        else:
-            return self.extra_vars
 
     def display_artifacts(self):
         '''

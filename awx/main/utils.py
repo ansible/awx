@@ -5,6 +5,7 @@
 import base64
 import hashlib
 import json
+import yaml
 import logging
 import os
 import re
@@ -478,6 +479,22 @@ def cache_list_capabilities(page, prefetch_list, model, user):
             if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
 
+def parse_yaml_or_json(vars_str):
+    '''
+    Attempt to parse a string with variables, and if attempt fails,
+    return an empty dictionary.
+    '''
+    if isinstance(vars_str, dict):
+        return vars_str
+    try:
+        vars_dict = json.loads(vars_str)
+    except (ValueError, TypeError):
+        try:
+            vars_dict = yaml.safe_load(vars_str)
+            assert isinstance(vars_dict, dict)
+        except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
+            vars_dict = {}
+    return vars_dict
 
 @memoize()
 def get_system_task_capacity():

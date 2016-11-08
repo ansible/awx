@@ -20,8 +20,9 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR
 )
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import ResourceMixin
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.redact import REPLACE_STR
+from awx.main.utils import parse_yaml_or_json
 
 from copy import copy
 
@@ -231,12 +232,15 @@ class WorkflowJobNode(WorkflowNodeBase):
         if aa_dict:
             self.ancestor_artifacts = aa_dict
             self.save(update_fields=['ancestor_artifacts'])
+        password_dict = {}
         if '_ansible_no_log' in aa_dict:
-            # TODO: merge Workflow Job survey passwords into this
-            password_dict = {}
             for key in aa_dict:
                 if key != '_ansible_no_log':
                     password_dict[key] = REPLACE_STR
+        workflow_job_survey_passwords = self.workflow_job.survey_passwords
+        if workflow_job_survey_passwords:
+            password_dict.update(workflow_job_survey_passwords)
+        if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
         # TODO: still lack consensus about variable precedence
@@ -260,7 +264,9 @@ class WorkflowJobOptions(BaseModel):
         default='',
     )
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin):
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
+
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
     class Meta:
         app_label = 'main'
@@ -290,7 +296,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin)
 
     @classmethod
     def _get_unified_job_field_names(cls):
-        return ['name', 'description', 'extra_vars', 'labels', 'schedule', 'launch_type']
+        return ['name', 'description', 'extra_vars', 'labels', 'survey_passwords', 'schedule', 'launch_type']
 
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_detail', args=(self.pk,))
@@ -317,6 +323,29 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, ResourceMixin)
         workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
         workflow_job.inherit_job_template_workflow_nodes()
         return workflow_job
+
+    def _accept_or_ignore_job_kwargs(self, extra_vars=None, **kwargs):
+        # Only accept allowed survey variables
+        ignored_fields = {}
+        prompted_fields = {}
+        prompted_fields['extra_vars'] = {}
+        ignored_fields['extra_vars'] = {}
+        extra_vars = parse_yaml_or_json(extra_vars)
+        if self.survey_enabled and self.survey_spec:
+            survey_vars = [question['variable'] for question in self.survey_spec.get('spec', [])]
+            for key in extra_vars:
+                if key in survey_vars:
+                    prompted_fields['extra_vars'][key] = extra_vars[key]
+                else:
+                    ignored_fields['extra_vars'][key] = extra_vars[key]
+        else:
+            prompted_fields['extra_vars'] = extra_vars
+
+        return prompted_fields, ignored_fields
+
+    def can_start_without_user_input(self):
+        '''Return whether WFJT can be launched without survey passwords.'''
+        return not bool(self.variables_needed_to_start)
 
     def get_warnings(self):
         warning_data = {}
@@ -372,7 +401,7 @@ class WorkflowJobInheritNodesMixin(object):
                 self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
                 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, WorkflowJobInheritNodesMixin):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WorkflowJobInheritNodesMixin):
 
     class Meta:
         app_label = 'main'
@@ -386,8 +415,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, JobNotificationMixin, Workflow
         default=None,
         on_delete=models.SET_NULL,
     )
-
-    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     @classmethod
     def _get_parent_field_name(cls):

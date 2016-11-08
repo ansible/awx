@@ -1520,8 +1520,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
             return True
 
         # will check this if surveys are added to WFJT
-        # if 'survey_enabled' in data and data['survey_enabled']:
-        #     self.check_license(feature='surveys')
+        if 'survey_enabled' in data and data['survey_enabled']:
+            self.check_license(feature='surveys')
 
         return self.check_related('organization', Organization, data)
 
@@ -1530,8 +1530,8 @@ class WorkflowJobTemplateAccess(BaseAccess):
             # check basic license, node count
             self.check_license()
             # if surveys are added to WFJTs, check license here
-            # if obj.survey_enabled:
-            #     self.check_license(feature='surveys')
+            if obj.survey_enabled:
+                self.check_license(feature='surveys')
 
         # Super users can start any job
         if self.user.is_superuser:
@@ -1540,9 +1540,10 @@ class WorkflowJobTemplateAccess(BaseAccess):
         return self.user in obj.execute_role
 
     def can_change(self, obj, data):
-        # # Check survey license if surveys are added to WFJTs
-        # if 'survey_enabled' in data and obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']:
-        #     self.check_license(feature='surveys')
+        # Check survey license if surveys are added to WFJTs
+        if (data and 'survey_enabled' in data and
+                obj.survey_enabled != data['survey_enabled'] and data['survey_enabled']):
+            self.check_license(feature='surveys')
 
         if self.user.is_superuser:
             return True

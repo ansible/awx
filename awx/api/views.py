@@ -2376,6 +2376,11 @@ class JobTemplateSurveySpec(GenericAPIView):
         obj.save()
         return Response()
 
+class WorkflowJobTemplateSurveySpec(JobTemplateSurveySpec):
+
+    model = WorkflowJobTemplate
+    parent_model = WorkflowJobTemplate
+
 class JobTemplateActivityStreamList(SubListAPIView):
 
     model = ActivityStream
@@ -2781,27 +2786,42 @@ class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     new_in_310 = True
 
 
-# TODO:
-class WorkflowJobTemplateLaunch(GenericAPIView):
+class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
     model = WorkflowJobTemplate
-    serializer_class = EmptySerializer
+    serializer_class = WorkflowJobLaunchSerializer
     new_in_310 = True
+    is_job_start = True
+    always_allow_superuser = False
 
-    def get(self, request, *args, **kwargs):
-        data = {}
+    def update_raw_data(self, data):
         obj = self.get_object()
-        data['warnings'] = obj.get_warnings()
-        return Response(data)
+        extra_vars = data.pop('extra_vars', None) or {}
+        if obj:
+            for v in obj.variables_needed_to_start:
+                extra_vars.setdefault(v, u'')
+            if extra_vars:
+                data['extra_vars'] = extra_vars
+        return data
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'start', obj):
             raise PermissionDenied()
 
-        new_job = obj.create_unified_job(**request.data)
-        new_job.signal_start(**request.data)
-        data = dict(workflow_job=new_job.id)
+        serializer = self.serializer_class(instance=obj, data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
+
+        new_job = obj.create_unified_job(**prompted_fields)
+        new_job.signal_start(**prompted_fields)
+
+        data = OrderedDict()
+        data['ignored_fields'] = ignored_fields
+        data.update(WorkflowJobSerializer(new_job, context=self.get_serializer_context()).to_representation(new_job))
+        data['workflow_job'] = new_job.id
         return Response(data, status=status.HTTP_201_CREATED)
 
 # TODO:
