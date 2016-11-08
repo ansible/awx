@@ -462,7 +462,7 @@ pep8: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
 
 flake8: reports
-	@$@ --output-file=reports/$@.report
+	@(set -o pipefail && $@ | tee reports/$@.report)
 
 pyflakes: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
