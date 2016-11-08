@@ -793,6 +793,68 @@ register(
 )
 
 ###############################################################################
+# MICROSOFT AZURE ACTIVE DIRECTORY SETTINGS
+###############################################################################
+
+register(
+    'SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL',
+    field_class=fields.CharField,
+    read_only=True,
+    default=SocialAuthCallbackURL('azuread-oauth2'),
+    label=_('Azure AD OAuth2 Callback URL'),
+    help_text=_('Register an Azure AD application as described by '
+                'https://msdn.microsoft.com/en-us/library/azure/dn132599.aspx '
+                'and obtain an OAuth2 key (Client ID) and secret (Client Secret). '
+                'Provide this URL as the callback URL for your application.'),
+    category=_('Azure AD OAuth2'),
+    category_slug='azuread-oauth2',
+)
+
+register(
+    'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
+    field_class=fields.CharField,
+    allow_blank=True,
+    label=_('Azure AD OAuth2 Key'),
+    help_text=_('The OAuth2 key (Client ID) from your Azure AD application.'),
+    category=_('Azure AD OAuth2'),
+    category_slug='azuread-oauth2',
+)
+
+register(
+    'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',
+    field_class=fields.CharField,
+    allow_blank=True,
+    label=_('Azure AD OAuth2 Secret'),
+    help_text=_('The OAuth2 secret (Client Secret) from your Azure AD application.'),
+    category=_('Azure AD OAuth2'),
+    category_slug='azuread-oauth2',
+)
+
+register(
+    'SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP',
+    field_class=fields.SocialOrganizationMapField,
+    allow_null=True,
+    default=None,
+    label=_('Azure AD OAuth2 Organization Map'),
+    help_text=SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT,
+    category=_('Azure AD OAuth2'),
+    category_slug='azuread-oauth2',
+    placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
+)
+
+register(
+    'SOCIAL_AUTH_AZUREAD_OAUTH2_TEAM_MAP',
+    field_class=fields.SocialTeamMapField,
+    allow_null=True,
+    default=None,
+    label=_('Azure AD OAuth2 Team Map'),
+    help_text=SOCIAL_AUTH_TEAM_MAP_HELP_TEXT,
+    category=_('Azure AD OAuth2'),
+    category_slug='azuread-oauth2',
+    placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+)
+
+###############################################################################
 # SAML AUTHENTICATION SETTINGS
 ###############################################################################
 

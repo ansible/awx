@@ -52,6 +52,10 @@ class AuthenticationBackendsField(fields.StringListField):
             'SOCIAL_AUTH_GITHUB_TEAM_SECRET',
             'SOCIAL_AUTH_GITHUB_TEAM_ID',
         ]),
+        ('social.backends.azuread.AzureADOAuth2', [
+            'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY',
+            'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET',
+        ]),
         ('awx.sso.backends.SAMLAuth', [
             'SOCIAL_AUTH_SAML_SP_ENTITY_ID',
             'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT',
