@@ -345,7 +345,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     def can_start_without_user_input(self):
         '''Return whether WFJT can be launched without survey passwords.'''
-        return bool(self.variables_needed_to_start)
+        return not bool(self.variables_needed_to_start)
 
     def get_warnings(self):
         warning_data = {}

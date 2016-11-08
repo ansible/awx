@@ -75,9 +75,29 @@ class TestWorkflowSurveys:
         "Assure that the survey default over-rides a JT variable"
         spec = survey_spec_factory('var1')
         spec['spec'][0]['default'] = 3
+        spec['spec'][0]['required'] = False
         wfjt = WorkflowJobTemplate(
             name="test-wfjt",
             survey_spec=spec,
+            survey_enabled=True,
             extra_vars="var1: 5"
         )
-        assert json.loads(wfjt._update_unified_job_kwargs()['extra_vars'])['var1'] == 3
+        updated_extra_vars = wfjt._update_unified_job_kwargs()
+        assert 'extra_vars' in updated_extra_vars
+        assert json.loads(updated_extra_vars['extra_vars'])['var1'] == 3
+        assert wfjt.can_start_without_user_input()
+
+    def test_variables_needed_to_start(self, survey_spec_factory):
+        "Assure that variables_needed_to_start output contains mandatory vars"
+        spec = survey_spec_factory(['question1', 'question2', 'question3'])
+        spec['spec'][0]['required'] = False
+        spec['spec'][1]['required'] = True
+        spec['spec'][2]['required'] = False
+        wfjt = WorkflowJobTemplate(
+            name="test-wfjt",
+            survey_spec=spec,
+            survey_enabled=True,
+            extra_vars="question2: hiworld"
+        )
+        assert wfjt.variables_needed_to_start == ['question2']
+        assert not wfjt.can_start_without_user_input()
