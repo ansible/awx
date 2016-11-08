@@ -61,7 +61,7 @@ class JobDict(PartialModelDict):
         'id', 'status', 'job_template_id', 'inventory_id', 'project_id', 
         'launch_type', 'limit', 'allow_simultaneous', 'created', 
         'job_type', 'celery_task_id', 'project__scm_update_on_launch',
-        'forks', 'inventory__inventory_sources',
+        'forks',
     )
     model = Job
 
