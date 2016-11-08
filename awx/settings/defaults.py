@@ -25,6 +25,7 @@ for setting in dir(global_settings):
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 def is_testing(argv=None):
+    import sys
     '''Return True if running django or py.test unit tests.'''
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
