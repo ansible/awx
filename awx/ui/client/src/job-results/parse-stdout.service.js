@@ -8,16 +8,24 @@ export default [function(){
     var val = {
         prettify: function(line){
             // TODO: figure out from Jared what this is
+
+            if (line.indexOf("[K") > -1) {
+                console.log(line);
+            }
+
             line = line.replace(/u001b/g, '');
 
             // ansi classes
-            line = line.replace(/\[0;32m/g, '<span class="ansi32">');
             line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
             line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
+            line = line.replace(/\[0;32m/g, '<span class="ansi32">');
             line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
             line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
             line = line.replace(/\[0;33m/g, '<span class="ansi33">');
+            line = line.replace(/\[0;34m/g, '<span class="ansi34">');
+            line = line.replace(/\[0;35m/g, '<span class="ansi35">');
             line = line.replace(/\[0;36m/g, '<span class="ansi36">');
+            line = line.replace(/(<host.*?>)\s/g, '$1');
 
             //end span
             line = line.replace(/\[0m/g, '</span>');
