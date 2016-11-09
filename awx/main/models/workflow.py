@@ -443,6 +443,19 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     def get_absolute_url(self):
         return reverse('api:workflow_job_detail', args=(self.pk,))
 
+    def notification_data(self):
+        result = super(WorkflowJob, self).notification_data()
+        str_arr = ['Workflow job summary:', '']
+        for node in self.workflow_job_nodes.all().select_related('job'):
+            if node.job is None:
+                node_job_description = 'not created yet.'
+            else:
+                node_job_description = ('#{0}, "{1}", finished with status {2}.'
+                                        .format(node.job.id, node.job.name, node.job.status))
+            str_arr.append("- node #{0}, job {1}".format(node.id, node_job_description))
+        result['body'] = '\n'.join(str_arr)
+        return result
+
     # TODO: Ask UI if this is needed ?
     #def get_ui_url(self):
     #    return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
