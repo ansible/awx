@@ -256,6 +256,8 @@ class WorkflowJobNode(WorkflowNodeBase):
             extra_vars.update(functional_aa_dict)
         if extra_vars:
             data['extra_vars'] = extra_vars
+        # ensure that unified jobs created by WorkflowJobs are marked
+        data['launch_type'] = 'workflow'
         return data
 
 class WorkflowJobOptions(BaseModel):

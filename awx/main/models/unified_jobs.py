@@ -394,6 +394,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ('callback', _('Callback')),        # Job was started via host callback.
         ('scheduled', _('Scheduled')),      # Job was started from a schedule.
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
+        ('workflow', _('Workflow')),        # Job was started from a workflow job.
     ]
 
     PASSWORD_FIELDS = ('start_args',)
