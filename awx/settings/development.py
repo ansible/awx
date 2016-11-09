@@ -54,7 +54,7 @@ PENDO_TRACKING_STATE = "off"
 try:
     import django_jenkins
     INSTALLED_APPS += (django_jenkins.__name__,)
-    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests', 'awx.fact.tests',)
+    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
 except ImportError:
     pass
 

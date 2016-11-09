@@ -210,7 +210,6 @@ INSTALLED_APPS = (
     'awx.main',
     'awx.api',
     'awx.ui',
-    'awx.fact',
     'awx.sso',
     'solo',
 )

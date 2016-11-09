@@ -62,7 +62,6 @@ lxml==3.4.4
 Markdown==2.4.1
 M2Crypto==0.22.3
 mock==1.0.1
-mongoengine==0.9.0
 monotonic==0.6
 msgpack-python==0.4.7
 munch==2.0.4
@@ -89,7 +88,6 @@ pycrypto==2.6.1
 pycparser==2.14
 pygerduty==0.32.1
 PyJWT==1.4.0
-pymongo==2.8
 pyOpenSSL==16.0.0
 pyparsing==2.0.7
 pyrad==2.0
