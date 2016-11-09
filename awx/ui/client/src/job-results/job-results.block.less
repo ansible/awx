@@ -17,18 +17,20 @@
 
 .JobResults-leftSide {
     .OnePlusTwo-left--panel(100%, @breakpoint-md);
-    // TODO: needs to be set based on height of browser window
-    height: 870px !important;
+    height: 80vh;
 }
 
 .JobResults-rightSide {
     .OnePlusTwo-right--panel(100%, @breakpoint-md);
-    // TODO: needs to be set based on height of browser window
-    height: 870px !important;
+    height: 80vh;
 
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
     }
+}
+
+.JobResults-detailsPanel{
+    overflow-y: scroll;
 }
 
 .JobResults-stdoutActionButton--active {
