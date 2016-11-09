@@ -448,11 +448,11 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         str_arr = ['Workflow job summary:', '']
         for node in self.workflow_job_nodes.all().select_related('job'):
             if node.job is None:
-                node_job_description = 'not created yet.'
+                node_job_description = 'no job.'
             else:
-                node_job_description = ('#{0}, "{1}", finished with status {2}.'
+                node_job_description = ('job #{0}, "{1}", which finished with status {2}.'
                                         .format(node.job.id, node.job.name, node.job.status))
-            str_arr.append("- node #{0}, job {1}".format(node.id, node_job_description))
+            str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
         return result
 
