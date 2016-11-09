@@ -8,8 +8,8 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
                 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'rbacUiControlService', 'ToJSON',
                 function($state, $stateParams, $scope, GroupForm, CredentialList,  ParseTypeChange, GenerateForm, inventoryData,
                          GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService, ToJSON) {
-                    var generator = GenerateForm,
-                        form = GroupForm();
+
+        let form = GroupForm();
         init();
 
         function init() {

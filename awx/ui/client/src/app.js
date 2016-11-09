@@ -33,7 +33,6 @@ if ($basePath) {
 
 // Modules
 import './helpers';
-import * as forms from './forms';
 import './lists';
 import './widgets';
 import './filters';
@@ -219,9 +218,8 @@ var tower = angular.module('Tower', [
     .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
         '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider', '$stateExtenderProvider',
         function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider, $stateExtenderProvider) {
-            let $stateExtender = $stateExtenderProvider.$get(),
-                stateDefinitions = stateDefinitionsProvider.$get();
+            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider) {
+            let stateDefinitions = stateDefinitionsProvider.$get();
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'

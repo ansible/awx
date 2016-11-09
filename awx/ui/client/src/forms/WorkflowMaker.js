@@ -31,15 +31,18 @@ export default
                     options: [
                         {
                             label: 'On&nbsp;Success',
-                            value: 'success'
+                            value: 'success',
+                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
                         },
                         {
                             label: 'On&nbsp;Failure',
-                            value: 'failure'
+                            value: 'failure',
+                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
                         },
                         {
                             label: 'Always',
-                            value: 'always'
+                            value: 'always',
+                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "always"'
                         }
                     ],
                     awRequiredWhen: {

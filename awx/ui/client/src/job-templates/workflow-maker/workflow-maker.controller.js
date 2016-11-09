@@ -21,9 +21,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             formIsValid: false
         };
 
-        // Set the intial edge type to success
-        $scope.edgeType = "success";
-
         $scope.job_type_options = [{
             label: "Run",
             value: "run"
@@ -35,14 +32,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         function init() {
             $scope.treeDataMaster = angular.copy($scope.treeData.data);
             $scope.$broadcast("refreshWorkflowChart");
-
-            $scope.$watchGroup(['selectedTemplate', 'edgeType'], function() {
-                if ($scope.selectedTemplate && $scope.edgeType) {
-                    $scope.workflowMakerFormConfig.formIsValid = true;
-                } else {
-                    $scope.workflowMakerFormConfig.formIsValid = false;
-                }
-            });
         }
 
         function resetNodeForm() {
@@ -55,7 +44,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             delete $scope.placeholderNode;
             delete $scope.betweenTwoNodes;
             $scope.nodeBeingEdited = null;
-            $scope.edgeType = "success";
             $scope.edgeTypeRestriction = null;
             $scope.workflowMakerFormConfig.activeTab = "jobs";
         }
@@ -104,25 +92,29 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                 parentId: betweenTwoNodes ? parent.source.id : parent.id
             });
 
+            // Set the default to success
+            let edgeType = "success";
+
             if (parent && ((betweenTwoNodes && parent.source.isStartNode) || (!betweenTwoNodes && parent.isStartNode))) {
                 // We don't want to give the user the option to select
                 // a type as this node will always be executed
-                $scope.edgeType = "always";
+                edgeType = "always";
                 $scope.showTypeOptions = false;
             } else {
                 if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
                     // This is a problem...
                 } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
                     $scope.edgeTypeRestriction = "successFailure";
-                    $scope.edgeType = "success";
+                    edgeType = "success";
                 } else if (_.includes(siblingConnectionTypes, "always")) {
                     $scope.edgeTypeRestriction = "always";
-                    $scope.edgeType = "always";
+                    edgeType = "always";
                 }
 
                 $scope.showTypeOptions = true;
             }
 
+            $scope.$broadcast("setEdgeType", edgeType);
             $scope.$broadcast("refreshWorkflowChart");
 
         };
@@ -343,8 +335,10 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             break;
                     }
 
-                    formValues.edgeType = $scope.nodeBeingEdited.edgeType;
+                    //formValues.edgeType = $scope.nodeBeingEdited.edgeType;
                     $scope.showTypeOptions = (parent && parent.isStartNode) ? false : true;
+
+                    $scope.$broadcast('setEdgeType', $scope.nodeBeingEdited.edgeType);
 
                     $scope.$broadcast('templateSelected', {
                         presetValues: formValues,

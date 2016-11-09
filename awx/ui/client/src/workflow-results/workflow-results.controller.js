@@ -13,7 +13,7 @@ export default ['workflowData',
         workflowNodes,
         $scope,
         ParseTypeChange,
-        ParseVariableString,
+        ParseVariableString
     ) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
@@ -48,10 +48,10 @@ export default ['workflowData',
         $scope.verbosity_label = getTowerLabel('verbosity');
     };
 
-    var getTotalHostCount = function(count) {
-        return Object
-            .keys(count).reduce((acc, i) => acc += count[i], 0);
-    };
+    // var getTotalHostCount = function(count) {
+    //     return Object
+    //         .keys(count).reduce((acc, i) => acc += count[i], 0);
+    // };
 
     // put initially resolved request data on scope
     $scope.workflow = workflowData;
@@ -101,60 +101,60 @@ export default ['workflowData',
 
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
-    var processEvent = function(event) {
-        // put the event in the queue
-        eventQueue.populate(event).then(mungedEvent => {
-            // make changes to ui based on the event returned from the queue
-            if (mungedEvent.changes) {
-                mungedEvent.changes.forEach(change => {
-                    // we've got a change we need to make to the UI!
-                    // update the necessary scope and make the change
-                    if (change === 'startTime' && !$scope.workflow.start) {
-                        $scope.workflow.start = mungedEvent.startTime;
-                    }
-
-                    if (change === 'count' && !$scope.countFinished) {
-                        // for all events that affect the host count,
-                        // update the status bar as well as the host
-                        // count badge
-                        $scope.count = mungedEvent.count;
-                        $scope.hostCount = getTotalHostCount(mungedEvent
-                            .count);
-                    }
-
-                    if (change === 'playCount') {
-                        $scope.playCount = mungedEvent.playCount;
-                    }
-
-                    if (change === 'taskCount') {
-                        $scope.taskCount = mungedEvent.taskCount;
-                    }
-
-                    if (change === 'finishedTime'  && !$scope.workflow.finished) {
-                        $scope.workflow.finished = mungedEvent.finishedTime;
-                    }
-
-                    if (change === 'countFinished') {
-                        // the playbook_on_stats event actually lets
-                        // us know that we don't need to iteratively
-                        // look at event to update the host counts
-                        // any more.
-                        $scope.countFinished = true;
-                    }
-
-                    if(change === 'stdout'){
-                        angular
-                            .element(".JobResultsStdOut-stdoutContainer")
-                            .append($compile(mungedEvent
-                                .stdout)($scope));
-                    }
-                });
-            }
-
-            // the changes have been processed in the ui, mark it in the queue
-            eventQueue.markProcessed(event);
-        });
-    };
+    // var processEvent = function(event) {
+    //     // put the event in the queue
+    //     eventQueue.populate(event).then(mungedEvent => {
+    //         // make changes to ui based on the event returned from the queue
+    //         if (mungedEvent.changes) {
+    //             mungedEvent.changes.forEach(change => {
+    //                 // we've got a change we need to make to the UI!
+    //                 // update the necessary scope and make the change
+    //                 if (change === 'startTime' && !$scope.workflow.start) {
+    //                     $scope.workflow.start = mungedEvent.startTime;
+    //                 }
+    //
+    //                 if (change === 'count' && !$scope.countFinished) {
+    //                     // for all events that affect the host count,
+    //                     // update the status bar as well as the host
+    //                     // count badge
+    //                     $scope.count = mungedEvent.count;
+    //                     $scope.hostCount = getTotalHostCount(mungedEvent
+    //                         .count);
+    //                 }
+    //
+    //                 if (change === 'playCount') {
+    //                     $scope.playCount = mungedEvent.playCount;
+    //                 }
+    //
+    //                 if (change === 'taskCount') {
+    //                     $scope.taskCount = mungedEvent.taskCount;
+    //                 }
+    //
+    //                 if (change === 'finishedTime'  && !$scope.workflow.finished) {
+    //                     $scope.workflow.finished = mungedEvent.finishedTime;
+    //                 }
+    //
+    //                 if (change === 'countFinished') {
+    //                     // the playbook_on_stats event actually lets
+    //                     // us know that we don't need to iteratively
+    //                     // look at event to update the host counts
+    //                     // any more.
+    //                     $scope.countFinished = true;
+    //                 }
+    //
+    //                 if(change === 'stdout'){
+    //                     angular
+    //                         .element(".JobResultsStdOut-stdoutContainer")
+    //                         .append($compile(mungedEvent
+    //                             .stdout)($scope));
+    //                 }
+    //             });
+    //         }
+    //
+    //         // the changes have been processed in the ui, mark it in the queue
+    //         eventQueue.markProcessed(event);
+    //     });
+    // };
 
     // PULL! grab completed event data and process each event
     // TODO: implement retry logic in case one of these requests fails
@@ -174,10 +174,10 @@ export default ['workflowData',
     // };
     // getEvents($scope.job.related.job_events);
 
-    // Processing of job_events messages from the websocket
-    $scope.$on(`ws-job_events-${$scope.workflow.id}`, function(e, data) {
-        processEvent(data);
-    });
+    // // Processing of job_events messages from the websocket
+    // $scope.$on(`ws-job_events-${$scope.workflow.id}`, function(e, data) {
+    //     processEvent(data);
+    // });
 
     // Processing of job-status messages from the websocket
     $scope.$on(`ws-jobs`, function(e, data) {

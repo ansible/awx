@@ -59,7 +59,8 @@ export default {
                         defer.resolve(data.results);
                     })
                     .error(function() {
-                        defer.resolve(data);
+                        // TODO: handle this
+                        //defer.resolve(data);
                     });
             return defer.promise;
         }],

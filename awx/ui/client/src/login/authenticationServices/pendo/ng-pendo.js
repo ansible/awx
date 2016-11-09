@@ -1,3 +1,5 @@
+/* jshint ignore:start */
+
 /*
 *       pendo.io Angular Module
 *
@@ -25,7 +27,7 @@
             setTimeout(waitFn, delay);
         }
     };
-    
+
     angular.module('pendolytics', [])
     .provider('$pendolytics', function() {
 

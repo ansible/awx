@@ -9,8 +9,6 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
-import { templateUrl } from './template-url/template-url.factory';
-
 export default ['$injector', '$stateExtender', '$log', function($injector, $stateExtender, $log) {
     return {
         /**

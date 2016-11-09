@@ -142,10 +142,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
     'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', '$log', 'i18n', '$timeout',
+    'Store', 'ActionButton', '$log', 'i18n',
     function ($rootScope, $location, $compile, GenerateList,
         Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n, $timeout) {
+        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -1079,6 +1079,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                             html += (field.readonly) ? "disabled " : "";
                             html += (field.required) ? "required " : "";
+                            html += (field.ngshow) ? "ng-show=\"" + field.ngShow + "\" " : "";
                             if(field.awRequiredWhen) {
                                 html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
                                 html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
@@ -1233,8 +1234,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
                 // string to be injected into the current view.
                 //
-                var btn, button, fld, field, html = '', i, section, group,
-                    tab, sectionShow, offset, width,ngDisabled, itm;
+                var btn, button, fld, field, html = '', section, group,
+                    sectionShow, offset, width,ngDisabled, itm;
 
                 // title and exit button
                 if(!(this.form.showHeader !== undefined && this.form.showHeader === false)) {

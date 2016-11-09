@@ -1,4 +1,4 @@
-export default ['templateUrl', '$compile', function(templateUrl, $compile) {
+export default ['templateUrl', function(templateUrl) {
     return {
         restrict: 'E',
         replace: true,

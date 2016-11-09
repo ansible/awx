@@ -22,8 +22,7 @@ export default
                 return function (params) {
 
                     var scope = params.scope,
-                        set = params.set,
-                        iterator = params.iterator;
+                        set = params.set;
 
                     // Listeners to perform lookups after main inventory list loads
 
@@ -86,8 +85,7 @@ export default
                 scope.lookUpOrganization = function () {
                     var list = OrganizationList,
                         listGenerator = GenerateList,
-                        listScope = listGenerator.inject(list, { mode: 'lookup', hdr: 'Select Organization' }),
-                        defaultUrl = '/api/v1/organizations/';
+                        listScope = listGenerator.inject(list, { mode: 'lookup', hdr: 'Select Organization' });
 
                     listScope.selectAction = function () {
                         var i, found = false;

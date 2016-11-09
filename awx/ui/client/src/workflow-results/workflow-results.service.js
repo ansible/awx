@@ -18,7 +18,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                     </div>`,
                 action: function() {
                     Wait('start');
-                    Rest.setUrl(job.url);
+                    Rest.setUrl(workflow.url);
                     Rest.destroy()
                         .success(function() {
                             Wait('stop');

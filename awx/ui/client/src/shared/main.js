@@ -10,7 +10,6 @@ import lookupModal from './lookup/main';
 import smartSearch from './smart-search/main';
 import paginate from './paginate/main';
 import columnSort from './column-sort/main';
-import title from './title.directive';
 import lodashAsPromised from './lodash-as-promised';
 import stringFilters from './string-filters/main';
 import truncatedText from './truncated-text.directive';

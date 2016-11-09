@@ -1039,7 +1039,6 @@ export default
                 //plays = JSON.parse(JSON.stringify(scope.jobData.plays)),
                 plays = scope.jobData.plays,
                 filteredListX = [],
-                filteredListA = [],
                 filteredListB = [],
                 key,
                 keys;
@@ -1113,7 +1112,6 @@ export default
             var scope = params.scope,
                 result = [],
                 filteredListX = [],
-                filteredListA = [],
                 filteredListB = [],
                 idx, key, keys, newKeys, tasks, t;
 
@@ -1196,11 +1194,9 @@ export default
         return function(params) {
             var scope = params.scope,
                 result = [],
-                filteredListA = [],
                 filteredListB = [],
                 idx = 0,
                 hostResults,
-                key,
                 keys;
 
             if (scope.activePlay && scope.activeTask && scope.jobData.plays[scope.activePlay] &&
@@ -1232,7 +1228,7 @@ export default
                 // else {
                 //     filteredListB = filteredListA;
                 // }
-                
+
                 keys = Object.keys(filteredListB);
                 keys.sort(function compare(a, b) {
                     if (filteredListB[a].name === filteredListB[b].name) {

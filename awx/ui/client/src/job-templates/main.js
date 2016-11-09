@@ -297,6 +297,10 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                             $scope[key] = value;
                                         });
                                     });
+
+                                    $scope.$on('setEdgeType', function(e, edgeType) {
+                                        $scope.edgeType = edgeType;
+                                    });
                                 }
                             ]
                         }

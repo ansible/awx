@@ -187,7 +187,6 @@ export default
                     Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
                     Rest.get()
                         .success(function (data) {
-                            console.log(data)
                             var msg;
                             switch (data.status) {
                             case 'failed':
@@ -252,7 +251,7 @@ export default
             if ($scope.cloudCredentialReadyRemove) {
                 $scope.cloudCredentialReadyRemove();
             }
-            $scope.cloudCredentialReadyRemove = $scope.$on('cloudCredentialReady', function (e, name) {
+            $scope.cloudCredentialReadyRemove = $scope.$on('cloudCredentialReady', function () {
                 $scope.$emit('jobTemplateLoadFinished');
             });
 
@@ -261,7 +260,7 @@ export default
             if ($scope.jobTemplateLoadedRemove) {
                 $scope.jobTemplateLoadedRemove();
             }
-            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject, relatedSets) {
+            $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential, masterObject) {
                 var dft;
 
                 master = masterObject;
