@@ -1,11 +1,9 @@
-PATH  := awx/ui/node_modules/.bin:$(PATH)
 PYTHON = python
 PYTHON_VERSION = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_version; print get_python_version()")
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 OFFICIAL ?= no
 PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
-GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
@@ -597,7 +595,7 @@ testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
 jshint:
-	$(GRUNT) --gruntfile awx/ui/Gruntfile.js jshint #Depends on node 6.x and npm 3.x installed on Jenkins slave
+	$(NPM_BIN) run --prefix awx/ui jshint
 
 ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run test:saucelabs

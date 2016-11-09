@@ -44,4 +44,5 @@ module.exports = function(grunt) {
         'webpack:prod',
         'concurrent:prod',
     ]);
+
 };
