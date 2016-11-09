@@ -7,102 +7,14 @@
 
 export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun) {
     var val = {
-        // the playbook_on_stats event returns the count data in a weird format.
-        // format to what we need!
-        getCountsFromStatsEvent: function(event_data) {
-            var hosts = {},
-                hostsArr;
-
-            // iterate over the event_data and populate an object with hosts
-            // and their status data
-            Object.keys(event_data).forEach(key => {
-                // failed passes boolean not integer
-                if (key === "failed") {
-                    // array of hosts from failed type
-                    hostsArr = Object.keys(event_data[key]);
-                    hostsArr.forEach(host => {
-                        if (!hosts[host]) {
-                            // host has not been added to hosts object
-                            // add now
-                            hosts[host] = {};
-                        }
-
-                        hosts[host][key] = event_data[key][host];
-                    });
-                } else {
-                    // array of hosts from each type ("changed", "dark", etc.)
-                    hostsArr = Object.keys(event_data[key]);
-                    hostsArr.forEach(host => {
-                        if (!hosts[host]) {
-                            // host has not been added to hosts object
-                            // add now
-                            hosts[host] = {};
-                        }
-
-                        if (!hosts[host][key]) {
-                            // host doesn't have key
-                            hosts[host][key] = 0;
-                        }
-                        hosts[host][key] += event_data[key][host];
-                    });
-                }
-            });
-
-            // use the hosts data populate above to get the count
-            var count = {
-                ok : _.filter(hosts, function(o){
-                    return !o.failures && !o.changed && o.ok > 0;
-                }),
-                skipped : _.filter(hosts, function(o){
-                    return o.skipped > 0;
-                }),
-                unreachable : _.filter(hosts, function(o){
-                    return o.dark > 0;
-                }),
-                failures : _.filter(hosts, function(o){
-                    return o.failed === true;
-                }),
-                changed : _.filter(hosts, function(o){
-                    return o.changed > 0;
-                })
-            };
-
-            // turn the count into an actual count, rather than a list of host
-            // names
-            Object.keys(count).forEach(key => {
-                count[key] = count[key].length;
-            });
-
-            return count;
-        },
-        getEvents: function(url) {
-            var val = $q.defer();
-
-            Rest.setUrl(url);
-            Rest.get()
-                .success(function(data) {
-                    val.resolve({results: data.results,
-                        next: data.next});
-                })
-                .error(function(obj, status) {
-                    ProcessErrors(null, obj, status, null, {
-                        hdr: 'Error!',
-                        msg: `Could not get job events.
-                            Returned status: ${status}`
-                    });
-                    val.reject(obj);
-                });
-
-            return val.promise;
-        },
-        deleteJob: function(job) {
+        deleteJob: function(workflow) {
             Prompt({
                 hdr: 'Delete Job',
                 body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to delete the job below?
+                        Are you sure you want to delete the workflow below?
                     </div>
                     <div class='Prompt-bodyTarget'>
-                        #${job.id} ${$filter('sanitize')(job.name)}
+                        #${workflow.id} ${$filter('sanitize')(workflow.name)}
                     </div>`,
                 action: function() {
                     Wait('start');
@@ -126,9 +38,9 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                 actionText: 'DELETE'
             });
         },
-        cancelJob: function(job) {
+        cancelJob: function(workflow) {
             var doCancel = function() {
-                Rest.setUrl(job.url + 'cancel');
+                Rest.setUrl(workflow.url + 'cancel');
                 Rest.post({})
                     .success(function() {
                         Wait('stop');
@@ -139,23 +51,23 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                         $('#prompt-modal').modal('hide');
                         ProcessErrors(null, obj, status, null, {
                             hdr: 'Error!',
-                            msg: `Could not cancel job.
+                            msg: `Could not cancel workflow.
                                 Returned status: ${status}`
                         });
                     });
             };
 
             Prompt({
-                hdr: 'Cancel Job',
+                hdr: 'Cancel Workflow',
                 body: `<div class='Prompt-bodyQuery'>
-                        Are you sure you want to cancel the job below?
+                        Are you sure you want to cancel the workflow below?
                     </div>
                     <div class='Prompt-bodyTarget'>
-                        #${job.id} ${$filter('sanitize')(job.name)}
+                        #${workflow.id} ${$filter('sanitize')(workflow.name)}
                     </div>`,
                 action: function() {
                     Wait('start');
-                    Rest.setUrl(job.url + 'cancel');
+                    Rest.setUrl(workflow.url + 'cancel');
                     Rest.get()
                         .success(function(data) {
                             if (data.can_cancel === true) {
@@ -179,7 +91,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                             $('#prompt-modal').modal('hide');
                             ProcessErrors(null, obj, status, null, {
                                 hdr: 'Error!',
-                                msg: `Could not cancel job.
+                                msg: `Could not cancel workflow.
                                     Returned status: ${status}`
                             });
                         });
@@ -188,7 +100,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
             });
         },
         relaunchJob: function(scope) {
-            InitiatePlaybookRun({ scope: scope, id: scope.job.id,
+            InitiatePlaybookRun({ scope: scope, id: scope.workflow.id,
                 relaunch: true });
         }
     };

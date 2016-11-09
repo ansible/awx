@@ -56,7 +56,7 @@ export default {
                 Rest.setUrl(workflowData.related.workflow_nodes);
                 Rest.get()
                     .success(function(data) {
-                        defer.resolve(data.data);
+                        defer.resolve(data.results);
                     })
                     .error(function() {
                         defer.resolve(data);

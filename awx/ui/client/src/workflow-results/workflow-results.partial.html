@@ -164,136 +164,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- STATUS DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            WorkflowResults-resultRow
-                            toggle-show">
-                        <label
-                            class="WorkflowResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Status
-                        </label>
-                        <div class="WorkflowResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                            <i
-                                class="WorkflowResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job.status }}">
-                            </i> {{ status_label }}
-                        </div>
-                    </div> -->
-
-                    <!-- SCHEDULED BY DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            WorkflowResults-resultRow toggle-show"
-                        ng-show="workflow.summary_fields.schedule_by.username">
-                        <label
-                            class="WorkflowResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Launched By
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            <a href="{{ scheduled_by_link }}"
-                                aw-tool-tip="Edit the Schedule"
-                                data-placement="top">
-                                {{ job.summary_fields.scheduled_by.username }}
-                            </a>
-                        </div>
-                    </div> -->
-
-                    <!-- ELAPSED TIME DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            WorkflowResults-resultRow toggle-show"
-                        ng-show="workflow_status.started">
-                        <label
-                            class="WorkflowResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Elapsed
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            {{ job_status.elapsed }}
-                        </div>
-                    </div> -->
-
-                    <!-- EXPLANATION DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            WorkflowResults-resultRow
-                            toggle-show"
-                        ng-show="workflow_status.explanation">
-                        <label
-                            class="WorkflowResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Explanation
-                        </label> -->
-
-                        <!-- PREVIOUS TASK SUCCEEDED -->
-                        <!-- <div class="WorkflowResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="!previousTaskFailed"
-                            ng-bind-html="job_status.explanation">
-                            <i
-                                class="WorkflowResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job_status.status }}">
-                            </i> {{ job_status.status_label }}
-                        </div> -->
-
-                        <!-- PREVIOUS TASK FAILED -->
-                        <!-- <div class="WorkflowResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="previousTaskFailed">
-                            Previous Task Failed
-                            <a
-                                href=""
-                                id="explanation_help"
-                                aw-pop-over="{{ task_detail }}"
-                                aw-pop-over-watch="task_detail"
-                                data-placement="bottom"
-                                data-container="body"
-                                class="help-link"
-                                over-title="Failure Detail"
-                                title=""
-                                tabindex="-1">
-                                <i class="fa fa-question-circle">
-                                </i>
-                            </a>
-                        </div> -->
-
-                    <!-- </div> -->
-
-                    <!-- RESULTS TRACEBACK DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            WorkflowResults-resultRow
-                            toggle-show" ng-show="workflow.result_traceback">
-                        <label
-                            class="WorkflowResults-resultRowLabel
-                                col-lg-2 col-md-12
-                                col-sm-12 col-xs-12">
-                            Results Traceback
-                        </label>
-                        <div class="WorkflowResults-resultRowText
-                            col-lg-10 col-md-12 col-sm-12 col-xs-12
-                            job_status_traceback"
-                            ng-bind-html="job.result_traceback">
-                        </div>
-                    </div> -->
-
                 </div>
 
             </div>
@@ -319,7 +189,7 @@
                             Total Jobs
                         </div>
                         <span class="badge List-titleBadge">
-                            {{ workflow_nodes.count || 0}}
+                            {{ workflow_nodes.length || 0}}
                         </span>
 
                         <!-- ELAPSED TIME -->
@@ -357,7 +227,7 @@
 
                     </div>
                 </div>
-                <host-status-bar></host-status-bar>
+                <workflow-status-bar></workflow-status-bar>
                 <!-- <job-results-standard-out></job-results-standard-out> -->
             </div>
 
