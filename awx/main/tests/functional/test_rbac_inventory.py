@@ -40,6 +40,14 @@ def test_modify_inv_script_foreign_org_admin(org_admin, organization, organizati
     assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
 
 @pytest.mark.django_db
+def test_org_member_inventory_script_permissions(org_member, organization):
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', organization=organization)
+    access = CustomInventoryScriptAccess(org_member)
+    assert access.can_read(custom_inv)
+    assert not access.can_delete(custom_inv)
+    assert not access.can_change(custom_inv, {'name': 'ed-test'})
+
+@pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
     u = user('admin', False)
     perm = Permission(user=u, inventory=inventory, permission_type='admin')

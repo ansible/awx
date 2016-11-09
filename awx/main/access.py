@@ -921,7 +921,7 @@ class ProjectAccess(BaseAccess):
 
     @check_superuser
     def can_change(self, obj, data):
-        if not self.check_related('organization', Organization, data):
+        if not self.check_related('organization', Organization, data, obj=obj):
             return False
         return self.user in obj.admin_role
 
@@ -1523,7 +1523,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         # if 'survey_enabled' in data and data['survey_enabled']:
         #     self.check_license(feature='surveys')
 
-        return self.check_related('organization', Organization, data)
+        return self.check_related('organization', Organization, data, mandatory=True)
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
@@ -1973,7 +1973,8 @@ class LabelAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.can_add(data) is False:
             return False
-        return self.check_related('organization', Organization, data, obj=obj, mandatory=True)
+
+        return self.user in obj.organization.admin_role
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
@@ -2069,11 +2070,11 @@ class CustomInventoryScriptAccess(BaseAccess):
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
-        return self.check_related('organization', Organization, data)
+        return self.check_related('organization', Organization, data, mandatory=True)
 
     @check_superuser
     def can_admin(self, obj, data=None):
-        return self.check_related('organization', Organization, data, obj=obj)
+        return self.check_related('organization', Organization, data, obj=obj) and self.user in obj.admin_role
 
     @check_superuser
     def can_change(self, obj, data):
