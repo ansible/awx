@@ -127,7 +127,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
         };
 
-        $scope.confirmNodeForm = function(formValues) {console.log(formValues);
+        $scope.confirmNodeForm = function(formValues) {
             if ($scope.workflowMakerFormConfig.nodeMode === "add") {
                 if ($scope.selectedTemplate && formValues.edgeType) {
 
@@ -178,7 +178,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             job_type: formValues.job_type && formValues.job_type.value ? formValues.job_type.value : null,
                             job_tags: formValues.job_tags,
                             skip_tags: formValues.skip_tags
-                        };console.log($scope.nodeBeingEdited.promptValues);
+                        };
                     }
 
                     $scope.nodeBeingEdited.isActiveEdit = false;

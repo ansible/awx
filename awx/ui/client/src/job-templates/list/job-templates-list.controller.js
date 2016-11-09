@@ -55,9 +55,9 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                         Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while routing to edit.');
                     }
                 }
-                else {
-                    Alert('Error: Unable to edit template', 'Template parameter is missing');
-                }
+            else {
+                Alert('Error: Unable to edit template', 'Template parameter is missing');
+            }
         };
 
         $scope.deleteJobTemplate = function(template) {

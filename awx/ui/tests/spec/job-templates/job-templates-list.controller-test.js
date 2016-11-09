@@ -5,7 +5,7 @@ describe('Controller: JobTemplatesList', () => {
     let scope,
         rootScope,
         state,
-        JobTemplatesList,
+        JobTemplatesListController,
         ClearScope,
         GetChoices,
         Alert,
@@ -16,7 +16,8 @@ describe('Controller: JobTemplatesList', () => {
         q,
         JobTemplateService,
         deleteWorkflowJobTemplateDeferred,
-        deleteJobTemplateDeferred;
+        deleteJobTemplateDeferred,
+        Dataset;
 
     beforeEach(angular.mock.module('Tower'));
     beforeEach(angular.mock.module('jobTemplates', ($provide) => {
@@ -43,6 +44,12 @@ describe('Controller: JobTemplatesList', () => {
             },
             deleteJobTemplate: function(){
                 return angular.noop;
+            }
+        };
+
+        Dataset = {
+            data: {
+                results: []
             }
         };
 
@@ -81,7 +88,7 @@ describe('Controller: JobTemplatesList', () => {
         JobTemplateService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
         JobTemplateService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
 
-        JobTemplatesList = $controller('JobTemplatesList', {
+        JobTemplatesListController = $controller('JobTemplatesListController', {
             $scope: scope,
             $rootScope: rootScope,
             $state: state,
@@ -91,13 +98,10 @@ describe('Controller: JobTemplatesList', () => {
             Prompt: Prompt,
             InitiatePlaybookRun: InitiatePlaybookRun,
             rbacUiControlService: rbacUiControlService,
-            JobTemplateService: JobTemplateService
+            JobTemplateService: JobTemplateService,
+            Dataset: Dataset
         });
     }));
-
-    it('should call GetChoices', ()=> {
-        expect(GetChoices).toHaveBeenCalled();
-    });
 
     describe('scope.editJobTemplate()', () => {
 
@@ -114,7 +118,7 @@ describe('Controller: JobTemplatesList', () => {
             };
 
             scope.editJobTemplate(testTemplate);
-            expect(state.transitionTo).toHaveBeenCalledWith('templates.editJobTemplate', {id: 1});
+            expect(state.transitionTo).toHaveBeenCalledWith('templates.editJobTemplate', {job_template_id: 1});
         });
 
         it('should transition to templates.templates.editWorkflowJobTemplate when type is "Workflow Job Template"', ()=>{
@@ -125,7 +129,7 @@ describe('Controller: JobTemplatesList', () => {
             };
 
             scope.editJobTemplate(testTemplate);
-            expect(state.transitionTo).toHaveBeenCalledWith('templates.editWorkflowJobTemplate', {id: 1});
+            expect(state.transitionTo).toHaveBeenCalledWith('templates.editWorkflowJobTemplate', {workflow_job_template_id: 1});
         });
 
         it('should call Alert when type is not "Job Template" or "Workflow Job Template"', ()=>{

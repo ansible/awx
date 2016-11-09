@@ -8,7 +8,6 @@ describe('Controller: WorkflowAdd', () => {
         ClearScope,
         Alert,
         GenerateForm,
-        initSurvey,
         JobTemplateService,
         q,
         getLabelsDeferred,
@@ -32,7 +31,8 @@ describe('Controller: WorkflowAdd', () => {
         GenerateForm = jasmine.createSpyObj('GenerateForm', [
             'inject',
             'reset',
-            'clearApiErrors'
+            'clearApiErrors',
+            'applyDefaults'
         ]);
 
         JobTemplateService = {
@@ -101,14 +101,6 @@ describe('Controller: WorkflowAdd', () => {
         expect(ClearScope).toHaveBeenCalled();
     });
 
-    it('should call GenerateForm.inject', ()=>{
-        expect(GenerateForm.inject).toHaveBeenCalled();
-    });
-
-    it('should call GenerateForm.reset', ()=>{
-        expect(GenerateForm.reset).toHaveBeenCalled();
-    });
-
     it('should get/set the label options and select2-ify the input', ()=>{
         // Resolve JobTemplateService.getLabelsForJobTemplate
         getLabelsDeferred.resolve({
@@ -121,7 +113,7 @@ describe('Controller: WorkflowAdd', () => {
             foo: "bar"
         });
         expect(CreateSelect2).toHaveBeenCalledWith({
-            element:'#workflow_labels',
+            element:'#workflow_job_template_labels',
             multiple: true,
             addNew: true
         });

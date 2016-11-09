@@ -21,6 +21,22 @@ describe('Controller: WorkflowMaker', () => {
 
     beforeEach(angular.mock.inject( ($rootScope, $controller, _WorkflowHelpService_) => {
         scope = $rootScope.$new();
+        scope.treeData = {
+            data: {
+                id: 1,
+                canDelete: false,
+                canEdit: false,
+                canAddTo: true,
+                isStartNode: true,
+                unifiedJobTemplate: {
+                    name: "Workflow Launch"
+                },
+                children: [],
+                deletedNodes: [],
+                totalNodes: 0
+            },
+            nextIndex: 2
+        };
         WorkflowHelpService = _WorkflowHelpService_;
 
         WorkflowMakerController = $controller('WorkflowMakerController', {
@@ -38,48 +54,5 @@ describe('Controller: WorkflowMaker', () => {
         });
 
     });
-
-    describe('scope.startAddNode()', () => {
-        
-    });
-
-    describe('scope.confirmNodeForm()', () => {
-
-    });
-
-    describe('scope.cancelNodeForm()', () => {
-
-    });
-
-    describe('scope.startEditNode()', () => {
-
-    });
-
-    describe('scope.startDeleteNode()', () => {
-
-    });
-
-    describe('scope.cancelDeleteNode()', () => {
-
-    });
-
-    describe('scope.confirmDeleteNode()', () => {
-
-    });
-
-    describe('scope.toggleFormTab()', () => {
-
-    });
-
-    describe('scope.toggle_job_template()', () => {
-
-    });
-
-    describe('scope.toggle_project()', () => {
-
-    });
-
-    describe('scope.toggle_inventory_source()', () => {
-
-    });
+    
 });
