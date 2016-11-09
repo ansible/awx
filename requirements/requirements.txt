@@ -23,6 +23,7 @@ django-auth-ldap==1.2.6
 django-celery==3.1.17
 django-crum==0.6.1
 django-extensions==1.5.9
+django-jsonfield==1.0.1
 git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
@@ -37,9 +38,7 @@ dogpile.core==0.4.1
 funcsigs==0.4
 gevent==1.1
 gevent-websocket==0.9.5
-git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=django-jsonfield
 git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
-git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@5dfa1df79f81765d36c0de31dc1c2f390e42d428#egg=django-rest-framework-mongoengine
 git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=gevent-socketio
 greenlet==0.4.9
 dogpile.cache==0.5.7
@@ -109,7 +108,7 @@ python-openid==2.2.5
 python-openstackclient==2.0.0
 python-radius==1.0
 python-saml==2.1.8
-git+https://github.com/matburt/python-social-auth.git@master#egg=python-social-auth
+python-social-auth==0.2.21
 python-swiftclient==2.7.0
 python-troveclient==1.4.0
 pytz==2015.7
