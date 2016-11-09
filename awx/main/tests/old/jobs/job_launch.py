@@ -157,7 +157,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.post(launch_url, {'credential_id': self.cred_sue.pk}, expect=403)
 
     def test_no_project_fail(self):
-        # Job Templates without projects can not be launched
+        # Job Templates without projects cannot be launched
         with self.current_user(self.user_sue):
             self.data['name'] = "missing proj"
             response = self.post(self.url, self.data, expect=201)
@@ -169,7 +169,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.post(launch_url2, {}, expect=400)
 
     def test_no_inventory_fail(self):
-        # Job Templates without inventory can not be launched
+        # Job Templates without inventory cannot be launched
         with self.current_user(self.user_sue):
             self.data['name'] = "missing inv"
             response = self.post(self.url, self.data, expect=201)

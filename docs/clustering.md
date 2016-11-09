@@ -161,7 +161,7 @@ When verifying acceptance we should ensure the following statements are true
   Job failures during the time period should be predictable and not catastrophic.
 * Node downtime testing should also include recoverability testing. Killing single services and ensuring the system can
   return itself to a working state
-* Persistent failure should be tested by killing single services in such a way that the cluster node can not be recovered
+* Persistent failure should be tested by killing single services in such a way that the cluster node cannot be recovered
   and ensuring that the node is properly taken offline
 * Network partitioning failures will be important also. In order to test this
   - Disallow a single node from communicating with the other nodes but allow it to communicate with the database

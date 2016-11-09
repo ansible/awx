@@ -263,11 +263,11 @@ def test_job_relaunch_resource_access(job_with_links, user):
     job_with_links.inventory.use_role.members.add(both_user)
     assert both_user.can_access(Job, 'start', job_with_links)
 
-    # Confirm that a user with credential access alone can not launch
+    # Confirm that a user with credential access alone cannot launch
     job_with_links.credential.use_role.members.add(credential_user)
     assert not credential_user.can_access(Job, 'start', job_with_links)
 
-    # Confirm that a user with inventory access alone can not launch
+    # Confirm that a user with inventory access alone cannot launch
     job_with_links.inventory.use_role.members.add(inventory_user)
     assert not inventory_user.can_access(Job, 'start', job_with_links)
 

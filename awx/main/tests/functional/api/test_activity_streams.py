@@ -89,7 +89,7 @@ def test_rbac_stream_user_roles(activity_stream_entry, organization, org_admin, 
 def test_stream_access_cant_change(activity_stream_entry, organization, org_admin, settings):
     settings.ACTIVITY_STREAM_ENABLED = True
     access = ActivityStreamAccess(org_admin)
-    # These should always return false because the activity stream can not be edited
+    # These should always return false because the activity stream cannot be edited
     assert not access.can_add(activity_stream_entry)
     assert not access.can_change(activity_stream_entry, {'organization': None})
     assert not access.can_delete(activity_stream_entry)

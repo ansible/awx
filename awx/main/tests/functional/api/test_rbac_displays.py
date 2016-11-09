@@ -124,7 +124,7 @@ class TestJobTemplateCopyEdit:
         SHOULD be able to edit that job template, for nonsensitive changes
         """
 
-        # Attach credential to JT that org admin can not use
+        # Attach credential to JT that org admin cannot use
         jt_copy_edit.credential = machine_credential
         jt_copy_edit.save()
 
@@ -222,7 +222,7 @@ class TestAccessListCapabilities:
         assert direct_access_list[0]['role']['user_capabilities']['unattach'] == 'foobar'
 
     def test_user_access_list_direct_access_capability(self, rando, get):
-        "When a user views their own access list, they can not unattach their admin role"
+        "When a user views their own access list, they cannot unattach their admin role"
         response = get(reverse('api:user_access_list', args=(rando.id,)), rando)
         direct_access_list = response.data['results'][0]['summary_fields']['direct_access']
         assert not direct_access_list[0]['role']['user_capabilities']['unattach']
@@ -267,7 +267,7 @@ def test_user_roles_unattach_functional(organization, alice, bob, get):
     organization.member_role.members.add(alice)
     organization.member_role.members.add(bob)
     response = get(reverse('api:user_roles_list', args=(alice.id,)), bob)
-    # Org members can not revoke the membership of other members
+    # Org members cannot revoke the membership of other members
     assert not response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
 
 

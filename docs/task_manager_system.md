@@ -6,7 +6,7 @@ Independent jobs are ran in order of creation time, earliest first. Jobs with de
 
 ## Task Manager Architecture
 
-The task manager has a single entry point, `Scheduler().schedule()`. The method may be called in parallel, at any time, as many times as the user wants. The `schedule()` function tries to aquire a single, global, lock using the Instance table first record in the database. If the lock can not be aquired the method returns. The failure to aquire the lock indicates that there is another instance currently running `schedule()`.
+The task manager has a single entry point, `Scheduler().schedule()`. The method may be called in parallel, at any time, as many times as the user wants. The `schedule()` function tries to aquire a single, global, lock using the Instance table first record in the database. If the lock cannot be aquired the method returns. The failure to aquire the lock indicates that there is another instance currently running `schedule()`.
 
 ### Hybrid Scheduler: Periodic + Event 
 The `schedule()` function is ran (a) periodically by a celery task and (b) on job creation or completion. The task manager system would behave correctly if ran, exclusively, via (a) or (b). We chose to trigger `schedule()` via both mechanisms because of the nice properties I will now mention. (b) reduces the time from launch to running, resulting a better user experience. (a) is a fail-safe in case we miss code-paths, in the present and future, that change the 3 scheduling considerations for which we should call `schedule()` (i.e. adding new nodes to tower changes the capacity, obscure job error handling that fails a job)

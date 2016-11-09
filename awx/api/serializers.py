@@ -1910,7 +1910,7 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
 
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
-            raise serializers.ValidationError({'survey_enabled': _('Survey Enabled can not be used with scan jobs.')})
+            raise serializers.ValidationError({'survey_enabled': _('Survey Enabled cannot be used with scan jobs.')})
 
         return super(JobTemplateSerializer, self).validate(attrs)
 

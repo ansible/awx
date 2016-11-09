@@ -354,17 +354,17 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def _extra_job_type_errors(self, data):
         """
         Used to enforce 2 special cases around scan jobs and prompting
-         - the inventory can not be changed on a scan job template
-         - scan jobs can not be switched to run/check type and vice versa
+         - the inventory cannot be changed on a scan job template
+         - scan jobs cannot be switched to run/check type and vice versa
         """
         errors = {}
         if 'job_type' in data and self.ask_job_type_on_launch:
             if ((self.job_type == PERM_INVENTORY_SCAN and not data['job_type'] == PERM_INVENTORY_SCAN) or
                     (data['job_type'] == PERM_INVENTORY_SCAN and not self.job_type == PERM_INVENTORY_SCAN)):
-                errors['job_type'] = _('Can not override job_type to or from a scan job.')
+                errors['job_type'] = _('Cannot override job_type to or from a scan job.')
         if (self.job_type == PERM_INVENTORY_SCAN and ('inventory' in data) and self.ask_inventory_on_launch and
                 self.inventory != data['inventory']):
-            errors['inventory'] = _('Inventory can not be changed at runtime for scan jobs.')
+            errors['inventory'] = _('Inventory cannot be changed at runtime for scan jobs.')
         return errors
 
     @property

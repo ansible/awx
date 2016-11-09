@@ -61,7 +61,7 @@ def apply_roles(roles, objects, persisted):
         return None
 
     if not persisted:
-        raise RuntimeError('roles can not be used when persisted=False')
+        raise RuntimeError('roles cannot be used when persisted=False')
 
     for role in roles:
         obj_role, sep, member_role = role.partition(':')
@@ -352,7 +352,7 @@ def generate_workflow_job_template_nodes(workflow_job_template,
 
     workflow_job_template_nodes = kwargs.get('workflow_job_template_nodes', [])
     if len(workflow_job_template_nodes) > 0 and not persisted:
-        raise RuntimeError('workflow job template nodes can not be used when persisted=False')
+        raise RuntimeError('workflow job template nodes cannot be used when persisted=False')
 
     new_nodes = []
 

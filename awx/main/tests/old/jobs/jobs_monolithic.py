@@ -485,7 +485,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
             data['credential'] = self.cred_sue.pk
             response = self.post(url, data, expect=402)
         self.create_test_license_file(features=dict(system_tracking=True))
-        # Scan Jobs can not be created with survey enabled
+        # Scan Jobs cannot be created with survey enabled
         with self.current_user(self.user_sue):
             data['credential'] = self.cred_sue.pk
             data['survey_enabled'] = True

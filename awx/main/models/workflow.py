@@ -117,7 +117,7 @@ class WorkflowNodeBase(CreatedModifiedModel):
         prompts_dict = self.prompts_dict()
         if not hasattr(ujt_obj, '_ask_for_vars_dict'):
             if prompts_dict:
-                return {'ignored': {'all': 'Can not use prompts on unified_job_template that is not type of job template'}}
+                return {'ignored': {'all': 'Cannot use prompts on unified_job_template that is not type of job template'}}
             else:
                 return {}
 
