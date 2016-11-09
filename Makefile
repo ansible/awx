@@ -569,14 +569,15 @@ $(UI_DEPS_FLAG_FILE): awx/ui/package.json
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-machine
+	$(NPM_BIN) --prefix awx/ui run build-docker-machine -- $(MAKEFLAGS)
 
+# Native docker. Builds UI and raises BrowserSync & filesystem polling.
 ui-docker: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-cid
+	$(NPM_BIN) --prefix awx/ui run build-docker-cid -- $(MAKEFLAGS)
 
-# Builds UI with development/debug settings enabled. Does not raise browser-sync or filesystem polling.
+# Builds UI with development UI without raising browser-sync or filesystem polling.
 ui-devel: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-devel
+	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 

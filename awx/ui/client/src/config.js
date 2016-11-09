@@ -28,8 +28,6 @@
         // custom_login_info: "example notice" // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
         tooltip_delay: { show: 500, hide: 100 }, // Default number of milliseconds to delay displaying/hiding tooltips
 
-        debug_mode: false, // Enable console logging messages
-
         password_length: 8, // Minimum user password length.  Set to 0 to not set a limit
         password_hasLowercase: true, // require a lowercase letter in the password
         password_hasUppercase: false, // require an uppercase letter in the password
@@ -57,8 +55,6 @@
                 lint: true
             }
         },
-
-        websocket_port: 8080
 
     };
 })();

@@ -18,12 +18,17 @@ import 'select2';
 import uiRouter from 'angular-ui-router';
 // backwards compatibility for $stateChange* events
 import 'angular-ui-router/release/stateEvents';
-// ui-router debugging
-//import { trace } from 'angular-ui-router';
-//trace.enable();
+
 
 // Configuration dependencies
 global.$AnsibleConfig = null;
+// Provided via Webpack DefinePlugin in webpack.config.js
+global.$ENV = $ENV || null;
+// ui-router debugging
+if ($ENV['route-debug']){
+    let trace = require('angular-ui-router').trace;
+    trace.enable();
+}
 
 var urlPrefix;
 
@@ -203,6 +208,9 @@ var tower = angular.module('Tower', [
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')
+    .config(['$logProvider', function($logProvider) {
+        $logProvider.debugEnabled($ENV['ng-debug'] || false);
+    }])
     .config(['$pendolyticsProvider', function($pendolyticsProvider) {
         $pendolyticsProvider.doNotAutoStart();
     }])
@@ -214,11 +222,10 @@ var tower = angular.module('Tower', [
         });
     }])
     .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
-        '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider', '$stateExtenderProvider',
+        '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider',
         function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider, $stateExtenderProvider) {
-            let $stateExtender = $stateExtenderProvider.$get(),
-                stateDefinitions = stateDefinitionsProvider.$get();
+            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider) {
+            let stateDefinitions = stateDefinitionsProvider.$get();
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -356,441 +363,427 @@ var tower = angular.module('Tower', [
             });
         }
     ])
+    .run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
+        'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
+        'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
+        'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
+        'FeaturesService', '$filter', 'SocketService', 'I18NInit',
+        function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
+            CheckLicense, $location, Authorization, LoadBasePaths, Timer,
+            ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
+            ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
+            $filter, SocketService, I18NInit) {
 
-.config(['$provide', function($provide) {
-    $provide.decorator('$log', ['$delegate', function($delegate) {
-        var _debug = $delegate.debug;
-        $delegate.debug = function(msg) {
-            // only show debug messages when debug_mode set to true in config
-            if ($AnsibleConfig && $AnsibleConfig.debug_mode) {
-                _debug(msg);
-            }
-        };
-        return $delegate;
-    }]);
-}])
+            $rootScope.$state = $state;
+            $rootScope.$state.matches = function(stateName) {
+                return $state.current.name.search(stateName) > 0;
+            };
+            $rootScope.$stateParams = $stateParams;
 
-.run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
-    'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
-    'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
-    'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-    'FeaturesService', '$filter', 'SocketService', 'I18NInit',
-    function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
-        CheckLicense, $location, Authorization, LoadBasePaths, Timer,
-        ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
-        ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-        $filter, SocketService, I18NInit) {
+            I18NInit();
+            $stateExtender.addState({
+                name: 'dashboard',
+                url: '/home',
+                templateUrl: urlPrefix + 'partials/home.html',
+                controller: Home,
+                params: { licenseMissing: null },
+                data: {
+                    activityStream: true,
+                    refreshButton: true,
+                    socket: {
+                        "groups": {
+                            "jobs": ["status_changed"]
+                        }
+                    },
+                },
+                ncyBreadcrumb: {
+                    label: N_("DASHBOARD")
+                },
+                resolve: {
+                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
+                        function($q, jobStatusGraphData, $rootScope) {
+                            return $rootScope.featuresConfigured.promise.then(function() {
+                                return $q.all({
+                                    jobStatus: jobStatusGraphData.get("month", "all"),
+                                });
+                            });
+                        }
+                    ]
+                }
+            });
 
-        $rootScope.$state = $state;
-        $rootScope.$state.matches = function(stateName) {
-            return $state.current.name.search(stateName) > 0;
-        };
-        $rootScope.$stateParams = $stateParams;
-
-        I18NInit();
-        $stateExtender.addState({
-            name: 'dashboard',
-            url: '/home',
-            templateUrl: urlPrefix + 'partials/home.html',
-            controller: Home,
-            params: { licenseMissing: null },
-            data: {
-                activityStream: true,
-                refreshButton: true,
-                socket: {
-                    "groups": {
-                        "jobs": ["status_changed"]
+            $stateExtender.addState({
+                searchPrefix: 'job',
+                name: 'jobs',
+                url: '/jobs',
+                ncyBreadcrumb: {
+                    label: N_("JOBS")
+                },
+                params: {
+                    job_search: {
+                        value: { order_by: '-finished' }
                     }
                 },
-            },
-            ncyBreadcrumb: {
-                label: N_("DASHBOARD")
-            },
-            resolve: {
-                graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-                    function($q, jobStatusGraphData, $rootScope) {
-                        return $rootScope.featuresConfigured.promise.then(function() {
-                            return $q.all({
-                                jobStatus: jobStatusGraphData.get("month", "all"),
+                data: {
+                    socket: {
+                        "groups": {
+                            "jobs": ["status_changed"],
+                            "schedules": ["changed"]
+                        }
+                    }
+                },
+                resolve: {
+                    Dataset: ['AllJobsList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
+                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                    }]
+                },
+                views: {
+                    '@': {
+                        templateUrl: urlPrefix + 'partials/jobs.html',
+                    },
+                    'list@jobs': {
+                        templateProvider: function(AllJobsList, generateList) {
+                            let html = generateList.build({
+                                list: AllJobsList,
+                                mode: 'edit'
+                            });
+                            return html;
+                        },
+                        controller: JobsListController
+                    }
+                }
+            });
+
+
+            $stateExtender.addState({
+                name: 'teamUsers',
+                url: '/teams/:team_id/users',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: UsersList,
+                resolve: {
+                    Users: ['UsersList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
+                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                    }]
+                }
+            });
+
+
+            $stateExtender.addState({
+                name: 'userCredentials',
+                url: '/users/:user_id/credentials',
+                templateUrl: urlPrefix + 'partials/users.html',
+                controller: CredentialsList
+            });
+
+            $stateExtender.addState({
+                name: 'userCredentialAdd',
+                url: '/users/:user_id/credentials/add',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsAdd
+            });
+
+            $stateExtender.addState({
+                name: 'teamUserCredentialEdit',
+                url: '/teams/:user_id/credentials/:credential_id',
+                templateUrl: urlPrefix + 'partials/teams.html',
+                controller: CredentialsEdit
+            });
+
+            $stateExtender.addState({
+                name: 'sockets',
+                url: '/sockets',
+                templateUrl: urlPrefix + 'partials/sockets.html',
+                controller: SocketsController,
+                ncyBreadcrumb: {
+                    label: 'SOCKETS'
+                }
+            });
+
+            $rootScope.addPermission = function(scope) {
+                $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
+            };
+            $rootScope.addPermissionWithoutTeamTab = function(scope) {
+                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
+            };
+
+            $rootScope.deletePermission = function(user, accessListEntry) {
+                let entry = accessListEntry;
+
+                let action = function() {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+
+                    let url;
+                    if (entry.team_id) {
+                        url = GetBasePath("teams") + entry.team_id + "/roles/";
+                    } else {
+                        url = GetBasePath("users") + user.id + "/roles/";
+                    }
+
+                    Rest.setUrl(url);
+                    Rest.post({ "disassociate": true, "id": entry.id })
+                        .success(function() {
+                            Wait('stop');
+                            $state.go('.', null, { reload: true });
+                        })
+                        .error(function(data, status) {
+                            ProcessErrors($rootScope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status
                             });
                         });
-                    }
-                ]
-            }
-        });
+                };
 
-        $stateExtender.addState({
-            searchPrefix: 'job',
-            name: 'jobs',
-            url: '/jobs',
-            ncyBreadcrumb: {
-                label: N_("JOBS")
-            },
-            params: {
-                job_search: {
-                    value: { order_by: '-finished' }
-                }
-            },
-            data: {
-                socket: {
-                    "groups": {
-                        "jobs": ["status_changed"],
-                        "schedules": ["changed"]
-                    }
-                }
-            },
-            resolve: {
-                Dataset: ['AllJobsList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                    let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                }]
-            },
-            views: {
-                '@': {
-                    templateUrl: urlPrefix + 'partials/jobs.html',
-                },
-                'list@jobs': {
-                    templateProvider: function(AllJobsList, generateList) {
-                        let html = generateList.build({
-                            list: AllJobsList,
-                            mode: 'edit'
-                        });
-                        return html;
-                    },
-                    controller: JobsListController
-                }
-            }
-        });
-
-
-        $stateExtender.addState({
-            name: 'teamUsers',
-            url: '/teams/:team_id/users',
-            templateUrl: urlPrefix + 'partials/teams.html',
-            controller: UsersList,
-            resolve: {
-                Users: ['UsersList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                    let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                    return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                }]
-            }
-        });
-
-
-        $stateExtender.addState({
-            name: 'userCredentials',
-            url: '/users/:user_id/credentials',
-            templateUrl: urlPrefix + 'partials/users.html',
-            controller: CredentialsList
-        });
-
-        $stateExtender.addState({
-            name: 'userCredentialAdd',
-            url: '/users/:user_id/credentials/add',
-            templateUrl: urlPrefix + 'partials/teams.html',
-            controller: CredentialsAdd
-        });
-
-        $stateExtender.addState({
-            name: 'teamUserCredentialEdit',
-            url: '/teams/:user_id/credentials/:credential_id',
-            templateUrl: urlPrefix + 'partials/teams.html',
-            controller: CredentialsEdit
-        });
-
-        $stateExtender.addState({
-            name: 'sockets',
-            url: '/sockets',
-            templateUrl: urlPrefix + 'partials/sockets.html',
-            controller: SocketsController,
-            ncyBreadcrumb: {
-                label: 'SOCKETS'
-            }
-        });
-
-        $rootScope.addPermission = function(scope) {
-            $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
-        };
-        $rootScope.addPermissionWithoutTeamTab = function(scope) {
-            $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
-        };
-
-        $rootScope.deletePermission = function(user, accessListEntry) {
-            let entry = accessListEntry;
-
-            let action = function() {
-                $('#prompt-modal').modal('hide');
-                Wait('start');
-
-                let url;
-                if (entry.team_id) {
-                    url = GetBasePath("teams") + entry.team_id + "/roles/";
+                if (accessListEntry.team_id) {
+                    Prompt({
+                        hdr: `Team access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
+                        action: action,
+                        actionText: 'REMOVE TEAM ACCESS'
+                    });
                 } else {
-                    url = GetBasePath("users") + user.id + "/roles/";
+                    Prompt({
+                        hdr: `User access removal`,
+                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
+                        action: action,
+                        actionText: 'REMOVE'
+                    });
                 }
-
-                Rest.setUrl(url);
-                Rest.post({ "disassociate": true, "id": entry.id })
-                    .success(function() {
-                        Wait('stop');
-                        $state.go('.', null, { reload: true });
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors($rootScope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                        });
-                    });
             };
 
-            if (accessListEntry.team_id) {
-                Prompt({
-                    hdr: `Team access removal`,
-                    body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
-                    action: action,
-                    actionText: 'REMOVE TEAM ACCESS'
-                });
-            } else {
-                Prompt({
-                    hdr: `User access removal`,
-                    body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
-                    action: action,
-                    actionText: 'REMOVE'
-                });
-            }
-        };
-
-        $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
-            var action = function() {
-                $('#prompt-modal').modal('hide');
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.post({ "disassociate": true, "id": userId })
-                    .success(function() {
-                        Wait('stop');
-                        $rootScope.$broadcast("refreshList", "permission");
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors($rootScope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
+            $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
+                var action = function() {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({ "disassociate": true, "id": userId })
+                        .success(function() {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "permission");
+                        })
+                        .error(function(data, status) {
+                            ProcessErrors($rootScope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
+                            });
                         });
-                    });
-            };
+                };
 
-            Prompt({
-                hdr: `Remove role`,
-                body: `
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
                         <div class="Prompt-bodyQuery">
                             Confirm  the removal of the ${roleType}
                                 <span class="Prompt-emphasis"> ${roleName} </span>
                             role associated with ${userName}.
                         </div>
                     `,
-                action: action,
-                actionText: 'REMOVE'
-            });
-        };
-
-        $rootScope.deletePermissionFromTeam = function(teamId, teamName, roleName, roleType, url) {
-            var action = function() {
-                $('#prompt-modal').modal('hide');
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.post({ "disassociate": true, "id": teamId })
-                    .success(function() {
-                        Wait('stop');
-                        $rootScope.$broadcast("refreshList", "role");
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors($rootScope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                        });
-                    });
+                    action: action,
+                    actionText: 'REMOVE'
+                });
             };
 
-            Prompt({
-                hdr: `Remove role`,
-                body: `
+            $rootScope.deletePermissionFromTeam = function(teamId, teamName, roleName, roleType, url) {
+                var action = function() {
+                    $('#prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(url);
+                    Rest.post({ "disassociate": true, "id": teamId })
+                        .success(function() {
+                            Wait('stop');
+                            $rootScope.$broadcast("refreshList", "role");
+                        })
+                        .error(function(data, status) {
+                            ProcessErrors($rootScope, data, status, null, {
+                                hdr: 'Error!',
+                                msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
+                            });
+                        });
+                };
+
+                Prompt({
+                    hdr: `Remove role`,
+                    body: `
                         <div class="Prompt-bodyQuery">
                             Confirm  the removal of the ${roleType}
                                 <span class="Prompt-emphasis"> ${roleName} </span>
                             role associated with the ${teamName} team.
                         </div>
                     `,
-                action: action,
-                actionText: 'REMOVE'
-            });
-        };
+                    action: action,
+                    actionText: 'REMOVE'
+                });
+            };
 
-        function activateTab() {
-            // Make the correct tab active
-            var base = $location.path().replace(/^\//, '').split('/')[0];
+            function activateTab() {
+                // Make the correct tab active
+                var base = $location.path().replace(/^\//, '').split('/')[0];
 
-            if (base === '') {
-                base = 'home';
-            } else {
-                //base.replace(/\_/g, ' ');
-                base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
-            }
-            //make sure that the tower icon works when not in portal mode
-            $('.navbar-brand').attr('href', '/#/home');
-            $rootScope.portalMode = false;
-            if (base === 'portal') {
-                $rootScope.portalMode = true;
-                //in portal mode we don't want the tower icon to lead anywhere
-                $('.navbar-brand').removeAttr('href');
-            }
-
-            $('#ansible-list-title').html('<strong>' + base.replace(/\_/, ' ') + '</strong>');
-
-            $('#ansible-main-menu li').each(function() {
-                $(this).removeClass('active');
-            });
-            $('#ansible-main-menu #' + base).addClass('active');
-            // Apply to mobile menu as well
-            $('#ansible-mobile-menu a').each(function() {
-                $(this).removeClass('active');
-            });
-            $('#ansible-mobile-menu a[href="#' + base + '"]').addClass('active');
-        }
-
-        if ($rootScope.removeConfigReady) {
-            $rootScope.removeConfigReady();
-        }
-        $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
-            var list, id;
-            // initially set row edit indicator for crud pages
-            if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
-                list = $location.$$path.split("/")[3];
-                id = $location.$$path.split("/")[4];
-                $rootScope.listBeingEdited = list;
-                $rootScope.rowBeingEdited = id;
-                $rootScope.initialIndicatorLoad = true;
-            } else if ($location.$$path.split("/")[2]) {
-                list = $location.$$path.split("/")[1];
-                id = $location.$$path.split("/")[2];
-                $rootScope.listBeingEdited = list;
-                $rootScope.rowBeingEdited = id;
-            }
-
-            LoadBasePaths();
-
-            $rootScope.crumbCache = [];
-
-            // $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
-            //     SocketService.subscribe(toState, toParams);
-            // });
-
-            $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
-
-                if (fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')) {
-                    $rootScope.licenseMissing = toParams.licenseMissing;
+                if (base === '') {
+                    base = 'home';
+                } else {
+                    //base.replace(/\_/g, ' ');
+                    base = (base === 'job_events' || base === 'job_host_summaries') ? 'jobs' : base;
                 }
+                //make sure that the tower icon works when not in portal mode
+                $('.navbar-brand').attr('href', '/#/home');
+                $rootScope.portalMode = false;
+                if (base === 'portal') {
+                    $rootScope.portalMode = true;
+                    //in portal mode we don't want the tower icon to lead anywhere
+                    $('.navbar-brand').removeAttr('href');
+                }
+
+                $('#ansible-list-title').html('<strong>' + base.replace(/\_/, ' ') + '</strong>');
+
+                $('#ansible-main-menu li').each(function() {
+                    $(this).removeClass('active');
+                });
+                $('#ansible-main-menu #' + base).addClass('active');
+                // Apply to mobile menu as well
+                $('#ansible-mobile-menu a').each(function() {
+                    $(this).removeClass('active');
+                });
+                $('#ansible-mobile-menu a[href="#' + base + '"]').addClass('active');
+            }
+
+            if ($rootScope.removeConfigReady) {
+                $rootScope.removeConfigReady();
+            }
+            $rootScope.removeConfigReady = $rootScope.$on('ConfigReady', function() {
                 var list, id;
-                // broadcast event change if editing crud object
+                // initially set row edit indicator for crud pages
                 if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
                     list = $location.$$path.split("/")[3];
                     id = $location.$$path.split("/")[4];
-
-                    if (!$rootScope.initialIndicatorLoad) {
-                        delete $rootScope.listBeingEdited;
-                        delete $rootScope.rowBeingEdited;
-                    } else {
-                        delete $rootScope.initialIndicatorLoad;
-                    }
-
-                    $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
+                    $rootScope.initialIndicatorLoad = true;
                 } else if ($location.$$path.split("/")[2]) {
                     list = $location.$$path.split("/")[1];
                     id = $location.$$path.split("/")[2];
-
-                    delete $rootScope.listBeingEdited;
-                    delete $rootScope.rowBeingEdited;
-
-                    $rootScope.$broadcast("EditIndicatorChange", list, id);
-                } else if ($rootScope.addedAnItem) {
-                    delete $rootScope.addedAnItem;
-                    $rootScope.$broadcast("RemoveIndicator");
-                } else {
-                    $rootScope.$broadcast("RemoveIndicator");
+                    $rootScope.listBeingEdited = list;
+                    $rootScope.rowBeingEdited = id;
                 }
-            });
 
-            if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
-                // User not authenticated, redirect to login page
-                $location.path('/login');
-            } else {
-                var lastUser = $cookieStore.get('current_user'),
-                    timestammp = Store('sessionTime');
-                if (lastUser && lastUser.id && timestammp && timestammp[lastUser.id] && timestammp[lastUser.id].loggedIn) {
-                    var stime = timestammp[lastUser.id].time,
-                        now = new Date().getTime();
-                    if ((stime - now) <= 0) {
-                        $location.path('/login');
+                LoadBasePaths();
+
+                $rootScope.crumbCache = [];
+
+                // $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
+                //     SocketService.subscribe(toState, toParams);
+                // });
+
+                $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
+
+                    if (fromState.name === 'license' && toParams.hasOwnProperty('licenseMissing')) {
+                        $rootScope.licenseMissing = toParams.licenseMissing;
+                    }
+                    var list, id;
+                    // broadcast event change if editing crud object
+                    if ($location.$$path && $location.$$path.split("/")[3] && $location.$$path.split("/")[3] === "schedules") {
+                        list = $location.$$path.split("/")[3];
+                        id = $location.$$path.split("/")[4];
+
+                        if (!$rootScope.initialIndicatorLoad) {
+                            delete $rootScope.listBeingEdited;
+                            delete $rootScope.rowBeingEdited;
+                        } else {
+                            delete $rootScope.initialIndicatorLoad;
+                        }
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($location.$$path.split("/")[2]) {
+                        list = $location.$$path.split("/")[1];
+                        id = $location.$$path.split("/")[2];
+
+                        delete $rootScope.listBeingEdited;
+                        delete $rootScope.rowBeingEdited;
+
+                        $rootScope.$broadcast("EditIndicatorChange", list, id);
+                    } else if ($rootScope.addedAnItem) {
+                        delete $rootScope.addedAnItem;
+                        $rootScope.$broadcast("RemoveIndicator");
+                    } else {
+                        $rootScope.$broadcast("RemoveIndicator");
+                    }
+                });
+
+                if (!Authorization.getToken() || !Authorization.isUserLoggedIn()) {
+                    // User not authenticated, redirect to login page
+                    $location.path('/login');
+                } else {
+                    var lastUser = $cookieStore.get('current_user'),
+                        timestammp = Store('sessionTime');
+                    if (lastUser && lastUser.id && timestammp && timestammp[lastUser.id] && timestammp[lastUser.id].loggedIn) {
+                        var stime = timestammp[lastUser.id].time,
+                            now = new Date().getTime();
+                        if ((stime - now) <= 0) {
+                            $location.path('/login');
+                        }
+                    }
+                    // If browser refresh, set the user_is_superuser value
+                    $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
+                    $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
+
+                    // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
+                    if (!_.contains($location.$$url, '/login')) {
+                        ConfigService.getConfig().then(function() {
+                            Timer.init().then(function(timer) {
+                                $rootScope.sessionTimer = timer;
+                                SocketService.init();
+                                pendoService.issuePendoIdentity();
+                                CheckLicense.test();
+                                FeaturesService.get();
+                                if ($location.$$path === "/home" && $state.current && $state.current.name === "") {
+                                    $state.go('dashboard');
+                                } else if ($location.$$path === "/portal" && $state.current && $state.current.name === "") {
+                                    $state.go('portalMode');
+                                }
+                            });
+                        });
                     }
                 }
-                // If browser refresh, set the user_is_superuser value
-                $rootScope.user_is_superuser = Authorization.getUserInfo('is_superuser');
-                $rootScope.user_is_system_auditor = Authorization.getUserInfo('is_system_auditor');
 
-                // state the user refreshes we want to open the socket, except if the user is on the login page, which should happen after the user logs in (see the AuthService module for that call to OpenSocket)
-                if (!_.contains($location.$$url, '/login')) {
-                    ConfigService.getConfig().then(function() {
-                        Timer.init().then(function(timer) {
-                            $rootScope.sessionTimer = timer;
-                            SocketService.init();
-                            pendoService.issuePendoIdentity();
-                            CheckLicense.test();
-                            FeaturesService.get();
-                            if ($location.$$path === "/home" && $state.current && $state.current.name === "") {
-                                $state.go('dashboard');
-                            } else if ($location.$$path === "/portal" && $state.current && $state.current.name === "") {
-                                $state.go('portalMode');
-                            }
-                        });
-                    });
-                }
+                activateTab();
+
+                $rootScope.viewCurrentUser = function() {
+                    $location.path('/users/' + $rootScope.current_user.id);
+                };
+
+                $rootScope.viewLicense = function() {
+                    $location.path('/license');
+                };
+                $rootScope.toggleTab = function(e, tab, tabs) {
+                    e.preventDefault();
+                    $('#' + tabs + ' #' + tab).tab('show');
+                };
+
+                $rootScope.leavePortal = function() {
+                    $rootScope.portalMode = false;
+                    $location.path('/home/');
+                };
+
+            }); // end of 'ConfigReady'
+
+
+            if (!$AnsibleConfig) {
+                // create a promise that will resolve state $AnsibleConfig is loaded
+                $rootScope.loginConfig = $q.defer();
             }
+            if (!$rootScope.featuresConfigured) {
+                // create a promise that will resolve when features are loaded
+                $rootScope.featuresConfigured = $q.defer();
+            }
+            $rootScope.licenseMissing = true;
+            //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
+            // this, set the last path to /portal for instances where portal is visited for the first time.
+            $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;
 
-            activateTab();
-
-            $rootScope.viewCurrentUser = function() {
-                $location.path('/users/' + $rootScope.current_user.id);
-            };
-
-            $rootScope.viewLicense = function() {
-                $location.path('/license');
-            };
-            $rootScope.toggleTab = function(e, tab, tabs) {
-                e.preventDefault();
-                $('#' + tabs + ' #' + tab).tab('show');
-            };
-
-            $rootScope.leavePortal = function() {
-                $rootScope.portalMode = false;
-                $location.path('/home/');
-            };
-
-        }); // end of 'ConfigReady'
-
-
-        if (!$AnsibleConfig) {
-            // create a promise that will resolve state $AnsibleConfig is loaded
-            $rootScope.loginConfig = $q.defer();
+            LoadConfig();
         }
-        if (!$rootScope.featuresConfigured) {
-            // create a promise that will resolve when features are loaded
-            $rootScope.featuresConfigured = $q.defer();
-        }
-        $rootScope.licenseMissing = true;
-        //the authorization controller redirects to the home page automatcially if there is no last path defined. in order to override
-        // this, set the last path to /portal for instances where portal is visited for the first time.
-        $rootScope.lastPath = ($location.path() === "/portal") ? 'portal' : undefined;
-
-        LoadConfig();
-    }
-]);
+    ]);
 
 export default tower;

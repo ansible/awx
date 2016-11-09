@@ -30,6 +30,7 @@ module.exports = function(grunt) {
         'clean:tmp',
         'clean:static',
         'concurrent:dev',
+        'sync',
     ]);
 
     grunt.registerTask('devNoSync', [

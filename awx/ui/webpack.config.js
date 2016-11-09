@@ -1,5 +1,16 @@
-var path = require('path'),
-    webpack = require('webpack');
+var awx_env,
+    path = require('path'),
+    webpack = require('webpack'),
+    options = require('minimist')(JSON.parse(process.env.npm_config_argv).remain),
+    merge = require('lodash').merge;
+
+awx_env = {
+    'proxy': {
+        'django_host': process.env.npm_package_config_django_host,
+        'django_port': process.env.npm_package_config_django_port
+    }
+};
+merge(awx_env, options);
 
 var vendorPkgs = [
     'angular',
@@ -54,6 +65,7 @@ var dev = {
         }),
         // (chunkName, outfileName)
         new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
+        new webpack.DefinePlugin({ $ENV: JSON.stringify(awx_env) })
     ],
     module: {
         preLoaders: [{
@@ -65,8 +77,7 @@ var dev = {
                 emitErrors: true
             }
         }],
-        loaders: [
-        {
+        loaders: [{
             // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
             test: /\.angular-tz-extensions.js$/,
             loader: 'imports?define=>false'
@@ -118,8 +129,7 @@ var release = {
         })
     ],
     module: {
-        loaders: [
-        {
+        loaders: [{
             // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
             test: /\.angular-tz-extensions.js$/,
             loader: 'imports?define=>false!'
