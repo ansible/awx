@@ -759,6 +759,16 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
 
     @property
+    def spawned_by_workflow(self):
+        return self.launch_type == 'workflow'
+
+    @property
+    def workflow_job_id(self):
+        if self.spawned_by_workflow():
+            return self.unified_job_node.workflow_job.pk
+        return None
+
+    @property
     def celery_task(self):
         try:
             if self.celery_task_id:

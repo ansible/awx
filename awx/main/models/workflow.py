@@ -185,9 +185,9 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
         return WorkflowJobNode.objects.create(**create_kwargs)
 
 class WorkflowJobNode(WorkflowNodeBase):
-    job = models.ForeignKey(
+    job = models.OneToOneField(
         'UnifiedJob',
-        related_name='unified_job_nodes',
+        related_name='unified_job_node',
         blank=True,
         null=True,
         default=None,
