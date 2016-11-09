@@ -45,17 +45,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             });
         }
 
-        function resetPromptFields() {
-            $scope.credential = null;
-            $scope.credential_name = null;
-            $scope.inventory = null;
-            $scope.inventory_name = null;
-            $scope.job_type = null;
-            $scope.limit = null;
-            $scope.job_tags = null;
-            $scope.skip_tags = null;
-        }
-
         function resetNodeForm() {
             $scope.workflowMakerFormConfig.nodeMode = "idle";
             $scope.showTypeOptions = false;
@@ -69,9 +58,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             $scope.edgeType = "success";
             $scope.edgeTypeRestriction = null;
             $scope.workflowMakerFormConfig.activeTab = "jobs";
-
-            resetPromptFields();
-
         }
 
         $scope.lookUpInventory = function(){
@@ -141,26 +127,26 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
         };
 
-        $scope.confirmNodeForm = function() {
+        $scope.confirmNodeForm = function(formValues) {console.log(formValues);
             if ($scope.workflowMakerFormConfig.nodeMode === "add") {
-                if ($scope.selectedTemplate && $scope.edgeType) {
+                if ($scope.selectedTemplate && formValues.edgeType) {
 
                     $scope.placeholderNode.unifiedJobTemplate = $scope.selectedTemplate;
-                    $scope.placeholderNode.edgeType = $scope.edgeType;
+                    $scope.placeholderNode.edgeType = formValues.edgeType;
                     if ($scope.placeholderNode.unifiedJobTemplate.type === 'job_template') {
                         $scope.placeholderNode.promptValues = {
                             credential: {
-                                id: $scope.credential,
-                                name: $scope.credential_name
+                                id: formValues.credential,
+                                name: formValues.credential_name
                             },
                             inventory: {
-                                id: $scope.inventory,
-                                name: $scope.inventory_name
+                                id: formValues.inventory,
+                                name: formValues.inventory_name
                             },
-                            limit: $scope.limit,
-                            job_type: $scope.job_type && $scope.job_type.value ? $scope.job_type.value : null,
-                            job_tags: $scope.job_tags,
-                            skip_tags: $scope.skip_tags
+                            limit: formValues.limit,
+                            job_type: formValues.job_type && formValues.job_type.value ? formValues.job_type.value : null,
+                            job_tags: formValues.job_tags,
+                            skip_tags: formValues.skip_tags
                         };
                     }
                     $scope.placeholderNode.canEdit = true;
@@ -174,25 +160,25 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
                 }
             } else if ($scope.workflowMakerFormConfig.nodeMode === "edit") {
-                if ($scope.selectedTemplate && $scope.edgeType) {
+                if ($scope.selectedTemplate && formValues.edgeType) {
                     $scope.nodeBeingEdited.unifiedJobTemplate = $scope.selectedTemplate;
-                    $scope.nodeBeingEdited.edgeType = $scope.edgeType;
+                    $scope.nodeBeingEdited.edgeType = formValues.edgeType;
 
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.type === 'job_template') {
                         $scope.nodeBeingEdited.promptValues = {
                             credential: {
-                                id: $scope.credential,
-                                name: $scope.credential_name
+                                id: formValues.credential,
+                                name: formValues.credential_name
                             },
                             inventory: {
-                                id: $scope.inventory,
-                                name: $scope.inventory_name
+                                id: formValues.inventory,
+                                name: formValues.inventory_name
                             },
-                            limit: $scope.limit,
-                            job_type: $scope.job_type && $scope.job_type.value ? $scope.job_type.value : null,
-                            job_tags: $scope.job_tags,
-                            skip_tags: $scope.skip_tags
-                        };
+                            limit: formValues.limit,
+                            job_type: formValues.job_type && formValues.job_type.value ? formValues.job_type.value : null,
+                            job_tags: formValues.job_tags,
+                            skip_tags: formValues.skip_tags
+                        };console.log($scope.nodeBeingEdited.promptValues);
                     }
 
                     $scope.nodeBeingEdited.isActiveEdit = false;
@@ -248,48 +234,50 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
                 let finishConfiguringEdit = function() {
 
+                    let formValues = {};
+
                     // build any prompt values
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_credential_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.credential) {
-                            $scope.credential_name = $scope.nodeBeingEdited.promptValues.credential.name;
-                            $scope.credentiial = $scope.nodeBeingEdited.promptValues.credential.id;
+                            formValues.credential_name = $scope.nodeBeingEdited.promptValues.credential.name;
+                            formValues.credential = $scope.nodeBeingEdited.promptValues.credential.id;
                         } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential) {
-                            $scope.credential_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name : null;
-                            $scope.credential = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id : null;
+                            formValues.credential_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name : null;
+                            formValues.credential = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id : null;
                         } else {
-                            $scope.credential_name = null;
-                            $scope.credential = null;
+                            formValues.credential_name = null;
+                            formValues.credential = null;
                         }
                     }
 
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_inventory_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.inventory) {
-                            $scope.inventory_name = $scope.nodeBeingEdited.promptValues.inventory.name;
-                            $scope.inventory = $scope.nodeBeingEdited.promptValues.inventory.id;
+                            formValues.inventory_name = $scope.nodeBeingEdited.promptValues.inventory.name;
+                            formValues.inventory = $scope.nodeBeingEdited.promptValues.inventory.id;
                         } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory) {
-                            $scope.inventory_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name : null;
-                            $scope.inventory = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id : null;
+                            formValues.inventory_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name : null;
+                            formValues.inventory = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id : null;
                         } else {
-                            $scope.inventory_name = null;
-                            $scope.inventory = null;
+                            formValues.inventory_name = null;
+                            formValues.inventory = null;
                         }
                     }
 
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_job_type_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.job_type) {
-                            $scope.job_type = {
+                            formValues.job_type = {
                                 value: $scope.nodeBeingEdited.promptValues.job_type
                             };
                         } else if ($scope.nodeBeingEdited.originalNodeObj.job_type) {
-                            $scope.job_type = {
+                            formValues.job_type = {
                                 value: $scope.nodeBeingEdited.originalNodeObj.job_type
                             };
                         } else if ($scope.nodeBeingEdited.unifiedJobTemplate.job_type) {
-                            $scope.job_type = {
+                            formValues.job_type = {
                                 value: $scope.nodeBeingEdited.unifiedJobTemplate.job_type
                             };
                         } else {
-                            $scope.job_type = {
+                            formValues.job_type = {
                                 value: null
                             };
                         }
@@ -305,35 +293,35 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_limit_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.limit === 'string') {
-                            $scope.limit = $scope.nodeBeingEdited.promptValues.limit;
+                            formValues.limit = $scope.nodeBeingEdited.promptValues.limit;
                         } else if (typeof $scope.nodeBeingEdited.originalNodeObj.limit === 'string') {
-                            $scope.limit = $scope.nodeBeingEdited.originalNodeObj.limit;
+                            formValues.limit = $scope.nodeBeingEdited.originalNodeObj.limit;
                         } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.limit === 'string') {
-                            $scope.limit = $scope.nodeBeingEdited.unifiedJobTemplate.limit;
+                            formValues.limit = $scope.nodeBeingEdited.unifiedJobTemplate.limit;
                         } else {
-                            $scope.limit = null;
+                            formValues.limit = null;
                         }
                     }
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_skip_tags_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.skip_tags === 'string') {
-                            $scope.skip_tags = $scope.nodeBeingEdited.promptValues.skip_tags;
+                            formValues.skip_tags = $scope.nodeBeingEdited.promptValues.skip_tags;
                         } else if (typeof $scope.nodeBeingEdited.originalNodeObj.skip_tags === 'string') {
-                            $scope.skip_tags = $scope.nodeBeingEdited.originalNodeObj.skip_tags;
+                            formValues.skip_tags = $scope.nodeBeingEdited.originalNodeObj.skip_tags;
                         } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags === 'string') {
-                            $scope.skip_tags = $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags;
+                            formValues.skip_tags = $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags;
                         } else {
-                            $scope.skip_tags = null;
+                            formValues.skip_tags = null;
                         }
                     }
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_tags_on_launch) {
                         if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.job_tags === 'string') {
-                            $scope.job_tags = $scope.nodeBeingEdited.promptValues.job_tags;
+                            formValues.job_tags = $scope.nodeBeingEdited.promptValues.job_tags;
                         } else if (typeof $scope.nodeBeingEdited.originalNodeObj.job_tags === 'string') {
-                            $scope.job_tags = $scope.nodeBeingEdited.originalNodeObj.job_tags;
+                            formValues.job_tags = $scope.nodeBeingEdited.originalNodeObj.job_tags;
                         } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.job_tags === 'string') {
-                            $scope.job_tags = $scope.nodeBeingEdited.unifiedJobTemplate.job_tags;
+                            formValues.job_tags = $scope.nodeBeingEdited.unifiedJobTemplate.job_tags;
                         } else {
-                            $scope.job_tags = null;
+                            formValues.job_tags = null;
                         }
                     }
 
@@ -355,8 +343,13 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             break;
                     }
 
-                    $scope.edgeType = $scope.nodeBeingEdited.edgeType;
+                    formValues.edgeType = $scope.nodeBeingEdited.edgeType;
                     $scope.showTypeOptions = (parent && parent.isStartNode) ? false : true;
+
+                    $scope.$broadcast('templateSelected', {
+                        presetValues: formValues,
+                        activeTab: $scope.workflowMakerFormConfig.activeTab
+                    });
 
                     $scope.$broadcast("refreshWorkflowChart");
                 };
@@ -390,24 +383,18 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             $q.all(defers)
                                 .then(function(responses) {
                                     if (retrievingCredential) {
-                                        $scope.credential = responses[0].data.id;
-                                        $scope.credential_name = responses[0].data.name;
                                         $scope.nodeBeingEdited.promptValues.credential = {
                                             name: responses[0].data.name,
                                             id: responses[0].data.id
                                         };
 
                                         if (retrievingInventory) {
-                                            $scope.inventory = responses[1].data.id;
-                                            $scope.inventory_name = responses[1].data.name;
                                             $scope.nodeBeingEdited.promptValues.inventory = {
                                                 name: responses[1].data.name,
                                                 id: responses[1].data.id
                                             };
                                         }
                                     } else if (retrievingInventory) {
-                                        $scope.inventory = responses[0].data.id;
-                                        $scope.inventory_name = responses[0].data.name;
                                         $scope.nodeBeingEdited.promptValues.inventory = {
                                             name: responses[0].data.name,
                                             id: responses[0].data.id
@@ -481,34 +468,34 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             }
         };
 
-        $scope.$on('templateSelected', function(e, selectedTemplate) {
-
-            resetPromptFields();
+        $scope.templateSelected = function(selectedTemplate) {
 
             $scope.selectedTemplate = angular.copy(selectedTemplate);
 
+            let formValues = {};
+
             if ($scope.selectedTemplate.ask_credential_on_launch) {
                 if ($scope.selectedTemplate.summary_fields.credential) {
-                    $scope.credential_name = $scope.selectedTemplate.summary_fields.credential.name ? $scope.selectedTemplate.summary_fields.credential.name : null;
-                    $scope.credential = $scope.selectedTemplate.summary_fields.credential.id ? $scope.selectedTemplate.summary_fields.credential.id : null;
+                    formValues.credential_name = $scope.selectedTemplate.summary_fields.credential.name ? $scope.selectedTemplate.summary_fields.credential.name : null;
+                    formValues.credential = $scope.selectedTemplate.summary_fields.credential.id ? $scope.selectedTemplate.summary_fields.credential.id : null;
                 } else {
-                    $scope.credential_name = null;
-                    $scope.credential = null;
+                    formValues.credential_name = null;
+                    formValues.credential = null;
                 }
             }
 
             if ($scope.selectedTemplate.ask_inventory_on_launch) {
                 if ($scope.selectedTemplate.summary_fields.inventory) {
-                    $scope.inventory_name = $scope.selectedTemplate.summary_fields.inventory.name ? $scope.selectedTemplate.summary_fields.inventory.name : null;
-                    $scope.inventory = $scope.selectedTemplate.summary_fields.inventory.id ? $scope.selectedTemplate.summary_fields.inventory.id : null;
+                    formValues.inventory_name = $scope.selectedTemplate.summary_fields.inventory.name ? $scope.selectedTemplate.summary_fields.inventory.name : null;
+                    formValues.inventory = $scope.selectedTemplate.summary_fields.inventory.id ? $scope.selectedTemplate.summary_fields.inventory.id : null;
                 } else {
-                    $scope.inventory_name = null;
-                    $scope.inventory = null;
+                    formValues.inventory_name = null;
+                    formValues.inventory = null;
                 }
             }
 
             if ($scope.selectedTemplate.ask_job_type_on_launch) {
-                $scope.job_type = {
+                formValues.job_type = {
                     value: $scope.selectedTemplate.job_type ? $scope.selectedTemplate.job_type : null
                 };
 
@@ -520,19 +507,25 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             }
 
             if ($scope.selectedTemplate.ask_limit_on_launch) {
-                $scope.limit = $scope.selectedTemplate.limit ? $scope.selectedTemplate.limit : null;
+                formValues.limit = $scope.selectedTemplate.limit ? $scope.selectedTemplate.limit : null;
             }
 
             if ($scope.selectedTemplate.ask_skip_tags_on_launch) {
-                $scope.skip_tags = $scope.selectedTemplate.skip_tags ? $scope.selectedTemplate.skip_tags : null;
+                formValues.skip_tags = $scope.selectedTemplate.skip_tags ? $scope.selectedTemplate.skip_tags : null;
             }
 
             if ($scope.selectedTemplate.ask_tags_on_launch) {
-                $scope.job_tags = $scope.selectedTemplate.job_tags ? $scope.selectedTemplate.job_tags : null;
+                formValues.job_tags = $scope.selectedTemplate.job_tags ? $scope.selectedTemplate.job_tags : null;
             }
 
-            $scope.$broadcast('clearOtherTemplateLists', $scope.workflowMakerFormConfig.activeTab);
-        });
+            // Communicate down the scope chain to our children that a template has been selected.  This
+            // will handle populating the form properly as well as clearing out any previously selected
+            // templates in different lists
+            $scope.$broadcast('templateSelected', {
+                presetValues: formValues,
+                activeTab: $scope.workflowMakerFormConfig.activeTab
+            });
+        };
 
         init();
 

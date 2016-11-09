@@ -1064,7 +1064,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += label();
 
                         html += "<div ";
-                        html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+                        html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
+                        html += (horizontal) ? "class=\"radio-group " + getFieldWidth() + "\"" : "class=\"radio-group\"";
                         html += ">\n";
 
                         for (i = 0; i < field.options.length; i++) {
@@ -1078,11 +1079,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                             html += (field.readonly) ? "disabled " : "";
                             html += (field.required) ? "required " : "";
+                            if(field.awRequiredWhen) {
+                                html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                                html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                                html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
+                            }
                             html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "";
                             html += " > " + field.options[i].label + "\n";
                             html += "</label>\n";
                         }
-                        if (field.required) {
+                        if (field.required || field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
                                 this.form.name + '_form.' + fld + ".$dirty && " +
                                 this.form.name + '_form.' + fld + ".$error.required\">Please select a value.</div>\n";

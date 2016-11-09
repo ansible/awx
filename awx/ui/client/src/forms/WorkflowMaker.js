@@ -24,6 +24,28 @@ export default
             showHeader: false,
 
             fields: {
+                edgeType: {
+                    label: 'Type',
+                    type: 'radio_group',
+                    ngShow: 'selectedTemplate && showTypeOptions',
+                    options: [
+                        {
+                            label: 'On&nbsp;Success',
+                            value: 'success'
+                        },
+                        {
+                            label: 'On&nbsp;Failure',
+                            value: 'failure'
+                        },
+                        {
+                            label: 'Always',
+                            value: 'always'
+                        }
+                    ],
+                    awRequiredWhen: {
+                        reqExpression: 'showTypeOptions'
+                    }
+                },
                 credential: {
                     label: 'Credential',
                     type: 'lookup',
@@ -137,7 +159,7 @@ export default
                     ngClick: 'cancelNodeForm()'
                 },
                 save: {
-                    ngClick: 'confirmNodeForm()',
+                    ngClick: 'saveNodeForm()',
                     ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate"
                 }
             }

@@ -142,14 +142,14 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                                     name: row.name
                                                 };
 
-                                                $scope.$emit('templateSelected', row);
+                                                $scope.templateSelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
-                                        if(tab !== 'jobs') {
+                                    $scope.$on('templateSelected', function(e, options) {
+                                        if(options.activeTab !== 'jobs') {
                                             // Clear out any selected job
                                         }
                                     });
@@ -190,14 +190,14 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                                     name: row.name
                                                 };
 
-                                                $scope.$emit('templateSelected', row);
+                                                $scope.templateSelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
-                                        if(tab !== 'project_sync') {
+                                    $scope.$on('templateSelected', function(e, options) {
+                                        if(options.activeTab !== 'project_sync') {
 
                                         }
                                     });
@@ -236,14 +236,14 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                                     name: row.name
                                                 };
 
-                                                $scope.$emit('templateSelected', row);
+                                                $scope.templateSelected(row);
                                             }
                                         });
 
                                     };
 
-                                    $scope.$on('clearOtherTemplateLists', function(e, tab) {
-                                        if(tab !== 'inventory_sync') {
+                                    $scope.$on('templateSelected', function(e, options) {
+                                        if(options.activeTab !== 'inventory_sync') {
 
                                         }
                                     });
@@ -259,7 +259,46 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                     noPanel: true
                                 });
                                 return html;
-                            }
+                            },
+                            controller: ['$scope',
+                                function($scope) {
+                                    function resetPromptFields() {
+                                        $scope.credential = null;
+                                        $scope.credential_name = null;
+                                        $scope.inventory = null;
+                                        $scope.inventory_name = null;
+                                        $scope.job_type = null;
+                                        $scope.limit = null;
+                                        $scope.job_tags = null;
+                                        $scope.skip_tags = null;
+                                    }
+
+                                    $scope.saveNodeForm = function(){
+                                        // Gather up all of our form data - then let the main scope know what
+                                        // the new data is
+
+                                        $scope.confirmNodeForm({
+                                            skip_tags: $scope.skip_tags,
+                                            job_tags: $scope.job_tags,
+                                            limit: $scope.limit,
+                                            credential: $scope.credential,
+                                            credential_name: $scope.credential_name,
+                                            inventory: $scope.inventory,
+                                            inventory_name: $scope.inventory_name,
+                                            edgeType: $scope.edgeType,
+                                            job_type: $scope.job_type
+                                        });
+                                    };
+
+                                    $scope.$on('templateSelected', function(e, options) {
+                                        resetPromptFields();
+                                        // Loop across the preset values and attach them to scope
+                                        _.forOwn(options.presetValues, function(value, key) {
+                                            $scope[key] = value;
+                                        });
+                                    });
+                                }
+                            ]
                         }
                     },
                     resolve: {

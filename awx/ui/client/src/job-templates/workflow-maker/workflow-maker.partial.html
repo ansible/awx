@@ -76,25 +76,6 @@
                     <div id="workflow-project-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'project_sync'" ui-view="projectSyncList"></div>
                     <div id="workflow-inventory-sync-list" ng-show="workflowMakerFormConfig.activeTab === 'inventory_sync'" ui-view="inventorySyncList"></div>
                 </div>
-                <div ng-show="showTypeOptions" class="WorkflowMaker-formElement">
-                    <label class="Form-inputLabelContainer">
-                        <span class="Form-inputLabel prepend-asterisk"> TYPE</span>
-                    </label>
-                    <div>
-                        <div ng-hide="edgeTypeRestriction ==='always'">
-                            <input type="radio" ng-model="edgeType" id="workflow-type-success" value="success">
-                            <label class="WorkflowMaker-formLabel" for="workflow-type-success">On Success</label>
-                        </div>
-                        <div ng-hide="edgeTypeRestriction ==='always'">
-                            <input type="radio" ng-model="edgeType" id="workflow-type-failure" value="failure">
-                            <label class="WorkflowMaker-formLabel" for="workflow-type-failure">On Failure</label>
-                        </div>
-                        <div ng-hide="edgeTypeRestriction ==='successFailure'">
-                            <input type="radio" ng-model="edgeType" id="workflow-type-always" value="always">
-                            <label class="WorkflowMaker-formLabel" for="workflow-type-always">Always</label>
-                        </div>
-                    </div>
-                </div>
                 <div id="workflow-maker-form" ui-view="workflowForm"></div>
             </div>
         </div>
