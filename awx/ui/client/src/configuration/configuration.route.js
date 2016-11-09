@@ -17,7 +17,12 @@
      name: 'configuration',
      route: '/configuration/:currentTab',
      params: {
-         currentTab: ''
+         currentTab: {
+             value: 'auth',
+             dynamic: true,
+             isOptional: true
+         }
+
      },
      ncyBreadcrumb: {
          label: "Edit Configuration"

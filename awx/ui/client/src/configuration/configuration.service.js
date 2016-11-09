@@ -59,7 +59,7 @@ export default ['GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest', '$rootSco
                 var deferred = $q.defer();
 
                 Rest.setUrl(url + '/all');
-                Rest.delete()
+                Rest.destroy()
                     .success(function(data) {
                         deferred.resolve(data);
                     })
