@@ -1,3 +1,5 @@
+/* jshint ignore:start */
+
 function isString(arg) {
     return typeof arg === 'string';
 }
@@ -45,8 +47,8 @@ export function format(f) {
     var args = arguments;
     var len = args.length;
     var str = String(f).replace(formatRegExp, function(x) {
-        if (x === '%%') {return '%';}
-        if (i >= len) {return x;}
+        if (x === '%%') return '%';
+        if (i >= len) return x;
         switch (x) {
         case '%s': return String(args[i++]);
         case '%d': return Number(args[i++]);
@@ -57,7 +59,6 @@ export function format(f) {
             } catch (_) {
                 return '[Circular]';
             }
-            break;
         default:
             return x;
         }
@@ -79,7 +80,7 @@ export default
         return function() {
             var langInfo = $window.navigator.language ||
                     $window.navigator.userLanguage;
-            //var langUrl = langInfo.replace('-', '_');
+            var langUrl = langInfo.replace('-', '_');
             //gettextCatalog.debug = true;
             gettextCatalog.setCurrentLanguage(langInfo);
             // TODO: the line below is commented out temporarily until

@@ -22,9 +22,8 @@
               if(res.type && res.type === 'job_template') {
                   $state.go('templates.editJobTemplate', {id: res.id}, {reload: true});
               }
-              else if(res.type && res.type === 'workflow') {
-                  // TODO: direct the user to the edit state for workflows
-              }
+              // Workflow edit to be implemented post 3.1 but we'll need to handle the
+              // state transition for that here
             });
  				})
   			.error(function(res, status){

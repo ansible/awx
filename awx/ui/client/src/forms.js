@@ -16,7 +16,6 @@ import JobEventData from "./forms/JobEventData";
 import JobSummary from "./forms/JobSummary";
 import JobTemplates from "./forms/JobTemplates";
 import JobVarsPrompt from "./forms/JobVarsPrompt";
-import Jobs from "./forms/Jobs";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
@@ -41,7 +40,6 @@ export
         JobSummary,
         JobTemplates,
         JobVarsPrompt,
-        Jobs,
         LogViewerOptions,
         LogViewerStatus,
         Organizations,

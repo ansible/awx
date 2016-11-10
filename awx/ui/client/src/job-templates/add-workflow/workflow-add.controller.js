@@ -80,14 +80,18 @@
                      $scope.variables, true);
 
                  // The idea here is that we want to find the new option elements that also have a label that exists in the dom
-                 $("#workflow_job_template_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
-                     $("#workflow_job_template_labels").siblings(".select2").first().find(".select2-selection__choice").each(function(labelIndex, label) {
-                         if($(option).text() === $(label).attr('title')) {
-                             // Mark that the option has a label present so that we can filter by that down below
-                             $(option).attr('data-label-is-present', true);
-                         }
-                     });
-                 });
+                 $("#workflow_job_template_labels > option")
+                    .filter("[data-select2-tag=true]")
+                    .each(function(optionIndex, option) {
+                        $("#workflow_job_template_labels")
+                            .siblings(".select2").first().find(".select2-selection__choice")
+                            .each(function(labelIndex, label) {
+                                if($(option).text() === $(label).attr('title')) {
+                                    // Mark that the option has a label present so that we can filter by that down below
+                                    $(option).attr('data-label-is-present', true);
+                                }
+                            });
+                    });
 
                  $scope.newLabels = $("#workflow_job_template_labels > option")
                      .filter("[data-select2-tag=true]")

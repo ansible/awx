@@ -36,8 +36,6 @@ export default
                 description: {
                     label: 'Description',
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
                     column: 1
                 },
                 organization: {
@@ -58,8 +56,6 @@ export default
                     class: 'Form-formGroup--fullWidth',
                     ngOptions: 'label.label for label in labelOptions track by label.value',
                     multiSelect: true,
-                    addRequired: false,
-                    editRequired: false,
                     dataTitle: 'Labels',
                     dataPlacement: 'right',
                     awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
@@ -70,8 +66,6 @@ export default
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     rows: 6,
-                    addRequired: false,
-                    editRequired: false,
                     "default": "---",
                     column: 2,
                     awPopOver: "<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +

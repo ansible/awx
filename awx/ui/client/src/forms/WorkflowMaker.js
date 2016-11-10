@@ -56,7 +56,6 @@ export default
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
                     requiredErrorMsg: "Please select a Credential.",
-                    column: 1,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
                      " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>",
@@ -65,7 +64,7 @@ export default
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_credential_on_launch",
                     awRequiredWhen: {
-                        reqExpression: 'selectedTemplate.ask_credential_on_launch'
+                        reqExpression: 'selectedTemplate && selectedTemplate.ask_credential_on_launch'
                     }
                 },
                 inventory: {
@@ -77,7 +76,6 @@ export default
                     basePath: 'organization',
                     ngClick: 'lookUpInventory()',
                     requiredErrorMsg: "Please select an Inventory.",
-                    column: 1,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
                     dataTitle: 'Inventory',
@@ -85,7 +83,7 @@ export default
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_inventory_on_launch",
                     awRequiredWhen: {
-                        reqExpression: 'selectedTemplate.ask_inventory_on_launch'
+                        reqExpression: 'selectedTemplate && selectedTemplate.ask_inventory_on_launch'
                     }
                 },
                 job_type: {
@@ -93,7 +91,6 @@ export default
                     type: 'select',
                     ngOptions: 'type.label for type in job_type_options track by type.value',
                     "default": 0,
-                    column: 1,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
                         " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
@@ -104,15 +101,12 @@ export default
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_job_type_on_launch",
                     awRequiredWhen: {
-                        reqExpression: 'selectedTemplate.ask_job_type_on_launch'
+                        reqExpression: 'selectedTemplate && selectedTemplate.ask_job_type_on_launch'
                     }
                 },
                 limit: {
                     label: 'Limit',
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false,
-                    column: 1,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                         "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
@@ -126,10 +120,7 @@ export default
                     label: 'Job Tags',
                     type: 'textarea',
                     rows: 5,
-                    addRequired: false,
-                    editRequired: false,
                     'elementClass': 'Form-textInput',
-                    column: 2,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
@@ -143,10 +134,7 @@ export default
                     label: 'Skip Tags',
                     type: 'textarea',
                     rows: 5,
-                    addRequired: false,
-                    editRequired: false,
                     'elementClass': 'Form-textInput',
-                    column: 2,
                     class: 'Form-formGroup--fullWidth',
                     awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.</p>" +
