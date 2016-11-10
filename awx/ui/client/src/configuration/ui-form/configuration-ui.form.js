@@ -18,7 +18,6 @@
                  reset: 'PENDO_TRACKING_STATE'
              }
          },
-
          buttons: {
              reset: {
                  ngClick: 'vm.resetAllConfirm()',
