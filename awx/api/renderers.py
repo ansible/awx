@@ -44,8 +44,11 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     def get_rendered_html_form(self, data, view, method, request):
         # Never show auto-generated form (only raw form).
         obj = getattr(view, 'object', None)
-        if obj is None and hasattr(view, 'get_object') and hasattr(view, 'retrieve'):
-            obj = view.get_object()
+        if obj is None and hasattr(view, 'get_object') and hasattr(view, 'retrieve'):# and view.check_permissions():
+            try:
+                obj = view.get_object()
+            except Exception:
+                obj = None
         with override_method(view, request, method) as request:
             if not self.show_form_for_method(view, method, request, obj):
                 return
