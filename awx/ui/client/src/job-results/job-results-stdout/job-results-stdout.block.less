@@ -1,7 +1,7 @@
 @import '../../shared/branding/colors.default.less';
 
 .JobResultsStdOut {
-    height: 100%;
+    height: ~"calc(100% - 70px)";
 }
 
 .JobResultsStdOut-toolbar {
@@ -31,6 +31,7 @@
     padding-right: 8px;
     padding-top: 10px;
     border-top-left-radius: 5px;
+    z-index: 1;
 }
 
 .JobResultsStdOut-expandAllButton {
@@ -85,21 +86,20 @@
 }
 
 .JobResultsStdOut-stdoutContainer {
-    height: ~"calc(100% - 108px)";
+    height: ~"calc(100% - 48px)";
     background-color: @default-no-items-bord;
-    border: 1px solid @default-list-header-bg;
-    border-top: 0px;
-    border-radius: 5px;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    margin-bottom: 10px;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .JobResultsStdOut-numberColumnPreload {
     background-color: #EBEBEB;
     width: 70px;
     position: fixed;
+    top: 148px;
+    bottom: 20px;
+    margin-top: 65px;
+    margin-bottom: 65px;
 }
 
 .JobResultsStdOut-aLineOfStdOut {
@@ -148,4 +148,22 @@
     white-space: pre-wrap;
     word-break: break-word;
     width:100%;
+}
+
+.JobResultsStdOut-footer {
+    height: 10px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: @default-no-items-bord;
+    border: 1px solid @default-list-header-bg;
+    border-top: 0px;
+    border-radius: 5px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.JobResultsStdOut-footerNumberColumn {
+    background-color: @default-list-header-bg;
+    width: 70px;
+    height: 100%;
 }
