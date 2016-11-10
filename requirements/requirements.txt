@@ -1,4 +1,4 @@
-git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
+git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.0
@@ -23,7 +23,8 @@ django-auth-ldap==1.2.6
 django-celery==3.1.17
 django-crum==0.6.1
 django-extensions==1.5.9
-git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
+django-jsonfield==1.0.1
+git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
 djangorestframework==3.3.2
@@ -32,15 +33,12 @@ django-solo==1.1.2
 django-split-settings==0.1.1
 django-transaction-hooks==0.2
 django-taggit==0.17.6
-git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
+git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
 funcsigs==0.4
 gevent==1.1
 gevent-websocket==0.9.5
-git+https://github.com/chrismeyersfsu/django-jsonfield.git@tower_0.9.12#egg=django-jsonfield
-git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
-git+https://github.com/umutbozkurt/django-rest-framework-mongoengine.git@5dfa1df79f81765d36c0de31dc1c2f390e42d428#egg=django-rest-framework-mongoengine
-git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=gevent-socketio
+git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
 greenlet==0.4.9
 dogpile.cache==0.5.7
 enum34==1.1.2
@@ -63,7 +61,6 @@ lxml==3.4.4
 Markdown==2.4.1
 M2Crypto==0.22.3
 mock==1.0.1
-mongoengine==0.9.0
 monotonic==0.6
 msgpack-python==0.4.7
 munch==2.0.4
@@ -90,7 +87,6 @@ pycrypto==2.6.1
 pycparser==2.14
 pygerduty==0.32.1
 PyJWT==1.4.0
-pymongo==2.8
 pyOpenSSL==16.0.0
 pyparsing==2.0.7
 pyrad==2.0
@@ -109,7 +105,7 @@ python-openid==2.2.5
 python-openstackclient==2.0.0
 python-radius==1.0
 python-saml==2.1.8
-git+https://github.com/matburt/python-social-auth.git@master#egg=python-social-auth
+python-social-auth==0.2.21
 python-swiftclient==2.7.0
 python-troveclient==1.4.0
 pytz==2015.7
