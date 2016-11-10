@@ -1,4 +1,4 @@
-git+https://github.com/chrismeyersfsu/ansiconv.git@tower_1.0.0#egg=ansiconv
+git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
 amqp==1.4.9
 anyjson==0.3.3
 appdirs==1.4.0
@@ -24,7 +24,7 @@ django-celery==3.1.17
 django-crum==0.6.1
 django-extensions==1.5.9
 django-jsonfield==1.0.1
-git+https://github.com/chrismeyersfsu/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
+git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
 djangorestframework==3.3.2
@@ -33,12 +33,12 @@ django-solo==1.1.2
 django-split-settings==0.1.1
 django-transaction-hooks==0.2
 django-taggit==0.17.6
-git+https://github.com/matburt/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
+git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
 dogpile.core==0.4.1
 funcsigs==0.4
 gevent==1.1
 gevent-websocket==0.9.5
-git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
+git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
 greenlet==0.4.9
 dogpile.cache==0.5.7
 enum34==1.1.2
