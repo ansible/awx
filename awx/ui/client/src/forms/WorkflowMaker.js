@@ -10,10 +10,16 @@
  * @description This form is for adding/editing a Job Template
 */
 
+// export default
+//     angular.module('WorkflowMakerFormDefinition', [])
+//
+//         .value ('WorkflowMakerFormObject', {
+
 export default
     angular.module('WorkflowMakerFormDefinition', [])
 
-        .value ('WorkflowMakerFormObject', {
+        .factory('WorkflowMakerFormObject', ['i18n', function(i18n) {
+        return {
 
             addTitle: '',
             editTitle: '',
@@ -25,23 +31,23 @@ export default
 
             fields: {
                 edgeType: {
-                    label: 'Type',
+                    label: i18n._('Type'),
                     type: 'radio_group',
                     ngShow: 'selectedTemplate && showTypeOptions',
                     ngDisabled: '!canAddWorkflowJobTemplate',
                     options: [
                         {
-                            label: 'On&nbsp;Success',
+                            label: i18n._('On&nbsp;Success'),
                             value: 'success',
                             ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
                         },
                         {
-                            label: 'On&nbsp;Failure',
+                            label: i18n._('On&nbsp;Failure'),
                             value: 'failure',
                             ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
                         },
                         {
-                            label: 'Always',
+                            label: i18n._('Always'),
                             value: 'always',
                             ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "always"'
                         }
@@ -51,16 +57,16 @@ export default
                     }
                 },
                 credential: {
-                    label: 'Credential',
+                    label: i18n._('Credential'),
                     type: 'lookup',
                     sourceModel: 'credential',
                     sourceField: 'name',
                     ngClick: 'lookUpCredential()',
-                    requiredErrorMsg: "Please select a Credential.",
+                    requiredErrorMsg: i18n._("Please select a Credential."),
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
-                     " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>",
-                    dataTitle: 'Credential',
+                    awPopOver: i18n._("<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
+                     " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>"),
+                    dataTitle: i18n._('Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_credential_on_launch",
@@ -70,17 +76,17 @@ export default
                     }
                 },
                 inventory: {
-                    label: 'Inventory',
+                    label: i18n._('Inventory'),
                     type: 'lookup',
                     sourceModel: 'inventory',
                     sourceField: 'name',
                     list: 'OrganizationList',
                     basePath: 'organization',
                     ngClick: 'lookUpInventory()',
-                    requiredErrorMsg: "Please select an Inventory.",
+                    requiredErrorMsg: i18n._("Please select an Inventory."),
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
-                    dataTitle: 'Inventory',
+                    awPopOver: i18n._("<p>Select the inventory containing the hosts you want this job to manage.</p>"),
+                    dataTitle: i18n._('Inventory'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_inventory_on_launch",
@@ -90,16 +96,16 @@ export default
                     }
                 },
                 job_type: {
-                    label: 'Job Type',
+                    label: i18n._('Job Type'),
                     type: 'select',
                     ngOptions: 'type.label for type in job_type_options track by type.value',
                     "default": 0,
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
+                    awPopOver: i18n._("<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
                         " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
                         " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature.</p>",
-                    dataTitle: 'Job Type',
+                        " scanned facts for use with Tower's System Tracking feature.</p>"),
+                    dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_job_type_on_launch",
@@ -109,43 +115,43 @@ export default
                     }
                 },
                 limit: {
-                    label: 'Limit',
+                    label: i18n._('Limit'),
                     type: 'text',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
+                    awPopOver: i18n._("<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                         "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
-                        "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>",
-                    dataTitle: 'Limit',
+                        "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>"),
+                    dataTitle: i18n._('Limit'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_limit_on_launch",
                     ngDisabled: '!canAddWorkflowJobTemplate'
                 },
                 job_tags: {
-                    label: 'Job Tags',
+                    label: i18n._('Job Tags'),
                     type: 'textarea',
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
+                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>",
-                    dataTitle: "Job Tags",
+                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    dataTitle: i18n._("Job Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_tags_on_launch",
                     ngDisabled: '!canAddWorkflowJobTemplate'
                 },
                 skip_tags: {
-                    label: 'Skip Tags',
+                    label: i18n._('Skip Tags'),
                     type: 'textarea',
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
+                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
                         "<p>Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>",
-                    dataTitle: "Skip Tags",
+                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    dataTitle: i18n._("Skip Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_skip_tags_on_launch",
@@ -167,7 +173,7 @@ export default
                     ngShow: 'canAddWorkflowJobTemplate'
                 }
             }
-        })
+        };}])
         .factory('WorkflowMakerForm', ['WorkflowMakerFormObject', 'NotificationsList', function(WorkflowMakerFormObject, NotificationsList) {
             return function() {
                 var itm;

@@ -13,9 +13,10 @@
 export default
     angular.module('WorkflowFormDefinition', [])
 
-        .value ('WorkflowFormObject', {
+        .factory('WorkflowFormObject', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New Workflow',
+            addTitle: i18n._('New Workflow'),
             editTitle: '{{ name }}',
             name: 'workflow_job_template',
             base: 'workflow',
@@ -27,57 +28,57 @@ export default
 
             fields: {
                 name: {
-                    label: 'Name',
+                    label: i18n._('Name'),
                     type: 'text',
                     required: true,
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     column: 1
                 },
                 description: {
-                    label: 'Description',
+                    label: i18n._('Description'),
                     type: 'text',
                     column: 1,
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 organization: {
-                    label: 'Organization',
+                    label: i18n._('Organization'),
                     type: 'lookup',
                     sourceModel: 'organization',
                     basePath: 'organizations',
                     list: 'OrganizationList',
                     sourceField: 'name',
-                    dataTitle: 'Organization',
+                    dataTitle: i18n._('Organization'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     column: 1,
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 labels: {
-                    label: 'Labels',
+                    label: i18n._('Labels'),
                     type: 'select',
                     class: 'Form-formGroup--fullWidth',
                     ngOptions: 'label.label for label in labelOptions track by label.value',
                     multiSelect: true,
-                    dataTitle: 'Labels',
+                    dataTitle: i18n._('Labels'),
                     dataPlacement: 'right',
-                    awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
+                    awPopOver: i18n._("<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>"),
                     dataContainer: 'body',
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 variables: {
-                    label: 'Extra Variables',
+                    label: i18n._('Extra Variables'),
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
                     rows: 6,
                     "default": "---",
                     column: 2,
-                    awPopOver: "<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
+                    awPopOver: i18n._("<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
                         "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
-                    dataTitle: 'Extra Variables',
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n"),
+                    dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
@@ -102,18 +103,20 @@ export default
 
             related: {
                 permissions: {
-                    awToolTip: 'Please save before assigning permissions',
+                    awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
-                    basePath: 'job_templates/:id/access_list/',
+                    basePath: 'api/v1/workflow_job_templates/{{$stateParams.workflow_job_template_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
                     type: 'collection',
-                    title: 'Permissions',
+                    title: i18n._('Permissions'),
                     iterator: 'permission',
                     index: false,
                     open: false,
-                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addPermission",
+                            ngClick: "$state.go('.add')",
                             label: 'Add',
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
@@ -134,14 +137,12 @@ export default
                             type: 'role',
                             noSort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
                             noSort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
                         }
                     }
                 },
@@ -155,23 +156,23 @@ export default
                     ngClick: 'addSurvey()',
                     ngShow: '!survey_exists',
                     awFeature: 'surveys',
-                    awToolTip: 'Please save before adding a survey',
+                    awToolTip: i18n._('Please save before adding a survey'),
                     dataPlacement: 'top',
-                    label: 'Add Survey',
+                    label: i18n._('Add Survey'),
                     class: 'Form-primaryButton'
                 },
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
                     ngShow: 'survey_exists',
-                    label: 'Edit Survey',
+                    label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 },
                 workflow_editor: {
                     ngClick: 'openWorkflowMaker()',
-                    awToolTip: 'Please save before defining the workflow graph',
+                    awToolTip: i18n._('Please save before defining the workflow graph'),
                     dataPlacement: 'top',
-                    label: 'Workflow Editor',
+                    label: i18n._('Workflow Editor'),
                     class: 'Form-primaryButton'
                 }
             },
@@ -188,7 +189,7 @@ export default
                     }
                 };
             }
-        })
+        };}])
 
         .factory('WorkflowForm', ['WorkflowFormObject', 'NotificationsList',
         function(WorkflowFormObject, NotificationsList) {
