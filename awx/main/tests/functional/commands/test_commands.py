@@ -8,8 +8,6 @@ except ImportError:
 
 from django.core.management import call_command
 
-from awx.main.models import Instance
-
 from awx.main.management.commands.update_password import UpdatePassword
 
 def run_command(name, *args, **options):

@@ -44,7 +44,7 @@ class InstanceManager(models.Manager):
         return self.all().count()
 
     def total_capacity(self):
-        sumval = self.filter(modified__gte=now()-timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
+        sumval = self.filter(modified__gte=now() - timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
                      .aggregate(total_capacity=Sum('capacity'))['total_capacity']
         return max(50, sumval)
 
