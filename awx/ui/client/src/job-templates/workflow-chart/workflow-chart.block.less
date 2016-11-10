@@ -1,35 +1,33 @@
-.WorkflowChart-isActiveEdit {
-    stroke: red;
-}
+@import "./client/src/shared/branding/colors.default.less";
 
 .nodeConnector circle, .nodeConnector .linkCross, .node .addCircle, .node .removeCircle, .node .WorkflowChart-hoverPath {
     opacity: 0;
 }
 
 .node .addCircle, .nodeConnector .addCircle {
-    fill: #5CB85C;
+    fill: @default-succ;
 }
 
 .addCircle.addHovering {
-    fill: #449D44;
+    fill: @default-succ-hov;
 }
 
 .node .removeCircle {
-    fill: #D9534F;
+    fill: @default-err;
 }
 
 .removeCircle.removeHovering {
-    fill: #C9302C;
+    fill: @default-err-hov;
 }
 
 .node .WorkflowChart-defaultText {
     font-size: 12px;
     font-family: 'Open Sans', sans-serif;
-    fill: #707070;
+    fill: @default-interface-txt;
 }
 
 .node .rect {
-    fill: #FCFCFC;
+    fill: @default-secondary-bg;
 }
 
 .rect.placeholder {
@@ -37,7 +35,7 @@
 }
 
 .node .transparentRect {
-    fill: #FFFFFF;
+    fill: @default-bg;
     opacity: 0;
 }
 
@@ -61,11 +59,11 @@
 }
 
 .WorkflowChart-svg {
-    background-color: #f6f6f6;
+    background-color: @default-no-items-bord;
 }
 .WorkflowChart-nodeTypeCircle {
-    fill: #848992;
+    fill: @default-icon;
 }
 .WorkflowChart-nodeTypeLetter {
-    fill: #FFFFFF;
+    fill: @default-bg;
 }
