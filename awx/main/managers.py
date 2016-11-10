@@ -2,8 +2,10 @@
 # All Rights Reserved.
 
 import sys
+from datetime import timedelta
 
 from django.db import models
+from django.utils.timezone import now
 from django.db.models import Sum
 from django.conf import settings
 
@@ -42,7 +44,9 @@ class InstanceManager(models.Manager):
         return self.all().count()
 
     def total_capacity(self):
-        return self.aggregate(total_capacity=Sum('capacity'))['total_capacity']
+        sumval = self.filter(modified__gte=now()-timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
+                     .aggregate(total_capacity=Sum('capacity'))['total_capacity']
+        return max(50, sumval)
 
     def my_role(self):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing

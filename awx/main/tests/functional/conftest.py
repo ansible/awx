@@ -153,7 +153,7 @@ def user_project(user):
 
 @pytest.fixture
 def instance(settings):
-    return Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org")
+    return Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org", capacity=100)
 
 @pytest.fixture
 def organization(instance):
