@@ -42,8 +42,28 @@ Workflow job summary:
 ...
 ```
 
-## Acceptance Criteria
+## Test Coverage
+* Verify that CUID operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
+* Verify the RBAC property of workflow resources. In specific: 
+  * Workflow job templates can only be accessible by super users ---- system admin, admin of the same organization and system auditor and auditor of the same organization with read permission only.
+  * Workflow jobs follows the permission rules of its associated workflow job template.
+  * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template.
+  * Workflow job nodes follows the permission rules of both its associated workflow job and unified job.
+* Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
+* Verify that only the permitted types of unified job templates can be associated with a workflow job template node. Currently the permitted types are **job templates, inventory sources and projects**.
+* Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of parent trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.
+* Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger validation error. The three types of invalid associations are cycle, convergence(multiple parent) and mutex('always' XOR the rest).
+* Verify that workflow jobs can be launched by POSTing to endpoint `/workflow_job_templates/\d/launch/`.
+* Verify that schedules can be successfully (dis)associated with a workflow job template, and workflow jobs can be triggered by the schedule of associated workflow job template at specified time point.
+* Verify that during a workflow job run, all its decision trees follow their correct paths of execution. Unwarranted behaviors include child node executing before its parent and wrong path being selected (failure nodes are executed when parent node succeeds and so on).
+* Verify that a subtree of execution will never start if its root node runs into internal error (*not ends with failure*).
+* Verify that a subtree of execution will never start if its root node is successfully canceled.
+* Verify that cancelling a workflow job that is cancellable will consequently cancel any of its cancellable spawned jobs and thus end the whole workflow execution.
+* Verify that during a workflow job run, its spawned jobs are blocked from deletion.
+* Verify that notification templates can be successfully (dis)associated with a workflow job template. Later when its spawned workflow jobs finish running, verify that the correct type of notifications will be sent according to the job status.
 
-## Testing Considerations
-
-## Performance Testing
+## Test Notes
+* Please apply non-trivial topology when testing workflow run. A non-trivial topology for a workflow job template should include:
+  * Multiple decision trees.
+  * Relatively large hight in each decision tree.
+  * All three types of relationships (`success`, `failure` and `always`).
