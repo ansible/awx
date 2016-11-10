@@ -48,7 +48,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
             //ignore
         }
 
-        job = Find({ list: list, key: 'id', val: id });
+        job = Find({ list: $scope.jobs, key: 'id', val: id });
         if (job.type === 'inventory_update') {
             typeId = job.inventory_source;
         } else if (job.type === 'project_update') {
@@ -88,21 +88,11 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
 
     };
 
-    $scope.refreshJobs = function() {
-        $state.reload();
-    };
-
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobs', function() {
+    $scope.$on('ws-jobs', function(){
         $scope.refreshJobs();
     });
 
-    if ($rootScope.removeScheduleStatusChange) {
-        $rootScope.removeScheduleStatusChange();
-    }
-    $rootScope.removeScheduleStatusChange = $rootScope.$on('ScheduleStatusChange', function() {
+    $scope.$on('ws-schedules', function(){
         $state.reload();
     });
 }
