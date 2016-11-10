@@ -42,7 +42,7 @@ export default
               label: i18n._('Activity'),
               columnClass: 'List-tableCell col-lg-2 col-md-2 hidden-sm hidden-xs',
               nosort: true,
-              //ngInclude: "'/static/partials/job-template-smart-status.html'",
+              ngInclude: "'/static/partials/job-template-smart-status.html'",
               type: 'template'
             },
             labels: {
