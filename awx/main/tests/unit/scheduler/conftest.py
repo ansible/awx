@@ -22,7 +22,7 @@ def epoch():
 
 @pytest.fixture
 def scheduler_factory(mocker, epoch):
-    mocker.patch('awx.main.models.Instance.objects.total_capacity', return_value=999999999)
+    mocker.patch('awx.main.models.Instance.objects.total_capacity', return_value=10000)
 
     def fn(tasks=[], inventory_sources=[], latest_project_updates=[], latest_inventory_updates=[], create_project_update=None, create_inventory_update=None):
         sched = TaskManager()
@@ -190,15 +190,15 @@ Job
 '''
 @pytest.fixture
 def job_factory(epoch):
-    def fn(project__scm_update_on_launch=True, inventory__inventory_sources=[]):
+    def fn(id=1, project__scm_update_on_launch=True, inventory__inventory_sources=[], allow_simultaneous=False):
         return JobDict({ 
-            'id': 1, 
+            'id': id,
             'status': 'pending', 
             'job_template_id': 1, 
             'project_id': 1, 
             'inventory_id': 1,
             'launch_type': 'manual', 
-            'allow_simultaneous': False, 
+            'allow_simultaneous': allow_simultaneous,
             'created': epoch - timedelta(seconds=99), 
             'celery_task_id': '', 
             'project__scm_update_on_launch': project__scm_update_on_launch, 

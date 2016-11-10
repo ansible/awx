@@ -243,7 +243,6 @@ class TaskManager():
 
             for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
                 if inventory_source_task['id'] in inventory_sources_already_updated:
-                    print("Inventory already updated")
                     continue
                 if self.graph.should_update_related_inventory_source(task, inventory_source_task['id']):
                     inventory_task = self.create_inventory_update(task, inventory_source_task)
@@ -316,6 +315,8 @@ class TaskManager():
             self.capacity_used += t.task_impact()
 
     def would_exceed_capacity(self, task):
+        if self.capacity_used == 0:
+            return False
         return (task.task_impact() + self.capacity_used > self.capacity_total)
 
     def consume_capacity(self, task):
