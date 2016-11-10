@@ -75,7 +75,7 @@ export default
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
             "view": {
                 mode: "all",
-                ngClick: "viewJob(all_job.id)",
+                ngClick: "viewJob(job.id)",
                 awToolTip: "View the job",
                 dataPlacement: "top"
             },
@@ -85,21 +85,21 @@ export default
                 ngClick: 'relaunchJob($event, job.id)',
                 awToolTip: 'Relaunch using the same parameters',
                 dataPlacement: 'top',
-                ngShow: "!(all_job.type == 'system_job') && all_job.summary_fields.user_capabilities.start"
+                ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start"
             },
             cancel: {
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
                 awToolTip: 'Cancel the job',
                 dataPlacement: 'top',
-                ngShow: "(all_job.status === 'running'|| all_job.status === 'waiting' || all_job.status === 'pending') && all_job.summary_fields.user_capabilities.start"
+                ngShow: "(job.status === 'running'|| job.status === 'waiting' || job.status === 'pending') && job.summary_fields.user_capabilities.start"
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
                 awToolTip: 'Delete the job',
                 dataPlacement: 'top',
-                ngShow: "(all_job.status !== 'running' && all_job.status !== 'waiting' && all_job.status !== 'pending') && all_job.summary_fields.user_capabilities.delete"
+                ngShow: "(job.status !== 'running' && job.status !== 'waiting' && job.status !== 'pending') && job.summary_fields.user_capabilities.delete"
             }
         }
     });
