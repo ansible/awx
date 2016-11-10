@@ -7,11 +7,11 @@
 export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateList', 'ProjectList',
     'GetBasePath', 'Wait', 'JobTemplateService', '$state',
     'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
-    'GenerateForm', 'InventoryList', 'CredentialList', '$q', '$timeout',
+    'GenerateForm', 'InventoryList', 'CredentialList', '$q',
     function($scope, WorkflowHelpService, GenerateList, JobTemplateList, ProjectList,
         GetBasePath, Wait, JobTemplateService, $state,
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
-        GenerateForm, InventoryList, CredentialList, $q, $timeout) {
+        GenerateForm, InventoryList, CredentialList, $q) {
 
         let form = WorkflowMakerForm();
 
@@ -274,13 +274,6 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             };
                         }
 
-                        // The default needs to be in place before we can select2-ify the dropdown
-                        $timeout(function() {
-                            CreateSelect2({
-                                element: '#workflow_maker_job_type',
-                                multiple: false
-                            });
-                        });
                     }
 
                     if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_limit_on_launch) {

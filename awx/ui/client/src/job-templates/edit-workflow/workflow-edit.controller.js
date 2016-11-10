@@ -20,7 +20,7 @@
 
         $scope.$watch('workflow_job_template_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
-                $scope.canAdd = false;
+                $scope.canAddWorkflowJobTemplate = false;
             }
         });
 
@@ -125,13 +125,6 @@
         }
 
         function init() {
-            // // Inject the edit form
-            // generator.inject(form, {
-            //     mode: 'edit' ,
-            //     scope: $scope,
-            //     related: false
-            // });
-            // generator.reset();
 
             // Select2-ify the lables input
             CreateSelect2({
@@ -139,24 +132,6 @@
                 multiple: true,
                 addNew: true
             });
-
-            // // Make the variables textarea look nice
-            // ParseTypeChange({
-            //     scope: $scope,
-            //     field_id: 'workflow_job_template_variables',
-            //     onChange: function() {
-            //         $scope[form.name + '_form'].$setDirty();
-            //     }
-            // });
-
-            // // Initialize the organization lookup
-            // LookUpInit({
-            //     scope: $scope,
-            //     form: form,
-            //     list: OrganizationList,
-            //     field: 'organization',
-            //     input_type: 'radio'
-            // });
 
             Rest.setUrl('api/v1/labels');
             Wait("start");

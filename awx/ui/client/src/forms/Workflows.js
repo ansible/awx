@@ -29,14 +29,15 @@ export default
                 name: {
                     label: 'Name',
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    required: true,
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     column: 1
                 },
                 description: {
                     label: 'Description',
                     type: 'text',
-                    column: 1
+                    column: 1,
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 organization: {
                     label: 'Organization',
@@ -48,7 +49,8 @@ export default
                     dataTitle: 'Organization',
                     dataContainer: 'body',
                     dataPlacement: 'right',
-                    column: 1
+                    column: 1,
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 labels: {
                     label: 'Labels',
@@ -59,7 +61,8 @@ export default
                     dataTitle: 'Labels',
                     dataPlacement: 'right',
                     awPopOver: "<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>",
-                    dataContainer: 'body'
+                    dataContainer: 'body',
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 variables: {
                     label: 'Extra Variables',
@@ -76,17 +79,24 @@ export default
                         "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataTitle: 'Extra Variables',
                     dataPlacement: 'right',
-                    dataContainer: "body"
+                    dataContainer: "body",
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)' // TODO: get working
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "workflow_form.$invalid || can_edit!==true"//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "workflow_form.$invalid || can_edit!==true", //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 }
             },
 
@@ -108,7 +118,7 @@ export default
                             awToolTip: 'Add a permission',
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ADD',
-                            ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                         }
                     },
 

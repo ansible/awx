@@ -10,7 +10,8 @@ export default ['templateUrl', 'CreateDialog', 'Wait',
     function(templateUrl, CreateDialog, Wait) {
         return {
             scope: {
-                treeData: '='
+                treeData: '=',
+                canAddWorkflowJobTemplate: '='
             },
             restrict: 'E',
             templateUrl: templateUrl('job-templates/workflow-maker/workflow-maker'),

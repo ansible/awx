@@ -64,14 +64,16 @@ export default
                 options: [
                     {
                         optionContent: 'Job Template',
-                        optionSref: 'templates.addJobTemplate'
+                        optionSref: 'templates.addJobTemplate',
+                        ngShow: 'canAddJobTemplate'
                     },
                     {
                         optionContent: 'Workflow Job Template',
-                        optionSref: 'templates.addWorkflowJobTemplate'
+                        optionSref: 'templates.addWorkflowJobTemplate',
+                        ngShow: 'canAddWorkflowJobTemplate'
                     }
                 ],
-                ngShow: 'canAdd'
+                ngShow: 'canAddJobTemplate || canAddWorkflowJobTemplate'
             }
         },
 

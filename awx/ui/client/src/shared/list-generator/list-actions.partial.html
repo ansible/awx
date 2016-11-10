@@ -10,7 +10,7 @@
             </button>
             <ul class="dropdown-menu pull-right">
                 <li ng-repeat="option in options.options">
-                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent"></a>
+                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent" ng-show="{{option.ngShow}}"></a>
                 </li>
             </ul>
         </div>
@@ -37,7 +37,7 @@
             </button>
             <ul class="dropdown-menu pull-right">
                 <li ng-repeat="option in options.options">
-                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent"></a>
+                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent" ng-show="{{option.ngShow}}"></a>
                 </li>
             </ul>
         </div>

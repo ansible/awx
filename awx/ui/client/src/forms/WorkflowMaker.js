@@ -28,6 +28,7 @@ export default
                     label: 'Type',
                     type: 'radio_group',
                     ngShow: 'selectedTemplate && showTypeOptions',
+                    ngDisabled: '!canAddWorkflowJobTemplate',
                     options: [
                         {
                             label: 'On&nbsp;Success',
@@ -63,6 +64,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_credential_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_credential_on_launch'
                     }
@@ -82,6 +84,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_inventory_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_inventory_on_launch'
                     }
@@ -100,6 +103,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_job_type_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_job_type_on_launch'
                     }
@@ -114,7 +118,8 @@ export default
                     dataTitle: 'Limit',
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngShow: "selectedTemplate.ask_limit_on_launch"
+                    ngShow: "selectedTemplate.ask_limit_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate'
                 },
                 job_tags: {
                     label: 'Job Tags',
@@ -128,7 +133,8 @@ export default
                     dataTitle: "Job Tags",
                     dataPlacement: "right",
                     dataContainer: "body",
-                    ngShow: "selectedTemplate.ask_tags_on_launch"
+                    ngShow: "selectedTemplate.ask_tags_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate'
                 },
                 skip_tags: {
                     label: 'Skip Tags',
@@ -142,16 +148,23 @@ export default
                     dataTitle: "Skip Tags",
                     dataPlacement: "right",
                     dataContainer: "body",
-                    ngShow: "selectedTemplate.ask_skip_tags_on_launch"
+                    ngShow: "selectedTemplate.ask_skip_tags_on_launch",
+                    ngDisabled: '!canAddWorkflowJobTemplate'
                 }
             },
             buttons: {
                 cancel: {
-                    ngClick: 'cancelNodeForm()'
+                    ngClick: 'cancelNodeForm()',
+                    ngShow: 'canAddWorkflowJobTemplate'
+                },
+                close: {
+                    ngClick: 'cancelNodeForm()',
+                    ngShow: '!canAddWorkflowJobTemplate'
                 },
                 save: {
                     ngClick: 'saveNodeForm()',
-                    ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate"
+                    ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate",
+                    ngShow: 'canAddWorkflowJobTemplate'
                 }
             }
         })

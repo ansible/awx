@@ -10,6 +10,7 @@ export default [
     return {
         scope: {
             treeData: '=',
+            canAddWorkflowJobTemplate: '=',
             addNode: '&',
             editNode: '&',
             deleteNode: '&'
@@ -17,7 +18,12 @@ export default [
         restrict: 'E',
         link: function(scope, element) {
 
-            var margin = {top: 20, right: 20, bottom: 20, left: 20},
+            scope.$watch('canAddWorkflowJobTemplate', function() {
+                // Redraw the graph if permissions change
+                update();
+            });
+
+            let margin = {top: 20, right: 20, bottom: 20, left: 20},
                 width = 950,
                 height = 590 - margin.top - margin.bottom,
                 i = 0,
@@ -26,21 +32,21 @@ export default [
                 rootW = 60,
                 rootH = 40;
 
-            var tree = d3.layout.tree()
+            let tree = d3.layout.tree()
                     .size([height, width]);
 
-            var line = d3.svg.line()
+            let line = d3.svg.line()
                      .x(function(d){return d.x;})
                      .y(function(d){return d.y;});
 
             function lineData(d){
 
-                var sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + rectW;
-                var sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + rectH / 2;
-                var targetX = d.target.y;
-                var targetY = d.target.x + rectH / 2;
+                let sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + rectW;
+                let sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + rectH / 2;
+                let targetX = d.target.y;
+                let targetY = d.target.x + rectH / 2;
 
-                var points = [
+                let points = [
                     {
                         x: sourceX,
                         y: sourceY
@@ -65,23 +71,23 @@ export default [
                 }
             }
 
-            var svg = d3.select(element[0]).append("svg")
+            let svg = d3.select(element[0]).append("svg")
                     .attr("width", width)
                     .attr("height", height)
                     .attr("class", "WorkflowChart-svg")
                     .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            var node = svg.selectAll(".node"),
+            let node = svg.selectAll(".node"),
                 link = svg.selectAll(".link");
 
             function update() {
                 // Declare the nodes
-                var nodes = tree.nodes(scope.treeData);
+                let nodes = tree.nodes(scope.treeData);
                 node = node.data(nodes, function(d) { d.y = d.depth * 180; return d.id || (d.id = ++i); });
                 link = link.data(tree.links(nodes), function(d) { return d.source.id + "-" + d.target.id; });
 
-                var nodeEnter = node.enter().append("g")
+                let nodeEnter = node.enter().append("g")
                         .attr("class", "node")
                         .attr("id", function(d){return "node-" + d.id;})
                         .attr("parent", function(d){return d.parent ? d.parent.id : null;})
@@ -89,7 +95,7 @@ export default [
                         .attr("fill", "red");
 
                 nodeEnter.each(function(d) {
-                    var thisNode = d3.select(this);
+                    let thisNode = d3.select(this);
                     if(d.isStartNode) {
                         thisNode.append("rect")
                             .attr("width", 60)
@@ -174,7 +180,7 @@ export default [
                             .attr("cx", rectW)
                             .attr("r", 10)
                             .attr("class", "addCircle nodeCircle")
-                            .style("display", function(d) { return d.placeholder ? "none" : null; })
+                            .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
                             .call(add_node)
                             .on("mouseover", function(d) {
                                 d3.select("#node-" + d.id)
@@ -196,7 +202,7 @@ export default [
                                 .size(60)
                                 .type("cross")
                             )
-                            .style("display", function(d) { return d.placeholder ? "none" : null; })
+                            .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
                             .call(add_node)
                             .on("mouseover", function(d) {
                                 d3.select("#node-" + d.id)
@@ -216,7 +222,7 @@ export default [
                             .attr("cy", rectH)
                             .attr("r", 10)
                             .attr("class", "removeCircle")
-                            .style("display", function(d) { return (d.canDelete === false || d.placeholder) ? "none" : null; })
+                            .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                             .call(remove_node)
                             .on("mouseover", function(d) {
                                 d3.select("#node-" + d.id)
@@ -238,7 +244,7 @@ export default [
                                 .size(60)
                                 .type("cross")
                             )
-                            .style("display", function(d) { return (d.canDelete === false || d.placeholder) ? "none" : null; })
+                            .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                             .call(remove_node)
                             .on("mouseover", function(d) {
                                 d3.select("#node-" + d.id)
@@ -257,7 +263,7 @@ export default [
 
                 node.exit().remove();
 
-                var linkEnter = link.enter().append("g")
+                let linkEnter = link.enter().append("g")
                     .attr("class", "nodeConnector")
                     .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id;});
 
@@ -294,7 +300,7 @@ export default [
                     })
                     .attr("r", 10)
                     .attr("class", "addCircle linkCircle")
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder) ? "none" : null; })
+                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .call(add_node_between)
                     .on("mouseover", function(d) {
                         d3.select("#link-" + d.source.id + "-" + d.target.id)
@@ -317,7 +323,7 @@ export default [
                         .size(60)
                         .type("cross")
                     )
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder) ? "none" : null; })
+                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .call(add_node_between)
                     .on("mouseover", function(d) {
                         d3.select("#link-" + d.source.id + "-" + d.target.id)
@@ -335,19 +341,19 @@ export default [
                 link.exit().remove();
 
                 // Transition nodes and links to their new positions.
-                var t = svg.transition();
+                let t = svg.transition();
 
                 t.selectAll(".nodeCircle")
-                    .style("display", function(d) { return d.placeholder ? "none" : null; });
+                    .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; });
 
                 t.selectAll(".nodeAddCross")
-                    .style("display", function(d) { return d.placeholder ? "none" : null; });
+                    .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; });
 
                 t.selectAll(".removeCircle")
-                    .style("display", function(d) { return (d.canDelete === false || d.placeholder) ? "none" : null; });
+                    .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; });
 
                 t.selectAll(".nodeRemoveCross")
-                    .style("display", function(d) { return (d.canDelete === false || d.placeholder) ? "none" : null; });
+                    .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; });
 
                 t.selectAll(".link")
                         .attr("class", function(d) {
@@ -412,27 +418,33 @@ export default [
 
             function add_node() {
                 this.on("click", function(d) {
-                    scope.addNode({
-                        parent: d,
-                        betweenTwoNodes: false
-                    });
+                    if(scope.canAddWorkflowJobTemplate !== false) {
+                        scope.addNode({
+                            parent: d,
+                            betweenTwoNodes: false
+                        });
+                    }
                 });
             }
 
             function add_node_between() {
                 this.on("click", function(d) {
-                    scope.addNode({
-                        parent: d,
-                        betweenTwoNodes: true
-                    });
+                    if(scope.canAddWorkflowJobTemplate !== false) {
+                        scope.addNode({
+                            parent: d,
+                            betweenTwoNodes: true
+                        });
+                    }
                 });
             }
 
             function remove_node() {
                 this.on("click", function(d) {
-                    scope.deleteNode({
-                        nodeToDelete: d
-                    });
+                    if(scope.canAddWorkflowJobTemplate !== false) {
+                        scope.deleteNode({
+                            nodeToDelete: d
+                        });
+                    }
                 });
             }
 

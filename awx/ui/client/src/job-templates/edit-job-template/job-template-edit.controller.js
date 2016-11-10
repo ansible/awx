@@ -31,7 +31,7 @@ export default
 
             $scope.$watch('job_template_obj.summary_fields.user_capabilities.edit', function(val) {
                 if (val === false) {
-                    $scope.canAdd = false;
+                    $scope.canAddJobTemplate = false;
                 }
             });
 

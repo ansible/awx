@@ -108,7 +108,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                     },
                     views: {
                         'modal': {
-                            template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree"></workflow-maker>`
+                            template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(WorkflowMakerJobTemplateList, generateList) {
@@ -260,8 +260,8 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 });
                                 return html;
                             },
-                            controller: ['$scope',
-                                function($scope) {
+                            controller: ['$scope', '$timeout', 'CreateSelect2',
+                                function($scope, $timeout, CreateSelect2) {
                                     function resetPromptFields() {
                                         $scope.credential = null;
                                         $scope.credential_name = null;
@@ -295,6 +295,14 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                         // Loop across the preset values and attach them to scope
                                         _.forOwn(options.presetValues, function(value, key) {
                                             $scope[key] = value;
+                                        });
+
+                                        // The default needs to be in place before we can select2-ify the dropdown
+                                        $timeout(function() {
+                                            CreateSelect2({
+                                                element: '#workflow_maker_job_type',
+                                                multiple: false
+                                            });
                                         });
                                     });
 
