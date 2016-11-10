@@ -77,8 +77,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 $log.debug('Received event for project: ' + project.name);
                 $log.debug('Status changed to: ' + data.status);
                 if (data.status === 'successful' || data.status === 'failed') {
-                    // @issue: OLD SEARCH
-                    // $scope.search(list.iterator, null, null, null, null, false);
+                    $state.go('.', null, { reload: true });
                 } else {
                     project.scm_update_tooltip = "SCM update currently running";
                     project.scm_type_class = "btn-disabled";
