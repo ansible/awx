@@ -39,7 +39,6 @@ funcsigs==0.4
 gevent==1.1
 gevent-websocket==0.9.5
 git+https://github.com/chrismeyersfsu/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
-git+https://github.com/chrismeyersfsu/gevent-socketio.git@tower_0.3.6#egg=gevent-socketio
 greenlet==0.4.9
 dogpile.cache==0.5.7
 enum34==1.1.2
