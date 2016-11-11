@@ -11,4 +11,4 @@ services:
       TEST_DIRS: awx/main/tests/unit awx/main/tests/functional
     command: ["make test"]
     volumes:
-      - ../../../:/ansible-tower
+      - ../../../:/tower_devel
