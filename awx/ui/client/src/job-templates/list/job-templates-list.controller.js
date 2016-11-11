@@ -7,10 +7,12 @@
 export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Alert',
     'JobTemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'JobTemplateService',
+    'QuerySet',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
         JobTemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
-        InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, JobTemplateService
+        InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, JobTemplateService,
+        qs
     ) {
         ClearScope();
 
@@ -39,8 +41,16 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
         }
 
         $scope.$on(`ws-jobs`, function () {
-            // @issue - this is ham-fisted, expose a simple QuerySet.reload() fn that'll re-fetch dataset
-            $state.reload();
+            // @issue - this is no longer quite as ham-fisted but I'd like for someone else to take a peek
+            // calling $state.reload(); here was problematic when launching a job because job launch also
+            // attempts to transition the state and they were squashing each other.
+
+            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+            qs.search(path, $stateParams[`${list.iterator}_search`])
+            .then(function(searchResponse) {
+                $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            });
         });
         $scope.addJobTemplate = function() {
             $state.go('jobTemplates.add');
