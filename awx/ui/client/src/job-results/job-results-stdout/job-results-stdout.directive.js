@@ -94,8 +94,8 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 $anchorScroll();
             };
 
-            scope.topLineAnchor = function() {
-                $location.hash('topLineAnchor');
+            scope.lineAnchor = function() {
+                $location.hash('lineAnchor');
                 $anchorScroll();
             };
 
@@ -128,10 +128,10 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
 
                 if (type === 'expand') {
                     $(".line_num_" + scope.visLine)
-                        .prepend($("#topLineAnchor"));
+                        .prepend($("#lineAnchor"));
                 } else {
                     $(".line_num_" + scope.parentVisLine)
-                        .prepend($("#topLineAnchor"));
+                        .prepend($("#lineAnchor"));
                 }
 
                 var expandClass;
@@ -145,7 +145,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                     .each((i, val) => {
                         $timeout(function(){
                             angular.element(val).trigger('click');
-                            scope.topLineAnchor();
+                            scope.lineAnchor();
                         });
                     });
 
@@ -160,7 +160,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                                 $timeout(function(){
                                     angular.element(val)
                                         .trigger('click');
-                                    scope.topLineAnchor();
+                                    scope.lineAnchor();
                                 });
                         }
                     });
