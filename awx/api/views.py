@@ -2332,23 +2332,20 @@ class JobTemplateSurveySpec(GenericAPIView):
 
         if not request.user.can_access(self.model, 'change', obj, None):
             raise PermissionDenied()
-        try:
-            obj.survey_spec = json.dumps(request.data)
-        except ValueError:
-            return Response(dict(error=_("Invalid JSON when parsing survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "name" not in obj.survey_spec:
+        new_spec = request.data
+        if "name" not in new_spec:
             return Response(dict(error=_("'name' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "description" not in obj.survey_spec:
+        if "description" not in new_spec:
             return Response(dict(error=_("'description' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if "spec" not in obj.survey_spec:
+        if "spec" not in new_spec:
             return Response(dict(error=_("'spec' missing from survey spec.")), status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(obj.survey_spec["spec"], list):
+        if not isinstance(new_spec["spec"], list):
             return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
-        if len(obj.survey_spec["spec"]) < 1:
+        if len(new_spec["spec"]) < 1:
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
         idx = 0
         variable_set = set()
-        for survey_item in obj.survey_spec["spec"]:
+        for survey_item in new_spec["spec"]:
             if not isinstance(survey_item, dict):
                 return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             if "type" not in survey_item:
@@ -2365,7 +2362,8 @@ class JobTemplateSurveySpec(GenericAPIView):
             if "required" not in survey_item:
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
             idx += 1
-        obj.save()
+        obj.survey_spec = new_spec
+        obj.save(update_fields=['survey_spec'])
         return Response()
 
     def delete(self, request, *args, **kwargs):
