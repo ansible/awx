@@ -182,9 +182,9 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
 
                                     $scope.toggle_inventory_source = function(id) {
 
-                                        $scope.inventory_sources.forEach(function(row, i) {
+                                        $scope.workflow_inventory_sources.forEach(function(row, i) {
                                             if (row.id === id) {
-                                                $scope.inventory_sources[i].checked = 1;
+                                                $scope.workflow_inventory_sources[i].checked = 1;
                                                 $scope.selection[list.iterator] = {
                                                     id: row.id,
                                                     name: row.name
