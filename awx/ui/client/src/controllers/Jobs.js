@@ -41,7 +41,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
     };
 
     $scope.relaunchJob = function(event, id) {
-        var list, job, typeId;
+        var job, typeId;
         try {
             $(event.target).tooltip('hide');
         } catch (e) {

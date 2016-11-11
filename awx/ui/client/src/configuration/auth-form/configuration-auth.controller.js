@@ -22,7 +22,6 @@ export default [
     'CreateSelect2',
     'GenerateForm',
     'ParseTypeChange',
-    'Wait',
     function(
         $scope,
         $state,
@@ -40,8 +39,7 @@ export default [
         ConfigurationUtils,
         CreateSelect2,
         GenerateForm,
-        ParseTypeChange,
-        Wait
+        ParseTypeChange
     ) {
         var authVm = this;
 

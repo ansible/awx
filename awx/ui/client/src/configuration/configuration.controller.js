@@ -122,6 +122,30 @@ export default [
 
         $scope.configDataResolve = configDataResolve;
 
+        var triggerModal = function(msg, title, buttons) {
+            if ($scope.removeModalReady) {
+                $scope.removeModalReady();
+            }
+            $scope.removeModalReady = $scope.$on('ModalReady', function() {
+                // $('#lookup-save-button').attr('disabled', 'disabled');
+                $('#FormModal-dialog').dialog('open');
+            });
+
+            $('#FormModal-dialog').html(msg);
+
+            CreateDialog({
+                scope: $scope,
+                buttons: buttons,
+                width: 600,
+                height: 200,
+                minWidth: 500,
+                title: title,
+                id: 'FormModal-dialog',
+                resizable: false,
+                callback: 'ModalReady'
+            });
+        };
+
         function activeTabCheck(setForm) {
             if(!$scope[formTracker.currentFormName()].$dirty) {
                 active(setForm);
@@ -212,7 +236,7 @@ export default [
             payload[key] = $scope.configDataResolve[key].default;
 
             ConfigurationService.patchConfiguration(payload)
-                .then(function(data) {
+                .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
                 })
                 .catch(function(error) {
@@ -226,30 +250,6 @@ export default [
                 .finally(function() {
                     Wait('stop');
                 });
-        };
-
-        var triggerModal = function(msg, title, buttons) {
-            if ($scope.removeModalReady) {
-                $scope.removeModalReady();
-            }
-            $scope.removeModalReady = $scope.$on('ModalReady', function() {
-                // $('#lookup-save-button').attr('disabled', 'disabled');
-                $('#FormModal-dialog').dialog('open');
-            });
-
-            $('#FormModal-dialog').html(msg);
-
-            CreateDialog({
-                scope: $scope,
-                buttons: buttons,
-                width: 600,
-                height: 200,
-                minWidth: 500,
-                title: title,
-                id: 'FormModal-dialog',
-                resizable: false,
-                callback: 'ModalReady'
-            });
         };
 
         function clearApiErrors() {
@@ -332,7 +332,7 @@ export default [
             var payload = {};
             payload[key] = $scope[key];
             ConfigurationService.patchConfiguration(payload)
-                .then(function(results) {
+                .then(function() {
                     //TODO consider updating form values with returned data here
                 })
                 .catch(function(error, status) {
@@ -352,7 +352,7 @@ export default [
         var resetAll = function() {
             Wait('start');
             ConfigurationService.resetAll()
-                .then(function(results) {
+                .then(function() {
                     populateFromApi();
                     $scope[formTracker.currentFormName].$setPristine();
                 })
