@@ -19,4 +19,3 @@ Refer to `docs/build_system.md` for more about Jenkins and installing nightly bu
 Refer to `docs/release_process.md` for information on the steps involved in creating a release.
 
 Refer to http://docs.ansible.com/ansible-tower/index.html for information on installing/upgrading, setup, troubleshooting, and much more.
-
