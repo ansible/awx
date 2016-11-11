@@ -17,16 +17,32 @@
             </div>
         </div>
         <div class="JobResultsStdOut-toolbarStdoutColumn">
+            <!-- <span class="foo">{{ visibleItems }}</span> -->
             <div class="JobResultsStdOut-followButton"
-                aw-tool-tip="Follow standard out."
-                data-placement="left">
+                ng-class="{'is-engaged': followEngaged && !jobFinished}"
+                aw-tool-tip="Follow standard out"
+                data-placement="left"
+                ng-click="followToggleClicked()">
                 <i class="JobResultsStdOut-followIcon fa fa-arrow-down">
                 </i>
             </div>
+            <!-- TODO: get followTooltip watch working
+            <div class="JobResultsStdOut-followButton"
+                aw-tool-tip="{{followTooltip}}"
+                data-tip-watch="followTooltip"
+                data-placement="left"
+                ng-click="followToggleClicked()">
+                <i class="JobResultsStdOut-followIcon fa fa-arrow-down">
+                </i>
+            </div> -->
         </div>
     </div>
     <div class="JobResultsStdOut-stdoutContainer">
         <div class="JobResultsStdOut-numberColumnPreload"></div>
+        <div id='topLineAnchor'></div>
+        <div id="followAnchor"
+            class="JobResultsStdOut-followAnchor">
+        </div>
     </div>
     <div class="JobResultsStdOut-footer">
         <div class="JobResultsStdOut-footerNumberColumn"></div>

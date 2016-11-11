@@ -1,4 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', '$compile', function(jobData, jobDataOptions, jobLabels, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue, $compile) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', '$rootScope', 'eventQueue', '$compile', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, $rootScope, eventQueue, $compile) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -81,6 +81,11 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
     $scope.countFinished = count.countFinished;
     $scope.stdoutArr = [];
 
+    // if the job is still running engage following of the last line in the
+    // standard out pane
+    $scope.jobFinished = jobFinished;
+    $scope.followEngaged = !$scope.jobFinished;
+
     // EVENT STUFF BELOW
 
     // just putting the event queue on scope so it can be inspected in the
@@ -121,6 +126,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
 
                     if (change === 'finishedTime'  && !$scope.job.finished) {
                         $scope.job.finished = mungedEvent.finishedTime;
+                        $scope.jobFinished = true;
                     }
 
                     if (change === 'countFinished') {
@@ -136,6 +142,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'count', '$scope', 'Pa
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
                                 .stdout)($scope));
+
+                        if ($scope.followEngaged) {
+                            $scope.followScroll();
+                        }
                     }
                 });
             }

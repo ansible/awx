@@ -31,14 +31,22 @@ export default [function(){
             line = line.replace(/\[0m/g, '</span>');
             return line;
         },
-        getCollapseClasses: function(event) {
+        getCollapseClasses: function(event, line, lineNum) {
             var string = "";
             if (event.event_name === "playbook_on_play_start") {
                 string += " header_play";
+                string += " header_play_" + event.event_data.play_uuid;
+                if (line) {
+                    string += " actual_header";
+                }
             } else if (event.event_name === "playbook_on_task_start") {
                 string += " header_task";
+                string += " header_task_" + event.event_data.task_uuid;
                 if (event.event_data.play_uuid) {
                     string += " play_" + event.event_data.play_uuid;
+                }
+                if (line) {
+                    string += " actual_header";
                 }
             } else {
                 if (event.event_data.play_uuid) {
@@ -48,7 +56,7 @@ export default [function(){
                     string += " task_" + event.event_data.task_uuid;
                 }
             }
-
+            string += " line_num_" + lineNum;
             return string;
         },
         getCollapseIcon: function(event, line) {
@@ -94,7 +102,7 @@ export default [function(){
                     event.stdout.split("\r\n").slice(0, -1))
                 .map(lineArr => {
                     return `
-<div class="JobResultsStdOut-aLineOfStdOut${this.getCollapseClasses(event)}">
+<div class="JobResultsStdOut-aLineOfStdOut${this.getCollapseClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
     <div class="JobResultsStdOut-stdoutColumn">${this.prettify(lineArr[1])}</div>
 </div>`;

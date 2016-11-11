@@ -85,6 +85,24 @@
     color: @default-interface-txt;
 }
 
+.JobResultsStdOut-followButton.is-engaged {
+    background-color: @default-link;
+    color: @default-bg;
+}
+
+.JobResultsStdOut-followButton.is-engaged .JobResultsStdOut-followIcon {
+    color: @default-bg;
+}
+
+.JobResultsStdOut-followButton.is-engaged:hover {
+    background-color: @default-icon;
+}
+
+.JobResultsStdOut-followButton.is-engaged:hover .JobResultsStdOut-followIcon,
+.JobResultsStdOut-followButton.is-engaged .JobResultsStdOut-followIcon:hover {
+    color: @default-border;
+}
+
 .JobResultsStdOut-stdoutContainer {
     height: ~"calc(100% - 48px)";
     background-color: @default-no-items-bord;
@@ -166,4 +184,11 @@
     background-color: @default-list-header-bg;
     width: 70px;
     height: 100%;
+}
+
+.foo {
+    margin-right: auto;
+    margin-top: 8px;
+    margin-left: 20px;
+    font-weight: bold;
 }

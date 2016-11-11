@@ -44,6 +44,14 @@ export default {
                 });
             return val.promise;
         }],
+        // used to signify if job is completed or still running
+        jobFinished: ['jobData', function(jobData) {
+            if (jobData.finished) {
+                return true;
+            } else {
+                return false;
+            }
+        }],
         // after the GET for the job, this helps us keep the status bar from
         // flashing as rest data comes in.  If the job is finished and
         // there's a playbook_on_stats event, go ahead and resolve the count
