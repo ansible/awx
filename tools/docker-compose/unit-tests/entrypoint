@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-mkdir -p /ansible-tower/awx/ui/
-mv -n /tmp/ansible-tower/awx/ui/node_modules /ansible-tower/awx/ui
+mkdir -p /tower_devel/awx/ui/
+mv -n /tmp/awx/ui/node_modules /tmp/awx/ui/.deps_built /tower_devel/awx/ui
 
 exec $@
