@@ -1,0 +1,80 @@
+@import '../../shared/branding/colors.default.less';
+
+.WorkflowStatusBar {
+    display: flex;
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.WorkflowStatusBar-ok,
+.WorkflowStatusBar-changed,
+.WorkflowStatusBar-unreachable,
+.WorkflowStatusBar-failures,
+.WorkflowStatusBar-skipped,
+.WorkflowStatusBar-noData {
+    height: 15px;
+    border-top: 5px solid @default-bg;
+    border-bottom: 5px solid @default-bg;
+}
+
+.WorkflowStatusBar-ok {
+    background-color: @default-succ;
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.WorkflowStatusBar-changed {
+    background-color: @default-warning;
+    flex: 0 0 auto;
+}
+
+.WorkflowStatusBar-unreachable {
+    background-color: @default-unreachable;
+    flex: 0 0 auto;
+}
+
+.WorkflowStatusBar-failures {
+    background-color: @default-err;
+    flex: 0 0 auto;
+}
+
+.WorkflowStatusBar-skipped {
+    background-color: @default-link;
+    flex: 0 0 auto;
+}
+
+.WorkflowStatusBar-noData {
+    background-color: @default-icon-hov;
+    flex: 1 0 auto;
+}
+
+.WorkflowStatusBar-tooltipLabel {
+    text-transform: uppercase;
+    margin-right: 15px;
+}
+
+.WorkflowStatusBar-tooltipBadge {
+    border-radius: 5px;
+}
+
+.WorkflowStatusBar-tooltipBadge--ok {
+    background-color: @default-succ;
+}
+
+.WorkflowStatusBar-tooltipBadge--unreachable {
+    background-color: @default-unreachable;
+}
+
+.WorkflowStatusBar-tooltipBadge--skipped {
+    background-color: @default-link;
+}
+
+.WorkflowStatusBar-tooltipBadge--changed {
+    background-color: @default-warning;
+}
+
+.WorkflowStatusBar-tooltipBadge--failures {
+    background-color: @default-err;
+
+}

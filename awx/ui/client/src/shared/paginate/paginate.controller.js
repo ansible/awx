@@ -50,9 +50,9 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         }
 
         function calcDataRange() {
-            if ($scope.current() == 1 && $scope.dataset.count < parseInt(pageSize)) {
+            if ($scope.current() === 1 && $scope.dataset.count < parseInt(pageSize)) {
                 return `1 - ${$scope.dataset.count}`;
-            } else if ($scope.current() == 1) {
+            } else if ($scope.current() === 1) {
                 return `1 - ${pageSize}`;
             } else {
                 let floor = (($scope.current() - 1) * parseInt(pageSize)) + 1;

@@ -132,7 +132,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             }
         },
 
-        relatedSets: function(urls) {
+        relatedSets: function() {
             return {
                 permissions: {
                     awToolTip: i18n._('Please save before assigning permissions'),

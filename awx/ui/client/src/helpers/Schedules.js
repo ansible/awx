@@ -381,7 +381,6 @@ export default
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
-                    callback = params.callback,
                     url = GetBasePath('schedules') + id +'/';
 
                 // Perform the update

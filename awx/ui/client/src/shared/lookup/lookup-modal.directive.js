@@ -1,4 +1,4 @@
-export default ['templateUrl', '$compile', function(templateUrl, $compile) {
+export default ['templateUrl', function(templateUrl) {
     return {
         restrict: 'E',
         replace: true,
@@ -27,6 +27,9 @@ export default ['templateUrl', '$compile', function(templateUrl, $compile) {
                 let list = $scope.list;
                 $scope.$parent[`${list.iterator}_name`] = $scope.selection[list.iterator].name;
                 $scope.$parent[list.iterator] = $scope.selection[list.iterator].id;
+                $state.go('^');
+            };
+            $scope.cancelForm = function() {
                 $state.go('^');
             };
         }]

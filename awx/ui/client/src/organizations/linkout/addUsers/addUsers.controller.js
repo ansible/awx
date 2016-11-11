@@ -11,15 +11,11 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$rootScope', 'ProcessErrors',  'generateList', 'GetBasePath',
+export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath',
 'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait',
-function($scope, $rootScope, ProcessErrors, generateList, GetBasePath,
+function($scope, $rootScope, ProcessErrors, GetBasePath,
     SelectionInit, templateUrl, $state, Rest, $q, Wait) {
     $scope.$on("linkLists", function() {
-        var generator = generateList,
-            //list = AddUserList,
-            id = "addUsersList",
-            mode = "add";
 
         if ($state.current.name.split(".")[1] === "users") {
             $scope.addType = "Users";
@@ -36,7 +32,7 @@ function($scope, $rootScope, ProcessErrors, generateList, GetBasePath,
             $scope.add_users = $scope.$parent.add_user_dataset.results;
 
             $scope.selectedItems = [];
-            $scope.$on('selectedOrDeselected', (item)=>{
+            $scope.$on('selectedOrDeselected', ()=>{
                 throw {name: 'NotYetImplemented'};
             });
         }

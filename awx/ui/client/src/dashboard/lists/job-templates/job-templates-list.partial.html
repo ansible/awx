@@ -3,7 +3,7 @@
         <h3 class="DashboardList-headerText">
             <translate>RECENTLY USED JOB TEMPLATES</translate>
         </h3>
-        <a href="/#/job_templates" class="DashboardList-viewAll">
+        <a href="/#/templates" class="DashboardList-viewAll">
             <translate>VIEW ALL</translate>
         </a>
     </div>
@@ -25,7 +25,7 @@
                 ng-class-even="'List-tableRow--evenRow'"
                 ng-repeat = "job_template in job_templates">
               <td class="DashboardList-nameCell">
-                  <a href="#/job_templates/{{ job_template.id }}" class="DashboardList-nameContainer">
+                  <a href="#/templates/{{ job_template.id }}" class="DashboardList-nameContainer">
                       {{ job_template.name }}
                   </a>
               </td>
@@ -53,7 +53,7 @@
         </h3>
     </div>
     <div class="DashboardList-container">
-        <p class="DashboardList-noJobs" translate>No job templates were recently used.<br />
-        You can create a job template <a href="#/job_templates/add">here</a>.</p>
+        <p class="DashboardList-noJobs">No job templates were recently used.<br />
+        You can create a job template <a href="#/templates/add">here</a>.</p>
     </div>
 </div>

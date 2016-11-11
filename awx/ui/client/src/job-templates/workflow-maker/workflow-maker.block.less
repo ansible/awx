@@ -1,0 +1,194 @@
+@import "./client/src/shared/branding/colors.default.less";
+
+.WorkflowMaker-header {
+    display: flex;
+    height: 34px;
+}
+.WorkflowMaker-title {
+    align-items: center;
+    flex: 1 0 auto;
+    display: flex;
+    height: 34px;
+}
+.WorkflowMaker-titleText {
+    color: @list-title-txt;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+.WorkflowMaker-exitHolder {
+    justify-content: flex-end;
+    display: flex;
+}
+.WorkflowMaker-exit{
+    cursor:pointer;
+    padding:0px;
+    border: none;
+    height:20px;
+    font-size: 20px;
+    background-color:@default-bg;
+    color:@d7grey;
+    transition: color 0.2s;
+    line-height:1;
+}
+.WorkflowMaker-exit:hover{
+    color:@default-icon;
+}
+.WorkflowMaker-contentHolder {
+    display: flex;
+    border: 1px solid #EBEBEB;
+    height: ~"calc(100% - 85px)";
+}
+.WorkflowMaker-contentLeft {
+    flex: 1 0 auto;
+    flex-direction: column;
+    height: 100%;
+}
+.WorkflowMaker-contentRight {
+    flex: 0 0 400px;
+    border-left: 1px solid #EBEBEB;
+    padding: 20px;
+    height: 100%;
+    overflow-y: scroll;
+}
+.WorkflowMaker-buttonHolder {
+    height: 30px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+.WorkflowMaker-saveButton{
+    background-color: @submit-button-bg;
+    color: @submit-button-text;
+    text-transform: uppercase;
+    transition: background-color 0.2s;
+    padding-left:15px;
+    padding-right: 15px;
+    margin-left: 20px;
+}
+
+.WorkflowMaker-saveButton:disabled{
+    background-color: @submit-button-bg-dis;
+}
+
+.WorkflowMaker-saveButton:hover{
+    background-color: @submit-button-bg-hov;
+    color: @submit-button-text;
+}
+
+.WorkflowMaker-cancelButton{
+    background-color: @default-bg;
+    color: @btn-txt;
+    text-transform: uppercase;
+    border-radius: 5px;
+    border: 1px solid @btn-bord;
+    transition: background-color 0.2s;
+    padding-left:15px;
+    padding-right: 15px;
+}
+
+.WorkflowMaker-cancelButton:hover{
+    background-color: @btn-bg-hov;
+    color: @btn-txt;
+}
+
+.WorkflowMaker-deleteOverlay {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+.WorkflowMaker-deleteModal {
+    height: 200px;
+    width: 600px;
+    background-color: @default-bg;
+    border-radius: 5px;
+}
+.WorkflowMaker-formTitle {
+    color: @list-title-txt;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+.WorkflowMaker-formHelp {
+    color: #707070;
+}
+.WorkflowMaker-formLists {
+    margin-bottom: 20px;
+}
+.WorkflowMaker-formTitle {
+    display: flex;
+    color: #707070;
+    margin-right: 10px;
+}
+.WorkflowMaker-formLabel {
+    font-weight: normal;
+}
+.WorkflowMaker-formElement {
+    margin-bottom: 10px;
+}
+.WorkflowMaker-legend {
+    display: flex;
+    height: 40px;
+    line-height: 40px;
+    color: #707070;
+}
+.WorkflowMaker-chart {
+    display: flex;
+}
+.WorkflowMaker-legendLeft {
+    display: flex;
+    flex: 1 0 auto;
+    padding-left: 20px;
+}
+.WorkflowMaker-legendRight {
+    flex: 0 0 170px;
+    text-align: right;
+    padding-right: 20px;
+}
+.WorkflowMaker-legendItem {
+    display: flex;
+}
+.WorkflowMaker-legendItem:not(:last-child) {
+    padding-right: 20px;
+}
+.WorkflowMaker-onSuccessLegend {
+    height: 4px;
+    width: 20px;
+    background-color: @submit-button-bg;
+    margin: 18px 5px 18px 0px;
+}
+.WorkflowMaker-onFailLegend {
+    height: 4px;
+    width: 20px;
+    background-color: #d9534f;
+    margin: 18px 5px 18px 0px;
+}
+.WorkflowMaker-alwaysLegend {
+    height: 4px;
+    width: 20px;
+    background-color: #337ab7;
+    margin: 18px 5px 18px 0px;
+}
+.WorkflowMaker-letterCircle{
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    background: #848992;
+    color: #FFF;
+    text-align: center;
+    margin: 10px 5px 10px 0px;
+    line-height: 20px;
+}
+.WorkflowMaker-totalJobs {
+    margin-right: 10px;
+}

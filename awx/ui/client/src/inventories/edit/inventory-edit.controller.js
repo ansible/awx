@@ -14,7 +14,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, Prompt, InitiatePlaybookRun,
-    deleteJobTemplate, $state, $filter) {
+    JobTemplateService, $state, $filter) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -141,25 +141,23 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         $location.path($location.path() + '/job_templates/' + this.scan_job_template.id);
     };
 
-    $scope.deleteScanJob = function() {
-        var id = this.scan_job_template.id,
-            action = function() {
-                $('#prompt-modal').modal('hide');
-                Wait('start');
-                deleteJobTemplate(id)
-                    .success(function() {
-                        $('#prompt-modal').modal('hide');
-                        // @issue: OLD SEARCH
-                        //   $scope.search(form.related.scan_job_templates.iterator);
-                    })
-                    .error(function(data) {
-                        Wait('stop');
-                        ProcessErrors($scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'DELETE returned status: ' + status
-                        });
-                    });
-            };
+    $scope.deleteScanJob = function () {
+        var id = this.scan_job_template.id ,
+          action = function () {
+            $('#prompt-modal').modal('hide');
+            Wait('start');
+            JobTemplateService.deleteJobTemplate(id)
+                .success(function () {
+                  $('#prompt-modal').modal('hide');
+                  // @issue: OLD SEARCH
+                  // $scope.search(form.related.scan_job_templates.iterator);
+                })
+                .error(function (data) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'DELETE returned status: ' + status });
+                });
+        };
 
         Prompt({
             hdr: 'Delete',
@@ -176,5 +174,5 @@ export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'InventoryForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString', 'Prompt', 'InitiatePlaybookRun',
-    'deleteJobTemplate', '$state', '$filter', InventoriesEdit,
+    'JobTemplateService', '$state', '$filter', InventoriesEdit,
 ];

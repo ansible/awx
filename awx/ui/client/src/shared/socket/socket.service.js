@@ -50,13 +50,13 @@ export default
                         $log.debug('Websocket Error Logged: ' + error); //log errors
                     };
 
-                    self.socket.onconnecting = function (event) {
+                    self.socket.onconnecting = function () {
                         self.checkStatus();
                         $log.debug('Websocket reconnecting');
                         needsResubscribing = true;
                     };
 
-                    self.socket.onclose = function (event) {
+                    self.socket.onclose = function () {
                         self.checkStatus();
                         $log.debug(`Websocket disconnected`);
                     };

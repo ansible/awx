@@ -280,7 +280,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('jobTemplates.edit', {job_template_id: id}, {reload: true});
+                $state.go('templates.editJobTemplate', {id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -501,14 +501,13 @@
 
                 } catch (err) {
                     Wait('stop');
-                    console.log(err)
                     Alert("Error", "Error parsing extra variables. " +
                         "Parser returned: " + err);
                 }
             };
 
             $scope.formCancel = function () {
-                $state.go('jobTemplates');
+                $state.transitionTo('templates');
             };
         }
     ];

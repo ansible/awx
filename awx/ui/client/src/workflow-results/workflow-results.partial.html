@@ -1,0 +1,236 @@
+<div class="tab-pane" id="workflow-results">
+    <div ng-cloak
+        id="htmlTemplate"
+        class="WorkflowResults"
+        ng-class="{'fullscreen': stdoutFullScreen}">
+        <div ui-view></div>
+
+        <!-- LEFT PANE -->
+        <div class="WorkflowResults-leftSide"
+            ng-class="{'WorkflowResults-stdoutActionButton--active': stdoutFullScreen}">
+            <div class="Panel"
+                ng-show="!stdoutFullScreen">
+
+                <!-- LEFT PANE HEADER -->
+                <div class="WorkflowResults-panelHeader">
+                    <div
+                        class="WorkflowResults-panelHeaderText">
+                        RESULTS
+                    </div>
+
+                    <!-- LEFT PANE HEADER ACTIONS -->
+                    <div>
+
+                        <!-- RELAUNCH ACTION -->
+                        <button class="List-actionButton"
+                            data-placement="top"
+                            mode="all"
+                            ng-click="relaunchJob()"
+                            aw-tool-tip="Relaunch using the same parameters"
+                            data-original-title=""
+                            title="">
+                            <i class="icon-launch"></i>
+                        </button>
+
+                        <!-- CANCEL ACTION -->
+                        <button class="List-actionButton
+                                List-actionButton--delete"
+                            data-placement="top"
+                            ng-click="deleteJob()"
+                            ng-show="workflow_status.status == 'running' ||
+                                job_status.status=='pending' "
+                            aw-tool-tip="Cancel"
+                            data-original-title="" title="">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+
+                        <!-- DELETE ACTION -->
+                        <button class="List-actionButton
+                                List-actionButton--delete"
+                            data-placement="top"
+                            ng-click="deleteJob()"
+                            ng-hide="job_status.status == 'running' ||
+                                job_status.status == 'pending' "
+                            aw-tool-tip="Delete"
+                            data-original-title=""
+                            title="">
+                            <i class="fa fa-trash-o"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LEFT PANE DETAILS GROUP -->
+                <div>
+
+                    <!-- START TIME DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.started">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Started
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            {{ workflow.started | longDate }}
+                        </div>
+                    </div>
+
+                    <!-- FINISHED TIME DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.started">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Finished
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            {{ (workflow.finished |
+                                longDate) || "Not Finished" }}
+                        </div>
+                    </div>
+
+                    <!-- TEMPLATE DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.name">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Template
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ workflow_template_link }}"
+                                aw-tool-tip="Edit the job template"
+                                data-placement="top">
+                                {{ workflow.name }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- JOB TYPE DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.type">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Job Type
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            Workflow Job
+                        </div>
+                    </div>
+
+                    <!-- CREATED BY DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.summary_fields.created_by.username">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Launched By
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ created_by_link }}"
+                                aw-tool-tip="Edit the User"
+                                data-placement="top">
+                                {{ workflow.summary_fields.created_by.username }}
+                            </a>
+                        </div>
+                    </div>
+
+
+                    <!-- EXTRA VARIABLES DETAIL -->
+                    <div class="WorkflowResults-resultRow
+                        WorkflowResults-resultRow--variables"
+                        ng-show="variables">
+                        <label class="WorkflowResults-resultRowLabel
+                            WorkflowResults-resultRowLabel--fullWidth">
+                            Extra Variables
+                        </label>
+                        <textarea
+                            rows="6"
+                            ng-model="variables"
+                            name="variables"
+                            class="WorkflowResults-extraVars"
+                            id="pre-formatted-variables">
+                        </textarea>
+                    </div>
+
+                    <!-- LABELS DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="labels && labels.length > 0">
+                        <label class="WorkflowResults-resultRowLabel
+                            WorkflowResults-resultRowLabel--fullWidth">
+                            Labels
+                        </label>
+                        <div class="LabelList
+                            WorkflowResults-resultRowText
+                            WorkflowResults-resultRowText--fullWidth">
+                            <div ng-repeat="label in labels"
+                                class="LabelList-tagContainer">
+                                <div class="LabelList-tag">
+                                    <div class="LabelList-name">
+                                        {{ label }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT PANE -->
+        <div class="WorkflowResults-rightSide">
+            <div class="Panel">
+
+                <!-- RIGHT PANE HEADER -->
+                <div class="StandardOut-panelHeader">
+                    <div class="StandardOut-panelHeaderText">
+                        <i class="WorkflowResults-statusResultIcon
+                            fa icon-job-{{ job.status }}">
+                        </i>
+                        {{ workflow.name }}
+                    </div>
+
+                    <!-- HEADER COUNTS -->
+                    <div class="WorkflowResults-badgeRow">
+                        <!-- PLAYS COUNT -->
+                        <div class="WorkflowResults-badgeTitle">
+                            Total Jobs
+                        </div>
+                        <span class="badge List-titleBadge">
+                            {{ workflow_nodes.length || 0}}
+                        </span>
+
+                        <!-- ELAPSED TIME -->
+                        <div class="WorkflowResults-badgeTitle">
+                            Elapsed
+                        </div>
+                        <span class="badge List-titleBadge">
+                            {{ job.elapsed * 1000 }}
+                        </span>
+                    </div>
+
+                    <!-- HEADER ACTIONS -->
+                    <div class="StandardOut-panelHeaderActions">
+
+                        <!-- FULL-SCREEN TOGGLE ACTION -->
+                        <button class="StandardOut-actionButton"
+                            aw-tool-tip="Toggle Output"
+                            data-placement="top"
+                            ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
+                            ng-click="toggleStdoutFullscreen()">
+                            <i class="fa fa-arrows-alt"></i>
+                        </button>
+
+                        <!-- DOWNLOAD ACTION -->
+                        <a ng-show="workflow_status.status === 'failed' ||
+                            job_status.status === 'successful' ||
+                            job_status.status === 'canceled'"
+                            href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            <button class="StandardOut-actionButton"
+                                aw-tool-tip="Download Output"
+                                data-placement="top">
+                                <i class="fa fa-download"></i>
+                            </button>
+                        </a>
+
+                    </div>
+                </div>
+                <workflow-status-bar></workflow-status-bar>
+                <!-- <job-results-standard-out></job-results-standard-out> -->
+            </div>
+
+        </div>
+    </div>
+</div>

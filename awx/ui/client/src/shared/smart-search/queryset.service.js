@@ -1,5 +1,5 @@
-export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory', 'GetBasePath',
-    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory, GetBasePath) {
+export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory',
+    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory) {
         return {
             // kick off building a model for a specific endpoint
             // this is usually a list's basePath

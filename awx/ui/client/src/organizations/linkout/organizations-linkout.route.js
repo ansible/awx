@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import { templateUrl } from '../../shared/template-url/template-url.factory';
 import OrganizationsAdmins from './controllers/organizations-admins.controller';
 import OrganizationsInventories from './controllers/organizations-inventories.controller';
 import OrganizationsJobTemplates from './controllers/organizations-job-templates.controller';

@@ -1,0 +1,69 @@
+@import "./client/src/shared/branding/colors.default.less";
+
+.nodeConnector circle, .nodeConnector .linkCross, .node .addCircle, .node .removeCircle, .node .WorkflowChart-hoverPath {
+    opacity: 0;
+}
+
+.node .addCircle, .nodeConnector .addCircle {
+    fill: @default-succ;
+}
+
+.addCircle.addHovering {
+    fill: @default-succ-hov;
+}
+
+.node .removeCircle {
+    fill: @default-err;
+}
+
+.removeCircle.removeHovering {
+    fill: @default-err-hov;
+}
+
+.node .WorkflowChart-defaultText {
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif;
+    fill: @default-interface-txt;
+}
+
+.node .rect {
+    fill: @default-secondary-bg;
+}
+
+.rect.placeholder {
+    stroke-dasharray: 3;
+}
+
+.node .transparentRect {
+    fill: @default-bg;
+    opacity: 0;
+}
+
+.WorkflowChart-alwaysShowAdd circle,
+.WorkflowChart-alwaysShowAdd path,
+.WorkflowChart-alwaysShowAdd .linkCross,
+.hovering .addCircle,
+.hovering .removeCircle,
+.hovering .WorkflowChart-hoverPath,
+.hovering .linkCross {
+    opacity: 1;
+}
+
+.link {
+  fill: none;
+  stroke-width: 2px;
+}
+
+.link.placeholder {
+    stroke-dasharray: 3;
+}
+
+.WorkflowChart-svg {
+    background-color: @default-no-items-bord;
+}
+.WorkflowChart-nodeTypeCircle {
+    fill: @default-icon;
+}
+.WorkflowChart-nodeTypeLetter {
+    fill: @default-bg;
+}

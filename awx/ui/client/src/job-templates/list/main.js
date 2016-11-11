@@ -8,4 +8,4 @@ import controller from './job-templates-list.controller';
 
 export default
     angular.module('jobTemplatesList', [])
-        .controller('JobTemplatesList', controller);
+        .controller('JobTemplatesListController', controller);

@@ -19,7 +19,11 @@
  					jobTemplateCopyService.set(res)
             .success(function(res){
               Wait('stop');
-              $state.go('jobTemplates.edit', {id: res.id}, {reload: true});
+              if(res.type && res.type === 'job_template') {
+                  $state.go('templates.editJobTemplate', {id: res.id}, {reload: true});
+              }
+              // Workflow edit to be implemented post 3.1 but we'll need to handle the
+              // state transition for that here
             });
  				})
   			.error(function(res, status){
