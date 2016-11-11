@@ -6,8 +6,6 @@
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
 
-import jobResultsController from './job-results.controller';
-
 export default {
     name: 'jobDetail',
     url: '/jobs/:id',
@@ -156,5 +154,5 @@ export default {
         }]
     },
     templateUrl: templateUrl('job-results/job-results'),
-    controller: jobResultsController
+    controller: 'jobResultsController'
 };
