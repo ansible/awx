@@ -6,8 +6,9 @@ from awx.main.access import (
 
 @pytest.mark.django_db
 def test_label_get_queryset_user(label, user):
-    access = LabelAccess(user('user', False))
-    label.organization.member_role.members.add(user('user', False))
+    u = user('user', False)
+    access = LabelAccess(u)
+    label.organization.member_role.members.add(u)
     assert access.get_queryset().count() == 1
 
 @pytest.mark.django_db
