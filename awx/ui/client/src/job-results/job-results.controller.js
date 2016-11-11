@@ -86,6 +86,15 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.jobFinished = jobFinished;
     $scope.followEngaged = !$scope.jobFinished;
 
+    // follow button for completed job should specify that the
+    // button will jump to the bottom of the standard out pane,
+    // not follow lines as they come in
+    if ($scope.jobFinished) {
+        $scope.followTooltip = "Jump to last line of standard out.";
+    } else {
+        $scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
+    }
+
     // EVENT STUFF BELOW
 
     // just putting the event queue on scope so it can be inspected in the
@@ -127,6 +136,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                     if (change === 'finishedTime'  && !$scope.job.finished) {
                         $scope.job.finished = mungedEvent.finishedTime;
                         $scope.jobFinished = true;
+                        $scope.followTooltip = "Jump to last line of standard out.";
                     }
 
                     if (change === 'countFinished') {
@@ -142,6 +152,9 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
                                 .stdout)($scope));
+
+                        $(".JobResultsStdOut-followAnchor")
+                            .appendTo(".JobResultsStdOut-stdoutContainer");
 
                         if ($scope.followEngaged) {
                             $scope.followScroll();

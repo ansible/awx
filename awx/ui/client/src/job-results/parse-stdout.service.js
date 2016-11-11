@@ -99,7 +99,7 @@ export default [function(){
             return _
                 .zip(_.range(event.start_line + 1,
                     event.end_line + 1),
-                    event.stdout.split("\r\n").slice(0, -1))
+                    event.stdout.replace("\t", "        ").split("\r\n").slice(0, -1))
                 .map(lineArr => {
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getCollapseClasses(event, lineArr[1], lineArr[0])}">

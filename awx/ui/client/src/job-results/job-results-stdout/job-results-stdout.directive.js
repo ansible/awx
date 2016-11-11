@@ -5,8 +5,8 @@
  *************************************************/
 
 // import hostStatusBarController from './host-status-bar.controller';
-export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll', '$log',
-    function(templateUrl, $timeout, $location, $anchorScroll, $log) {
+export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
+    function(templateUrl, $timeout, $location, $anchorScroll) {
     return {
         scope: false,
         templateUrl: templateUrl('job-results/job-results-stdout/job-results-stdout'),
@@ -55,10 +55,10 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll', '$log'
                 });
                 scope.visLine = visItem;
                 scope.parentVisLine = parentItem;
-                scope.visibleItems = "First visible line: " + visItem + ", Parent line: " + parentItem;
             };
 
             var lastScrollTop = 0;
+            scope.stdoutOverflowed = false;
             $(".JobResultsStdOut-stdoutContainer").on('scroll', function() {
                 var st = $(this).scrollTop();
                 if (st < lastScrollTop){
@@ -67,10 +67,15 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll', '$log'
                 }
 
                 if($(this).scrollTop() + $(this).innerHeight() >=
-                    $(this)[0].scrollHeight) {
+                    $(this)[0].scrollHeight - 25) {
                     // user scrolled all the way to bottom, so engage
                     // follow
                     scope.followEngaged = true;
+                }
+
+                // pane is now overflowed, show top indicator
+                if (st > 0) {
+                    scope.stdoutOverflowed = true;
                 }
 
                 lastScrollTop = st;
@@ -84,17 +89,15 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll', '$log'
                 $anchorScroll();
             };
 
+            scope.toTop = function() {
+                $location.hash('topAnchor');
+                $anchorScroll();
+            };
+
             scope.topLineAnchor = function() {
                 $location.hash('topLineAnchor');
                 $anchorScroll();
-            }
-
-            // follow button for completed job should specify that the
-            // button will jump to the bottom of the standard out pane,
-            // not follow lines as they come in
-            if (scope.jobFinished) {
-                scope.followTooltip = "Jump to last line";
-            }
+            };
 
             // if following becomes active, go ahead and get to the bottom
             // of the standard out pane
@@ -105,9 +108,9 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll', '$log'
 
                 if (!scope.jobFinished) {
                     if (val) {
-                        scope.followTooltip = "Follow standard out";
+                        scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
                     } else {
-                        scope.followTooltip = "Unfollow standard out";
+                        scope.followTooltip = "Click to follow standard out as it comes in.";
                     }
                 }
             });
