@@ -280,7 +280,7 @@
 
 
             function saveCompleted(id) {
-                $state.go('templates.editJobTemplate', {id: id}, {reload: true});
+                $state.go('templates.editJobTemplate', {job_template_id: id}, {reload: true});
             }
 
             if ($scope.removeTemplateSaveSuccess) {
@@ -426,7 +426,7 @@
                 try {
                     for (fld in form.fields) {
                         if (form.fields[fld].type === 'select' &&
-                            fld !== 'playbook') {
+                            fld !== 'playbook' && $scope[fld]) {
                             data[fld] = $scope[fld].value;
                         }
                         else if(form.fields[fld].type === 'checkbox_group') {
