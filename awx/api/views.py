@@ -2916,6 +2916,31 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     always_allow_superuser = False
     new_in_310 = True
 
+class WorkflowJobTemplateCopy(GenericAPIView):
+
+    model = WorkflowJobTemplate
+    parent_model = WorkflowJobTemplate
+    serializer_class = EmptySerializer
+    new_in_310 = True
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = {}
+        copy_TF, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
+        data['can_copy'] = copy_TF
+        data['warnings'] = messages
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.can_access(self.model, 'copy', obj):
+            return PermissionDenied()
+        new_wfjt = obj.user_copy(request.user)
+        data = OrderedDict()
+        data.update(WorkflowJobTemplateSerializer(
+            new_wfjt, context=self.get_serializer_context()).to_representation(new_wfjt))
+        return Response(data, status=status.HTTP_201_CREATED)
+
 
 class WorkflowJobTemplateLabelList(JobTemplateLabelList):
     parent_model = WorkflowJobTemplate
@@ -2952,7 +2977,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
 
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
-        new_job = obj.create_unified_job(**prompted_fields)
+        new_job = obj.create_workflow_job(**prompted_fields)
         new_job.signal_start(**prompted_fields)
 
         data = OrderedDict()

@@ -393,6 +393,8 @@ def create_workflow_job_template(name, organization=None, persisted=True, **kwar
 
     if 'survey' in kwargs:
         spec = create_survey_spec(kwargs['survey'])
+    else:
+        spec = {}
 
     wfjt = mk_workflow_job_template(name,
                                     organization=organization,

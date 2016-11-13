@@ -159,6 +159,18 @@ class WorkflowNodeBase(CreatedModifiedModel):
         return ['workflow_job', 'unified_job_template',
                 'inventory', 'credential', 'char_prompts']
 
+    def create_workflow_job_node(self, **kwargs):
+        '''
+        Create a new workflow job node based on this workflow node.
+        '''
+        create_kwargs = {}
+        for field_name in self._get_workflow_job_field_names():
+            if field_name in kwargs:
+                create_kwargs[field_name] = kwargs[field_name]
+            elif hasattr(self, field_name):
+                create_kwargs[field_name] = getattr(self, field_name)
+        return WorkflowJobNode.objects.create(**create_kwargs)
+
 
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     workflow_job_template = models.ForeignKey(
@@ -173,17 +185,24 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
     def get_absolute_url(self):
         return reverse('api:workflow_job_template_node_detail', args=(self.pk,))
 
-    def create_workflow_job_node(self, **kwargs):
+    def create_wfjt_node_copy(self, user, workflow_job_template=None):
         '''
-        Create a new workflow job node based on this workflow node.
+        Copy this node to a new WFJT, leaving out related fields the user
+        is not allowed to access
         '''
         create_kwargs = {}
         for field_name in self._get_workflow_job_field_names():
-            if field_name in kwargs:
-                create_kwargs[field_name] = kwargs[field_name]
-            elif hasattr(self, field_name):
-                create_kwargs[field_name] = getattr(self, field_name)
-        return WorkflowJobNode.objects.create(**create_kwargs)
+            if hasattr(self, field_name):
+                item = getattr(self, field_name)
+                if field_name in ['inventory', 'credential']:
+                    if not user.can_access(item.__class__, 'use', item):
+                        continue
+                if field_name in ['unified_job_template']:
+                    if not user.can_access(item.__class__, 'start', item):
+                        continue
+                create_kwargs[field_name] = item
+        create_kwargs['workflow_job_template'] = workflow_job_template
+        return self.__class__.objects.create(**create_kwargs)
 
 
 class WorkflowJobNode(WorkflowNodeBase):
@@ -248,14 +267,14 @@ class WorkflowJobNode(WorkflowNodeBase):
         if password_dict:
             data['survey_passwords'] = password_dict
         # process extra_vars
-        # TODO: still lack consensus about variable precedence
         extra_vars = {}
-        if self.workflow_job and self.workflow_job.extra_vars:
-            extra_vars.update(self.workflow_job.extra_vars_dict)
         if aa_dict:
             functional_aa_dict = copy(aa_dict)
             functional_aa_dict.pop('_ansible_no_log', None)
             extra_vars.update(functional_aa_dict)
+        # Workflow Job extra_vars higher precedence than ancestor artifacts
+        if self.workflow_job and self.workflow_job.extra_vars:
+            extra_vars.update(self.workflow_job.extra_vars_dict)
         if extra_vars:
             data['extra_vars'] = extra_vars
         # ensure that unified jobs created by WorkflowJobs are marked
@@ -273,6 +292,35 @@ class WorkflowJobOptions(BaseModel):
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
+
+    @property
+    def workflow_nodes(self):
+        raise NotImplementedError()
+
+    def _create_workflow_nodes(self, old_node_list, user=None):
+        node_links = {}
+        for old_node in old_node_list:
+            if user:
+                new_node = old_node.create_wfjt_node_copy(user, workflow_job_template=self)
+            else:
+                new_node = old_node.create_workflow_job_node(workflow_job=self)
+            node_links[old_node.pk] = new_node
+        return node_links
+
+    def _inherit_node_relationships(self, old_node_list, node_links):
+        for old_node in old_node_list:
+            new_node = node_links[old_node.pk]
+            for relationship in ['always_nodes', 'success_nodes', 'failure_nodes']:
+                old_manager = getattr(old_node, relationship)
+                for old_child_node in old_manager.all():
+                    new_child_node = node_links[old_child_node.pk]
+                    new_manager = getattr(new_node, relationship)
+                    new_manager.add(new_child_node)
+
+    def copy_nodes_from_original(self, original=None, user=None):
+        old_node_list = original.workflow_nodes.prefetch_related('always_nodes', 'success_nodes', 'failure_nodes').all()
+        node_links = self._create_workflow_nodes(old_node_list, user=user)
+        self._inherit_node_relationships(old_node_list, node_links)
 
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
@@ -297,6 +345,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         'singleton:' + ROLE_SINGLETON_SYSTEM_AUDITOR,
         'organization.auditor_role', 'execute_role', 'admin_role'
     ])
+
+    @property
+    def workflow_nodes(self):
+        return self.workflow_job_template_nodes
 
     @classmethod
     def _get_unified_job_class(cls):
@@ -326,21 +378,10 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return dict(error=list(error_notification_templates),
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
-    # TODO: Surveys
 
-    #def create_job(self, **kwargs):
-    #    '''
-    #    Create a new job based on this template.
-    #    '''
-    #    return self.create_unified_job(**kwargs)
-
-    # TODO: Delete create_unified_job here and explicitly call create_workflow_job() .. figure out where the call is
-    def create_unified_job(self, **kwargs):
-
-        #def create_workflow_job(self, **kwargs):
-        #workflow_job =  self.create_unified_job(**kwargs)
-        workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
-        workflow_job.inherit_job_template_workflow_nodes()
+    def create_workflow_job(self, **kwargs):
+        workflow_job = self.create_unified_job(**kwargs)
+        workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
     def _accept_or_ignore_job_kwargs(self, extra_vars=None, **kwargs):
@@ -377,51 +418,13 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                 warning_data[node.pk] = node_prompts_warnings
         return warning_data
 
-
-class WorkflowJobInheritNodesMixin(object):
-    def _inherit_relationship(self, old_node, new_node, node_ids_map, node_type):
-        old_related_nodes = self._get_all_by_type(old_node, node_type)
-        new_node_type_mgr = getattr(new_node, node_type)
-
-        for old_related_node in old_related_nodes:
-            new_related_node = self._get_workflow_job_node_by_id(node_ids_map[old_related_node.id])
-            new_node_type_mgr.add(new_related_node)
-
-    '''
-    Create a WorkflowJobNode for each WorkflowJobTemplateNode
-    '''
-    def _create_workflow_job_nodes(self, old_nodes):
-        return [old_node.create_workflow_job_node(workflow_job=self) for old_node in old_nodes]
-
-    def _map_workflow_job_nodes(self, old_nodes, new_nodes):
-        node_ids_map = {}
-
-        for i, old_node in enumerate(old_nodes):
-            node_ids_map[old_node.id] = new_nodes[i].id
-
-        return node_ids_map
-
-    def _get_workflow_job_template_nodes(self):
-        return self.workflow_job_template.workflow_job_template_nodes.all()
-
-    def _get_workflow_job_node_by_id(self, id):
-        return WorkflowJobNode.objects.get(id=id)
-
-    def _get_all_by_type(self, node, node_type):
-        return getattr(node, node_type).all()
-
-    def inherit_job_template_workflow_nodes(self):
-        old_nodes = self._get_workflow_job_template_nodes()
-        new_nodes = self._create_workflow_job_nodes(old_nodes)
-        node_ids_map = self._map_workflow_job_nodes(old_nodes, new_nodes)
-
-        for index, old_node in enumerate(old_nodes):
-            new_node = new_nodes[index]
-            for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
-                self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
+    def user_copy(self, user):
+        new_wfjt = self.copy_unified_jt()
+        new_wfjt.copy_nodes_from_original(original=self, user=user)
+        return new_wfjt
 
 
-class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WorkflowJobInheritNodesMixin):
+class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
     class Meta:
         app_label = 'main'
         ordering = ('id',)
@@ -434,6 +437,10 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
         default=None,
         on_delete=models.SET_NULL,
     )
+
+    @property
+    def workflow_nodes(self):
+        return self.workflow_job_nodes
 
     @classmethod
     def _get_parent_field_name(cls):

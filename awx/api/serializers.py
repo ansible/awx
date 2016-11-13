@@ -339,7 +339,7 @@ class BaseSerializer(serializers.ModelSerializer):
         if hasattr(self, 'show_capabilities'):
             view = self.context.get('view', None)
             parent_obj = None
-            if view and hasattr(view, 'parent_model'):
+            if view and hasattr(view, 'parent_model') and hasattr(view, 'get_parent_object'):
                 parent_obj = view.get_parent_object()
             if view and view.request and view.request.user:
                 user_capabilities = get_user_capabilities(
@@ -2203,7 +2203,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 
 class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerializer):
-    show_capabilities = ['start', 'edit', 'delete']
+    show_capabilities = ['start', 'edit', 'copy', 'delete']
 
     class Meta:
         model = WorkflowJobTemplate
@@ -2215,6 +2215,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             workflow_jobs = reverse('api:workflow_job_template_jobs_list', args=(obj.pk,)),
             schedules = reverse('api:workflow_job_template_schedules_list', args=(obj.pk,)),
             launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
+            copy = reverse('api:workflow_job_template_copy', args=(obj.pk,)),
             workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
             labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),
             activity_stream = reverse('api:workflow_job_template_activity_stream_list', args=(obj.pk,)),

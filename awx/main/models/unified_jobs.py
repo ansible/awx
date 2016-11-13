@@ -10,6 +10,7 @@ import os
 import os.path
 from collections import OrderedDict
 from StringIO import StringIO
+from datetime import datetime
 
 # Django
 from django.conf import settings
@@ -355,6 +356,38 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field = getattr(unified_job, field_name)
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
+
+
+    def copy_unified_jt(self):
+        '''
+        Create a copy of this unified job template.
+        '''
+        unified_jt_class = self.__class__
+        create_kwargs = {}
+        m2m_fields = {}
+        for field_name in self._get_unified_jt_copy_names():
+            # Foreign keys can be specified as field_name or field_name_id.
+            id_field_name = '%s_id' % field_name
+            if hasattr(self, id_field_name):
+                value = getattr(self, id_field_name)
+                if hasattr(value, 'id'):
+                    value = value.id
+                create_kwargs[id_field_name] = value
+            elif hasattr(self, field_name):
+                field_obj = self._meta.get_field_by_name(field_name)[0]
+                # Many to Many can be specified as field_name
+                if isinstance(field_obj, models.ManyToManyField):
+                    m2m_fields[field_name] = getattr(self, field_name)
+                else:
+                    create_kwargs[field_name] = getattr(self, field_name)
+        time_now = datetime.now()
+        create_kwargs['name'] = create_kwargs['name'] + ' copy ' + time_now.strftime('%Y:%m:%d %H:%M:%S')
+        unified_jt = unified_jt_class(**create_kwargs)
+        unified_jt.save()
+        for field_name, src_field_value in m2m_fields.iteritems():
+            dest_field = getattr(unified_jt, field_name)
+            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
+        return unified_jt
 
 
 class UnifiedJobTypeStringMixin(object):
