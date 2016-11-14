@@ -23,7 +23,7 @@ django-auth-ldap==1.2.6
 django-celery==3.1.17
 django-crum==0.6.1
 django-extensions==1.5.9
-django-jsonfield==0.9.12
+django-jsonfield==1.0.1
 git+https://github.com/ansible/django-jsonbfield@fix-sqlite_serialization#egg=jsonbfield
 django-polymorphic==0.7.2
 django-radius==1.0.0
