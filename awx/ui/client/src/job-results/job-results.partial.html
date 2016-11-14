@@ -8,7 +8,7 @@
         <!-- LEFT PANE -->
         <div class="JobResults-leftSide"
             ng-class="{'JobResults-stdoutActionButton--active': stdoutFullScreen}">
-            <div class="JobResults-detailsPanel Panel" 
+            <div class="JobResults-detailsPanel Panel"
                 ng-show="!stdoutFullScreen">
 
                 <!-- LEFT PANE HEADER -->
@@ -500,9 +500,9 @@
                         </button>
 
                         <!-- DOWNLOAD ACTION -->
-                        <a ng-show="job_status.status === 'failed' ||
-                            job_status.status === 'successful' ||
-                            job_status.status === 'canceled'"
+                        <a ng-show="job.status === 'failed' ||
+                            job.status === 'successful' ||
+                            job.status === 'canceled'"
                             href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
                             <button class="StandardOut-actionButton"
                                 aw-tool-tip="Download Output"
