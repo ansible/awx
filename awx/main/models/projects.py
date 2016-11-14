@@ -7,9 +7,6 @@ import os
 import re
 import urlparse
 
-# JSONField
-from jsonfield import JSONField
-
 # Django
 from django.conf import settings
 from django.db import models
@@ -34,6 +31,7 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
 

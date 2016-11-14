@@ -18,9 +18,8 @@ from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.irc_backend import IrcBackend
+from awx.main.fields import JSONField
 
-# Django-JSONField
-from jsonfield import JSONField
 
 logger = logging.getLogger('awx.main.models.notifications')
 

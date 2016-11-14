@@ -20,9 +20,6 @@ from django.utils.timezone import now
 from django.utils.encoding import smart_text
 from django.apps import apps
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # Django-Polymorphic
 from polymorphic import PolymorphicModel
 
@@ -35,6 +32,7 @@ from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, _inventory_updates
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
+from awx.main.fields import JSONField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 

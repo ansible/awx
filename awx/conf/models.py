@@ -7,11 +7,9 @@ import json
 # Django
 from django.db import models
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # Tower
 from awx.main.models.base import CreatedModifiedModel
+from awx.main.fields import JSONField
 
 __all__ = ['Setting']
 
