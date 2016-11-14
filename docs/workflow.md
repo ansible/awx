@@ -15,6 +15,8 @@ Workflow Nodes are containers of workflow spawned job resources and function as 
 
 Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d/workflow_nodes/` to be associated with underlying workflow job template, or under endpoint `/workflow_job_template_nodes/` directly. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parnent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
 
+Apart from the core fields, workflow job template nodes have optional fields `credential`, `inventory` and `char_prompts`. These fields will be passed on to corresponding fields of underlying jobs if those fields are set prompted at runtime.
+
 Workflow job nodes are created by workflow job template nodes at the beginning of workflow job runs. Other than the fields inherited from its template, workflow job nodes also come with a `job` field which references the to-be-spawned job resource.
 
 ### Decision Tree Formation and Restrictions
@@ -58,11 +60,13 @@ Workflow job summary:
 ### Task-related
 * Verify that workflow jobs can be launched by POSTing to endpoint `/workflow_job_templates/\d/launch/`.
 * Verify that schedules can be successfully (dis)associated with a workflow job template, and workflow jobs can be triggered by the schedule of associated workflow job template at specified time point.
+* Verify that extra variables and surveys work for workflow job templates the same way as they work for normal job templates.
 * Verify that during a workflow job run, all its decision trees follow their correct paths of execution. Unwarranted behaviors include child node executing before its parent and wrong path being selected (*failure nodes* are executed when parent node *succeeds* and so on).
 * Verify that a subtree of execution will never start if its root node runs into internal error (*not ends with failure*).
 * Verify that a subtree of execution will never start if its root node is successfully canceled.
 * Verify that cancelling a workflow job that is cancellable will consequently cancel any of its cancellable spawned jobs and thus interrupts the whole workflow execution.
 * Verify that during a workflow job run, deleting its spawned jobs are prohibited.
+* Verify that at the beginning of each spawned job run, its prompted fields will be populated by the wrapping workflow job node with corrected values. For example, `credential` field of workflow job node goes to `credential` field of spawned job.
 * Verify that notification templates can be successfully (dis)associated with a workflow job template. Later when its spawned workflow jobs finish running, verify that the correct type of notifications will be sent according to the job status.
 
 ## Test Notes
