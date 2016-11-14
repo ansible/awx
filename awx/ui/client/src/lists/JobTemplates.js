@@ -10,11 +10,12 @@ export default
     .factory('JobTemplateList', ['i18n', function(i18n) {
     return {
 
-        name: 'job_templates',
-        iterator: 'job_template',
-        selectTitle: i18n._('Add Job Template'),
-        editTitle: i18n._('Job Templates'),
-        listTitle: i18n._('Job Templates'),
+        name: 'templates',
+        iterator: 'template',
+        basePath: 'unified_job_templates',
+        selectTitle: i18n._('Template'),
+        editTitle: i18n._('Templates'),
+        listTitle: i18n._('Templates'),
         selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
             "button to create a new job template.",
         index: false,
@@ -24,7 +25,14 @@ export default
             name: {
                 key: true,
                 label: i18n._('Name'),
-                columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9'
+                columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9',
+                ngClick: "editJobTemplate(template)"
+            },
+            type: {
+                label: i18n._('Type'),
+                searchType: 'select',
+                searchOptions: [], // will be set by Options call to job templates resource
+                columnClass: 'col-lg-2 col-md-2 col-sm-4 hidden-xs'
             },
             description: {
                 label: i18n._('Description'),
@@ -41,73 +49,85 @@ export default
                 label: i18n._('Labels'),
                 type: 'labels',
                 nosort: true,
-                columnClass: 'List-tableCell col-lg-4 col-md-4 hidden-sm hidden-xs'
+                columnClass: 'List-tableCell col-lg-2 col-md-4 hidden-sm hidden-xs'
             }
         },
 
         actions: {
             add: {
                 mode: 'all', // One of: edit, select, all
-                ngClick: 'addJobTemplate()',
-                basePaths: ['job_templates'],
+                type: 'buttonDropdown',
+                basePaths: ['templates'],
                 awToolTip: i18n._('Create a new template'),
-                actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD'),
-                ngShow: 'canAdd'
+                actionClass: 'btn List-dropdownSuccess',
+                buttonContent: i18n._('ADD'),
+                options: [
+                    {
+                        optionContent: 'Job Template',
+                        optionSref: 'templates.addJobTemplate',
+                        ngShow: 'canAddJobTemplate'
+                    },
+                    {
+                        optionContent: 'Workflow Job Template',
+                        optionSref: 'templates.addWorkflowJobTemplate',
+                        ngShow: 'canAddWorkflowJobTemplate'
+                    }
+                ],
+                ngShow: 'canAddJobTemplate || canAddWorkflowJobTemplate'
             }
         },
 
         fieldActions: {
 
-            columnClass: 'col-lg-2 col-md-3 col-sm-3 col-xs-3',
+            columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-3',
 
             submit: {
                 label: i18n._('Launch'),
                 mode: 'all',
-                ngClick: 'submitJob(job_template.id)',
+                ngClick: 'submitJob(template)',
                 awToolTip: i18n._('Start a job using this template'),
                 dataPlacement: 'top',
-                ngShow: 'job_template.summary_fields.user_capabilities.start'
+                ngShow: 'template.summary_fields.user_capabilities.start'
             },
             schedule: {
                 label: i18n._('Schedule'),
                 mode: 'all',
-                ngClick: 'scheduleJob(job_template.id)',
+                ngClick: 'scheduleJob(template)',
                 awToolTip: i18n._('Schedule future job template runs'),
                 dataPlacement: 'top',
-                ngShow: 'job_template.summary_fields.user_capabilities.schedule'
+                ngShow: 'template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: i18n._('Copy'),
-                'ui-sref': 'jobTemplates.copy({id: job_template.id})',
+                'ui-sref': 'templates.copy({id: template.id})',
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy template'),
                 dataPlacement: 'top',
-                ngShow: 'job_template.summary_fields.user_capabilities.copy'
+                ngShow: 'template.summary_fields.user_capabilities.copy'
             },
             edit: {
                 label: i18n._('Edit'),
-                ngClick: "editJobTemplate(job_template.id)",
+                ngClick: "editJobTemplate(template)",
                 awToolTip: i18n._('Edit template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngShow: 'job_template.summary_fields.user_capabilities.edit'
+                ngShow: 'template.summary_fields.user_capabilities.edit'
             },
             view: {
                 label: i18n._('View'),
-                ngClick: "editJobTemplate(job_template.id)",
+                ngClick: "editJobTemplate(template.id)",
                 awToolTip: i18n._('View template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngShow: '!job_template.summary_fields.user_capabilities.edit'
+                ngShow: '!template.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 label: i18n._('Delete'),
-                ngClick: "deleteJobTemplate(job_template.id, job_template.name)",
+                ngClick: "deleteJobTemplate(template)",
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Delete template'),
                 dataPlacement: 'top',
-                ngShow: 'job_template.summary_fields.user_capabilities.delete'
+                ngShow: 'template.summary_fields.user_capabilities.delete'
             }
         }
     };}]);

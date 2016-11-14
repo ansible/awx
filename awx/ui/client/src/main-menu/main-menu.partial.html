@@ -29,10 +29,10 @@
         </a>
         <a class="MainMenu-item"
             id="main_menu_job_templates_mobile_link"
-            href="/#/job_templates"
-            ng-class="{'is-currentRoute' : isCurrentState('jobTemplates')}">
+            href="/#/templates"
+            ng-class="{'is-currentRoute' : isCurrentState('templates')}">
             <span class="MainMenu-itemText">
-                <translate>JOB TEMPLATES</translate>
+                <translate>TEMPLATES</translate>
             </span>
         </a>
         <a class="MainMenu-item"
@@ -106,11 +106,11 @@
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left"
         id="main_menu_job_templates_link"
-        href="/#/job_templates"
+        href="/#/templates"
         ng-hide="licenseMissing"
-        ng-class="{'is-currentRoute' : isCurrentState('jobTemplates'), 'is-loggedOut' : !current_user || !current_user.username}">
+        ng-class="{'is-currentRoute' : isCurrentState('templates'), 'is-loggedOut' : !current_user || !current_user.username}">
         <span class="MainMenu-itemText">
-            <translate>JOB TEMPLATES</translate>
+            <translate>TEMPLATES</translate>
         </span>
     </a>
     <a class="MainMenu-item MainMenu-item--notMobile MainMenu-item--left MainMenu-item--lastLeft"

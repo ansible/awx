@@ -90,9 +90,8 @@ export default [
             });
         };
 
-
         base = $location.path().replace(/^\//, '').split('/')[0];
-        console.log(base)
+        
         if (base === 'management_jobs') {
             $scope.base = base = 'system_job_templates';
         }

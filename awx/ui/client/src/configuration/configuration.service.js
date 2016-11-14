@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest', '$rootScope', '$timeout', 'Wait',
-    function(GetBasePath, ProcessErrors, $q, $http, Rest, $rootScope, $timeout, Wait) {
+export default ['GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
+    function(GetBasePath, ProcessErrors, $q, $http, Rest) {
         var url = GetBasePath('settings');
 
         return {

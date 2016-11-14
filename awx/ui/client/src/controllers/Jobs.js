@@ -41,7 +41,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
     };
 
     $scope.relaunchJob = function(event, id) {
-        var list, job, typeId;
+        var job, typeId;
         try {
             $(event.target).tooltip('hide');
         } catch (e) {
@@ -83,6 +83,9 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
                 break;
             case 'inventory_update':
                 goToJobDetails('inventorySyncStdout');
+                break;
+            case 'workflow_job':
+                goToJobDetails('workflowResults');
                 break;
         }
 

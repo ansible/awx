@@ -525,7 +525,7 @@ export default
                         scope.job_template_name = data.name;
                         scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
                         scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
-                        scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
+                        scope.job_template_url = '/#/templates/' + data.unified_job_template;
                         scope.inventory_url = (scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
                         scope.project_url = (scope.project_name && data.project) ? '/#/projects/' + data.project : '';
                         scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';

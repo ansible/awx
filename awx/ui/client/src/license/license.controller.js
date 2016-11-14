@@ -13,6 +13,48 @@ export default
     function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
         ProcessErrors, CheckLicense, moment, $window, ConfigService,
         FeaturesService, pendoService, i18n){
+
+        var calcDaysRemaining = function(seconds){
+	 		// calculate the number of days remaining on the license
+			var duration = moment.duration(seconds, 'seconds').asDays();
+			duration = Math.floor(duration);
+            if(duration < 0 ){
+                duration = 0;
+            }
+            duration = (duration!==1) ? `${duration} Days` : `${duration} Day`;
+			return duration;
+	 	};
+
+
+        var calcExpiresOn = function(days){
+            // calculate the expiration date of the license
+            days = parseInt(days);
+            return moment().add(days, 'days').calendar();
+        };
+
+        var reset = function(){
+            document.getElementById('License-form').reset();
+        };
+
+        var init = function(){
+            // license/license.partial.html compares fileName
+            $scope.fileName = N_("No file selected.");
+            $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
+            Wait('start');
+            ConfigService.getConfig().then(function(config){
+                $scope.license = config;
+                $scope.license.version = config.version.split('-')[0];
+                $scope.time = {};
+                $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
+                $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
+                $scope.valid = CheckLicense.valid($scope.license.license_info);
+                $scope.compliant = $scope.license.license_info.compliant;
+                Wait('stop');
+            });
+        };
+
+        init();
+
         $scope.getKey = function(event){
             // Mimic HTML5 spec, show filename
             $scope.fileName = event.target.files[0].name;
@@ -73,43 +115,5 @@ export default
                     });
 			});
 		};
-	 	var calcDaysRemaining = function(seconds){
-	 		// calculate the number of days remaining on the license
-			var duration = moment.duration(seconds, 'seconds').asDays();
-			duration = Math.floor(duration);
-            if(duration < 0 ){
-                duration = 0;
-            }
-            duration = (duration!==1) ? `${duration} Days` : `${duration} Day`;
-			return duration;
-	 	};
-
-
-        var calcExpiresOn = function(days){
-            // calculate the expiration date of the license
-            days = parseInt(days);
-            return moment().add(days, 'days').calendar();
-        };
-
-        var init = function(){
-            // license/license.partial.html compares fileName
-            $scope.fileName = N_("No file selected.");
-            $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
-            Wait('start');
-            ConfigService.getConfig().then(function(config){
-                $scope.license = config;
-                $scope.license.version = config.version.split('-')[0];
-                $scope.time = {};
-                $scope.time.remaining = calcDaysRemaining($scope.license.license_info.time_remaining);
-                $scope.time.expiresOn = calcExpiresOn($scope.time.remaining);
-                $scope.valid = CheckLicense.valid($scope.license.license_info);
-                $scope.compliant = $scope.license.license_info.compliant;
-                Wait('stop');
-            });
-        };
-        var reset = function(){
-            document.getElementById('License-form').reset();
-        };
-        init();
      }
-    ];
+];

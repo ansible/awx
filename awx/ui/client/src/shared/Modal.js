@@ -65,6 +65,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 forms = _.chain([params.form]).flatten().compact().value(),
                 buttons,
                 id = params.id,
+                position = (params.position === undefined) ? { my: "center", at: "center", of: window } : params.position,
                 x, y, wh, ww;
 
             function updateButtonStatus(isValid) {
@@ -91,7 +92,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 
             // Set modal dimensions based on viewport width
             ww = $(document).width();
-            wh = $('body').height();
+            wh = $(document).height();
             x = (width > ww) ? ww - 10 : width;
             y = (height > wh) ? wh - 10 : height;
 
@@ -108,6 +109,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
                 resizable: resizable,
                 draggable: draggable,
                 dialogClass: dialogClass,
+                position: position,
                 create: function () {
                     // Fix the close button
                     $('.ui-dialog[aria-describedby="' + id + '"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).html('<i class="fa fa-times-circle"></i>');

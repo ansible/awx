@@ -231,10 +231,14 @@ clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
+	rm -rf awx/job_status
+	rm -rf reports
+	rm -f awx/awx_test.sqlite3
 	rm -rf tmp
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
+	find . -type d -name "__pycache__" -delete
 
 # convenience target to assert environment variables are defined
 guard-%:

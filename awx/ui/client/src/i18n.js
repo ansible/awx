@@ -1,3 +1,5 @@
+/* jshint ignore:start */
+
 function isString(arg) {
     return typeof arg === 'string';
 }
@@ -83,7 +85,7 @@ export default
             gettextCatalog.setCurrentLanguage(langInfo);
             // TODO: the line below is commented out temporarily until
             // the .po files are received from the i18n team, in order to avoid
-            // 404 file not found console errors in dev 
+            // 404 file not found console errors in dev
             // gettextCatalog.loadRemote('/static/languages/' + langUrl + '.json');
         };
     }])

@@ -1956,7 +1956,7 @@ class LabelAccess(BaseAccess):
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
             return self.model.objects.all()
-        return self.model.objects.filter(
+        return self.model.objects.all().filter(
             organization__in=Organization.accessible_objects(self.user, 'read_role')
         )
 

@@ -1,0 +1,112 @@
+@import '../shared/branding/colors.less';
+@import '../shared/branding/colors.default.less';
+@import '../shared/layouts/one-plus-two.less';
+
+@breakpoint-md: 1200px;
+@breakpoint-sm: 623px;
+
+.WorkflowResults {
+    .OnePlusTwo-container(100%, @breakpoint-md);
+
+    &.fullscreen {
+        .WorkflowResults-rightSide {
+            max-width: 100%;
+        }
+    }
+}
+
+.WorkflowResults-leftSide {
+    .OnePlusTwo-left--panel(100%, @breakpoint-md);
+    height: ~"calc(100vh - 177px)";
+}
+
+.WorkflowResults-rightSide {
+    .OnePlusTwo-right--panel(100%, @breakpoint-md);
+    height: ~"calc(100vh - 177px)";
+
+    @media (max-width: @breakpoint-md - 1px) {
+        padding-right: 15px;
+    }
+}
+
+.WorkflowResults-stdoutActionButton--active {
+    display: none;
+    visibility: hidden;
+    flex:none;
+    width:0px;
+    padding-right: 0px;
+}
+
+.WorkflowResults-panelHeader {
+    display: flex;
+    height: 30px;
+}
+
+.WorkflowResults-panelHeaderText {
+    color: @default-interface-txt;
+    flex: 1 0 auto;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-transform: uppercase;
+}
+
+.WorkflowResults-resultRow {
+    width: 100%;
+    display: flex;
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.WorkflowResults-resultRow--variables {
+    flex-direction: column;
+}
+
+.WorkflowResults-resultRowLabel {
+    text-transform: uppercase;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: normal!important;
+    width: 30%;
+    margin-right: 20px;
+
+    @media screen and (max-width: @breakpoint-md) {
+        flex: 2.5 0 auto;
+    }
+}
+
+.WorkflowResults-resultRowLabel--fullWidth {
+    width: 100%;
+    margin-right: 0px;
+}
+
+.WorkflowResults-resultRowText {
+    width: ~"calc(70% - 20px)";
+    flex: 1 0 auto;
+    text-transform: none;
+    word-wrap: break-word;
+}
+
+.WorkflowResults-resultRowText--fullWidth {
+    width: 100%;
+}
+
+.WorkflowResults-statusResultIcon {
+    padding-left: 0px;
+    padding-right: 10px;
+}
+
+.WorkflowResults-badgeRow {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
+.WorkflowResults-badgeTitle{
+    color: @default-interface-txt;
+    font-size: 14px;
+    margin-right: 10px;
+    font-weight: normal;
+    text-transform: uppercase;
+    margin-left: 20px;
+}

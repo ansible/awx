@@ -123,6 +123,7 @@ var release = {
             'jsyaml': 'js-yaml',
             'jsonlint': 'codemirror.jsonlint'
         }),
+        new webpack.DefinePlugin({ $ENV: {} }),
         new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
         new webpack.optimize.UglifyJsPlugin({
             mangle: false

@@ -2,35 +2,63 @@
             hiddenOnCurrentPage(options.basePaths) ||
             hiddenInCurrentMode(options.mode)">
     <div class="List-action--showTooltipOnDisabled" ng-if="options.showTipWhenDisabled" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" data-title="{{options.dataTitle}}" data-tooltip-inner-class="{{options.tooltipInnerClass}}">
-        <button
-            toolbar-button
-            mode="options.mode"
-            class="{{options.actionClass}}"
-            ng-disabled="{{options.ngDisabled}}"
-            ng-show="{{options.ngShow}}"
-            ng-click="$eval(options.ngClick)"
-            toolbar="true"
-            aw-feature="{{options.awFeature}}">
-            <span ng-bind-html="options.buttonContent"></span>
-        </button>
+        <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}">
+            <button type="button" class="{{options.actionClass}} List-dropdownButton" ng-bind-html="options.buttonContent"></button>
+            <button type="button" class="{{options.actionClass}} List-dropdownButton List-dropdownCaratButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="List-dropdownCarat"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu pull-right">
+                <li ng-repeat="option in options.options">
+                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent" ng-show="{{option.ngShow}}"></a>
+                </li>
+            </ul>
+        </div>
+        <span ng-if="!options.type || options.type === 'button'">
+            <button
+                toolbar-button
+                mode="options.mode"
+                class="{{options.actionClass}}"
+                ng-disabled="{{options.ngDisabled}}"
+                ng-show="{{options.ngShow}}"
+                ng-click="$eval(options.ngClick)"
+                toolbar="true"
+                aw-feature="{{options.awFeature}}">
+                <span ng-bind-html="options.buttonContent"></span>
+            </button>
+        </span>
     </div>
     <span ng-if="!options.showTipWhenDisabled">
-        <button
-            toolbar-button
-            mode="options.mode"
-            aw-tool-tip="{{options.awToolTip}}"
-            data-tip-watch="{{options.dataTipWatch}}"
-            data-placement="{{options.dataPlacement}}"
-            data-container="{{options.dataContainer}}"
-            class="{{options.actionClass}}"
-            data-title="{{options.dataTitle}}"
-            ng-disabled="{{options.ngDisabled}}"
-            ng-click="$eval(options.ngClick)"
-            ng-show="{{options.ngShow}}"
-            toolbar="true"
-            aw-feature="{{options.awFeature}}">
-            <span ng-bind-html="options.buttonContent"></span>
-        </button>
+        <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}">
+            <button type="button" class="{{options.actionClass}} List-dropdownButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span>{{options.buttonContent}}&nbsp;</span>
+                <span class="List-dropdownCarat"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu pull-right">
+                <li ng-repeat="option in options.options">
+                    <a ui-sref="{{option.optionSref}}" ng-bind-html="option.optionContent" ng-show="{{option.ngShow}}"></a>
+                </li>
+            </ul>
+        </div>
+        <span ng-if="!options.type || options.type === 'button'">
+            <button
+                toolbar-button
+                mode="options.mode"
+                aw-tool-tip="{{options.awToolTip}}"
+                data-tip-watch="{{options.dataTipWatch}}"
+                data-placement="{{options.dataPlacement}}"
+                data-container="{{options.dataContainer}}"
+                class="{{options.actionClass}}"
+                data-title="{{options.dataTitle}}"
+                ng-disabled="{{options.ngDisabled}}"
+                ng-click="$eval(options.ngClick)"
+                ng-show="{{options.ngShow}}"
+                toolbar="true"
+                aw-feature="{{options.awFeature}}">
+                <span ng-bind-html="options.buttonContent"></span>
+            </button>
+        </span>
     </span>
 
 </span>

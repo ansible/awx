@@ -2682,9 +2682,10 @@ class NotificationTemplateSerializer(BaseSerializer):
     def to_representation(self, obj):
         ret = super(NotificationTemplateSerializer, self).to_representation(obj)
         for field in obj.notification_class.init_parameters:
-            if field in ret['notification_configuration'] and \
-               force_text(ret['notification_configuration'][field]).startswith('$encrypted$'):
-                ret['notification_configuration'][field] = '$encrypted$'
+            config = obj.notification_configuration
+            if field in config and force_text(config[field]).startswith('$encrypted$'):
+                config[field] = '$encrypted$'
+        ret['notification_configuration'] = config
         return ret
 
     def get_related(self, obj):

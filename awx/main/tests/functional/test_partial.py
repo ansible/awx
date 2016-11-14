@@ -101,8 +101,11 @@ class TestInventoryUpdateLatestDict():
         inv_src2 = InventorySource.objects.create(group=g2, update_on_launch=False, inventory=inventory)
         inv_src3 = InventorySource.objects.create(group=g3, update_on_launch=True, inventory=inventory)
 
+        import time
         iu1 = InventoryUpdate.objects.create(inventory_source=inv_src1, status='successful')
+        time.sleep(0.1)
         iu2 = InventoryUpdate.objects.create(inventory_source=inv_src2, status='waiting')
+        time.sleep(0.1)
         iu3 = InventoryUpdate.objects.create(inventory_source=inv_src3, status='waiting')
         return [iu1, iu2, iu3]
 
@@ -114,7 +117,7 @@ class TestInventoryUpdateLatestDict():
         inventory_updates_expected = [inventory_updates[0], inventory_updates[2]]
 
         assert 2 == len(tasks)
-        for i, inventory_update in enumerate(inventory_updates_expected):
-            assert inventory_update.id == tasks[i]['id']
-
+        task_ids = [task['id'] for task in tasks]
+        for inventory_update in inventory_updates_expected:
+            inventory_update.id in task_ids
     

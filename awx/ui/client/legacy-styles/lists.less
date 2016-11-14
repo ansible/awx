@@ -357,6 +357,32 @@ table, tbody {
     cursor: not-allowed;
 }
 
+.List-dropdownButton {
+    border: none;
+}
+
+.List-dropdownSuccess {
+    background-color: @submit-button-bg;
+    color: @submit-button-text;
+    border-color: @submit-button-bg-hov;
+}
+
+.List-dropdownSuccess:hover,
+.List-dropdownSuccess:focus {
+    color: @submit-button-text;
+    background-color: @submit-button-bg-hov;
+}
+
+.List-dropdownCarat {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px dashed;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
 @media (max-width: 991px) {
     .List-searchWidget + .List-searchWidget {
         margin-top: 20px;

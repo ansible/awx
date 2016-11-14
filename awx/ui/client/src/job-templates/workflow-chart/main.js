@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from './job-templates-edit.controller';
+import workflowChart from './workflow-chart.directive';
 
 export default
-    angular.module('jobTemplatesEdit', [])
-        .controller('JobTemplatesEdit', controller);
+	angular.module('jobTemplatesWorkflowChart', [])
+		.directive('workflowChart', workflowChart);

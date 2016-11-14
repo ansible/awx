@@ -38,7 +38,6 @@ if ($basePath) {
 
 // Modules
 import './helpers';
-import * as forms from './forms';
 import './lists';
 import './widgets';
 import './filters';
@@ -53,6 +52,7 @@ import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
 import jobDetail from './job-detail/main';
+import workflowResults from './workflow-results/main';
 import jobSubmission from './job-submission/main';
 import notifications from './notifications/main';
 import about from './about/main';
@@ -122,6 +122,7 @@ var tower = angular.module('Tower', [
     activityStream.name,
     footer.name,
     jobDetail.name,
+    workflowResults.name,
     jobSubmission.name,
     notifications.name,
     standardOut.name,
@@ -168,7 +169,6 @@ var tower = angular.module('Tower', [
     'ProjectsHelper',
     'CompletedJobsDefinition',
     'AllJobsDefinition',
-    'JobFormDefinition',
     'JobSummaryDefinition',
     'ParseHelper',
     'ChildrenHelper',
@@ -202,6 +202,9 @@ var tower = angular.module('Tower', [
     'ActivityStreamHelper',
     'gettext',
     'I18N',
+    'WorkflowFormDefinition',
+    'InventorySourcesListDefinition',
+    'WorkflowMakerFormDefinition'
 ])
 
 .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')

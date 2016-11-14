@@ -8,7 +8,7 @@ export default [
     function() {
 
         return {
-            listToArray: function(input, key) {
+            listToArray: function(input) {
                 if (input.indexOf('\n') !== -1) {
                     //Parse multiline input
                     return input.replace(/^\s+|\s+$/g, "").split('\n');
@@ -17,7 +17,7 @@ export default [
                 }
             },
 
-            arrayToList: function(input, key) {
+            arrayToList: function(input) {
                 var multiLineInput = false;
                 _.each(input, function(statement) {
                     if (statement.indexOf(',') !== -1) {
@@ -40,7 +40,7 @@ export default [
                 return true;
             },
 
-            formatPlaceholder: function(input, key) {
+            formatPlaceholder: function(input) {
                 if(input !== null && typeof input === 'object') {
                     if(Array.isArray(input)) {
                         var multiLineInput = false;
