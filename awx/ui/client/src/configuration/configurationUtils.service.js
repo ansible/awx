@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [
-    function() {
+export default ['$q',
+    function($q) {
 
         return {
             listToArray: function(input) {
@@ -64,6 +64,33 @@ export default [
                 } else {
                     return input;
                 }
+            },
+
+            imageProcess: function(file) {
+                var deferred = $q.defer();
+                var SIZELIMIT = 1000000; // 1 MB
+                var ACCEPTEDFORMATS = ['image/png', 'image/gif', 'image/jpeg']; //Basic check
+
+                if(file.size < SIZELIMIT && ACCEPTEDFORMATS.indexOf(file.type) !== -1) {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function () {
+                        deferred.resolve(reader.result);
+                    };
+                    reader.onerror = function () {
+                        deferred.reject('File could not be parsed');
+                    };
+                } else {
+                    var error = 'Error: ';
+                    if(file.size > SIZELIMIT) {
+                        error += 'Must be under ' + SIZELIMIT / 1000000 + 'MB. ';
+                    }
+                    if(ACCEPTEDFORMATS.indexOf(file.type) === -1) {
+                        error += 'Wrong file type - must be png, gif, or jpg.';
+                    }
+                    deferred.reject(error);
+                }
+                return deferred.promise;
             }
 
         };

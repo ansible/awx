@@ -1,9 +1,14 @@
-.Form-resetValue {
-    float: right;
+@import "./client/src/shared/branding/colors.default.less";
+
+.Form-resetValue, .Form-resetFile {
     text-transform: uppercase;
     font-weight: normal;
     cursor: pointer;
     font-size: 12px;
+}
+
+.Form-resetValue {
+    float: right
 }
 
 .Form-tab {
@@ -24,4 +29,23 @@
 
 .Form-tabRow {
     width: 80%;
+}
+
+input.Form-filePicker {
+    width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+label#filePickerButton {
+    cursor: pointer;
+    background-color: #fff;
+    color: @default-interface-txt;
+}
+input#filePickerText {
+    cursor: default;
+    border-radius: 0 5px 5px 0;
+    background-color: #fff;
 }

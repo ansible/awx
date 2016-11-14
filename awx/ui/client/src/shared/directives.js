@@ -123,6 +123,77 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
     };
 }])
 
+// imageUpload
+//
+// Accepts image and returns base64 information with basic validation
+// Can eventually expand to handle all uploads with different endpoints and handlers
+//
+.directive('imageUpload', ['ConfigurationUtils', function(ConfigurationUtils) {
+    return {
+        restrict: 'E',
+        scope: {
+            key: '@'
+        },
+        template: `
+                <div class="input-group">
+                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">BROWSE</label>
+                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="Choose file" readonly>
+                      <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
+                    </div>
+                <!-- Update when API supports file name saving
+                <div ng-if="imagePresent" class="Form-filePicker--selectedFile">
+                    Custom logo has been uploaded.
+                </div>-->
+                <!-- Thumbnail feature
+                <div class="thumbnail">
+                    <img src="{{image}}" alt="Current logo">
+                </div> -->
+                <div class="error" id="filePickerError"></div>`,
+
+        link: function(scope) {
+            var fieldKey = scope.key;
+            var filePickerText = angular.element(document.getElementById('filePickerText'));
+            var filePickerError = angular.element(document.getElementById('filePickerError'));
+            var filePickerButton = angular.element(document.getElementById('filePickerButton'));
+
+            scope.imagePresent = global.$AnsibleConfig.custom_logo;
+
+            scope.$on('loginUpdated', function() {
+                scope.imagePresent = global.$AnsibleConfig.custom_logo;
+            });
+
+            scope.update = function(e) {
+                if(scope.$parent[fieldKey]) {
+                    e.preventDefault();
+                    scope.$parent[fieldKey] = '';
+                    filePickerButton.html('BROWSE');
+                    filePickerText.val('');
+                }
+                else {
+                    // Nothing exists so open file picker
+                }
+            };
+
+            scope.fileChange = function(file) {
+                filePickerError.html('');
+
+                ConfigurationUtils.imageProcess(file[0])
+                    .then(function(result) {
+                        scope.$parent[fieldKey] = result;
+                        filePickerText.val(file[0].name);
+                        filePickerButton.html('REMOVE');
+                    }).catch(function(error) {
+                        filePickerText.html(file[0].name);
+                        filePickerError.text(error);
+                    }).finally(function() {
+
+                    });
+            };
+
+        }
+    };
+}])
+
 
 .directive('surveyCheckboxes', function() {
     return {
