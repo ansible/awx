@@ -764,7 +764,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     @property
     def workflow_job_id(self):
-        if self.spawned_by_workflow():
+        if self.spawned_by_workflow:
             return self.unified_job_node.workflow_job.pk
         return None
 

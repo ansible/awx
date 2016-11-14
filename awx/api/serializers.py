@@ -2452,6 +2452,8 @@ class JobEventSerializer(BaseSerializer):
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
             d['job']['job_template_name'] = obj.job.job_template.name
+            d['job']['spawned_by_workflow'] = obj.job.spawned_by_workflow
+            d['job']['workflow_job_id'] = obj.job.workflow_job_id
         except (KeyError, AttributeError):
             pass
         return d
