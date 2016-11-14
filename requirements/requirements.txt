@@ -10,7 +10,7 @@ billiard==3.3.0.16
 boto==2.43.0
 celery==3.1.23
 cffi==1.7.0
-channels==0.17.2
+channels==0.17.3
 cliff==1.15.0
 cmd2==0.6.8
 daphne==0.15.0
