@@ -14,7 +14,7 @@ channels==0.17.2
 cliff==1.15.0
 cmd2==0.6.8
 daphne==0.15.0
-d2to1==0.2.11   # TODO: Still needed?
+d2to1==0.2.11
 defusedxml==0.4.1
 Django==1.8.16
 debtcollector==1.2.0
