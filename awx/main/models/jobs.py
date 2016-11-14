@@ -21,9 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
@@ -40,6 +37,7 @@ from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
+from awx.main.fields import JSONField
 
 from awx.main.consumers import emit_channel_notification
 

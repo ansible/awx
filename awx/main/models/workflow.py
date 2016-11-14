@@ -9,8 +9,6 @@ from django.db import models
 from django.core.urlresolvers import reverse
 #from django import settings as tower_settings
 
-from jsonfield import JSONField
-
 # AWX
 from awx.main.models import UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import (
@@ -26,6 +24,7 @@ from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.redact import REPLACE_STR
 from awx.main.utils import parse_yaml_or_json
+from awx.main.fields import JSONField
 
 from copy import copy
 
