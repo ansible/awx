@@ -18,6 +18,8 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         $scope.network_credential_link = getTowerLink('network_credential');
     };
 
+    // uses options to set scope variables to their readable string
+    // value
     var getTowerLabels = function() {
         var getTowerLabel = function(key) {
             if ($scope.jobOptions && $scope.jobOptions[key]) {
@@ -43,6 +45,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.job = jobData;
     $scope.jobOptions = jobDataOptions.actions.GET;
     $scope.labels = jobLabels;
+    $scope.jobFinished = jobFinished;
 
     // turn related api browser routes into tower routes
     getTowerLinks();
@@ -79,11 +82,9 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.count = count.val;
     $scope.hostCount = getTotalHostCount(count.val);
     $scope.countFinished = count.countFinished;
-    $scope.stdoutArr = [];
 
     // if the job is still running engage following of the last line in the
     // standard out pane
-    $scope.jobFinished = jobFinished;
     $scope.followEngaged = !$scope.jobFinished;
 
     // follow button for completed job should specify that the
@@ -96,11 +97,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     }
 
     // EVENT STUFF BELOW
-
-    // just putting the event queue on scope so it can be inspected in the
-    // console
-    $scope.event_queue = eventQueue.queue;
-    $scope.defersArr = eventQueue.populateDefers;
 
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
