@@ -2987,6 +2987,25 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
+class WorkflowJobRelaunch(GenericAPIView):
+
+    model = WorkflowJob
+    serializer_class = EmptySerializer
+    is_job_start = True
+
+    def get(self, request, *args, **kwargs):
+        return Response({})
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        new_workflow_job = obj.create_relaunch_workflow_job()
+        result = new_workflow_job.signal_start()
+
+        data = WorkflowJobSerializer(new_workflow_job, context=self.get_serializer_context()).data
+        headers = {'Location': new_workflow_job.get_absolute_url()}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 # TODO:
 class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
 

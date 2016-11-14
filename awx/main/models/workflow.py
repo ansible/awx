@@ -322,6 +322,12 @@ class WorkflowJobOptions(BaseModel):
         node_links = self._create_workflow_nodes(old_node_list, user=user)
         self._inherit_node_relationships(old_node_list, node_links)
 
+    def create_relaunch_workflow_job(self):
+        self.launch_type = 'relaunch'
+        new_workflow_job = self.copy_unified_job()
+        new_workflow_job.copy_nodes_from_original(original=self)
+        return new_workflow_job
+
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
     class Meta:
@@ -424,6 +430,11 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return new_wfjt
 
 
+# Stub in place because of old migraitons, can remove if migraitons are squashed
+class WorkflowJobInheritNodesMixin(object):
+    pass
+
+
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
     class Meta:
         app_label = 'main'
@@ -445,6 +456,10 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
     @classmethod
     def _get_parent_field_name(cls):
         return 'workflow_job_template'
+
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        return WorkflowJobTemplate
 
     def _has_failed(self):
         return False

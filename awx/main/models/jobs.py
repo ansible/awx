@@ -455,6 +455,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def _global_timeout_setting(self):
         return 'DEFAULT_JOB_TIMEOUT'
 
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        return JobTemplate
+
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
 

@@ -2252,6 +2252,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
         res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
         res['activity_stream'] = reverse('api:workflow_job_activity_stream_list', args=(obj.pk,))
+        res['relaunch'] = reverse('api:workflow_job_relaunch', args=(obj.pk,))
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
         return res

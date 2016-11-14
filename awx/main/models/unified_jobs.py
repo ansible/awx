@@ -357,7 +357,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
-
     def copy_unified_jt(self):
         '''
         Create a copy of this unified job template.
@@ -585,6 +584,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        '''
+        Return subclass of UnifiedJobTemplate that applies to this unified job.
+        '''
+        raise NotImplementedError # Implement in subclass.
+
     def _global_timeout_setting(self):
         "Override in child classes, None value indicates this is not configurable"
         return None
@@ -698,6 +704,36 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             except Exception:
                 pass
         super(UnifiedJob, self).delete()
+
+    def copy_unified_job(self):
+        '''
+        Create a copy of this unified job.
+        '''
+        unified_job_class = self.__class__
+        unified_jt_class = self._get_unified_job_template_class()
+        create_kwargs = {}
+        m2m_fields = {}
+        for field_name in unified_jt_class._get_unified_job_field_names():
+            # Foreign keys can be specified as field_name or field_name_id.
+            id_field_name = '%s_id' % field_name
+            if hasattr(self, id_field_name):
+                value = getattr(self, id_field_name)
+                if hasattr(value, 'id'):
+                    value = value.id
+                create_kwargs[id_field_name] = value
+            elif hasattr(self, field_name):
+                field_obj = self._meta.get_field_by_name(field_name)[0]
+                # Many to Many can be specified as field_name
+                if isinstance(field_obj, models.ManyToManyField):
+                    m2m_fields[field_name] = getattr(self, field_name)
+                else:
+                    create_kwargs[field_name] = getattr(self, field_name)
+        unified_job = unified_job_class(**create_kwargs)
+        unified_job.save()
+        for field_name, src_field_value in m2m_fields.iteritems():
+            dest_field = getattr(unified_job, field_name)
+            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
+        return unified_job
 
     def result_stdout_raw_handle(self, attempt=0):
         """Return a file-like object containing the standard out of the
