@@ -1,10 +1,5 @@
-export default ['CreateDialog', 'Wait', '$q', '$state', function(CreateDialog, Wait, $q, $state){
+export default [function(){
     return {
-        closeDialog: function() {
-            $('#workflow-modal-dialog').dialog('destroy');
-
-            $state.go('^');
-        },
         searchTree: function(params) {
             // params.element
             // params.matchingId

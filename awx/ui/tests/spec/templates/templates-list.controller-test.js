@@ -1,11 +1,11 @@
 'use strict';
 
-describe('Controller: JobTemplatesList', () => {
+describe('Controller: TemplatesList', () => {
     // Setup
     let scope,
         rootScope,
         state,
-        JobTemplatesListController,
+        TemplatesListController,
         ClearScope,
         GetChoices,
         Alert,
@@ -14,13 +14,13 @@ describe('Controller: JobTemplatesList', () => {
         rbacUiControlService,
         canAddDeferred,
         q,
-        JobTemplateService,
+        TemplatesService,
         deleteWorkflowJobTemplateDeferred,
         deleteJobTemplateDeferred,
         Dataset;
 
     beforeEach(angular.mock.module('Tower'));
-    beforeEach(angular.mock.module('jobTemplates', ($provide) => {
+    beforeEach(angular.mock.module('templates', ($provide) => {
 
         state = jasmine.createSpyObj('state', [
             '$get',
@@ -38,7 +38,7 @@ describe('Controller: JobTemplatesList', () => {
             }
         };
 
-        JobTemplateService = {
+        TemplatesService = {
             deleteWorkflowJobTemplate: function(){
                 return angular.noop;
             },
@@ -85,10 +85,10 @@ describe('Controller: JobTemplatesList', () => {
 
         rbacUiControlService.canAdd = jasmine.createSpy('canAdd').and.returnValue(canAddDeferred.promise);
 
-        JobTemplateService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
-        JobTemplateService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
+        TemplatesService.deleteWorkflowJobTemplate = jasmine.createSpy('deleteWorkflowJobTemplate').and.returnValue(deleteWorkflowJobTemplateDeferred.promise);
+        TemplatesService.deleteJobTemplate = jasmine.createSpy('deleteJobTemplate').and.returnValue(deleteJobTemplateDeferred.promise);
 
-        JobTemplatesListController = $controller('JobTemplatesListController', {
+        TemplatesListController = $controller('TemplatesListController', {
             $scope: scope,
             $rootScope: rootScope,
             $state: state,
@@ -98,7 +98,7 @@ describe('Controller: JobTemplatesList', () => {
             Prompt: Prompt,
             InitiatePlaybookRun: InitiatePlaybookRun,
             rbacUiControlService: rbacUiControlService,
-            JobTemplateService: JobTemplateService,
+            TemplatesService: TemplatesService,
             Dataset: Dataset
         });
     }));
@@ -163,7 +163,7 @@ describe('Controller: JobTemplatesList', () => {
             expect(Prompt).toHaveBeenCalled();
         });
 
-        it('should call JobTemplateService.deleteWorkflowJobTemplate when the user takes affirmative action on the delete modal and type = "Workflow Job Template"', ()=>{
+        it('should call TemplatesService.deleteWorkflowJobTemplate when the user takes affirmative action on the delete modal and type = "Workflow Job Template"', ()=>{
             // Note that Prompt has been mocked up above to immediately call the callback function that gets passed in
             // which is how we access the private function in the controller
 
@@ -174,10 +174,10 @@ describe('Controller: JobTemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
-            expect(JobTemplateService.deleteWorkflowJobTemplate).toHaveBeenCalled();
+            expect(TemplatesService.deleteWorkflowJobTemplate).toHaveBeenCalled();
         });
 
-        it('should call JobTemplateService.deleteJobTemplate when the user takes affirmative action on the delete modal and type = "Workflow Job Template"', ()=>{
+        it('should call TemplatesService.deleteJobTemplate when the user takes affirmative action on the delete modal and type = "Workflow Job Template"', ()=>{
             // Note that Prompt has been mocked up above to immediately call the callback function that gets passed in
             // which is how we access the private function in the controller
 
@@ -188,7 +188,7 @@ describe('Controller: JobTemplatesList', () => {
             };
 
             scope.deleteJobTemplate(testTemplate);
-            expect(JobTemplateService.deleteJobTemplate).toHaveBeenCalled();
+            expect(TemplatesService.deleteJobTemplate).toHaveBeenCalled();
         });
 
     });

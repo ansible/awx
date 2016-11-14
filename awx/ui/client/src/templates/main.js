@@ -4,26 +4,27 @@
  * All Rights Reserved
  *************************************************/
 
-import jobTemplateService from './job-template.service';
-
+import templatesService from './templates.service';
 import surveyMaker from './survey-maker/main';
-import jobTemplatesList from './list/main';
-import jobTemplatesAdd from './add-job-template/main';
-import jobTemplatesEdit from './edit-job-template/main';
-import jobTemplatesCopy from './copy/main';
-import workflowAdd from './add-workflow/main';
-import workflowEdit from './edit-workflow/main';
+import templatesList from './list/main';
+import jobTemplatesAdd from './job_templates/add-job-template/main';
+import jobTemplatesEdit from './job_templates/edit-job-template/main';
+import jobTemplatesCopy from './job_templates/copy-job-template/main';
+import workflowAdd from './workflows/add-workflow/main';
+import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
-import workflowChart from './workflow-chart/main';
-import workflowMaker from './workflow-maker/main';
-import jobTemplatesListRoute from './list/job-templates-list.route';
+import workflowChart from './workflows/workflow-chart/main';
+import workflowMaker from './workflows/workflow-maker/main';
+import templatesListRoute from './list/templates-list.route';
+import workflowService from './workflows/workflow.service';
 
 export default
-angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemplatesAdd.name,
+angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
         jobTemplatesEdit.name, jobTemplatesCopy.name, labels.name, workflowAdd.name, workflowEdit.name,
         workflowChart.name, workflowMaker.name
     ])
-    .service('JobTemplateService', jobTemplateService)
+    .service('TemplatesService', templatesService)
+    .service('WorkflowHelpService', workflowService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
@@ -332,9 +333,9 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],
-                        WorkflowMakerJobTemplateList: ['JobTemplateList',
-                            (JobTemplateList) => {
-                                let list = _.cloneDeep(JobTemplateList);
+                        WorkflowMakerJobTemplateList: ['TemplateList',
+                            (TemplateList) => {
+                                let list = _.cloneDeep(TemplateList);
                                 delete list.fields.type;
                                 delete list.fields.description;
                                 delete list.fields.smart_status;
@@ -472,7 +473,7 @@ angular.module('jobTemplates', [surveyMaker.name, jobTemplatesList.name, jobTemp
                         states: _.reduce(generated, (result, definition) => {
                             return result.concat(definition.states);
                         }, [
-                            stateExtender.buildDefinition(jobTemplatesListRoute),
+                            stateExtender.buildDefinition(templatesListRoute),
                             stateExtender.buildDefinition(workflowMaker),
                             stateExtender.buildDefinition(inventoryLookup),
                             stateExtender.buildDefinition(credentialLookup)

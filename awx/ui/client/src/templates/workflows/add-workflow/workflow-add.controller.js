@@ -6,11 +6,11 @@
 
  export default
  [   '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors', 'ClearScope',
-     'Wait', '$state', 'CreateSelect2', 'JobTemplateService', 'ToJSON',
+     'Wait', '$state', 'CreateSelect2', 'TemplatesService', 'ToJSON',
      'ParseTypeChange', 'OrganizationList', '$q', 'Rest', 'GetBasePath',
      function(
          $scope, WorkflowForm, GenerateForm, Alert, ProcessErrors, ClearScope,
-         Wait, $state, CreateSelect2, JobTemplateService, ToJSON,
+         Wait, $state, CreateSelect2, TemplatesService, ToJSON,
          ParseTypeChange, OrganizationList, $q, Rest, GetBasePath
      ) {
 
@@ -45,7 +45,7 @@
              });
 
              // Go out and grab the possible labels
-             JobTemplateService.getLabelOptions()
+             TemplatesService.getLabelOptions()
                 .then(function(data){
                     $scope.labelOptions = data;
                     // select2-ify the labels input
@@ -98,7 +98,7 @@
                      .filter("[data-label-is-present=true]")
                      .map((i, val) => ({name: $(val).text()}));
 
-                 JobTemplateService.createWorkflowJobTemplate(data)
+                 TemplatesService.createWorkflowJobTemplate(data)
                      .then(function(data) {
 
                          let orgDefer = $q.defer();

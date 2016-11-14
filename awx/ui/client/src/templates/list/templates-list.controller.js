@@ -5,18 +5,18 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Alert',
-    'JobTemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'JobTemplateService',
+    'TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
+    'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'TemplatesService',
     'QuerySet',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
-        JobTemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
-        InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, JobTemplateService,
+        TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
+        InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
         qs
     ) {
         ClearScope();
 
-        var list = JobTemplateList;
+        var list = TemplateList;
 
         init();
 
@@ -95,7 +95,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                             $('#prompt-modal').modal('hide');
                             Wait('start');
                             if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
-                                JobTemplateService.deleteWorkflowJobTemplate(template.id)
+                                TemplatesService.deleteWorkflowJobTemplate(template.id)
                                 .then(function () {
                                     handleSuccessfulDelete();
                                 }, function (data) {
@@ -105,7 +105,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                                 });
                             }
                             else if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
-                                JobTemplateService.deleteJobTemplate(template.id)
+                                TemplatesService.deleteJobTemplate(template.id)
                                 .then(function () {
                                     handleSuccessfulDelete();
                                 }, function (data) {

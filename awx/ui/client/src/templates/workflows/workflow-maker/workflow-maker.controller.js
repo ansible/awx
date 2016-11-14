@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateList', 'ProjectList',
-    'GetBasePath', 'Wait', 'JobTemplateService', '$state',
+export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList', 'ProjectList',
+    'GetBasePath', 'Wait', 'TemplatesService', '$state',
     'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
     'GenerateForm', 'InventoryList', 'CredentialList', '$q',
-    function($scope, WorkflowHelpService, GenerateList, JobTemplateList, ProjectList,
-        GetBasePath, Wait, JobTemplateService, $state,
+    function($scope, WorkflowHelpService, GenerateList, TemplateList, ProjectList,
+        GetBasePath, Wait, TemplatesService, $state,
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
         GenerateForm, InventoryList, CredentialList, $q) {
 
@@ -59,11 +59,11 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         $scope.closeWorkflowMaker = function() {
             // Revert the data to the master which was created when the dialog was opened
             $scope.treeData.data = angular.copy($scope.treeDataMaster);
-            WorkflowHelpService.closeDialog();
+            $scope.closeDialog();
         };
 
         $scope.saveWorkflowMaker = function() {
-            WorkflowHelpService.closeDialog();
+            $scope.closeDialog();
         };
 
         /* ADD NODE FUNCTIONS */
@@ -348,7 +348,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                     // This is a node that we got back from the api with an incomplete
                     // unified job template so we're going to pull down the whole object
 
-                    JobTemplateService.getUnifiedJobTemplate($scope.nodeBeingEdited.unifiedJobTemplate.id)
+                    TemplatesService.getUnifiedJobTemplate($scope.nodeBeingEdited.unifiedJobTemplate.id)
                         .then(function(data) {
 
                             $scope.nodeBeingEdited.unifiedJobTemplate = _.clone(data.data.results[0]);
@@ -358,12 +358,12 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             let retrievingInventory = false;
 
                             if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_credential_on_launch && $scope.nodeBeingEdited.originalNodeObj.credential) {
-                                defers.push(JobTemplateService.getCredential($scope.nodeBeingEdited.originalNodeObj.credential));
+                                defers.push(TemplatesService.getCredential($scope.nodeBeingEdited.originalNodeObj.credential));
                                 retrievingCredential = true;
                             }
 
                             if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_inventory_on_launch && $scope.nodeBeingEdited.originalNodeObj.inventory) {
-                                defers.push(JobTemplateService.getInventory($scope.nodeBeingEdited.originalNodeObj.inventory));
+                                defers.push(TemplatesService.getInventory($scope.nodeBeingEdited.originalNodeObj.inventory));
                                 retrievingInventory = true;
                             }
 

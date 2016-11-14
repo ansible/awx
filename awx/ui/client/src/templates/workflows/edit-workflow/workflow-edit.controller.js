@@ -8,12 +8,12 @@
  [   '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
      'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange', 'Wait', 'Empty',
      'ToJSON', 'initSurvey', '$state', 'CreateSelect2', 'ParseVariableString',
-     'JobTemplateService', 'OrganizationList', 'Rest',
+     'TemplatesService', 'OrganizationList', 'Rest',
      function(
          $scope, $stateParams, WorkflowForm, GenerateForm, Alert, ProcessErrors,
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-         JobTemplateService, OrganizationList, Rest
+         TemplatesService, OrganizationList, Rest
      ) {window.state = $state;
 
         ClearScope();
@@ -192,7 +192,7 @@
                 });
 
             // Get the workflow nodes
-            JobTemplateService.getWorkflowJobTemplateNodes(id)
+            TemplatesService.getWorkflowJobTemplateNodes(id)
             .then(function(data){
 
                 let nodesArray = data.data.results;
@@ -251,7 +251,7 @@
             });
 
             // Go out and GET the workflow job temlate data needed to populate the form
-            JobTemplateService.getWorkflowJobTemplate(id)
+            TemplatesService.getWorkflowJobTemplate(id)
             .then(function(data){
                 let workflowJobTemplateData = data.data;
                 $scope.workflow_job_template_obj = workflowJobTemplateData;
@@ -392,7 +392,7 @@
 
             if(params.node.isNew) {
 
-                JobTemplateService.addWorkflowNode({
+                TemplatesService.addWorkflowNode({
                     url: generatePostUrl(),
                     data: buildSendableNodeData()
                 })
@@ -500,7 +500,7 @@
                 // these promise arrays to play nicely.  I tried to just append
                 // a single promise to deletePromises but it just wasn't working
                 let editWorkflowJobTemplate = [id].map(function(id) {
-                    return JobTemplateService.updateWorkflowJobTemplate({
+                    return TemplatesService.updateWorkflowJobTemplate({
                         id: id,
                         data: data
                     });
@@ -510,7 +510,7 @@
                     let completionCallback = function() {
 
                         let disassociatePromises = $scope.disassociateRequests.map(function(request) {
-                            return JobTemplateService.disassociateWorkflowNode({
+                            return TemplatesService.disassociateWorkflowNode({
                                 parentId: request.parentId,
                                 nodeId: request.nodeId,
                                 edge: request.edge
@@ -518,7 +518,7 @@
                         });
 
                         let editNodePromises = $scope.editRequests.map(function(request) {
-                            return JobTemplateService.editWorkflowNode({
+                            return TemplatesService.editWorkflowNode({
                                 id: request.id,
                                 data: request.data
                             });
@@ -528,7 +528,7 @@
                         .then(function() {
 
                             let associatePromises = $scope.associateRequests.map(function(request) {
-                                return JobTemplateService.associateWorkflowNode({
+                                return TemplatesService.associateWorkflowNode({
                                     parentId: request.parentId,
                                     nodeId: request.nodeId,
                                     edge: request.edge
@@ -536,7 +536,7 @@
                             });
 
                             let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                                return JobTemplateService.deleteWorkflowJobTemplateNode(nodeId);
+                                return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                             });
 
                             $q.all(associatePromises.concat(deletePromises))
@@ -634,7 +634,7 @@
                 else {
 
                     let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                        return JobTemplateService.deleteWorkflowJobTemplateNode(nodeId);
+                        return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                     });
 
                     $q.all(deletePromises.concat(editWorkflowJobTemplate))

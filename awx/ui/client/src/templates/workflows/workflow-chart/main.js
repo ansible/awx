@@ -7,5 +7,5 @@
 import workflowChart from './workflow-chart.directive';
 
 export default
-	angular.module('jobTemplatesWorkflowChart', [])
+	angular.module('workflowChart', [])
 		.directive('workflowChart', workflowChart);

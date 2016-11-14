@@ -5,7 +5,7 @@ import render from './render/main';
 import shared from './shared/main';
 
 export default
-    angular.module('jobTemplates.surveyMaker',
+    angular.module('templates.surveyMaker',
                    [ listGenerator.name,
                      questions.name,
                      surveys.name,
