@@ -75,6 +75,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
 
             return count;
         },
+        // rest call to grab previously complete job_events
         getEvents: function(url) {
             var val = $q.defer();
 

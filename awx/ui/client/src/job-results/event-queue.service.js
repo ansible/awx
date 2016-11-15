@@ -7,162 +7,155 @@
 export default ['jobResultsService', 'parseStdoutService', '$q', function(jobResultsService, parseStdoutService, $q){
     var val = {};
 
-    // Get the count of the last event
-    var getPreviousCount = function(counter, type) {
-        var countAttr;
-
-        if (type === 'play') {
-            countAttr = 'playCount';
-        } else if (type === 'task') {
-            countAttr = 'taskCount';
-        } else {
-            countAttr = 'count';
-        }
-
-        var previousCount = $q.defer();
-
-        // iteratively find the last count
-        var findCount = function(counter) {
-            if (counter === 0) {
-                // if counter is 0, no count has been initialized
-                // initialize one!
-
-                if (countAttr === 'count') {
-                    previousCount.resolve({
-                        ok: 0,
-                        skipped: 0,
-                        unreachable: 0,
-                        failures: 0,
-                        changed: 0
-                    });
-                } else {
-                    previousCount.resolve(0);
-                }
-
-            } else if (val.queue[counter] && val.queue[counter][countAttr] !== undefined) {
-                // this event has a count, resolve!
-                previousCount.resolve(_.clone(val.queue[counter][countAttr]));
-            } else {
-                // this event doesn't have a count, decrement to the
-                // previous event and check it
-                findCount(counter - 1);
-            }
-        };
-
-        if (val.queue[counter - 1]) {
-            // if the previous event has been resolved, start the iterative
-            // get previous count process
-            findCount(counter - 1);
-        } else if (val.populateDefers[counter - 1]){
-            // if the previous event has not been resolved, wait for it to
-            // be and then start the iterative get previous count process
-            val.populateDefers[counter - 1].promise.then(function() {
-                findCount(counter - 1);
-            });
-        }
-
-        return previousCount.promise;
-    };
-
-    // munge the raw event from the backend into the event_queue's format
-    var mungeEvent = function(event) {
-        var mungedEventDefer = $q.defer();
-
-        // basic data needed in the munged event
-        var mungedEvent = {
-            counter: event.counter,
-            id: event.id,
-            processed: false,
-            name: event.event_name,
-            changes: []
-        };
-
-        // the interface for grabbing standard out is generalized and
-        // present across many types of events, so go ahead and check for
-        // updates to it
-        if (event.stdout) {
-            mungedEvent.stdout = parseStdoutService.parseStdout(event);
-            mungedEvent.changes.push('stdout');
-        }
-
-        // for different types of events, you need different types of data
-        if (event.event_name === 'playbook_on_start') {
-            mungedEvent.count = {
-                ok: 0,
-                skipped: 0,
-                unreachable: 0,
-                failures: 0,
-                changed: 0
-            };
-            mungedEvent.startTime = event.modified;
-            mungedEvent.changes.push('count');
-            mungedEvent.changes.push('startTime');
-        } else if (event.event_name === 'playbook_on_play_start') {
-            getPreviousCount(mungedEvent.counter, "play")
-                .then(count => {
-                    mungedEvent.playCount = count + 1;
-                    mungedEvent.changes.push('playCount');
-                });
-        } else if (event.event_name === 'playbook_on_task_start') {
-            getPreviousCount(mungedEvent.counter, "task")
-                .then(count => {
-                    mungedEvent.taskCount = count + 1;
-                    mungedEvent.changes.push('taskCount');
-                });
-        } else if (event.event_name === 'runner_on_ok' ||
-            event.event_name === 'runner_on_async_ok') {
-                getPreviousCount(mungedEvent.counter)
-                    .then(count => {
-                        mungedEvent.count = count;
-                        mungedEvent.count.ok++;
-                        mungedEvent.changes.push('count');
-                    });
-        } else if (event.event_name === 'runner_on_skipped') {
-            getPreviousCount(mungedEvent.counter)
-                .then(count => {
-                    mungedEvent.count = count;
-                    mungedEvent.count.skipped++;
-                    mungedEvent.changes.push('count');
-                });
-        } else if (event.event_name === 'runner_on_unreachable') {
-            getPreviousCount(mungedEvent.counter)
-                .then(count => {
-                    mungedEvent.count = count;
-                    mungedEvent.count.unreachable++;
-                    mungedEvent.changes.push('count');
-                });
-        } else if (event.event_name === 'runner_on_error' ||
-            event.event_name === 'runner_on_async_failed') {
-                getPreviousCount(mungedEvent.counter)
-                    .then(count => {
-                        mungedEvent.count = count;
-                        mungedEvent.count.failed++;
-                        mungedEvent.changes.push('count');
-                    });
-        } else if (event.event_name === 'playbook_on_stats') {
-            // get the data for populating the host status bar
-            mungedEvent.count = jobResultsService
-                .getCountsFromStatsEvent(event.event_data);
-            mungedEvent.finishedTime = event.modified;
-            mungedEvent.changes.push('count');
-            mungedEvent.changes.push('countFinished');
-            mungedEvent.changes.push('finishedTime');
-        }
-
-        mungedEventDefer.resolve(mungedEvent);
-
-        return mungedEventDefer.promise;
-    };
-
     val = {
         populateDefers: {},
         queue: {},
+        // Get the count of the last event
+        getPreviousCount: function(counter, type) {
+            var countAttr;
+
+            if (type === 'play') {
+                countAttr = 'playCount';
+            } else if (type === 'task') {
+                countAttr = 'taskCount';
+            } else {
+                countAttr = 'count';
+            }
+
+            var previousCount = $q.defer();
+
+            // iteratively find the last count
+            var findCount = function(counter) {
+                if (counter === 0) {
+                    // if counter is 0, no count has been initialized
+                    // initialize one!
+
+                    if (countAttr === 'count') {
+                        previousCount.resolve({
+                            ok: 0,
+                            skipped: 0,
+                            unreachable: 0,
+                            failures: 0,
+                            changed: 0
+                        });
+                    } else {
+                        previousCount.resolve(0);
+                    }
+
+                } else if (val.queue[counter] && val.queue[counter][countAttr] !== undefined) {
+                    // this event has a count, resolve!
+                    previousCount.resolve(_.clone(val.queue[counter][countAttr]));
+                } else {
+                    // this event doesn't have a count, decrement to the
+                    // previous event and check it
+                    findCount(counter - 1);
+                }
+            };
+
+            if (val.queue[counter - 1]) {
+                // if the previous event has been resolved, start the iterative
+                // get previous count process
+                findCount(counter - 1);
+            } else if (val.populateDefers[counter - 1]){
+                // if the previous event has not been resolved, wait for it to
+                // be and then start the iterative get previous count process
+                val.populateDefers[counter - 1].promise.then(function() {
+                    findCount(counter - 1);
+                });
+            }
+
+            return previousCount.promise;
+        },
+        // munge the raw event from the backend into the event_queue's format
+        munge: function(event) {
+            var mungedEventDefer = $q.defer();
+
+            // basic data needed in the munged event
+            var mungedEvent = {
+                counter: event.counter,
+                id: event.id,
+                processed: false,
+                name: event.event_name,
+                changes: []
+            };
+
+            // the interface for grabbing standard out is generalized and
+            // present across many types of events, so go ahead and check for
+            // updates to it
+            if (event.stdout) {
+                mungedEvent.stdout = parseStdoutService.parseStdout(event);
+                mungedEvent.changes.push('stdout');
+            }
+
+            // for different types of events, you need different types of data
+            if (event.event_name === 'playbook_on_start') {
+                mungedEvent.count = {
+                    ok: 0,
+                    skipped: 0,
+                    unreachable: 0,
+                    failures: 0,
+                    changed: 0
+                };
+                mungedEvent.startTime = event.modified;
+                mungedEvent.changes.push('count');
+                mungedEvent.changes.push('startTime');
+            } else if (event.event_name === 'playbook_on_play_start') {
+                val.getPreviousCount(mungedEvent.counter, "play")
+                    .then(count => {
+                        mungedEvent.playCount = count + 1;
+                        mungedEvent.changes.push('playCount');
+                    });
+            } else if (event.event_name === 'playbook_on_task_start') {
+                val.getPreviousCount(mungedEvent.counter, "task")
+                    .then(count => {
+                        mungedEvent.taskCount = count + 1;
+                        mungedEvent.changes.push('taskCount');
+                    });
+            } else if (event.event_name === 'runner_on_ok' ||
+                event.event_name === 'runner_on_async_ok') {
+                    val.getPreviousCount(mungedEvent.counter)
+                        .then(count => {
+                            mungedEvent.count = count;
+                            mungedEvent.count.ok++;
+                            mungedEvent.changes.push('count');
+                        });
+            } else if (event.event_name === 'runner_on_skipped') {
+                val.getPreviousCount(mungedEvent.counter)
+                    .then(count => {
+                        mungedEvent.count = count;
+                        mungedEvent.count.skipped++;
+                        mungedEvent.changes.push('count');
+                    });
+            } else if (event.event_name === 'runner_on_unreachable') {
+                val.getPreviousCount(mungedEvent.counter)
+                    .then(count => {
+                        mungedEvent.count = count;
+                        mungedEvent.count.unreachable++;
+                        mungedEvent.changes.push('count');
+                    });
+            } else if (event.event_name === 'runner_on_error' ||
+                event.event_name === 'runner_on_async_failed') {
+                    val.getPreviousCount(mungedEvent.counter)
+                        .then(count => {
+                            mungedEvent.count = count;
+                            mungedEvent.count.failed++;
+                            mungedEvent.changes.push('count');
+                        });
+            } else if (event.event_name === 'playbook_on_stats') {
+                // get the data for populating the host status bar
+                mungedEvent.count = jobResultsService
+                    .getCountsFromStatsEvent(event.event_data);
+                mungedEvent.finishedTime = event.modified;
+                mungedEvent.changes.push('count');
+                mungedEvent.changes.push('countFinished');
+                mungedEvent.changes.push('finishedTime');
+            }
+
+            mungedEventDefer.resolve(mungedEvent);
+
+            return mungedEventDefer.promise;
+        },
         // reinitializes the event queue value for the job results page
-        //
-        // TODO: implement some sort of local storage scheme
-        // to make viewing job details that the user has
-        // previous clicked on super quick, this would be where you grab
-        // from local storage
         initialize: function() {
             val.queue = {};
             val.populateDefers = {};
@@ -175,6 +168,8 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 val.populateDefers[event.counter] = $q.defer();
             }
 
+            // make sure not to send duplicate events over to the
+            // controller
             if (val.queue[event.counter] &&
                 val.queue[event.counter].processed) {
                     val.populateDefers.reject("duplicate event: " +
@@ -185,11 +180,6 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 var resolvePopulation = function(event) {
                     // to resolve, put the event on the queue and
                     // then resolve the deferred value
-                    //
-                    // TODO: implement some sort of local storage scheme
-                    // to make viewing job details that the user has
-                    // previous clicked on super quick, this would be
-                    // where you put in local storage
                     val.queue[event.counter] = event;
                     val.populateDefers[event.counter].resolve(event);
                 };
@@ -197,7 +187,7 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 if (event.counter === 1) {
                     // for the first event, go ahead and munge and
                     // resolve
-                    mungeEvent(event).then(event => {
+                    val.munge(event).then(event => {
                         resolvePopulation(event);
                     });
                 } else {
@@ -214,15 +204,11 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                     }
 
                     // you can start the munging process...
-                    mungeEvent(event).then(event => {
+                    val.munge(event).then(event => {
                         // ...but wait until the previous event has
                         // been resolved before resolving this one and
                         // doing stuff in the ui (that's why we
-                        // needed that previous conditional).  this
-                        // could be done in a more asynchronous nature
-                        // if we need a performance boost.  See the
-                        // todo note in the markProcessed function
-                        // for an idea
+                        // needed that previous conditional).
                         val.populateDefers[event.counter - 1].promise
                             .then(() => {
                                 resolvePopulation(event);
@@ -245,19 +231,6 @@ export default ['jobResultsService', 'parseStdoutService', '$q', function(jobRes
                 // the event has now done it's work in the UI, record
                 // that!
                 val.queue[event.counter].processed = true;
-
-                // TODO: we can actually record what has been done in the
-                // UI and at what event too!  (something like "resolved
-                // the count on event 63)".
-                //
-                // if we do something like this, we actually wouldn't
-                // have to wait until the previous events had completed
-                // before resolving and returning to the controller
-                // in populate()...
-                // in other words, we could send events out of order to
-                // the controller, but let the controller know that it's
-                // an older event that what is in the view so we don't
-                // need to do anything
             };
 
             if (!val.queue[event.counter]) {

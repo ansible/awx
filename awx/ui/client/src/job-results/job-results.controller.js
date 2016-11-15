@@ -144,14 +144,19 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                     }
 
                     if(change === 'stdout'){
+                        // put stdout elements in stdout container
                         angular
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
                                 .stdout)($scope));
 
+                        // move the followAnchor to the bottom of the
+                        // container
                         $(".JobResultsStdOut-followAnchor")
                             .appendTo(".JobResultsStdOut-stdoutContainer");
 
+                        // if follow is engaged,
+                        // scroll down to the followAnchor
                         if ($scope.followEngaged) {
                             $scope.followScroll();
                         }

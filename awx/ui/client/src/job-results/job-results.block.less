@@ -3,7 +3,6 @@
 @import '../shared/layouts/one-plus-two.less';
 
 @breakpoint-md: 1200px;
-@breakpoint-sm: 623px;
 
 .JobResults {
     .OnePlusTwo-container(100%, @breakpoint-md);
@@ -115,7 +114,7 @@
     margin-left: 20px;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: @breakpoint-md) {
     .JobResults-detailsPanel {
         overflow-y: auto;
     }

@@ -1,5 +1,7 @@
 @import '../../shared/branding/colors.default.less';
 
+@breakpoint-md: 1200px;
+
 .JobResultsStdOut {
     height: ~"calc(100% - 70px)";
 }
@@ -204,7 +206,7 @@
     color: @default-interface-txt;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: @breakpoint-md) {
     .JobResultsStdOut-numberColumnPreload {
         display: none;
     }
