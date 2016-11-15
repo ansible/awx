@@ -6,7 +6,7 @@ asgi-amqp==0.3.1
 azure==2.0.0rc5
 Babel==2.2.0
 baron==0.6.2
-billiard==3.3.0.16
+billiard==3.3.0.23
 boto==2.43.0
 celery==3.1.23
 cffi==1.7.0
