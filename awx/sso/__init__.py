@@ -18,6 +18,7 @@ def xmlsec_initialize(*args, **kwargs):
             original_xmlsec_initialize(*args, **kwargs)
             xmlsec_initialized = True
 
+
 dm.xmlsec.binding.initialize = xmlsec_initialize
 
 

@@ -35,6 +35,7 @@ def test_cleanup_granularity(fact_scans, hosts):
     deleted_count = cleanup_facts.cleanup(timestamp_future, granularity)
     assert 60 == deleted_count
 
+
 '''
 Delete half of the scans
 '''

@@ -200,6 +200,7 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
         if l.is_candidate_for_detach():
             l.delete()
 
+
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
@@ -306,6 +307,7 @@ class ActivityStreamEnabled(threading.local):
 
     def __nonzero__(self):
         return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
+
 
 activity_stream_enabled = ActivityStreamEnabled()
 

@@ -33,6 +33,7 @@ class BaseRedirectView(RedirectView):
         else:
             return url
 
+
 sso_error = BaseRedirectView.as_view()
 sso_inactive = BaseRedirectView.as_view()
 
@@ -67,6 +68,7 @@ class CompleteView(BaseRedirectView):
             response.set_cookie('current_user', current_user)
         return response
 
+
 sso_complete = CompleteView.as_view()
 
 
@@ -85,5 +87,6 @@ class MetadataView(View):
             return HttpResponse(content=metadata, content_type='text/xml')
         else:
             return HttpResponse(content=str(errors), content_type='text/plain')
+
 
 saml_metadata = MetadataView.as_view()

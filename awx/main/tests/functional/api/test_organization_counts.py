@@ -40,6 +40,7 @@ def organization_resource_creator(organization, user):
         return organization
     return rf
 
+
 COUNTS_PRIMES = {
     'users': 11,
     'admins': 5,

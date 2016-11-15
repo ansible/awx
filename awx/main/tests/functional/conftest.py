@@ -51,6 +51,7 @@ def disable_signals():
     mocked = mock.patch('django.dispatch.Signal.send', autospec=True)
     mocked.start()
 
+
 '''
 FIXME: Not sure how "far" just setting the BROKER_URL will get us.
 We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)

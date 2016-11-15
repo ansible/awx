@@ -88,6 +88,7 @@ def _load_default_license_from_file():
         logger.warning('Could not read license from "%s".', license_file, exc_info=True)
     return {}
 
+
 register(
     'LICENSE',
     field_class=fields.DictField,

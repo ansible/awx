@@ -469,6 +469,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         else:
             return self.attach(request, *args, **kwargs)
 
+
 '''
 Models for which you want the last instance to be deleted from the database
 when the last disassociate is called should inherit from this class. Further, 

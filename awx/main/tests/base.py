@@ -89,6 +89,7 @@ class MockCommonlySlowTestMixin(object):
         mock.patch.object(generics, 'get_view_description', return_value=None).start()
         super(MockCommonlySlowTestMixin, self).__init__(*args, **kwargs)
 
+
 ansible_version = get_ansible_version()
 class BaseTestMixin(MockCommonlySlowTestMixin):
     '''

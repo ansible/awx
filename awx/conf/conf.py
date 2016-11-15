@@ -60,6 +60,7 @@ register(
 def _get_read_only_ansible_cow_selection_default():
     return getattr(settings, 'ANSIBLE_COW_SELECTION', 'No default cow!')
 
+
 register(
     'READONLY_ANSIBLE_COW_SELECTION',
     field_class=fields.CharField,

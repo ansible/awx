@@ -134,4 +134,5 @@ class EventContext(object):
     def dump_end(self, fileobj):
         self.dump(fileobj, self.get_end_dict())
 
+
 event_context = EventContext()

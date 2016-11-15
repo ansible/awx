@@ -67,6 +67,7 @@ def with_verbosity(f):
             return f(*args, **kwargs)
     return wrapper
 
+
 Display.verbose = with_verbosity(Display.verbose)
 
 
@@ -88,5 +89,6 @@ def display_with_context(f):
                 event_context.dump_end(fileobj)
                 event_context.remove_local(uuid=None)
     return wrapper
+
 
 Display.display = display_with_context(Display.display)

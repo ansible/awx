@@ -161,4 +161,5 @@ def main():
     results = dict(ansible_facts=dict(files=files))
     module.exit_json(**results)
 
+
 main()

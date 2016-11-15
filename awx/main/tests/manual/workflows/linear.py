@@ -36,5 +36,6 @@ def do_init():
     jt_never= JobTemplate.objects.get(id=7)
     do_init_workflow(jt_success, jt_fail, jt_never)
 
+
 if __name__ == "__main__":
     do_init()

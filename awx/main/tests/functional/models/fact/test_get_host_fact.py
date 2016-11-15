@@ -20,6 +20,7 @@ def test_newest_scan_exact(hosts, fact_scans):
 
     assert fact_found == fact_known
 
+
 '''
 Show me the most recent state of the sytem at any point of time.
 or, said differently
@@ -48,6 +49,7 @@ def test_newest_scan_less_than(hosts, fact_scans):
 
     assert fact_found == fact_known
 
+
 '''
 Tests query Fact that is in the middle of the fact scan timeline, but not an exact timestamp.
 '''
@@ -69,6 +71,7 @@ def test_query_middle_of_timeline(hosts, fact_scans):
 
     assert fact_found == fact_known
 
+
 '''
 Query time less than any fact scan. Should return None
 '''
@@ -82,6 +85,7 @@ def test_query_result_empty(hosts, fact_scans):
     fact_found = Fact.get_host_fact(hosts[0].id, 'ansible', timestamp_less)
 
     assert fact_found is None
+
 
 '''
 Query by fact module other than 'ansible'

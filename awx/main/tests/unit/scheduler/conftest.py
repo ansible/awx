@@ -185,6 +185,7 @@ def successful_inventory_update(epoch, inventory_update_factory):
     inventory_update['status'] = 'successful'
     return inventory_update
 
+
 '''
 Job
 '''
@@ -218,6 +219,7 @@ def running_job(job_factory):
     job = job_factory()
     job['status'] = 'running'
     return job
+
 
 '''
 Inventory id -> [InventorySourceDict, ...]
