@@ -48,6 +48,7 @@ def dag_simple_edge_labels():
 
     return dag
 
+
 '''
 class TestSimpleDAG(object):
     def test_get_root_nodes(self, dag_root):

@@ -77,6 +77,7 @@ def proc_data_files(data_files):
 
 #####################################################################
 
+
 setup(
     name='ansible-tower',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?

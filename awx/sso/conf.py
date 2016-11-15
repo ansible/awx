@@ -23,6 +23,7 @@ class SocialAuthCallbackURL(object):
         path = reverse('social:complete', args=(self.provider,))
         return urlparse.urljoin(settings.TOWER_URL_BASE, path)
 
+
 SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _('''\
 Mapping to organization admins/users from social auth accounts. This setting
 controls which users are placed into which Tower organizations based on
@@ -798,6 +799,7 @@ register(
 
 def get_saml_metadata_url():
     return urlparse.urljoin(settings.TOWER_URL_BASE, reverse('sso:saml_metadata'))
+
 
 register(
     'SOCIAL_AUTH_SAML_CALLBACK_URL',

@@ -41,5 +41,6 @@ def do_init():
     jt_parallel.append(JobTemplate.objects.get(id=18))
     do_init_workflow(jt_success, jt_fail, jt_never, jt_parallel)
 
+
 if __name__ == "__main__":
     do_init()

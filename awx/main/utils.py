@@ -662,6 +662,7 @@ def getattrd(obj, name, default=NoDefaultProvided):
             return default
         raise
 
+
 current_apps = apps
 def set_current_apps(apps):
     global current_apps

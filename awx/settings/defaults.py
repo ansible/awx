@@ -37,6 +37,7 @@ def is_testing(argv=None):
 def IS_TESTING(argv=None):
     return is_testing(argv)
 
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SQL_DEBUG = DEBUG

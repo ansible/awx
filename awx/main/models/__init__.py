@@ -34,7 +34,10 @@ def _new_handle_m2m_field(self, obj, field):
     except AttributeError:
         return
     return _original_handle_m2m_field(self, obj, field)
+
+
 _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
+
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User # noqa
@@ -58,6 +61,7 @@ def user_get_admin_of_organizations(user):
 def user_get_auditor_of_organizations(user):
     return Organization.objects.filter(auditor_role__members=user)
 
+
 User.add_to_class('organizations', user_get_organizations)
 User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
 User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
@@ -73,6 +77,7 @@ def user_is_system_auditor(user, tf):
             Role.singleton('system_auditor').members.add(user)
         else:
             Role.singleton('system_auditor').members.remove(user)
+
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
 

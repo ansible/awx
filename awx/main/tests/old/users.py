@@ -74,6 +74,7 @@ class AuthTokenLimitTest(BaseTest):
         response = self.get(user_me_url, expect=401, auth=auth_token1)
         self.assertEqual(AuthToken.reason_long('limit_reached'), response['detail'])
 
+
 '''
 Ensure ips from the X-Forwarded-For get honored and used in auth tokens
 '''

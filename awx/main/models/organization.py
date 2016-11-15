@@ -191,6 +191,7 @@ class Profile(CreatedModifiedModel):
         default='',
     )
 
+
 """
 Since expiration and session expiration is event driven a token could be
 invalidated for both reasons. Further, we only support a single reason for a

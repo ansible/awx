@@ -105,6 +105,7 @@ def jt_ask(job_template_factory):
 def project_unit():
     return Project(name='example-proj')
 
+
 example_prompts = dict(job_type='check', job_tags='quack', limit='duck', skip_tags='oink')
 
 @pytest.fixture

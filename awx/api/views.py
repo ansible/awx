@@ -1736,6 +1736,7 @@ class GroupList(ListCreateAPIView):
     serializer_class = GroupSerializer
     capabilities_prefetch = ['inventory.admin', 'inventory.adhoc', 'inventory.update']
 
+
 '''
 Useful when you have a self-refering ManyToManyRelationship.
 * Tower uses a shallow (2-deep only) url pattern. For example:
@@ -4011,7 +4012,6 @@ class RoleChildrenList(SubListAPIView):
     def get_queryset(self):
         role = Role.objects.get(pk=self.kwargs['pk'])
         return Role.filter_visible_roles(self.request.user, role.children.all())
-
 
 
 # Create view functions for all of the class-based views to simplify inclusion

@@ -57,6 +57,7 @@ def test_process_fact_message_services(fact_msg_services):
 
     check_process_fact_message_module(fact_returned, fact_msg_services, 'services')
 
+
 '''
 We pickypack our fact sending onto the Ansible fact interface.
 The interface is <hostname, facts>. Where facts is a json blob of all the facts.
