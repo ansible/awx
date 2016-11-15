@@ -129,7 +129,7 @@ suds==0.4
 unicodecsv==0.14.1
 warlock==1.2.0
 twilio==4.9.1
-uwsgi==2.0.14
+uWSGI==2.0.14
 wheel==0.24.0
 wrapt==1.10.6
 wsgiref==0.1.2
