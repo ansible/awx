@@ -314,9 +314,6 @@ class Command(BaseCommand):
                 self.stdout.write('  No settings to migrate!')
         for name, db_value in to_migrate.items():
             display_value = json.dumps(db_value, indent=4)
-            # Always encode "raw" strings as JSON.
-            if isinstance(db_value, basestring):
-                db_value = json.dumps(db_value)
             setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
             action = 'No Change'
             if not setting:

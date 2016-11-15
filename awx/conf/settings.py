@@ -1,6 +1,5 @@
 # Python
 import contextlib
-import json
 import logging
 import threading
 import time
@@ -142,16 +141,18 @@ class SettingsWrapper(UserSettingsHolder):
     def _get_local(self, name):
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
-        value = cache.get(cache_key, empty)
-        logger.debug('cache get(%r, %r) -> %r', cache_key, empty, value)
-        if value == SETTING_CACHE_NOTSET:
+        cache_value = cache.get(cache_key, empty)
+        logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
+        if cache_value == SETTING_CACHE_NOTSET:
             value = empty
-        elif value == SETTING_CACHE_NONE:
+        elif cache_value == SETTING_CACHE_NONE:
             value = None
-        elif value == SETTING_CACHE_EMPTY_LIST:
+        elif cache_value == SETTING_CACHE_EMPTY_LIST:
             value = []
-        elif value == SETTING_CACHE_EMPTY_DICT:
+        elif cache_value == SETTING_CACHE_EMPTY_DICT:
             value = {}
+        else:
+            value = cache_value
         field = settings_registry.get_setting_field(name)
         if value is empty:
             setting = None
@@ -159,9 +160,6 @@ class SettingsWrapper(UserSettingsHolder):
                 setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
             if setting:
                 value = setting.value
-                # If None implies not set, convert when reading the value.
-                if value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
-                    value = SETTING_CACHE_NOTSET
             else:
                 value = SETTING_CACHE_NOTSET
                 if SETTING_CACHE_DEFAULTS:
@@ -169,8 +167,12 @@ class SettingsWrapper(UserSettingsHolder):
                         value = field.get_default()
                     except SkipField:
                         pass
-            logger.debug('cache set(%r, %r, %r)', cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
-            cache.set(cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
+            # If None implies not set, convert when reading the value.
+            if value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
+                value = SETTING_CACHE_NOTSET
+            if cache_value != value:
+                logger.debug('cache set(%r, %r, %r)', cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
+                cache.set(cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:
                 value = field.get_default()
@@ -218,9 +220,6 @@ class SettingsWrapper(UserSettingsHolder):
             logger.exception('Unable to assign value "%r" to setting "%s".', value, name, exc_info=True)
             raise e
 
-        # Always encode "raw" strings as JSON.
-        if isinstance(db_value, basestring):
-            db_value = json.dumps(db_value)
         setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
         if not setting:
             setting = Setting.objects.create(key=name, user=None, value=db_value)

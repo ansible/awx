@@ -33,8 +33,6 @@ __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField']
 class JSONField(upstream_JSONField):
 
     def from_db_value(self, value, expression, connection, context):
-        if value in ['', None]:
-            return {}
         return super(JSONField, self).from_db_value(value, expression, connection, context)
 
 # Based on AutoOneToOneField from django-annoying:
