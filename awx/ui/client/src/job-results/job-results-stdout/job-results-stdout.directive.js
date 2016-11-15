@@ -57,28 +57,70 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 scope.parentVisLine = parentItem;
             };
 
-            var lastScrollTop = 0;
-            scope.stdoutOverflowed = false;
-            $(".JobResultsStdOut-stdoutContainer").on('scroll', function() {
-                var st = $(this).scrollTop();
+            // find when window changes from mobile to desktop width
+            if (window.innerWidth < 1200) {
+                scope.isMobile = true;
+            } else {
+                scope.isMobile = false;
+            }
+            $( window ).resize(function() {
+                if (window.innerWidth < 1200 && !scope.isMobile) {
+                    scope.isMobile = true;
+                } else if (window.innerWidth >= 1200 & scope.isMobile) {
+                    scope.isMobile = false;
+                }
+            });
+
+            var lastScrollTop;
+
+            var initScrollTop = function() {
+                lastScrollTop = 0;
+            }
+            var scrollWatcher = function() {
+                var st = $(this).scrollTop(),
+                    fullHeight;
                 if (st < lastScrollTop){
                     // user up scrolled, so disengage follow
                     scope.followEngaged = false;
                 }
 
+                if (scope.isMobile) {
+                    fullHeight = $("body").height();
+                } else {
+                    fullHeight = $(this)[0].scrollHeight - 25;
+                }
+
                 if($(this).scrollTop() + $(this).innerHeight() >=
-                    $(this)[0].scrollHeight - 25) {
+                    fullHeight) {
                     // user scrolled all the way to bottom, so engage
                     // follow
                     scope.followEngaged = true;
                 }
 
                 // pane is now overflowed, show top indicator
-                if (st > 0) {
+                if (st > 0 && !scope.isMobile) {
                     scope.stdoutOverflowed = true;
                 }
 
                 lastScrollTop = st;
+            }
+
+            scope.$watch('isMobile', function(val) {
+                if (val === true) {
+                    // make sure ^ TOP always shown
+                    scope.stdoutOverflowed = true;
+
+                    initScrollTop();
+                    $(".JobResultsStdOut-stdoutContainer")
+                        .unbind('scroll');
+                    $(window).on('scroll', scrollWatcher);
+
+                } else if (val === false) {
+                    initScrollTop();
+                    $(window).unbind('scroll');
+                    $(".JobResultsStdOut-stdoutContainer").on('scroll',
+                        scrollWatcher);
+                }
             });
 
             scope.followScroll = function() {

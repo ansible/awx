@@ -111,13 +111,14 @@
 }
 
 .JobResultsStdOut-numberColumnPreload {
-    background-color: #EBEBEB;
+    background-color: @default-list-header-bg;
     width: 70px;
     position: fixed;
     top: 148px;
     bottom: 20px;
     margin-top: 65px;
     margin-bottom: 65px;
+
 }
 
 .JobResultsStdOut-aLineOfStdOut {
@@ -203,9 +204,30 @@
     color: @default-interface-txt;
 }
 
-.foo {
-    margin-right: auto;
-    margin-top: 8px;
-    margin-left: 20px;
-    font-weight: bold;
+@media (max-width: 1199px) {
+    .JobResultsStdOut-numberColumnPreload {
+        display: none;
+    }
+
+    .JobResultsStdOut-topAnchor {
+        position: static;
+        width: 100%;
+        top: -20px;
+        margin-top: -250px;
+        margin-bottom: 250px;
+    }
+
+    .JobResultsStdOut-followAnchor {
+        height: 20px;
+        width: 100%;
+        border-left: 70px solid @default-list-header-bg;
+    }
+
+    .JobResultsStdOut-stdoutContainer {
+        overflow-y: auto;
+    }
+
+    .JobResultsStdOut-lineAnchor {
+        display: none !important;
+    }
 }
