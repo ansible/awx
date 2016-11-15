@@ -67,7 +67,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.category_slug not in category_slugs:
             raise PermissionDenied()
 
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug)
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False)
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
         else:
