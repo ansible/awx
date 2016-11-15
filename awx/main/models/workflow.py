@@ -422,7 +422,7 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
-        related_name='jobs',
+        related_name='workflow_jobs',
         blank=True,
         null=True,
         default=None,
