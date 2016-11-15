@@ -3,7 +3,6 @@
 
 # Python
 import collections
-import json
 import sys
 
 # Django
@@ -100,9 +99,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             if key == 'LICENSE':
                 continue
             setattr(serializer.instance, key, value)
-            # Always encode "raw" strings as JSON.
-            if isinstance(value, basestring):
-                value = json.dumps(value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
                 setting = Setting.objects.create(key=key, user=user, value=value)

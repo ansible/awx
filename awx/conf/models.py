@@ -21,8 +21,6 @@ class Setting(CreatedModifiedModel):
     )
     value = JSONField(
         null=True,
-        # FIXME: Enable when we upgrade to JSONField with support:
-        # load_kwargs={'object_pairs_hook': collections.OrderedDict},
     )
     user = models.ForeignKey(
         'auth.User',

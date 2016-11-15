@@ -426,6 +426,12 @@ class LDAPTeamMapField(fields.DictField):
 
 class RADIUSSecretField(fields.CharField):
 
+    def run_validation(self, data=empty):
+        value = super(RADIUSSecretField, self).run_validation(data)
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        return value
+
     def to_internal_value(self, value):
         value = super(RADIUSSecretField, self).to_internal_value(value)
         if isinstance(value, unicode):

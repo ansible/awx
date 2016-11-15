@@ -33,7 +33,7 @@ __all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField']
 class JSONField(upstream_JSONField):
 
     def from_db_value(self, value, expression, connection, context):
-        if value in ['', None]:
+        if value in {'', None} and not self.null:
             return {}
         return super(JSONField, self).from_db_value(value, expression, connection, context)
 

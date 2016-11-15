@@ -14,11 +14,6 @@ def copy_tower_settings(apps, schema_editor):
             # LICENSE is stored as a string; convert it to a dict.
             if tower_setting.key == 'LICENSE':
                 value = json.loads(value)
-            # Anything else (e.g. TOWER_URL_BASE) that is stored as a string
-            # needs to be converted to a JSON-encoded string to work with the
-            # JSON field.
-            elif tower_setting.value_type == 'string':
-                value = json.dumps(value)
             setting, created = Setting.objects.get_or_create(
                 key=tower_setting.key,
                 user=tower_setting.user,
