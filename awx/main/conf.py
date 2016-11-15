@@ -169,7 +169,7 @@ register(
     'AWX_ANSIBLE_CALLBACK_PLUGINS',
     field_class=fields.StringListField,
     label=_('Ansible Callback Plugins'),
-    help_text=_('List of paths for extra callback plugins to be used when running jobs.'),
+    help_text=_('List of paths to search for extra callback plugins to be used when running jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
 )
