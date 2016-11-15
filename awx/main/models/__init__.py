@@ -34,6 +34,8 @@ def _new_handle_m2m_field(self, obj, field):
     except AttributeError:
         return
     return _original_handle_m2m_field(self, obj, field)
+
+
 _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 
 
