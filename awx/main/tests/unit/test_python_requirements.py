@@ -40,6 +40,7 @@ def test_env_matches_requirements_txt():
         if res is False:
             not_found.append(r)
 
-    raise RuntimeError("%s not found in \n\n%s" % (not_found, reqs_actual))
+    if len(not_found) > 0:
+        raise RuntimeError("%s not found in \n\n%s" % (not_found, reqs_actual))
 
 
