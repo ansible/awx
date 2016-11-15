@@ -510,6 +510,7 @@ register(
                 'callback URL for your application.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -600,6 +601,7 @@ register(
                 'as the callback URL for your application.'),
     category=_('GitHub OAuth2'),
     category_slug='github',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -662,6 +664,7 @@ register(
                 'Provide this URL as the callback URL for your application.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -735,6 +738,7 @@ register(
                 'Provide this URL as the callback URL for your application.'),
     category=_('GitHub Team OAuth2'),
     category_slug='github-team',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -810,6 +814,7 @@ register(
                 'and this callback URL for your application.'),
     category=_('SAML'),
     category_slug='saml',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
