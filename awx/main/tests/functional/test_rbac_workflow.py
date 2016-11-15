@@ -24,7 +24,7 @@ def wfjt_node(wfjt_with_nodes):
 
 @pytest.fixture
 def workflow_job(wfjt):
-    return wfjt.jobs.create(name='test_workflow')
+    return wfjt.workflow_jobs.create(name='test_workflow')
 
 
 @pytest.mark.django_db
