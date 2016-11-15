@@ -34,7 +34,7 @@ def test_send_notifications_list(mocker):
     mock_job = mocker.MagicMock(spec=UnifiedJob)
     patches.append(mocker.patch('awx.main.models.UnifiedJob.objects.get', return_value=mock_job))
 
-    mock_notification = mocker.MagicMock(spec=Notification, subject="test", body={ 'hello': 'world' })
+    mock_notification = mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})
     patches.append(mocker.patch('awx.main.models.Notification.objects.get', return_value=mock_notification))
 
     with apply_patches(patches):

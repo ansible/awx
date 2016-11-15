@@ -37,7 +37,7 @@ class Label(CommonModelNameNotUnique):
         return \
             Label.objects.filter(
                 organization=None,
-                jobtemplate_labels__isnull=True
+                unifiedjobtemplate_labels__isnull=True
             )
 
     def is_detached(self):
