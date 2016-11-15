@@ -18,6 +18,7 @@ var vendorPkgs = [
     'angular-codemirror',
     'angular-cookies',
     'angular-drag-and-drop-lists',
+    'angular-duration-format',
     'angular-gettext',
     'angular-md5',
     'angular-moment',

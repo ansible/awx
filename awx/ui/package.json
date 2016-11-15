@@ -84,6 +84,7 @@
     "angular-codemirror": "chouseknecht/angular-codemirror#1.0.4",
     "angular-cookies": "^1.4.3",
     "angular-drag-and-drop-lists": "leigh-johnson/angular-drag-and-drop-lists#1.4.0",
+    "angular-duration-format": "^1.0.1",
     "angular-gettext": "^2.3.5",
     "angular-md5": "^0.1.8",
     "angular-moment": "^0.10.1",

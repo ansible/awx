@@ -16,8 +16,6 @@ import jobResultsService from './job-results.service';
 import eventQueueService from './event-queue.service';
 import parseStdoutService from './parse-stdout.service';
 
-import durationFilter from './duration.filter';
-
 export default
     angular.module('jobResults', [hostStatusBar.name, jobResultsStdOut.name, hostEvent.name])
         .run(['$stateExtender', function($stateExtender) {
@@ -26,5 +24,4 @@ export default
         .controller('jobResultsController', jobResultsController)
         .service('jobResultsService', jobResultsService)
         .service('eventQueue', eventQueueService)
-        .service('parseStdoutService', parseStdoutService)
-        .filter('duration', durationFilter);
+        .service('parseStdoutService', parseStdoutService);
