@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList', 'ProjectList',
+export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'ProjectList',
     'GetBasePath', 'Wait', 'TemplatesService', '$state',
     'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
     'GenerateForm', 'InventoryList', 'CredentialList', '$q',
-    function($scope, WorkflowHelpService, GenerateList, TemplateList, ProjectList,
+    function($scope, WorkflowService, GenerateList, TemplateList, ProjectList,
         GetBasePath, Wait, TemplatesService, $state,
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
         GenerateForm, InventoryList, CredentialList, $q) {
@@ -78,7 +78,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList',
             $scope.addParent = parent;
             $scope.betweenTwoNodes = betweenTwoNodes;
 
-            $scope.placeholderNode = WorkflowHelpService.addPlaceholderNode({
+            $scope.placeholderNode = WorkflowService.addPlaceholderNode({
                 parent: parent,
                 betweenTwoNodes: betweenTwoNodes,
                 tree: $scope.treeData.data,
@@ -87,7 +87,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList',
 
             $scope.treeData.nextIndex++;
 
-            let siblingConnectionTypes = WorkflowHelpService.getSiblingConnectionTypes({
+            let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
                 tree: $scope.treeData.data,
                 parentId: betweenTwoNodes ? parent.source.id : parent.id
             });
@@ -187,7 +187,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList',
         $scope.cancelNodeForm = function() {
             if ($scope.workflowMakerFormConfig.nodeMode === "add") {
                 // Remove the placeholder node from the tree
-                WorkflowHelpService.removeNodeFromTree({
+                WorkflowService.removeNodeFromTree({
                     tree: $scope.treeData.data,
                     nodeToBeDeleted: $scope.placeholderNode
                 });
@@ -212,12 +212,12 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList',
 
                 $scope.workflowMakerFormConfig.nodeMode = "edit";
 
-                let parent = WorkflowHelpService.searchTree({
+                let parent = WorkflowService.searchTree({
                     element: $scope.treeData.data,
                     matchingId: nodeToEdit.parent.id
                 });
 
-                $scope.nodeBeingEdited = WorkflowHelpService.searchTree({
+                $scope.nodeBeingEdited = WorkflowService.searchTree({
                     element: parent,
                     matchingId: nodeToEdit.id
                 });
@@ -427,7 +427,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'TemplateList',
 
                 // TODO: turn this into a promise so that we can handle errors
 
-                WorkflowHelpService.removeNodeFromTree({
+                WorkflowService.removeNodeFromTree({
                     tree: $scope.treeData.data,
                     nodeToBeDeleted: $scope.nodeToBeDeleted
                 });

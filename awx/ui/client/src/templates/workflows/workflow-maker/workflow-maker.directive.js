@@ -14,7 +14,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
                 canAddWorkflowJobTemplate: '='
             },
             restrict: 'E',
-            templateUrl: templateUrl('job-templates/workflow-maker/workflow-maker'),
+            templateUrl: templateUrl('templates/workflows/workflow-maker/workflow-maker'),
             controller: workflowMakerController,
             link: function(scope) {
                 CreateDialog({

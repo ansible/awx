@@ -24,7 +24,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
         workflowChart.name, workflowMaker.name
     ])
     .service('TemplatesService', templatesService)
-    .service('WorkflowHelpService', workflowService)
+    .service('WorkflowService', workflowService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
