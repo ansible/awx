@@ -464,7 +464,10 @@ pep8: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
 
 flake8: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	(set -o pipefail && $@ | tee reports/$@.report)
 
 pyflakes: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
