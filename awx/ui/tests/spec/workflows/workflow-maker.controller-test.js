@@ -7,7 +7,7 @@ describe('Controller: WorkflowMaker', () => {
         WorkflowHelpService;
 
     beforeEach(angular.mock.module('Tower'));
-    beforeEach(angular.mock.module('jobTemplates', ($provide) => {
+    beforeEach(angular.mock.module('templates', ($provide) => {
 
         WorkflowHelpService = jasmine.createSpyObj('WorkflowHelpService', [
             'closeDialog',
@@ -21,6 +21,7 @@ describe('Controller: WorkflowMaker', () => {
 
     beforeEach(angular.mock.inject( ($rootScope, $controller, _WorkflowHelpService_) => {
         scope = $rootScope.$new();
+        scope.closeDialog = jasmine.createSpy();
         scope.treeData = {
             data: {
                 id: 1,
@@ -50,9 +51,9 @@ describe('Controller: WorkflowMaker', () => {
 
         it('should close the dialog', ()=>{
             scope.saveWorkflowMaker();
-            expect(WorkflowHelpService.closeDialog).toHaveBeenCalled();
+            expect(scope.closeDialog).toHaveBeenCalled();
         });
 
     });
-    
+
 });

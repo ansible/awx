@@ -12,7 +12,7 @@ export default
             return {
                 restrict: 'E',
                 scope: false,
-                templateUrl: templateUrl('job-templates/labels/labelsList'),
+                templateUrl: templateUrl('templates/labels/labelsList'),
                 link: function(scope, element, attrs) {
                     scope.showDelete = attrs.showDelete === 'true';
                     scope.seeMoreInactive = true;

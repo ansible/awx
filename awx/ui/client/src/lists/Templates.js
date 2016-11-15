@@ -6,8 +6,8 @@
 
 
 export default
-    angular.module('JobTemplatesListDefinition', [])
-    .factory('JobTemplateList', ['i18n', function(i18n) {
+    angular.module('TemplatesListDefinition', [])
+    .factory('TemplateList', ['i18n', function(i18n) {
     return {
 
         name: 'templates',

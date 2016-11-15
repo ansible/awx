@@ -8,13 +8,13 @@
  [   '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
      'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange', 'Wait', 'Empty',
      'ToJSON', 'initSurvey', '$state', 'CreateSelect2', 'ParseVariableString',
-     'JobTemplateService', 'OrganizationList', 'Rest',
+     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService',
      function(
          $scope, $stateParams, WorkflowForm, GenerateForm, Alert, ProcessErrors,
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-         JobTemplateService, OrganizationList, Rest
-     ) {window.state = $state;
+         TemplatesService, OrganizationList, Rest, WorkflowService
+     ) {
 
         ClearScope();
 
@@ -39,90 +39,6 @@
         $scope.editRequests = [];
         $scope.associateRequests = [];
         $scope.disassociateRequests = [];
-
-        $scope.workflowTree = {
-            data: {
-                id: 1,
-                canDelete: false,
-                canEdit: false,
-                canAddTo: true,
-                isStartNode: true,
-                unifiedJobTemplate: {
-                    name: "Workflow Launch"
-                },
-                children: [],
-                deletedNodes: [],
-                totalNodes: 0
-            },
-            nextIndex: 2
-        };
-
-        function buildBranch(params) {
-            // params.nodeId
-            // params.parentId
-            // params.edgeType
-            // params.nodesObj
-            // params.isRoot
-
-            let treeNode = {
-                children: [],
-                c: "#D7D7D7",
-                id: $scope.workflowTree.nextIndex,
-                nodeId: params.nodeId,
-                canDelete: true,
-                canEdit: true,
-                canAddTo: true,
-                placeholder: false,
-                edgeType: params.edgeType,
-                unifiedJobTemplate: _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template),
-                isNew: false,
-                edited: false,
-                originalEdge: params.edgeType,
-                originalNodeObj: _.clone(params.nodesObj[params.nodeId]),
-                promptValues: {},
-                isRoot: params.isRoot ? params.isRoot : false
-            };
-
-            $scope.workflowTree.data.totalNodes++;
-
-            $scope.workflowTree.nextIndex++;
-
-            if(params.parentId) {
-                treeNode.originalParentId = params.parentId;
-            }
-
-            // Loop across the success nodes and add them recursively
-            _.forEach(params.nodesObj[params.nodeId].success_nodes, function(successNodeId) {
-                treeNode.children.push(buildBranch({
-                    nodeId: successNodeId,
-                    parentId: params.nodeId,
-                    edgeType: "success",
-                    nodesObj: params.nodesObj
-                }));
-            });
-
-            // failure nodes
-            _.forEach(params.nodesObj[params.nodeId].failure_nodes, function(failureNodesId) {
-                treeNode.children.push(buildBranch({
-                    nodeId: failureNodesId,
-                    parentId: params.nodeId,
-                    edgeType: "failure",
-                    nodesObj: params.nodesObj
-                }));
-            });
-
-            // always nodes
-            _.forEach(params.nodesObj[params.nodeId].always_nodes, function(alwaysNodesId) {
-                treeNode.children.push(buildBranch({
-                    nodeId: alwaysNodesId,
-                    parentId: params.nodeId,
-                    edgeType: "always",
-                    nodesObj: params.nodesObj
-                }));
-            });
-
-            return treeNode;
-        }
 
         function init() {
 
@@ -192,43 +108,11 @@
                 });
 
             // Get the workflow nodes
-            JobTemplateService.getWorkflowJobTemplateNodes(id)
+            TemplatesService.getWorkflowJobTemplateNodes(id)
             .then(function(data){
 
-                let nodesArray = data.data.results;
-                let nodesObj = {};
-                let nonRootNodeIds = [];
-                let allNodeIds = [];
-
-                // Determine which nodes are root nodes
-                _.forEach(nodesArray, function(node) {
-                    nodesObj[node.id] = _.clone(node);
-
-                    allNodeIds.push(node.id);
-
-                    _.forEach(node.success_nodes, function(nodeId){
-                    nonRootNodeIds.push(nodeId);
-                    });
-                    _.forEach(node.failure_nodes, function(nodeId){
-                    nonRootNodeIds.push(nodeId);
-                    });
-                    _.forEach(node.always_nodes, function(nodeId){
-                    nonRootNodeIds.push(nodeId);
-                    });
-                });
-
-                let rootNodes = _.difference(allNodeIds, nonRootNodeIds);
-
-                // Loop across the root nodes and re-build the tree
-                _.forEach(rootNodes, function(rootNodeId) {
-                    let branch = buildBranch({
-                        nodeId: rootNodeId,
-                        edgeType: "always",
-                        nodesObj: nodesObj,
-                        isRoot: true
-                    });
-
-                    $scope.workflowTree.data.children.push(branch);
+                $scope.workflowTree = WorkflowService.buildTree({
+                    workflowNodes: data.data.results
                 });
 
                 // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
@@ -251,7 +135,7 @@
             });
 
             // Go out and GET the workflow job temlate data needed to populate the form
-            JobTemplateService.getWorkflowJobTemplate(id)
+            TemplatesService.getWorkflowJobTemplate(id)
             .then(function(data){
                 let workflowJobTemplateData = data.data;
                 $scope.workflow_job_template_obj = workflowJobTemplateData;
@@ -392,7 +276,7 @@
 
             if(params.node.isNew) {
 
-                JobTemplateService.addWorkflowNode({
+                TemplatesService.addWorkflowNode({
                     url: generatePostUrl(),
                     data: buildSendableNodeData()
                 })
@@ -500,7 +384,7 @@
                 // these promise arrays to play nicely.  I tried to just append
                 // a single promise to deletePromises but it just wasn't working
                 let editWorkflowJobTemplate = [id].map(function(id) {
-                    return JobTemplateService.updateWorkflowJobTemplate({
+                    return TemplatesService.updateWorkflowJobTemplate({
                         id: id,
                         data: data
                     });
@@ -510,7 +394,7 @@
                     let completionCallback = function() {
 
                         let disassociatePromises = $scope.disassociateRequests.map(function(request) {
-                            return JobTemplateService.disassociateWorkflowNode({
+                            return TemplatesService.disassociateWorkflowNode({
                                 parentId: request.parentId,
                                 nodeId: request.nodeId,
                                 edge: request.edge
@@ -518,7 +402,7 @@
                         });
 
                         let editNodePromises = $scope.editRequests.map(function(request) {
-                            return JobTemplateService.editWorkflowNode({
+                            return TemplatesService.editWorkflowNode({
                                 id: request.id,
                                 data: request.data
                             });
@@ -528,7 +412,7 @@
                         .then(function() {
 
                             let associatePromises = $scope.associateRequests.map(function(request) {
-                                return JobTemplateService.associateWorkflowNode({
+                                return TemplatesService.associateWorkflowNode({
                                     parentId: request.parentId,
                                     nodeId: request.nodeId,
                                     edge: request.edge
@@ -536,7 +420,7 @@
                             });
 
                             let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                                return JobTemplateService.deleteWorkflowJobTemplateNode(nodeId);
+                                return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                             });
 
                             $q.all(associatePromises.concat(deletePromises))
@@ -634,7 +518,7 @@
                 else {
 
                     let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                        return JobTemplateService.deleteWorkflowJobTemplateNode(nodeId);
+                        return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
                     });
 
                     $q.all(deletePromises.concat(editWorkflowJobTemplate))

@@ -288,13 +288,15 @@ export default [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgJobTemplateList: ['JobTemplateList', 'GetBasePath', '$stateParams', function(JobTemplateList) {
-            let list = _.cloneDeep(JobTemplateList);
+        OrgJobTemplateList: ['TemplateList', 'GetBasePath', '$stateParams', function(TemplateList) {
+            let list = _.cloneDeep(TemplateList);
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
             list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='jobTemplates.add'>Job Templates</a>&nbsp;section";
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+            list.iterator = 'job_template';
+            list.name = 'job_templates';
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',

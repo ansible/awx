@@ -14,7 +14,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, Prompt, InitiatePlaybookRun,
-    JobTemplateService, $state, $filter) {
+    TemplatesService, $state, $filter) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -146,7 +146,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
           action = function () {
             $('#prompt-modal').modal('hide');
             Wait('start');
-            JobTemplateService.deleteJobTemplate(id)
+            TemplatesService.deleteJobTemplate(id)
                 .success(function () {
                   $('#prompt-modal').modal('hide');
                   // @issue: OLD SEARCH
@@ -174,5 +174,5 @@ export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'InventoryForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString', 'Prompt', 'InitiatePlaybookRun',
-    'JobTemplateService', '$state', '$filter', InventoriesEdit,
+    'TemplatesService', '$state', '$filter', InventoriesEdit,
 ];

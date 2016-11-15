@@ -6,15 +6,15 @@
 
 import workflowMakerController from './workflow-maker.controller';
 
-export default ['templateUrl', 'CreateDialog', 'Wait',
-    function(templateUrl, CreateDialog, Wait) {
+export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
+    function(templateUrl, CreateDialog, Wait, $state) {
         return {
             scope: {
                 treeData: '=',
                 canAddWorkflowJobTemplate: '='
             },
             restrict: 'E',
-            templateUrl: templateUrl('job-templates/workflow-maker/workflow-maker'),
+            templateUrl: templateUrl('templates/workflows/workflow-maker/workflow-maker'),
             controller: workflowMakerController,
             link: function(scope) {
                 CreateDialog({
@@ -49,6 +49,12 @@ export default ['templateUrl', 'CreateDialog', 'Wait',
 
                     scope.$broadcast("refreshWorkflowChart");
                 });
+
+                scope.closeDialog = function() {
+                    $('#workflow-modal-dialog').dialog('destroy');
+
+                    $state.go('^');
+                };
             }
         };
     }

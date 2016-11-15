@@ -9,7 +9,7 @@ import route from './job-templates-copy.route';
 import service from './job-templates-copy.service';
 
 export default
- 	angular.module('jobTemplates.copy', [])
+ 	angular.module('templates.copy', [])
  		.service('jobTemplateCopyService', service)
  		.controller('jobTemplateCopyController', controller)
  		.run(['$stateExtender', function($stateExtender) {
