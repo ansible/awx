@@ -23,7 +23,7 @@ describe('Controller: jobResultsController', () => {
     eventDefer = {};
     populateResolve = {};
 
-    var provideVals = function() {
+    let provideVals = () => {
         angular.mock.module('jobResults', ($provide) => {
             ParseTypeChange = jasmine.createSpy('ParseTypeChange');
             ParseVariableString = jasmine.createSpy('ParseVariableString');
@@ -52,7 +52,7 @@ describe('Controller: jobResultsController', () => {
         });
     };
 
-    var injectVals = function() {
+    let injectVals = () => {
         angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q) => {
             $scope = $rootScope.$new();
             $rScope = $rootScope;
@@ -93,7 +93,7 @@ describe('Controller: jobResultsController', () => {
 
     beforeEach(angular.mock.module('Tower'));
 
-    var bootstrapTest = function() {
+    let bootstrapTest = () => {
         provideVals();
         injectVals();
     };
@@ -173,7 +173,7 @@ describe('Controller: jobResultsController', () => {
     });
 
     describe('extra vars stuff', () => {
-        var extraVars = "foo";
+        let extraVars = "foo";
 
         beforeEach(() => {
             jobData.extra_vars = extraVars;
@@ -196,7 +196,7 @@ describe('Controller: jobResultsController', () => {
         });
 
         it('should call ParseTypeChange with proper params', () => {
-            var params = {
+            let params = {
                 scope: $scope,
                 field_id: 'pre-formatted-variables',
                 readOnly: true
@@ -321,7 +321,7 @@ describe('Controller: jobResultsController', () => {
         });
     });
 
-    describe('event stuff', function() {
+    describe('event stuff', () => {
         beforeEach(() => {
             jobData.id = 1;
             jobData.related.job_events = "url";
@@ -334,13 +334,13 @@ describe('Controller: jobResultsController', () => {
         });
 
         it('should call processEvent when receiving message', () => {
-            var eventPayload = {"foo": "bar"};
+            let eventPayload = {"foo": "bar"};
             $rScope.$broadcast('ws-job_events-1', eventPayload);
             expect(eventQueue.populate).toHaveBeenCalledWith(eventPayload);
         });
 
         it('should set the job status on scope when receiving message', () => {
-            var eventPayload = {
+            let eventPayload = {
                 unified_job_id: 1,
                 status: 'finished'
             };
