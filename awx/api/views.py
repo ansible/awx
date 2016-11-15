@@ -2916,6 +2916,7 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     always_allow_superuser = False
     new_in_310 = True
 
+
 class WorkflowJobTemplateCopy(GenericAPIView):
 
     model = WorkflowJobTemplate
@@ -2999,7 +3000,7 @@ class WorkflowJobRelaunch(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         new_workflow_job = obj.create_relaunch_workflow_job()
-        result = new_workflow_job.signal_start()
+        new_workflow_job.signal_start()
 
         data = WorkflowJobSerializer(new_workflow_job, context=self.get_serializer_context()).data
         headers = {'Location': new_workflow_job.get_absolute_url()}

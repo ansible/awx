@@ -341,8 +341,6 @@ class BaseAccess(object):
             # Aliases for going form UI language to API language
             if display_method == 'edit':
                 method = 'change'
-            elif display_method == 'copy':
-                method = 'add'
             elif display_method == 'adhoc':
                 method = 'run_ad_hoc_commands'
             else:
@@ -368,7 +366,7 @@ class BaseAccess(object):
             access_method = getattr(self, "can_%s" % method)
             if method in ['change']: # 3 args
                 user_capabilities[display_method] = access_method(obj, data)
-            elif method in ['delete', 'run_ad_hoc_commands']:
+            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
                 user_capabilities[display_method] = access_method(obj)
             elif method in ['start']:
                 user_capabilities[display_method] = access_method(obj, validate_license=False)
