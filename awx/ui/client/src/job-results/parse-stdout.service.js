@@ -7,7 +7,6 @@
 export default [function(){
     var val = {
         prettify: function(line){
-            // TODO: figure out from Jared what this is
 
             if (line.indexOf("[K") > -1) {
                 console.log(line);
@@ -30,6 +29,17 @@ export default [function(){
             //end span
             line = line.replace(/\[0m/g, '</span>');
             return line;
+        },
+        getAnchorTags: function(event, line){
+            if(event.event.indexOf("runner_") === -1){
+                return line;
+            }
+            else{
+                var str = `<a ui-sref="jobDetail.host-event.details({eventId: ${event.parent}, taskId: ${event.id} })" aw-tool-tip="Event ID: ${event.id} <br> Status: ${event.event_display}. <br> Click for details" data-tip-watch="result.tip" data-placement="top">`,
+                str2 = '</a>';
+                return str.concat(line).concat(str2);
+            }
+
         },
         getCollapseClasses: function(event, line, lineNum) {
             var string = "";
@@ -104,7 +114,7 @@ export default [function(){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getCollapseClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn">${this.prettify(lineArr[1])}</div>
+    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))}</div>
 </div>`;
                 }).join("");
         }
