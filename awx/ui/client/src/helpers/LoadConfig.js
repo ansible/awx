@@ -25,58 +25,60 @@ angular.module('LoadConfigHelper', ['Utilities'])
 .factory('LoadConfig', ['$log', '$rootScope', '$http', '$location',
     'ProcessErrors', 'Store',
     function($log, $rootScope, $http, $location, ProcessErrors, Store) {
-    return function() {
+        return function() {
 
-        if ($rootScope.removeLoadConfig) {
-            $rootScope.removeLoadConfig();
-        }
-        $rootScope.removeLoadConfig = $rootScope.$on('LoadConfig', function() {
-            $rootScope.enteredPath = $location.path();
-            // Load js/local_settings.json
-            $http({ method:'GET', url: $basePath + 'local_settings.json' })
-                .then(function(response) {
-                    $log.info('loaded local_settings.json');
-                    if(angular.isObject(response.data)){
-                        global.$AnsibleConfig = _.extend($AnsibleConfig, response.data);
-                        Store('AnsibleConfig', global.$AnsibleConfig);
-                        if ($rootScope.loginConfig) {
-                            $rootScope.loginConfig.resolve('config loaded');
-                        }
-                        $rootScope.$emit('ConfigReady');
+            // These ettings used to be found in config.js, hardcoded now.
+            var configSettings = {
+                // custom_logo: true, // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard tower console logo
+                // custom_login_info: "example notice", // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
+                "tooltip_delay": {
+                    "show": 500,
+                    "hide": 100
+                },
+                "password_length": 8,
+                "password_hasLowercase": true,
+                "password_hasUppercase": false,
+                "password_hasNumber": true,
+                "password_hasSymbol": false,
+                "variable_edit_modes": {
+                    "yaml": {
+                        "mode": "text/x-yaml",
+                        "matchBrackets": true,
+                        "autoCloseBrackets": true,
+                        "styleActiveLine": true,
+                        "lineNumbers": true,
+                        "gutters": ["CodeMirror-lint-markers"],
+                        "lint": true
+                    },
+                    "json": {
+                        "mode": "application/json",
+                        "styleActiveLine": true,
+                        "matchBrackets": true,
+                        "autoCloseBrackets": true,
+                        "lineNumbers": true,
+                        "gutters": ["CodeMirror-lint-markers"],
+                        "lint": true
                     }
-                    else {
-                        $log.info('local_settings.json is not a valid object');
-                        if ($rootScope.loginConfig) {
-                            $rootScope.loginConfig.resolve('config loaded');
-                        }
-                        $rootScope.$emit('ConfigReady');
-                    }
+                },
+            };
 
-                }, function() {
-                    //local_settings.json not found
-                    $log.info('local_settings.json not found');
-                    if ($rootScope.loginConfig) {
-                        $rootScope.loginConfig.resolve('config loaded');
-                    }
-                    $rootScope.$emit('ConfigReady');
-                });
-        });
+            // Auto-resolving what used to be found when attempting to load local_setting.json
+            if ($rootScope.loginConfig) {
+                $rootScope.loginConfig.resolve('config loaded');
+            }
+            $rootScope.$emit('ConfigReady');
+
+            // Load new hardcoded settings from above
+            // TODO Add a check for a custom image to add to the settings.
+                // Update flag to true
+                // in loginModal.controller load the base64 src
+                // change partial to use base65 in the img src
+
+            global.$AnsibleConfig = configSettings;
+            Store('AnsibleConfig', global.$AnsibleConfig);
+            $rootScope.$emit('LoadConfig');
 
 
-        // load config.js
-        $log.info('attempting to load config.js');
-        $http({ method:'GET', url: $basePath + 'config.js' })
-            .then(function(response) {
-                $log.info('loaded config.js');
-                global.$AnsibleConfig = eval(response.data);
-                Store('AnsibleConfig', global.$AnsibleConfig);
-                $rootScope.$emit('LoadConfig');
-            })
-            .catch(function(response) {
-                response.data = 'Failed to load ' + $basePath + '/config.js';
-                ProcessErrors($rootScope, response, response.status, null, { hdr: 'Error!',
-                    msg: 'Failed to load ' + $basePath + '/config.js.'
-                });
-            });
-    };
-}]);
+        };
+    }
+]);
