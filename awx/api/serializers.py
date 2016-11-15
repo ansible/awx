@@ -1792,7 +1792,12 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
-        return {'count': obj.labels.count(), 'results': [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]}
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
+        if len(label_list) < 10:
+            label_ct = len(label_list)
+        else:
+            label_ct = obj.labels.count()
+        return {'count': label_ct, 'results': label_list}
 
     def get_summary_fields(self, obj):
         res = super(LabelsListMixin, self).get_summary_fields(obj)
