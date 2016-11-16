@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0049_v310_workflow_surveys'),
+        ('main', '0050_v310_JSONField_changes'),
     ]
 
     operations = [
