@@ -13,60 +13,139 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
         restrict: 'E',
         link: function(scope, element) {
 
+            // utility function used to find the top visible line and
+            // parent header in the pane
+            //
+            // note that while this function is called when in mobile width
+            // the line anchor is not displayed in the css so calls
+            // to lineAnchor do nothing
             var findTopLines = function() {
-                scope.visibleItems = "";
                 var $container = $('.JobResultsStdOut-stdoutContainer');
+
+                // get the first visible line's head element
+                var getHeadElement = function (line) {
+                    var lineHasHeaderClass = !!(line
+                        .hasClass("header_play") ||
+                            line.hasClass("header_task"));
+                    var lineClassList;
+                    var lineUUIDClass;
+
+                    if (lineHasHeaderClass) {
+                        // find head element when the first visible
+                        // line is a header
+
+                        lineClassList = line.attr("class")
+                            .split(" ");
+
+                        // get the header class w task uuid...
+                        lineUUIDClass = lineClassList
+                            .filter(n => n
+                                .indexOf("header_task_") > -1)[0];
+
+                        // ...if that doesn't exist get the one
+                        // w play uuid
+                        if (!lineUUIDClass) {
+                            lineUUIDClass = lineClassList
+                                .filter(n => n.
+                                    indexOf("header_play_") > -1)[0];
+                        }
+
+                        // get the header line (not their might
+                        // be more than one, so get the one with
+                        // the actual header class)
+                        //
+                        // TODO it might be better in this case to just
+                        // return `line` (less jumping with a cowsay
+                        // case)
+                        return $(".actual_header." +
+                            lineUUIDClass);
+                    } else {
+                        // find head element when the first visible
+                        // line is not a header
+
+                        lineClassList = line.attr("class")
+                            .split(" ");
+
+                        // get the class w task uuid...
+                        lineUUIDClass = lineClassList
+                            .filter(n => n
+                                .indexOf("task_") > -1)[0];
+
+                        // ...if that doesn't exist get the one
+                        // w play uuid
+                        if (!lineUUIDClass) {
+                            lineUUIDClass = lineClassList
+                                .filter(n => n
+                                    .indexOf("play_") > -1)[0];
+                        }
+
+                        // get the header line (not their might
+                        // be more than one, so get the one with
+                        // the actual header class)
+                        return $(".actual_header.header_" +
+                            lineUUIDClass);
+                    }
+                };
+
                 var visItem,
                     parentItem;
-                $container.find('.JobResultsStdOut-aLineOfStdOut').each( function () {
-                    var $this = $(this);
-                    if ( $this.position().top + $this.height() > $container.position().top &&
-                        $this.position().top < ($container.height() + $container.position().top) ) {
-                        visItem = parseInt($($this.children()[0]).text());
 
-                        var $head,
-                            classList,
-                            header;
-                        if ($this.hasClass("header_play") || $this.hasClass("header_task")) {
-                            classList = $this.attr("class")
-                                .split(" ");
-                            header = classList
-                                .filter(n => n.indexOf("header_task_") > -1)[0];
-                            if (!header) {
-                                header = classList
-                                    .filter(n => n.indexOf("header_play_") > -1)[0];
-                            }
-                            $head = $(".actual_header." + header);
-                        } else {
-                            classList = $this.attr("class")
-                                .split(" ");
-                            header = classList
-                                .filter(n => n.indexOf("task_") > -1)[0];
-                            if (!header) {
-                                header = classList
-                                    .filter(n => n.indexOf("play_") > -1)[0];
-                            }
+                var containerHeight = $container.height();
+                var containerTop = $container.position().top;
+                var containerNetHeight = containerHeight + containerTop;
 
-                            $head = $(".actual_header.header_" + header);
-                        }
-                        parentItem = parseInt($($head.children()[0]).text());
-                        return false;
+                // iterate through each line of standard out
+                $container.find('.JobResultsStdOut-aLineOfStdOut')
+                    .each( function () {
+                        var $this = $(this);
+
+                        var lineHeight = $this.height();
+                        var lineTop = $this.position().top;
+                        var lineNetHeight = lineHeight + lineTop;
+
+                        // check to see if the line is the first visible
+                        // line in the viewport...
+                        if (lineNetHeight > containerTop &&
+                            lineTop < containerNetHeight) {
+
+                            // ...if it is, return the line number
+                            // for this line
+                            visItem = parseInt($($this
+                                .children()[0])
+                                .text());
+
+                            // as well as the line number for it's
+                            // closest parent header line
+                            var $head = getHeadElement($this);
+                            parentItem = parseInt($($head
+                                .children()[0])
+                                .text());
+
+                            // stop iterating over the standard out
+                            // lines once the first one has been
+                            // found
+                            return false;
                     }
                 });
-                scope.visLine = visItem;
-                scope.parentVisLine = parentItem;
+
+                return {
+                    visLine: visItem,
+                    parentVisLine: parentItem
+                };
             };
 
-            // find when window changes from mobile to desktop width
-            if (window.innerWidth < 1200) {
+            // find if window is initially mobile or desktop width
+            if (window.innerWidth <= 1200) {
                 scope.isMobile = true;
             } else {
                 scope.isMobile = false;
             }
-            $( window ).resize(function() {
-                if (window.innerWidth < 1200 && !scope.isMobile) {
+            // watch changes to the window size
+            $(window).resize(function() {
+                // and update the isMobile var accordingly
+                if (window.innerWidth <= 1200 && !scope.isMobile) {
                     scope.isMobile = true;
-                } else if (window.innerWidth >= 1200 & scope.isMobile) {
+                } else if (window.innerWidth > 1200 & scope.isMobile) {
                     scope.isMobile = false;
                 }
             });
@@ -75,55 +154,71 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
 
             var initScrollTop = function() {
                 lastScrollTop = 0;
-            }
+            };
             var scrollWatcher = function() {
-                var st = $(this).scrollTop(),
-                    fullHeight;
+                var st = $(this).scrollTop();
+                var netScroll = st + $(this).innerHeight();
+                var fullHeight;
+
                 if (st < lastScrollTop){
                     // user up scrolled, so disengage follow
                     scope.followEngaged = false;
                 }
 
                 if (scope.isMobile) {
+                    // for mobile the height is the body of the entire
+                    // page
                     fullHeight = $("body").height();
                 } else {
+                    // for desktop the height is the body of the
+                    // stdoutContainer, minus the "^ TOP" indicator
                     fullHeight = $(this)[0].scrollHeight - 25;
                 }
 
-                if($(this).scrollTop() + $(this).innerHeight() >=
-                    fullHeight) {
+                if(netScroll >= fullHeight) {
                     // user scrolled all the way to bottom, so engage
                     // follow
                     scope.followEngaged = true;
                 }
 
-                // pane is now overflowed, show top indicator
-                if (st > 0 && !scope.isMobile) {
+                // pane is now overflowed, show top indicator.
+                if (st > 0) {
                     scope.stdoutOverflowed = true;
                 }
 
                 lastScrollTop = st;
-            }
+            };
 
+            // update scroll watchers when isMobile changes based on
+            // window resize
             scope.$watch('isMobile', function(val) {
                 if (val === true) {
-                    // make sure ^ TOP always shown
+                    // make sure ^ TOP always shown for mobile
                     scope.stdoutOverflowed = true;
 
-                    initScrollTop();
+                    // unbind scroll watcher on standard out container
                     $(".JobResultsStdOut-stdoutContainer")
                         .unbind('scroll');
+
+                    // init scroll watcher on window
+                    initScrollTop();
                     $(window).on('scroll', scrollWatcher);
 
                 } else if (val === false) {
-                    initScrollTop();
+                    // unbind scroll watcher on window
                     $(window).unbind('scroll');
+
+                    // init scroll watcher on standard out container
+                    initScrollTop();
                     $(".JobResultsStdOut-stdoutContainer").on('scroll',
                         scrollWatcher);
                 }
             });
 
+            // called to scroll to follow anchor
             scope.followScroll = function() {
+                // a double-check to make sure the follow anchor is at
+                // the bottom of the standard out container
                 $(".JobResultsStdOut-followAnchor")
                     .appendTo(".JobResultsStdOut-stdoutContainer");
 
@@ -131,11 +226,19 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 $anchorScroll();
             };
 
+            // called to scroll to top of standard out (when "^ TOP" is
+            // clicked)
             scope.toTop = function() {
                 $location.hash('topAnchor');
                 $anchorScroll();
             };
 
+            // called to scroll to the current line anchor
+            // when expand all/collapse all/filtering is engaged
+            //
+            // note that while this function can be called when in mobile
+            // width the line anchor is not displayed in the css so those
+            // calls do nothing
             scope.lineAnchor = function() {
                 $location.hash('lineAnchor');
                 $anchorScroll();
@@ -144,10 +247,12 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
             // if following becomes active, go ahead and get to the bottom
             // of the standard out pane
             scope.$watch('followEngaged', function(val) {
+                // scroll to follow point if followEngaged is true
                 if (val) {
                     scope.followScroll();
                 }
 
+                // set up tooltip changes for not finsihed job
                 if (!scope.jobFinished) {
                     if (val) {
                         scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
@@ -157,73 +262,121 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 }
             });
 
+            // follow button ng-click function
             scope.followToggleClicked = function() {
                 if (scope.jobFinished) {
+                    // when the job is finished engage followScroll
                     scope.followScroll();
                 } else {
+                    // when the job is not finished toggle followEngaged
+                    // which is watched above
                     scope.followEngaged = !scope.followEngaged;
                 }
             };
 
+            // expand all/collapse all ng-click function
             scope.toggleAllStdout = function(type) {
-                findTopLines();
+                // find the top visible line in the container currently,
+                // as well as the header parent of that line
+                var topLines = findTopLines();
 
                 if (type === 'expand') {
-                    $(".line_num_" + scope.visLine)
+                    // for expand prepend the lineAnchor to the visible
+                    // line
+                    $(".line_num_" + topLines.visLine)
                         .prepend($("#lineAnchor"));
                 } else {
-                    $(".line_num_" + scope.parentVisLine)
+                    // for collapse prepent the lineAnchor to the
+                    // visible line's parent header
+                    $(".line_num_" + topLines.parentVisLine)
                         .prepend($("#lineAnchor"));
                 }
 
                 var expandClass;
                 if (type === 'expand') {
+                    // for expand all, you'll need to find all the
+                    // collapsed headers to expand them
                     expandClass = "fa-caret-right";
                 } else {
+                    // for collapse all, you'll need to find all the
+                    // expanded headers to collapse them
                     expandClass = "fa-caret-down";
                 }
 
+                // find all applicable task headers that need to be
+                // toggled
                 element.find(".expanderizer--task."+expandClass)
                     .each((i, val) => {
+                        // and trigger their expansion/collapsing
                         $timeout(function(){
+                            // TODO change to a direct call of the
+                            // toggleLine function
                             angular.element(val).trigger('click');
+                            // TODO only call lineAnchor for those
+                            // that are above the first visible line
                             scope.lineAnchor();
                         });
                     });
 
+                // find all applicable play headers that need to be
+                // toggled
                 element.find(".expanderizer--play."+expandClass)
                     .each((i, val) => {
+                        // for collapse all, only collapse play
+                        // headers that do not have children task
+                        // headers
                         if(angular.element("." +
                             angular.element(val).attr("data-uuid"))
                                 .find(".expanderizer--task")
                                     .length === 0 ||
                                         type !== 'collapse') {
 
+                                // trigger their expansion/
+                                // collapsing
                                 $timeout(function(){
+                                    // TODO change to a direct
+                                    // call of the
+                                    // toggleLine function
                                     angular.element(val)
                                         .trigger('click');
+                                    // TODO only call lineAnchor
+                                    // for those that are above
+                                    // the first visible line
                                     scope.lineAnchor();
                                 });
                         }
                     });
             };
 
+            // expand/collapse triangle ng-click function
             scope.toggleLine = function($event, id) {
+                // if the section is currently expanded
                 if ($($event.currentTarget).hasClass("fa-caret-down")) {
+                    // hide all the children lines
                     $(id).hide();
+
+                    // and change the triangle for the header to collapse
                     $($event.currentTarget)
                         .removeClass("fa-caret-down");
                     $($event.currentTarget)
                         .addClass("fa-caret-right");
                 } else {
+                    // if the section is currently collapsed
+
+                    // show all the children lines
                     $(id).show();
+
+                    // and change the triangle for the header to expanded
                     $($event.currentTarget)
                         .removeClass("fa-caret-right");
                     $($event.currentTarget)
                         .addClass("fa-caret-down");
 
+                    // if the section you expanded is a play
                     if ($($event.currentTarget)
                         .hasClass("expanderizer--play")) {
+                            // find all children task headers and
+                            // expand them too
                             $("." + $($event.currentTarget)
                                 .attr("data-uuid"))
                                 .find(".expanderizer--task")
@@ -231,6 +384,9 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                                     if ($(val)
                                         .hasClass("fa-caret-right")) {
                                     $timeout(function(){
+                                        // TODO change to a
+                                        // direct call of the
+                                        // toggleLine function
                                         angular.element(val)
                                             .trigger('click');
                                     });

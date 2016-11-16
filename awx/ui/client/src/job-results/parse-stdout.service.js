@@ -82,14 +82,21 @@ export default ['$log', function($log){
                 // play header classes
                 string += " header_play";
                 string += " header_play_" + event.event_data.play_uuid;
-                if (line) {
+
+                // give the actual header class to the line with the
+                // actual header info (think cowsay)
+                if (line.indexOf("PLAY") > -1) {
                     string += " actual_header";
                 }
             } else if (event.event_name === "playbook_on_task_start") {
                 // task header classes
                 string += " header_task";
                 string += " header_task_" + event.event_data.task_uuid;
-                if (line) {
+
+                // give the actual header class to the line with the
+                // actual header info (think cowsay)
+                if (line.indexOf("TASK") > -1 ||
+                    line.indexOf("RUNNING HANDLER") > -1) {
                     string += " actual_header";
                 }
 
