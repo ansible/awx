@@ -11,7 +11,7 @@ var hostEventModal = {
     url: '/task/:taskId/host-event/:eventId',
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-modal'),
-    'abstract': true,
+    'abstract': false,
     resolve: {
         hostEvent: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
             return JobDetailService.getRelatedJobEvents($stateParams.id, {
@@ -31,13 +31,6 @@ var hostEventModal = {
         $('.modal-backdrop').remove();
         $('body').removeClass('modal-open');
     }
-};
-
-var hostEventDetails = {
-    name: 'jobDetail.host-event.details',
-    url: '/details',
-    controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-details'),
 };
 
 var hostEventJson = {
@@ -62,4 +55,4 @@ var hostEventStderr = {
 };
 
 
-export { hostEventDetails, hostEventJson, hostEventModal, hostEventStdout, hostEventStderr };
+export { hostEventJson, hostEventModal, hostEventStdout, hostEventStderr };

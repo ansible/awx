@@ -6,8 +6,8 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent', 'hostResults',
-    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent, hostResults){
+    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent', 'hostResults', 'parseStdoutService',
+    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent, hostResults, parseStdoutService){
 
         $scope.processEventStatus = JobDetailService.processEventStatus;
         $scope.hostResults = [];
@@ -29,7 +29,7 @@
                 lineNumbers: true,
                 mode: mode
             });
-            editor.setSize("100%", 300);
+            editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
         };
         /*ignore jslint end*/
@@ -44,26 +44,6 @@
             return $scope.hostResults.indexOf(result[0]);
         };
 
-        $scope.showPrev = function(){
-            return $scope.getActiveHostIndex() !== 0;
-        };
-
-        $scope.showNext = function(){
-            return $scope.getActiveHostIndex() < $scope.hostResults.indexOf($scope.hostResults[$scope.hostResults.length - 1]);
-        };
-
-        $scope.goNext = function(){
-            var index = $scope.getActiveHostIndex() + 1;
-            var id = $scope.hostResults[index].id;
-            $state.go('jobDetail.host-event.details', {eventId: id});
-        };
-
-        $scope.goPrev = function(){
-            var index = $scope.getActiveHostIndex() - 1;
-            var id = $scope.hostResults[index].id;
-            $state.go('jobDetail.host-event.details', {eventId: id});
-        };
-
         var init = function(){
             $scope.event = _.cloneDeep(hostEvent);
             $scope.hostResults = hostResults;
@@ -71,7 +51,7 @@
 
             // grab standard out & standard error if present, and remove from the results displayed in the details panel
             if (hostEvent.stdout){
-                $scope.stdout = hostEvent.stdout;
+                $scope.stdout = parseStdoutService.prettifyLite(hostEvent.stdout);
                 delete $scope.event.stdout;
             }
             if (hostEvent.stderr){

@@ -33,13 +33,44 @@ export default ['$log', function($log){
             line = line.replace(/\[0m/g, '</span>');
             return line;
         },
+        prettifyLite: function(line){
+            // this function will return a line of stdout without the <span>
+            // tags styling the output. This isn't needed in the case
+            // of the host event modal where stdout is displayed in a CodeMirror
+
+
+            // TODO: remove once Chris's fixes to the [K lines comes in
+            if (line.indexOf("[K") > -1) {
+                $log.error(line);
+            }
+
+            line = line.replace(/u001b/g, '');
+
+            // ansi classes
+            line = line.replace(/\[1;31m/g, '');
+            line = line.replace(/\[0;31m/g, '');
+            line = line.replace(/\[0;32m/g, '');
+            line = line.replace(/\[0;32m=/g, '');
+            line = line.replace(/\[0;32m1/g, '');
+            line = line.replace(/\[0;33m/g, '');
+            line = line.replace(/\[0;34m/g, '');
+            line = line.replace(/\[0;35m/g, '');
+            line = line.replace(/\[0;36m/g, '');
+            line = line.replace(/(<host.*?>)\s/g, '$1');
+
+            //end span
+            line = line.replace(/\[0m/g, '');
+            //TODO: figure out how to get rid of the hidden characters that
+            // show up in the codmirror as red dots
+            return line;
+        },
         // adds anchor tags and tooltips to host status lines
         getAnchorTags: function(event, line){
             if(event.event.indexOf("runner_") === -1){
                 return line;
             }
             else{
-                return `<a ui-sref="jobDetail.host-event.details({eventId: ${event.parent}, taskId: ${event.id} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display}. <br>Click for details" data-tip-watch="result.tip" data-placement="top">${line}</a>`;
+                return `<a ui-sref="jobDetail.host-event.json({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top">${line}</a>`;
             }
 
         },
@@ -126,7 +157,7 @@ export default ['$log', function($log){
         data-uuid="${clickClass}">
     </i>
 </span>`;
-                console.log(expandDom);
+                // console.log(expandDom);
                 return expandDom;
             } else {
                 // non-header lines don't get an expander
