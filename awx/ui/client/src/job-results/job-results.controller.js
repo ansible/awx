@@ -178,6 +178,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                     // get the name in the same format as the data
                     // coming over the websocket
                     event.event_name = event.event;
+                    delete event.event;
                     processEvent(event);
                 });
                 if (events.next) {

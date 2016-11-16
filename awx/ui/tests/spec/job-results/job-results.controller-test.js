@@ -4,7 +4,7 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventDefer, populateResolve, $rScope;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q;
 
     jobData = {
         related: {}
@@ -20,7 +20,9 @@ describe('Controller: jobResultsController', () => {
         val: {},
         countFinished: false
     };
-    eventDefer = {};
+    eventResolve = {
+        results: []
+    };
     populateResolve = {};
 
     let provideVals = () => {
@@ -53,9 +55,22 @@ describe('Controller: jobResultsController', () => {
     };
 
     let injectVals = () => {
-        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q) => {
+        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend) => {
+            // when you call $scope.$apply() (which you need to do to
+            // to get inside of .then blocks to test), something is
+            // causing a request for all static files.
+            //
+            // this is a hack to just pass those requests through
+            //
+            // from googling this is probably due to angular-router
+            // weirdness
+            $httpBackend.when("GET", (url) => (url
+                .indexOf("/static/") !== -1))
+                .respond('');
+
             $scope = $rootScope.$new();
             $rScope = $rootScope;
+            q = $q;
             jobData = _jobData_;
             jobDataOptions = _jobDataOptions_;
             jobLabels = _jobLabels_;
@@ -65,14 +80,12 @@ describe('Controller: jobResultsController', () => {
             ParseVariableString = _ParseVariableString_;
             ParseVariableString.and.returnValue(jobData.extra_vars);
             jobResultsService = _jobResultsService_;
-
-            // TODO: neither one of these and.returnValue's work as
-            // expected, gotta figure out how to make these work
-            eventDefer = $q.defer();
-            jobResultsService.getEvents.and.returnValue($q.when(eventDefer));
-
             eventQueue = _eventQueue_;
-            eventQueue.populate.and.returnValue($q.when(populateResolve));
+
+            jobResultsService.getEvents.and
+                .returnValue($q.when(eventResolve));
+            eventQueue.populate.and
+                .returnValue($q.when(populateResolve));
 
             $compile = _$compile_;
 
@@ -347,9 +360,130 @@ describe('Controller: jobResultsController', () => {
             $rScope.$broadcast('ws-jobs', eventPayload);
             expect($scope.job.status).toBe(eventPayload.status);
         });
+    });
 
-        // TODO: test getEvents function
+    describe('getEvents and populate stuff', () => {
+        describe('getEvents', () => {
+            let event1 = {
+                event: 'foo'
+            };
 
-        // TODO: test processEvent function
+            let event2 = {
+                event_name: 'bar'
+            };
+
+            let event1Processed = {
+                event_name: 'foo'
+            };
+
+            beforeEach(() => {
+                eventResolve = {
+                    results: [
+                        event1,
+                        event2
+                    ]
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('should change the event name to event_name', () => {
+                expect(eventQueue.populate)
+                    .toHaveBeenCalledWith(event1Processed);
+            });
+
+            it('should pass through the event with event_name', () => {
+                expect(eventQueue.populate)
+                    .toHaveBeenCalledWith(event2);
+            });
+
+            it('should have called populate twice', () => {
+                expect(eventQueue.populate.calls.count()).toEqual(2);
+            });
+
+            // TODO: can't figure out how to a test of events.next...
+            // if you set events.next to true it causes the tests to
+            // stop running
+        });
+
+        describe('populate - start time', () => {
+            beforeEach(() => {
+                jobData.start = "";
+
+                populateResolve = {
+                    startTime: 'foo',
+                    changes: ['startTime']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('sets start time when passed as a change', () => {
+                expect($scope.job.start).toBe('foo');
+            });
+        });
+
+        describe('populate - start time already set', () => {
+            beforeEach(() => {
+                jobData.start = "bar";
+
+                populateResolve = {
+                    startTime: 'foo',
+                    changes: ['startTime']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('does not set start time because already set', () => {
+                expect($scope.job.start).toBe('bar');
+            });
+        });
+
+        describe('populate - count already received', () => {
+            let receiveCount = {
+                ok: 2,
+                skipped: 2,
+                unreachable: 2,
+                failures: 2,
+                changed: 2
+            };
+
+            let alreadyCount = {
+                ok: 3,
+                skipped: 3,
+                unreachable: 3,
+                failures: 3,
+                changed: 3
+            };
+
+            beforeEach(() => {
+                count.countFinished = true;
+                count.val = alreadyCount;
+
+                populateResolve = {
+                    count: receiveCount,
+                    changes: ['count']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('count does not change', () => {
+                expect($scope.count).toBe(alreadyCount);
+                expect($scope.hostCount).toBe(15);
+            });
+        });
+
+        // TODO: playCount, taskCount, finishedTime, countFinished, and
+        // stdout change tests
     });
 });
