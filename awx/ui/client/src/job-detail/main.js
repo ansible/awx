@@ -18,7 +18,7 @@ export default
     	hostSummary.name
     	])
         .controller('JobDetailController', controller)
-        .service('JobDetailService', service)
+        .service('JobDetailService', service);
         // .run(['$stateExtender', function($stateExtender) {
         //     $stateExtender.addState(route);
         // }]);
