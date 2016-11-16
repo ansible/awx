@@ -53,7 +53,8 @@ The new task manager should, basically, work like the old one. Old task manager 
 
 ### Task Manager Rules
 * Groups of blocked tasks run in chronological order
-* Tasks that are not blocked run whenever there is capacity available
+* Tasks that are not blocked run whenever there is capacity available***
+ * ***1 job is always allowed to run, even if there isn't enough capacity.
 * Only 1 Project Updates for a Project may be running
 * Only 1 Inventory Update for an Inventory Source may be running
 * For a related Project, only a Job xor Project Update may be running
