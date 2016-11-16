@@ -18,6 +18,7 @@ from awx.main.socket_queue import Socket
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
 
+
 class FactCacheReceiver(object):
     def __init__(self):
         self.timestamp = None
@@ -90,6 +91,7 @@ class FactCacheReceiver(object):
                     wt.start()
                 else:
                     self.process_fact_message(message)
+
 
 class Command(NoArgsCommand):
     '''

@@ -17,6 +17,7 @@ from awx.main.tests.job_base import BaseJobTestMixin
 
 __all__ = ['JobStartCancelTest',]
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobStartCancelTest(BaseJobTestMixin, BaseLiveServerTest):
 

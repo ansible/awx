@@ -11,17 +11,18 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.conf.models import Setting
 
-'''
-Ensures that tests don't pick up dev container license file
-'''
+
 @pytest.fixture
 def mock_no_license_file(mocker):
+    '''
+    Ensures that tests don't pick up dev container license file
+    '''
     os.environ['AWX_LICENSE_FILE'] = '/does_not_exist'
     return None
 
+
 @pytest.mark.django_db
 def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get, put, patch, delete, admin, enterprise_license):
-
     url = reverse('api:setting_singleton_detail', args=('system',))
     response = get(url, user=admin, expect=200)
     assert not response.data['LICENSE']

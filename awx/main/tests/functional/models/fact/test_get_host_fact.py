@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from awx.main.models import Fact
 
+
 @pytest.mark.django_db
 def test_newest_scan_exact(hosts, fact_scans):
     epoch = timezone.now()
@@ -20,18 +21,19 @@ def test_newest_scan_exact(hosts, fact_scans):
 
     assert fact_found == fact_known
 
-'''
-Show me the most recent state of the sytem at any point of time.
-or, said differently
-For any timestamp, get the first scan that is <= the timestamp.
-'''
 
-'''
-Ensure most recent scan run is the scan returned.
-Query by future date.
-'''
 @pytest.mark.django_db
 def test_newest_scan_less_than(hosts, fact_scans):
+    '''
+    Show me the most recent state of the sytem at any point of time.
+    or, said differently
+    For any timestamp, get the first scan that is <= the timestamp.
+    '''
+
+    '''
+    Ensure most recent scan run is the scan returned.
+    Query by future date.
+    '''
     epoch = timezone.now()
     timestamp_future = epoch + timedelta(days=10)
     hosts = hosts(host_count=2)
@@ -48,11 +50,12 @@ def test_newest_scan_less_than(hosts, fact_scans):
 
     assert fact_found == fact_known
 
-'''
-Tests query Fact that is in the middle of the fact scan timeline, but not an exact timestamp.
-'''
+
 @pytest.mark.django_db
 def test_query_middle_of_timeline(hosts, fact_scans):
+    '''
+    Tests query Fact that is in the middle of the fact scan timeline, but not an exact timestamp.
+    '''
     epoch = timezone.now()
     timestamp_middle = epoch + timedelta(days=1, hours=3)
     hosts = hosts(host_count=2)
@@ -69,11 +72,12 @@ def test_query_middle_of_timeline(hosts, fact_scans):
 
     assert fact_found == fact_known
 
-'''
-Query time less than any fact scan. Should return None
-'''
+
 @pytest.mark.django_db
 def test_query_result_empty(hosts, fact_scans):
+    '''
+    Query time less than any fact scan. Should return None
+    '''
     epoch = timezone.now()
     timestamp_less = epoch - timedelta(days=1)
     hosts = hosts(host_count=2)
@@ -83,11 +87,12 @@ def test_query_result_empty(hosts, fact_scans):
 
     assert fact_found is None
 
-'''
-Query by fact module other than 'ansible'
-'''
+
 @pytest.mark.django_db
 def test_by_module(hosts, fact_scans):
+    '''
+    Query by fact module other than 'ansible'
+    '''
     epoch = timezone.now()
     hosts = hosts(host_count=2)
     facts = fact_scans(fact_scans=3, timestamp_epoch=epoch)
@@ -108,4 +113,3 @@ def test_by_module(hosts, fact_scans):
 
     assert fact_found_services == fact_known_services
     assert fact_found_packages == fact_known_packages
-

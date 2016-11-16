@@ -11,14 +11,12 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.timezone import now, make_aware, get_default_timezone
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.utils import ignore_inventory_computed_fields
 from awx.main.consumers import emit_channel_notification
 from django.core.urlresolvers import reverse
+from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.schedule')
 

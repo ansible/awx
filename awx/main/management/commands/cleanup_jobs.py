@@ -14,6 +14,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob
 
+
 class Command(NoArgsCommand):
     '''
     Management command to cleanup old jobs and project updates.

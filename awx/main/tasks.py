@@ -69,6 +69,7 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 
 logger = logging.getLogger('awx.main.tasks')
 
+
 @celeryd_init.connect
 def celery_startup(conf=None, **kwargs):
     # Re-init all schedules
@@ -80,6 +81,7 @@ def celery_startup(conf=None, **kwargs):
             sch.save()
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
+
 
 @task(queue='default')
 def send_notifications(notification_list, job_id=None):
@@ -102,6 +104,7 @@ def send_notifications(notification_list, job_id=None):
         if job_id is not None:
             job_actual.notifications.add(notification)
 
+
 @task(bind=True, queue='default')
 def run_administrative_checks(self):
     if not settings.TOWER_ADMIN_ALERTS:
@@ -122,9 +125,11 @@ def run_administrative_checks(self):
                   tower_admin_emails,
                   fail_silently=True)
 
+
 @task(bind=True, queue='default')
 def cleanup_authtokens(self):
     AuthToken.objects.filter(expires__lt=now()).delete()
+
 
 @task(bind=True)
 def cluster_node_heartbeat(self):
@@ -135,6 +140,7 @@ def cluster_node_heartbeat(self):
         inst.save()
         return
     raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+
 
 @task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
@@ -165,6 +171,7 @@ def tower_periodic_scheduler(self):
         emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
     state.save()
 
+
 def _send_notification_templates(instance, status_str):
     if status_str not in ['succeeded', 'failed']:
         raise ValueError(_("status_str must be either succeeded or failed"))
@@ -191,6 +198,7 @@ def handle_work_success(self, result, task_actual):
 
     from awx.main.scheduler.tasks import run_job_complete
     run_job_complete.delay(instance.id)
+
 
 @task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
@@ -230,6 +238,7 @@ def handle_work_error(self, task_id, subtasks=None):
         from awx.main.scheduler.tasks import run_job_complete
         run_job_complete.delay(first_instance.id)
         pass
+
 
 @task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
@@ -1222,6 +1231,7 @@ class RunProjectUpdate(BaseTask):
             else:
                 logger.error("Could not find scm revision in check")
 
+
 class RunInventoryUpdate(BaseTask):
 
     name = 'awx.main.tasks.run_inventory_update'
@@ -1555,6 +1565,7 @@ class RunInventoryUpdate(BaseTask):
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
 
 class RunAdHocCommand(BaseTask):
     '''

@@ -19,8 +19,8 @@ from rest_framework.test import (
     force_authenticate,
 )
 
-class TestCustomInventoryScriptSerializer(object):
 
+class TestCustomInventoryScriptSerializer(object):
     @pytest.mark.parametrize("superuser,sysaudit,admin_role,value",
                              ((True, False, False, '#!/python'),
                               (False, True, False, '#!/python'),
@@ -28,12 +28,12 @@ class TestCustomInventoryScriptSerializer(object):
                               (False, False, False, None)))
     def test_to_representation_orphan(self, superuser, sysaudit, admin_role, value):
         with mock.patch.object(CustomInventoryScriptSerializer, 'get_summary_fields', return_value={}):
-                User.add_to_class('is_system_auditor', sysaudit)
+            with mock.patch.object(User, 'is_system_auditor', return_value=sysaudit):
                 user = User(username="root", is_superuser=superuser)
                 roles = [user] if admin_role else []
 
                 with mock.patch('awx.main.models.CustomInventoryScript.admin_role', new_callable=PropertyMock, return_value=roles):
-                    cis = CustomInventoryScript(pk=1, script='#!/python')
+                    cis = CustomInventoryScript(pk=1, script=value)
                     serializer = CustomInventoryScriptSerializer()
 
                     factory = APIRequestFactory()

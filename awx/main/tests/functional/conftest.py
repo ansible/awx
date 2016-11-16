@@ -43,23 +43,26 @@ from awx.main.models.notifications import (
     Notification
 )
 
-'''
-Disable all django model signals.
-'''
+
 @pytest.fixture(scope="session", autouse=False)
 def disable_signals():
+    '''
+    Disable all django model signals.
+    '''
     mocked = mock.patch('django.dispatch.Signal.send', autospec=True)
     mocked.start()
 
-'''
-FIXME: Not sure how "far" just setting the BROKER_URL will get us.
-We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)
 
-Allows django signal code to execute without the need for redis
-'''
 @pytest.fixture(scope="session", autouse=True)
 def celery_memory_broker():
+    '''
+    FIXME: Not sure how "far" just setting the BROKER_URL will get us.
+    We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)
+
+    Allows django signal code to execute without the need for redis
+    '''
     settings.BROKER_URL='memory://localhost/'
+
 
 @pytest.fixture
 def user():
@@ -72,6 +75,7 @@ def user():
         return user
     return u
 
+
 @pytest.fixture
 def check_jobtemplate(project, inventory, credential):
     return \
@@ -82,6 +86,7 @@ def check_jobtemplate(project, inventory, credential):
             credential=credential,
             name='check-job-template'
         )
+
 
 @pytest.fixture
 def deploy_jobtemplate(project, inventory, credential):
@@ -94,9 +99,11 @@ def deploy_jobtemplate(project, inventory, credential):
             name='deploy-job-template'
         )
 
+
 @pytest.fixture
 def team(organization):
     return organization.teams.create(name='test-team')
+
 
 @pytest.fixture
 def team_member(user, team):
@@ -115,6 +122,7 @@ def project(instance, organization):
                                  )
     return prj
 
+
 @pytest.fixture
 def project_factory(organization):
     def factory(name):
@@ -128,11 +136,13 @@ def project_factory(organization):
         return prj
     return factory
 
+
 @pytest.fixture
 def job_factory(job_template, admin):
     def factory(job_template=job_template, initial_state='new', created_by=admin):
         return job_template.create_job(created_by=created_by, status=initial_state)
     return factory
+
 
 @pytest.fixture
 def team_factory(organization):
@@ -146,34 +156,42 @@ def team_factory(organization):
         return t
     return factory
 
+
 @pytest.fixture
 def user_project(user):
     owner = user('owner')
     return Project.objects.create(name="test-user-project", created_by=owner, description="test-user-project-desc")
 
+
 @pytest.fixture
 def instance(settings):
     return Instance.objects.create(uuid=settings.SYSTEM_UUID, hostname="instance.example.org", capacity=100)
+
 
 @pytest.fixture
 def organization(instance):
     return Organization.objects.create(name="test-org", description="test-org-desc")
 
+
 @pytest.fixture
 def credential():
     return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret')
+
 
 @pytest.fixture
 def machine_credential():
     return Credential.objects.create(name='machine-cred', kind='ssh', username='test_user', password='pas4word')
 
+
 @pytest.fixture
 def org_credential(organization):
     return Credential.objects.create(kind='aws', name='test-cred', username='something', password='secret', organization=organization)
 
+
 @pytest.fixture
 def inventory(organization):
     return organization.inventories.create(name="test-inv")
+
 
 @pytest.fixture
 def inventory_factory(organization):
@@ -185,9 +203,11 @@ def inventory_factory(organization):
         return inv
     return factory
 
+
 @pytest.fixture
 def label(organization):
     return organization.labels.create(name="test-label", description="test-label-desc")
+
 
 @pytest.fixture
 def notification_template(organization):
@@ -196,6 +216,7 @@ def notification_template(organization):
                                                notification_type="webhook",
                                                notification_configuration=dict(url="http://localhost",
                                                                                headers={"Test": "Header"}))
+
 
 @pytest.fixture
 def notification(notification_template):
@@ -206,26 +227,32 @@ def notification(notification_template):
                                        recipients='admin@redhat.com',
                                        subject='email subject')
 
+
 @pytest.fixture
 def job_template_with_survey_passwords(job_template_with_survey_passwords_factory):
     return job_template_with_survey_passwords_factory(persisted=True)
+
 
 @pytest.fixture
 def admin(user):
     return user('admin', True)
 
+
 @pytest.fixture
 def alice(user):
     return user('alice', False)
+
 
 @pytest.fixture
 def bob(user):
     return user('bob', False)
 
+
 @pytest.fixture
 def rando(user):
     "Rando, the random user that doesn't have access to anything"
     return user('rando', False)
+
 
 @pytest.fixture
 def org_admin(user, organization):
@@ -234,6 +261,7 @@ def org_admin(user, organization):
     organization.member_role.members.add(ret)
     return ret
 
+
 @pytest.fixture
 def org_auditor(user, organization):
     ret = user('org-auditor', False)
@@ -241,11 +269,13 @@ def org_auditor(user, organization):
     organization.member_role.members.add(ret)
     return ret
 
+
 @pytest.fixture
 def org_member(user, organization):
     ret = user('org-member', False)
     organization.member_role.members.add(ret)
     return ret
+
 
 @pytest.fixture
 def organizations(instance):
@@ -257,6 +287,7 @@ def organizations(instance):
         return orgs
     return rf
 
+
 @pytest.fixture
 def group_factory(inventory):
     def g(name):
@@ -265,6 +296,7 @@ def group_factory(inventory):
         except:
             return Group.objects.create(inventory=inventory, name=name)
     return g
+
 
 @pytest.fixture
 def hosts(group_factory):
@@ -281,22 +313,27 @@ def hosts(group_factory):
         return hosts
     return rf
 
+
 @pytest.fixture
 def group(inventory):
     return inventory.groups.create(name='single-group')
+
 
 @pytest.fixture
 def inventory_source(group, inventory):
     return InventorySource.objects.create(name=group.name, group=group,
                                           inventory=inventory, source='gce')
 
+
 @pytest.fixture
 def inventory_update(inventory_source):
     return InventoryUpdate.objects.create(inventory_source=inventory_source)
 
+
 @pytest.fixture
 def host(group, inventory):
     return group.hosts.create(name='single-host', inventory=inventory)
+
 
 @pytest.fixture
 def permissions():
@@ -339,34 +376,40 @@ def _request(verb):
         return response
     return rf
 
+
 @pytest.fixture
 def post():
     return _request('post')
+
 
 @pytest.fixture
 def get():
     return _request('get')
 
+
 @pytest.fixture
 def put():
     return _request('put')
+
 
 @pytest.fixture
 def patch():
     return _request('patch')
 
+
 @pytest.fixture
 def delete():
     return _request('delete')
+
 
 @pytest.fixture
 def head():
     return _request('head')
 
+
 @pytest.fixture
 def options():
     return _request('options')
-
 
 
 @pytest.fixture
@@ -391,26 +434,32 @@ def fact_scans(group_factory, fact_ansible_json, fact_packages_json, fact_servic
         return facts
     return rf
 
+
 def _fact_json(module_name):
     current_dir = os.path.dirname(os.path.realpath(__file__))
     with open('%s/%s.json' % (current_dir, module_name)) as f:
         return json.load(f)
 
+
 @pytest.fixture
 def fact_ansible_json():
     return _fact_json('ansible')
+
 
 @pytest.fixture
 def fact_packages_json():
     return _fact_json('packages')
 
+
 @pytest.fixture
 def fact_services_json():
     return _fact_json('services')
 
+
 @pytest.fixture
 def permission_inv_read(organization, inventory, team):
     return Permission.objects.create(inventory=inventory, team=team, permission_type=PERM_INVENTORY_READ)
+
 
 @pytest.fixture
 def job_template(organization):
@@ -418,6 +467,7 @@ def job_template(organization):
     jt.save()
 
     return jt
+
 
 @pytest.fixture
 def job_template_labels(organization, job_template):

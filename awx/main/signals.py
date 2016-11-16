@@ -32,6 +32,7 @@ logger = logging.getLogger('awx.main.signals')
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
 
+
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
@@ -48,6 +49,7 @@ def emit_job_event_detail(sender, **kwargs):
             event_serialized['group_name'] = "workflow_events"
             emit_channel_notification('workflow_events-' + str(instance.job.workflow_job_id), event_serialized)
 
+
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
@@ -59,6 +61,7 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
         event_serialized["event_name"] = instance.event
         event_serialized["group_name"] = "ad_hoc_command_events"
         emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
     logger.debug("In update inventory computed fields")
@@ -94,6 +97,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     else:
         update_inventory_computed_fields.delay(inventory.id, True)
 
+
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     if getattr(_inventory_updates, 'is_updating', False):
         return
@@ -114,6 +118,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         if inventory is not None:
             update_inventory_computed_fields.delay(inventory.id, True)
 
+
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
     'When a role parent is added or removed, update our role hierarchy list'
     if action == 'post_add':
@@ -128,12 +133,14 @@ def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwarg
         else:
             model.rebuild_role_ancestor_list([], [instance.id])
 
+
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
     if instance.is_superuser:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
     else:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
 
 def create_user_role(instance, **kwargs):
     try:
@@ -149,6 +156,7 @@ def create_user_role(instance, **kwargs):
         )
         role.members.add(instance)
 
+
 def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
     content_type = ContentType.objects.get_for_model(Organization)
 
@@ -163,6 +171,7 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
                     instance.content_object.admin_role.children.add(user.admin_role)
                 if action == 'pre_remove':
                     instance.content_object.admin_role.children.remove(user.admin_role)
+
 
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
@@ -198,10 +207,12 @@ def rbac_activity_stream(instance, sender, **kwargs):
 
         activity_stream_associate(sender, instance, role=role, **kwargs)
 
+
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
     for l in instance.labels.all():
         if l.is_candidate_for_detach():
             l.delete()
+
 
 post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
 post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
@@ -228,6 +239,7 @@ pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobT
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted
 
+
 @receiver(pre_delete, sender=Group)
 def save_related_pks_before_group_delete(sender, **kwargs):
     if getattr(_inventory_updates, 'is_removing', False):
@@ -237,6 +249,7 @@ def save_related_pks_before_group_delete(sender, **kwargs):
     instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
     instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
     instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
+
 
 @receiver(post_delete, sender=Group)
 def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
@@ -271,6 +284,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
 
 # Update host pointers to last_job and last_job_host_summary when a job is deleted
 
+
 def _update_host_last_jhs(host):
     jhs_qs = JobHostSummary.objects.filter(host__pk=host.pk)
     try:
@@ -288,11 +302,13 @@ def _update_host_last_jhs(host):
     if update_fields:
         host.save(update_fields=update_fields)
 
+
 @receiver(pre_delete, sender=Job)
 def save_host_pks_before_job_delete(sender, **kwargs):
     instance = kwargs['instance']
     hosts_qs = Host.objects.filter( last_job__pk=instance.pk)
     instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
+
 
 @receiver(post_delete, sender=Job)
 def update_host_last_job_after_job_deleted(sender, **kwargs):
@@ -303,6 +319,7 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 # Set via ActivityStreamRegistrar to record activity stream events
 
+
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
         self.enabled = True
@@ -310,7 +327,9 @@ class ActivityStreamEnabled(threading.local):
     def __nonzero__(self):
         return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
 
+
 activity_stream_enabled = ActivityStreamEnabled()
+
 
 @contextlib.contextmanager
 def disable_activity_stream():
@@ -342,6 +361,7 @@ model_serializer_mapping = {
     Notification: NotificationSerializer,
 }
 
+
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
         # Skip recording any inventory source directly associated with a group.
@@ -363,6 +383,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         #      we don't really use them anyway.
         if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
             getattr(activity_entry, object1).add(instance)
+
 
 def activity_stream_update(sender, instance, **kwargs):
     if instance.id is None:
@@ -387,6 +408,7 @@ def activity_stream_update(sender, instance, **kwargs):
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         getattr(activity_entry, object1).add(instance)
 
+
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
         return
@@ -400,6 +422,7 @@ def activity_stream_delete(sender, instance, **kwargs):
         changes=json.dumps(changes),
         object1=object1)
     activity_entry.save()
+
 
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:

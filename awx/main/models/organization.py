@@ -72,7 +72,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
         return self.name
 
 
-
 class Team(CommonModelNameNotUnique, ResourceMixin):
     '''
     A team is a group of users that work on common projects.
@@ -191,6 +190,7 @@ class Profile(CreatedModifiedModel):
         default='',
     )
 
+
 """
 Since expiration and session expiration is event driven a token could be
 invalidated for both reasons. Further, we only support a single reason for a
@@ -199,6 +199,8 @@ session token being invalid. For this case, mark the token as expired.
 Note: Again, because the value of reason is event based. The reason may not be
 set (i.e. may equal '') even though a session is expired or a limit is reached.
 """
+
+
 class AuthToken(BaseModel):
     '''
     Custom authentication tokens per user with expiration and request-specific

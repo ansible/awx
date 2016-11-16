@@ -27,10 +27,10 @@ export default {
     searchPrefix: 'template',
     views: {
         '@': {
-            controller: 'JobTemplatesListController',
-            templateProvider: function(JobTemplateList, generateList) {
+            controller: 'TemplatesListController',
+            templateProvider: function(TemplateList, generateList) {
                 let html = generateList.build({
-                    list: JobTemplateList,
+                    list: TemplateList,
                     mode: 'edit'
                 });
                 html = generateList.wrapPanel(html);
@@ -39,7 +39,7 @@ export default {
         }
     },
     resolve: {
-        Dataset: ['JobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
+        Dataset: ['TemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                 return qs.search(path, $stateParams[`${list.iterator}_search`]);

@@ -20,11 +20,13 @@ from rest_framework.filters import BaseFilterBackend
 # Ansible Tower
 from awx.main.utils import get_type_for_model, to_python_boolean
 
+
 class MongoFilterBackend(BaseFilterBackend):
 
     # FIX: Note that MongoEngine can't use the filter backends from DRF
     def filter_queryset(self, request, queryset, view):
         return queryset
+
 
 class TypeFilterBackend(BaseFilterBackend):
     '''
@@ -61,6 +63,7 @@ class TypeFilterBackend(BaseFilterBackend):
         except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
+
 
 class FieldLookupBackend(BaseFilterBackend):
     '''
@@ -228,6 +231,7 @@ class FieldLookupBackend(BaseFilterBackend):
             raise ParseError(e.args[0])
         except ValidationError as e:
             raise ParseError(e.messages)
+
 
 class OrderByBackend(BaseFilterBackend):
     '''

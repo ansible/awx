@@ -6,7 +6,7 @@ asgi-amqp==0.3.1
 azure==2.0.0rc5
 Babel==2.2.0
 baron==0.6.2
-billiard==3.3.0.16
+billiard==3.3.0.23
 boto==2.43.0
 celery==3.1.23
 cffi==1.7.0
@@ -129,7 +129,7 @@ suds==0.4
 unicodecsv==0.14.1
 warlock==1.2.0
 twilio==4.9.1
-uwsgi==2.0.14
+uWSGI==2.0.14
 wheel==0.24.0
 wrapt==1.10.6
 wsgiref==0.1.2

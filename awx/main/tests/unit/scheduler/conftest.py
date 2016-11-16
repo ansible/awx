@@ -20,6 +20,7 @@ from awx.main.scheduler import TaskManager
 def epoch():
     return tz_now()
 
+
 @pytest.fixture
 def scheduler_factory(mocker, epoch):
     mocker.patch('awx.main.models.Instance.objects.total_capacity', return_value=10000)
@@ -51,6 +52,7 @@ def scheduler_factory(mocker, epoch):
         return sched
     return fn
 
+
 @pytest.fixture
 def project_update_factory(epoch):
     def fn():
@@ -65,11 +67,13 @@ def project_update_factory(epoch):
         })
     return fn
 
+
 @pytest.fixture
 def pending_project_update(project_update_factory):
     project_update = project_update_factory()
     project_update['status'] = 'pending'
     return project_update
+
 
 @pytest.fixture
 def waiting_project_update(epoch, project_update_factory):
@@ -77,11 +81,13 @@ def waiting_project_update(epoch, project_update_factory):
     project_update['status'] = 'waiting'
     return project_update
 
+
 @pytest.fixture
 def running_project_update(epoch, project_update_factory):
     project_update = project_update_factory()
     project_update['status'] = 'running'
     return project_update
+
 
 @pytest.fixture
 def successful_project_update(epoch, project_update_factory):
@@ -89,6 +95,7 @@ def successful_project_update(epoch, project_update_factory):
     project_update['finished'] = epoch - timedelta(seconds=90)
     project_update['status'] = 'successful'
     return project_update
+
 
 @pytest.fixture
 def successful_project_update_cache_expired(epoch, project_update_factory):
@@ -100,12 +107,14 @@ def successful_project_update_cache_expired(epoch, project_update_factory):
     project_update['project__scm_update_cache_timeout'] = 1
     return project_update
 
+
 @pytest.fixture
 def failed_project_update(epoch, project_update_factory):
     project_update = project_update_factory()
     project_update['finished'] = epoch - timedelta(seconds=90)
     project_update['status'] = 'failed'
     return project_update
+
 
 @pytest.fixture
 def inventory_update_factory(epoch):
@@ -122,6 +131,7 @@ def inventory_update_factory(epoch):
         })
     return fn
 
+
 @pytest.fixture
 def inventory_update_latest_factory(epoch):
     def fn():
@@ -137,9 +147,11 @@ def inventory_update_latest_factory(epoch):
         })
     return fn
 
+
 @pytest.fixture
 def inventory_update_latest(inventory_update_latest_factory):
     return inventory_update_latest_factory()
+
 
 @pytest.fixture
 def successful_inventory_update_latest(inventory_update_latest_factory):
@@ -148,11 +160,13 @@ def successful_inventory_update_latest(inventory_update_latest_factory):
     iu['finished'] = iu['created'] + timedelta(seconds=10)
     return iu
 
+
 @pytest.fixture
 def failed_inventory_update_latest(inventory_update_latest_factory):
     iu = inventory_update_latest_factory()
     iu['status'] = 'failed'
     return iu
+
 
 @pytest.fixture
 def pending_inventory_update(epoch, inventory_update_factory):
@@ -160,11 +174,13 @@ def pending_inventory_update(epoch, inventory_update_factory):
     inventory_update['status'] = 'pending'
     return inventory_update
 
+
 @pytest.fixture
 def waiting_inventory_update(epoch, inventory_update_factory):
     inventory_update = inventory_update_factory()
     inventory_update['status'] = 'waiting'
     return inventory_update
+
 
 @pytest.fixture
 def failed_inventory_update(epoch, inventory_update_factory):
@@ -172,11 +188,13 @@ def failed_inventory_update(epoch, inventory_update_factory):
     inventory_update['status'] = 'failed'
     return inventory_update
 
+
 @pytest.fixture
 def running_inventory_update(epoch, inventory_update_factory):
     inventory_update = inventory_update_factory()
     inventory_update['status'] = 'running'
     return inventory_update
+
 
 @pytest.fixture
 def successful_inventory_update(epoch, inventory_update_factory):
@@ -185,11 +203,12 @@ def successful_inventory_update(epoch, inventory_update_factory):
     inventory_update['status'] = 'successful'
     return inventory_update
 
-'''
-Job
-'''
+
 @pytest.fixture
 def job_factory(epoch):
+    '''
+    Job
+    '''
     def fn(id=1, project__scm_update_on_launch=True, inventory__inventory_sources=[], allow_simultaneous=False):
         return JobDict({ 
             'id': id,
@@ -207,11 +226,13 @@ def job_factory(epoch):
         })
     return fn
 
+
 @pytest.fixture
 def pending_job(job_factory):
     job = job_factory()
     job['status'] = 'pending'
     return job
+
 
 @pytest.fixture
 def running_job(job_factory):
@@ -219,16 +240,18 @@ def running_job(job_factory):
     job['status'] = 'running'
     return job
 
-'''
-Inventory id -> [InventorySourceDict, ...]
-'''
+
 @pytest.fixture
 def inventory_source_factory():
+    '''
+    Inventory id -> [InventorySourceDict, ...]
+    '''
     def fn(id=1):
         return InventorySourceDict({
             'id': id,
         })
     return fn
+
 
 @pytest.fixture
 def inventory_id_sources(inventory_source_factory):
@@ -238,4 +261,3 @@ def inventory_id_sources(inventory_source_factory):
             inventory_source_factory(id=2),
         ]),
     ]
-

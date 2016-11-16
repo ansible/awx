@@ -25,6 +25,7 @@ from awx.main.models import (
 # persisted=False
 #
 
+
 def mk_instance(persisted=True):
     if not persisted:
         raise RuntimeError('creating an Instance requires persisted=True')
@@ -158,6 +159,7 @@ def mk_job_template(name, job_type='run',
         jt.save()
     return jt
 
+
 def mk_workflow_job(status='new', workflow_job_template=None, extra_vars={},
                     persisted=True):
     job = WorkflowJob(status=status, extra_vars=json.dumps(extra_vars))
@@ -167,6 +169,7 @@ def mk_workflow_job(status='new', workflow_job_template=None, extra_vars={},
     if persisted:
         job.save()
     return job
+
 
 def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, persisted=True):
     if extra_vars:
@@ -182,6 +185,7 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
         wfjt.save()
     return wfjt
 
+
 def mk_workflow_job_template_node(workflow_job_template=None,
                                   unified_job_template=None, 
                                   success_nodes=None,
@@ -196,6 +200,7 @@ def mk_workflow_job_template_node(workflow_job_template=None,
     if persisted:
         workflow_node.save()
     return workflow_node
+
 
 def mk_workflow_job_node(unified_job_template=None, 
                          success_nodes=None,

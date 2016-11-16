@@ -7,6 +7,7 @@ from awx.main.migrations import _rbac as rbac
 from awx.main.access import UserAccess
 from awx.main.models import Role
 
+
 @pytest.mark.django_db
 def test_user_admin(user_project, project, user):
     username = unicode("\xc3\xb4", "utf-8")
@@ -28,6 +29,7 @@ def test_user_admin(user_project, project, user):
     assert sa.members.filter(id=joe.id).exists() is False
     assert sa.members.filter(id=admin.id).exists() is True
 
+
 @pytest.mark.django_db
 def test_user_queryset(user):
     u = user('pete', False)
@@ -35,6 +37,7 @@ def test_user_queryset(user):
     access = UserAccess(u)
     qs = access.get_queryset()
     assert qs.count() == 1
+
 
 @pytest.mark.django_db
 def test_user_accessible_objects(user, organization):
@@ -48,6 +51,7 @@ def test_user_accessible_objects(user, organization):
 
     organization.member_role.members.remove(u)
     assert User.accessible_objects(admin, 'admin_role').count() == 1
+
 
 @pytest.mark.django_db
 def test_org_user_admin(user, organization):
@@ -63,6 +67,7 @@ def test_org_user_admin(user, organization):
     organization.admin_role.members.remove(admin)
     assert admin not in member.admin_role
 
+
 @pytest.mark.django_db
 def test_org_user_removed(user, organization):
     admin = user('orgadmin')
@@ -76,12 +81,14 @@ def test_org_user_removed(user, organization):
     organization.member_role.members.remove(member)
     assert admin not in member.admin_role
 
+
 @pytest.mark.django_db
 def test_org_admin_create_sys_auditor(org_admin):
     access = UserAccess(org_admin)
     assert not access.can_add(data=dict(
         username='new_user', password="pa$$sowrd", email="asdf@redhat.com",
         is_system_auditor='true'))
+
 
 @pytest.mark.django_db
 def test_org_admin_edit_sys_auditor(org_admin, alice, organization):

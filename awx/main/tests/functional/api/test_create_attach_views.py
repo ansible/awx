@@ -16,6 +16,7 @@ def test_user_role_view_access(rando, inventory, mocker, post):
         inventory.admin_role, rando, 'members', data,
         skip_sub_obj_read_check=False)
 
+
 @pytest.mark.django_db
 def test_team_role_view_access(rando, team, inventory, mocker, post):
     "Assure correct access method is called when assigning teams new roles"
@@ -29,6 +30,7 @@ def test_team_role_view_access(rando, team, inventory, mocker, post):
     mock_access.can_attach.assert_called_once_with(
         inventory.admin_role, team, 'member_role.parents', data,
         skip_sub_obj_read_check=False)
+
 
 @pytest.mark.django_db
 def test_role_team_view_access(rando, team, inventory, mocker, post):

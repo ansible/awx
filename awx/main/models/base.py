@@ -320,6 +320,7 @@ class CommonModelNameNotUnique(PrimordialModel):
         unique=False,
     )
 
+
 class NotificationFieldsModel(BaseModel):
 
     class Meta:

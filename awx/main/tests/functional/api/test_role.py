@@ -2,6 +2,7 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.mark.django_db
 def test_admin_visible_to_orphaned_users(get, alice):
     names = set()

@@ -3,6 +3,7 @@
 import pytest
 from datetime import timedelta
 
+
 class TestJobBlocked():
     def test_inventory_update_waiting(self, scheduler_factory, waiting_inventory_update, pending_job):
         scheduler = scheduler_factory(tasks=[waiting_inventory_update, pending_job])
@@ -36,6 +37,7 @@ class TestJobBlocked():
         scheduler.start_task.assert_not_called()
         assert scheduler.create_project_update.call_count == 0
 
+
 class TestJob():
     @pytest.fixture
     def successful_project_update(self, project_update_factory):
@@ -53,6 +55,7 @@ class TestJob():
         scheduler._schedule()
 
         scheduler.start_task.assert_called_with(pending_job)
+
 
 class TestCapacity():
     @pytest.fixture
@@ -81,4 +84,3 @@ class TestCapacity():
 
         calls = [mocker.call(job) for job in pending_jobs_impactful]
         scheduler.start_task.assert_has_calls(calls)
-

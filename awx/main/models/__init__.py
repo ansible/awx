@@ -28,13 +28,18 @@ from awx.main.models.channels import * # noqa
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
 from django.core.serializers.python import Serializer as _PythonSerializer
 _original_handle_m2m_field = _PythonSerializer.handle_m2m_field
+
+
 def _new_handle_m2m_field(self, obj, field):
     try:
         field.rel.through._meta
     except AttributeError:
         return
     return _original_handle_m2m_field(self, obj, field)
+
+
 _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
+
 
 # Add custom methods to User model for permissions checks.
 from django.contrib.auth.models import User # noqa
@@ -46,25 +51,31 @@ User.add_to_class('can_access', check_user_access)
 User.add_to_class('accessible_objects', user_accessible_objects)
 User.add_to_class('admin_role', user_admin_role)
 
+
 @property
 def user_get_organizations(user):
     return Organization.objects.filter(member_role__members=user)
+
 
 @property
 def user_get_admin_of_organizations(user):
     return Organization.objects.filter(admin_role__members=user)
 
+
 @property
 def user_get_auditor_of_organizations(user):
     return Organization.objects.filter(auditor_role__members=user)
+
 
 User.add_to_class('organizations', user_get_organizations)
 User.add_to_class('admin_of_organizations', user_get_admin_of_organizations)
 User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 
+
 @property
 def user_is_system_auditor(user):
     return Role.singleton('system_auditor').members.filter(id=user.id).exists()
+
 
 @user_is_system_auditor.setter
 def user_is_system_auditor(user, tf):
@@ -73,6 +84,7 @@ def user_is_system_auditor(user, tf):
             Role.singleton('system_auditor').members.add(user)
         else:
             Role.singleton('system_auditor').members.remove(user)
+
 
 User.add_to_class('is_system_auditor', user_is_system_auditor)
 

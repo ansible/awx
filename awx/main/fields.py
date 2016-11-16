@@ -19,16 +19,27 @@ from django.db.models.fields.related import (
 )
 from django.utils.encoding import smart_text
 
+# Django-JSONField
+from jsonfield import JSONField as upstream_JSONField
+
 # AWX
 from awx.main.models.rbac import batch_role_ancestor_rebuilding, Role
 from awx.main.utils import get_current_apps
 
 
-__all__ = ['AutoOneToOneField', 'ImplicitRoleField']
+__all__ = ['AutoOneToOneField', 'ImplicitRoleField', 'JSONField']
 
+
+class JSONField(upstream_JSONField):
+
+    def from_db_value(self, value, expression, connection, context):
+        if value in {'', None} and not self.null:
+            return {}
+        return super(JSONField, self).from_db_value(value, expression, connection, context)
 
 # Based on AutoOneToOneField from django-annoying:
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
+
 
 class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
     """Descriptor for access to the object from its related class."""
@@ -45,6 +56,7 @@ class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
                     setattr(obj, f.name, getattr(instance, f.name))
             obj.save()
             return obj
+
 
 class AutoOneToOneField(models.OneToOneField):
     """OneToOneField that creates related object if it doesn't exist."""

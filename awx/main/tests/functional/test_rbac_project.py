@@ -92,6 +92,7 @@ def test_project_migration():
     assert o2.projects.all()[0].jobtemplates.count() == 1
     assert o3.projects.all()[0].jobtemplates.count() == 0
 
+
 @pytest.mark.django_db
 def test_single_org_project_migration(organization):
     project = Project.objects.create(name='my project',
@@ -103,6 +104,7 @@ def test_single_org_project_migration(organization):
     project = Project.objects.get(id=project.id)
     assert project.organization.id == organization.id
 
+
 @pytest.mark.django_db
 def test_no_org_project_migration(organization):
     project = Project.objects.create(name='my project',
@@ -111,6 +113,7 @@ def test_no_org_project_migration(organization):
     assert project.organization is None
     rbac.migrate_projects(apps, None)
     assert project.organization is None
+
 
 @pytest.mark.django_db
 def test_multi_org_project_migration():
@@ -145,6 +148,7 @@ def test_project_user_project(user_project, project, user):
     assert u in user_project.read_role
     assert u not in project.read_role
 
+
 @pytest.mark.django_db
 def test_project_accessible_by_sa(user, project):
     u = user('systemadmin', is_superuser=True)
@@ -158,6 +162,7 @@ def test_project_accessible_by_sa(user, project):
     print(project.admin_role.ancestors.all())
     print(project.admin_role.ancestors.all())
     assert u in project.admin_role
+
 
 @pytest.mark.django_db
 def test_project_org_members(user, organization, project):
@@ -175,6 +180,7 @@ def test_project_org_members(user, organization, project):
 
     assert admin in project.admin_role
     assert member in project.read_role
+
 
 @pytest.mark.django_db
 def test_project_team(user, team, project):
@@ -194,6 +200,7 @@ def test_project_team(user, team, project):
     assert member in project.read_role
     assert nonmember not in project.read_role
 
+
 @pytest.mark.django_db
 def test_project_explicit_permission(user, team, project, organization):
     u = user('prjuser')
@@ -211,12 +218,14 @@ def test_project_explicit_permission(user, team, project, organization):
 
     assert u in project.read_role
 
+
 @pytest.mark.django_db
 def test_create_project_foreign_org_admin(org_admin, organization, organization_factory):
     """Org admins can only create projects in their own org."""
     other_org = organization_factory('not-my-org').organization
     access = ProjectAccess(org_admin)
     assert not access.can_add({'organization': other_org.pk, 'name': 'new-project'})
+
 
 @pytest.mark.django_db
 def test_modify_project_foreign_org_admin(org_admin, organization, organization_factory, project):

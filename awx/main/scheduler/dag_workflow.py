@@ -2,6 +2,7 @@
 # AWX
 from awx.main.scheduler.dag_simple import SimpleDAG
 
+
 class WorkflowDAG(SimpleDAG):
     def __init__(self, workflow_job=None):
         super(WorkflowDAG, self).__init__()

@@ -2,6 +2,7 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.fixture
 def organization_resource_creator(organization, user):
     def rf(users, admins, job_templates, projects, inventories, teams):
@@ -40,6 +41,7 @@ def organization_resource_creator(organization, user):
         return organization
     return rf
 
+
 COUNTS_PRIMES = {
     'users': 11,
     'admins': 5,
@@ -57,9 +59,11 @@ COUNTS_ZEROS = {
     'teams': 0
 }
 
+
 @pytest.fixture
 def resourced_organization(organization_resource_creator):
     return organization_resource_creator(**COUNTS_PRIMES)
+
 
 @pytest.mark.django_db
 def test_org_counts_detail_admin(resourced_organization, user, get):
@@ -71,6 +75,7 @@ def test_org_counts_detail_admin(resourced_organization, user, get):
 
     counts = response.data['summary_fields']['related_field_counts']
     assert counts == COUNTS_PRIMES
+
 
 @pytest.mark.django_db
 def test_org_counts_detail_member(resourced_organization, user, get):
@@ -90,6 +95,7 @@ def test_org_counts_detail_member(resourced_organization, user, get):
         'teams': 0
     }
 
+
 @pytest.mark.django_db
 def test_org_counts_list_admin(resourced_organization, user, get):
     # Check that all types of resources are counted by a superuser
@@ -99,6 +105,7 @@ def test_org_counts_list_admin(resourced_organization, user, get):
 
     counts = response.data['results'][0]['summary_fields']['related_field_counts']
     assert counts == COUNTS_PRIMES
+
 
 @pytest.mark.django_db
 def test_org_counts_list_member(resourced_organization, user, get):
@@ -119,6 +126,7 @@ def test_org_counts_list_member(resourced_organization, user, get):
         'teams': 0
     }
 
+
 @pytest.mark.django_db
 def test_new_org_zero_counts(user, post):
     # Check that a POST to the organization list endpoint returns
@@ -131,6 +139,7 @@ def test_new_org_zero_counts(user, post):
     new_org_list = post_response.render().data
     counts_dict = new_org_list['summary_fields']['related_field_counts']
     assert counts_dict == COUNTS_ZEROS
+
 
 @pytest.mark.django_db
 def test_two_organizations(resourced_organization, organizations, user, get):
@@ -149,6 +158,7 @@ def test_two_organizations(resourced_organization, organizations, user, get):
 
     assert counts[org_id_full] == COUNTS_PRIMES
     assert counts[org_id_zero] == COUNTS_ZEROS
+
 
 @pytest.mark.django_db
 def test_scan_JT_counted(resourced_organization, user, get):
@@ -169,6 +179,7 @@ def test_scan_JT_counted(resourced_organization, user, get):
     detail_response = get(reverse('api:organization_detail', args=[resourced_organization.pk]), admin_user)
     assert detail_response.status_code == 200
     assert detail_response.data['summary_fields']['related_field_counts'] == counts_dict
+
 
 @pytest.mark.django_db
 def test_JT_associated_with_project(organizations, project, user, get):

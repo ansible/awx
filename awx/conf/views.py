@@ -3,7 +3,6 @@
 
 # Python
 import collections
-import json
 import sys
 
 # Django
@@ -68,7 +67,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.category_slug not in category_slugs:
             raise PermissionDenied()
 
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug)
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False)
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
         else:
@@ -100,9 +99,6 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             if key == 'LICENSE':
                 continue
             setattr(serializer.instance, key, value)
-            # Always encode "raw" strings as JSON.
-            if isinstance(value, basestring):
-                value = json.dumps(value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:
                 setting = Setting.objects.create(key=key, user=user, value=value)

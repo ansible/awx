@@ -8,7 +8,7 @@ describe('Controller: WorkflowAdd', () => {
         ClearScope,
         Alert,
         GenerateForm,
-        JobTemplateService,
+        TemplatesService,
         q,
         getLabelsDeferred,
         createWorkflowJobTemplateDeferred,
@@ -20,7 +20,7 @@ describe('Controller: WorkflowAdd', () => {
         ToJSON;
 
     beforeEach(angular.mock.module('Tower'));
-    beforeEach(angular.mock.module('jobTemplates', ($provide) => {
+    beforeEach(angular.mock.module('templates', ($provide) => {
 
         state = jasmine.createSpyObj('state', [
             '$get',
@@ -35,7 +35,7 @@ describe('Controller: WorkflowAdd', () => {
             'applyDefaults'
         ]);
 
-        JobTemplateService = {
+        TemplatesService = {
             getLabelOptions: function(){
                 return angular.noop;
             },
@@ -79,8 +79,8 @@ describe('Controller: WorkflowAdd', () => {
         ParseTypeChange = _ParseTypeChange_;
         ToJSON = _ToJSON_;
 
-        JobTemplateService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);
-        JobTemplateService.createWorkflowJobTemplate = jasmine.createSpy('createWorkflowJobTemplate').and.returnValue(createWorkflowJobTemplateDeferred.promise);
+        TemplatesService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);
+        TemplatesService.createWorkflowJobTemplate = jasmine.createSpy('createWorkflowJobTemplate').and.returnValue(createWorkflowJobTemplateDeferred.promise);
 
         WorkflowAdd = $controller('WorkflowAdd', {
             $scope: scope,
@@ -88,7 +88,7 @@ describe('Controller: WorkflowAdd', () => {
             ClearScope: ClearScope,
             Alert: Alert,
             GenerateForm: GenerateForm,
-            JobTemplateService: JobTemplateService,
+            TemplatesService: TemplatesService,
             ProcessErrors: ProcessErrors,
             CreateSelect2: CreateSelect2,
             Wait: Wait,
@@ -102,7 +102,7 @@ describe('Controller: WorkflowAdd', () => {
     });
 
     it('should get/set the label options and select2-ify the input', ()=>{
-        // Resolve JobTemplateService.getLabelsForJobTemplate
+        // Resolve TemplatesService.getLabelsForJobTemplate
         getLabelsDeferred.resolve({
             foo: "bar"
         });
@@ -120,7 +120,7 @@ describe('Controller: WorkflowAdd', () => {
     });
 
     it('should call ProcessErrors when getLabelsForJobTemplate returns a rejected promise', ()=>{
-        // Reject JobTemplateService.getLabelsForJobTemplate
+        // Reject TemplatesService.getLabelsForJobTemplate
         getLabelsDeferred.reject({
             data: "mockedData",
             status: 400
@@ -133,11 +133,11 @@ describe('Controller: WorkflowAdd', () => {
 
     describe('scope.formSave()', () => {
 
-        it('should call JobTemplateService.createWorkflowJobTemplate', ()=>{
+        it('should call TemplatesService.createWorkflowJobTemplate', ()=>{
             scope.name = "Test Workflow";
             scope.description = "This is a test description";
             scope.formSave();
-            expect(JobTemplateService.createWorkflowJobTemplate).toHaveBeenCalledWith({
+            expect(TemplatesService.createWorkflowJobTemplate).toHaveBeenCalledWith({
                 name: "Test Workflow",
                 description: "This is a test description",
                 labels: undefined,

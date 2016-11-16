@@ -35,6 +35,7 @@ def test_cases(project):
         ret.append(e)
     return ret
 
+
 @pytest.fixture
 def negative_test_cases(job_factory):
     ret = []
@@ -53,6 +54,7 @@ formats = [
     ('html', 'text/html'),
 ]
 
+
 @pytest.mark.parametrize("format,content_type", formats)
 @pytest.mark.django_db
 def test_project_update_redaction_enabled(get, format, content_type, test_cases, admin):
@@ -65,6 +67,7 @@ def test_project_update_redaction_enabled(get, format, content_type, test_cases,
         assert test_data['uri'].username not in content
         assert test_data['uri'].password not in content
         assert content.count(test_data['uri'].host) == test_data['occurrences']
+
 
 @pytest.mark.parametrize("format,content_type", formats)
 @pytest.mark.django_db
@@ -80,7 +83,6 @@ def test_job_redaction_disabled(get, format, content_type, negative_test_cases, 
 
 @pytest.mark.django_db
 def test_options_fields_choices(instance, options, user):
-
     url = reverse('api:unified_job_list')
     response = options(url, None, user('admin', True))
 
@@ -89,5 +91,3 @@ def test_options_fields_choices(instance, options, user):
     assert UnifiedJob.LAUNCH_TYPE_CHOICES == response.data['actions']['GET']['launch_type']['choices']
     assert 'choice' == response.data['actions']['GET']['status']['type']
     assert UnifiedJob.STATUS_CHOICES == response.data['actions']['GET']['status']['choices']
-
-

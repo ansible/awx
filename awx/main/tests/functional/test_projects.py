@@ -83,11 +83,13 @@ def test_team_project_list(get, team_project_list):
     # alice should see all projects they can see when viewing an admin
     assert get(reverse('api:user_projects_list', args=(admin.pk,)), alice).data['count'] == 2
 
+
 @pytest.mark.django_db
 def test_team_project_list_fail1(get, team_project_list):
     objects = team_project_list
     res = get(reverse('api:team_projects_list', args=(objects.teams.team2.pk,)), objects.users.alice)
     assert res.status_code == 403
+
 
 @pytest.mark.parametrize("u,expected_status_code", [
     ('rando', 403),
@@ -115,17 +117,21 @@ def test_create_project(post, organization, org_admin, org_member, admin, rando,
     if expected_status_code == 201:
         assert Project.objects.filter(name='Project', organization=organization).exists()
 
+
 @pytest.mark.django_db()
 def test_create_project_null_organization(post, organization, admin):
     post(reverse('api:project_list'), { 'name': 't', 'organization': None}, admin, expect=201)
+
 
 @pytest.mark.django_db()
 def test_create_project_null_organization_xfail(post, organization, org_admin):
     post(reverse('api:project_list'), { 'name': 't', 'organization': None}, org_admin, expect=403)
 
+
 @pytest.mark.django_db()
 def test_patch_project_null_organization(patch, organization, project, admin):
     patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': organization.id}, admin, expect=200)
+
 
 @pytest.mark.django_db()
 def test_patch_project_null_organization_xfail(patch, project, org_admin):

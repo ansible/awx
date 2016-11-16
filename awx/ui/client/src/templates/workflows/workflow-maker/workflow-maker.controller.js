@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateList', 'ProjectList',
-    'GetBasePath', 'Wait', 'JobTemplateService', '$state',
+export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'ProjectList',
+    'GetBasePath', 'Wait', 'TemplatesService', '$state',
     'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
     'GenerateForm', 'InventoryList', 'CredentialList', '$q',
-    function($scope, WorkflowHelpService, GenerateList, JobTemplateList, ProjectList,
-        GetBasePath, Wait, JobTemplateService, $state,
+    function($scope, WorkflowService, GenerateList, TemplateList, ProjectList,
+        GetBasePath, Wait, TemplatesService, $state,
         ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
         GenerateForm, InventoryList, CredentialList, $q) {
 
@@ -59,11 +59,11 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         $scope.closeWorkflowMaker = function() {
             // Revert the data to the master which was created when the dialog was opened
             $scope.treeData.data = angular.copy($scope.treeDataMaster);
-            WorkflowHelpService.closeDialog();
+            $scope.closeDialog();
         };
 
         $scope.saveWorkflowMaker = function() {
-            WorkflowHelpService.closeDialog();
+            $scope.closeDialog();
         };
 
         /* ADD NODE FUNCTIONS */
@@ -78,7 +78,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
             $scope.addParent = parent;
             $scope.betweenTwoNodes = betweenTwoNodes;
 
-            $scope.placeholderNode = WorkflowHelpService.addPlaceholderNode({
+            $scope.placeholderNode = WorkflowService.addPlaceholderNode({
                 parent: parent,
                 betweenTwoNodes: betweenTwoNodes,
                 tree: $scope.treeData.data,
@@ -87,7 +87,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
             $scope.treeData.nextIndex++;
 
-            let siblingConnectionTypes = WorkflowHelpService.getSiblingConnectionTypes({
+            let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
                 tree: $scope.treeData.data,
                 parentId: betweenTwoNodes ? parent.source.id : parent.id
             });
@@ -187,7 +187,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
         $scope.cancelNodeForm = function() {
             if ($scope.workflowMakerFormConfig.nodeMode === "add") {
                 // Remove the placeholder node from the tree
-                WorkflowHelpService.removeNodeFromTree({
+                WorkflowService.removeNodeFromTree({
                     tree: $scope.treeData.data,
                     nodeToBeDeleted: $scope.placeholderNode
                 });
@@ -212,12 +212,12 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
                 $scope.workflowMakerFormConfig.nodeMode = "edit";
 
-                let parent = WorkflowHelpService.searchTree({
+                let parent = WorkflowService.searchTree({
                     element: $scope.treeData.data,
                     matchingId: nodeToEdit.parent.id
                 });
 
-                $scope.nodeBeingEdited = WorkflowHelpService.searchTree({
+                $scope.nodeBeingEdited = WorkflowService.searchTree({
                     element: parent,
                     matchingId: nodeToEdit.id
                 });
@@ -348,7 +348,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                     // This is a node that we got back from the api with an incomplete
                     // unified job template so we're going to pull down the whole object
 
-                    JobTemplateService.getUnifiedJobTemplate($scope.nodeBeingEdited.unifiedJobTemplate.id)
+                    TemplatesService.getUnifiedJobTemplate($scope.nodeBeingEdited.unifiedJobTemplate.id)
                         .then(function(data) {
 
                             $scope.nodeBeingEdited.unifiedJobTemplate = _.clone(data.data.results[0]);
@@ -358,12 +358,12 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
                             let retrievingInventory = false;
 
                             if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_credential_on_launch && $scope.nodeBeingEdited.originalNodeObj.credential) {
-                                defers.push(JobTemplateService.getCredential($scope.nodeBeingEdited.originalNodeObj.credential));
+                                defers.push(TemplatesService.getCredential($scope.nodeBeingEdited.originalNodeObj.credential));
                                 retrievingCredential = true;
                             }
 
                             if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_inventory_on_launch && $scope.nodeBeingEdited.originalNodeObj.inventory) {
-                                defers.push(JobTemplateService.getInventory($scope.nodeBeingEdited.originalNodeObj.inventory));
+                                defers.push(TemplatesService.getInventory($scope.nodeBeingEdited.originalNodeObj.inventory));
                                 retrievingInventory = true;
                             }
 
@@ -427,7 +427,7 @@ export default ['$scope', 'WorkflowHelpService', 'generateList', 'JobTemplateLis
 
                 // TODO: turn this into a promise so that we can handle errors
 
-                WorkflowHelpService.removeNodeFromTree({
+                WorkflowService.removeNodeFromTree({
                     tree: $scope.treeData.data,
                     nodeToBeDeleted: $scope.nodeToBeDeleted
                 });

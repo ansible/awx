@@ -53,7 +53,8 @@ The new task manager should, basically, work like the old one. Old task manager 
 
 ### Task Manager Rules
 * Groups of blocked tasks run in chronological order
-* Tasks that are not blocked run whenever there is capacity available
+* Tasks that are not blocked run whenever there is capacity available***
+ * ***1 job is always allowed to run, even if there isn't enough capacity.
 * Only 1 Project Updates for a Project may be running
 * Only 1 Inventory Update for an Inventory Source may be running
 * For a related Project, only a Job xor Project Update may be running
@@ -67,5 +68,6 @@ Feature in Tower where dynamic inventory and projects associated with Job Templa
 * projects marked as update on launch should trigger a project update when a related job template is launched
 * inventory sources marked as update on launch should trigger an inventory update when a related job template is launched
 * spawning of project update and/or inventory updates should **not** be triggered when a related job template is launched **IF** there is an update && the last update finished successfully && the finished time puts the update within the configured cache window.
+* **Note:** Update on launch spawned jobs (i.e. InventoryUpdate and ProjectUpdate) are considered dependent jobs. The `launch_type` is `dependent`. If a `dependent` jobs fails then the dependent job should also fail.
 
 Example permutations of blocking: https://docs.google.com/a/redhat.com/document/d/1AOvKiTMSV0A2RHykHW66BZKBuaJ_l0SJ-VbMwvu-5Gk/edit?usp=sharing

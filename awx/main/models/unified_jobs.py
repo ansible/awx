@@ -20,9 +20,6 @@ from django.utils.timezone import now
 from django.utils.encoding import smart_text
 from django.apps import apps
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # Django-Polymorphic
 from polymorphic import PolymorphicModel
 
@@ -35,6 +32,7 @@ from awx.main.models.schedules import Schedule
 from awx.main.utils import decrypt_field, _inventory_updates
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
+from awx.main.fields import JSONField
 
 __all__ = ['UnifiedJobTemplate', 'UnifiedJob']
 
@@ -358,6 +356,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
+
 class UnifiedJobTypeStringMixin(object):
     @classmethod
     def _underscore_to_camel(cls, word):
@@ -380,6 +379,7 @@ class UnifiedJobTypeStringMixin(object):
         if not model:
             return None
         return model.objects.get(id=job_id)
+
 
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):
     '''

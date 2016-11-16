@@ -284,18 +284,18 @@ virtualenv_tower:
 requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
 	else \
-	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
+	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
 	else \
-	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
+	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
 	fi
 
 requirements_tower_dev:
@@ -464,7 +464,10 @@ pep8: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
 
 flake8: reports
-	@(set -o pipefail && $@ | tee reports/$@.report)
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	(set -o pipefail && $@ | tee reports/$@.report)
 
 pyflakes: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)

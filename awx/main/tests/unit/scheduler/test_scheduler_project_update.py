@@ -3,6 +3,7 @@
 # ProjectUpdateDict. We should instead return a ProjectUpdateLatestDict()
 # For now, this is ok since the fields on deviate that much.
 
+
 class TestStartProjectUpdate():
     def test(self, scheduler_factory, pending_project_update):
         scheduler = scheduler_factory(tasks=[pending_project_update])
@@ -26,7 +27,6 @@ class TestStartProjectUpdate():
 
 
 class TestCreateDependentProjectUpdate():
-
     def test(self, scheduler_factory, pending_job, waiting_project_update):
         scheduler = scheduler_factory(tasks=[pending_job], 
                                       create_project_update=waiting_project_update)
@@ -58,6 +58,7 @@ class TestCreateDependentProjectUpdate():
 
         scheduler.start_task.assert_called_with(waiting_project_update, [pending_job])
 
+
 class TestProjectUpdateBlocked():
     def test_projct_update_running(self, scheduler_factory, running_project_update, pending_project_update):
         scheduler = scheduler_factory(tasks=[running_project_update, pending_project_update])
@@ -72,4 +73,3 @@ class TestProjectUpdateBlocked():
         scheduler._schedule()
 
         scheduler.start_task.assert_not_called()
-

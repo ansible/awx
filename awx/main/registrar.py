@@ -39,4 +39,5 @@ class ActivityStreamRegistrar(object):
                 m2m_attr = getattr(model, m2mfield.name)
                 m2m_changed.disconnect(dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
 
+
 activity_stream_registrar = ActivityStreamRegistrar()

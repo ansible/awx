@@ -4,6 +4,7 @@
 from awx.main.models import Instance
 from django.core.management.base import NoArgsCommand
 
+
 class Command(NoArgsCommand):
     """List instances from the Tower database
     """

@@ -19,6 +19,7 @@ def job(mocker):
     ret.project = mocker.MagicMock(scm_revision='asdf1234')
     return ret
 
+
 @pytest.mark.survey
 def test_job_survey_password_redaction():
     """Tests the Job model's funciton to redact passwords from
@@ -37,6 +38,7 @@ def test_job_survey_password_redaction():
         'secret_key': '$encrypted$',
         'SSN': '$encrypted$'}
 
+
 @pytest.mark.survey
 def test_survey_passwords_not_in_extra_vars():
     """Tests that survey passwords not included in extra_vars are
@@ -52,6 +54,7 @@ def test_survey_passwords_not_in_extra_vars():
         'submitter_email': 'foobar@redhat.com',
     }
 
+
 def test_job_safe_args_redacted_passwords(job):
     """Verify that safe_args hides passwords in the job extra_vars"""
     kwargs = {'ansible_version': '2.1'}
@@ -61,6 +64,7 @@ def test_job_safe_args_redacted_passwords(job):
     extra_vars = json.loads(safe_args[ev_index])
     assert extra_vars['secret_key'] == '$encrypted$'
 
+
 def test_job_args_unredacted_passwords(job):
     kwargs = {'ansible_version': '2.1'}
     run_job = RunJob()
@@ -68,6 +72,7 @@ def test_job_args_unredacted_passwords(job):
     ev_index = args.index('-e') + 1
     extra_vars = json.loads(args[ev_index])
     assert extra_vars['secret_key'] == 'my_password'
+
 
 class TestWorkflowSurveys:
     def test_update_kwargs_survey_defaults(self, survey_spec_factory):

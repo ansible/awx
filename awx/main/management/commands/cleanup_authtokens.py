@@ -12,6 +12,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import * # noqa
 
+
 class Command(BaseCommand):
     '''
     Management command to cleanup expired auth tokens

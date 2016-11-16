@@ -58,12 +58,15 @@ access_registry = {
     # ...
 }
 
+
 class StateConflict(ValidationError):
     status_code = 409
+
 
 def register_access(model_class, access_class):
     access_classes = access_registry.setdefault(model_class, [])
     access_classes.append(access_class)
+
 
 @property
 def user_admin_role(self):
@@ -76,8 +79,10 @@ def user_admin_role(self):
     role.parents = [org.admin_role.pk for org in self.organizations]
     return role
 
+
 def user_accessible_objects(user, role_name):
     return ResourceMixin._accessible_objects(User, user, role_name)
+
 
 def get_user_queryset(user, model_class):
     '''
@@ -98,6 +103,7 @@ def get_user_queryset(user, model_class):
             queryset = queryset.filter(pk__in=qs.values_list('pk', flat=True))
         return queryset
 
+
 def check_user_access(user, model_class, action, *args, **kwargs):
     '''
     Return True if user can perform action against model_class with the
@@ -117,6 +123,7 @@ def check_user_access(user, model_class, action, *args, **kwargs):
             return result
     return False
 
+
 def get_user_capabilities(user, instance, **kwargs):
     '''
     Returns a dictionary of capabilities the user has on the particular
@@ -129,6 +136,7 @@ def get_user_capabilities(user, instance, **kwargs):
         return access_class(user).get_user_capabilities(instance, **kwargs)
     return None
 
+
 def check_superuser(func):
     '''
     check_superuser is a decorator that provides a simple short circuit
@@ -140,6 +148,7 @@ def check_superuser(func):
             return True
         return func(self, *args, **kwargs)
     return wrapper
+
 
 class BaseAccess(object):
     '''
@@ -488,6 +497,7 @@ class OrganizationAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+
 class InventoryAccess(BaseAccess):
     '''
     I can see inventory when:
@@ -557,6 +567,7 @@ class InventoryAccess(BaseAccess):
     def can_run_ad_hoc_commands(self, obj):
         return self.user in obj.adhoc_role
 
+
 class HostAccess(BaseAccess):
     '''
     I can see hosts whenever I can see their inventory.
@@ -610,6 +621,7 @@ class HostAccess(BaseAccess):
 
     def can_delete(self, obj):
         return obj and self.user in obj.inventory.admin_role
+
 
 class GroupAccess(BaseAccess):
     '''
@@ -677,6 +689,7 @@ class GroupAccess(BaseAccess):
         if obj and obj.inventory_source:
             return self.user.can_access(InventorySource, 'start', obj.inventory_source, validate_license=validate_license)
         return False
+
 
 class InventorySourceAccess(BaseAccess):
     '''
@@ -757,6 +770,7 @@ class InventoryUpdateAccess(BaseAccess):
     def can_delete(self, obj):
         return self.user in obj.inventory_source.inventory.admin_role
 
+
 class CredentialAccess(BaseAccess):
     '''
     I can see credentials when:
@@ -829,6 +843,7 @@ class CredentialAccess(BaseAccess):
         #    return True
         return self.can_change(obj, None)
 
+
 class TeamAccess(BaseAccess):
     '''
     I can see a team when:
@@ -889,6 +904,7 @@ class TeamAccess(BaseAccess):
         return super(TeamAccess, self).can_unattach(obj, sub_obj, relationship,
                                                     *args, **kwargs)
 
+
 class ProjectAccess(BaseAccess):
     '''
     I can see projects when:
@@ -943,6 +959,7 @@ class ProjectAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         return obj and self.user in obj.update_role
 
+
 class ProjectUpdateAccess(BaseAccess):
     '''
     I can see project updates when I can see the project.
@@ -978,6 +995,7 @@ class ProjectUpdateAccess(BaseAccess):
     @check_superuser
     def can_delete(self, obj):
         return obj and self.user in obj.project.admin_role
+
 
 class JobTemplateAccess(BaseAccess):
     '''
@@ -1175,6 +1193,7 @@ class JobTemplateAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+
 class JobAccess(BaseAccess):
     '''
     I can see jobs when:
@@ -1313,6 +1332,7 @@ class JobAccess(BaseAccess):
             return True
         return obj.job_template is not None and self.user in obj.job_template.admin_role
 
+
 class SystemJobTemplateAccess(BaseAccess):
     '''
     I can only see/manage System Job Templates if I'm a super user
@@ -1325,6 +1345,7 @@ class SystemJobTemplateAccess(BaseAccess):
         '''Only a superuser can start a job from a SystemJobTemplate'''
         return False
 
+
 class SystemJobAccess(BaseAccess):
     '''
     I can only see manage System Jobs if I'm a super user
@@ -1333,6 +1354,7 @@ class SystemJobAccess(BaseAccess):
 
     def can_start(self, obj, validate_license=True):
         return False # no relaunching of system jobs
+
 
 # TODO:
 class WorkflowJobTemplateNodeAccess(BaseAccess):
@@ -1430,6 +1452,7 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
     def can_unattach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
         return self.wfjt_admin(obj) and self.check_same_WFJT(obj, sub_obj)
 
+
 class WorkflowJobNodeAccess(BaseAccess):
     '''
     I can see a WorkflowJobNode if I have permission to...
@@ -1461,6 +1484,7 @@ class WorkflowJobNodeAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
 
 # TODO: revisit for survey logic, notification attachments?
 class WorkflowJobTemplateAccess(BaseAccess):
@@ -1554,7 +1578,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         is_delete_allowed = self.user.is_superuser or self.user in obj.admin_role
         if not is_delete_allowed:
             return False
-        active_jobs = [dict(type="job", id=o.id)
+        active_jobs = [dict(type="workflow_job", id=o.id)
                        for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
             raise StateConflict({"conflict": _("Resource is being used by running jobs"),
@@ -1603,6 +1627,7 @@ class WorkflowJobAccess(BaseAccess):
         if not obj.can_cancel:
             return False
         return self.can_delete(obj) or self.user == obj.created_by
+
 
 class AdHocCommandAccess(BaseAccess):
     '''
@@ -1660,6 +1685,7 @@ class AdHocCommandAccess(BaseAccess):
             return True
         return obj.inventory is not None and self.user in obj.inventory.admin_role
 
+
 class AdHocCommandEventAccess(BaseAccess):
     '''
     I can see ad hoc command event records whenever I can read both ad hoc
@@ -1688,6 +1714,7 @@ class AdHocCommandEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+
 class JobHostSummaryAccess(BaseAccess):
     '''
     I can see job/host summary records whenever I can read both job and host.
@@ -1712,6 +1739,7 @@ class JobHostSummaryAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
 
 class JobEventAccess(BaseAccess):
     '''
@@ -1745,6 +1773,7 @@ class JobEventAccess(BaseAccess):
 
     def can_delete(self, obj):
         return False
+
 
 class UnifiedJobTemplateAccess(BaseAccess):
     '''
@@ -1787,6 +1816,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         #)
 
         return qs.all()
+
 
 class UnifiedJobAccess(BaseAccess):
     '''
@@ -1838,6 +1868,7 @@ class UnifiedJobAccess(BaseAccess):
         #)
         return qs.all()
 
+
 class ScheduleAccess(BaseAccess):
     '''
     I can see a schedule if I can see it's related unified job, I can create them or update them if I have write access
@@ -1877,6 +1908,7 @@ class ScheduleAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, {})
+
 
 class NotificationTemplateAccess(BaseAccess):
     '''
@@ -1926,6 +1958,7 @@ class NotificationTemplateAccess(BaseAccess):
             return False
         return self.user in obj.organization.admin_role
 
+
 class NotificationAccess(BaseAccess):
     '''
     I can see/use a notification if I have permission to
@@ -1946,6 +1979,7 @@ class NotificationAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.user.can_access(NotificationTemplate, 'delete', obj.notification_template)
+
 
 class LabelAccess(BaseAccess):
     '''
@@ -1979,6 +2013,7 @@ class LabelAccess(BaseAccess):
 
     def can_delete(self, obj):
         return self.can_change(obj, None)
+
 
 class ActivityStreamAccess(BaseAccess):
     '''
@@ -2058,6 +2093,7 @@ class ActivityStreamAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+
 class CustomInventoryScriptAccess(BaseAccess):
 
     model = CustomInventoryScript
@@ -2084,6 +2120,7 @@ class CustomInventoryScriptAccess(BaseAccess):
     @check_superuser
     def can_delete(self, obj):
         return self.can_admin(obj)
+
 
 class RoleAccess(BaseAccess):
     '''

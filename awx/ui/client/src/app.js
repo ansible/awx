@@ -67,7 +67,7 @@ import moment from './shared/moment/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
-import JobTemplates from './job-templates/main';
+import Templates from './templates/main';
 import credentials from './credentials/main';
 import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
 import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
@@ -126,7 +126,7 @@ var tower = angular.module('Tower', [
     jobSubmission.name,
     notifications.name,
     standardOut.name,
-    JobTemplates.name,
+    Templates.name,
     portalMode.name,
     config.name,
     credentials.name,
@@ -135,7 +135,7 @@ var tower = angular.module('Tower', [
     'OrganizationFormDefinition',
     'UserFormDefinition',
     'OrganizationListDefinition',
-    'jobTemplates',
+    'templates',
     'UserListDefinition',
     'UserHelper',
     'PromptDialog',
@@ -158,7 +158,7 @@ var tower = angular.module('Tower', [
     'TeamHelper',
     'CredentialsListDefinition',
     'CredentialFormDefinition',
-    'JobTemplatesListDefinition',
+    'TemplatesListDefinition',
     'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',
     'JobTemplatesHelper',

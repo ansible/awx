@@ -17,8 +17,10 @@ from rest_framework.test import APIRequestFactory
 #DRF
 from rest_framework import serializers
 
+
 def mock_JT_resource_data():
     return ({}, [])
+
 
 @pytest.fixture
 def job_template(mocker):
@@ -26,13 +28,16 @@ def job_template(mocker):
     mock_jt.resource_validation_data = mock_JT_resource_data
     return mock_jt
 
+
 @pytest.fixture
 def job(mocker, job_template):
     return mocker.MagicMock(pk=5, job_template=job_template)
 
+
 @pytest.fixture
 def jobs(mocker):
     return [Job(id=x, name='job-%d' % x) for x in xrange(0, 25)]
+
 
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})
 @mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x,y: {})
@@ -56,6 +61,7 @@ class TestJobTemplateSerializerGetRelated():
         job_template.host_config_key = None
         related = get_related_mock_and_run(JobTemplateSerializer, job_template)
         assert 'callback' not in related
+
 
 class TestJobTemplateSerializerGetSummaryFields():
     def test__recent_jobs(self, mocker, job_template, jobs):
@@ -109,8 +115,8 @@ class TestJobTemplateSerializerGetSummaryFields():
         assert response['user_capabilities']['copy'] == 'foo'
         assert response['user_capabilities']['edit'] == 'foobar'
 
-class TestJobTemplateSerializerValidation(object):
 
+class TestJobTemplateSerializerValidation(object):
     good_extra_vars = ["{\"test\": \"keys\"}", "---\ntest: key"]
     bad_extra_vars = ["{\"test\": \"keys\"", "---\ntest: [2"]
 
@@ -121,4 +127,3 @@ class TestJobTemplateSerializerValidation(object):
         for ev in self.bad_extra_vars:
             with pytest.raises(serializers.ValidationError):
                 serializer.validate_extra_vars(ev)
-

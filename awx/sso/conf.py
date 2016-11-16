@@ -23,6 +23,7 @@ class SocialAuthCallbackURL(object):
         path = reverse('social:complete', args=(self.provider,))
         return urlparse.urljoin(settings.TOWER_URL_BASE, path)
 
+
 SOCIAL_AUTH_ORGANIZATION_MAP_HELP_TEXT = _('''\
 Mapping to organization admins/users from social auth accounts. This setting
 controls which users are placed into which Tower organizations based on
@@ -510,6 +511,7 @@ register(
                 'callback URL for your application.'),
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -600,6 +602,7 @@ register(
                 'as the callback URL for your application.'),
     category=_('GitHub OAuth2'),
     category_slug='github',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -662,6 +665,7 @@ register(
                 'Provide this URL as the callback URL for your application.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -735,6 +739,7 @@ register(
                 'Provide this URL as the callback URL for your application.'),
     category=_('GitHub Team OAuth2'),
     category_slug='github-team',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
@@ -796,8 +801,10 @@ register(
 # SAML AUTHENTICATION SETTINGS
 ###############################################################################
 
+
 def get_saml_metadata_url():
     return urlparse.urljoin(settings.TOWER_URL_BASE, reverse('sso:saml_metadata'))
+
 
 register(
     'SOCIAL_AUTH_SAML_CALLBACK_URL',
@@ -810,6 +817,7 @@ register(
                 'and this callback URL for your application.'),
     category=_('SAML'),
     category_slug='saml',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(

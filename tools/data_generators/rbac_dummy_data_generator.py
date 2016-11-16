@@ -82,6 +82,7 @@ inventory_hosts  = []
 jobs             = []
 #job_events       = []
 
+
 def spread(n, m):
     ret = []
     # At least one in each slot, split up the rest exponentially so the first
@@ -100,6 +101,7 @@ def spread(n, m):
     if n > 0 and len(ret):
         ret[0] += n
     return ret
+
 
 ids = defaultdict(lambda: 0)
 

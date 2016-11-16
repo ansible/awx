@@ -24,6 +24,7 @@ for setting in dir(global_settings):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+
 def is_testing(argv=None):
     import sys
     '''Return True if running django or py.test unit tests.'''
@@ -34,8 +35,10 @@ def is_testing(argv=None):
         return True
     return False
 
+
 def IS_TESTING(argv=None):
     return is_testing(argv)
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG

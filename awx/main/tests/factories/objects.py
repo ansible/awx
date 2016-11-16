@@ -2,6 +2,7 @@ from collections import namedtuple
 
 from .exc import NotUnique
 
+
 def generate_objects(artifacts, kwargs):
     '''generate_objects takes a list of artifacts that are supported by
     a create function and compares it to the kwargs passed in to the create

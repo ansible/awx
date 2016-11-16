@@ -12,6 +12,7 @@ from awx.main.models.unified_jobs import UnifiedJobTemplate, UnifiedJob
 
 __all__ = ('Label', )
 
+
 class Label(CommonModelNameNotUnique):
     '''
     Generic Tag. Designed for tagging Job Templates, but expandable to other models.
@@ -37,7 +38,7 @@ class Label(CommonModelNameNotUnique):
         return \
             Label.objects.filter(
                 organization=None,
-                jobtemplate_labels__isnull=True
+                unifiedjobtemplate_labels__isnull=True
             )
 
     def is_detached(self):
@@ -55,4 +56,3 @@ class Label(CommonModelNameNotUnique):
             return True
         else:
             return False
-

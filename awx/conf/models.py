@@ -7,11 +7,9 @@ import json
 # Django
 from django.db import models
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # Tower
 from awx.main.models.base import CreatedModifiedModel
+from awx.main.fields import JSONField
 
 __all__ = ['Setting']
 
@@ -23,8 +21,6 @@ class Setting(CreatedModifiedModel):
     )
     value = JSONField(
         null=True,
-        # FIXME: Enable when we upgrade to JSONField with support:
-        # load_kwargs={'object_pairs_hook': collections.OrderedDict},
     )
     user = models.ForeignKey(
         'auth.User',

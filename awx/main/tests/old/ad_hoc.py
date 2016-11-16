@@ -29,6 +29,7 @@ from awx.main.tests.data.ssh import (
 
 __all__ = ['RunAdHocCommandTest', 'AdHocCommandApiTest']
 
+
 class BaseAdHocCommandTest(BaseJobExecutionTest):
     '''
     Common initialization for testing ad hoc commands.
@@ -376,6 +377,7 @@ class RunAdHocCommandTest(BaseAdHocCommandTest):
 
 def run_pexpect_mock(self, *args, **kwargs):
     return 'successful', 0
+
 
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class AdHocCommandApiTest(BaseAdHocCommandTest):

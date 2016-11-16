@@ -496,6 +496,7 @@ class BaseSerializer(serializers.ModelSerializer):
 class EmptySerializer(serializers.Serializer):
     pass
 
+
 class BaseFactSerializer(BaseSerializer):
 
     __metaclass__ = BaseSerializerMetaclass
@@ -508,6 +509,7 @@ class BaseFactSerializer(BaseSerializer):
             choices = [(o, o.title()) for o in modules]
             ret['module'] = serializers.ChoiceField(choices=choices, read_only=True, required=False)
         return ret
+
 
 class UnifiedJobTemplateSerializer(BaseSerializer):
 
@@ -1293,6 +1295,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
     class Meta:
         model = Group
 
+
 class CustomInventoryScriptSerializer(BaseSerializer):
 
     script = serializers.CharField(trim_whitespace=False)
@@ -1494,7 +1497,6 @@ class TeamSerializer(BaseSerializer):
         if obj is not None and 'organization' in ret and not obj.organization:
             ret['organization'] = None
         return ret
-
 
 
 class RoleSerializer(BaseSerializer):
@@ -1792,12 +1794,18 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
-        return {'count': obj.labels.count(), 'results': [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]}
+        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
+        if len(label_list) < 10:
+            label_ct = len(label_list)
+        else:
+            label_ct = obj.labels.count()
+        return {'count': label_ct, 'results': label_list}
 
     def get_summary_fields(self, obj):
         res = super(LabelsListMixin, self).get_summary_fields(obj)
         res['labels'] = self._summary_field_labels(obj)
         return res
+
 
 class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
 
@@ -2063,6 +2071,7 @@ class JobRelaunchSerializer(JobSerializer):
         attrs = super(JobRelaunchSerializer, self).validate(attrs)
         return attrs
 
+
 class AdHocCommandSerializer(UnifiedJobSerializer):
 
     class Meta:
@@ -2163,6 +2172,7 @@ class SystemJobTemplateSerializer(UnifiedJobTemplateSerializer):
         ))
         return res
 
+
 class SystemJobSerializer(UnifiedJobSerializer):
 
     class Meta:
@@ -2179,12 +2189,14 @@ class SystemJobSerializer(UnifiedJobSerializer):
             res['cancel'] = reverse('api:system_job_cancel', args=(obj.pk,))
         return res
 
+
 class SystemJobCancelSerializer(SystemJobSerializer):
 
     can_cancel = serializers.BooleanField(read_only=True)
 
     class Meta:
         fields = ('can_cancel',)
+
 
 class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'edit', 'delete']
@@ -2211,9 +2223,11 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
     def validate_extra_vars(self, value):
         return vars_validate_or_raise(value)
 
+
 # TODO:
 class WorkflowJobTemplateListSerializer(WorkflowJobTemplateSerializer):
     pass
+
 
 # TODO:
 class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
@@ -2242,9 +2256,11 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             ret['extra_vars'] = obj.display_extra_vars()
         return ret
 
+
 # TODO:
 class WorkflowJobListSerializer(WorkflowJobSerializer, UnifiedJobListSerializer):
     pass
+
 
 class WorkflowJobCancelSerializer(WorkflowJobSerializer):
 
@@ -2341,6 +2357,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
                 "unified_job_template": _("Can not nest a %s inside a WorkflowJobTemplate") % ujt_obj.__class__.__name__})
         return super(WorkflowJobTemplateNodeSerializer, self).validate(attrs)
 
+
 class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
     class Meta:
         model = WorkflowJobNode
@@ -2357,14 +2374,16 @@ class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
             res['workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job.pk,))
         return res
 
+
 class WorkflowJobNodeListSerializer(WorkflowJobNodeSerializer):
     pass
+
 
 class WorkflowJobNodeDetailSerializer(WorkflowJobNodeSerializer):
     pass
 
-class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer):
 
+class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer):
     '''
     Influence the api browser sample data to not include workflow_job_template
     when editing a WorkflowNode.
@@ -2379,17 +2398,22 @@ class WorkflowJobTemplateNodeDetailSerializer(WorkflowJobTemplateNodeSerializer)
             field_kwargs.pop('queryset', None)
         return field_class, field_kwargs
 
+
 class WorkflowJobTemplateNodeListSerializer(WorkflowJobTemplateNodeSerializer):
     pass
+
 
 class JobListSerializer(JobSerializer, UnifiedJobListSerializer):
     pass
 
+
 class AdHocCommandListSerializer(AdHocCommandSerializer, UnifiedJobListSerializer):
     pass
 
+
 class SystemJobListSerializer(SystemJobSerializer, UnifiedJobListSerializer):
     pass
+
 
 class JobHostSummarySerializer(BaseSerializer):
 
@@ -2607,6 +2631,7 @@ class JobLaunchSerializer(BaseSerializer):
         obj.credential = JT_credential
         return attrs
 
+
 class WorkflowJobLaunchSerializer(BaseSerializer):
 
     can_start_without_user_input = serializers.BooleanField(read_only=True)
@@ -2664,6 +2689,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
         attrs = super(WorkflowJobLaunchSerializer, self).validate(attrs)
         obj.extra_vars = WFJT_extra_vars
         return attrs
+
 
 class NotificationTemplateSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
@@ -2754,6 +2780,7 @@ class NotificationTemplateSerializer(BaseSerializer):
             raise serializers.ValidationError(error_list)
         return attrs
 
+
 class NotificationSerializer(BaseSerializer):
 
     class Meta:
@@ -2768,6 +2795,7 @@ class NotificationSerializer(BaseSerializer):
         ))
         return res
 
+
 class LabelSerializer(BaseSerializer):
 
     class Meta:
@@ -2779,6 +2807,7 @@ class LabelSerializer(BaseSerializer):
         if obj.organization:
             res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
+
 
 class ScheduleSerializer(BaseSerializer):
     show_capabilities = ['edit', 'delete']
@@ -2852,6 +2881,7 @@ class ScheduleSerializer(BaseSerializer):
         except Exception:
             raise serializers.ValidationError(_("rrule parsing failed validation."))
         return value
+
 
 class ActivityStreamSerializer(BaseSerializer):
 
@@ -2995,6 +3025,7 @@ class FactVersionSerializer(BaseFactSerializer):
         }
         res['fact_view'] = build_url('api:host_fact_compare_view', args=(obj.host.pk,), get=params)
         return res
+
 
 class FactSerializer(BaseFactSerializer):
 

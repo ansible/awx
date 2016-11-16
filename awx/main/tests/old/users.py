@@ -39,6 +39,7 @@ class AuthTokenTimeoutTest(BaseTest):
         self.assertIn('Auth-Token-Timeout', response)
         self.assertEqual(response['Auth-Token-Timeout'], str(settings.AUTH_TOKEN_EXPIRATION))
 
+
 class AuthTokenLimitTest(BaseTest):
     def setUp(self):
         super(AuthTokenLimitTest, self).setUp()
@@ -74,10 +75,11 @@ class AuthTokenLimitTest(BaseTest):
         response = self.get(user_me_url, expect=401, auth=auth_token1)
         self.assertEqual(AuthToken.reason_long('limit_reached'), response['detail'])
 
-'''
-Ensure ips from the X-Forwarded-For get honored and used in auth tokens
-'''
+
 class AuthTokenProxyTest(BaseTest):
+    '''
+    Ensure ips from the X-Forwarded-For get honored and used in auth tokens
+    '''
     def check_token_and_expires_exist(self, response):
         self.assertTrue('token' in response)
         self.assertTrue('expires' in response)
@@ -161,6 +163,7 @@ class AuthTokenProxyTest(BaseTest):
         client_kwargs = {'HTTP_X_FORWARDED_FOR': ''}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self.check_me_is_admin(response)
+
 
 class UsersTest(BaseTest):
 

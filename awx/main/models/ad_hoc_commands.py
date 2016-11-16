@@ -17,13 +17,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.notifications import JobNotificationMixin
+from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
@@ -210,6 +208,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "AdHoc Command"
+
 
 class AdHocCommandEvent(CreatedModifiedModel):
     '''

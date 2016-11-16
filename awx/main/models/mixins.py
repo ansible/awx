@@ -5,16 +5,17 @@ import json
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
-from jsonfield import JSONField
 
 # AWX
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
 from awx.main.utils import parse_yaml_or_json
+from awx.main.fields import JSONField
 
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin']
+
 
 class ResourceMixin(models.Model):
 
@@ -216,4 +217,3 @@ class SurveyJobMixin(models.Model):
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
-

@@ -41,6 +41,7 @@ else:
 #####################################################################
 # Helper Functions
 
+
 def explode_glob_path(path):
     """Take a glob and hand back the full recursive expansion,
     ignoring links.
@@ -76,6 +77,7 @@ def proc_data_files(data_files):
     return result
 
 #####################################################################
+
 
 setup(
     name='ansible-tower',

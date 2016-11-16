@@ -21,9 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models.base import * # noqa
@@ -40,6 +37,7 @@ from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
+from awx.main.fields import JSONField
 
 from awx.main.consumers import emit_channel_notification
 
@@ -189,6 +187,7 @@ class JobOptions(BaseModel):
             return self.credential.passwords_needed
         else:
             return []
+
 
 class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
     '''
@@ -393,6 +392,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.project.organization)))
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
+
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     '''
@@ -647,6 +647,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Job"
+
 
 class JobHostSummary(CreatedModifiedModel):
     '''

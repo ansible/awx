@@ -2,6 +2,7 @@ from awx.main.models import Job, Instance
 from django.test.utils import override_settings
 import pytest
 
+
 @pytest.mark.django_db
 def test_orphan_unified_job_creation(instance, inventory):
     job = Job.objects.create(job_template=None, inventory=inventory, name='hi world')
@@ -9,6 +10,7 @@ def test_orphan_unified_job_creation(instance, inventory):
     assert job2.job_template is None
     assert job2.inventory == inventory
     assert job2.name == 'hi world'
+
 
 @pytest.mark.django_db
 def test_job_capacity_and_with_inactive_node():

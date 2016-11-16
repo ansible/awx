@@ -5,6 +5,7 @@ from awx.main.models import (
 )
 from awx.main.models.jobs import JobTemplate
 
+
 def do_init_workflow(job_template_success, job_template_fail, job_template_never):
     wfjt, created = WorkflowJobTemplate.objects.get_or_create(name="linear workflow")
     wfjt.delete()
@@ -30,11 +31,13 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
         
         nodes_success[1].failure_nodes.add(nodes_never[2])
 
+
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)
     jt_fail= JobTemplate.objects.get(id=6)
     jt_never= JobTemplate.objects.get(id=7)
     do_init_workflow(jt_success, jt_fail, jt_never)
+
 
 if __name__ == "__main__":
     do_init()

@@ -13,6 +13,7 @@ from django.utils.timezone import now
 # AWX
 from awx.main.models import ActivityStream
 
+
 class Command(NoArgsCommand):
     '''
     Management command to purge old activity stream events.
