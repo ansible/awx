@@ -44,6 +44,7 @@ except ImportError:
     print("pyzmq is required")
     sys.exit(1)
 
+
 class CacheModule(BaseCacheModule):
 
     def __init__(self, *args, **kwargs):

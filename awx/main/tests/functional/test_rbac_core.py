@@ -53,7 +53,6 @@ def test_auto_inheritance_by_parents(organization, alice):
     assert alice not in organization.admin_role
 
 
-
 @pytest.mark.django_db
 def test_accessible_objects(organization, alice, bob):
     A = Role.objects.create()
@@ -67,6 +66,7 @@ def test_accessible_objects(organization, alice, bob):
     A.children.add(organization.admin_role)
     assert Organization.accessible_objects(alice, 'admin_role').count() == 1
     assert Organization.accessible_objects(bob, 'admin_role').count() == 0
+
 
 @pytest.mark.django_db
 def test_team_symantics(organization, team, alice):
@@ -92,6 +92,7 @@ def test_auto_field_adjustments(organization, inventory, team, alice):
     inventory.save()
     assert alice not in inventory.admin_role
     #assert False
+
 
 @pytest.mark.django_db
 def test_implicit_deletes(alice):
@@ -126,6 +127,7 @@ def test_content_object(user):
 
     org = Organization.objects.create(name='test-org')
     assert org.admin_role.content_object.id == org.id
+
 
 @pytest.mark.django_db
 def test_hierarchy_rebuilding_multi_path():

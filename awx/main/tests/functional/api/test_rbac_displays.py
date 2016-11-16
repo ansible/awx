@@ -172,6 +172,7 @@ def mock_access_method(mocker):
     mock_method.__name__ = 'bars' # Required for a logging statement
     return mock_method
 
+
 @pytest.mark.django_db
 class TestAccessListCapabilities:
     """
@@ -240,6 +241,7 @@ def test_team_roles_unattach(mocker, team, team_member, inventory, mock_access_m
         inventory.admin_role, team.member_role, 'parents', skip_sub_obj_read_check=True, data={})
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
 
+
 @pytest.mark.django_db
 def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_method, get):
     # Add to same organization so that alice and bob can see each other
@@ -254,6 +256,7 @@ def test_user_roles_unattach(mocker, organization, alice, bob, mock_access_metho
         organization.member_role, alice, 'members', skip_sub_obj_read_check=True, data={})
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach'] == 'foobar'
 
+
 @pytest.mark.django_db
 def test_team_roles_unattach_functional(team, team_member, inventory, get):
     team.member_role.children.add(inventory.admin_role)
@@ -261,6 +264,7 @@ def test_team_roles_unattach_functional(team, team_member, inventory, get):
     # Team member should be able to remove access to inventory, becauase
     # the inventory admin_role grants that ability
     assert response.data['results'][0]['summary_fields']['user_capabilities']['unattach']
+
 
 @pytest.mark.django_db
 def test_user_roles_unattach_functional(organization, alice, bob, get):
@@ -278,12 +282,14 @@ def test_prefetch_jt_capabilities(job_template, rando):
     cache_list_capabilities(qs, ['admin', 'execute'], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'edit': False, 'start': True}
 
+
 @pytest.mark.django_db
 def test_prefetch_group_capabilities(group, rando):
     group.inventory.adhoc_role.members.add(rando)
     qs = Group.objects.all()
     cache_list_capabilities(qs, ['inventory.admin', 'inventory.adhoc'], Group, rando)
     assert qs[0].capabilities_cache == {'edit': False, 'adhoc': True}
+
 
 @pytest.mark.django_db
 def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_credential, rando):
@@ -309,10 +315,12 @@ def test_prefetch_jt_copy_capability(job_template, project, inventory, machine_c
     ]}], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'copy': True}
 
+
 @pytest.mark.django_db
 def test_manual_projects_no_update(project, get, admin_user):
     response = get(reverse('api:project_detail', args=[project.pk]), admin_user, expect=200)
     assert not response.data['summary_fields']['user_capabilities']['start']
+
 
 @pytest.mark.django_db
 def test_group_update_capabilities_possible(group, inventory_source, admin_user):
@@ -321,6 +329,7 @@ def test_group_update_capabilities_possible(group, inventory_source, admin_user)
 
     capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
     assert capabilities['start']
+
 
 @pytest.mark.django_db
 def test_group_update_capabilities_impossible(group, inventory_source, admin_user):
@@ -332,6 +341,7 @@ def test_group_update_capabilities_impossible(group, inventory_source, admin_use
     capabilities = get_user_capabilities(admin_user, group, method_list=['start'])
     assert not capabilities['start']
 
+
 @pytest.mark.django_db
 def test_license_check_not_called(mocker, job_template, project, org_admin, get):
     job_template.project = project
@@ -340,4 +350,3 @@ def test_license_check_not_called(mocker, job_template, project, org_admin, get)
     with mocker.patch('awx.main.access.BaseAccess.check_license', mock_license_check):
         get(reverse('api:job_template_detail', args=[job_template.pk]), org_admin, expect=200)
         assert not mock_license_check.called
-

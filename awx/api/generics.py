@@ -42,6 +42,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
 
 logger = logging.getLogger('awx.api.generics')
 
+
 def get_view_name(cls, suffix=None):
     '''
     Wrapper around REST framework get_view_name() to support get_name() method
@@ -58,6 +59,7 @@ def get_view_name(cls, suffix=None):
     if name:
         return ('%s %s' % (name, suffix)) if suffix else name
     return views.get_view_name(cls, suffix=None)
+
 
 def get_view_description(cls, html=False):
     '''
@@ -77,6 +79,7 @@ def get_view_description(cls, html=False):
     if html:
         desc = '<div class="description">%s</div>' % desc
     return mark_safe(desc)
+
 
 class APIView(views.APIView):
 
@@ -227,10 +230,12 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         d['settings'] = settings
         return d
 
+
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
 
     def get_queryset(self):
         return self.request.user.get_queryset(self.model)
+
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
@@ -266,9 +271,11 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 fields.append(field.name)
         return fields
 
+
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
     pass
+
 
 class ParentMixin(object):
 
@@ -287,6 +294,7 @@ class ParentMixin(object):
             args = (self.parent_model, parent_access, parent, None)
         if not self.request.user.can_access(*args):
             raise PermissionDenied()
+
 
 class SubListAPIView(ListAPIView, ParentMixin):
     # Base class for a read-only sublist view.
@@ -314,6 +322,7 @@ class SubListAPIView(ListAPIView, ParentMixin):
         qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = getattrd(parent, self.relationship).distinct()
         return qs & sublist_qs
+
 
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects
@@ -366,6 +375,7 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
 
         headers = {'Location': obj.get_absolute_url()}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
@@ -490,11 +500,14 @@ class DeleteLastUnattachLabelMixin(object):
 
         return res
 
+
 class SubDetailAPIView(generics.RetrieveAPIView, GenericAPIView, ParentMixin):
     pass
 
+
 class RetrieveAPIView(generics.RetrieveAPIView, GenericAPIView):
     pass
+
 
 class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
 
@@ -510,6 +523,7 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
         ''' scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering '''
         pass
 
+
 class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
@@ -520,8 +534,10 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
     pass
+
 
 class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass

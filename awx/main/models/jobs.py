@@ -188,6 +188,7 @@ class JobOptions(BaseModel):
         else:
             return []
 
+
 class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin):
     '''
     A job template is a reusable job definition for applying a project (with
@@ -391,6 +392,7 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             success_notification_templates = set(success_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_success=self.project.organization)))
             any_notification_templates = set(any_notification_templates + list(base_notification_templates.filter(organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
+
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     '''
@@ -645,6 +647,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Job"
+
 
 class JobHostSummary(CreatedModifiedModel):
     '''

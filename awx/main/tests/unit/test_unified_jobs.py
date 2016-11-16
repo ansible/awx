@@ -23,6 +23,7 @@ def test_result_stdout_raw_handle_file__found(exists, open):
 
     assert result == 'my_file_handler'
 
+
 # stdout file missing, job finished
 @mock.patch('os.path.exists', return_value=False)
 def test_result_stdout_raw_handle__missing(exists):
@@ -34,6 +35,7 @@ def test_result_stdout_raw_handle__missing(exists):
 
     assert isinstance(result, StringIO)
     assert result.read() == 'stdout capture is missing'
+
 
 # stdout file missing, job not finished
 @mock.patch('os.path.exists', return_value=False)

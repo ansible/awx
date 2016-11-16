@@ -8,6 +8,7 @@ from awx.main.migrations import _rbac as rbac
 from django.apps import apps
 from django.contrib.auth.models import User
 
+
 @pytest.mark.django_db
 def test_credential_migration_user(credential, user, permissions):
     u = user('user', False)
@@ -17,6 +18,7 @@ def test_credential_migration_user(credential, user, permissions):
     rbac.migrate_credential(apps, None)
 
     assert u in credential.admin_role
+
 
 @pytest.mark.django_db
 def test_two_teams_same_cred_name(organization_factory):
@@ -33,11 +35,13 @@ def test_two_teams_same_cred_name(organization_factory):
     assert objects.teams.team1.member_role in cred1.use_role.parents.all()
     assert objects.teams.team2.member_role in cred2.use_role.parents.all()
 
+
 @pytest.mark.django_db
 def test_credential_use_role(credential, user, permissions):
     u = user('user', False)
     credential.use_role.members.add(u)
     assert u in credential.use_role
+
 
 @pytest.mark.django_db
 def test_credential_migration_team_member(credential, team, user, permissions):
@@ -58,6 +62,7 @@ def test_credential_migration_team_member(credential, team, user, permissions):
     assert u in credential.use_role
     assert u not in credential.admin_role
 
+
 @pytest.mark.django_db
 def test_credential_migration_team_admin(credential, team, user, permissions):
     u = user('user', False)
@@ -70,6 +75,7 @@ def test_credential_migration_team_admin(credential, team, user, permissions):
     # Admin permissions post migration
     rbac.migrate_credential(apps, None)
     assert u in credential.admin_role
+
 
 @pytest.mark.django_db
 def test_credential_migration_org_auditor(credential, team, org_auditor):
@@ -89,6 +95,7 @@ def test_credential_migration_org_auditor(credential, team, org_auditor):
     assert org_auditor not in credential.use_role
     assert org_auditor in credential.read_role
 
+
 def test_credential_access_superuser():
     u = User(username='admin', is_superuser=True)
     access = CredentialAccess(u)
@@ -97,6 +104,7 @@ def test_credential_access_superuser():
     assert access.can_add(None)
     assert access.can_change(credential, None)
     assert access.can_delete(credential)
+
 
 @pytest.mark.django_db
 def test_credential_access_auditor(credential, organization_factory):
@@ -108,6 +116,7 @@ def test_credential_access_auditor(credential, organization_factory):
 
     access = CredentialAccess(objects.users.user1)
     assert access.can_read(credential)
+
 
 @pytest.mark.django_db
 def test_credential_access_admin(user, team, credential):
@@ -135,6 +144,7 @@ def test_credential_access_admin(user, team, credential):
     # should have can_change access as org-admin
     assert access.can_change(credential, {'description': 'New description.'})
 
+
 @pytest.mark.django_db
 def test_org_credential_access_member(alice, org_credential, credential):
     org_credential.admin_role.members.add(alice)
@@ -152,6 +162,7 @@ def test_org_credential_access_member(alice, org_credential, credential):
         'description': 'New description.',
         'organization': None})
 
+
 @pytest.mark.django_db
 def test_cred_job_template_xfail(user, deploy_jobtemplate):
     ' Personal credential migration '
@@ -166,6 +177,7 @@ def test_cred_job_template_xfail(user, deploy_jobtemplate):
     access = CredentialAccess(a)
     rbac.migrate_credential(apps, None)
     assert not access.can_change(cred, {'organization': org.pk})
+
 
 @pytest.mark.django_db
 def test_cred_job_template(user, team, deploy_jobtemplate):
@@ -188,6 +200,7 @@ def test_cred_job_template(user, team, deploy_jobtemplate):
     org.admin_role.members.remove(a)
     assert not access.can_change(cred, {'organization': org.pk})
 
+
 @pytest.mark.django_db
 def test_cred_multi_job_template_single_org_xfail(user, deploy_jobtemplate):
     a = user('admin', False)
@@ -203,6 +216,7 @@ def test_cred_multi_job_template_single_org_xfail(user, deploy_jobtemplate):
     cred.refresh_from_db()
 
     assert not access.can_change(cred, {'organization': org.pk})
+
 
 @pytest.mark.django_db
 def test_cred_multi_job_template_single_org(user, team, deploy_jobtemplate):
@@ -222,6 +236,7 @@ def test_cred_multi_job_template_single_org(user, team, deploy_jobtemplate):
 
     org.admin_role.members.remove(a)
     assert not access.can_change(cred, {'organization': org.pk})
+
 
 @pytest.mark.django_db
 def test_single_cred_multi_job_template_multi_org(user, organizations, credential, team):
@@ -252,6 +267,7 @@ def test_single_cred_multi_job_template_multi_org(user, organizations, credentia
 
     assert jts[0].credential != jts[1].credential
 
+
 @pytest.mark.django_db
 def test_cred_inventory_source(user, inventory, credential):
     u = user('member', False)
@@ -268,6 +284,7 @@ def test_cred_inventory_source(user, inventory, credential):
     rbac.migrate_credential(apps, None)
     assert u not in credential.use_role
 
+
 @pytest.mark.django_db
 def test_cred_project(user, credential, project):
     u = user('member', False)
@@ -280,11 +297,13 @@ def test_cred_project(user, credential, project):
     rbac.migrate_credential(apps, None)
     assert u not in credential.use_role
 
+
 @pytest.mark.django_db
 def test_cred_no_org(user, credential):
     su = user('su', True)
     access = CredentialAccess(su)
     assert access.can_change(credential, {'user': su.pk})
+
 
 @pytest.mark.django_db
 def test_cred_team(user, team, credential):

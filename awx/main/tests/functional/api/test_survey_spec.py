@@ -16,10 +16,12 @@ def mock_no_surveys(self, add_host=False, feature=None, check_expiration=True):
     else:
         pass
 
+
 @pytest.fixture
 def job_template_with_survey(job_template_factory):
     objects = job_template_factory('jt', project='prj', survey='submitted_email')
     return objects.job_template
+
 
 # Survey license-based denial tests
 @mock.patch('awx.api.views.feature_enabled', lambda feature: False)
@@ -31,6 +33,7 @@ def test_survey_spec_view_denied(job_template_with_survey, get, admin_user):
                    args=(job_template_with_survey.id,)), admin_user, expect=402)
     assert response.data['detail'] == 'Your license does not allow adding surveys.'
 
+
 @mock.patch('awx.main.access.BaseAccess.check_license', mock_no_surveys)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -38,6 +41,7 @@ def test_deny_enabling_survey(deploy_jobtemplate, patch, admin_user):
     response = patch(url=deploy_jobtemplate.get_absolute_url(),
                      data=dict(survey_enabled=True), user=admin_user, expect=402)
     assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
+
 
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
@@ -47,6 +51,7 @@ def test_job_start_blocked_without_survey_license(job_template_with_survey, admi
     access = JobTemplateAccess(admin_user)
     with pytest.raises(LicenseForbids):
         access.can_start(job_template_with_survey)
+
 
 @mock.patch('awx.main.access.BaseAccess.check_license', mock_no_surveys)
 @pytest.mark.django_db
@@ -65,6 +70,7 @@ def test_deny_creating_with_survey(project, post, admin_user):
         user=admin_user, expect=402)
     assert response.data['detail'] == 'Feature surveys is not enabled in the active license.'
 
+
 # Test normal operations with survey license work
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
@@ -72,6 +78,7 @@ def test_deny_creating_with_survey(project, post, admin_user):
 def test_survey_spec_view_allowed(deploy_jobtemplate, get, admin_user):
     get(reverse('api:job_template_survey_spec', args=(deploy_jobtemplate.id,)),
         admin_user, expect=200)
+
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
@@ -82,6 +89,7 @@ def test_survey_spec_sucessful_creation(survey_spec_factory, job_template, post,
          data=survey_input_data, user=admin_user, expect=200)
     updated_jt = JobTemplate.objects.get(pk=job_template.pk)
     assert updated_jt.survey_spec == survey_input_data
+
 
 # Tests related to survey content validation
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
@@ -96,6 +104,7 @@ def test_survey_spec_non_dict_error(deploy_jobtemplate, post, admin_user):
         user=admin_user, expect=400)
     assert response.data['error'] == "Survey question 0 is not a json object."
 
+
 @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -106,6 +115,7 @@ def test_survey_spec_dual_names_error(survey_spec_factory, deploy_jobtemplate, p
         user=user('admin', True), expect=400)
     assert response.data['error'] == "'variable' 'submitter_email' duplicated in survey question 1."
 
+
 # Test actions that should be allowed with non-survey license
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
@@ -115,6 +125,7 @@ def test_disable_survey_access_without_license(job_template_with_survey, admin_u
     access = JobTemplateAccess(admin_user)
     assert access.can_change(job_template_with_survey, dict(survey_enabled=False))
 
+
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -123,6 +134,7 @@ def test_delete_survey_access_without_license(job_template_with_survey, admin_us
     access = JobTemplateAccess(admin_user)
     assert access.can_change(job_template_with_survey, dict(survey_spec=None))
     assert access.can_change(job_template_with_survey, dict(survey_spec={}))
+
 
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
@@ -137,6 +149,7 @@ def test_job_start_allowed_with_survey_spec(job_template_factory, admin_user):
     access = JobTemplateAccess(admin_user)
     assert access.can_start(job_template_with_survey, {})
 
+
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @pytest.mark.django_db
 @pytest.mark.survey
@@ -145,6 +158,7 @@ def test_job_template_delete_access_with_survey(job_template_with_survey, admin_
     to delete the survey. This checks that system admins can delete the survey on a JT."""
     access = JobTemplateAccess(admin_user)
     assert access.can_delete(job_template_with_survey)
+
 
 @mock.patch('awx.api.views.feature_enabled', lambda feature: False)
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
@@ -156,6 +170,7 @@ def test_delete_survey_spec_without_license(job_template_with_survey, delete, ad
            admin_user, expect=200)
     new_jt = JobTemplate.objects.get(pk=job_template_with_survey.pk)
     assert new_jt.survey_spec == {}
+
 
 @mock.patch('awx.main.access.BaseAccess.check_license', lambda self, **kwargs: True)
 @mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job',
@@ -174,6 +189,7 @@ def test_launch_survey_enabled_but_no_survey_spec(job_template_factory, post, ad
                     dict(extra_vars=dict(survey_var=7)), admin_user, expect=201)
     assert 'survey_var' in response.data['ignored_fields']['extra_vars']
 
+
 @mock.patch('awx.main.access.BaseAccess.check_license', new=mock_no_surveys)
 @mock.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job',
             lambda self: mock.MagicMock(spec=Job, id=968))
@@ -190,6 +206,7 @@ def test_launch_with_non_empty_survey_spec_no_license(job_template_factory, post
     obj.survey_enabled = False
     obj.save()
     post(reverse('api:job_template_launch', args=[obj.pk]), {}, admin_user, expect=201)
+
 
 @pytest.mark.django_db
 @pytest.mark.survey

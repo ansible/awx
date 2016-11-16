@@ -39,6 +39,7 @@ EXAMPLES = '''
 #           }, ... ] } }
 '''
 
+
 def rpm_package_list():
     import rpm
     trans_set = rpm.TransactionSet()
@@ -53,6 +54,7 @@ def rpm_package_list():
         installed_packages.append(package_details)
     return installed_packages
 
+
 def deb_package_list():
     import apt
     apt_cache = apt.Cache()
@@ -66,6 +68,7 @@ def deb_package_list():
                                source='apt')
         installed_packages.append(package_details)
     return installed_packages
+
 
 def main():
     module = AnsibleModule(

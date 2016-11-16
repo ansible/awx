@@ -356,6 +356,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
+
 class UnifiedJobTypeStringMixin(object):
     @classmethod
     def _underscore_to_camel(cls, word):
@@ -378,6 +379,7 @@ class UnifiedJobTypeStringMixin(object):
         if not model:
             return None
         return model.objects.get(id=job_id)
+
 
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):
     '''

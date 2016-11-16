@@ -5,6 +5,7 @@ import sys
 # Based on http://stackoverflow.com/a/6879344/131141 -- Initialize tower display
 # callback as early as possible to wrap ansible.display.Display methods.
 
+
 def argv_ready(argv):
     if argv and os.path.basename(argv[0]) in {'ansible', 'ansible-playbook'}:
         import tower_display_callback  # noqa

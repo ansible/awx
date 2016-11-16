@@ -16,11 +16,14 @@ from awx.main.management.commands.cleanup_facts import CleanupFacts, Command
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
 
+
 def mock_feature_enabled(feature):
     return True
 
+
 def mock_feature_disabled(feature):
     return False
+
 
 @pytest.mark.django_db
 def test_cleanup_granularity(fact_scans, hosts):
@@ -51,6 +54,7 @@ def test_cleanup_older_than(fact_scans, hosts):
     cleanup_facts = CleanupFacts()
     deleted_count = cleanup_facts.cleanup(fact_middle.timestamp, granularity)
     assert 210 == deleted_count
+
 
 @pytest.mark.django_db
 def test_cleanup_older_than_granularity_module(fact_scans, hosts):
@@ -96,6 +100,7 @@ def test_cleanup_logic(fact_scans, hosts):
             timestamp_pivot -= granularity
             assert fact.timestamp == timestamp_pivot
 
+
 @mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_disabled)
 @pytest.mark.django_db
 @pytest.mark.license_feature
@@ -104,6 +109,7 @@ def test_system_tracking_feature_disabled(mocker):
     with pytest.raises(CommandError) as err:
         cmd.handle(None)
     assert 'The System Tracking feature is not enabled for your Tower instance' in err.value
+
 
 @mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
@@ -117,6 +123,7 @@ def test_parameters_ok(mocker):
     cmd = Command()
     cmd.handle(None, **kv)
     run.assert_called_once_with(relativedelta(days=1), relativedelta(days=1), module=None)
+
 
 @pytest.mark.django_db
 def test_string_time_to_timestamp_ok():
@@ -147,6 +154,7 @@ def test_string_time_to_timestamp_ok():
         res = cmd.string_time_to_timestamp(kv['time'])
         assert kv['timestamp'] == res
 
+
 @pytest.mark.django_db
 def test_string_time_to_timestamp_invalid():
     kvs = [
@@ -176,6 +184,7 @@ def test_string_time_to_timestamp_invalid():
         res = cmd.string_time_to_timestamp(kv['time'])
         assert res is None
 
+
 @mock.patch('awx.main.management.commands.cleanup_facts.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 def test_parameters_fail(mocker):
@@ -198,4 +207,3 @@ def test_parameters_fail(mocker):
         with pytest.raises(CommandError) as err:
             cmd.handle(None, older_than=kv['older_than'], granularity=kv['granularity'])
         assert kv['msg'] in err.value
-

@@ -184,6 +184,7 @@ class Metadata(metadata.SimpleMetadata):
 
         return metadata
 
+
 class RoleMetadata(Metadata):
     def determine_metadata(self, request, view):
         metadata = super(RoleMetadata, self).determine_metadata(request, view)

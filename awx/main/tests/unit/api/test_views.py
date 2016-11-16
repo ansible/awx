@@ -6,11 +6,13 @@ from awx.api.views import (
     JobTemplateLabelList,
 )
 
+
 @pytest.fixture
 def mock_response_new(mocker):
     m = mocker.patch('awx.api.views.Response.__new__')
     m.return_value = m
     return m
+
 
 class TestApiV1RootView:
     def test_get_endpoints(self, mocker, mock_response_new):
@@ -53,6 +55,7 @@ class TestApiV1RootView:
         data_arg = mock_response_new.mock_calls[0][1][1]
         for endpoint in endpoints:
             assert endpoint in data_arg
+
 
 class TestJobTemplateLabelList:
     def test_inherited_mixin_unattach(self):

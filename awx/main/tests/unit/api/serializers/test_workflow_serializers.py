@@ -16,6 +16,7 @@ from awx.main.models import (
     WorkflowJobNode,
 )
 
+
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobTemplateSerializerGetRelated():
     @pytest.fixture
@@ -35,6 +36,7 @@ class TestWorkflowJobTemplateSerializerGetRelated():
                          'workflow_job_templates',
                          related_resource_name)
 
+
 @mock.patch('awx.api.serializers.BaseSerializer.get_related', lambda x,y: {})
 class TestWorkflowNodeBaseSerializerGetRelated():
     @pytest.fixture
@@ -42,7 +44,7 @@ class TestWorkflowNodeBaseSerializerGetRelated():
         jt = job_template_factory(name="blah", persisted=False).job_template
         jt.pk = 1
         return jt
-    
+
     @pytest.fixture
     def workflow_job_template_node_related(self, job_template):
         return WorkflowJobTemplateNode(pk=1, unified_job_template=job_template)
@@ -59,6 +61,7 @@ class TestWorkflowNodeBaseSerializerGetRelated():
     def test_workflow_unified_job_template_absent(self, workflow_job_template_node):
         related = WorkflowJobTemplateNodeSerializer().get_related(workflow_job_template_node)
         assert 'unified_job_template' not in related
+
 
 @mock.patch('awx.api.serializers.WorkflowNodeBaseSerializer.get_related', lambda x,y: {})
 class TestWorkflowJobTemplateNodeSerializerGetRelated():
@@ -111,11 +114,12 @@ class FakeView:
     def get_object(self):
         return self.obj
 
+
 class FakeRequest:
     pass
 
-class TestWorkflowJobTemplateNodeSerializerCharPrompts():
 
+class TestWorkflowJobTemplateNodeSerializerCharPrompts():
     @pytest.fixture
     def WFJT_serializer(self):
         serializer = WorkflowJobTemplateNodeSerializer()

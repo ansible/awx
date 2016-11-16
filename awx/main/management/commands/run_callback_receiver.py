@@ -17,8 +17,8 @@ from awx.main.models import * # noqa
 
 logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 
-class CallbackBrokerWorker(ConsumerMixin):
 
+class CallbackBrokerWorker(ConsumerMixin):
     def __init__(self, connection):
         self.connection = connection
 
@@ -50,6 +50,7 @@ class CallbackBrokerWorker(ConsumerMixin):
             traceback.print_exc()
             logger.error('Callback Task Processor Raised Exception: %r', exc)
         message.ack()
+
 
 class Command(NoArgsCommand):
     '''

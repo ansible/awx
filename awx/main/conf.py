@@ -77,6 +77,7 @@ register(
     category_slug='system',
 )
 
+
 def _load_default_license_from_file():
     try:
         license_file = os.environ.get('AWX_LICENSE_FILE', '/etc/tower/license')

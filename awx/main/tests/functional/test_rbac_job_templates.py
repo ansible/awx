@@ -22,6 +22,7 @@ def jt_objects(job_template_factory):
         credential='cred1', cloud_credential='aws1', network_credential='juniper1')
     return objects
 
+
 @pytest.mark.django_db
 def test_job_template_migration_check(credential, deploy_jobtemplate, check_jobtemplate, user):
     admin = user('admin', is_superuser=True)
@@ -52,6 +53,7 @@ def test_job_template_migration_check(credential, deploy_jobtemplate, check_jobt
     assert joe in check_jobtemplate.execute_role
     assert admin in deploy_jobtemplate.execute_role
     assert joe not in deploy_jobtemplate.execute_role
+
 
 @pytest.mark.django_db
 def test_job_template_migration_deploy(credential, deploy_jobtemplate, check_jobtemplate, user):
@@ -168,6 +170,7 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
     assert access.can_read(deploy_jobtemplate)
     assert access.can_add({})
 
+
 @pytest.mark.django_db
 def test_job_template_access_read_level(jt_objects, rando):
 
@@ -184,6 +187,7 @@ def test_job_template_access_read_level(jt_objects, rando):
     assert not access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
     assert not access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
 
+
 @pytest.mark.django_db
 def test_job_template_access_use_level(jt_objects, rando):
 
@@ -199,6 +203,7 @@ def test_job_template_access_use_level(jt_objects, rando):
     assert access.can_add(dict(credential=jt_objects.credential.pk, project=proj_pk))
     assert access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
     assert access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
+
 
 @pytest.mark.django_db
 def test_job_template_access_org_admin(jt_objects, rando):
@@ -219,6 +224,7 @@ def test_job_template_access_org_admin(jt_objects, rando):
 
     assert access.can_read(jt_objects.job_template)
     assert access.can_delete(jt_objects.job_template)
+
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
@@ -243,12 +249,14 @@ def test_job_template_creator_access(project, rando, post):
     # Creating a JT should place the creator in the admin role
     assert rando in jt_obj.admin_role
 
+
 @pytest.mark.django_db
 def test_associate_label(label, user, job_template):
     access = JobTemplateAccess(user('joe', False))
     job_template.admin_role.members.add(user('joe', False))
     label.organization.read_role.members.add(user('joe', False))
     assert access.can_attach(job_template, label, 'labels', None)
+
 
 @pytest.mark.django_db
 def test_move_schedule_to_JT_no_access(job_template, rando):
@@ -259,6 +267,7 @@ def test_move_schedule_to_JT_no_access(job_template, rando):
     jt2 = JobTemplate.objects.create(name="other-jt")
     access = ScheduleAccess(rando)
     assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+
 
 @pytest.mark.django_db
 def test_move_schedule_from_JT_no_access(job_template, rando):

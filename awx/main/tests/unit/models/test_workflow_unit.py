@@ -8,6 +8,7 @@ from awx.main.models.workflow import (
 )
 import mock
 
+
 class TestWorkflowJobInheritNodesMixin():
     class TestCreateWorkflowJobNodes():
         @pytest.fixture
@@ -23,7 +24,7 @@ class TestWorkflowJobInheritNodesMixin():
 
             mixin = WorkflowJobInheritNodesMixin()
             mixin._create_workflow_job_nodes(job_template_nodes)
-            
+
             for job_template_node in job_template_nodes:
                 workflow_job_node_create.assert_any_call(workflow_job=mixin)
 
@@ -38,7 +39,7 @@ class TestWorkflowJobInheritNodesMixin():
 
         def test__map_workflow_job_nodes(self, job_template_nodes, job_nodes):
             mixin = WorkflowJobInheritNodesMixin()
-            
+
             node_ids_map = mixin._map_workflow_job_nodes(job_template_nodes, job_nodes)
             assert len(node_ids_map) == len(job_template_nodes)
 
@@ -59,7 +60,7 @@ class TestWorkflowJobInheritNodesMixin():
         def job_nodes(self, mocker):
             nodes = [mocker.MagicMock(id=i) for i in range(100, 110)]
             return nodes
-        
+
         @pytest.fixture
         def job_nodes_dict(self, job_nodes):
             _map = {}
@@ -70,7 +71,7 @@ class TestWorkflowJobInheritNodesMixin():
 
         def test__inherit_relationship(self, mocker, job_template_nodes, job_nodes, job_nodes_dict):
             mixin = WorkflowJobInheritNodesMixin()
-            
+
             mixin._get_workflow_job_node_by_id = lambda x: job_nodes_dict[x]
             mixin._get_all_by_type = lambda x,node_type: x.success_nodes
 
@@ -87,6 +88,7 @@ class TestWorkflowJobInheritNodesMixin():
 def workflow_job_unit():
     return WorkflowJob(name='workflow', status='new')
 
+
 @pytest.fixture
 def workflow_job_template_unit():
     return WorkflowJobTemplate(name='workflow')
@@ -101,12 +103,14 @@ def jt_ask(job_template_factory):
     jt.ask_tags_on_launch = True
     return jt
 
+
 @pytest.fixture
 def project_unit():
     return Project(name='example-proj')
 
 
 example_prompts = dict(job_type='check', job_tags='quack', limit='duck', skip_tags='oink')
+
 
 @pytest.fixture
 def job_node_no_prompts(workflow_job_unit, jt_ask):
@@ -119,9 +123,11 @@ def job_node_with_prompts(job_node_no_prompts):
     job_node_no_prompts.credential = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
     return job_node_no_prompts
 
+
 @pytest.fixture
 def wfjt_node_no_prompts(workflow_job_template_unit, jt_ask):
     return WorkflowJobTemplateNode(workflow_job_template=workflow_job_template_unit, unified_job_template=jt_ask)
+
 
 @pytest.fixture
 def wfjt_node_with_prompts(wfjt_node_no_prompts):
@@ -130,8 +136,8 @@ def wfjt_node_with_prompts(wfjt_node_no_prompts):
     wfjt_node_no_prompts.credential = Credential(name='example-inv', kind='ssh', username='asdf', password='asdf')
     return wfjt_node_no_prompts
 
-class TestWorkflowJobCreate:
 
+class TestWorkflowJobCreate:
     def test_create_no_prompts(self, wfjt_node_no_prompts, workflow_job_unit, mocker):
         mock_create = mocker.MagicMock()
         with mocker.patch('awx.main.models.WorkflowJobNode.objects.create', mock_create):
@@ -152,6 +158,7 @@ class TestWorkflowJobCreate:
                 credential=wfjt_node_with_prompts.credential,
                 unified_job_template=wfjt_node_with_prompts.unified_job_template,
                 workflow_job=workflow_job_unit)
+
 
 @mock.patch('awx.main.models.workflow.WorkflowNodeBase.get_parent_nodes', lambda self: [])
 class TestWorkflowJobNodeJobKWARGS:

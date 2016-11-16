@@ -14,7 +14,6 @@ from django.test import TransactionTestCase
 
 @pytest.mark.django_db
 class TestWorkflowDAGFunctional(TransactionTestCase):
-
     def workflow_job(self):
         wfj = WorkflowJob.objects.create()
         nodes = [WorkflowJobNode.objects.create(workflow_job=wfj) for i in range(0, 5)]
@@ -34,6 +33,7 @@ class TestWorkflowDAGFunctional(TransactionTestCase):
         wfj = self.workflow_job()
         with self.assertNumQueries(4):
             dag._init_graph(wfj)
+
 
 @pytest.mark.django_db
 class TestWorkflowJob:
@@ -95,9 +95,9 @@ class TestWorkflowJob:
         assert queued_node.get_job_kwargs()['extra_vars'] == {'a': 42, 'b': 43}
         assert queued_node.ancestor_artifacts == {'a': 42, 'b': 43}
 
+
 @pytest.mark.django_db
 class TestWorkflowJobTemplate:
-
     @pytest.fixture
     def wfjt(self, workflow_job_template_factory):
         wfjt = workflow_job_template_factory('test').workflow_job_template
@@ -133,6 +133,7 @@ class TestWorkflowJobTemplate:
         node_assoc_1 = WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt)
         assert (test_view.is_valid_relation(nodes[2], node_assoc_1) ==
                 {'Error': 'Cannot associate failure_nodes when always_nodes have been associated.'})
+
 
 @pytest.mark.django_db
 class TestWorkflowJobFailure:

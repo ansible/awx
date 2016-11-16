@@ -73,6 +73,7 @@ def get_object_or_403(klass, *args, **kwargs):
     except queryset.model.MultipleObjectsReturned as e:
         raise PermissionDenied(*e.args)
 
+
 def to_python_boolean(value, allow_none=False):
     value = unicode(value)
     if value.lower() in ('true', '1', 't'):
@@ -83,6 +84,7 @@ def to_python_boolean(value, allow_none=False):
         return None
     else:
         raise ValueError(_(u'Unable to convert "%s" to boolean') % unicode(value))
+
 
 def camelcase_to_underscore(s):
     '''
@@ -131,6 +133,7 @@ def get_ansible_version():
     except:
         return 'unknown'
 
+
 @memoize()
 def get_ssh_version():
     '''
@@ -143,6 +146,7 @@ def get_ssh_version():
         return result.split(" ")[0].split("_")[1]
     except:
         return 'unknown'
+
 
 def get_awx_version():
     '''
@@ -167,8 +171,10 @@ def get_encryption_key_for_pk(pk, field_name):
     h.update(field_name)
     return h.digest()[:16]
 
+
 def get_encryption_key(instance, field_name):
     return get_encryption_key_for_pk(instance.pk, field_name)
+
 
 def encrypt_field(instance, field_name, ask=False, subfield=None):
     '''
@@ -188,6 +194,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
     b64data = base64.b64encode(encrypted)
     return '$encrypted$%s$%s' % ('AES', b64data)
 
+
 def decrypt_value(encryption_key, value):
     algo, b64data = value[len('$encrypted$'):].split('$', 1)
     if algo != 'AES':
@@ -196,6 +203,7 @@ def decrypt_value(encryption_key, value):
     cipher = AES.new(encryption_key, AES.MODE_ECB)
     value = cipher.decrypt(encrypted)
     return value.rstrip('\x00')
+
 
 def decrypt_field(instance, field_name, subfield=None):
     '''
@@ -210,9 +218,11 @@ def decrypt_field(instance, field_name, subfield=None):
 
     return decrypt_value(key, value)
 
+
 def decrypt_field_value(pk, field_name, value):
     key = get_encryption_key_for_pk(pk, field_name)
     return decrypt_value(key, value)
+
 
 def update_scm_url(scm_type, url, username=True, password=True,
                    check_special_cases=True, scp_format=False):
@@ -321,7 +331,6 @@ def update_scm_url(scm_type, url, username=True, password=True,
     return new_url
 
 
-
 def get_allowed_fields(obj, serializer_mapping):
     from django.contrib.auth.models import User
 
@@ -336,6 +345,7 @@ def get_allowed_fields(obj, serializer_mapping):
         allowed_fields = [f for f in allowed_fields if f not in field_blacklist]
 
     return allowed_fields
+
 
 def model_instance_diff(old, new, serializer_mapping=None):
     """
@@ -505,6 +515,7 @@ def parse_yaml_or_json(vars_str):
             vars_dict = {}
     return vars_dict
 
+
 @memoize()
 def get_system_task_capacity():
     '''
@@ -549,6 +560,7 @@ def ignore_inventory_group_removal():
     finally:
         _inventory_updates.is_removing = previous_value
 
+
 @memoize()
 def check_proot_installed():
     '''
@@ -564,6 +576,7 @@ def check_proot_installed():
     except (OSError, ValueError):
         return False
 
+
 def build_proot_temp_dir():
     '''
     Create a temporary directory for proot to use.
@@ -572,6 +585,7 @@ def build_proot_temp_dir():
     path = tempfile.mkdtemp(prefix='ansible_tower_proot_', dir=settings.AWX_PROOT_BASE_PATH)
     os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
     return path
+
 
 def wrap_args_with_proot(args, cwd, **kwargs):
     '''
@@ -616,6 +630,7 @@ def wrap_args_with_proot(args, cwd, **kwargs):
     new_args.extend(args)
     return new_args
 
+
 def get_pk_from_dict(_dict, key):
     '''
     Helper for obtaining a pk from user data dict or None if not present.
@@ -625,6 +640,7 @@ def get_pk_from_dict(_dict, key):
     except (TypeError, KeyError, ValueError):
         return None
 
+
 def build_url(*args, **kwargs):
     get = kwargs.pop('get', {})
     url = reverse(*args, **kwargs)
@@ -632,11 +648,13 @@ def build_url(*args, **kwargs):
         url += '?' + urllib.urlencode(get)
     return url
 
+
 def timestamp_apiformat(timestamp):
     timestamp = timestamp.isoformat()
     if timestamp.endswith('+00:00'):
         timestamp = timestamp[:-6] + 'Z'
     return timestamp
+
 
 # damn you python 2.6
 def timedelta_total_seconds(timedelta):
@@ -647,6 +665,7 @@ def timedelta_total_seconds(timedelta):
 
 class NoDefaultProvided(object):
     pass
+
 
 def getattrd(obj, name, default=NoDefaultProvided):
     """
@@ -664,9 +683,12 @@ def getattrd(obj, name, default=NoDefaultProvided):
 
 
 current_apps = apps
+
+
 def set_current_apps(apps):
     global current_apps
     current_apps = apps
+
 
 def get_current_apps():
     global current_apps

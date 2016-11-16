@@ -39,8 +39,10 @@ class Instance(models.Model):
         # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
         return "tower"
 
+
 class TowerScheduleState(SingletonModel):
     schedule_last_run = models.DateTimeField(auto_now_add=True)
+
 
 class JobOrigin(models.Model):
     """A model representing the relationship between a unified job and

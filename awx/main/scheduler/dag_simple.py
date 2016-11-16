@@ -8,6 +8,7 @@ from awx.main.models import (
     SystemJob,
 )
 
+
 class SimpleDAG(object):
     ''' A simple implementation of a directed acyclic graph '''
 

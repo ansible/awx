@@ -13,6 +13,7 @@ from awx.main.models import (
     Job,
 )
 
+
 def mock_JT_resource_data():
     return ({}, [])
 
@@ -22,17 +23,21 @@ def job_template(mocker):
     mock_jt.resource_validation_data = mock_JT_resource_data
     return mock_jt
 
+
 @pytest.fixture
 def job(mocker, job_template):
     return mocker.MagicMock(pk=5, job_template=job_template)
+
 
 @pytest.fixture
 def labels(mocker):
     return [Label(id=x, name='label-%d' % x) for x in xrange(0, 25)]
 
+
 @pytest.fixture
 def jobs(mocker):
     return [Job(id=x, name='job-%d' % x) for x in xrange(0, 25)]
+
 
 @mock.patch('awx.api.serializers.UnifiedJobTemplateSerializer.get_related', lambda x,y: {})
 @mock.patch('awx.api.serializers.JobOptionsSerializer.get_related', lambda x,y: {})
@@ -58,10 +63,10 @@ class TestJobSerializerGetRelated():
         assert 'job_template' in related
         assert related['job_template'] == '/api/v1/%s/%d/' % ('job_templates', job.job_template.pk)
 
+
 @mock.patch('awx.api.serializers.BaseSerializer.to_representation', lambda self,obj: {
     'extra_vars': obj.extra_vars})
 class TestJobSerializerSubstitution():
-
     def test_survey_password_hide(self, mocker):
         job = mocker.MagicMock(**{
             'display_extra_vars.return_value': '{\"secret_key\": \"$encrypted$\"}',
@@ -72,6 +77,7 @@ class TestJobSerializerSubstitution():
         assert extra_vars['secret_key'] == '$encrypted$'
         job.display_extra_vars.assert_called_once_with()
         assert 'my_password' not in extra_vars
+
 
 @mock.patch('awx.api.serializers.BaseSerializer.get_summary_fields', lambda x,y: {})
 class TestJobOptionsSerializerGetSummaryFields():
@@ -88,4 +94,3 @@ class TestJobOptionsSerializerGetSummaryFields():
 
     def test_labels_exists(self, test_get_summary_fields, job_template):
         test_get_summary_fields(JobOptionsSerializer, job_template, 'labels')
-

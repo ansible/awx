@@ -8,6 +8,7 @@ from awx.main.scheduler.dag_workflow import WorkflowDAG
 from awx.main.models import Job
 from awx.main.models.workflow import WorkflowJobNode
 
+
 @pytest.fixture
 def dag_root():
     dag = SimpleDAG()
@@ -25,8 +26,9 @@ def dag_root():
     dag.add_edge(data[0], data[1])
     dag.add_edge(data[2], data[3])
     dag.add_edge(data[4], data[5])
-        
+
     return dag
+
 
 @pytest.fixture
 def dag_simple_edge_labels():
@@ -62,6 +64,7 @@ class TestSimpleDAG(object):
         nodes = dag.get_dependencies(dag.nodes[0]['node_object'], 'two')
 '''
 
+
 @pytest.fixture
 def factory_node():
     def fn(id, status):
@@ -71,6 +74,7 @@ def factory_node():
             wfn.job = j
         return wfn
     return fn
+
 
 @pytest.fixture
 def workflow_dag_level_2(factory_node):
@@ -91,6 +95,7 @@ def workflow_dag_level_2(factory_node):
 
     return (dag, data[3:6], False)
 
+
 @pytest.fixture
 def workflow_dag_multiple_roots(factory_node):
     dag = WorkflowDAG()
@@ -110,6 +115,7 @@ def workflow_dag_multiple_roots(factory_node):
 
     expected = data[0:3]
     return (dag, expected, False)
+
 
 @pytest.fixture
 def workflow_dag_multiple_edges_labeled(factory_node):
@@ -133,6 +139,7 @@ def workflow_dag_multiple_edges_labeled(factory_node):
     expected = data[5:6]
     return (dag, expected, False)
 
+
 @pytest.fixture
 def workflow_dag_finished(factory_node):
     dag = WorkflowDAG()
@@ -155,6 +162,7 @@ def workflow_dag_finished(factory_node):
     expected = []
     return (dag, expected, True)
 
+
 @pytest.fixture
 def workflow_dag_always(factory_node):
     dag = WorkflowDAG()
@@ -171,6 +179,7 @@ def workflow_dag_always(factory_node):
     expected = data[2:3]
     return (dag, expected, False)
 
+
 @pytest.fixture(params=['workflow_dag_multiple_roots', 'workflow_dag_level_2',
                         'workflow_dag_multiple_edges_labeled', 'workflow_dag_finished',
                         'workflow_dag_always'])
@@ -185,4 +194,3 @@ class TestWorkflowDAG():
     def test_is_workflow_done(self, workflow_dag):
         dag, expected, is_done = workflow_dag
         assert dag.is_workflow_done() == is_done
-

@@ -17,6 +17,7 @@ import yaml
 
 __all__ = ['JobTemplateLaunchTest', 'JobTemplateLaunchPasswordsTest']
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
     def setUp(self):
@@ -185,6 +186,7 @@ class JobTemplateLaunchTest(BaseJobTestMixin, django.test.TransactionTestCase):
         self.cred_sue.delete()
         with self.current_user(self.user_sue):
             self.post(self.launch_url, {}, expect=400)
+
 
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateLaunchPasswordsTest(BaseJobTestMixin, django.test.TransactionTestCase):

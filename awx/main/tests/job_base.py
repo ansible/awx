@@ -12,6 +12,7 @@ TEST_PLAYBOOK = '''- hosts: all
     command: test 1 = 1
 '''
 
+
 class BaseJobTestMixin(BaseTestMixin):
 
 

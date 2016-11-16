@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from awx.main.models import Fact
 
+
 @pytest.mark.django_db
 def test_newest_scan_exact(hosts, fact_scans):
     epoch = timezone.now()
@@ -112,4 +113,3 @@ def test_by_module(hosts, fact_scans):
 
     assert fact_found_services == fact_known_services
     assert fact_found_packages == fact_known_packages
-

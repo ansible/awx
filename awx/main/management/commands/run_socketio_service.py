@@ -25,6 +25,7 @@ from socketio.namespace import BaseNamespace
 
 logger = logging.getLogger('awx.main.commands.run_socketio_service')
 
+
 class SocketSession(object):
     def __init__(self, session_id, token_key, socket):
         self.socket = weakref.ref(socket)
@@ -45,8 +46,8 @@ class SocketSession(object):
         auth_token = auth_token[0]
         return bool(not auth_token.is_expired())
 
-class SocketSessionManager(object):
 
+class SocketSessionManager(object):
     def __init__(self):
         self.SESSIONS_MAX = 1000
         self.socket_sessions = []
@@ -79,8 +80,8 @@ class SocketSessionManager(object):
         self._prune()
         return session
 
-class SocketController(object):
 
+class SocketController(object):
     def __init__(self, SocketSessionManager):
         self.server = None
         self.SocketSessionManager = SocketSessionManager
@@ -127,12 +128,12 @@ class SocketController(object):
 
 socketController = SocketController(SocketSessionManager())
 
+
 #
 # Socket session is attached to self.session['socket_session']
 # self.session and self.socket.session point to the same dict
 #
 class TowerBaseNamespace(BaseNamespace):
-
     def get_allowed_methods(self):
         return ['recv_disconnect']
 
@@ -179,33 +180,33 @@ class TowerBaseNamespace(BaseNamespace):
         if socket_session and not socket_session.is_valid():
             self.disconnect(silent=False)
 
-class TestNamespace(TowerBaseNamespace):
 
+class TestNamespace(TowerBaseNamespace):
     def recv_connect(self):
         logger.info("Received client connect for test namespace from %s" % str(self.environ['REMOTE_ADDR']))
         self.emit('test', "If you see this then you attempted to connect to the test socket endpoint")
         super(TestNamespace, self).recv_connect()
 
-class JobNamespace(TowerBaseNamespace):
 
+class JobNamespace(TowerBaseNamespace):
     def recv_connect(self):
         logger.info("Received client connect for job namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(JobNamespace, self).recv_connect()
 
-class JobEventNamespace(TowerBaseNamespace):
 
+class JobEventNamespace(TowerBaseNamespace):
     def recv_connect(self):
         logger.info("Received client connect for job event namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(JobEventNamespace, self).recv_connect()
 
-class AdHocCommandEventNamespace(TowerBaseNamespace):
 
+class AdHocCommandEventNamespace(TowerBaseNamespace):
     def recv_connect(self):
         logger.info("Received client connect for ad hoc command event namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(AdHocCommandEventNamespace, self).recv_connect()
 
-class ScheduleNamespace(TowerBaseNamespace):
 
+class ScheduleNamespace(TowerBaseNamespace):
     def get_allowed_methods(self):
         parent_allowed = super(ScheduleNamespace, self).get_allowed_methods()
         return parent_allowed + ["schedule_changed"]
@@ -214,16 +215,16 @@ class ScheduleNamespace(TowerBaseNamespace):
         logger.info("Received client connect for schedule namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(ScheduleNamespace, self).recv_connect()
 
+
 # Catch-all namespace.
 # Deliver 'global' events over this namespace
 class ControlNamespace(TowerBaseNamespace):
-
     def recv_connect(self):
         logger.warn("Received client connect for control namespace from %s" % str(self.environ['REMOTE_ADDR']))
         super(ControlNamespace, self).recv_connect()
 
-class TowerSocket(object):
 
+class TowerSocket(object):
     def __call__(self, environ, start_response):
         path = environ['PATH_INFO'].strip('/') or 'index.html'
         if path.startswith('socket.io'):
@@ -237,6 +238,7 @@ class TowerSocket(object):
             logger.warn("Invalid connect path received: " + path)
             start_response('404 Not Found', [])
             return ['Tower version %s' % awx.__version__]
+
 
 def notification_handler(server):
     with Socket('websocket', 'r') as websocket:
@@ -253,6 +255,7 @@ def notification_handler(server):
                 socketController.send_packet(packet, message.pop('token_key'))
             else:
                 socketController.broadcast_packet(packet)
+
 
 class Command(NoArgsCommand):
     '''

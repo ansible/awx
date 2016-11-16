@@ -30,6 +30,7 @@ def test_custom_inv_script_access(organization, user):
     organization.admin_role.members.add(ou)
     assert ou in custom_inv.admin_role
 
+
 @pytest.mark.django_db
 def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project):
     custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test',
@@ -39,6 +40,7 @@ def test_modify_inv_script_foreign_org_admin(org_admin, organization, organizati
     access = CustomInventoryScriptAccess(org_admin)
     assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
 
+
 @pytest.mark.django_db
 def test_org_member_inventory_script_permissions(org_member, organization):
     custom_inv = CustomInventoryScript.objects.create(name='test', script='test', organization=organization)
@@ -46,6 +48,7 @@ def test_org_member_inventory_script_permissions(org_member, organization):
     assert access.can_read(custom_inv)
     assert not access.can_delete(custom_inv)
     assert not access.can_change(custom_inv, {'name': 'ed-test'})
+
 
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
@@ -60,6 +63,7 @@ def test_inventory_admin_user(inventory, permissions, user):
     assert u in inventory.admin_role
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
+
 
 @pytest.mark.django_db
 def test_inventory_auditor_user(inventory, permissions, user):
@@ -77,6 +81,7 @@ def test_inventory_auditor_user(inventory, permissions, user):
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
 
+
 @pytest.mark.django_db
 def test_inventory_updater_user(inventory, permissions, user):
     u = user('updater', False)
@@ -91,6 +96,7 @@ def test_inventory_updater_user(inventory, permissions, user):
     assert u not in inventory.admin_role
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists()
+
 
 @pytest.mark.django_db
 def test_inventory_executor_user(inventory, permissions, user):
@@ -107,7 +113,6 @@ def test_inventory_executor_user(inventory, permissions, user):
     assert u in inventory.read_role
     assert inventory.use_role.members.filter(id=u.id).exists()
     assert inventory.update_role.members.filter(id=u.id).exists() is False
-
 
 
 @pytest.mark.django_db
@@ -231,6 +236,7 @@ def test_access_auditor(organization, inventory, user):
     assert not access.can_admin(inventory, {'organization': organization.id})
     assert not access.can_delete(inventory)
     assert not access.can_run_ad_hoc_commands(inventory)
+
 
 @pytest.mark.django_db
 def test_inventory_update_org_admin(inventory_update, org_admin):

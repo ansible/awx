@@ -4,6 +4,7 @@ from awx.main.access import (
     LabelAccess,
 )
 
+
 @pytest.mark.django_db
 def test_label_get_queryset_user(label, user):
     u = user('user', False)
@@ -11,15 +12,18 @@ def test_label_get_queryset_user(label, user):
     label.organization.member_role.members.add(u)
     assert access.get_queryset().count() == 1
 
+
 @pytest.mark.django_db
 def test_label_get_queryset_su(label, user):
     access = LabelAccess(user('user', True))
     assert access.get_queryset().count() == 1
 
+
 @pytest.mark.django_db
 def test_label_access(label, user):
     access = LabelAccess(user('user', False))
     assert not access.can_read(label)
+
 
 @pytest.mark.django_db
 def test_label_access_superuser(label, user):
@@ -28,6 +32,7 @@ def test_label_access_superuser(label, user):
     assert access.can_read(label)
     assert access.can_change(label, None)
     assert access.can_delete(label)
+
 
 @pytest.mark.django_db
 def test_label_access_admin(organization_factory):
@@ -47,6 +52,7 @@ def test_label_access_admin(organization_factory):
     assert access.can_change(label, None)
     assert access.can_change(label, {'organization': members.organization.id})
     assert access.can_delete(label)
+
 
 @pytest.mark.django_db
 def test_label_access_user(label, user):

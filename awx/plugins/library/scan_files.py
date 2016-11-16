@@ -99,6 +99,7 @@ EXAMPLES = '''
 #             },
 '''
 
+
 def main():
     module = AnsibleModule(
         argument_spec = dict(paths=dict(required=True, type='list'),

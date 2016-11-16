@@ -7,10 +7,12 @@ from awx.main.access import (
     # WorkflowJobNodeAccess
 )
 
+
 @pytest.fixture
 def wfjt(workflow_job_template_factory, organization):
     objects = workflow_job_template_factory('test_workflow', organization=organization, persisted=True)
     return objects.workflow_job_template
+
 
 @pytest.fixture
 def wfjt_with_nodes(workflow_job_template_factory, organization, job_template):
@@ -18,9 +20,11 @@ def wfjt_with_nodes(workflow_job_template_factory, organization, job_template):
         'test_workflow', organization=organization, workflow_job_template_nodes=[{'unified_job_template': job_template}], persisted=True)
     return objects.workflow_job_template
 
+
 @pytest.fixture
 def wfjt_node(wfjt_with_nodes):
     return wfjt_with_nodes.workflow_job_template_nodes.all()[0]
+
 
 @pytest.fixture
 def workflow_job(wfjt):
@@ -50,12 +54,14 @@ class TestWorkflowJobTemplateAccess:
         access = WorkflowJobTemplateAccess(org_admin)
         assert not access.can_add({'reference_obj': wfjt_with_nodes})
 
+
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
 
     def test_jt_access_to_edit(self, wfjt_node, org_admin):
         access = WorkflowJobTemplateNodeAccess(org_admin)
         assert not access.can_change(wfjt_node, {'job_type': 'scan'})
+
 
 @pytest.mark.django_db
 class TestWorkflowJobAccess:

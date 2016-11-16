@@ -186,6 +186,7 @@ TEST_SURVEY_REQUIREMENTS = '''
 }
 '''
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
@@ -505,6 +506,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TransactionTestCase):
         with self.current_user(self.user_doug):
             self.get(detail_url, expect=403)
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
@@ -657,6 +659,7 @@ class JobTest(BaseJobTestMixin, django.test.TransactionTestCase):
         # the method used to START a JobTemplate follow the exact same permissions as those to create it ...
         # and that jobs come back nicely serialized with related resources and so on ...
         # that we can drill all the way down and can get at host failure lists, etc ...
+
 
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 @override_settings(CELERY_ALWAYS_EAGER=True,
@@ -1098,6 +1101,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 job = Job.objects.get(pk=job.pk)
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
+
 
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class JobTemplateSurveyTest(BaseJobTestMixin, django.test.TransactionTestCase):

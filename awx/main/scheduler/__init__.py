@@ -35,6 +35,7 @@ from celery.task.control import inspect
 
 logger = logging.getLogger('awx.main.scheduler')
 
+
 class TaskManager():
     def __init__(self):
         self.graph = DependencyGraph()

@@ -4,7 +4,6 @@ import pytest
 from django.core.urlresolvers import reverse
 
 
-
 """
     def run_test_ad_hoc_command(self, **kwargs):
         # Post to list to start a new ad hoc command.
@@ -22,6 +21,7 @@ from django.core.urlresolvers import reverse
                 del data[k]
         return self.post(url, data, expect=expect)
 """
+
 
 @pytest.fixture
 def post_adhoc(post, inventory, machine_credential):
@@ -46,7 +46,6 @@ def post_adhoc(post, inventory, machine_credential):
     return f
 
 
-
 @pytest.mark.django_db
 def test_admin_post_ad_hoc_command_list(admin, post_adhoc, inventory, machine_credential):
     res = post_adhoc(reverse('api:ad_hoc_command_list'), {}, admin, expect=201)
@@ -65,17 +64,21 @@ def test_admin_post_ad_hoc_command_list(admin, post_adhoc, inventory, machine_cr
 def test_empty_post_403(admin, post):
     post(reverse('api:ad_hoc_command_list'), {}, admin, expect=400)
 
+
 @pytest.mark.django_db
 def test_empty_put_405(admin, put):
     put(reverse('api:ad_hoc_command_list'), {}, admin, expect=405)
+
 
 @pytest.mark.django_db
 def test_empty_patch_405(admin, patch):
     patch(reverse('api:ad_hoc_command_list'), {}, admin, expect=405)
 
+
 @pytest.mark.django_db
 def test_empty_delete_405(admin, delete):
     delete(reverse('api:ad_hoc_command_list'), admin, expect=405)
+
 
 @pytest.mark.django_db
 def test_user_post_ad_hoc_command_list(alice, post_adhoc, inventory, machine_credential):
@@ -83,16 +86,19 @@ def test_user_post_ad_hoc_command_list(alice, post_adhoc, inventory, machine_cre
     machine_credential.use_role.members.add(alice)
     post_adhoc(reverse('api:ad_hoc_command_list'), {}, alice, expect=201)
 
+
 @pytest.mark.django_db
 def test_user_post_ad_hoc_command_list_xfail(alice, post_adhoc, inventory, machine_credential):
     inventory.read_role.members.add(alice) # just read access? no dice.
     machine_credential.use_role.members.add(alice)
     post_adhoc(reverse('api:ad_hoc_command_list'), {}, alice, expect=403)
 
+
 @pytest.mark.django_db
 def test_user_post_ad_hoc_command_list_without_creds(alice, post_adhoc, inventory, machine_credential):
     inventory.adhoc_role.members.add(alice)
     post_adhoc(reverse('api:ad_hoc_command_list'), {}, alice, expect=403)
+
 
 @pytest.mark.django_db
 def test_user_post_ad_hoc_command_list_without_inventory(alice, post_adhoc, inventory, machine_credential):
@@ -145,4 +151,3 @@ def test_bad_data3(admin, post_adhoc):
 @pytest.mark.django_db
 def test_bad_data4(admin, post_adhoc):
     post_adhoc(reverse('api:ad_hoc_command_list'), {'forks': -1}, admin, expect=400)
-

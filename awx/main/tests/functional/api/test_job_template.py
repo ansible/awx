@@ -9,6 +9,7 @@ from awx.main.migrations import _save_password_keys as save_password_keys
 from django.core.urlresolvers import reverse
 from django.apps import apps
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
@@ -33,6 +34,7 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         'inventory': inventory.id,
         'playbook': 'helloworld.yml',
     }, alice, expect=expect)
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
@@ -62,6 +64,7 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
         'playbook': 'alt-helloworld.yml',
     }, alice, expect=expect)
 
+
 @pytest.mark.django_db
 def test_edit_playbook(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
@@ -78,6 +81,7 @@ def test_edit_playbook(patch, job_template_factory, alice):
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
         'playbook': 'helloworld.yml',
     }, alice, expect=403)
+
 
 @pytest.mark.django_db
 def test_edit_nonsenstive(patch, job_template_factory, alice):
@@ -104,12 +108,15 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
     }, alice, expect=200)
     print(res.data)
     assert res.data['name'] == 'updated'
+
+
 @pytest.fixture
 def jt_copy_edit(job_template_factory, project):
     objects = job_template_factory(
         'copy-edit-job-template',
         project=project)
     return objects.job_template
+
 
 @pytest.mark.django_db
 def test_job_template_role_user(post, organization_factory, job_template_factory):
@@ -127,10 +134,8 @@ def test_job_template_role_user(post, organization_factory, job_template_factory
     assert response.status_code == 204
 
 
-
 @pytest.mark.django_db
 def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
-
     # Grant random user JT admin access only
     jt_copy_edit.admin_role.members.add(rando)
     jt_copy_edit.save()
@@ -142,6 +147,7 @@ def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
     post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
     assert post_response.status_code == 403
+
 
 @pytest.mark.django_db
 def test_scan_jt_no_inventory(job_template_factory):
@@ -175,6 +181,7 @@ def test_scan_jt_no_inventory(job_template_factory):
     assert not serializer.is_valid()
     assert 'inventory' in serializer.errors
 
+
 @pytest.mark.django_db
 def test_scan_jt_surveys(inventory):
     serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
@@ -182,6 +189,7 @@ def test_scan_jt_surveys(inventory):
                                              "survey_enabled": True})
     assert not serializer.is_valid()
     assert "survey_enabled" in serializer.errors
+
 
 @pytest.mark.django_db
 def test_jt_without_project(inventory):
@@ -198,6 +206,7 @@ def test_jt_without_project(inventory):
     serializer = JobTemplateSerializer(data=data)
     assert serializer.is_valid()
 
+
 @pytest.mark.django_db
 def test_disallow_template_delete_on_running_job(job_template_factory, delete, admin_user):
     objects = job_template_factory('jt',
@@ -210,12 +219,14 @@ def test_disallow_template_delete_on_running_job(job_template_factory, delete, a
     delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
     assert delete_response.status_code == 409
 
+
 @pytest.mark.django_db
 def test_save_survey_passwords_to_job(job_template_with_survey_passwords):
     """Test that when a new job is created, the survey_passwords field is
     given all of the passwords that exist in the JT survey"""
     job = job_template_with_survey_passwords.create_unified_job()
     assert job.survey_passwords == {'SSN': '$encrypted$', 'secret_key': '$encrypted$'}
+
 
 @pytest.mark.django_db
 def test_save_survey_passwords_on_migration(job_template_with_survey_passwords):

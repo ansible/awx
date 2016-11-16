@@ -12,21 +12,25 @@ from awx.main.tasks import (
 )
 from awx.main.task_engine import TaskEnhancer
 
+
 @contextmanager
 def apply_patches(_patches):
     [p.start() for p in _patches]
     yield
     [p.stop() for p in _patches]
 
+
 def test_send_notifications_not_list():
     with pytest.raises(TypeError):
         send_notifications(None)
+
 
 def test_send_notifications_job_id(mocker):
     with mocker.patch('awx.main.models.UnifiedJob.objects.get'):
         send_notifications([], job_id=1)
         assert UnifiedJob.objects.get.called
         assert UnifiedJob.objects.get.called_with(id=1)
+
 
 def test_send_notifications_list(mocker):
     patches = list()
@@ -45,6 +49,7 @@ def test_send_notifications_list(mocker):
 
         assert mock_job.notifications.add.called
         assert mock_job.notifications.add.called_with(mock_notification)
+
 
 @pytest.mark.parametrize("current_instances,call_count", [(91, 2), (89,1)])
 def test_run_admin_checks_usage(mocker, current_instances, call_count):

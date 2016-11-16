@@ -30,6 +30,7 @@ def user_from_token(auth_token):
     except User.DoesNotExist:
         return None
 
+
 @channel_session
 def ws_connect(message):
     token = None

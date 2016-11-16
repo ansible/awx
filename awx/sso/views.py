@@ -22,6 +22,7 @@ from awx.api.serializers import UserSerializer
 
 logger = logging.getLogger('awx.sso.views')
 
+
 class BaseRedirectView(RedirectView):
 
     def get_redirect_url(self, *args, **kwargs):

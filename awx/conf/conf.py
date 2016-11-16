@@ -57,6 +57,7 @@ register(
     category_slug='cows',
 )
 
+
 def _get_read_only_ansible_cow_selection_default():
     return getattr(settings, 'ANSIBLE_COW_SELECTION', 'No default cow!')
 

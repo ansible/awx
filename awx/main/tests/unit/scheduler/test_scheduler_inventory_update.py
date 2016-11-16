@@ -3,9 +3,11 @@
 import pytest
 from datetime import timedelta
 
+
 @pytest.fixture
 def pending_job(job_factory):
     return job_factory(project__scm_update_on_launch=False, inventory__inventory_sources=['1'])
+
 
 @pytest.fixture
 def successful_inventory_update_latest(inventory_update_latest_factory):
@@ -15,12 +17,14 @@ def successful_inventory_update_latest(inventory_update_latest_factory):
     iu['finished'] = iu['created'] + timedelta(seconds=10)
     return iu
 
+
 @pytest.fixture
 def successful_inventory_update_latest_cache_expired(inventory_update_latest_factory):
     iu = inventory_update_latest_factory()
     iu['inventory_source__update_cache_timeout'] = 1
     iu['finished'] = iu['created'] + timedelta(seconds=2)
     return iu
+
 
 class TestStartInventoryUpdate():
     def test_pending(self, scheduler_factory, pending_inventory_update):
@@ -29,6 +33,7 @@ class TestStartInventoryUpdate():
         scheduler._schedule()
 
         scheduler.start_task.assert_called_with(pending_inventory_update)
+
 
 class TestInventoryUpdateBlocked():
     def test_running_inventory_update(self, epoch, scheduler_factory, running_inventory_update, pending_inventory_update):
@@ -47,8 +52,8 @@ class TestInventoryUpdateBlocked():
 
         scheduler._schedule()
 
-class TestCreateDependentInventoryUpdate():
 
+class TestCreateDependentInventoryUpdate():
     def test(self, scheduler_factory, pending_job, waiting_inventory_update, inventory_id_sources):
         scheduler = scheduler_factory(tasks=[pending_job], 
                                       create_inventory_update=waiting_inventory_update,
@@ -82,4 +87,3 @@ class TestCreateDependentInventoryUpdate():
         scheduler._schedule()
 
         scheduler.start_task.assert_called_with(waiting_inventory_update, [pending_job])
-

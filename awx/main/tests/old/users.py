@@ -39,6 +39,7 @@ class AuthTokenTimeoutTest(BaseTest):
         self.assertIn('Auth-Token-Timeout', response)
         self.assertEqual(response['Auth-Token-Timeout'], str(settings.AUTH_TOKEN_EXPIRATION))
 
+
 class AuthTokenLimitTest(BaseTest):
     def setUp(self):
         super(AuthTokenLimitTest, self).setUp()
@@ -162,6 +163,7 @@ class AuthTokenProxyTest(BaseTest):
         client_kwargs = {'HTTP_X_FORWARDED_FOR': ''}
         response = self._get_me(expect=200, auth=auth_token, remote_addr=remote_addr, client_kwargs=client_kwargs)
         self.check_me_is_admin(response)
+
 
 class UsersTest(BaseTest):
 

@@ -25,6 +25,7 @@ logger = logging.getLogger('awx.main.models.notifications')
 
 __all__ = ['NotificationTemplate', 'Notification']
 
+
 class NotificationTemplate(CommonModel):
 
     NOTIFICATION_TYPES = [('email', _('Email'), CustomEmailBackend),
@@ -116,6 +117,7 @@ class NotificationTemplate(CommonModel):
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         return backend_obj.send_messages([notification_obj])
 
+
 class Notification(CreatedModifiedModel):
     '''
     A notification event emitted when a NotificationTemplate is run
@@ -171,6 +173,7 @@ class Notification(CreatedModifiedModel):
     def get_absolute_url(self):
         return reverse('api:notification_detail', args=(self.pk,))
 
+
 class JobNotificationMixin(object):
     def get_notification_templates(self):
         raise RuntimeError("Define me")
@@ -193,4 +196,3 @@ class JobNotificationMixin(object):
 
     def build_notification_failed_message(self):
         return self._build_notification_message('failed')
-

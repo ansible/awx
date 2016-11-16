@@ -10,6 +10,7 @@ from django.core.management import call_command
 
 from awx.main.management.commands.update_password import UpdatePassword
 
+
 def run_command(name, *args, **options):
     command_runner = options.pop('command_runner', call_command)
     stdin_fileobj = options.pop('stdin_fileobj', None)

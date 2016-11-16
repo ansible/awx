@@ -21,6 +21,7 @@ from awx.main.models import UnifiedJob, AuthToken
 
 logger = logging.getLogger('awx.api.authentication')
 
+
 class TokenAuthentication(authentication.TokenAuthentication):
     '''
     Custom token authentication using tokens that expire and are associated

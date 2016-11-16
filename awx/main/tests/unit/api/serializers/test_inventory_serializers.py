@@ -19,8 +19,8 @@ from rest_framework.test import (
     force_authenticate,
 )
 
-class TestCustomInventoryScriptSerializer(object):
 
+class TestCustomInventoryScriptSerializer(object):
     @pytest.mark.parametrize("superuser,sysaudit,admin_role,value",
                              ((True, False, False, '#!/python'),
                               (False, True, False, '#!/python'),

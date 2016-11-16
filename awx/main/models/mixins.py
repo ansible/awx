@@ -16,6 +16,7 @@ from awx.main.fields import JSONField
 
 __all__ = ['ResourceMixin', 'SurveyJobTemplateMixin', 'SurveyJobMixin']
 
+
 class ResourceMixin(models.Model):
 
     class Meta:
@@ -216,4 +217,3 @@ class SurveyJobMixin(models.Model):
             return json.dumps(extra_vars)
         else:
             return self.extra_vars
-

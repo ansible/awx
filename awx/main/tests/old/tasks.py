@@ -237,6 +237,7 @@ TEST_VAULT_PLAYBOOK = '''$ANSIBLE_VAULT;1.1;AES256
 
 TEST_VAULT_PASSWORD = '1234'
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class RunJobTest(BaseJobExecutionTest):
     '''

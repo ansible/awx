@@ -185,6 +185,7 @@ class BaseCommandMixin(object):
             sys.stderr = original_stderr
         return result, captured_stdout, captured_stderr
 
+
 class CreateDefaultOrgTest(BaseCommandMixin, BaseTest):
     '''
     Test cases for create_default_org management command.
@@ -209,6 +210,7 @@ class CreateDefaultOrgTest(BaseCommandMixin, BaseTest):
         self.assertFalse('Default organization added' in stdout)
         self.assertEqual(Organization.objects.count(), 1)
 
+
 class DumpDataTest(BaseCommandMixin, BaseTest):
     '''
     Test cases for dumpdata management command.
@@ -222,6 +224,7 @@ class DumpDataTest(BaseCommandMixin, BaseTest):
         result, stdout, stderr = self.run_command('dumpdata')
         self.assertEqual(result, None)
         json.loads(stdout)
+
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,

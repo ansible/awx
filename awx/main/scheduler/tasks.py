@@ -21,17 +21,21 @@ logger = logging.getLogger('awx.main.scheduler')
 # Would we need the request loop then? I think so. Even if we get the in-memory
 # updated model, the call to schedule() may get stale data.
 
+
 @task
 def run_job_launch(job_id):
     TaskManager().schedule()
+
 
 @task
 def run_job_complete(job_id):
     TaskManager().schedule()
 
+
 @task
 def run_task_manager():
     TaskManager().schedule()
+
 
 @task
 def run_fail_inconsistent_running_jobs():
