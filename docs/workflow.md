@@ -1,23 +1,23 @@
 ## Tower Workflow Overview
-Workflows are structured pipelines of multiple tower job runs. Think of workflows as jobs that have no native content, but triggers other job in specific orders to accomplish the purpose of tracking the full set of jobs that were part of a release process as a single unit.
+Workflows are structured compositions of Tower job resources. The only job of a workflow is to trigger other jobs in specific orders to achieve certain goals, such as tracking the full set of jobs that were part of a release process as a single unit.
 
-A workflow job is composed of one or more decision trees, each node of which contains zero to one tower job resource (the permitted types are jobs, inventory updates and project updates). A workflow job run starts from creating and running jobs of the root node of each decision tree. When a parent node has its job resource finished running, it would pick up a subset of its child nodes according to its job status, and create new job resources for them. The selected child nodes would then run their own jobs and so forth till all nodes that needs to run finish running, which marks the end of the underlying workflow job run.
+A workflow has an associated tree-graph that is composed of multiple nodes. Each node in the tree has one associated job template (job template, inventory update, or project update) along with related resources that, if defined, will override the associated job template resources (i.e. credential, inventory, etc.) if the job template associated with the node is chosen to run.
 
 ## Usage Manual
 
-### Workflow CUID
-Like other job resources, workflow jobs are created based on workflow job templates. Workflow job templates are equipped with common relational fields including labels, schedules, notification templates, extra variables and survey specifications. It also comes with a custom `workflow_nodes` field which refers to a list of related workflow job template nodes.
+### Workflow Create-Read-Update-Delete (CRUD)
+Like other job resources, workflow jobs are created from workflow job templates. The API exposes common fields similar to job templates, including labels, schedules, notification templates, extra variables and survey specifications. Other than that, in the API, the related workflow graph nodes can be gotten to via the related workflow_nodes field.
 
-The CUID operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs. However, from RBAC perspective, CUID on workflow job templates/jobs are limited to super users. That is, an organization administrator takes full control over all workflow job templates/jobs under the same organization, while an organization auditor is able to see workflow job templates/jobs under the same organization. On the other hand, ordinary organization members have no, and are not able to gain, permission over any workflow-related resources.
+The CRUD operations against a workflow job template and its corresponding workflow jobs are almost identical to those of normal job templates and related jobs. However, from an RBAC perspective, CRUD on workflow job templates/jobs are limited to super users. That is, an organization administrator takes full control over all workflow job templates/jobs under the same organization, while an organization auditor is able to see workflow job templates/jobs under the same organization. On the other hand, ordinary organization members have no, and are not able to gain, permission over any workflow-related resources.
 
 ### Workflow Nodes
 Workflow Nodes are containers of workflow spawned job resources and function as nodes of workflow decision trees. Like that of workflow itself, the two types of workflow nodes are workflow job template nodes and workflow job nodes. 
 
-Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d/workflow_nodes/` to be associated with underlying workflow job template, or under endpoint `/workflow_job_template_nodes/` directly. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parnent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
+Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d/workflow_nodes/` to be associated with underlying workflow job template, or directly under endpoint `/workflow_job_template_nodes/`. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parnent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
 
 Apart from the core fields, workflow job template nodes have optional fields `credential`, `inventory` and `char_prompts`. These fields will be passed on to corresponding fields of underlying jobs if those fields are set prompted at runtime.
 
-Workflow job nodes are created by workflow job template nodes at the beginning of workflow job runs. Other than the fields inherited from its template, workflow job nodes also come with a `job` field which references the to-be-spawned job resource.
+When a workflow job template is launched a workflow job is created. A workflow job node is create for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus an additional `job` field, which is a reference to the to-be-spawned job resource.
 
 ### Decision Tree Formation and Restrictions
 The decision tree structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
@@ -45,8 +45,8 @@ Workflow job summary:
 ```
 
 ## Test Coverage
-### CUID-related
-* Verify that CUID operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
+### CRUD-related
+* Verify that CRUD operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
 * Verify the RBAC property of workflow resources. In specific: 
   * Workflow job templates can only be accessible by superusers ---- system admin, admin of the same organization and system auditor and auditor of the same organization with read permission only.
   * Workflow jobs follows the permission rules of its associated workflow job template.
