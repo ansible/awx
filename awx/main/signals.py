@@ -327,6 +327,7 @@ class ActivityStreamEnabled(threading.local):
 
 activity_stream_enabled = ActivityStreamEnabled()
 
+
 @contextlib.contextmanager
 def disable_activity_stream():
     '''

@@ -62,15 +62,15 @@ def test_process_fact_message_services(fact_msg_services):
     check_process_fact_message_module(fact_returned, fact_msg_services, 'services')
 
 
-'''
-We pickypack our fact sending onto the Ansible fact interface.
-The interface is <hostname, facts>. Where facts is a json blob of all the facts.
-This makes it hard to decipher what facts are new/changed.
-Because of this, we handle the same fact module data being sent multiple times
-and just keep the newest version.
-'''
 @pytest.mark.django_db
 def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible):
+    '''
+    We pickypack our fact sending onto the Ansible fact interface.
+    The interface is <hostname, facts>. Where facts is a json blob of all the facts.
+    This makes it hard to decipher what facts are new/changed.
+    Because of this, we handle the same fact module data being sent multiple times
+    and just keep the newest version.
+    '''
     #epoch = timezone.now()
     epoch = datetime.fromtimestamp(fact_msg_ansible['date_key'])
     fact_scans(fact_scans=1, timestamp_epoch=epoch)

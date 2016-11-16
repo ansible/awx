@@ -498,6 +498,7 @@ def cache_list_capabilities(page, prefetch_list, model, user):
             if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
 
+
 def parse_yaml_or_json(vars_str):
     '''
     Attempt to parse a string with variables, and if attempt fails,

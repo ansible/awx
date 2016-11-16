@@ -76,10 +76,10 @@ class AuthTokenLimitTest(BaseTest):
         self.assertEqual(AuthToken.reason_long('limit_reached'), response['detail'])
 
 
-'''
-Ensure ips from the X-Forwarded-For get honored and used in auth tokens
-'''
 class AuthTokenProxyTest(BaseTest):
+    '''
+    Ensure ips from the X-Forwarded-For get honored and used in auth tokens
+    '''
     def check_token_and_expires_exist(self, response):
         self.assertTrue('token' in response)
         self.assertTrue('expires' in response)

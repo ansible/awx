@@ -44,23 +44,23 @@ from awx.main.models.notifications import (
 )
 
 
-'''
-Disable all django model signals.
-'''
 @pytest.fixture(scope="session", autouse=False)
 def disable_signals():
+    '''
+    Disable all django model signals.
+    '''
     mocked = mock.patch('django.dispatch.Signal.send', autospec=True)
     mocked.start()
 
 
-'''
-FIXME: Not sure how "far" just setting the BROKER_URL will get us.
-We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)
-
-Allows django signal code to execute without the need for redis
-'''
 @pytest.fixture(scope="session", autouse=True)
 def celery_memory_broker():
+    '''
+    FIXME: Not sure how "far" just setting the BROKER_URL will get us.
+    We may need to incluence CELERY's configuration like we do in the old unit tests (see base.py)
+
+    Allows django signal code to execute without the need for redis
+    '''
     settings.BROKER_URL='memory://localhost/'
 
 

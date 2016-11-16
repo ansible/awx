@@ -140,13 +140,16 @@ def test_get_inventory_ad_hoc_command_list(admin, alice, post_adhoc, get, invent
 def test_bad_data1(admin, post_adhoc):
     post_adhoc(reverse('api:ad_hoc_command_list'), {'module_name': 'command', 'module_args': None}, admin, expect=400)
 
+
 @pytest.mark.django_db
 def test_bad_data2(admin, post_adhoc):
     post_adhoc(reverse('api:ad_hoc_command_list'), {'job_type': 'baddata'}, admin, expect=400)
 
+
 @pytest.mark.django_db
 def test_bad_data3(admin, post_adhoc):
     post_adhoc(reverse('api:ad_hoc_command_list'), {'verbosity': -1}, admin, expect=400)
+
 
 @pytest.mark.django_db
 def test_bad_data4(admin, post_adhoc):

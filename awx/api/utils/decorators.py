@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework import status
 
+
 def paginated(method):
     """Given an method with a Django REST Framework API method signature
     (e.g. `def get(self, request, ...):`), abstract out boilerplate pagination

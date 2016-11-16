@@ -1295,6 +1295,7 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
     class Meta:
         model = Group
 
+
 class CustomInventoryScriptSerializer(BaseSerializer):
 
     script = serializers.CharField(trim_whitespace=False)

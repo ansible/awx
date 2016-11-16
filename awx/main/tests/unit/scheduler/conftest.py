@@ -152,6 +152,7 @@ def inventory_update_latest_factory(epoch):
 def inventory_update_latest(inventory_update_latest_factory):
     return inventory_update_latest_factory()
 
+
 @pytest.fixture
 def successful_inventory_update_latest(inventory_update_latest_factory):
     iu = inventory_update_latest_factory()
@@ -203,11 +204,11 @@ def successful_inventory_update(epoch, inventory_update_factory):
     return inventory_update
 
 
-'''
-Job
-'''
 @pytest.fixture
 def job_factory(epoch):
+    '''
+    Job
+    '''
     def fn(id=1, project__scm_update_on_launch=True, inventory__inventory_sources=[], allow_simultaneous=False):
         return JobDict({ 
             'id': id,
@@ -240,11 +241,11 @@ def running_job(job_factory):
     return job
 
 
-'''
-Inventory id -> [InventorySourceDict, ...]
-'''
 @pytest.fixture
 def inventory_source_factory():
+    '''
+    Inventory id -> [InventorySourceDict, ...]
+    '''
     def fn(id=1):
         return InventorySourceDict({
             'id': id,

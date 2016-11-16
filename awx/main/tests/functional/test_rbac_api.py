@@ -108,7 +108,6 @@ def test_cant_delete_role(delete, admin):
     assert response.status_code == 405
 
 
-
 #
 # /user/<id>/roles
 #
@@ -259,6 +258,7 @@ def test_get_role(get, admin, role):
     response = get(url, admin)
     assert response.status_code == 200
     assert response.data['id'] == role.id
+
 
 @pytest.mark.django_db
 def test_put_role_405(put, admin, role):
@@ -434,7 +434,6 @@ def test_role_children(get, team, admin, role):
     assert response.data['results'][0]['id'] == role.id or response.data['results'][1]['id'] == role.id
 
 
-
 #
 # Generics
 #
@@ -457,6 +456,7 @@ def test_ensure_rbac_fields_are_present(organization, get, admin):
     assert org_role_response.status_code == 200
     role = org_role_response.data
     assert role['related']['organization'] == url
+
 
 @pytest.mark.django_db
 def test_ensure_role_summary_is_present(organization, get, user):

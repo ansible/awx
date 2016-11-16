@@ -39,11 +39,11 @@ def test_cleanup_granularity(fact_scans, hosts):
     assert 60 == deleted_count
 
 
-'''
-Delete half of the scans
-'''
 @pytest.mark.django_db
 def test_cleanup_older_than(fact_scans, hosts):
+    '''
+    Delete half of the scans
+    '''
     epoch = timezone.now()
     hosts(5)
     fact_scans(28, timestamp_epoch=epoch)
@@ -70,11 +70,11 @@ def test_cleanup_older_than_granularity_module(fact_scans, hosts):
     assert 20 == deleted_count
 
 
-'''
-Reduce the granularity of half of the facts scans, by half.
-'''
 @pytest.mark.django_db
 def test_cleanup_logic(fact_scans, hosts):
+    '''
+    Reduce the granularity of half of the facts scans, by half.
+    '''
     epoch = timezone.now()
     hosts = hosts(5)
     fact_scans(60, timestamp_epoch=epoch)

@@ -93,6 +93,7 @@ def workflow_job_unit():
 def workflow_job_template_unit():
     return WorkflowJobTemplate(name='workflow')
 
+
 @pytest.fixture
 def jt_ask(job_template_factory):
     # note: factory sets ask_xxxx_on_launch to true for inventory & credential
@@ -115,6 +116,7 @@ example_prompts = dict(job_type='check', job_tags='quack', limit='duck', skip_ta
 @pytest.fixture
 def job_node_no_prompts(workflow_job_unit, jt_ask):
     return WorkflowJobNode(workflow_job=workflow_job_unit, unified_job_template=jt_ask)
+
 
 @pytest.fixture
 def job_node_with_prompts(job_node_no_prompts):

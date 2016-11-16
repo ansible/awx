@@ -12,11 +12,11 @@ from django.core.urlresolvers import reverse
 from awx.conf.models import Setting
 
 
-'''
-Ensures that tests don't pick up dev container license file
-'''
 @pytest.fixture
 def mock_no_license_file(mocker):
+    '''
+    Ensures that tests don't pick up dev container license file
+    '''
     os.environ['AWX_LICENSE_FILE'] = '/does_not_exist'
     return None
 

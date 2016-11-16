@@ -186,6 +186,7 @@ def workflow_dag_always(factory_node):
 def workflow_dag(request):
     return request.getfuncargvalue(request.param)
 
+
 class TestWorkflowDAG():
     def test_bfs_nodes_to_run(self, workflow_dag):
         dag, expected, is_done = workflow_dag

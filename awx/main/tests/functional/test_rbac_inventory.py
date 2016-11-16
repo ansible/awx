@@ -14,6 +14,7 @@ from awx.main.access import (
 )
 from django.apps import apps
 
+
 @pytest.mark.django_db
 def test_custom_inv_script_access(organization, user):
     u = user('user', False)

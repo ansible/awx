@@ -17,6 +17,7 @@ from awx.main.models import (
 def mock_JT_resource_data():
     return ({}, [])
 
+
 @pytest.fixture
 def job_template(mocker):
     mock_jt = mocker.MagicMock(pk=5)
