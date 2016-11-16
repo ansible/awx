@@ -18,6 +18,7 @@ from awx.conf.license import feature_enabled
 OLDER_THAN = 'older_than'
 GRANULARITY = 'granularity'
 
+
 class CleanupFacts(object):
     def __init__(self):
         self.timestamp = None
@@ -27,7 +28,7 @@ class CleanupFacts(object):
     #   Find all factVersion < pivot && > (pivot - granularity) grouped by host sorted by time descending (because it's indexed this way)
     #   foreach group
     #       Delete all except LAST entry (or Delete all except the FIRST entry, it's an arbitrary decision)
-    #   
+    #
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity, module=None):
@@ -89,6 +90,7 @@ class CleanupFacts(object):
         deleted_count = self.cleanup(t - older_than, granularity, module=module)
         print("Deleted %d facts." % deleted_count)
 
+
 class Command(BaseCommand):
     help = 'Cleanup facts. For each host older than the value specified, keep one fact scan for each time window (granularity).'
     option_list = BaseCommand.option_list + (
@@ -142,4 +144,3 @@ class Command(BaseCommand):
             raise CommandError('--granularity invalid value "%s"' % options[GRANULARITY])
 
         cleanup_facts.run(older_than, granularity, module=options['module'])
-

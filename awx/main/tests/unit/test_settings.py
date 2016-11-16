@@ -1,5 +1,6 @@
 from split_settings.tools import include
 
+
 def test_postprocess_auth_basic_enabled():
     locals().update({'__file__': __file__})
 

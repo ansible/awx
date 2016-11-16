@@ -20,6 +20,7 @@ class HostManager(models.Manager):
         except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
             return len(set(self.values_list('name', flat=True)))
 
+
 class InstanceManager(models.Manager):
     """A custom manager class for the Instance model.
 

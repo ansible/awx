@@ -32,6 +32,7 @@ __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'Workflow
 
 CHAR_PROMPTS_LIST = ['job_type', 'job_tags', 'skip_tags', 'limit']
 
+
 class WorkflowNodeBase(CreatedModifiedModel):
     class Meta:
         abstract = True
@@ -158,6 +159,7 @@ class WorkflowNodeBase(CreatedModifiedModel):
         return ['workflow_job', 'unified_job_template',
                 'inventory', 'credential', 'char_prompts']
 
+
 class WorkflowJobTemplateNode(WorkflowNodeBase):
     workflow_job_template = models.ForeignKey(
         'WorkflowJobTemplate',
@@ -183,6 +185,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
                 create_kwargs[field_name] = getattr(self, field_name)
         return WorkflowJobNode.objects.create(**create_kwargs)
 
+
 class WorkflowJobNode(WorkflowNodeBase):
     job = models.ForeignKey(
         'UnifiedJob',
@@ -205,7 +208,7 @@ class WorkflowJobNode(WorkflowNodeBase):
         default={},
         editable=False,
     )
-    
+
     def get_absolute_url(self):
         return reverse('api:workflow_job_node_detail', args=(self.pk,))
 
@@ -257,6 +260,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             data['extra_vars'] = extra_vars
         return data
 
+
 class WorkflowJobOptions(BaseModel):
     class Meta:
         abstract = True
@@ -268,8 +272,8 @@ class WorkflowJobOptions(BaseModel):
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
-class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
 
+class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
     class Meta:
         app_label = 'main'
 
@@ -371,6 +375,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                 warning_data[node.pk] = node_prompts_warnings
         return warning_data
 
+
 class WorkflowJobInheritNodesMixin(object):
     def _inherit_relationship(self, old_node, new_node, node_ids_map, node_type):
         old_related_nodes = self._get_all_by_type(old_node, node_type)
@@ -412,10 +417,9 @@ class WorkflowJobInheritNodesMixin(object):
             new_node = new_nodes[index]
             for node_type in ['success_nodes', 'failure_nodes', 'always_nodes']:
                 self._inherit_relationship(old_node, new_node, node_ids_map, node_type)
-                
+
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin, WorkflowJobInheritNodesMixin):
-
     class Meta:
         app_label = 'main'
         ordering = ('id',)

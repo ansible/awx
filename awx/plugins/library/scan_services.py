@@ -43,11 +43,13 @@ EXAMPLES = '''
 #            }, .... ] } }
 '''
 
+
 class BaseService(object):
 
     def __init__(self, module):
         self.module = module
         self.incomplete_warning = False
+
 
 class ServiceScanService(BaseService):
 
@@ -135,6 +137,7 @@ class ServiceScanService(BaseService):
                     services.append(service_data)
         return services
 
+
 class SystemctlScanService(BaseService):
 
     def systemd_enabled(self):
@@ -169,6 +172,7 @@ class SystemctlScanService(BaseService):
                              "state": state_val,
                              "source": "systemd"})
         return services
+
 
 def main():
     module = AnsibleModule(argument_spec = dict())

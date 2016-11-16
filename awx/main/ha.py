@@ -4,6 +4,7 @@
 # AWX
 from awx.main.models import Instance
 
+
 def is_ha_environment():
     """Return True if this is an HA environment, and False
     otherwise.

@@ -4,8 +4,8 @@ from pip.operations import freeze
 
 from django.conf import settings
 
-def test_env_matches_requirements_txt():
 
+def test_env_matches_requirements_txt():
     def check_is_in(src, dests):
         if src not in dests:
             print("%s not in" % src)
@@ -33,7 +33,7 @@ def test_env_matches_requirements_txt():
                 continue
             line.rstrip()
             reqs_expected.append(line.rstrip().split('=='))
-    
+
     not_found = []
     for r in reqs_expected:
         res = check_is_in(r, reqs_actual)

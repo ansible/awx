@@ -14,6 +14,7 @@ from awx.main.tests.base import BaseLiveServerTest
 
 __all__ = ['InventoryScriptTest']
 
+
 class BaseScriptTest(BaseLiveServerTest):
     '''
     Base class for tests that run external scripts to access the API.
@@ -54,6 +55,7 @@ class BaseScriptTest(BaseLiveServerTest):
                                 stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         return proc.returncode, stdout, stderr
+
 
 class InventoryScriptTest(BaseScriptTest):
     '''

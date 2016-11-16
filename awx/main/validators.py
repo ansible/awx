@@ -172,6 +172,7 @@ def validate_ssh_private_key(data):
     """
     return validate_pem(data, min_keys=1)
 
+
 def vars_validate_or_raise(vars_str):
     """
     Validate that fields like extra_vars or variables on resources like

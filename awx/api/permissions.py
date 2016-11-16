@@ -21,6 +21,7 @@ logger = logging.getLogger('awx.api.permissions')
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
            'TaskPermission', 'ProjectUpdatePermission', 'UserPermission']
 
+
 class ModelAccessPermission(permissions.BasePermission):
     '''
     Default permissions class to check user access based on the model and
@@ -140,6 +141,7 @@ class ModelAccessPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view, obj)
 
+
 class JobTemplateCallbackPermission(ModelAccessPermission):
     '''
     Permission check used by job template callback view for requests from
@@ -164,6 +166,7 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
             raise PermissionDenied()
         else:
             return True
+
 
 class TaskPermission(ModelAccessPermission):
     '''
@@ -191,6 +194,7 @@ class TaskPermission(ModelAccessPermission):
             return bool(not obj or obj.pk == unified_job.inventory_id)
         else:
             return False
+
 
 class ProjectUpdatePermission(ModelAccessPermission):
     '''

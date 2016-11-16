@@ -391,6 +391,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
 
+
 class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
     '''
     Internal job for tracking project updates from SCM.

@@ -41,6 +41,7 @@ else:
 #####################################################################
 # Helper Functions
 
+
 def explode_glob_path(path):
     """Take a glob and hand back the full recursive expansion,
     ignoring links.

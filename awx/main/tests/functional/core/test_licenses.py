@@ -8,6 +8,7 @@ from datetime import datetime
 from awx.main.models import Host
 from awx.main.task_engine import TaskEnhancer
 
+
 @pytest.mark.django_db
 def test_license_writer(inventory, admin):
     task_enhancer = TaskEnhancer(
@@ -49,6 +50,7 @@ def test_license_writer(inventory, admin):
     assert vdata['valid_key'] is True
     assert vdata['compliant'] is False
     assert vdata['subscription_name']
+
 
 @pytest.mark.django_db
 def test_expired_licenses():

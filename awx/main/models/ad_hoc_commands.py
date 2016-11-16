@@ -209,6 +209,7 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
     def get_notification_friendly_name(self):
         return "AdHoc Command"
 
+
 class AdHocCommandEvent(CreatedModifiedModel):
     '''
     An event/message logged from the ad hoc event callback for each host.

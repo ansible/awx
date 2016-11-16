@@ -87,6 +87,7 @@ def apply_roles(roles, objects, persisted):
             else:
                 raise RuntimeError('unable to add non-user {} for members list of {}'.format(member_str, obj_str))
 
+
 def generate_users(organization, teams, superuser, persisted, **kwargs):
     '''generate_users evaluates a mixed list of User objects and strings.
     If a string is encountered a user with that username is created and added to the lookup dict.
@@ -112,6 +113,7 @@ def generate_users(organization, teams, superuser, persisted, **kwargs):
                     users[p1] = mk_user(p1, organization=organization, team=None, is_superuser=superuser, persisted=persisted)
     return users
 
+
 def generate_teams(organization, persisted, **kwargs):
     '''generate_teams evalutes a mixed list of Team objects and strings.
     If a string is encountered a team with that string name is created and added to the lookup dict.
@@ -125,6 +127,7 @@ def generate_teams(organization, persisted, **kwargs):
             else:
                 teams[t] = mk_team(t, organization=organization, persisted=persisted)
     return teams
+
 
 def create_survey_spec(variables=None, default_type='integer', required=True):
     '''
@@ -175,6 +178,7 @@ def create_survey_spec(variables=None, default_type='integer', required=True):
 # create methods are intended to be called directly as needed
 # or encapsulated by specific factory fixtures in a conftest
 #
+
 
 def create_job_template(name, roles=None, persisted=True, **kwargs):
     Objects = generate_objects(["job_template", "jobs",
@@ -260,6 +264,7 @@ def create_job_template(name, roles=None, persisted=True, **kwargs):
                    organization=org,
                    survey=spec,)
 
+
 def create_organization(name, roles=None, persisted=True, **kwargs):
     Objects = generate_objects(["organization",
                                 "teams", "users",
@@ -319,6 +324,7 @@ def create_organization(name, roles=None, persisted=True, **kwargs):
                    notification_templates=_Mapped(notification_templates),
                    inventories=_Mapped(inventories))
 
+
 def create_notification_template(name, roles=None, persisted=True, **kwargs):
     Objects = generate_objects(["notification_template",
                                 "organization",
@@ -346,6 +352,7 @@ def create_notification_template(name, roles=None, persisted=True, **kwargs):
                    superusers=_Mapped(superusers),
                    teams=teams)
 
+
 def generate_workflow_job_template_nodes(workflow_job_template,
                                          persisted,
                                          **kwargs):
@@ -371,6 +378,7 @@ def generate_workflow_job_template_nodes(workflow_job_template,
                 continue
             for related_index in workflow_job_template_nodes[i][node_type]:
                 getattr(new_node, node_type).add(new_nodes[related_index])
+
 
 # TODO: Implement survey and jobs
 def create_workflow_job_template(name, organization=None, persisted=True, **kwargs):

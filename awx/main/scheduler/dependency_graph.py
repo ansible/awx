@@ -9,6 +9,8 @@ from awx.main.scheduler.partial import (
     AdHocCommandDict,
     WorkflowJobDict,
 )
+
+
 class DependencyGraph(object):
     PROJECT_UPDATES = 'project_updates'
     INVENTORY_UPDATES = 'inventory_updates'

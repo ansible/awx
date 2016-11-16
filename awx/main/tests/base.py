@@ -41,6 +41,7 @@ TEST_PLAYBOOK = '''- hosts: mygroup
     command: test 1 = 1
 '''
 
+
 class QueueTestMixin(object):
     def start_queue(self):
         self.start_rabbit()
@@ -83,6 +84,7 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
+
 class MockCommonlySlowTestMixin(object):
     def __init__(self, *args, **kwargs):
         from awx.api import generics
@@ -91,6 +93,8 @@ class MockCommonlySlowTestMixin(object):
 
 
 ansible_version = get_ansible_version()
+
+
 class BaseTestMixin(MockCommonlySlowTestMixin):
     '''
     Mixin with shared code for use by all test cases.
@@ -676,16 +680,19 @@ class BaseTestMixin(MockCommonlySlowTestMixin):
                              u'expected no traceback, got:\n%s' %
                              job.result_traceback)
 
+
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.
     '''
+
 
 class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
     '''
     Base class for tests requiring transactions (or where the test database
     needs to be accessed by subprocesses).
     '''
+
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
@@ -697,6 +704,7 @@ class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
     def setUp(self):
         super(BaseLiveServerTest, self).setUp()
         settings.INTERNAL_API_URL = self.live_server_url
+
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,

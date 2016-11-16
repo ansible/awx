@@ -14,6 +14,7 @@ from awx.main.models import (
     WorkflowJob,
 )
 
+
 class PartialModelDict(object):
     FIELDS = ()
     model = None
@@ -60,6 +61,7 @@ class PartialModelDict(object):
     def task_impact(self):
         raise RuntimeError("Inherit and implement me")
 
+
 class JobDict(PartialModelDict):
     FIELDS = (
         'id', 'status', 'job_template_id', 'inventory_id', 'project_id', 
@@ -83,6 +85,7 @@ class JobDict(PartialModelDict):
         start_args = start_args or {}
         return start_args.get('inventory_sources_already_updated', [])
 
+
 class ProjectUpdateDict(PartialModelDict):
     FIELDS = (
         'id', 'status', 'project_id', 'created', 'celery_task_id', 
@@ -105,6 +108,7 @@ class ProjectUpdateDict(PartialModelDict):
         }
         return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
 
+
 class ProjectUpdateLatestDict(ProjectUpdateDict):
     FIELDS = (
         'id', 'status', 'project_id', 'created', 'finished', 
@@ -125,6 +129,7 @@ class ProjectUpdateLatestDict(ProjectUpdateDict):
                 results.append(cls(cls.model.objects.filter(id=qs[0].id).values(*cls.get_db_values())[0]))
         return results
 
+
 class InventoryUpdateDict(PartialModelDict):
     #'inventory_source__update_on_launch', 
     #'inventory_source__update_cache_timeout',
@@ -138,6 +143,7 @@ class InventoryUpdateDict(PartialModelDict):
 
     def task_impact(self):
         return 20
+
 
 class InventoryUpdateLatestDict(InventoryUpdateDict):
     #'inventory_source__update_on_launch', 
@@ -166,6 +172,7 @@ class InventoryUpdateLatestDict(InventoryUpdateDict):
                     results.append(cls(cls.model.objects.filter(id=qs[0].id).values(*cls.get_db_values())[0]))
         return results
 
+
 class InventorySourceDict(PartialModelDict):
     FIELDS = (
         'id',
@@ -187,6 +194,7 @@ class InventorySourceDict(PartialModelDict):
         }
         return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
 
+
 class SystemJobDict(PartialModelDict):
     FIELDS = (
         'id', 'created', 'status',
@@ -206,6 +214,7 @@ class SystemJobDict(PartialModelDict):
         }
         return [cls(o) for o in cls.model.objects.filter(**kv).values(*cls.get_db_values())]
 
+
 class AdHocCommandDict(PartialModelDict):
     FIELDS = (
         'id', 'created', 'status', 'inventory_id',
@@ -217,6 +226,7 @@ class AdHocCommandDict(PartialModelDict):
 
     def task_impact(self):
         return 20
+
 
 class WorkflowJobDict(PartialModelDict):
     FIELDS = (

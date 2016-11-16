@@ -40,6 +40,7 @@ class JSONField(upstream_JSONField):
 # Based on AutoOneToOneField from django-annoying:
 # https://bitbucket.org/offline/django-annoying/src/a0de8b294db3/annoying/fields.py
 
+
 class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
     """Descriptor for access to the object from its related class."""
 
@@ -55,6 +56,7 @@ class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
                     setattr(obj, f.name, getattr(instance, f.name))
             obj.save()
             return obj
+
 
 class AutoOneToOneField(models.OneToOneField):
     """OneToOneField that creates related object if it doesn't exist."""

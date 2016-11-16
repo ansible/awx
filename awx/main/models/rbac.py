@@ -79,6 +79,7 @@ def check_singleton(func):
         return func(*args, **kwargs)
     return wrapper
 
+
 @contextlib.contextmanager
 def batch_role_ancestor_rebuilding(allow_nesting=False):
     '''
@@ -425,6 +426,7 @@ class Role(models.Model):
 
     def is_ancestor_of(self, role):
         return role.ancestors.filter(id=self.id).exists()
+
 
 class RoleAncestorEntry(models.Model):
 

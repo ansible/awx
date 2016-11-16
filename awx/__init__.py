@@ -17,6 +17,7 @@ try:
 except ImportError: # pragma: no cover
     MODE = 'production'
 
+
 def find_commands(management_dir):
     # Modified version of function from django/core/management/__init__.py.
     command_dir = os.path.join(management_dir, 'commands')
@@ -32,6 +33,7 @@ def find_commands(management_dir):
     except OSError:
         pass
     return commands
+
 
 def prepare_env():
     # Update the default settings environment variable based on current mode.

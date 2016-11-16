@@ -37,6 +37,7 @@ TEST_PLAYBOOK = '''- hosts: mygroup
     command: test 1 = 1
 '''
 
+
 class ProjectsTest(BaseTransactionTest):
 
     # tests for users, projects, and teams

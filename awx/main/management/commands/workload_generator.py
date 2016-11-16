@@ -23,7 +23,7 @@ from awx.main.utils import timedelta_total_seconds
 TEST_FACT_ANSIBLE = {
     "ansible_swapfree_mb" : 4092,
     "ansible_default_ipv6" : {
-        
+
     },
     "ansible_distribution_release" : "trusty",
     "ansible_system_vendor" : "innotek GmbH",
@@ -199,6 +199,7 @@ EXPERIMENT_DEFAULT = {
     ]
 }
 
+
 class Experiment(object):
     def __init__(self, exp, fact_fixtures, raw_db, mongoengine_db):
         self.db = raw_db
@@ -291,6 +292,7 @@ class Experiment(object):
         print("Finished at: %s" % time_end)
         print("Total runtime: %s seconds" % timedelta_total_seconds(time_end - time_start))
 
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--drop', dest='drop', action='store_true', default=False, 
@@ -334,4 +336,3 @@ class Command(BaseCommand):
 
         self.experiment = Experiment(exp, FACT_FIXTURES, db, enginedb)
         self.experiment.generate_workload()
-

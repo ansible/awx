@@ -47,6 +47,7 @@ TEST_TOWER_SETTINGS_MANIFEST = {
     }
 }
 
+
 @override_settings(TOWER_SETTINGS_MANIFEST=TEST_TOWER_SETTINGS_MANIFEST)
 @pytest.mark.skip(reason="Settings deferred to 3.1")
 class SettingsPlaceholder(BaseTest):

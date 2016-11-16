@@ -5,6 +5,7 @@ from awx.main.models import (
 )
 from awx.main.models.jobs import JobTemplate
 
+
 def do_init_workflow(job_template_success, job_template_fail, job_template_never, jts_parallel):
     wfjt, created = WorkflowJobTemplate.objects.get_or_create(name="parallel workflow")
     wfjt.delete()
@@ -29,6 +30,7 @@ def do_init_workflow(job_template_success, job_template_fail, job_template_never
     # Add a failure node for each paralell node
     for i, n in enumerate(nodes_parallel):
         n.failure_nodes.add(nodes_never[i])
+
 
 def do_init():
     jt_success = JobTemplate.objects.get(id=5)

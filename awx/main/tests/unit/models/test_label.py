@@ -9,9 +9,9 @@ mock_query_set = mock.MagicMock()
 
 mock_objects = mock.MagicMock(filter=mock.MagicMock(return_value=mock_query_set))
 
+
 @mock.patch('awx.main.models.label.Label.objects', mock_objects)
 class TestLabelFilterMocked:
-
     def test_get_orphaned_labels(self, mocker):
         ret = Label.get_orphaned_labels()
 
@@ -63,4 +63,3 @@ class TestLabelFilterMocked:
         mock_jt_qs.count.assert_called_with()
 
         assert ret is expected
-

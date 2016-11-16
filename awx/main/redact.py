@@ -3,6 +3,7 @@ import urlparse
 
 REPLACE_STR = '$encrypted$'
 
+
 class UriCleaner(object):
     REPLACE_STR = REPLACE_STR
     # https://regex101.com/r/sV2dO2/2
@@ -50,6 +51,7 @@ class UriCleaner(object):
                 text_index = len(redactedtext) - 1
 
         return redactedtext
+
 
 class PlainTextCleaner(object):
     REPLACE_STR = REPLACE_STR

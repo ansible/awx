@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 # user credential creation
 #
 
+
 @pytest.mark.django_db
 def test_create_user_credential_via_credentials_list(post, get, alice):
     response = post(reverse('api:credential_list'), {
@@ -21,6 +22,7 @@ def test_create_user_credential_via_credentials_list(post, get, alice):
     assert response.status_code == 200
     assert response.data['count'] == 1
 
+
 @pytest.mark.django_db
 def test_credential_validation_error_with_bad_user(post, admin):
     response = post(reverse('api:credential_list'), {
@@ -30,6 +32,7 @@ def test_credential_validation_error_with_bad_user(post, admin):
     }, admin)
     assert response.status_code == 400
     assert response.data['user'][0] == 'Incorrect type. Expected pk value, received unicode.'
+
 
 @pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list(post, get, alice):
@@ -44,6 +47,7 @@ def test_create_user_credential_via_user_credentials_list(post, get, alice):
     assert response.status_code == 200
     assert response.data['count'] == 1
 
+
 @pytest.mark.django_db
 def test_create_user_credential_via_credentials_list_xfail(post, alice, bob):
     response = post(reverse('api:credential_list'), {
@@ -52,6 +56,7 @@ def test_create_user_credential_via_credentials_list_xfail(post, alice, bob):
         'username': 'someusername'
     }, alice)
     assert response.status_code == 403
+
 
 @pytest.mark.django_db
 def test_create_user_credential_via_user_credentials_list_xfail(post, alice, bob):
@@ -66,6 +71,7 @@ def test_create_user_credential_via_user_credentials_list_xfail(post, alice, bob
 #
 # team credential creation
 #
+
 
 @pytest.mark.django_db
 def test_create_team_credential(post, get, team, organization, org_admin, team_member):
@@ -83,6 +89,7 @@ def test_create_team_credential(post, get, team, organization, org_admin, team_m
     # Assure that credential's organization is implictly set to team's org
     assert response.data['results'][0]['summary_fields']['organization']['id'] == team.organization.id
 
+
 @pytest.mark.django_db
 def test_create_team_credential_via_team_credentials_list(post, get, team, org_admin, team_member):
     response = post(reverse('api:team_credentials_list', args=(team.pk,)), {
@@ -96,6 +103,7 @@ def test_create_team_credential_via_team_credentials_list(post, get, team, org_a
     assert response.status_code == 200
     assert response.data['count'] == 1
 
+
 @pytest.mark.django_db
 def test_create_team_credential_by_urelated_user_xfail(post, team, organization, alice, team_member):
     response = post(reverse('api:credential_list'), {
@@ -105,6 +113,7 @@ def test_create_team_credential_by_urelated_user_xfail(post, team, organization,
         'username': 'someusername'
     }, alice)
     assert response.status_code == 403
+
 
 @pytest.mark.django_db
 def test_create_team_credential_by_team_member_xfail(post, team, organization, alice, team_member):
@@ -122,6 +131,7 @@ def test_create_team_credential_by_team_member_xfail(post, team, organization, a
 # Permission granting
 #
 
+
 @pytest.mark.django_db
 def test_grant_org_credential_to_org_user_through_role_users(post, credential, organization, org_admin, org_member):
     credential.organization = organization
@@ -130,6 +140,7 @@ def test_grant_org_credential_to_org_user_through_role_users(post, credential, o
         'id': org_member.id
     }, org_admin)
     assert response.status_code == 204
+
 
 @pytest.mark.django_db
 def test_grant_org_credential_to_org_user_through_user_roles(post, credential, organization, org_admin, org_member):
@@ -140,6 +151,7 @@ def test_grant_org_credential_to_org_user_through_user_roles(post, credential, o
     }, org_admin)
     assert response.status_code == 204
 
+
 @pytest.mark.django_db
 def test_grant_org_credential_to_non_org_user_through_role_users(post, credential, organization, org_admin, alice):
     credential.organization = organization
@@ -148,6 +160,7 @@ def test_grant_org_credential_to_non_org_user_through_role_users(post, credentia
         'id': alice.id
     }, org_admin)
     assert response.status_code == 400
+
 
 @pytest.mark.django_db
 def test_grant_org_credential_to_non_org_user_through_user_roles(post, credential, organization, org_admin, alice):
@@ -158,6 +171,7 @@ def test_grant_org_credential_to_non_org_user_through_user_roles(post, credentia
     }, org_admin)
     assert response.status_code == 400
 
+
 @pytest.mark.django_db
 def test_grant_private_credential_to_user_through_role_users(post, credential, alice, bob):
     # normal users can't do this
@@ -166,6 +180,7 @@ def test_grant_private_credential_to_user_through_role_users(post, credential, a
         'id': bob.id
     }, alice)
     assert response.status_code == 400
+
 
 @pytest.mark.django_db
 def test_grant_private_credential_to_org_user_through_role_users(post, credential, org_admin, org_member):
@@ -176,6 +191,7 @@ def test_grant_private_credential_to_org_user_through_role_users(post, credentia
     }, org_admin)
     assert response.status_code == 400
 
+
 @pytest.mark.django_db
 def test_sa_grant_private_credential_to_user_through_role_users(post, credential, admin, bob):
     # but system admins can
@@ -183,6 +199,7 @@ def test_sa_grant_private_credential_to_user_through_role_users(post, credential
         'id': bob.id
     }, admin)
     assert response.status_code == 204
+
 
 @pytest.mark.django_db
 def test_grant_private_credential_to_user_through_user_roles(post, credential, alice, bob):
@@ -193,6 +210,7 @@ def test_grant_private_credential_to_user_through_user_roles(post, credential, a
     }, alice)
     assert response.status_code == 400
 
+
 @pytest.mark.django_db
 def test_grant_private_credential_to_org_user_through_user_roles(post, credential, org_admin, org_member):
     # org admins can't either
@@ -202,6 +220,7 @@ def test_grant_private_credential_to_org_user_through_user_roles(post, credentia
     }, org_admin)
     assert response.status_code == 400
 
+
 @pytest.mark.django_db
 def test_sa_grant_private_credential_to_user_through_user_roles(post, credential, admin, bob):
     # but system admins can
@@ -209,6 +228,7 @@ def test_sa_grant_private_credential_to_user_through_user_roles(post, credential
         'id': credential.use_role.id
     }, admin)
     assert response.status_code == 204
+
 
 @pytest.mark.django_db
 def test_grant_org_credential_to_team_through_role_teams(post, credential, organization, org_admin, org_auditor, team):
@@ -221,6 +241,7 @@ def test_grant_org_credential_to_team_through_role_teams(post, credential, organ
     assert response.status_code == 204
     assert org_auditor in credential.read_role
 
+
 @pytest.mark.django_db
 def test_grant_org_credential_to_team_through_team_roles(post, credential, organization, org_admin, org_auditor, team):
     assert org_auditor not in credential.read_role
@@ -232,6 +253,7 @@ def test_grant_org_credential_to_team_through_team_roles(post, credential, organ
     assert response.status_code == 204
     assert org_auditor in credential.read_role
 
+
 @pytest.mark.django_db
 def test_sa_grant_private_credential_to_team_through_role_teams(post, credential, admin, team):
     # not even a system admin can grant a private cred to a team though
@@ -239,6 +261,7 @@ def test_sa_grant_private_credential_to_team_through_role_teams(post, credential
         'id': team.id
     }, admin)
     assert response.status_code == 400
+
 
 @pytest.mark.django_db
 def test_sa_grant_private_credential_to_team_through_team_roles(post, credential, admin, team):
@@ -249,11 +272,10 @@ def test_sa_grant_private_credential_to_team_through_team_roles(post, credential
     assert response.status_code == 400
 
 
-
-
 #
 # organization credentials
 #
+
 
 @pytest.mark.django_db
 def test_create_org_credential_as_not_admin(post, organization, org_member):
@@ -264,6 +286,7 @@ def test_create_org_credential_as_not_admin(post, organization, org_member):
     }, org_member)
     assert response.status_code == 403
 
+
 @pytest.mark.django_db
 def test_create_org_credential_as_admin(post, organization, org_admin):
     response = post(reverse('api:credential_list'), {
@@ -272,6 +295,7 @@ def test_create_org_credential_as_admin(post, organization, org_admin):
         'organization': organization.id,
     }, org_admin)
     assert response.status_code == 201
+
 
 @pytest.mark.django_db
 def test_credential_detail(post, get, organization, org_admin):
@@ -287,6 +311,7 @@ def test_credential_detail(post, get, organization, org_admin):
     assert 'organization' in summary_fields
     related_fields = response.data['related']
     assert 'organization' in related_fields
+
 
 @pytest.mark.django_db
 def test_list_created_org_credentials(post, get, organization, org_admin, org_member):
@@ -336,6 +361,7 @@ def test_cant_change_organization(patch, credential, organization, org_admin):
     }, org_admin)
     assert response.status_code == 403
 
+
 @pytest.mark.django_db
 def test_cant_add_organization(patch, credential, organization, org_admin):
     assert credential.organization is None
@@ -350,6 +376,7 @@ def test_cant_add_organization(patch, credential, organization, org_admin):
 # Openstack Credentials
 #
 
+
 @pytest.mark.django_db
 def test_openstack_create_ok(post, organization, admin):
     data = {
@@ -363,6 +390,7 @@ def test_openstack_create_ok(post, organization, admin):
     }
     response = post(reverse('api:credential_list'), data, admin)
     assert response.status_code == 201
+
 
 @pytest.mark.django_db
 def test_openstack_create_fail_required_fields(post, organization, admin):
@@ -383,6 +411,7 @@ def test_openstack_create_fail_required_fields(post, organization, admin):
 # misc xfail conditions
 #
 
+
 @pytest.mark.django_db
 def test_create_credential_missing_user_team_org_xfail(post, admin):
     # Must specify one of user, team, or organization
@@ -391,4 +420,3 @@ def test_create_credential_missing_user_team_org_xfail(post, admin):
         'username': 'someusername',
     }, admin)
     assert response.status_code == 400
-

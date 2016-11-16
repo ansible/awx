@@ -20,9 +20,11 @@ from awx.main.scheduler.partial import (
     InventoryUpdateLatestDict,
 )
 
+
 @pytest.fixture
 def org():
     return Organization.objects.create(name="org1")
+
 
 class TestProjectUpdateLatestDictDict():
     @pytest.fixture
@@ -84,6 +86,7 @@ class TestInventoryUpdateDict():
 
             assert 1 == len(tasks)
             assert waiting_inventory_update.id == tasks[0]['id']
+
 
 class TestInventoryUpdateLatestDict():
     @pytest.fixture

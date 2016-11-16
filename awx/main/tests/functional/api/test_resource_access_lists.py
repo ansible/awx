@@ -3,6 +3,7 @@ import pytest
 from django.core.urlresolvers import reverse
 from awx.main.models import Role
 
+
 @pytest.mark.django_db
 def test_indirect_access_list(get, organization, project, team_factory, user, admin):
     project_admin = user('project_admin')

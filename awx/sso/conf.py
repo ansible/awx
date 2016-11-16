@@ -801,6 +801,7 @@ register(
 # SAML AUTHENTICATION SETTINGS
 ###############################################################################
 
+
 def get_saml_metadata_url():
     return urlparse.urljoin(settings.TOWER_URL_BASE, reverse('sso:saml_metadata'))
 
