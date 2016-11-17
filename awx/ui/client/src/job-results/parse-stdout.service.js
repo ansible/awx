@@ -8,65 +8,56 @@ export default ['$log', function($log){
     var val = {
         // parses stdout string from api and formats various codes to the
         // correct dom structure
-        prettify: function(line){
+        prettify: function(line, unstyled){
 
             // TODO: remove once Chris's fixes to the [K lines comes in
             if (line.indexOf("[K") > -1) {
                 $log.error(line);
             }
+            if(!unstyled){
+                // add span tags with color styling
+                line = line.replace(/u001b/g, '');
 
-            line = line.replace(/u001b/g, '');
+                // ansi classes
+                line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
+                line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
+                line = line.replace(/\[0;32m/g, '<span class="ansi32">');
+                line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
+                line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
+                line = line.replace(/\[0;33m/g, '<span class="ansi33">');
+                line = line.replace(/\[0;34m/g, '<span class="ansi34">');
+                line = line.replace(/\[0;35m/g, '<span class="ansi35">');
+                line = line.replace(/\[0;36m/g, '<span class="ansi36">');
+                line = line.replace(/(<host.*?>)\s/g, '$1');
 
-            // ansi classes
-            line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
-            line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
-            line = line.replace(/\[0;32m/g, '<span class="ansi32">');
-            line = line.replace(/\[0;32m=/g, '<span class="ansi32">');
-            line = line.replace(/\[0;32m1/g, '<span class="ansi36">');
-            line = line.replace(/\[0;33m/g, '<span class="ansi33">');
-            line = line.replace(/\[0;34m/g, '<span class="ansi34">');
-            line = line.replace(/\[0;35m/g, '<span class="ansi35">');
-            line = line.replace(/\[0;36m/g, '<span class="ansi36">');
-            line = line.replace(/(<host.*?>)\s/g, '$1');
-
-            //end span
-            line = line.replace(/\[0m/g, '</span>');
-            return line;
-        },
-        prettifyLite: function(line){
-            // this function will return a line of stdout without the <span>
-            // tags styling the output. This isn't needed in the case
-            // of the host event modal where stdout is displayed in a CodeMirror
-
-
-            // TODO: remove once Chris's fixes to the [K lines comes in
-            if (line.indexOf("[K") > -1) {
-                $log.error(line);
+                //end span
+                line = line.replace(/\[0m/g, '</span>');
             }
+            else {
+                // For the host event modal in the standard out tab,
+                // the styling isn't necessary
+                line = line.replace(/u001b/g, '');
 
-            line = line.replace(/u001b/g, '');
+                // ansi classes
+                line = line.replace(/\[1;31m/g, '');
+                line = line.replace(/\[0;31m/g, '');
+                line = line.replace(/\[0;32m/g, '');
+                line = line.replace(/\[0;32m=/g, '');
+                line = line.replace(/\[0;32m1/g, '');
+                line = line.replace(/\[0;33m/g, '');
+                line = line.replace(/\[0;34m/g, '');
+                line = line.replace(/\[0;35m/g, '');
+                line = line.replace(/\[0;36m/g, '');
+                line = line.replace(/(<host.*?>)\s/g, '$1');
 
-            // ansi classes
-            line = line.replace(/\[1;31m/g, '');
-            line = line.replace(/\[0;31m/g, '');
-            line = line.replace(/\[0;32m/g, '');
-            line = line.replace(/\[0;32m=/g, '');
-            line = line.replace(/\[0;32m1/g, '');
-            line = line.replace(/\[0;33m/g, '');
-            line = line.replace(/\[0;34m/g, '');
-            line = line.replace(/\[0;35m/g, '');
-            line = line.replace(/\[0;36m/g, '');
-            line = line.replace(/(<host.*?>)\s/g, '$1');
-
-            //end span
-            line = line.replace(/\[0m/g, '');
-            //TODO: figure out how to get rid of the hidden characters that
-            // show up in the codmirror as red dots
+                //end span
+                line = line.replace(/\[0m/g, '');
+            }
             return line;
         },
         // adds anchor tags and tooltips to host status lines
         getAnchorTags: function(event, line){
-            if(event.event.indexOf("runner_") === -1){
+            if(event.event_name.indexOf("runner_") === -1){
                 return line;
             }
             else{

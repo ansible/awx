@@ -51,7 +51,7 @@
 
             // grab standard out & standard error if present, and remove from the results displayed in the details panel
             if (hostEvent.stdout){
-                $scope.stdout = parseStdoutService.prettifyLite(hostEvent.stdout);
+                $scope.stdout = parseStdoutService.prettify(hostEvent.stdout, "unstyled");
                 delete $scope.event.stdout;
             }
             if (hostEvent.stderr){
