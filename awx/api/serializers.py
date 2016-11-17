@@ -2218,6 +2218,8 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             notification_templates_error = reverse('api:workflow_job_template_notification_templates_error_list', args=(obj.pk,)),
             survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
 
     def validate_extra_vars(self, value):
