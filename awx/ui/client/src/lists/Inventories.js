@@ -66,7 +66,7 @@ export default
                 ngClick: 'addInventory()',
                 awToolTip: i18n._('Create a new inventory'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD'),
+                buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: 'canAdd'
             }
         },

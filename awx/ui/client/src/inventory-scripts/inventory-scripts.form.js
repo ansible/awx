@@ -55,8 +55,8 @@ export default ['i18n', function(i18n) {
                 awDropFile: true,
                 ngDisabled: '!(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)',
                 rows: 10,
-                awPopOver: i18n._("<p>Drag and drop your custom inventory script file here or create one in the field to import your custom inventory. " +
-                                    "<br><br> Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python</p>"),
+                awPopOver: "<p>" + i18n._("Drag and drop your custom inventory script file here or create one in the field to import your custom inventory.") + " " +
+                                    "<br><br> " + i18n.sprintf(i18n._("Script must begin with a hashbang sequence: i.e.... %s"), "#!/usr/bin/env python") + "</p>",
                 dataTitle: i18n._('Custom Script'),
                 dataPlacement: 'right',
                 dataContainer: "body"

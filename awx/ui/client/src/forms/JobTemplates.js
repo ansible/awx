@@ -51,10 +51,13 @@ export default
                     "default": 0,
                     required: true,
                     column: 1,
-                    awPopOver: i18n._("<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
-                        " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature.</p>"),
+                    awPopOver: "<p>" + i18n._("When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
+                        " on the selected hosts.") + "</p> <p>" +
+                        i18n.sprintf(i18n._("Setting the type to %scheck%s will not execute the playbook."), "<em>", "</em>") + " " +
+                        i18n.sprintf(i18n._("Instead, %s will check playbook " +
+                        " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p> <p>" +
+                        i18n.sprintf(i18n._("Setting the type to %sscan%s will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature."), "<em>", "</em>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -78,7 +81,7 @@ export default
                     },
                     requiredErrorMsg: "Please select an Inventory or check the Prompt on launch option.",
                     column: 1,
-                    awPopOver: i18n._("<p>Select the inventory containing the hosts you want this job to manage.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the inventory containing the hosts you want this job to manage.") + "</p>",
                     dataTitle: i18n._('Inventory'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -106,7 +109,7 @@ export default
                         init: "true"
                     },
                     column: 1,
-                    awPopOver: i18n._("<p>Select the project containing the playbook you want this job to execute.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the project containing the playbook you want this job to execute.") + "</p>",
                     dataTitle: i18n._('Project'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -123,7 +126,7 @@ export default
                         init: "true"
                     },
                     column: 1,
-                    awPopOver: i18n._("<p>Select the playbook to be executed by this job.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the playbook to be executed by this job.") + "</p>",
                     dataTitle: i18n._('Playbook'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -145,8 +148,8 @@ export default
                     },
                     requiredErrorMsg: "Please select a Machine Credential or check the Prompt on launch option.",
                     column: 1,
-                    awPopOver: i18n._("<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
-                     " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
+                     " the username and SSH key or password that Ansible will need to log into the remote hosts.") + "</p>",
                     dataTitle: i18n._('Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -167,8 +170,8 @@ export default
                     sourceModel: 'cloud_credential',
                     sourceField: 'name',
                     column: 1,
-                    awPopOver: i18n._("<p>Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
-                        "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.</p>"),
+                    awPopOver:"<p>" + i18n._("Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
+                        "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.") + "</p>",
                     dataTitle: i18n._('Cloud Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -185,7 +188,7 @@ export default
                     sourceModel: 'network_credential',
                     sourceField: 'name',
                     column: 1,
-                    awPopOver: i18n._("<p>Network credentials are used by Ansible networking modules to connect to and manage networking devices.</p>"),
+                    awPopOver: "<p>" + i18n._("Network credentials are used by Ansible networking modules to connect to and manage networking devices.") + "</p>",
                     dataTitle: i18n._('Network Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -201,9 +204,10 @@ export default
                     "default": '0',
                     'class': "input-small",
                     column: 1,
-                    awPopOver: i18n._('<p>The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
-                        'the default value from the <a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
-                        ' target=\"_blank\">ansible configuration file</a>.</p>'),
+                    awPopOver: '<p>' + i18n.sprintf(i18n._('The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
+                        'the default value from the %sansible configuration file%s.'), '' +
+                        '<a id="ansible_forks_docs" href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
+                        ' target=\"_blank\">', '</a>') +'</p>',
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -213,9 +217,10 @@ export default
                     label: i18n._('Limit'),
                     type: 'text',
                     column: 1,
-                    awPopOver: i18n._("<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
-                        "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
-                        "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>"),
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
+                        "Multiple patterns can be separated by %s %s or %s"), "&#59;", "&#58;", "&#44;") + "</p><p>" +
+                        i18n.sprintf(i18n._("For more information and examples see " +
+                        "%sthe Patterns topic at docs.ansible.com%s."), "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">", "</a>") + "</p>",
                     dataTitle: i18n._('Limit'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -232,7 +237,7 @@ export default
                     "default": 1,
                     required: true,
                     column: 1,
-                    awPopOver: i18n._("<p>Control the level of output ansible will produce as the playbook executes.</p>"),
+                    awPopOver: "<p>" + i18n._("Control the level of output ansible will produce as the playbook executes.") + "</p>",
                     dataTitle: i18n._('Verbosity'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -244,9 +249,9 @@ export default
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     column: 2,
-                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
-                        "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
+                        "<p>" + i18n._("Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.") + "</p>" +
+                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
                     dataTitle: i18n._("Job Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
@@ -262,9 +267,9 @@ export default
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     column: 2,
-                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
-                        "<p>Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
+                        "<p>" + i18n._("Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.") + "</p>" +
+                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
                     dataTitle: i18n._("Skip Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
@@ -282,7 +287,7 @@ export default
                         label: i18n._('Enable Privilege Escalation'),
                         type: 'checkbox',
                         column: 2,
-                        awPopOver: i18n._("<p>If enabled, run this playbook as an administrator. This is the equivalent of passing the <code>--become</code> option to the <code>ansible-playbook</code> command. </p>"),
+                        awPopOver: "<p>" + i18n.sprintf(i18n._("If enabled, run this playbook as an administrator. This is the equivalent of passing the %s option to the %s command."), '<code>--become</code>', '<code>ansible-playbook</code>') + " </p>",
                         dataPlacement: 'right',
                         dataTitle: i18n._('Become Privilege Escalation'),
                         dataContainer: "body",
@@ -294,8 +299,8 @@ export default
                         type: 'checkbox',
                         ngChange: "toggleCallback('host_config_key')",
                         column: 2,
-                        awPopOver: i18n._("<p>Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
-                            "using this job template.</p>"),
+                        awPopOver: "<p>" + i18n._("Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update " +
+                            "using this job template.") + "</p>",
                         dataPlacement: 'right',
                         dataTitle: i18n._('Allow Provisioning Callbacks'),
                         dataContainer: "body",
@@ -338,7 +343,7 @@ export default
                     multiSelect: true,
                     dataTitle: i18n._('Labels'),
                     dataPlacement: 'right',
-                    awPopOver: i18n._("<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>"),
+                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.") + "</p>",
                     dataContainer: 'body',
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
@@ -349,12 +354,12 @@ export default
                     rows: 6,
                     "default": "---",
                     column: 2,
-                    awPopOver: i18n._("<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
-                        "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Pass extra command line variables to the playbook. This is the %s or %s command line parameter " +
+                        "for %s. Provide key/value pairs using either YAML or JSON."), '<code>-e</code>', '<code>--extra-vars</code>', '<code>ansible-playbook</code>') + "</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n"),
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",

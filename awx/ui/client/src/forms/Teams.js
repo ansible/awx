@@ -83,7 +83,7 @@ export default
                             label: 'Add',
                             awToolTip: i18n._('Add user to team'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: i18n._('&#43; ADD'),
+                            buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },

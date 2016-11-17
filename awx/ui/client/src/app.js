@@ -312,7 +312,7 @@ var tower = angular.module('Tower', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        label: 'CREDENTIALS'
+                        label: N_('CREDENTIALS')
                     }
                 })
             });
@@ -336,7 +336,7 @@ var tower = angular.module('Tower', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        label: 'TEAMS'
+                        label: N_('TEAMS')
                     }
                 })
             });
@@ -360,7 +360,7 @@ var tower = angular.module('Tower', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        label: 'USERS'
+                        label: N_('USERS')
                     }
                 })
             });
@@ -500,7 +500,7 @@ var tower = angular.module('Tower', [
                 templateUrl: urlPrefix + 'partials/sockets.html',
                 controller: SocketsController,
                 ncyBreadcrumb: {
-                    label: 'SOCKETS'
+                    label: N_('SOCKETS')
                 }
             });
 

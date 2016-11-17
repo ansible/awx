@@ -4,8 +4,8 @@ module.exports = {
             markerNames: ['_', 'N_']
         },
         files: {
-            'po/ansible-tower.pot': ['client/src/**/*.js',
-                                     'client/src/**/*.html']
+            'po/ansible-tower-ui.pot': ['client/src/**/*.js',
+                                        'client/src/**/*.html']
         }
     },
 };

@@ -961,7 +961,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 this.form.name + "_form." + fld + `.$error.email'>${error_message}</div>`;
                         }
                         if (field.awPassMatch) {
-                            error_message = error_message = i18n._("This value does not match the password you entered previously.  Please confirm that password.");
+                            error_message = i18n._("This value does not match the password you entered previously.  Please confirm that password.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-passmatch-error' ng-show='" + this.form.name + "_form." + fld +
                                 `.$error.awpassmatch'>${error_message}</div>`;
                         }
@@ -973,7 +973,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (field.chkPass && $AnsibleConfig) {
                             // password strength
                             if ($AnsibleConfig.password_length) {
-                                error_message = i18n.format(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
+                                error_message = i18n.sprintf(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
                                     `.$error.password_length">${error_message}</div>`;
                             }
@@ -993,7 +993,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     `.$error.hasNumber">${error_message}</div>`;
                             }
                             if ($AnsibleConfig.password_hasSymbol) {
-                                i18n.format(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
+                                error_message = i18n.sprintf(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
                                     `.$error.hasSymbol">${error_message}</div>`;
                             }
@@ -1097,7 +1097,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(!field.multiSelect && !field.disableChooseOption){
                             html += "<option value=\"\">";
                                 // Add a custom default select 'value' (default text)
-                            html += (field.defaultText) ? field.defaultText : i18n.format(i18n._("Choose a %s"), field.label.toLowerCase());
+                            html += (field.defaultText) ? field.defaultText : i18n.sprintf(i18n._("Choose a %s"), field.label.toLowerCase());
                             html += "</option>\n";
                         }
 
@@ -1459,9 +1459,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                     if(this.form.name === "user"){
                         html+= "<span class=\"Form-title--is_superuser\" "+
-                            "ng-show='is_superuser'>Admin</span>";
+                            "ng-show='is_superuser'>" + i18n._("Admin") + "</span>";
                         html+= "<span class=\"Form-title--is_system_auditor\" "+
-                            "ng-show='is_system_auditor'>Auditor</span>";
+                            "ng-show='is_system_auditor'>" + i18n._("Auditor") + "</span>";
                         html+= "<span class=\"Form-title--is_ldap_user\" "+
                             "ng-show='ldap_user'>LDAP</span>";
                         html+= "<span class=\"Form-title--is_external_account\" "+
@@ -1966,7 +1966,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 // Message for loading
                 html += "<tr ng-show=\"" + collection.iterator + "Loading == true\">\n";
-                html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
+                html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">" + i18n._("Loading...") + "</div></td>\n";
                 html += "</tr>\n";
 
                 // End List

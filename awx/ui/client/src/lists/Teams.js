@@ -48,7 +48,7 @@ export default
                 ngClick: 'addTeam()',
                 awToolTip: i18n._('Create a new team'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD'),
+                buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: 'canAdd'
             }
         },

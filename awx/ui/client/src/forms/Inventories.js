@@ -15,7 +15,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
     .factory('InventoryFormObject', ['i18n', function(i18n) {
         return {
 
-        addTitle: 'New Inventory',
+        addTitle: i18n._('New Inventory'),
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
         basePath: 'inventory',
@@ -57,14 +57,14 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                 class: 'Form-formGroup--fullWidth',
                 rows: 6,
                 "default": "---",
-                awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                awPopOver: "<p>" + i18n._("Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") + "</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
-                dataTitle: 'Inventory Variables',
+                    '<p>' + i18n.sprintf(i18n._('View JSON examples at %s'), '<a href="http://www.json.org" target="_blank">www.json.org</a>') + '</p>' +
+                    '<p>' + i18n.sprintf(i18n._('View YAML examples at %s'), '<a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a>') + '</p>',
+                dataTitle: i18n._('Inventory Variables'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)' // TODO: get working
@@ -150,7 +150,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: i18n._('&#43; ADD'),
+                            buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
