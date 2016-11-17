@@ -121,17 +121,18 @@ class BaseCallbackModule(CallbackBase):
         else:
             task = None
 
-        try:
-            event_context.add_local(event=event, **event_data)
-            if task:
-                self.set_task(task, local=True)
-            event_context.dump_begin(sys.stdout)
-            yield
-        finally:
-            event_context.dump_end(sys.stdout)
-            if task:
-                self.clear_task(local=True)
-            event_context.remove_local(event=None, **event_data)
+        with event_context.display_lock:
+            try:
+                event_context.add_local(event=event, **event_data)
+                if task:
+                    self.set_task(task, local=True)
+                event_context.dump_begin(sys.stdout)
+                yield
+            finally:
+                event_context.dump_end(sys.stdout)
+                if task:
+                    self.clear_task(local=True)
+                event_context.remove_local(event=None, **event_data)
 
     def set_playbook(self, playbook):
         # NOTE: Ansible doesn't generate a UUID for playbook_on_start so do it for them.
