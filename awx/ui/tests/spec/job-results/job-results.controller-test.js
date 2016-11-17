@@ -483,7 +483,77 @@ describe('Controller: jobResultsController', () => {
             });
         });
 
-        // TODO: playCount, taskCount, finishedTime, countFinished, and
-        // stdout change tests
+        describe('populate - playCount, taskCount and countFinished', () => {
+            beforeEach(() => {
+
+                populateResolve = {
+                    playCount: 12,
+                    taskCount: 13,
+                    changes: ['playCount', 'taskCount', 'countFinished']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('sets playCount', () => {
+                expect($scope.playCount).toBe(12);
+            });
+
+            it('sets taskCount', () => {
+                expect($scope.taskCount).toBe(13);
+            });
+
+            it('sets countFinished', () => {
+                expect($scope.countFinished).toBe(true);
+            });
+        });
+
+        describe('populate - finishedTime', () => {
+            beforeEach(() => {
+                jobData.finished = "";
+
+                populateResolve = {
+                    finishedTime: "finished_time",
+                    changes: ['finishedTime']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('sets finished time and changes follow tooltip', () => {
+                expect($scope.job.finished).toBe('finished_time');
+                expect($scope.jobFinished).toBe(true);
+                expect($scope.followTooltip)
+                    .toBe("Jump to last line of standard out.");
+            });
+        });
+
+        describe('populate - finishedTime when already finished', () => {
+            beforeEach(() => {
+                jobData.finished = "already_set";
+
+                populateResolve = {
+                    finishedTime: "finished_time",
+                    changes: ['finishedTime']
+                };
+
+                bootstrapTest();
+
+                $scope.$apply();
+            });
+
+            it('does not set finished time because already set', () => {
+                expect($scope.job.finished).toBe('already_set');
+                expect($scope.jobFinished).toBe(true);
+                expect($scope.followTooltip)
+                    .toBe("Jump to last line of standard out.");
+            });
+        });
+
+        // TODO: stdout change tests
     });
 });
