@@ -22,6 +22,7 @@ import base64
 import contextlib
 import datetime
 import json
+import multiprocessing
 import os
 import threading
 import uuid
@@ -34,6 +35,9 @@ class EventContext(object):
     Store global and local (per thread/process) data associated with callback
     events and other display output methods.
     '''
+
+    def __init__(self):
+        self.display_lock = multiprocessing.RLock()
 
     def add_local(self, **kwargs):
         if not hasattr(self, '_local'):
@@ -121,12 +125,13 @@ class EventContext(object):
 
     def dump(self, fileobj, data, max_width=78):
         b64data = base64.b64encode(json.dumps(data))
-        fileobj.write(u'\x1b[K')
-        for offset in xrange(0, len(b64data), max_width):
-            chunk = b64data[offset:offset + max_width]
-            escaped_chunk = u'{}\x1b[{}D'.format(chunk, len(chunk))
-            fileobj.write(escaped_chunk)
-        fileobj.write(u'\x1b[K')
+        with self.display_lock:
+            fileobj.write(u'\x1b[K')
+            for offset in xrange(0, len(b64data), max_width):
+                chunk = b64data[offset:offset + max_width]
+                escaped_chunk = u'{}\x1b[{}D'.format(chunk, len(chunk))
+                fileobj.write(escaped_chunk)
+            fileobj.write(u'\x1b[K')
 
     def dump_begin(self, fileobj):
         self.dump(fileobj, self.get_begin_dict())

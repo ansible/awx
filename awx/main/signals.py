@@ -36,7 +36,6 @@ logger = logging.getLogger('awx.main.signals')
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
     created = kwargs['created']
-    print("before created job_event_detail")
     if created:
         event_serialized = JobEventSerializer(instance).data
         event_serialized['id'] = instance.id
