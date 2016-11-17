@@ -15,9 +15,9 @@ Workflow Nodes are containers of workflow spawned job resources and function as 
 
 Workflow job template nodes are listed and created under endpoint `/workflow_job_templates/\d+/workflow_nodes/` to be associated with underlying workflow job template, or directly under endpoint `/workflow_job_template_nodes/`. The most important fields of a workflow job template node are `success_nodes`, `failure_nodes`, `always_nodes`, `unified_job_template` and `workflow_job_template`. The former three are lists of workflow job template nodes that, in union, forms the set of all its child nodes, in specific, `success_nodes` are triggered when parnent node job succeeds, `failure_nodes` are triggered when parent node job fails, and `always_nodes` are triggered regardless of whether parent job succeeds or fails; The later two reference the job template resource it contains and workflow job template it belongs to.
 
-Apart from the core fields, workflow job template nodes have optional fields `credential`, `inventory` and `char_prompts`. These fields will be passed on to corresponding fields of underlying jobs if those fields are set prompted at runtime.
+Apart from the core fields, workflow job template nodes have optional fields `credential`, `inventory`, `job_type`, `job_tags`, `skip_tags` and `limit`. These fields will be passed on to corresponding fields of underlying jobs if those fields are set prompted at runtime.
 
-When a workflow job template is launched a workflow job is created. A workflow job node is create for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus an additional `job` field, which is a reference to the to-be-spawned job resource.
+When a workflow job template is launched a workflow job is created. A workflow job node is create for each WFJT node and all fields from the WFJT node are copied. Note that workflow job nodes contain all fields that a workflow job template node contains plus two additional fields: `job` and `ancestor_artifacts`. `job` is a reference to the to-be-spawned job resource, whereas `ancestor_artifacts` is a read-only JSON field that capture `artifacts` field of containing spawned job and combine it with parent node's `ancestor_artifacts`.
 
 ### Tree-Graph Formation and Restrictions
 The tree-graph structure of a workflow is enforced by associating workflow job template nodes via endpoints `/workflow_job_template_nodes/\d+/*_nodes/`, where `*` has options `success`, `failure` and `always`. However there are restrictions that must be enforced when setting up new connections. Here are the three restrictions that will raise validation error when break:
@@ -27,6 +27,8 @@ The tree-graph structure of a workflow is enforced by associating workflow job t
 
 ### Workflow Run Details
 A typical workflow run starts by either POSTing to endpoint `/workflow_job_templates/\d+/launch/`, or being triggered automatically by related schedule. At the very first, the workflow job template creats workflow job, and all related workflow job template nodes create workflow job nodes. Right after that, all root nodes are populated with corresponding job resources and start running. If nothing goes wrong, each decision tree will follow its own route to completion. The entire workflow finishes running when all its decision trees complete.
+
+As stated, workflow job templates can be created with populated `extra_vars`. These extra_vars are the runtime extra variables of *any* spawned job, meaning that they will overwrite the existing extra variables of spawned jobs if present, and add new extra variables to spawned jobs if not. Note before the extra_vars set is applied as runtime job extra variables, it might be expaneded and over-written twice: first by corresponding survey spec, then by `ancestor_artifacts` field of parent workflow job node.
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
@@ -45,7 +47,7 @@ Workflow job summary:
 ```
 
 ### Workflow Copy and Relaunch
-Other than the normal way of creating workflow job templates/jobs, it is also possible to copy existing workflow job templates/jobs. The resulting new workflow job resource will be almost identical to which it copies from, with several unique fields to identify itself as well as to indicate its copy nature.
+Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be identical to which it copies from, with several unique fields to identify itself as well as to indicate its copy nature.
 
 Workflow job templates can be copied by POSTing to endpoint `/workflow_job_templates/\d+/copy/`. After copy finished, the resulting new workflow job template will have identical fields including description, extra_vars, labels, 'launch_type' and survey-related fields (survey_passwords, survey_spec and survey_enabled). More importantly, all workflow job template nodes of the original workflow job template, as well as the topology they bear, will be copied. On the other hand, schedules and notification templates of the original workflow job template will not be copied nor shared, and the name of the created workflow job template is the original name plus a special-formatted suffix to indicate its copy origin, such as **TODO**.
 
@@ -68,7 +70,9 @@ Worflow jobs cannot be copied directly, instead a workflow job is implicitly cop
 ### Task-related
 * Verify that workflow jobs can be launched by POSTing to endpoint `/workflow_job_templates/\d/launch/`.
 * Verify that schedules can be successfully (dis)associated with a workflow job template, and workflow jobs can be triggered by the schedule of associated workflow job template at specified time point.
-* Verify that extra variables and surveys work for workflow job templates the same way as they work for normal job templates.
+* Verify that extra variables work for workflow job templates as described. In specific, verify the role of workflow job extra variables as a set of global runtime variables over all its spawned jobs.
+* Verify that extra variables of a workflow job node are correctly overwritten in order by its own `survey_spec` if survey is enabled and `ancestor_artifacts` field of parent node.
+* Verify that when a contained job finished running with its `artifacts` field populated, the underlying workfow job node will populate its `ancestor_artifacts` field with the union of the job's `artifacts` field and the `ancestor_artifacts` field of its parent node.
 * Verify that during a workflow job run, all its decision trees follow their correct paths of execution. Unwarranted behaviors include child node executing before its parent and wrong path being selected (*failure nodes* are executed when parent node *succeeds* and so on).
 * Verify that a subtree of execution will never start if its root node runs into internal error (*not ends with failure*).
 * Verify that a subtree of execution will never start if its root node is successfully canceled.
