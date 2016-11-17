@@ -45,10 +45,6 @@ def emit_job_event_detail(sender, **kwargs):
         event_serialized["group_name"] = "job_events"
         emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
 
-        if instance.job.spawned_by_workflow:
-            event_serialized['group_name'] = "workflow_events"
-            emit_channel_notification('workflow_events-' + str(instance.job.workflow_job_id), event_serialized)
-
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
     instance = kwargs['instance']

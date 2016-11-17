@@ -792,13 +792,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
-        return {}
+        return {'workflow_job_id': self.workflow_job_id}
 
     def websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
         status_data.update(self.websocket_emit_data())
         status_data['group_name'] = 'jobs'
         emit_channel_notification('jobs-status_changed', status_data)
+
+        if self.spawned_by_workflow:
+            event_serialized['group_name'] = "workflow_events"
+            emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+
 
     def notification_data(self):
         return dict(id=self.id,
