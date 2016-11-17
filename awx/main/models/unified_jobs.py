@@ -801,7 +801,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         emit_channel_notification('jobs-status_changed', status_data)
 
         if self.spawned_by_workflow:
-            event_serialized['group_name'] = "workflow_events"
+            status_data['group_name'] = "workflow_events"
             emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
 
 
