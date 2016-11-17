@@ -77,17 +77,21 @@ def display_with_context(f):
     def wrapper(*args, **kwargs):
         log_only = args[5] if len(args) >= 6 else kwargs.get('log_only', False)
         stderr = args[3] if len(args) >= 4 else kwargs.get('stderr', False)
-        fileobj = sys.stderr if stderr else sys.stdout
         event_uuid = event_context.get().get('uuid', None)
-        try:
-            if not log_only and not event_uuid:
+        with event_context.display_lock:
+            # If writing only to a log file or there is already an event UUID
+            # set (from a callback module method), skip dumping the event data.
+            if log_only or event_uuid:
+                return f(*args, **kwargs)
+            try:
+                fileobj = sys.stderr if stderr else sys.stdout
                 event_context.add_local(uuid=str(uuid.uuid4()))
                 event_context.dump_begin(fileobj)
-            return f(*args, **kwargs)
-        finally:
-            if not log_only and not event_uuid:
+                return f(*args, **kwargs)
+            finally:
                 event_context.dump_end(fileobj)
                 event_context.remove_local(uuid=None)
+
     return wrapper
 
 

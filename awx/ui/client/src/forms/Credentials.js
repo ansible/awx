@@ -51,7 +51,7 @@ export default
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    awPopOver: i18n._("<p>If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.</p>"),
+                    awPopOver: "<p>" + i18n._("If no organization is given, the credential can only be used by the user that creates the credential.  Organization admins and system administrators can assign an organization so that roles for the credential can be assigned to users and teams in that organization.") + "</p>",
                     dataTitle: i18n._('Organization') + ' ',
                     dataPlacement: 'bottom',
                     dataContainer: "body",
@@ -64,24 +64,24 @@ export default
                     ngOptions: 'kind.label for kind in credential_kind_options track by kind.value', //  select as label for value in array 'kind.label for kind in credential_kind_options',
                     ngChange: 'kindChange()',
                     required: true,
-                    awPopOver: i18n._('<dl>\n' +
-                            '<dt>Machine</dt>\n' +
-                            '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
+                    awPopOver: '<dl>\n' +
+                            '<dt>' + i18n._('Machine') + '</dt>\n' +
+                            '<dd>' + i18n._('Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
                             'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
-                            'remote hosts.</dd>' +
-                            '<dt>Network</dt>\n' +
-                            '<dd>Authentication for network device access. This can include SSH keys, usernames, passwords, ' +
+                            'remote hosts.') + '</dd>' +
+                            '<dt>' + i18n._('Network') + '</dt>\n' +
+                            '<dd>' + i18n._('Authentication for network device access. This can include SSH keys, usernames, passwords, ' +
                             'and authorize information. Network credentials are used when submitting jobs to run playbooks against ' +
-                            'network devices.</dd>' +
-                            '<dt>Source Control</dt>\n' +
-                            '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
+                            'network devices.') + '</dd>' +
+                            '<dt>' + i18n._('Source Control') + '</dt>\n' +
+                            '<dd>' + i18n._('Used to check out and synchronize playbook repositories with a remote source control ' +
                             'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
-                            'used by Projects.</dd>\n' +
-                            '<dt>Others (Cloud Providers)</dt>\n' +
-                            '<dd>Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
+                            'used by Projects.') + '</dd>\n' +
+                            '<dt>' + i18n._('Others (Cloud Providers)') + '</dt>\n' +
+                            '<dd>' + i18n._('Usernames, passwords, and access keys for authenticating to the specified cloud or infrastructure ' +
                             'provider. These are used for dynamic inventory sources and for cloud provisioning and deployment ' +
-                            'in playbook runs.</dd>\n' +
-                            '</dl>\n'),
+                            'in playbook runs.') + '</dd>\n' +
+                            '</dl>\n',
                     dataTitle: i18n._('Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -122,7 +122,8 @@ export default
                     ngShow: "kind.value == 'aws'",
                     autocomplete: false,
                     apiField: 'security_token',
-                    awPopOver: i18n._("<div>Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users.</div><div style='padding-top: 10px'>To learn more about the IAM STS Token, refer to the <a href='http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html' target='_blank'>Amazon documentation</a>.</div>"),
+                    awPopOver: "<div>" + i18n._("Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users.") + "</div><div style='padding-top: 10px'>" +
+                               i18n.sprintf(i18n._("To learn more about the IAM STS Token, refer to the %sAmazon documentation%s."), "<a href='http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html' target='_blank'>", "</a>") + "</div>",
                     hasShowInputButton: true,
                     dataTitle: i18n._('STS Token'),
                     dataPlacement: 'right',
@@ -158,7 +159,7 @@ export default
 
 
                     autocomplete: false,
-                    awPopOver: i18n._('<p>Subscription ID is an Azure construct, which is mapped to a username.</p>'),
+                    awPopOver: '<p>' + i18n._('Subscription ID is an Azure construct, which is mapped to a username.') + '</p>',
                     dataTitle: i18n._('Subscription ID'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -187,7 +188,7 @@ export default
                         init: false
                     },
                     autocomplete: false,
-                    awPopOver: i18n._('<p>The email address assigned to the Google Compute Engine <b><i>service account.</b></i></p>'),
+                    awPopOver: '<p>' + i18n.sprintf(i18n._('The email address assigned to the Google Compute Engine %sservice account.'), '<b><i>') + '</b></i></p>',
                     dataTitle: i18n._('Email'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -281,9 +282,10 @@ export default
                     ngShow: "kind.value == 'ssh'",
                     dataTitle: i18n._('Privilege Escalation'),
                     ngOptions: 'become.label for become in become_options track by become.value',
-                    awPopOver: i18n._("<p>Specify a method for 'become' operations. " +
+                    // i18n.sprintf() does not support the order of multiple "%s"
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Specify a method for 'become' operations. " +
                     "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
-                    "<code>sudo | su | pbrun | pfexec | runas</code> <br>(defaults to <code>sudo</code>)</p>"),
+                    "%s"), "<code>sudo | su | pbrun | pfexec | runas</code>") + " <br>" + i18n.sprintf(i18n._("(defaults to %s)"), "<code>sudo</code>") + "</p>",
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: 'credentialSubForm',
@@ -373,11 +375,11 @@ export default
                     labelBind: 'domainLabel',
                     type: 'text',
                     ngShow: "kind.value == 'openstack'",
-                    awPopOver: i18n._("<p>OpenStack domains define administrative " +
+                    awPopOver: "<p>" + i18n._("OpenStack domains define administrative " +
                     "boundaries. It is only needed for Keystone v3 authentication URLs. " +
-                    "Common scenarios include:<ul><li><b>v2 URLs</b> - leave blank</li>" +
-                    "<li><b>v3 default</b> - set to 'default'</br></li>" +
-                    "<li><b>v3 multi-domain</b> - your domain name</p></li></ul></p>"),
+                    "Common scenarios include:") + "<ul><li><b>" + i18n.sprintf(i18n._("v2 URLs%s - leave blank"), "</b>") + "</li>" +
+                    "<li><b>" + i18n.sprintf(i18n._("v3 default%s - set to 'default'"), "</b>") + "</br></li>" +
+                    "<li><b>" + i18n.sprintf(i18n._("v3 multi-domain%s - your domain name"), "</b>") + "</p></li></ul></p>",
                     dataTitle: i18n._('Domain Name'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -438,7 +440,7 @@ export default
                             label: 'Add',
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: i18n._('&#43; ADD'),
+                            buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },

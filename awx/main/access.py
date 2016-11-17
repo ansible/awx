@@ -1579,7 +1579,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if not is_delete_allowed:
             return False
         active_jobs = [dict(type="workflow_job", id=o.id)
-                       for o in obj.jobs.filter(status__in=ACTIVE_STATES)]
+                       for o in obj.workflow_jobs.filter(status__in=ACTIVE_STATES)]
         if len(active_jobs) > 0:
             raise StateConflict({"conflict": _("Resource is being used by running jobs"),
                                  "active_jobs": active_jobs})

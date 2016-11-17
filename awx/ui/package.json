@@ -108,6 +108,7 @@
     "ng-toast": "leigh-johnson/ngToast#2.0.1",
     "nvd3": "leigh-johnson/nvd3#1.7.1",
     "reconnectingwebsocket": "^1.0.0",
-    "select2": "^4.0.2"
+    "select2": "^4.0.2",
+    "sprintf-js": "^1.0.3"
   }
 }

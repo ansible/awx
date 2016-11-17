@@ -94,8 +94,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Recipient List'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: i18n._('<p>Type an option on each line.</p>'+
-                            '<p>For example:<br>alias1@email.com<br>\n alias2@email.com<br>\n'),
+                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>alias1@email.com<br>\n alias2@email.com<br>\n',
                 dataTitle: i18n._('Recipient List'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -138,8 +138,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n'),
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
                 dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -155,8 +155,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n'),
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
                 dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -195,8 +195,8 @@ export default ['i18n', function(i18n) {
             from_number: {
                 label: i18n._('Source Phone Number'),
                 type: 'text',
-                awPopOver: i18n._('<p>Number associated with the "Messaging Service" in Twilio.</p>'+
-                            '<p>This must be of the form <code>+18005550199</code>.</p>'),
+                awPopOver: '<p>' + i18n._('Number associated with the "Messaging Service" in Twilio.') + '</p>'+
+                            '<p>' + i18n.sprintf(i18n._('This must be of the form %s.'), '<code>+18005550199</code>') + '</p>',
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
@@ -209,8 +209,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination SMS Number'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: i18n._('<p>Type an option on each line.</p>'+
-                            '<p>For example:<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n'),
+                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
                 dataTitle: i18n._('Destination SMS Number'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -292,8 +292,8 @@ export default ['i18n', function(i18n) {
             color: {
                 label: i18n._('Notification Color'),
                 type: 'text',
-                awPopOver: i18n._('<p>Color can be one of <code>yellow</code>, <code>green</code>, <code>red</code>, ' +
-                           '<code>purple</code>, <code>gray</code>, or <code>random</code>.\n'),
+                awPopOver: '<p>' + i18n.sprintf(i18n._('Color can be one of %s.'), '<code>yellow</code>, <code>green</code>, <code>red</code>, ' +
+                           '<code>purple</code>, <code>gray</code>, <code>random</code>') + '\n',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
@@ -329,13 +329,13 @@ export default ['i18n', function(i18n) {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
-                awPopOver: i18n._('<p>Specify HTTP Headers in JSON format</p>' +
-                           '<p>For example:<br><pre>\n' +
+                awPopOver: '<p>' + i18n._('Specify HTTP Headers in JSON format') + '</p>' +
+                           '<p>' + i18n._('For example:') + '<br><pre>\n' +
                            '{\n' +
                            '  "X-Auth-Token": "828jf0",\n' +
                            '  "X-Ansible": "Is great!"\n' +
                            '}\n' +
-                           '</pre></p>'),
+                           '</pre></p>',
                 dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
                 subForm: 'typeSubForm',
@@ -367,8 +367,8 @@ export default ['i18n', function(i18n) {
                 label: i18n._('Destination Channels or Users'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: i18n._('<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>#support or support<br>\n @username or username<br>\n'),
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>' + i18n.sprintf(i18n._('%s or %s'), '#support', 'support') + '<br>\n ' + i18n.sprintf(i18n._('%s or %s'), '@username', 'username') + '<br>\n',
                 dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
