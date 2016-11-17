@@ -55,7 +55,7 @@ export default
                 basePaths: ['organizations', 'users'], // base path must be in list, or action not available
                 awToolTip: i18n._('Create a new user'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD'),
+                buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: 'canAdd'
             }
         },

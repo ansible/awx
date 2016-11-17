@@ -65,7 +65,7 @@ export default ['i18n', function(i18n){
                 ngClick: 'addNotificationTemplate()',
                 awToolTip: i18n._('Create a new notification template'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: i18n._('&#43; ADD NOTIFICATION TEMPLATE'),
+                buttonContent: '&#43; ' + i18n._('ADD NOTIFICATION TEMPLATE'),
                 ngShow: 'current_user.is_superuser || (current_user_admin_orgs && current_user_admin_orgs.length > 0)'
             }
         }

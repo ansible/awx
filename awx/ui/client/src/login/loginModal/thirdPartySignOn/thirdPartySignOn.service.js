@@ -13,7 +13,7 @@
  */
 
  export default
-    ['$http', 'ProcessErrors', function($http, ProcessErrors) {
+    ['$http', 'ProcessErrors', 'i18n', function($http, ProcessErrors, i18n) {
         return function (params) {
             var scope = params.scope,
                 url = params.url;
@@ -31,7 +31,7 @@
                         newOption.type = "google";
                         newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-google";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with Google";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "Google");
 
                         return newOption;
                     }
@@ -42,15 +42,15 @@
                         newOption.type = "github";
                         newOption.icon = "fa-github ThirdPartySignOn-icon--gitHub";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with GitHub";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "GitHub");
 
                         // if this is a GitHub team or org, add that to
                         // the tooltip
                         if (key.split("-")[1]){
                             if (key.split("-")[1] === "team") {
-                                newOption.tooltip += " Teams";
+                                newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s Teams"), "GitHub");
                             } else if (key.split("-")[1] === "org") {
-                                newOption.tooltip += " Organizations";
+                                newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s Organizations"), "GitHub");
                             }
                         }
 
@@ -63,7 +63,7 @@
                         newOption.type = "saml";
                         newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-saml-02";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with SAML";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "SAML");
 
                         // add the idp of the saml type to the tooltip
                         if (key.split(":")[1]){

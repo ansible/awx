@@ -77,9 +77,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 class: 'Form-textUneditable',
                 showonly: true,
                 ngShow: "scm_type.value == 'manual' " ,
-                awPopOver: i18n._('<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
-                    'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' +
-                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>'),
+                awPopOver: '<p>' + i18n._('Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
+                    'Together the base path and selected playbook directory provide the full path used to locate playbooks.') + '</p>' +
+                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
@@ -95,9 +95,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
-                awPopOver: i18n._('<p>Select from the list of directories found in the base path.' +
-                    'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' +
-                    '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>'),
+                awPopOver: '<p>' + i18n._('Select from the list of directories found in the base path.' +
+                    'Together the base path and the playbook directory provide the full path used to locate playbooks.') + '</p>' +
+                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
@@ -151,7 +151,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     name: 'scm_clean',
                     label: i18n._('Clean'),
                     type: 'checkbox',
-                    awPopOver: i18n._('<p>Remove any local modifications prior to performing an update.</p>'),
+                    awPopOver: '<p>' + i18n._('Remove any local modifications prior to performing an update.') + '</p>',
                     dataTitle: i18n._('SCM Clean'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
@@ -161,8 +161,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     name: 'scm_delete_on_update',
                     label: i18n._('Delete on Update'),
                     type: 'checkbox',
-                    awPopOver: i18n._('<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
-                        'repository this may significantly increase the amount of time required to complete an update.</p>'),
+                    awPopOver: '<p>' + i18n._('Delete the local repository in its entirety prior to performing an update.') + '</p><p>' + i18n._('Depending on the size of the ' +
+                        'repository this may significantly increase the amount of time required to complete an update.') + '</p>',
                     dataTitle: i18n._('SCM Delete'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
@@ -172,7 +172,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     name: 'scm_update_on_launch',
                     label: i18n._('Update on Launch'),
                     type: 'checkbox',
-                    awPopOver: i18n._('<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>'),
+                    awPopOver: '<p>' + i18n._('Each time a job runs using this project, perform an update to the local repository prior to starting the job.') + '</p>',
                     dataTitle: i18n._('SCM Update'),
                     dataContainer: 'body',
                     dataPlacement: 'right',
@@ -181,7 +181,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 }]
             },
             scm_update_cache_timeout: {
-                label: i18n._(`Cache Timeout<span class="small-text"> (seconds)</span>`),
+                label: i18n.sprintf(i18n._('Cache Timeout%s (seconds)%s'), '<span class="small-text">', '</span>'),
                 id: 'scm-cache-timeout',
                 type: 'number',
                 integer: true,
@@ -189,9 +189,9 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngShow: "scm_update_on_launch && projectSelected && scm_type.value !== 'manual'",
                 spinner: true,
                 "default": '0',
-                awPopOver: i18n._('<p>Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
+                awPopOver: '<p>' + i18n._('Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
                     'evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, ' +
-                    'and a new project update will be performed.</p>'),
+                    'and a new project update will be performed.') + '</p>',
                 dataTitle: i18n._('Cache Timeout'),
                 dataPlacement: 'right',
                 dataContainer: "body",
@@ -235,7 +235,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                         label: 'Add',
                         awToolTip: i18n._('Add a permission'),
                         actionClass: 'btn List-buttonSubmit',
-                        buttonContent: i18n._('&#43; ADD'),
+                        buttonContent: '&#43; ' + i18n._('ADD'),
                         ngShow: '(project_obj.summary_fields.user_capabilities.edit || canAdd)'
                     }
                 },

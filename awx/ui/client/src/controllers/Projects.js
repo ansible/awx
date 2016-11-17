@@ -45,7 +45,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
     function buildTooltips(project) {
         project.statusIcon = GetProjectIcon(project.status);
         project.statusTip = GetProjectToolTip(project.status);
-        project.scm_update_tooltip = "Start an SCM update";
+        project.scm_update_tooltip = i18n._("Start an SCM update");
         project.scm_schedule_tooltip = i18n._("Schedule future SCM updates");
         project.scm_type_class = "";
 
@@ -153,13 +153,13 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
-                        msg: i18n.format(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
+                        msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
                 });
         };
 
         Prompt({
             hdr: i18n._('Delete'),
-            body: i18n._('<div class="Prompt-bodyQuery">Are you sure you want to delete the project below?</div>') + '<div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the project below?') + '</div>' + '<div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -177,7 +177,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 $scope.refresh();
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.format(i18n._('Call to %s failed. POST status: '), url) + status });
+                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST status: '), url) + status });
             });
     });
 
@@ -193,12 +193,12 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 if (data.can_cancel) {
                     $scope.$emit('Cancel_Update', url);
                 } else {
-                    Alert(i18n._('Cancel Not Allowed'), i18n._('<div>Either you do not have access or the SCM update process completed. ' +
-                        'Click the <em>Refresh</em> button to view the latest status.</div>'), 'alert-info', null, null, null, null, true);
+                    Alert(i18n._('Cancel Not Allowed'), '<div>' + i18n.sprintf(i18n._('Either you do not have access or the SCM update process completed. ' +
+                        'Click the %sRefresh%s button to view the latest status.'), '<em>', '</em>') + '</div>', 'alert-info', null, null, null, null, true);
                 }
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.format(i18n._('Call to %s failed. GET status: '), url) + status });
+                ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. GET status: '), url) + status });
             });
     });
 
@@ -214,11 +214,11 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                         })
                         .error(function (data, status) {
                             ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
-                                msg: i18n.format(i18n._('Call to %s failed. GET status: '), data.related.current_update) + status });
+                                msg: i18n.sprintf(i18n._('Call to %s failed. GET status: '), data.related.current_update) + status });
                         });
                 } else {
-                    Alert(i18n._('Update Not Found'), i18n.format(i18n._('<div>An SCM update does not appear to be running for project: %s. Click the <em>Refresh</em> ' +
-                        'button to view the latest status.</div>'), $filter('sanitize')(name)), 'alert-info',undefined,undefined,undefined,undefined,true);
+                    Alert(i18n._('Update Not Found'), '<div>' + i18n.sprintf(i18n._('An SCM update does not appear to be running for project: %s. Click the %sRefresh%s ' +
+                        'button to view the latest status.'), $filter('sanitize')(name), '<em>', '</em>') + '</div>', 'alert-info',undefined,undefined,undefined,undefined,true);
                 }
             })
             .error(function (data, status) {
@@ -377,27 +377,29 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
-                    $scope.urlPopover = i18n._('<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                    $scope.urlPopover = '<p>' +
+                        i18n._('Example URLs for GIT SCM include:') +
+                        '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
-                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
+                        '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                         'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH. GIT read only protocol (git://) does not use username or password information.');
+                        'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                     break;
                 case 'svn':
-                    $scope.urlPopover = i18n._('<p>Example URLs for Subversion SCM include:</p>' +
+                    $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
-                        '<li>svn+ssh://servername.example.com/path</li></ul>');
+                        '<li>svn+ssh://servername.example.com/path</li></ul>';
                     break;
                 case 'hg':
-                    $scope.urlPopover = i18n._('<p>Example URLs for Mercurial SCM include:</p>' +
+                    $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
-                        '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
+                        '<p>' + i18n.sprintf(i18n._('%sNote:%s Mercurial does not support password authentication for SSH. ' +
                         'Do not put the username and key in the URL. ' +
-                        'If using Bitbucket and SSH, do not supply your Bitbucket username.');
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                     break;
                 default:
-                    $scope.urlPopover = i18n._('<p> URL popover text');
+                    $scope.urlPopover = '<p> ' + i18n._('URL popover text');
             }
         }
 
@@ -535,14 +537,14 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 });
 
                 $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
-                $scope.scm_update_tooltip = "Start an SCM update";
+                $scope.scm_update_tooltip = i18n._("Start an SCM update");
                 $scope.scm_type_class = "";
                 if (data.status === 'running' || data.status === 'updating') {
-                    $scope.scm_update_tooltip = "SCM update currently running";
+                    $scope.scm_update_tooltip = i18n._("SCM update currently running");
                     $scope.scm_type_class = "btn-disabled";
                 }
                 if (Empty(data.scm_type)) {
-                    $scope.scm_update_tooltip = 'Manual projects do not require an SCM update';
+                    $scope.scm_update_tooltip = i18n._('Manual projects do not require an SCM update');
                     $scope.scm_type_class = "btn-disabled";
                 }
 
@@ -641,7 +643,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 
         Prompt({
             hdr: i18n._('Delete'),
-            body: i18n.format(i18n._('<div class="Prompt-bodyQuery">Are you sure you want to remove the %s below from %s?</div>'), title, $scope.name) + '<div class="Prompt-bodyTarget">' + name + '</div>',
+            body: '<div class="Prompt-bodyQuery">' + i18n.sprintf(i18n._('Are you sure you want to remove the %s below from %s?'), title, $scope.name) + '</div>' + '<div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
             actionText: 'DELETE'
         });
@@ -658,27 +660,27 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
-                    $scope.urlPopover = i18n._('<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                    $scope.urlPopover = '<p>' + i18n._('Example URLs for GIT SCM include:') + '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
-                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
+                        '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                         'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH. GIT read only protocol (git://) does not use username or password information.');
+                        'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                     break;
                 case 'svn':
-                    $scope.urlPopover = i18n._('<p>Example URLs for Subversion SCM include:</p>' +
+                    $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
-                        '<li>svn+ssh://servername.example.com/path</li></ul>');
+                        '<li>svn+ssh://servername.example.com/path</li></ul>';
                     break;
                 case 'hg':
-                    $scope.urlPopover = i18n._('<p>Example URLs for Mercurial SCM include:</p>' +
+                    $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
-                        '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
+                        '<p>' + i18n.sprintf(i18n._('%sNote:%s Mercurial does not support password authentication for SSH. ' +
                         'Do not put the username and key in the URL. ' +
-                        'If using Bitbucket and SSH, do not supply your Bitbucket username.');
+                        'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                     break;
                 default:
-                    $scope.urlPopover = i18n._('<p> URL popover text');
+                    $scope.urlPopover = '<p> ' + i18n._('URL popover text');
             }
         }
     };

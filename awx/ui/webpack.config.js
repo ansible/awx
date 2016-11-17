@@ -39,6 +39,7 @@ var vendorPkgs = [
     'ng-toast',
     'nvd3',
     'select2',
+    'sprintf-js',
     'reconnectingwebsocket'
 ];
 

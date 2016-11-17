@@ -5,6 +5,7 @@
  *************************************************/
 
 import {templateUrl} from '../../shared/template-url/template-url.factory';
+import {N_} from "../../i18n";
 
 export default {
     name: 'managementJobsList',
@@ -17,6 +18,6 @@ export default {
     },
     ncyBreadcrumb: {
         parent: 'setup',
-        label: 'MANAGEMENT JOBS'
+        label: N_('MANAGEMENT JOBS')
     },
 };

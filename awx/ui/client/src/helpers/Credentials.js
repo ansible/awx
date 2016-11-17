@@ -38,7 +38,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.key_required = false;                             // JT -- doing the same for key and project
                  scope.project_required = false;
                  scope.subscription_required = false;
-                 scope.key_description = i18n._("Paste the contents of the SSH private key file.<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>");
+                 scope.key_description = i18n.sprintf(i18n._("Paste the contents of the SSH private key file.%s or click to close%s"), "<div class=\"popover-footer\"><span class=\"key\">Esc</span>", "</div>");
                  scope.host_required = false;
                  scope.password_required = false;
                  scope.hostLabel = '';
@@ -71,8 +71,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.domainLabel = '';
                  scope.project_required = false;
                  scope.passwordLabel = i18n._('Password (API Key)');
-                 scope.projectPopOver = i18n._("<p>The project value</p>");
-                 scope.hostPopOver = i18n._("<p>The host value</p>");
+                 scope.projectPopOver = "<p>" + i18n._("The project value") + "</p>";
+                 scope.hostPopOver = "<p>" + i18n._("The host value") + "</p>";
                  scope.ssh_key_data_api_error = '';
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
@@ -102,10 +102,10 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.key_description =  i18n._('Paste the contents of the PEM file associated with the service account email.');
                              scope.projectLabel = i18n._("Project");
                              scope.project_required = false;
-                             scope.projectPopOver = i18n._("<p>The Project ID is the " +
+                             scope.projectPopOver = "<p>" + i18n._("The Project ID is the " +
                              "GCE assigned identification. It is constructed as " +
                              "two words followed by a three digit number.  Such " +
-                             "as: </p><p>adjective-noun-000</p>");
+                             "as: ") + "</p><p>adjective-noun-000</p>";
                          break;
                          case 'azure':
                              scope.sshKeyDataLabel = i18n._('Management Certificate');
@@ -135,11 +135,11 @@ angular.module('CredentialsHelper', ['Utilities'])
                              scope.project_required = true;
                              scope.host_required = true;
                              scope.username_required = true;
-                             scope.projectPopOver = i18n._("<p>This is the tenant name. " +
+                             scope.projectPopOver = "<p>" + i18n._("This is the tenant name. " +
                                  " This value is usually the same " +
-                                 " as the username.</p>");
-                             scope.hostPopOver = i18n._("<p>The host to authenticate with." +
-                                 "<br />For example, https://openstack.business.com/v2.0/");
+                                 " as the username.") + "</p>";
+                             scope.hostPopOver = "<p>" + i18n._("The host to authenticate with.") +
+                                 "<br />" + i18n.sprintf(i18n._("For example, %s"), "https://openstack.business.com/v2.0/");
                          break;
                          case 'satellite6':
                             scope.username_required = true;
@@ -147,8 +147,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
                             scope.hostLabel = i18n._("Satellite 6 Host");
-                            scope.hostPopOver = i18n._("Enter the hostname or IP address name which <br />" +
-                                "corresponds to your Red Hat Satellite 6 server.");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address name which %s" +
+                                "corresponds to your Red Hat Satellite 6 server."), "<br />");
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
@@ -156,8 +156,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
                             scope.hostLabel = i18n._("CloudForms Host");
-                            scope.hostPopOver = i18n._("Enter the hostname or IP address for the virtual <br />" +
-                                " machine which is hosting the CloudForm appliance.");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address for the virtual %s" +
+                                " machine which is hosting the CloudForm appliance."), "<br />");
                          break;
                          case 'net':
                             scope.username_required = true;
