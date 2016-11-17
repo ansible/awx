@@ -2984,7 +2984,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
     parent_model = WorkflowJobTemplate
-    relationship = 'jobs'
+    relationship = 'workflow_jobs'
     parent_key = 'workflow_job_template'
 
 

@@ -26,7 +26,7 @@ class TestWorkflowJobTemplateSerializerGetRelated():
         return wfjt
 
     @pytest.mark.parametrize("related_resource_name", [
-        'jobs',
+        'workflow_jobs',
         'launch',
         'workflow_nodes',
     ])
