@@ -51,13 +51,13 @@ export default
                     "default": 0,
                     required: true,
                     column: 1,
-                    awPopOver: "<p>" + i18n._("When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.") + "</p> <p>" +
-                        i18n.sprintf(i18n._("Setting the type to %scheck%s will not execute the playbook."), "<em>", "</em>") + " " +
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("When this template is submitted as a job, setting the type to %s will execute the playbook, running tasks " +
+                        " on the selected hosts."), "<em>run</em>") + "</p> <p>" +
+                        i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook."), "<em>check</em>") + " " +
                         i18n.sprintf(i18n._("Instead, %s will check playbook " +
                         " syntax, test environment setup and report problems."), "<code>ansible</code>") + "</p> <p>" +
-                        i18n.sprintf(i18n._("Setting the type to %sscan%s will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature."), "<em>", "</em>") + "</p>",
+                        i18n.sprintf(i18n._("Setting the type to %s will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature."), "<em>scan</em>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",

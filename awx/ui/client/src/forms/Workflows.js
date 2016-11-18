@@ -61,7 +61,7 @@ export default
                     multiSelect: true,
                     dataTitle: i18n._('Labels'),
                     dataPlacement: 'right',
-                    awPopOver: i18n._("<p>Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.</p>"),
+                    awPopOver: "<p>" + i18n._("Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display.") + "</p>",
                     dataContainer: 'body',
                     ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
@@ -72,12 +72,12 @@ export default
                     rows: 6,
                     "default": "---",
                     column: 2,
-                    awPopOver: i18n._("<p>Pass extra command line variables to the playbook. This is the <code>-e</code> or <code>--extra-vars</code> command line parameter " +
-                        "for <code>ansible-playbook</code>. Provide key/value pairs using either YAML or JSON.</p>" +
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Pass extra command line variables to the playbook. This is the %s or %s command line parameter " +
+                        "for %s. Provide key/value pairs using either YAML or JSON."), "<code>-e</code>", "<code>--extra-vars</code>", "<code>ansible-playbook</code>") + "</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                         "YAML:<br />\n" +
-                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n"),
+                        "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                     dataTitle: i18n._('Extra Variables'),
                     dataPlacement: 'right',
                     dataContainer: "body",

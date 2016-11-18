@@ -282,10 +282,9 @@ export default
                     ngShow: "kind.value == 'ssh'",
                     dataTitle: i18n._('Privilege Escalation'),
                     ngOptions: 'become.label for become in become_options track by become.value',
-                    // i18n.sprintf() does not support the order of multiple "%s"
-                    awPopOver: "<p>" + i18n.sprintf(i18n._("Specify a method for 'become' operations. " +
-                    "This is equivalent to specifying the <code>--become-method=BECOME_METHOD</code> parameter, where <code>BECOME_METHOD</code> could be "+
-                    "%s"), "<code>sudo | su | pbrun | pfexec | runas</code>") + " <br>" + i18n.sprintf(i18n._("(defaults to %s)"), "<code>sudo</code>") + "</p>",
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Specify a method for %s operations. " +
+                    "This is equivalent to specifying the %s parameter, where %s could be "+
+                    "%s"), "'become'", "<code>--become-method=BECOME_METHOD</code>", "<code>BECOME_METHOD</code>", "<code>sudo | su | pbrun | pfexec | runas</code>") + " <br>" + i18n.sprintf(i18n._("(defaults to %s)"), "<code>sudo</code>") + "</p>",
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: 'credentialSubForm',
