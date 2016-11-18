@@ -32,7 +32,9 @@
       "expect": false,
       "context": false,
       "describe": false,
-      "moment": false
+      "moment": false,
+      "spyOn": false,
+      "jasmine": false
     },
     "strict": false,
     "quotmark": false,
