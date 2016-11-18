@@ -32,6 +32,29 @@ describe('parseStdoutService', () => {
             expect(parseStdoutService.getCollapseIcon(nonHeaderEvent))
                 .toBe(emptySpan);
         });
+
+        it('returns collapse/decollapse icons for header events', () => {
+            let headerEvent = {
+                event_name: 'playbook_on_task_start',
+                start_line: 0,
+                end_line: 1,
+                stdout:"line1",
+                event_data: {
+                    task_uuid: '1da9012d-18e6-4562-85cd-83cf10a97f86'
+                }
+            };
+            let line = "TASK [setup] *******************************************************************";
+            let expandSpan = `
+<span class="JobResultsStdOut-lineExpander">
+<i class="JobResultsStdOut-lineExpanderIcon fa fa-caret-down expanderizer
+    expanderizer--task expanded"
+    ng-click="toggleLine($event, '.task_1da9012d-18e6-4562-85cd-83cf10a97f86')"
+    data-uuid="task_1da9012d-18e6-4562-85cd-83cf10a97f86">
+</i>
+</span>`;
+            expect(parseStdoutService.getCollapseIcon(headerEvent, line))
+                .toBe(expandSpan);
+        })
     });
 
     describe('getLineArr()', () => {
