@@ -354,7 +354,7 @@ export default [
             ConfigurationService.resetAll()
                 .then(function() {
                     populateFromApi();
-                    $scope[formTracker.currentFormName].$setPristine();
+                    $scope[formTracker.currentFormName()].$setPristine();
                 })
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
