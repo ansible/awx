@@ -23,7 +23,7 @@ import 'angular-ui-router/release/stateEvents';
 // Configuration dependencies
 global.$AnsibleConfig = null;
 // Provided via Webpack DefinePlugin in webpack.config.js
-global.$ENV = $ENV || null;
+global.$ENV = {} ;
 // ui-router debugging
 if ($ENV['route-debug']){
     let trace = require('angular-ui-router').trace;

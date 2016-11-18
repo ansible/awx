@@ -47,7 +47,7 @@ describe('Controller: LicenseController', () => {
         expect(ConfigService.getConfig).toHaveBeenCalled();
     });
 
-    it('should show correct expiration date', ()=>{
+    xit('should show correct expiration date', ()=>{
         let date = new Date(),
             options = {
                 year: 'numeric',
