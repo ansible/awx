@@ -33,6 +33,23 @@ describe('parseStdoutService', () => {
         });
     });
 
+    describe('getLineClasses()', () => {
+        it('creates a string that is used as a class', () => {
+            let headerEvent = {
+                event_name: 'playbook_on_task_start',
+                event_data: {
+                    task_uuid: '1da9012d-18e6-4562-85cd-83cf10a97f86'
+                }
+            };
+            let lineNum = 3;
+            let line = "TASK [setup] *******************************************************************";
+            let styledLine =  "header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
+            expect(parseStdoutService.getLineClasses(headerEvent, line, lineNum).toBe(styledLine));
+        });
+
+
+    });
+
     describe('getCollapseIcon()', () => {
         let emptySpan = `
 <span class="JobResultsStdOut-lineExpander"></span>`;
