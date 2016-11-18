@@ -5,6 +5,7 @@
 import copy
 import json
 import re
+import six
 import logging
 from collections import OrderedDict
 from dateutil import rrule
@@ -3037,3 +3038,11 @@ class FactSerializer(BaseFactSerializer):
         res = super(FactSerializer, self).get_related(obj)
         res['host'] = obj.host.get_absolute_url()
         return res
+
+    def to_representation(self, obj):
+        ret = super(FactSerializer, self).to_representation(obj)
+        if obj is None:
+            return ret
+        if 'facts' in ret and isinstance(ret['facts'], six.string_types):
+            ret['facts'] = json.loads(ret['facts'])
+        return ret
