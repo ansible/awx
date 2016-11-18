@@ -23,7 +23,7 @@ def setup_common(hosts, fact_scans, ts_from=None, ts_to=None, epoch=timezone.now
 
 
 @pytest.mark.django_db
-def test_all(hosts, fact_scans):
+def test_all(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=1)
     ts_to = epoch + timedelta(days=10)
@@ -34,7 +34,7 @@ def test_all(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_all_ansible(hosts, fact_scans):
+def test_all_ansible(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=1)
     ts_to = epoch + timedelta(days=10)
@@ -48,7 +48,7 @@ def test_all_ansible(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_empty_db(hosts, fact_scans):
+def test_empty_db(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     hosts = hosts(host_count=2)
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=1)
@@ -60,7 +60,7 @@ def test_empty_db(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_no_results(hosts, fact_scans):
+def test_no_results(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch - timedelta(days=100)
     ts_to = epoch - timedelta(days=50)
@@ -70,7 +70,7 @@ def test_no_results(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_exact_same_equal(hosts, fact_scans):
+def test_exact_same_equal(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_to = ts_from = epoch + timedelta(days=1)
 
@@ -82,7 +82,7 @@ def test_exact_same_equal(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_exact_from_exclusive_to_inclusive(hosts, fact_scans):
+def test_exact_from_exclusive_to_inclusive(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch + timedelta(days=1)
     ts_to = epoch + timedelta(days=2)
@@ -96,7 +96,7 @@ def test_exact_from_exclusive_to_inclusive(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_to_lte(hosts, fact_scans):
+def test_to_lte(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_to = epoch + timedelta(days=1)
 
@@ -111,7 +111,7 @@ def test_to_lte(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_from_gt(hosts, fact_scans):
+def test_from_gt(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     ts_from = epoch
 
@@ -126,7 +126,7 @@ def test_from_gt(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_no_ts(hosts, fact_scans):
+def test_no_ts(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
 
     (facts_known, fact_objs) = setup_common(hosts, fact_scans, ts_from=None, ts_to=None, epoch=epoch)

@@ -7,7 +7,7 @@ from awx.main.models import Fact
 
 
 @pytest.mark.django_db
-def test_newest_scan_exact(hosts, fact_scans):
+def test_newest_scan_exact(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     hosts = hosts(host_count=2)
     facts = fact_scans(fact_scans=3, timestamp_epoch=epoch)
@@ -23,7 +23,7 @@ def test_newest_scan_exact(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_newest_scan_less_than(hosts, fact_scans):
+def test_newest_scan_less_than(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Show me the most recent state of the sytem at any point of time.
     or, said differently
@@ -52,7 +52,7 @@ def test_newest_scan_less_than(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_query_middle_of_timeline(hosts, fact_scans):
+def test_query_middle_of_timeline(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Tests query Fact that is in the middle of the fact scan timeline, but not an exact timestamp.
     '''
@@ -74,7 +74,7 @@ def test_query_middle_of_timeline(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_query_result_empty(hosts, fact_scans):
+def test_query_result_empty(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Query time less than any fact scan. Should return None
     '''
@@ -89,7 +89,7 @@ def test_query_result_empty(hosts, fact_scans):
 
 
 @pytest.mark.django_db
-def test_by_module(hosts, fact_scans):
+def test_by_module(hosts, fact_scans, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Query by fact module other than 'ansible'
     '''
