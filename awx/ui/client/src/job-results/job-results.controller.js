@@ -96,6 +96,8 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         $scope.followTooltip = "Currently following standard out as it comes in.  Click to unfollow.";
     }
 
+    $scope.events = {};
+
     // EVENT STUFF BELOW
 
     // This is where the async updates to the UI actually happen.
@@ -145,10 +147,21 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
                     if(change === 'stdout'){
                         // put stdout elements in stdout container
+
+                        // this scopes the event to that particular
+                        // block of stdout.
+                        // If you need to see the event a particular
+                        // stdout block is from, you can:
+                        // angular.element($0).scope().event
+                        $scope.events[mungedEvent.counter] = $scope.$new();
+                        $scope.events[mungedEvent.counter]
+                            .event = mungedEvent;
+
                         angular
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
-                                .stdout)($scope));
+                                .stdout)($scope.events[mungedEvent
+                                    .counter]));
 
                         // move the followAnchor to the bottom of the
                         // container
@@ -158,6 +171,11 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                         // if follow is engaged,
                         // scroll down to the followAnchor
                         if ($scope.followEngaged) {
+                            if (!$scope.followScroll) {
+                                $scope.followScroll = function() {
+                                    return null;
+                                }
+                            }
                             $scope.followScroll();
                         }
                     }

@@ -39,7 +39,6 @@ describe('Controller: jobResultsController', () => {
                 'populate',
                 'markProcessed'
             ]);
-            $compile = jasmine.createSpy('$compile');
 
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
@@ -50,7 +49,6 @@ describe('Controller: jobResultsController', () => {
             $provide.value('ParseVariableString', ParseVariableString);
             $provide.value('jobResultsService', jobResultsService);
             $provide.value('eventQueue', eventQueue);
-            $provide.value('$compile', $compile);
         });
     };
 
@@ -554,6 +552,25 @@ describe('Controller: jobResultsController', () => {
             });
         });
 
-        // TODO: stdout change tests
+        describe('populate - stdout', () => {
+            beforeEach(() => {
+
+                populateResolve = {
+                    counter: 12,
+                    stdout: "line",
+                    changes: ['stdout']
+                };
+
+                bootstrapTest();
+
+                $scope.followEngaged = true;
+
+                $scope.$apply();
+            });
+
+            it('creates new child scope for the event', () => {
+                expect($scope.events[12].event).toBe(populateResolve);
+            });
+        });
     });
 });
