@@ -18,6 +18,21 @@ describe('parseStdoutService', () => {
         parseStdoutService = _parseStdoutService_;
     }));
 
+    describe('prettify()', () => {
+        it('returns lines of stdout with styling classes', () => {
+            let line = "[0;32mok: [host-00][0m",
+            styledLine = '<span class="ansi32">ok: [host-00]</span>';
+            expect(parseStdoutService.prettify(line).toBe(styledLine));
+        });
+
+        it('can return lines of stdout without styling classes', () => {
+            let line = "[0;32mok: [host-00][0m",
+            unstyled = "unstyled",
+            unstyledLine = 'ok: [host-00]';
+            expect(parseStdoutService.prettify(line, unstyled).toBe(unstyledLine));
+        });
+    });
+
     describe('getCollapseIcon()', () => {
         let emptySpan = `
 <span class="JobResultsStdOut-lineExpander"></span>`;
@@ -54,7 +69,7 @@ describe('parseStdoutService', () => {
 </span>`;
             expect(parseStdoutService.getCollapseIcon(headerEvent, line))
                 .toBe(expandSpan);
-        })
+        });
     });
 
     describe('getLineArr()', () => {
