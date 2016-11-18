@@ -20,6 +20,7 @@ import templateUrl from './template-url/main';
 import RestServices from '../rest/main';
 import stateDefinitions from './stateDefinitions.factory';
 import apiLoader from './api-loader';
+import 'angular-duration-format';
 
 export default
 angular.module('shared', [listGenerator.name,
@@ -36,6 +37,7 @@ angular.module('shared', [listGenerator.name,
         RestServices.name,
         apiLoader.name,
         require('angular-cookies'),
+        'angular-duration-format'
     ])
     .factory('stateDefinitions', stateDefinitions)
     .factory('lodashAsPromised', lodashAsPromised)

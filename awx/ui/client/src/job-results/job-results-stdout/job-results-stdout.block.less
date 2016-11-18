@@ -1,0 +1,240 @@
+@import '../../shared/branding/colors.default.less';
+
+@breakpoint-md: 1200px;
+
+.JobResultsStdOut {
+    height: ~"calc(100% - 70px)";
+}
+
+.JobResultsStdOut-toolbar {
+    display: flex;
+    height: 38px;
+    margin-top: 15px;
+    border: 1px solid @default-list-header-bg;
+    border-bottom: 0px;
+    border-radius: 5px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.JobResultsStdOut-toolbarNumberColumn {
+    background-color: @default-list-header-bg;
+    color: @b7grey;
+    flex: initial;
+    display: flex;
+    justify-content: space-between;
+    width: 70px;
+    padding-bottom: 0px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 10px;
+    border-top-left-radius: 5px;
+    z-index: 1;
+}
+
+.JobResultsStdOut-expandAllButton {
+    height: 18px;
+    width: 18px;
+    padding-left: 4px;
+    padding-top: 1px;
+    border-radius: 50%;
+    background-color: @default-bg;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.JobResultsStdOut-expandAllButton:hover .JobResultsStdOut-expandAllIcon,
+.JobResultsStdOut-expandAllIcon:hover {
+    color: @default-data-txt;
+}
+
+.JobResultsStdOut-toolbarStdoutColumn {
+    white-space: normal;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    background-color: @default-no-items-bord;
+}
+
+.JobResultsStdOut-followButton {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    width: 18px;
+    padding-left: 3.8px;
+    border-radius: 50%;
+    margin-top: 10px;
+    font-size: 12px;
+    background-color: @default-icon;
+    color: @default-border;
+}
+
+.JobResultsStdOut-followIcon {
+    color: @default-border;
+}
+
+.JobResultsStdOut-followButton:hover {
+    background-color: @default-icon-hov;
+}
+
+.JobResultsStdOut-followButton:hover .JobResultsStdOut-followIcon,
+.JobResultsStdOut-followIcon:hover {
+    color: @default-interface-txt;
+}
+
+.JobResultsStdOut-followButton.is-engaged {
+    background-color: @default-link;
+    color: @default-bg;
+}
+
+.JobResultsStdOut-followButton.is-engaged .JobResultsStdOut-followIcon {
+    color: @default-bg;
+}
+
+.JobResultsStdOut-followButton.is-engaged:hover {
+    background-color: @default-icon;
+}
+
+.JobResultsStdOut-followButton.is-engaged:hover .JobResultsStdOut-followIcon,
+.JobResultsStdOut-followButton.is-engaged .JobResultsStdOut-followIcon:hover {
+    color: @default-border;
+}
+
+.JobResultsStdOut-stdoutContainer {
+    height: ~"calc(100% - 48px)";
+    background-color: @default-no-items-bord;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.JobResultsStdOut-numberColumnPreload {
+    background-color: @default-list-header-bg;
+    width: 70px;
+    position: fixed;
+    top: 148px;
+    bottom: 20px;
+    margin-top: 65px;
+    margin-bottom: 65px;
+
+}
+
+.JobResultsStdOut-aLineOfStdOut {
+    display: flex;
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+}
+
+.JobResultsStdOut-lineExpander {
+    text-align: left;
+    padding-left: 11px;
+    margin-right: auto;
+}
+
+.JobResultsStdOut-lineExpanderIcon {
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.JobResultsStdOut-lineExpanderIcon:hover {
+    color: @default-data-txt;
+}
+
+.JobResultsStdOut-lineNumberColumn {
+    display: flex;
+    background-color: @default-list-header-bg;
+    text-align: right;
+    padding-right: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: @b7grey;
+    width: 75px;
+    flex: initial;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    z-index: 1;
+}
+
+.JobResultsStdOut-stdoutColumn {
+    padding-left: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: @default-interface-txt;
+    display: inline-block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    width:100%;
+}
+
+.JobResultsStdOut-aLineOfStdOut:hover,
+.JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-lineNumberColumn {
+    background-color: @default-bg;
+}
+
+.JobResultsStdOut-footer {
+    height: 10px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: @default-no-items-bord;
+    border: 1px solid @default-list-header-bg;
+    border-top: 0px;
+    border-radius: 5px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.JobResultsStdOut-footerNumberColumn {
+    background-color: @default-list-header-bg;
+    width: 70px;
+    height: 100%;
+}
+
+.JobResultsStdOut-followAnchor {
+    height: 20px;
+    width: 100%;
+}
+
+.JobResultsStdOut-toTop {
+    margin-right: 20px;
+    color: #D7D7D7;
+    cursor: pointer;
+    text-align: right;
+    font-family: monaco;
+}
+
+.JobResultsStdOut-toTop:hover {
+    color: @default-interface-txt;
+}
+
+@media (max-width: @breakpoint-md) {
+    .JobResultsStdOut-numberColumnPreload {
+        display: none;
+    }
+
+    .JobResultsStdOut-topAnchor {
+        position: static;
+        width: 100%;
+        top: -20px;
+        margin-top: -250px;
+        margin-bottom: 250px;
+    }
+
+    .JobResultsStdOut-followAnchor {
+        height: 20px;
+        width: 100%;
+        border-left: 70px solid @default-list-header-bg;
+    }
+
+    .JobResultsStdOut-stdoutContainer {
+        overflow-y: auto;
+    }
+
+    .JobResultsStdOut-lineAnchor {
+        display: none !important;
+    }
+}

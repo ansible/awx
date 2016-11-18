@@ -26,7 +26,6 @@
     return {
         // custom_logo: true // load /var/lib/awx/public/static/assets/custom_console_logo.png as the login modal header.  if false, will load the standard tower console logo
         // custom_login_info: "example notice" // have a notice displayed in the login modal for users.  note that, as a security measure, custom html is not supported and will be escaped.
-        tooltip_delay: { show: 500, hide: 100 }, // Default number of milliseconds to delay displaying/hiding tooltips
 
         password_length: 8, // Minimum user password length.  Set to 0 to not set a limit
         password_hasLowercase: true, // require a lowercase letter in the password
