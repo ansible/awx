@@ -3,7 +3,6 @@
 
 # Python
 import logging
-from threading import Thread
 from datetime import datetime
 
 from kombu import Connection, Exchange, Queue
@@ -17,28 +16,8 @@ from django.utils import timezone
 # AWX
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
-from awx.main.socket_queue import Socket
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
-
-
-class FactCacheReceiver(object):
-    def __init__(self):
-        self.timestamp = None
-
-
-    def run_receiver(self, use_processing_threads=True):
-        with Socket('fact_cache', 'r') as facts:
-            for message in facts.listen():
-                if 'host' not in message or 'facts' not in message or 'date_key' not in message:
-                    logger.warn('Received invalid message %s' % message)
-                    continue
-                logger.info('Received message %s' % message)
-                if use_processing_threads:
-                    wt = Thread(target=self.process_fact_message, args=(message,))
-                    wt.start()
-                else:
-                    self.process_fact_message(message)
 
 
 class FactBrokerWorker(ConsumerMixin):

@@ -53,7 +53,7 @@ class CacheModule(BaseCacheModule):
         self.connection = Connection(self.callback_connection)
         self.exchange = Exchange(self.callback_queue, type='direct')
         self.producer = Producer(self.connection)
-        
+
     def filter_ansible_facts(self, facts):
         return dict((k, facts[k]) for k in facts.keys() if k.startswith('ansible_'))
 
