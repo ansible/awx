@@ -60,7 +60,7 @@ export default ['$log', function($log){
                 //end span
                 line = line.replace(/\[0m/g, '');
             }
-            
+
             return line;
         },
         // adds anchor tags and tooltips to host status lines
@@ -170,19 +170,22 @@ export default ['$log', function($log){
                 return emptySpan;
             }
         },
+        getLineArr: function(event) {
+            return _
+                .zip(_.range(event.start_line + 1,
+                    event.end_line + 1),
+                    event.stdout.replace("\t", "        ").split("\r\n").slice(0, -1));
+        },
         // public function that provides the parsed stdout line, given a
         // job_event
         parseStdout: function(event){
             // this utilizes the start/end lines and stdout blob
             // to create an array in the format:
             // [
-            //     [lineNum: lineText],
-            //     [lineNum: lineText],
+            //     [lineNum, lineText],
+            //     [lineNum, lineText],
             // ]
-            var lineArr = _
-                .zip(_.range(event.start_line + 1,
-                    event.end_line + 1),
-                    event.stdout.replace("\t", "        ").split("\r\n").slice(0, -1));
+            var lineArr = this.getLineArr(event);
 
             // this takes each `[lineNum: lineText]` element and calls the
             // relevant helper functions in this service to build the
