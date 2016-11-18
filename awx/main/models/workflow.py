@@ -187,9 +187,9 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
 
 
 class WorkflowJobNode(WorkflowNodeBase):
-    job = models.ForeignKey(
+    job = models.OneToOneField(
         'UnifiedJob',
-        related_name='unified_job_nodes',
+        related_name='unified_job_node',
         blank=True,
         null=True,
         default=None,
@@ -258,6 +258,8 @@ class WorkflowJobNode(WorkflowNodeBase):
             extra_vars.update(functional_aa_dict)
         if extra_vars:
             data['extra_vars'] = extra_vars
+        # ensure that unified jobs created by WorkflowJobs are marked
+        data['launch_type'] = 'workflow'
         return data
 
 

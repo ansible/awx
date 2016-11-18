@@ -18,11 +18,7 @@ export default {
     data: {
         socket: {
             "groups":{
-                "jobs": ["status_changed", "summary"],
-                // not sure if you're gonna need to use job_events
-                // or if y'all will come up w/ a new socket group specifically
-                // for workflows
-                // "job_events": []
+                "workflow_events": []
             }
         }
     },

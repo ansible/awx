@@ -21,8 +21,9 @@ Once you''ve connected you are not subscribed to any event groups. You subscribe
     'groups': {
             'jobs': ['status_changed', 'summary'],
             'schedules': ['changed'],
-            'ad_hoc_command_events': [ids,],
-            'job_events': [ids,],
+            'ad_hoc_command_events': [ids...],
+            'job_events': [ids...],
+            'workflow_events': [ids...]
             'control': ['limit_reached'],
     }
 
@@ -39,12 +40,13 @@ production and development deployments that I will point out, but the actual ser
 between the two environments.
 
 ### Services
-| Name      | Details |
-|:---------:|:-----------------------------------------------------------------------------------------------------------:|
-| nginx     | listens on ports 80/443, handles HTTPS proxying, serves static assets, routes requests for daphne and uwsgi |
-| uwsgi     | listens on port 8050, handles API requests |
-| daphne    | listens on port 8051, handles Websocket requests |
-| runworker | no listening port, watches and processes the message queue |
+| Name        | Details |
+|:-----------:|:-----------------------------------------------------------------------------------------------------------:|
+| nginx       | listens on ports 80/443, handles HTTPS proxying, serves static assets, routes requests for daphne and uwsgi |
+| uwsgi       | listens on port 8050, handles API requests |
+| daphne      | listens on port 8051, handles Websocket requests |
+| runworker   | no listening port, watches and processes the message queue |
+| supervisord | (production-only) handles the process management of all the services except nginx |
 
 When a request comes in to *nginx* and have the `Upgrade` header and is for the path `/websocket`, then *nginx* knows that it should
 be routing that request to our *daphne* service.

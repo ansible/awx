@@ -394,6 +394,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         ('callback', _('Callback')),        # Job was started via host callback.
         ('scheduled', _('Scheduled')),      # Job was started from a schedule.
         ('dependency', _('Dependency')),    # Job was started as a dependency of another job.
+        ('workflow', _('Workflow')),        # Job was started from a workflow job.
     ]
 
     PASSWORD_FIELDS = ('start_args',)
@@ -758,6 +759,16 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return self._result_stdout_raw_limited(start_line, end_line, redact_sensitive, escape_ascii=True)
 
     @property
+    def spawned_by_workflow(self):
+        return self.launch_type == 'workflow'
+
+    @property
+    def workflow_job_id(self):
+        if self.spawned_by_workflow:
+            return self.unified_job_node.workflow_job.pk
+        return None
+
+    @property
     def celery_task(self):
         try:
             if self.celery_task_id:
@@ -781,13 +792,18 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
-        return {}
+        return {'workflow_job_id': self.workflow_job_id}
 
     def websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
         status_data.update(self.websocket_emit_data())
         status_data['group_name'] = 'jobs'
         emit_channel_notification('jobs-status_changed', status_data)
+
+        if self.spawned_by_workflow:
+            status_data['group_name'] = "workflow_events"
+            emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+
 
     def notification_data(self):
         return dict(id=self.id,

@@ -215,6 +215,9 @@ export default
                         if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "ad_hoc_command_events")){
                             state.data.socket.groups.ad_hoc_command_events = [id];
                         }
+                        if(state.data && state.data.socket && state.data.socket.groups.hasOwnProperty( "workflow_events")){
+                            state.data.socket.groups.workflow_events = [id];
+                        }
                         self.subscribe(state);
                     }
                     return true;
