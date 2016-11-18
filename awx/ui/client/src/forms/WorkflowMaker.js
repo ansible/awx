@@ -64,8 +64,8 @@ export default
                     ngClick: 'lookUpCredential()',
                     requiredErrorMsg: i18n._("Please select a Credential."),
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
-                     " the username and SSH key or password that Ansible will need to log into the remote hosts.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
+                     " the username and SSH key or password that Ansible will need to log into the remote hosts.") + "</p>",
                     dataTitle: i18n._('Credential'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -85,7 +85,7 @@ export default
                     ngClick: 'lookUpInventory()',
                     requiredErrorMsg: i18n._("Please select an Inventory."),
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>Select the inventory containing the hosts you want this job to manage.</p>"),
+                    awPopOver: "<p>" + i18n._("Select the inventory containing the hosts you want this job to manage.") + "</p>",
                     dataTitle: i18n._('Inventory'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -101,10 +101,12 @@ export default
                     ngOptions: 'type.label for type in job_type_options track by type.value',
                     "default": 0,
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
-                        " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, <code>ansible</code> will check playbook " +
-                        " syntax, test environment setup and report problems.</p> <p>Setting the type to <em>scan</em> will execute the playbook and store any " +
-                        " scanned facts for use with Tower's System Tracking feature.</p>"),
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("When this template is submitted as a job, setting the type to %s will execute the playbook, running tasks " +
+                        " on the selected hosts."), "<em>run</em>") + "</p> <p>" +
+                        i18n.sprintf(i18n._("Setting the type to %s will not execute the playbook. Instead, %s will check playbook " +
+                        " syntax, test environment setup and report problems."), "<em>check</em>", "<code>ansible</code>") + "</p> <p>" +
+                        i18n.sprintf(i18n._("Setting the type to %s will execute the playbook and store any " +
+                        " scanned facts for use with Tower's System Tracking feature."), "<em>scan</em>") + "</p>",
                     dataTitle: i18n._('Job Type'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -118,9 +120,10 @@ export default
                     label: i18n._('Limit'),
                     type: 'text',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
-                        "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
-                        "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>"),
+                    awPopOver: "<p>" + i18n.sprintf(i18n._("Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
+                        "Multiple patterns can be separated by %s %s or %s"), "&#59;", "&#58;", "&#44;") + "</p><p>" +
+                        i18n.sprintf(i18n._("For more information and examples see " +
+                        "%sthe Patterns topic at docs.ansible.com%s."), "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">", "</a>") + "</p>",
                     dataTitle: i18n._('Limit'),
                     dataPlacement: 'right',
                     dataContainer: "body",
@@ -133,9 +136,9 @@ export default
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
-                        "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
+                        "<p>" + i18n._("Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.") + "</p>" +
+                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
                     dataTitle: i18n._("Job Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
@@ -148,9 +151,9 @@ export default
                     rows: 5,
                     'elementClass': 'Form-textInput',
                     class: 'Form-formGroup--fullWidth',
-                    awPopOver: i18n._("<p>Provide a comma separated list of tags.</p>\n" +
-                        "<p>Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.</p>" +
-                        "<p>Consult the Ansible documentation for further details on the usage of tags.</p>"),
+                    awPopOver: "<p>" + i18n._("Provide a comma separated list of tags.") + "</p>\n" +
+                        "<p>" + i18n._("Skip tags are useful when you have a large playbook, and you want to skip specific parts of a play or task.") + "</p>" +
+                        "<p>" + i18n._("Consult the Ansible documentation for further details on the usage of tags.") + "</p>",
                     dataTitle: i18n._("Skip Tags"),
                     dataPlacement: "right",
                     dataContainer: "body",
