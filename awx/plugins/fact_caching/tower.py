@@ -29,20 +29,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import sys
 import os
 import time
-from ansible import constants as C
+
 try:
     from ansible.cache.base import BaseCacheModule
 except:
     from ansible.plugins.cache.base import BaseCacheModule
 
-try:
-    import zmq
-except ImportError:
-    print("pyzmq is required")
-    sys.exit(1)
+from kombu import Connection, Exchange, Producer
 
 
 class CacheModule(BaseCacheModule):
@@ -52,20 +47,13 @@ class CacheModule(BaseCacheModule):
         self._cache = {}
         self._all_keys = {}
 
-        # This is the local tower zmq connection
-        self._tower_connection = C.CACHE_PLUGIN_CONNECTION
         self.date_key = time.time()
-        try:
-            self.context = zmq.Context()
-            self.socket = self.context.socket(zmq.REQ)
-            self.socket.setsockopt(zmq.RCVTIMEO, 4000)
-            self.socket.setsockopt(zmq.LINGER, 2000)
-            self.socket.connect(self._tower_connection)
-        except Exception, e:
-            print("Connection to zeromq failed at %s with error: %s" % (str(self._tower_connection),
-                                                                        str(e)))
-            sys.exit(1)
-
+        self.callback_connection = os.environ['CALLBACK_CONNECTION']
+        self.callback_queue = os.environ['FACT_QUEUE']
+        self.connection = Connection(self.callback_connection)
+        self.exchange = Exchange(self.callback_queue, type='direct')
+        self.producer = Producer(self.connection)
+        
     def filter_ansible_facts(self, facts):
         return dict((k, facts[k]) for k in facts.keys() if k.startswith('ansible_'))
 
@@ -117,8 +105,12 @@ class CacheModule(BaseCacheModule):
         }
 
         # Emit fact data to tower for processing
-        self.socket.send_json(packet)
-        self.socket.recv()
+        self.producer.publish(packet,
+                              serializer='json',
+                              compression='bzip2',
+                              exchange=self.exchange,
+                              declare=[self.exchange],
+                              routing_key=self.callback_queue)
 
     def keys(self):
         return self._cache.keys()

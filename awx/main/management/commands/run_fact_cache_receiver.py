@@ -6,6 +6,9 @@ import logging
 from threading import Thread
 from datetime import datetime
 
+from kombu import Connection, Exchange, Queue
+from kombu.mixins import ConsumerMixin
+
 # Django
 from django.core.management.base import NoArgsCommand
 from django.conf import settings
@@ -22,6 +25,34 @@ logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
 class FactCacheReceiver(object):
     def __init__(self):
         self.timestamp = None
+
+
+    def run_receiver(self, use_processing_threads=True):
+        with Socket('fact_cache', 'r') as facts:
+            for message in facts.listen():
+                if 'host' not in message or 'facts' not in message or 'date_key' not in message:
+                    logger.warn('Received invalid message %s' % message)
+                    continue
+                logger.info('Received message %s' % message)
+                if use_processing_threads:
+                    wt = Thread(target=self.process_fact_message, args=(message,))
+                    wt.start()
+                else:
+                    self.process_fact_message(message)
+
+
+class FactBrokerWorker(ConsumerMixin):
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.timestamp = None
+
+    def get_consumers(self, Consumer, channel):
+        return [Consumer(queues=[Queue(settings.FACT_QUEUE,
+                                       Exchange(settings.FACT_QUEUE, type='direct'),
+                                       routing_key=settings.FACT_QUEUE)],
+                         accept=['json'],
+                         callbacks=[self.process_fact_message])]
 
     def _determine_module(self, facts):
         # Symantically determine the module type
@@ -40,17 +71,13 @@ class FactCacheReceiver(object):
         facts = self._extract_module_facts(module, facts)
         return (module, facts)
 
-    def process_fact_message(self, message):
-        hostname = message['host']
-        inventory_id = message['inventory_id']
-        facts_data = message['facts']
-        date_key = message['date_key']
-
-        # TODO: in ansible < v2 module_setup is emitted for "smart" fact caching.
-        # ansible v2 will not emit this message. Thus, this can be removed at that time.
-        if 'module_setup' in facts_data and len(facts_data) == 1:
-            logger.info('Received module_setup message')
-            return None
+    def process_fact_message(self, body, message):
+        print body
+        print type(body)
+        hostname = body['host']
+        inventory_id = body['inventory_id']
+        facts_data = body['facts']
+        date_key = body['date_key']
 
         try:
             host_obj = Host.objects.get(name=hostname, inventory__id=inventory_id)
@@ -79,32 +106,18 @@ class FactCacheReceiver(object):
             logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
         return fact_obj
 
-    def run_receiver(self, use_processing_threads=True):
-        with Socket('fact_cache', 'r') as facts:
-            for message in facts.listen():
-                if 'host' not in message or 'facts' not in message or 'date_key' not in message:
-                    logger.warn('Received invalid message %s' % message)
-                    continue
-                logger.info('Received message %s' % message)
-                if use_processing_threads:
-                    wt = Thread(target=self.process_fact_message, args=(message,))
-                    wt.start()
-                else:
-                    self.process_fact_message(message)
-
 
 class Command(NoArgsCommand):
     '''
-    blah blah
+    Save Fact Event packets to the database as emitted from a Tower Scan Job
     '''
     help = 'Launch the Fact Cache Receiver'
 
     def handle_noargs(self, **options):
-        fcr = FactCacheReceiver()
-        fact_cache_port = settings.FACT_CACHE_PORT
-        logger.info('Listening on port http://0.0.0.0:' + str(fact_cache_port))
-        try:
-            fcr.run_receiver()
-        except KeyboardInterrupt:
-            pass
+        with Connection(settings.BROKER_URL) as conn:
+            try:
+                worker = FactBrokerWorker(conn)
+                worker.run()
+            except KeyboardInterrupt:
+                pass
 
