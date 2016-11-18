@@ -10,10 +10,18 @@ export default ['$log', function($log){
         // correct dom structure
         prettify: function(line, unstyled){
 
+            line = line
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
             // TODO: remove once Chris's fixes to the [K lines comes in
             if (line.indexOf("[K") > -1) {
                 $log.error(line);
             }
+
             if(!unstyled){
                 // add span tags with color styling
                 line = line.replace(/u001b/g, '');
@@ -32,8 +40,7 @@ export default ['$log', function($log){
 
                 //end span
                 line = line.replace(/\[0m/g, '</span>');
-            }
-            else {
+            } else {
                 // For the host event modal in the standard out tab,
                 // the styling isn't necessary
                 line = line.replace(/u001b/g, '');
@@ -53,6 +60,7 @@ export default ['$log', function($log){
                 //end span
                 line = line.replace(/\[0m/g, '');
             }
+            
             return line;
         },
         // adds anchor tags and tooltips to host status lines
