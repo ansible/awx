@@ -384,7 +384,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
                 else:
                     create_kwargs[field_name] = getattr(self, field_name)
         time_now = datetime.now()
-        create_kwargs['name'] = create_kwargs['name'] + ' copy ' + time_now.strftime('%Y:%m:%d %H:%M:%S')
+        create_kwargs['name'] = create_kwargs['name'] + ' @ ' + time_now.strftime('%H:%M:%S %p')
         unified_jt = unified_jt_class(**create_kwargs)
         unified_jt.save()
         for field_name, src_field_value in m2m_fields.iteritems():
