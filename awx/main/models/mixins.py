@@ -79,10 +79,6 @@ class SurveyJobTemplateMixin(models.Model):
         default={},
     )
 
-    @classmethod
-    def _get_unified_jt_copy_names(cls):
-        return cls._get_unified_job_field_names() + ['survey_spec', 'survey_enabled']
-
     def survey_password_variables(self):
         vars = []
         if self.survey_enabled and 'spec' in self.survey_spec:

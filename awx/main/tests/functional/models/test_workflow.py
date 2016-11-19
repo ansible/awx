@@ -99,8 +99,10 @@ class TestWorkflowJob:
 @pytest.mark.django_db
 class TestWorkflowJobTemplate:
     @pytest.fixture
-    def wfjt(self, workflow_job_template_factory):
-        wfjt = workflow_job_template_factory('test').workflow_job_template
+    def wfjt(self, workflow_job_template_factory, organization):
+        wfjt = workflow_job_template_factory(
+            'test', organization=organization).workflow_job_template
+        wfjt.organization = organization
         nodes = [WorkflowJobTemplateNode.objects.create(workflow_job_template=wfjt) for i in range(0, 3)]
         nodes[0].success_nodes.add(nodes[1])
         nodes[1].failure_nodes.add(nodes[2])
@@ -145,6 +147,7 @@ class TestWorkflowJobTemplate:
         new_wfjt = wfjt.user_copy(admin_user)
         for fd in ['description', 'survey_spec', 'survey_enabled', 'extra_vars']:
             assert getattr(wfjt, fd) == getattr(new_wfjt, fd)
+        assert new_wfjt.organization == wfjt.organization
         assert len(new_wfjt.workflow_job_template_nodes.all()) == 3
         nodes = new_wfjt.workflow_job_template_nodes.all()
         assert nodes[0].success_nodes.all()[0] == nodes[1]

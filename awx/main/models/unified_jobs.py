@@ -357,6 +357,10 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
         return unified_job
 
+    @classmethod
+    def _get_unified_jt_copy_names(cls):
+        return cls._get_unified_job_field_names()
+
     def copy_unified_jt(self):
         '''
         Create a copy of this unified job template.
