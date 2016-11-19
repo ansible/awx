@@ -168,20 +168,24 @@ class TestWorkflowJobNodeJobKWARGS:
     Tests for building the keyword arguments that go into creating and
     launching a new job that corresponds to a workflow node.
     """
+    kwargs_base = {'launch_type': 'workflow'}
 
     def test_null_kwargs(self, job_node_no_prompts):
-        assert job_node_no_prompts.get_job_kwargs() == {}
+        assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base
 
     def test_inherit_workflow_job_extra_vars(self, job_node_no_prompts):
         workflow_job = job_node_no_prompts.workflow_job
         workflow_job.extra_vars = '{"a": 84}'
-        assert job_node_no_prompts.get_job_kwargs() == {'extra_vars': {'a': 84}}
+        assert job_node_no_prompts.get_job_kwargs() == dict(
+            extra_vars={'a': 84}, **self.kwargs_base)
 
     def test_char_prompts_and_res_node_prompts(self, job_node_with_prompts):
-        assert job_node_with_prompts.get_job_kwargs() == dict(
+        expect_kwargs = dict(
             inventory=job_node_with_prompts.inventory.pk,
             credential=job_node_with_prompts.credential.pk,
             **example_prompts)
+        expect_kwargs.update(self.kwargs_base)
+        assert job_node_with_prompts.get_job_kwargs() == expect_kwargs
 
     def test_reject_some_node_prompts(self, job_node_with_prompts):
         job_node_with_prompts.unified_job_template.ask_inventory_on_launch = False
@@ -189,13 +193,14 @@ class TestWorkflowJobNodeJobKWARGS:
         expect_kwargs = dict(inventory=job_node_with_prompts.inventory.pk,
                              credential=job_node_with_prompts.credential.pk,
                              **example_prompts)
+        expect_kwargs.update(self.kwargs_base)
         expect_kwargs.pop('inventory')
         expect_kwargs.pop('job_type')
         assert job_node_with_prompts.get_job_kwargs() == expect_kwargs
 
     def test_no_accepted_project_node_prompts(self, job_node_no_prompts, project_unit):
         job_node_no_prompts.unified_job_template = project_unit
-        assert job_node_no_prompts.get_job_kwargs() == {}
+        assert job_node_no_prompts.get_job_kwargs() == self.kwargs_base
 
 
 class TestWorkflowWarnings:
