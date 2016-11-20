@@ -37,10 +37,13 @@ class SettingCategoryList(ListAPIView):
 
     def get_queryset(self):
         setting_categories = []
+        categories = settings_registry.get_registered_categories()
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
-            categories = settings_registry.get_registered_categories()
+            pass  # categories = categories
+        elif 'user' in categories:
+            categories = {'user', _('User')}
         else:
-            categories = {'user': _('User')}
+            categories = {}
         for category_slug in sorted(categories.keys()):
             url = reverse('api:setting_singleton_detail', args=(category_slug,))
             setting_categories.append(SettingCategory(url, category_slug, categories[category_slug]))

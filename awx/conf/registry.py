@@ -54,14 +54,16 @@ class SettingsRegistry(object):
         categories = {
             'all': _('All'),
             'changed': _('Changed'),
-            'user': _('User'),
-            'user-defaults': _('User Defaults'),
         }
         for setting, kwargs in self._registry.items():
             category_slug = kwargs.get('category_slug', None)
             if category_slug is None or category_slug in categories:
                 continue
-            categories[category_slug] = kwargs.get('category', None) or category_slug
+            if category_slug == 'user':
+                categories['user'] = _('User')
+                categories['user-defaults'] = _('User-Defaults')
+            else:
+                categories[category_slug] = kwargs.get('category', None) or category_slug
         return categories
 
     def get_registered_settings(self, category_slug=None, read_only=None):
