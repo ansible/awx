@@ -813,6 +813,7 @@ register(
                 'Provide this URL as the callback URL for your application.'),
     category=_('Azure AD OAuth2'),
     category_slug='azuread-oauth2',
+    depends_on=['TOWER_URL_BASE'],
 )
 
 register(
