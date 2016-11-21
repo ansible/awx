@@ -160,6 +160,7 @@ supported services:
  - Port
  - some kind of token
  - enabling sending logs, and selecting which loggers to send
+ - use fully qualified domain name (fqdn) or not
  - flag to use HTTPS or not
 
 Some settings for the log handler will not be exposed to the user via
