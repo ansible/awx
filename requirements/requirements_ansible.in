@@ -1,0 +1,5 @@
+-e git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
+apache-libcloud==1.3.0
+azure==2.0.0rc6
+boto==2.43.0
+shade==1.13.1
