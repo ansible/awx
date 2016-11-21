@@ -35,7 +35,7 @@ each organization's membership.  For each organization it is possible to
 specify which users are automatically users of the organization and also
 which users can administer the organization. 
 
-- admins: None, True/False, string or list/tuple of strings.
+- admins: None, True/False, string or list of strings.
   If None, organization admins will not be updated.
   If True, all users using social auth will automatically be added as admins
   of the organization.
@@ -43,13 +43,14 @@ which users can administer the organization.
   the organiation.
   If a string or list of strings, specifies the usernames and emails for
   users who will be added to the organization. Strings in the format
-  "/<pattern>/<flags>" will be interpreted as regular expressions and may also
-  be used instead of string literals; only "i" and "m" are supported for flags.
+  "/<pattern>/<flags>" will be interpreted as JavaScript regular expressions and
+  may also be used instead of string literals; only "i" and "m" are supported
+  for flags.
 - remove_admins: True/False. Defaults to True.
   If True, a user who does not match will be removed from the organization's
   administrative list.
-- users: None, True/False, string or list/tuple of strings. Same rules apply
-  as for admins.
+- users: None, True/False, string or list of strings. Same rules apply as for
+  admins.
 - remove_users: True/False. Defaults to True. Same rules as apply for 
   remove_admins.\
 ''')
@@ -82,15 +83,15 @@ for each team's membership, where each can contain the following parameters:
   team name does not exist.  The organization will first be created if it
   does not exist.  If the license does not allow for multiple organizations,
   the team will always be assigned to the single default organization.
-- users: None, True/False, string or list/tuple of strings.
+- users: None, True/False, string or list of strings.
   If None, team members will not be updated.
   If True/False, all social auth users will be added/removed as team
   members.
   If a string or list of strings, specifies expressions used to match users.
   User will be added as a team member if the username or email matches.
-  Strings in the format "/<pattern>/<flags>" will be interpreted as regular
-  expressions and may also be used instead of string literals; only "i" and "m"
-  are supported for flags.
+  Strings in the format "/<pattern>/<flags>" will be interpreted as JavaScript
+  regular expressions and may also be used instead of string literals; only "i"
+  and "m" are supported for flags.
 - remove: True/False. Defaults to True. If True, a user who does not match
   the rules above will be removed from the team.\
 ''')
@@ -395,7 +396,7 @@ register(
                 ' - remove_admins: True/False. Defaults to True.\n'
                 '   If True, a user who is not an member of the given groups will '
                 'be removed from the organization\'s administrative list.\n'
-                ' - users: None, True/False, string or list/tuple of strings. '
+                ' - users: None, True/False, string or list of strings. '
                 'Same rules apply as for admins.\n'
                 ' - remove_users: True/False. Defaults to True. Same rules apply '
                 'as for remove_admins.'),
@@ -430,7 +431,7 @@ register(
                 'the team belongs. The team will be created if the combination of '
                 'organization and team name does not exist. The organization will '
                 'first be created if it does not exist.\n'
-                ' - users: None, True/False, string or list/tuple of strings.\n'
+                ' - users: None, True/False, string or list of strings.\n'
                 '   If None, team members will not be updated.\n'
                 '   If True/False, all LDAP users will be added/removed as team '
                 'members.\n'
