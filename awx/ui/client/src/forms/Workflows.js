@@ -25,6 +25,7 @@ export default
             stateTree: 'templates',
             activeEditState: 'templates.editWorkflowJobTemplate',
             tabs: true,
+            detailsClick: "$state.go('templates.editWorkflowJobTemplate')",
 
             fields: {
                 name: {
@@ -114,6 +115,7 @@ export default
                     iterator: 'permission',
                     index: false,
                     open: false,
+                    ngClick: "$state.go('templates.editWorkflowJobTemplate.permissions')",
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
@@ -198,7 +200,8 @@ export default
 
                 for (itm in WorkflowFormObject.related) {
                     if (WorkflowFormObject.related[itm].include === "NotificationsList") {
-                        WorkflowFormObject.related[itm] = NotificationsList;
+                        WorkflowFormObject.related[itm] = _.clone(NotificationsList);
+                        WorkflowFormObject.related[itm].ngClick = "$state.go('templates.editWorkflowJobTemplate.notifications')";
                         WorkflowFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                     }
                 }
