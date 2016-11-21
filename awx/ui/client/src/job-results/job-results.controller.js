@@ -174,7 +174,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                             if (!$scope.followScroll) {
                                 $scope.followScroll = function() {
                                     $log.error("follow scroll undefined, standard out directive not loaded yet?");
-                                }
+                                };
                             }
                             $scope.followScroll();
                         }
