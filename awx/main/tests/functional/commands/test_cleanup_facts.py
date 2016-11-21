@@ -26,7 +26,7 @@ def mock_feature_disabled(feature):
 
 
 @pytest.mark.django_db
-def test_cleanup_granularity(fact_scans, hosts):
+def test_cleanup_granularity(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     hosts(5)
     fact_scans(10, timestamp_epoch=epoch)
@@ -40,7 +40,7 @@ def test_cleanup_granularity(fact_scans, hosts):
 
 
 @pytest.mark.django_db
-def test_cleanup_older_than(fact_scans, hosts):
+def test_cleanup_older_than(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Delete half of the scans
     '''
@@ -57,7 +57,7 @@ def test_cleanup_older_than(fact_scans, hosts):
 
 
 @pytest.mark.django_db
-def test_cleanup_older_than_granularity_module(fact_scans, hosts):
+def test_cleanup_older_than_granularity_module(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     hosts(5)
     fact_scans(10, timestamp_epoch=epoch)
@@ -71,7 +71,7 @@ def test_cleanup_older_than_granularity_module(fact_scans, hosts):
 
 
 @pytest.mark.django_db
-def test_cleanup_logic(fact_scans, hosts):
+def test_cleanup_logic(fact_scans, hosts, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     Reduce the granularity of half of the facts scans, by half.
     '''

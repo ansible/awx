@@ -97,7 +97,7 @@ def test_no_facts_db(hosts, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_basic_fields(hosts, fact_scans, get, user):
+def test_basic_fields(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     search = {
         'from': epoch,
@@ -115,7 +115,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
 @pytest.mark.license_feature
-def test_basic_options_fields(hosts, fact_scans, options, user):
+def test_basic_options_fields(hosts, fact_scans, options, user, monkeypatch_jsonbfield_get_db_prep_save):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
@@ -131,7 +131,7 @@ def test_basic_options_fields(hosts, fact_scans, options, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_related_fact_view(hosts, fact_scans, get, user):
+def test_related_fact_view(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
 
     (host, response) = setup_common(hosts, fact_scans, get, user, epoch=epoch)
@@ -145,7 +145,7 @@ def test_related_fact_view(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_multiple_hosts(hosts, fact_scans, get, user):
+def test_multiple_hosts(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
 
     (host, response) = setup_common(hosts, fact_scans, get, user, epoch=epoch, host_count=3)
@@ -159,7 +159,7 @@ def test_multiple_hosts(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_param_to_from(hosts, fact_scans, get, user):
+def test_param_to_from(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     search = {
         'from': epoch - timedelta(days=10),
@@ -176,7 +176,7 @@ def test_param_to_from(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_param_module(hosts, fact_scans, get, user):
+def test_param_module(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     search = {
         'module': 'packages',
@@ -192,7 +192,7 @@ def test_param_module(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_param_from(hosts, fact_scans, get, user):
+def test_param_from(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     search = {
         'from': epoch + timedelta(days=1),
@@ -208,7 +208,7 @@ def test_param_from(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_param_to(hosts, fact_scans, get, user):
+def test_param_to(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     search = {
         'to': epoch + timedelta(days=1),
@@ -236,7 +236,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_normal_user_403(hosts, fact_scans, get, user, team):
+def test_normal_user_403(hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_bob = user('bob', False)
     response = _test_user_access_control(hosts, fact_scans, get, user_bob, team)
 
@@ -247,7 +247,7 @@ def test_normal_user_403(hosts, fact_scans, get, user, team):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_super_user_ok(hosts, fact_scans, get, user, team):
+def test_super_user_ok(hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_super = user('bob', True)
     response = _test_user_access_control(hosts, fact_scans, get, user_super, team)
 
@@ -269,7 +269,7 @@ def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team):
+def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_admin = user('johnson', False)
     org2 = organizations(1)
     org2[0].admin_role.members.add(user_admin)
