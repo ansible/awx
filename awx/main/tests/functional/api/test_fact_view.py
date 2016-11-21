@@ -77,7 +77,7 @@ def test_no_fact_found(hosts, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_basic_fields(hosts, fact_scans, get, user):
+def test_basic_fields(hosts, fact_scans, get, user, monkeypatch_jsonbfield_get_db_prep_save):
     hosts = hosts(host_count=1)
     fact_scans(fact_scans=1)
 
@@ -100,7 +100,7 @@ def test_basic_fields(hosts, fact_scans, get, user):
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_content(hosts, fact_scans, get, user, fact_ansible_json):
+def test_content(hosts, fact_scans, get, user, fact_ansible_json, monkeypatch_jsonbfield_get_db_prep_save):
     (fact_known, response) = setup_common(hosts, fact_scans, get, user)
 
     assert fact_known.host_id == response.data['host']
@@ -122,19 +122,19 @@ def _test_search_by_module(hosts, fact_scans, get, user, fact_json, module_name)
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_search_by_module_packages(hosts, fact_scans, get, user, fact_packages_json):
+def test_search_by_module_packages(hosts, fact_scans, get, user, fact_packages_json, monkeypatch_jsonbfield_get_db_prep_save):
     _test_search_by_module(hosts, fact_scans, get, user, fact_packages_json, 'packages')
 
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_search_by_module_services(hosts, fact_scans, get, user, fact_services_json):
+def test_search_by_module_services(hosts, fact_scans, get, user, fact_services_json, monkeypatch_jsonbfield_get_db_prep_save):
     _test_search_by_module(hosts, fact_scans, get, user, fact_services_json, 'services')
 
 
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.django_db
-def test_search_by_timestamp_and_module(hosts, fact_scans, get, user, fact_packages_json):
+def test_search_by_timestamp_and_module(hosts, fact_scans, get, user, fact_packages_json, monkeypatch_jsonbfield_get_db_prep_save):
     epoch = timezone.now()
     module_name = 'packages'
 
@@ -157,7 +157,7 @@ def _test_user_access_control(hosts, fact_scans, get, user_obj, team_obj):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_normal_user_403(hosts, fact_scans, get, user, team):
+def test_normal_user_403(hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_bob = user('bob', False)
     response = _test_user_access_control(hosts, fact_scans, get, user_bob, team)
 
@@ -168,7 +168,7 @@ def test_normal_user_403(hosts, fact_scans, get, user, team):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_super_user_ok(hosts, fact_scans, get, user, team):
+def test_super_user_ok(hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_super = user('bob', True)
     response = _test_user_access_control(hosts, fact_scans, get, user_super, team)
 
@@ -178,7 +178,7 @@ def test_super_user_ok(hosts, fact_scans, get, user, team):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
+def test_user_admin_ok(organization, hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_admin = user('johnson', False)
     organization.admin_role.members.add(user_admin)
 
@@ -190,7 +190,7 @@ def test_user_admin_ok(organization, hosts, fact_scans, get, user, team):
 @mock.patch('awx.api.views.feature_enabled', new=mock_feature_enabled)
 @pytest.mark.ac
 @pytest.mark.django_db
-def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team):
+def test_user_admin_403(organization, organizations, hosts, fact_scans, get, user, team, monkeypatch_jsonbfield_get_db_prep_save):
     user_admin = user('johnson', False)
     org2 = organizations(1)
     org2[0].admin_role.members.add(user_admin)

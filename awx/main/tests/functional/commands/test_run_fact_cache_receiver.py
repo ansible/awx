@@ -39,7 +39,7 @@ def check_process_fact_message_module(fact_returned, data, module_name):
 
 
 @pytest.mark.django_db
-def test_process_fact_message_ansible(fact_msg_ansible):
+def test_process_fact_message_ansible(fact_msg_ansible, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactCacheReceiver()
     fact_returned = receiver.process_fact_message(fact_msg_ansible)
 
@@ -47,7 +47,7 @@ def test_process_fact_message_ansible(fact_msg_ansible):
 
 
 @pytest.mark.django_db
-def test_process_fact_message_packages(fact_msg_packages):
+def test_process_fact_message_packages(fact_msg_packages, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactCacheReceiver()
     fact_returned = receiver.process_fact_message(fact_msg_packages)
 
@@ -55,7 +55,7 @@ def test_process_fact_message_packages(fact_msg_packages):
 
 
 @pytest.mark.django_db
-def test_process_fact_message_services(fact_msg_services):
+def test_process_fact_message_services(fact_msg_services, monkeypatch_jsonbfield_get_db_prep_save):
     receiver = FactCacheReceiver()
     fact_returned = receiver.process_fact_message(fact_msg_services)
 
@@ -63,7 +63,7 @@ def test_process_fact_message_services(fact_msg_services):
 
 
 @pytest.mark.django_db
-def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible):
+def test_process_facts_message_ansible_overwrite(fact_scans, fact_msg_ansible, monkeypatch_jsonbfield_get_db_prep_save):
     '''
     We pickypack our fact sending onto the Ansible fact interface.
     The interface is <hostname, facts>. Where facts is a json blob of all the facts.
