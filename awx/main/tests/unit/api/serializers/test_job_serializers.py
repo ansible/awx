@@ -8,6 +8,7 @@ from awx.api.serializers import (
     JobSerializer,
     JobOptionsSerializer,
 )
+
 from awx.main.models import (
     Label,
     Job,
@@ -26,8 +27,14 @@ def job_template(mocker):
 
 
 @pytest.fixture
-def job(mocker, job_template):
-    return mocker.MagicMock(pk=5, job_template=job_template)
+def project_update(mocker):
+    mock_pu = mocker.MagicMock(pk=1)
+    return mock_pu
+
+
+@pytest.fixture
+def job(mocker, job_template, project_update):
+    return mocker.MagicMock(pk=5, job_template=job_template, project_update=project_update)
 
 
 @pytest.fixture
