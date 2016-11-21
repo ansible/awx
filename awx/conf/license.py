@@ -14,7 +14,8 @@ from rest_framework.exceptions import APIException
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import memoize
 
-__all__ = ['LicenseForbids', 'get_license', 'feature_enabled', 'feature_exists']
+__all__ = ['LicenseForbids', 'get_license', 'get_licensed_features',
+           'feature_enabled', 'feature_exists']
 
 
 class LicenseForbids(APIException):
@@ -40,6 +41,15 @@ def get_license(show_key=False):
     if not show_key:
         license_data.pop('license_key', None)
     return license_data
+
+
+def get_licensed_features():
+    """Return a set of all features enabled by the active license."""
+    features = set()
+    for feature, enabled in _get_validated_license_data().get('features', {}).items():
+        if enabled:
+            features.add(feature)
+    return features
 
 
 def feature_enabled(name):

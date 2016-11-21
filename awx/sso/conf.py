@@ -182,6 +182,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     placeholder='ldaps://ldap.example.com:636',
+    feature_required='ldap',
 )
 
 register(
@@ -198,6 +199,7 @@ register(
                 'for other user information.'),
     category=_('LDAP'),
     category_slug='ldap',
+    feature_required='ldap',
 )
 
 register(
@@ -209,6 +211,7 @@ register(
     help_text=_('Password used to bind LDAP user account.'),
     category=_('LDAP'),
     category_slug='ldap',
+    feature_required='ldap',
 )
 
 register(
@@ -219,6 +222,7 @@ register(
     help_text=_('Whether to enable TLS when the LDAP connection is not using SSL.'),
     category=_('LDAP'),
     category_slug='ldap',
+    feature_required='ldap',
 )
 
 register(
@@ -237,6 +241,7 @@ register(
     placeholder=collections.OrderedDict([
         ('OPT_REFERRALS', 0),
     ]),
+    feature_required='ldap',
 )
 
 register(
@@ -257,6 +262,7 @@ register(
         'SCOPE_SUBTREE',
         '(sAMAccountName=%(user)s)',
     ),
+    feature_required='ldap',
 )
 
 register(
@@ -273,6 +279,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     placeholder='uid=%(user)s,OU=Users,DC=example,DC=com',
+    feature_required='ldap',
 )
 
 register(
@@ -292,6 +299,7 @@ register(
         ('last_name', 'sn'),
         ('email', 'mail'),
     ]),
+    feature_required='ldap',
 )
 
 register(
@@ -310,6 +318,7 @@ register(
         'SCOPE_SUBTREE',
         '(objectClass=group)',
     ),
+    feature_required='ldap',
 )
 
 register(
@@ -321,6 +330,7 @@ register(
                 'http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups'),
     category=_('LDAP'),
     category_slug='ldap',
+    feature_required='ldap',
 )
 
 register(
@@ -336,6 +346,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     placeholder='CN=Tower Users,OU=Users,DC=example,DC=com',
+    feature_required='ldap',
 )
 
 register(
@@ -350,6 +361,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     placeholder='CN=Disabled Users,OU=Users,DC=example,DC=com',
+    feature_required='ldap',
 )
 
 register(
@@ -368,6 +380,7 @@ register(
     placeholder=collections.OrderedDict([
         ('is_superuser', 'CN=Domain Admins,CN=Users,DC=example,DC=com'),
     ]),
+    feature_required='ldap',
 )
 
 register(
@@ -416,6 +429,7 @@ register(
             ('remove_admins', True),
         ])),
     ]),
+    feature_required='ldap',
 )
 
 register(
@@ -454,6 +468,7 @@ register(
             ('remove', False),
         ])),
     ]),
+    feature_required='ldap',
 )
 
 ###############################################################################
@@ -471,6 +486,7 @@ register(
     category=_('RADIUS'),
     category_slug='radius',
     placeholder='radius.example.com',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -483,6 +499,7 @@ register(
     help_text=_('Port of RADIUS server.'),
     category=_('RADIUS'),
     category_slug='radius',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -494,6 +511,7 @@ register(
     help_text=_('Shared secret for authenticating to RADIUS server.'),
     category=_('RADIUS'),
     category_slug='radius',
+    feature_required='enterprise_auth',
 )
 
 ###############################################################################
@@ -882,6 +900,7 @@ register(
     category=_('SAML'),
     category_slug='saml',
     depends_on=['TOWER_URL_BASE'],
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -894,6 +913,7 @@ register(
                 'metadata file, you can download one from this URL.'),
     category=_('SAML'),
     category_slug='saml',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -907,6 +927,7 @@ register(
                 'valid URL; only used as a unique ID).'),
     category=_('SAML'),
     category_slug='saml',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -920,6 +941,7 @@ register(
                 'and include the certificate content here.'),
     category=_('SAML'),
     category_slug='saml',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -933,6 +955,7 @@ register(
                 'and include the private key content here.'),
     category=_('SAML'),
     category_slug='saml',
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -950,6 +973,7 @@ register(
             ('url', 'http://www.example.com'),
         ])),
     ]),
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -965,6 +989,7 @@ register(
         ('givenName', 'Technical Contact'),
         ('emailAddress', 'techsup@example.com'),
     ]),
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -980,6 +1005,7 @@ register(
         ('givenName', 'Support Contact'),
         ('emailAddress', 'support@example.com'),
     ]),
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -1017,6 +1043,7 @@ register(
             ('attr_email', 'User.email'),
         ])),
     ]),
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -1029,6 +1056,7 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=SOCIAL_AUTH_ORGANIZATION_MAP_PLACEHOLDER,
+    feature_required='enterprise_auth',
 )
 
 register(
@@ -1041,4 +1069,5 @@ register(
     category=_('SAML'),
     category_slug='saml',
     placeholder=SOCIAL_AUTH_TEAM_MAP_PLACEHOLDER,
+    feature_required='enterprise_auth',
 )

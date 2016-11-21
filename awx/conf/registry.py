@@ -50,7 +50,7 @@ class SettingsRegistry(object):
     def get_dependent_settings(self, setting):
         return self._dependent_settings.get(setting, set())
 
-    def get_registered_categories(self):
+    def get_registered_categories(self, features_enabled=None):
         categories = {
             'all': _('All'),
             'changed': _('Changed'),
@@ -59,6 +59,10 @@ class SettingsRegistry(object):
             category_slug = kwargs.get('category_slug', None)
             if category_slug is None or category_slug in categories:
                 continue
+            if features_enabled is not None:
+                feature_required = kwargs.get('feature_required', None)
+                if feature_required and feature_required not in features_enabled:
+                    continue
             if category_slug == 'user':
                 categories['user'] = _('User')
                 categories['user-defaults'] = _('User-Defaults')
@@ -66,7 +70,7 @@ class SettingsRegistry(object):
                 categories[category_slug] = kwargs.get('category', None) or category_slug
         return categories
 
-    def get_registered_settings(self, category_slug=None, read_only=None):
+    def get_registered_settings(self, category_slug=None, read_only=None, features_enabled=None):
         setting_names = []
         if category_slug == 'user-defaults':
             category_slug = 'user'
@@ -79,6 +83,10 @@ class SettingsRegistry(object):
                 # Note: Doesn't catch fields that set read_only via __init__;
                 # read-only field kwargs should always include read_only=True.
                 continue
+            if features_enabled is not None:
+                feature_required = kwargs.get('feature_required', None)
+                if feature_required and feature_required not in features_enabled:
+                    continue
             setting_names.append(setting)
         return setting_names
 
@@ -95,6 +103,7 @@ class SettingsRegistry(object):
         category = field_kwargs.pop('category', None)
         depends_on = frozenset(field_kwargs.pop('depends_on', None) or [])
         placeholder = field_kwargs.pop('placeholder', empty)
+        feature_required = field_kwargs.pop('feature_required', empty)
         if getattr(field_kwargs.get('child', None), 'source', None) is not None:
             field_kwargs['child'].source = None
         field_instance = field_class(**field_kwargs)
@@ -103,6 +112,8 @@ class SettingsRegistry(object):
         field_instance.depends_on = depends_on
         if placeholder is not empty:
             field_instance.placeholder = placeholder
+        if feature_required is not empty:
+            field_instance.feature_required = feature_required
         original_field_instance = field_instance
         if field_class != original_field_class:
             original_field_instance = original_field_class(**field_kwargs)

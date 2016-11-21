@@ -19,6 +19,7 @@ from rest_framework import status
 # Tower
 from awx.api.generics import *  # noqa
 from awx.main.utils import *  # noqa
+from awx.conf.license import get_licensed_features
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
 from awx.conf import settings_registry
@@ -37,7 +38,7 @@ class SettingCategoryList(ListAPIView):
 
     def get_queryset(self):
         setting_categories = []
-        categories = settings_registry.get_registered_categories()
+        categories = settings_registry.get_registered_categories(features_enabled=get_licensed_features())
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             pass  # categories = categories
         elif 'user' in categories:
@@ -60,7 +61,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         self.category_slug = self.kwargs.get('category_slug', 'all')
-        all_category_slugs = settings_registry.get_registered_categories().keys()
+        all_category_slugs = settings_registry.get_registered_categories(features_enabled=get_licensed_features()).keys()
         if self.request.user.is_superuser or getattr(self.request.user, 'is_system_auditor', False):
             category_slugs = all_category_slugs
         else:
@@ -70,7 +71,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         if self.category_slug not in category_slugs:
             raise PermissionDenied()
 
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False)
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, read_only=False, features_enabled=get_licensed_features())
         if self.category_slug == 'user':
             return Setting.objects.filter(key__in=registered_settings, user=self.request.user)
         else:
@@ -78,7 +79,7 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         settings_qs = self.get_queryset()
-        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug)
+        registered_settings = settings_registry.get_registered_settings(category_slug=self.category_slug, features_enabled=get_licensed_features())
         all_settings = {}
         for setting in settings_qs:
             all_settings[setting.key] = setting.value
