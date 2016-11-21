@@ -3080,6 +3080,13 @@ class WorkflowJobNotificationsList(SubListAPIView):
     new_in_310 = True
 
 
+class WorkflowJobTemplateAccessList(ResourceAccessList):
+
+        model = User # needs to be User for AccessLists's
+        resource_model = WorkflowJobTemplate
+        new_in_310 = True
+
+
 class SystemJobTemplateList(ListAPIView):
 
     model = SystemJobTemplate
