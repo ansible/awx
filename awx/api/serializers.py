@@ -75,10 +75,11 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
+    'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
-    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'project_update',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
@@ -1963,6 +1964,8 @@ class JobSerializer(UnifiedJobSerializer, JobOptionsSerializer):
             res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
+        if obj.project_update:
+            res['project_update'] = reverse('api:project_update_detail', args=(obj.project_update.pk,))
         res['relaunch'] = reverse('api:job_relaunch', args=(obj.pk,))
         return res
 

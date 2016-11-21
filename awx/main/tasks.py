@@ -1025,6 +1025,7 @@ class RunJob(BaseTask):
             try:
                 project_update_task().run(local_project_sync.id)
                 job.scm_revision = job.project.scm_revision
+                job.project_update = local_project_sync
                 job.save()
             except Exception:
                 job.status = 'failed'

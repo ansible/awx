@@ -432,6 +432,15 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         verbose_name=_('SCM Revision'),
         help_text=_('The SCM Revision from the Project used for this job, if available'),
     )
+    project_update = models.ForeignKey(
+        'ProjectUpdate',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        help_text=_('The SCM Refresh task used to make sure the playbooks were available for the job run'),
+    )
+
 
 
     @classmethod
