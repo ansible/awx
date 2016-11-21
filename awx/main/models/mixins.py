@@ -102,9 +102,6 @@ class SurveyJobTemplateMixin(models.Model):
         Combine extra_vars with variable precedence order:
           JT extra_vars -> JT survey defaults -> runtime extra_vars
         '''
-        if 'launch_type' in kwargs and kwargs['launch_type'] == 'relaunch':
-            return kwargs
-
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 

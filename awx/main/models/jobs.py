@@ -633,14 +633,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         content = super(Job, self)._result_stdout_raw(*args, **kwargs)
         return self._survey_search_and_replace(content)
 
-    def copy(self):
-        presets = {}
-        for kw in JobTemplate._get_unified_job_field_names():
-            presets[kw] = getattr(self, kw)
-        if not self.job_template:
-            self.job_template = JobTemplate(name='temporary')
-        return self.job_template.create_unified_job(**presets)
-
     # Job Credential required
     @property
     def can_start(self):

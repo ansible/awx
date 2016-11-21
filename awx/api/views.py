@@ -3370,8 +3370,7 @@ class JobRelaunch(RetrieveAPIView, GenericAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        obj.launch_type = 'relaunch'
-        new_job = obj.copy()
+        new_job = obj.copy_unified_job()
         result = new_job.signal_start(**request.data)
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)

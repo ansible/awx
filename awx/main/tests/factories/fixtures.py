@@ -178,7 +178,7 @@ def mk_workflow_job_template(name, extra_vars='', spec=None, organization=None, 
     wfjt = WorkflowJobTemplate(name=name, extra_vars=extra_vars, organization=organization)
 
     wfjt.survey_spec = spec
-    if wfjt.survey_spec is not None:
+    if wfjt.survey_spec:
         wfjt.survey_enabled = True
 
     if persisted:

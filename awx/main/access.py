@@ -1549,7 +1549,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
                 if node.credential and self.user not in node.credential.use_role:
                     node_errors['credential'] = 'Prompted credential %s can not be coppied.' % node.credential.name
                 ujt = node.unified_job_template
-                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt):
+                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     node_errors['unified_job_template'] = (
                         'Prompted %s %s can not be coppied.' % (ujt._meta.verbose_name_raw, ujt.name))
                 if node_errors:
@@ -1832,6 +1832,11 @@ class UnifiedJobTemplateAccess(BaseAccess):
         #)
 
         return qs.all()
+
+    def can_start(self, obj, validate_license=True):
+        access_class = access_registry.get(obj.__class__, [])[0]
+        access_instance = access_class(self.user)
+        return access_instance.can_start(obj, validate_license=validate_license)
 
 
 class UnifiedJobAccess(BaseAccess):

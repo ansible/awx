@@ -24,7 +24,7 @@ class TestWorkflowJobInheritNodesMixin():
 
             mixin = WorkflowJobOptions()
             mixin._create_workflow_nodes(job_template_nodes)
-            
+
             for job_template_node in job_template_nodes:
                 workflow_job_node_create.assert_any_call(workflow_job=mixin)
 

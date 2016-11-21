@@ -198,7 +198,7 @@ class WorkflowJobTemplateNode(WorkflowNodeBase):
                     if not user.can_access(item.__class__, 'use', item):
                         continue
                 if field_name in ['unified_job_template']:
-                    if not user.can_access(item.__class__, 'start', item):
+                    if not user.can_access(item.__class__, 'start', item, validate_license=False):
                         continue
                 create_kwargs[field_name] = item
         create_kwargs['workflow_job_template'] = workflow_job_template
@@ -323,7 +323,6 @@ class WorkflowJobOptions(BaseModel):
         self._inherit_node_relationships(old_node_list, node_links)
 
     def create_relaunch_workflow_job(self):
-        self.launch_type = 'relaunch'
         new_workflow_job = self.copy_unified_job()
         new_workflow_job.copy_nodes_from_original(original=self)
         return new_workflow_job
@@ -436,7 +435,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return new_wfjt
 
 
-# Stub in place because of old migraitons, can remove if migraitons are squashed
+# Stub in place because of old migrations, can remove if migrations are squashed
 class WorkflowJobInheritNodesMixin(object):
     pass
 
