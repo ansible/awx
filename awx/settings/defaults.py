@@ -151,6 +151,9 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 
+# Note: This setting may be overridden by database settings.
+EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
+
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
