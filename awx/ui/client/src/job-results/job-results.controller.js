@@ -1,4 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log) {
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -173,7 +173,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                         if ($scope.followEngaged) {
                             if (!$scope.followScroll) {
                                 $scope.followScroll = function() {
-                                    return null;
+                                    $log.error("follow scroll undefined, standard out directive not loaded yet?");
                                 }
                             }
                             $scope.followScroll();
