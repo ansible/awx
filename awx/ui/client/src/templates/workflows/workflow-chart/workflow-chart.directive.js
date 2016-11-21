@@ -30,7 +30,8 @@ export default [
                 rectW = 120,
                 rectH = 60,
                 rootW = 60,
-                rootH = 40;
+                rootH = 40,
+                m = [40, 240, 40, 240];
 
             let tree = d3.layout.tree()
                     .size([height, width]);
@@ -71,28 +72,51 @@ export default [
                 }
             }
 
-            let svg = d3.select(element[0]).append("svg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("class", "WorkflowChart-svg")
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            let baseSvg = d3.select(element[0]).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("class", "WorkflowChart-svg")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(d3.behavior.zoom()
+                    .scaleExtent([0.5, 5])
+                    .on("zoom", zoom)
+                );
 
-            let node = svg.selectAll(".node"),
-                link = svg.selectAll(".link");
+            let svgGroup = baseSvg.append("g");
+
+            function zoom() {
+                let scale = d3.event.scale,
+                    translation = d3.event.translate,
+                    tbound = -height * scale,
+                    bbound = height * scale,
+                    lbound = (-width + m[1]) * scale,
+                    rbound = (width - m[3]) * scale;
+                  // limit translation to thresholds
+                  translation = [
+                      Math.max(Math.min(translation[0], rbound), lbound),
+                      Math.max(Math.min(translation[1], bbound), tbound)
+                  ];
+
+
+                svgGroup.attr("transform", "translate(" + translation + ")scale(" + scale + ")");
+            }
 
             function update() {
                 // Declare the nodes
-                let nodes = tree.nodes(scope.treeData);
-                node = node.data(nodes, function(d) { d.y = d.depth * 180; return d.id || (d.id = ++i); });
-                link = link.data(tree.links(nodes), function(d) { return d.source.id + "-" + d.target.id; });
+                let nodes = tree.nodes(scope.treeData),
+                    links = tree.links(nodes);
+                let node = svgGroup.selectAll("g.node")
+                    .data(nodes, function(d) {
+                        d.y = d.depth * 180;
+                        return d.id || (d.id = ++i);
+                    });
 
                 let nodeEnter = node.enter().append("g")
-                        .attr("class", "node")
-                        .attr("id", function(d){return "node-" + d.id;})
-                        .attr("parent", function(d){return d.parent ? d.parent.id : null;})
-                        .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-                        .attr("fill", "red");
+                    .attr("class", "node")
+                    .attr("id", function(d){return "node-" + d.id;})
+                    .attr("parent", function(d){return d.parent ? d.parent.id : null;})
+                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+                    .attr("fill", "red");
 
                 nodeEnter.each(function(d) {
                     let thisNode = d3.select(this);
@@ -263,85 +287,90 @@ export default [
 
                 node.exit().remove();
 
+                let link = svgGroup.selectAll("g.link")
+                    .data(links, function(d) {
+                        return d.target.id;
+                    });
+
                 let linkEnter = link.enter().append("g")
-                    .attr("class", "nodeConnector")
-                    .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id;});
+                     .attr("class", "link")
+                     .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id;});
 
                 // Add entering links in the parent’s old position.
-                linkEnter.insert("path", ".node")
-                        .attr("class", function(d) {
-                            return (d.source.placeholder || d.target.placeholder) ? "link placeholder" : "link";
-                        })
-                        .attr("d", lineData)
-                        .attr('stroke', function(d) {
-                            if(d.target.edgeType) {
-                                if(d.target.edgeType === "failure") {
-                                    return "#d9534f";
-                                }
-                                else if(d.target.edgeType === "success") {
-                                    return "#5cb85c";
-                                }
-                                else if(d.target.edgeType === "always"){
-                                    return "#337ab7";
-                                }
-                            }
-                            else {
-                                return "#D7D7D7";
-                            }
-                        });
+                linkEnter.insert("path", "g")
+                         .attr("class", function(d) {
+                             return (d.source.placeholder || d.target.placeholder) ? "linkPath placeholder" : "linkPath";
+                         })
+                         .attr("d", lineData)
+                         .attr('stroke', function(d) {
+                             if(d.target.edgeType) {
+                                 if(d.target.edgeType === "failure") {
+                                     return "#d9534f";
+                                 }
+                                 else if(d.target.edgeType === "success") {
+                                     return "#5cb85c";
+                                 }
+                                 else if(d.target.edgeType === "always"){
+                                     return "#337ab7";
+                                 }
+                             }
+                             else {
+                                 return "#D7D7D7";
+                             }
+                         });
 
                 linkEnter.append("circle")
-                    .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
-                    .attr("cx", function(d) {
-                        return (d.target.y + d.source.y + rectW) / 2;
-                    })
-                    .attr("cy", function(d) {
-                        return (d.target.x + d.source.x + rectH) / 2;
-                    })
-                    .attr("r", 10)
-                    .attr("class", "addCircle linkCircle")
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
-                    .call(add_node_between)
-                    .on("mouseover", function(d) {
-                        d3.select("#link-" + d.source.id + "-" + d.target.id)
-                            .classed("hovering", true);
-                        d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
-                            .classed("addHovering", true);
-                    })
-                    .on("mouseout", function(d){
-                        d3.select("#link-" + d.source.id + "-" + d.target.id)
-                            .classed("hovering", false);
-                        d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
-                            .classed("addHovering", false);
-                    });
+                     .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
+                     .attr("cx", function(d) {
+                         return (d.target.y + d.source.y + rectW) / 2;
+                     })
+                     .attr("cy", function(d) {
+                         return (d.target.x + d.source.x + rectH) / 2;
+                     })
+                     .attr("r", 10)
+                     .attr("class", "addCircle linkCircle")
+                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                     .call(add_node_between)
+                     .on("mouseover", function(d) {
+                         d3.select("#link-" + d.source.id + "-" + d.target.id)
+                             .classed("hovering", true);
+                         d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
+                             .classed("addHovering", true);
+                     })
+                     .on("mouseout", function(d){
+                         d3.select("#link-" + d.source.id + "-" + d.target.id)
+                             .classed("hovering", false);
+                         d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
+                             .classed("addHovering", false);
+                     });
 
                 linkEnter.append("path")
-                    .attr("class", "linkCross")
-                    .style("fill", "white")
-                    .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; })
-                    .attr("d", d3.svg.symbol()
-                        .size(60)
-                        .type("cross")
-                    )
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
-                    .call(add_node_between)
-                    .on("mouseover", function(d) {
-                        d3.select("#link-" + d.source.id + "-" + d.target.id)
-                            .classed("hovering", true);
-                        d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
-                            .classed("addHovering", true);
-                    })
-                    .on("mouseout", function(d){
-                        d3.select("#link-" + d.source.id + "-" + d.target.id)
-                            .classed("hovering", false);
-                        d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
-                            .classed("addHovering", false);
-                    });
+                     .attr("class", "linkCross")
+                     .style("fill", "white")
+                     .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; })
+                     .attr("d", d3.svg.symbol()
+                         .size(60)
+                         .type("cross")
+                     )
+                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                     .call(add_node_between)
+                     .on("mouseover", function(d) {
+                         d3.select("#link-" + d.source.id + "-" + d.target.id)
+                             .classed("hovering", true);
+                         d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
+                             .classed("addHovering", true);
+                     })
+                     .on("mouseout", function(d){
+                         d3.select("#link-" + d.source.id + "-" + d.target.id)
+                             .classed("hovering", false);
+                         d3.select("#link-" + d.source.id + "-" + d.target.id + "-add")
+                             .classed("addHovering", false);
+                     });
 
                 link.exit().remove();
 
                 // Transition nodes and links to their new positions.
-                let t = svg.transition();
+                let t = baseSvg.transition();
 
                 t.selectAll(".nodeCircle")
                     .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; });
@@ -355,9 +384,9 @@ export default [
                 t.selectAll(".nodeRemoveCross")
                     .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; });
 
-                t.selectAll(".link")
+                t.selectAll(".linkPath")
                         .attr("class", function(d) {
-                            return (d.source.placeholder || d.target.placeholder) ? "link placeholder" : "link";
+                            return (d.source.placeholder || d.target.placeholder) ? "linkPath placeholder" : "linkPath";
                         })
                         .attr("d", lineData)
                         .attr('stroke', function(d) {
@@ -413,7 +442,6 @@ export default [
                         return (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update")) ? "P" : (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? "I" : "");
                     })
                     .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
-
             }
 
             function add_node() {
