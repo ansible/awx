@@ -148,11 +148,29 @@
                             Project
                         </label>
                         <div class="JobResults-resultRowText">
+                            <a href="{{ project_update_link }}"
+                                aw-tool-tip="View project sync results"
+                                data-placement="top">
+                                <i class="JobResults-statusResultIcon
+                                    fa icon-job-{{ project_status }}">
+                                </i>
+                            </a>
                             <a href="{{ project_link }}"
                                 aw-tool-tip="Edit the project"
                                 data-placement="top">
                                 {{ job.summary_fields.project.name }}
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- REVISION DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.scm_revision">
+                        <label class="JobResults-resultRowLabel">
+                            Revision
+                        </label>
+                        <div class="JobResults-resultRowText JobResults-resultRowText--revision">
+                            {{ job.scm_revision }}
                         </div>
                     </div>
 
