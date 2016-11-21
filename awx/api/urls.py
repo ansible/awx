@@ -265,6 +265,7 @@ workflow_job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/schedules/$',                 'workflow_job_template_schedules_list'),
     url(r'^(?P<pk>[0-9]+)/survey_spec/$',               'workflow_job_template_survey_spec'),
     url(r'^(?P<pk>[0-9]+)/workflow_nodes/$',            'workflow_job_template_workflow_nodes_list'),
+    url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'workflow_job_template_activity_stream_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_any/$',             'workflow_job_template_notification_templates_any_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$',           'workflow_job_template_notification_templates_error_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$',         'workflow_job_template_notification_templates_success_list'),
@@ -280,6 +281,7 @@ workflow_job_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/labels/$',                    'workflow_job_label_list'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'workflow_job_cancel'),
     url(r'^(?P<pk>[0-9]+)/notifications/$',             'workflow_job_notifications_list'),
+    url(r'^(?P<pk>[0-9]+)/activity_stream/$',           'workflow_job_activity_stream_list'),
 )
 
 

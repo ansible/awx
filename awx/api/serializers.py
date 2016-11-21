@@ -2216,6 +2216,7 @@ class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerialize
             launch = reverse('api:workflow_job_template_launch', args=(obj.pk,)),
             workflow_nodes = reverse('api:workflow_job_template_workflow_nodes_list', args=(obj.pk,)),
             labels = reverse('api:workflow_job_template_label_list', args=(obj.pk,)),
+            activity_stream = reverse('api:workflow_job_template_activity_stream_list', args=(obj.pk,)),
             notification_templates_any = reverse('api:workflow_job_template_notification_templates_any_list', args=(obj.pk,)),
             notification_templates_success = reverse('api:workflow_job_template_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:workflow_job_template_notification_templates_error_list', args=(obj.pk,)),
@@ -2248,6 +2249,7 @@ class WorkflowJobSerializer(LabelsListMixin, UnifiedJobSerializer):
             res['notifications'] = reverse('api:workflow_job_notifications_list', args=(obj.pk,))
         res['workflow_nodes'] = reverse('api:workflow_job_workflow_nodes_list', args=(obj.pk,))
         res['labels'] = reverse('api:workflow_job_label_list', args=(obj.pk,))
+        res['activity_stream'] = reverse('api:workflow_job_activity_stream_list', args=(obj.pk,))
         if obj.can_cancel or True:
             res['cancel'] = reverse('api:workflow_job_cancel', args=(obj.pk,))
         return res
