@@ -35,7 +35,7 @@ __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', '
 logger = logging.getLogger('awx.main.models.inventory')
 
 
-class Inventory(CommonModel, ResourceMixin):
+class Inventory(CommonModelNameNotUnique, ResourceMixin):
     '''
     an inventory source contains lists and hosts.
     '''
