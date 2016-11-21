@@ -48,7 +48,7 @@ class FifoQueue(object):
 class CallbackQueueDispatcher(object):
 
     def __init__(self):
-        self.callback_connection = getattr(settings, 'CALLBACK_CONNECTION', None)
+        self.callback_connection = getattr(settings, 'BROKER_URL', None)
         self.connection_queue = getattr(settings, 'CALLBACK_QUEUE', '')
         self.connection = None
         self.exchange = None
