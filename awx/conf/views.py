@@ -6,6 +6,7 @@ import collections
 import sys
 
 # Django
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
@@ -117,6 +118,13 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         for setting in self.get_queryset().exclude(key='LICENSE'):
             setting.delete()
+
+        # When TOWER_URL_BASE is deleted from the API, reset it to the hostname
+        # used to make the request as a default.
+        if hasattr(instance, 'TOWER_URL_BASE'):
+            url = '{}://{}'.format(self.request.scheme, self.request.get_host())
+            if settings.TOWER_URL_BASE != url:
+                settings.TOWER_URL_BASE = url
 
 
 # Create view functions for all of the class-based views to simplify inclusion
