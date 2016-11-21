@@ -103,8 +103,11 @@ class ApiRootView(APIView):
             current_version = current,
             available_versions = dict(
                 v1 = current
-            )
+            ),
         )
+        if feature_enabled('rebranding'):
+            data['custom_logo'] = settings.CUSTOM_LOGO
+            data['custom_login_info'] = settings.CUSTOM_LOGIN_INFO
         return Response(data)
 
 

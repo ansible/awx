@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import base64
 import collections
 import difflib
 import json
@@ -141,12 +142,85 @@ class Command(BaseCommand):
                 os.remove(license_file)
         return diff_lines
 
+    def _get_local_settings_file(self):
+        if MODE == 'development':
+            static_root = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'ui', 'static')
+        else:
+            static_root = settings.STATIC_ROOT
+        return os.path.join(static_root, 'local_settings.json')
+
+    def _comment_local_settings_file(self, dry_run=True):
+        local_settings_file = self._get_local_settings_file()
+        diff_lines = []
+        if os.path.exists(local_settings_file):
+            try:
+                raw_local_settings_data = open(local_settings_file).read()
+                json.loads(raw_local_settings_data)
+            except Exception as e:
+                if not self.skip_errors:
+                    raise CommandError('Error reading local settings from {0}: {1!r}'.format(local_settings_file, e))
+                return diff_lines
+            if self.backup_suffix:
+                backup_local_settings_file = '{}{}'.format(local_settings_file, self.backup_suffix)
+            else:
+                backup_local_settings_file = '{}.old'.format(local_settings_file)
+            diff_lines = list(difflib.unified_diff(
+                raw_local_settings_data.splitlines(),
+                [],
+                fromfile=backup_local_settings_file,
+                tofile=local_settings_file,
+                lineterm='',
+            ))
+            if not dry_run:
+                if self.backup_suffix:
+                    shutil.copy2(local_settings_file, backup_local_settings_file)
+                os.remove(local_settings_file)
+        return diff_lines
+
+    def _get_custom_logo_file(self):
+        if MODE == 'development':
+            static_root = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'ui', 'static')
+        else:
+            static_root = settings.STATIC_ROOT
+        return os.path.join(static_root, 'assets', 'custom_console_logo.png')
+
+    def _comment_custom_logo_file(self, dry_run=True):
+        custom_logo_file = self._get_custom_logo_file()
+        diff_lines = []
+        if os.path.exists(custom_logo_file):
+            try:
+                raw_custom_logo_data = open(custom_logo_file).read()
+            except Exception as e:
+                if not self.skip_errors:
+                    raise CommandError('Error reading custom logo from {0}: {1!r}'.format(custom_logo_file, e))
+                return diff_lines
+            if self.backup_suffix:
+                backup_custom_logo_file = '{}{}'.format(custom_logo_file, self.backup_suffix)
+            else:
+                backup_custom_logo_file = '{}.old'.format(custom_logo_file)
+            diff_lines = list(difflib.unified_diff(
+                ['<PNG Image ({} bytes)>'.format(len(raw_custom_logo_data))],
+                [],
+                fromfile=backup_custom_logo_file,
+                tofile=custom_logo_file,
+                lineterm='',
+            ))
+            if not dry_run:
+                if self.backup_suffix:
+                    shutil.copy2(custom_logo_file, backup_custom_logo_file)
+                os.remove(custom_logo_file)
+        return diff_lines
+
     def _check_if_needs_comment(self, patterns, setting):
         files_to_comment = []
         # If any diffs are returned, this setting needs to be commented.
         diffs = comment_assignments(patterns, setting, dry_run=True)
         if setting == 'LICENSE':
             diffs.extend(self._comment_license_file(dry_run=True))
+        elif setting == 'CUSTOM_LOGIN_INFO':
+            diffs.extend(self._comment_local_settings_file(dry_run=True))
+        elif setting == 'CUSTOM_LOGO':
+            diffs.extend(self._comment_custom_logo_file(dry_run=True))
         for diff in diffs:
             for line in diff.splitlines():
                 if line.startswith('+++ '):
@@ -163,6 +237,27 @@ class Command(BaseCommand):
             except SkipField:
                 pass
         current_value = getattr(settings, setting, empty)
+        if setting == 'CUSTOM_LOGIN_INFO' and current_value in {empty, ''}:
+            local_settings_file = self._get_local_settings_file()
+            try:
+                if os.path.exists(local_settings_file):
+                    local_settings = json.load(open(local_settings_file))
+                    current_value = local_settings.get('custom_login_info', '')
+            except Exception as e:
+                if not self.skip_errors:
+                    raise CommandError('Error reading custom login info from {0}: {1!r}'.format(local_settings_file, e))
+        if setting == 'CUSTOM_LOGO' and current_value in {empty, ''}:
+            custom_logo_file = self._get_custom_logo_file()
+            try:
+                if os.path.exists(custom_logo_file):
+                    custom_logo_data = open(custom_logo_file).read()
+                    if custom_logo_data:
+                        current_value = 'data:image/png;base64,{}'.format(base64.b64encode(custom_logo_data))
+                    else:
+                        current_value = ''
+            except Exception as e:
+                if not self.skip_errors:
+                    raise CommandError('Error reading custom logo from {0}: {1!r}'.format(custom_logo_file, e))
         if current_value != default_value:
             if current_value is empty:
                 current_value = None
@@ -338,10 +433,16 @@ class Command(BaseCommand):
         if to_comment:
             to_comment_patterns = []
             license_file_to_comment = None
+            local_settings_file_to_comment = None
+            custom_logo_file_to_comment = None
             for files_to_comment in to_comment.values():
                 for file_to_comment in files_to_comment:
                     if file_to_comment == self._get_license_file():
                         license_file_to_comment = file_to_comment
+                    elif file_to_comment == self._get_local_settings_file():
+                        local_settings_file_to_comment = file_to_comment
+                    elif file_to_comment == self._get_custom_logo_file():
+                        custom_logo_file_to_comment = file_to_comment
                     elif file_to_comment not in to_comment_patterns:
                         to_comment_patterns.append(file_to_comment)
             # Run once in dry-run mode to catch any errors from updating the files.
@@ -351,4 +452,8 @@ class Command(BaseCommand):
                 diffs = comment_assignments(to_comment_patterns, to_comment.keys(), dry_run=False, backup_suffix=self.backup_suffix)
                 if license_file_to_comment:
                     diffs.extend(self._comment_license_file(dry_run=False))
+                if local_settings_file_to_comment:
+                    diffs.extend(self._comment_local_settings_file(dry_run=False))
+                if custom_logo_file_to_comment:
+                    diffs.extend(self._comment_custom_logo_file(dry_run=False))
             self._display_comment(diffs)
