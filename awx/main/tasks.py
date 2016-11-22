@@ -1019,7 +1019,7 @@ class RunJob(BaseTask):
 
     def pre_run_hook(self, job, **kwargs):
         if job.project and job.project.scm_type:
-            local_project_sync = job.project.create_project_update()
+            local_project_sync = job.project.create_project_update(launch_type="sync")
             local_project_sync.job_type = 'run'
             local_project_sync.save()
             project_update_task = local_project_sync._get_task_class()
