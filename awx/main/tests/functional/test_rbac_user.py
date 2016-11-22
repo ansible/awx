@@ -1,11 +1,45 @@
 import pytest
 
 from django.apps import apps
-from django.contrib.auth.models import User
+from django.test import TransactionTestCase
 
 from awx.main.migrations import _rbac as rbac
 from awx.main.access import UserAccess
-from awx.main.models import Role
+from awx.main.models import Role, User, Organization, Inventory
+
+
+@pytest.mark.django_db
+class TestSysAuditor(TransactionTestCase):
+    def rando(self):
+        return User.objects.create(username='rando', password='rando', email='rando@com.com')
+
+    def inventory(self):
+        org = Organization.objects.create(name='org')
+        inv = Inventory.objects.create(name='inv', organization=org)
+        return inv
+
+    def test_auditor_caching(self):
+        rando = self.rando()
+        with self.assertNumQueries(1):
+            v = rando.is_system_auditor
+        assert not v
+        with self.assertNumQueries(0):
+            v = rando.is_system_auditor
+        assert not v
+
+    def test_auditor_setter(self):
+        rando = self.rando()
+        inventory = self.inventory()
+        rando.is_system_auditor = True
+        assert rando in inventory.read_role
+
+    def test_refresh_with_set(self):
+        rando = self.rando()
+        rando.is_system_auditor = True
+        assert rando.is_system_auditor
+        rando.is_system_auditor = False
+        assert not rando.is_system_auditor
+
 
 
 @pytest.mark.django_db
