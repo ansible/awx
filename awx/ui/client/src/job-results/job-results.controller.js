@@ -46,6 +46,14 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.jobOptions = jobDataOptions.actions.GET;
     $scope.labels = jobLabels;
     $scope.jobFinished = jobFinished;
+    if(jobData.summary_fields && jobData.summary_fields.project_update &&
+        jobData.summary_fields.project_update.status){
+         $scope.project_status = jobData.summary_fields.project_update.status;
+    }
+    if(jobData.summary_fields && jobData.summary_fields.project_update &&
+        jobData.summary_fields.project_update.id){
+        $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+    }
 
     // turn related api browser routes into tower routes
     getTowerLinks();
@@ -197,6 +205,10 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
             $scope.job.status = data.status;
+        }
+        if (parseInt(data.project_id, 10) === parseInt($scope.job.project,10)) {
+            $scope.project_status = data.status;
+            $scope.project_update_link = `/#/scm_update/${data.unified_job_id}`;
         }
     });
 }];
