@@ -46,10 +46,12 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.jobOptions = jobDataOptions.actions.GET;
     $scope.labels = jobLabels;
     $scope.jobFinished = jobFinished;
-    if(jobData.summary_fields.project_update && jobData.summary_fields.project_update.status){
+    if(jobData.summary_fields && jobData.summary_fields.project_update &&
+        jobData.summary_fields.project_update.status){
          $scope.project_status = jobData.summary_fields.project_update.status;
     }
-    if(jobData.summary_fields.project_update && jobData.summary_fields.project_update.id){
+    if(jobData.summary_fields && jobData.summary_fields.project_update &&
+        jobData.summary_fields.project_update.id){
         $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
     }
 
