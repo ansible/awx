@@ -2489,6 +2489,16 @@ class JobEventSerializer(BaseSerializer):
             pass
         return d
 
+    def to_representation(self, obj):
+        ret = super(JobEventSerializer, self).to_representation(obj)
+        # Show full stdout for event detail view, truncate only for list view.
+        if hasattr(self.context.get('view', None), 'retrieve'):
+            return ret
+        max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
+        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
+            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+        return ret
+
 
 class AdHocCommandEventSerializer(BaseSerializer):
 
@@ -2509,6 +2519,16 @@ class AdHocCommandEventSerializer(BaseSerializer):
         if obj.host:
             res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         return res
+
+    def to_representation(self, obj):
+        ret = super(JobEventSerializer, self).to_representation(obj)
+        # Show full stdout for event detail view, truncate only for list view.
+        if hasattr(self.context.get('view', None), 'retrieve'):
+            return ret
+        max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
+        if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
+            ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
+        return ret
 
 
 class JobLaunchSerializer(BaseSerializer):
