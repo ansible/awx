@@ -305,14 +305,19 @@ class BaseAccess(object):
             if display_method not in method_list:
                 continue
 
-            # Validation consistency checks
+            # Actions not possible for reason unrelated to RBAC
+            # Cannot copy with validation errors, or update a manual group/project
             if display_method == 'copy' and isinstance(obj, JobTemplate):
                 validation_errors, resources_needed_to_start = obj.resource_validation_data()
                 if validation_errors:
                     user_capabilities[display_method] = False
                     continue
-            elif display_method == 'start' and isinstance(obj, Group):
+            elif display_method in ['start', 'schedule'] and isinstance(obj, Group):
                 if obj.inventory_source and not obj.inventory_source._can_update():
+                    user_capabilities[display_method] = False
+                    continue
+            elif display_method in ['start', 'schedule'] and isinstance(obj, (Project)):
+                if obj.scm_type == '':
                     user_capabilities[display_method] = False
                     continue
 
@@ -340,10 +345,6 @@ class BaseAccess(object):
                 continue
             elif display_method == 'copy' and isinstance(obj, (Group, Host)):
                 user_capabilities['copy'] = user_capabilities['edit']
-                continue
-            elif display_method == 'start' and isinstance(obj, (Project)) and obj.scm_type == '':
-                # Special case to return False for a manual project
-                user_capabilities['start'] = False
                 continue
 
             # Preprocessing before the access method is called

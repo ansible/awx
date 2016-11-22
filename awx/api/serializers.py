@@ -2833,6 +2833,8 @@ class ScheduleSerializer(BaseSerializer):
     def validate_unified_job_template(self, value):
         if type(value) == InventorySource and value.source not in SCHEDULEABLE_PROVIDERS:
             raise serializers.ValidationError(_('Inventory Source must be a cloud resource.'))
+        elif type(value) == Project and value.scm_type == '':
+            raise serializers.ValidationError(_('Manual Project can not have a schedule set.'))
         return value
 
     # We reject rrules if:

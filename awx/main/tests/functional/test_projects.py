@@ -136,3 +136,13 @@ def test_patch_project_null_organization(patch, organization, project, admin):
 @pytest.mark.django_db()
 def test_patch_project_null_organization_xfail(patch, project, org_admin):
     patch(reverse('api:project_detail', args=(project.id,)), { 'name': 't', 'organization': None}, org_admin, expect=400)
+
+
+@pytest.mark.django_db
+def test_cannot_schedule_manual_project(project, admin_user, post):
+    response = post(
+        reverse('api:project_schedules_list', args=(project.pk,)),
+        {"name": "foo", "description": "", "enabled": True,
+            "rrule": "DTSTART:20160926T040000Z RRULE:FREQ=HOURLY;INTERVAL=1",
+            "extra_data": {}}, admin_user, expect=400)
+    assert 'Manual' in response.data['unified_job_template'][0]
