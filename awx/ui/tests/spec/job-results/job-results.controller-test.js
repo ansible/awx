@@ -4,7 +4,7 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log;
 
     jobData = {
         related: {}
@@ -39,7 +39,6 @@ describe('Controller: jobResultsController', () => {
                 'populate',
                 'markProcessed'
             ]);
-            $compile = jasmine.createSpy('$compile');
 
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
@@ -50,12 +49,11 @@ describe('Controller: jobResultsController', () => {
             $provide.value('ParseVariableString', ParseVariableString);
             $provide.value('jobResultsService', jobResultsService);
             $provide.value('eventQueue', eventQueue);
-            $provide.value('$compile', $compile);
         });
     };
 
     let injectVals = () => {
-        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend) => {
+        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_) => {
             // when you call $scope.$apply() (which you need to do to
             // to get inside of .then blocks to test), something is
             // causing a request for all static files.
@@ -81,6 +79,7 @@ describe('Controller: jobResultsController', () => {
             ParseVariableString.and.returnValue(jobData.extra_vars);
             jobResultsService = _jobResultsService_;
             eventQueue = _eventQueue_;
+            $log = _$log_;
 
             jobResultsService.getEvents.and
                 .returnValue($q.when(eventResolve));
@@ -99,7 +98,8 @@ describe('Controller: jobResultsController', () => {
                 ParseTypeChange: ParseTypeChange,
                 jobResultsService: jobResultsService,
                 eventQueue: eventQueue,
-                $compile: $compile
+                $compile: $compile,
+                $log: $log
             });
         });
     };
@@ -554,6 +554,31 @@ describe('Controller: jobResultsController', () => {
             });
         });
 
-        // TODO: stdout change tests
+        describe('populate - stdout', () => {
+            beforeEach(() => {
+
+                populateResolve = {
+                    counter: 12,
+                    stdout: "line",
+                    changes: ['stdout']
+                };
+
+                bootstrapTest();
+
+                spyOn($log, 'error');
+
+                $scope.followEngaged = true;
+
+                $scope.$apply();
+            });
+
+            it('creates new child scope for the event', () => {
+                expect($scope.events[12].event).toBe(populateResolve);
+
+                // in unit test, followScroll should not be defined as
+                // directive has not been instantiated
+                expect($log.error).toHaveBeenCalledWith("follow scroll undefined, standard out directive not loaded yet?");
+            });
+        });
     });
 });
