@@ -1149,7 +1149,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<input ";
                         html += (field.spinner) ? "" : "type=\"text\" ";
-                        html += "\" value=\"" + field['default'] + "\" ";
+                        html += " value=\"" + field['default'] + "\" ";
                         html += "class=\"";
                         if (!field.slider && !field.spinner) {
                             html += "form-control";
@@ -1494,22 +1494,22 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<div class=\"Form-tabHolder\">";
 
                     if(this.mode === "edit"){
-                        html += `<div id="${this.form.name}_tab" class="Form-tab" ` +
-                            `ng-click="$state.go('${this.form.stateTree}.edit')" ` +
-                            `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">` +
+                        html += `<div id="${this.form.name}_tab" class="Form-tab" `;
+                        html += this.form.detailsClick ? `ng-click="` + this.form.detailsClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit')" `;
+                        html += `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">` +
                             `${details}</div>`;
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
                             html += `<div id="${itm}_tab" `+
-                                `class="Form-tab" `+
-                                `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
+                                `class="Form-tab" `;
+                            html += (this.form.related[itm].ngClick) ? `ng-click="` + this.form.related[itm].ngClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
                             if (collection.awToolTip){
                                 html += `aw-tool-tip="${collection.awToolTip}" ` +
                                 `aw-tip-placement="${collection.dataPlacement}" ` +
                                 `data-tip-watch="${collection.dataTipWatch}" `;
                             }
-                            html += `ng-class="{'is-selected' : $state.is('${this.form.activeEditState}.${itm}') || $state.is('${this.form.stateTree}.edit.${itm}')}" ` ;
+                            html += `ng-class="{'is-selected' : $state.is('${this.form.activeEditState}.${itm}') || $state.is('${this.form.stateTree}.edit.${itm}') ` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }
@@ -1594,7 +1594,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "</div>";//tabHolder
                 }
 
-                if(!_.isEmpty(this.form.related) && this.mode === "edit"){// TODO: either include $state.is('templates.editWorkflowJobTemplate') or figure out something else to do here
+                if(!_.isEmpty(this.form.related) && this.mode === "edit"){
                     html += `<div class="Form-tabSection" ng-class="{'is-selected' : $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">`;
                 }
 
@@ -1648,7 +1648,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             }
                             else if (!field.subForm && currentSubForm !== undefined) {
                                currentSubForm = undefined;
-                               html += '</div></div> ';
+                               html += '</div> ';
                             }
 
                             html += this.buildField(fld, field, options, this.form);
@@ -1773,12 +1773,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     }
                 }
+
+                if(!_.isEmpty(this.form.related) && this.mode === "edit"){
+                    html += `</div>`;
+                }
+
                 if (this.form.include){
                     _.forEach(this.form.include, (template) =>{
                         html += `<div ng-include="'${template}'"></div>`;
                     });
                 }
-               // console.log(html)
+                // console.log(html);
                 return this.wrapPanel(html, options.noPanel);
             },
 

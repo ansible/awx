@@ -28,6 +28,7 @@ export default
             activeEditState: 'templates.editJobTemplate',
             // (optional) array of supporting templates to ng-include inside generated html
             include: ['/static/partials/survey-maker-modal.html'],
+            detailsClick: "$state.go('templates.editJobTemplate')",
 
             fields: {
                 name: {
@@ -420,6 +421,7 @@ export default
                     iterator: 'permission',
                     index: false,
                     open: false,
+                    ngClick: "$state.go('templates.editJobTemplate.permissions')",
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
@@ -482,11 +484,13 @@ export default
 
                 for (itm in JobTemplateFormObject.related) {
                     if (JobTemplateFormObject.related[itm].include === "NotificationsList") {
-                        JobTemplateFormObject.related[itm] = NotificationsList;
+                        JobTemplateFormObject.related[itm] = _.clone(NotificationsList);
+                        JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.notifications')";
                         JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
                     }
                     if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {
                         JobTemplateFormObject.related[itm] = CompletedJobsList;
+                        JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.completed_jobs')";
                         JobTemplateFormObject.related[itm].generateList = true;
                     }
                 }

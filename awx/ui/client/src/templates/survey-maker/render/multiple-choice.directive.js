@@ -38,7 +38,7 @@ export default
                         isDisabled: '=ngDisabled',
                         preview: '='
                     },
-                    templateUrl: templateUrl('job-templates/survey-maker/render/multiple-choice'),
+                    templateUrl: templateUrl('templates/survey-maker/render/multiple-choice'),
                     link: _.partial(link, $timeout, CreateSelect2)
                 };
             return directive;

@@ -8,12 +8,12 @@
  [   '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
      'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange', 'Wait', 'Empty',
      'ToJSON', 'initSurvey', '$state', 'CreateSelect2', 'ParseVariableString',
-     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService',
+     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService', 'ToggleNotification',
      function(
          $scope, $stateParams, WorkflowForm, GenerateForm, Alert, ProcessErrors,
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-         TemplatesService, OrganizationList, Rest, WorkflowService
+         TemplatesService, OrganizationList, Rest, WorkflowService, ToggleNotification
      ) {
 
         ClearScope();
@@ -614,6 +614,23 @@
 
         $scope.formCancel = function () {
             $state.transitionTo('templates');
+        };
+
+        $scope.toggleNotification = function(event, notifier_id, column) {
+            var notifier = this.notification;
+            try {
+                $(event.target).tooltip('hide');
+            }
+            catch(e) {
+                // ignore
+            }
+            ToggleNotification({
+                scope: $scope,
+                url: GetBasePath('workflow_job_templates') + id,
+                notifier: notifier,
+                column: column,
+                callback: 'NotificationRefresh'
+            });
         };
 
         init();

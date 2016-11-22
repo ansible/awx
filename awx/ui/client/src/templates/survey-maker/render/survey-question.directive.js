@@ -119,7 +119,7 @@ export default
                             isDisabled: '@ngDisabled',
                             preview: '='
                         },
-                    templateUrl: templateUrl('job-templates/survey-maker/render/survey-question'),
+                    templateUrl: templateUrl('templates/survey-maker/render/survey-question'),
                     link: _.partial(link, $sce, $filter, Empty)
                 };
 

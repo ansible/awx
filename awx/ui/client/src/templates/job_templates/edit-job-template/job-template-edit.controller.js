@@ -166,8 +166,7 @@ export default
                 }
                 ToggleNotification({
                     scope: $scope,
-                    url: defaultUrl,
-                    id: id,
+                    url: defaultUrl + id,
                     notifier: notifier,
                     column: column,
                     callback: 'NotificationRefresh'
