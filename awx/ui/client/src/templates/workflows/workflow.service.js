@@ -5,9 +5,9 @@ export default [function(){
             // params.matchingId
             // params.byNodeId
 
-            let thisNodeId = params.byNodeId ? params.element.nodeId : params.element.id;
+            let prospectiveId = params.byNodeId ? params.element.nodeId : params.element.id;
 
-            if(thisNodeId === params.matchingId){
+            if(prospectiveId === params.matchingId){
                  return params.element;
             }else if (params.element.children && params.element.children.length > 0){
                  let result = null;
@@ -209,8 +209,7 @@ export default [function(){
                 originalEdge: params.edgeType,
                 originalNodeObj: _.clone(params.nodesObj[params.nodeId]),
                 promptValues: {},
-                isRoot: params.isRoot ? params.isRoot : false,
-                //jobStatus: 'failed' successful waiting running pending
+                isRoot: params.isRoot ? params.isRoot : false
             };
 
             params.treeData.data.totalNodes++;
