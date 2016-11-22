@@ -3,8 +3,11 @@ export default [function(){
         searchTree: function(params) {
             // params.element
             // params.matchingId
+            // params.byNodeId
 
-            if(params.element.id === params.matchingId){
+            let thisNodeId = params.byNodeId ? params.element.nodeId : params.element.id;
+
+            if(thisNodeId === params.matchingId){
                  return params.element;
             }else if (params.element.children && params.element.children.length > 0){
                  let result = null;
@@ -12,7 +15,8 @@ export default [function(){
                  _.forEach(params.element.children, function(child) {
                      result = thisService.searchTree({
                          element: child,
-                         matchingId: params.matchingId
+                         matchingId: params.matchingId,
+                         byNodeId: params.byNodeId ? params.byNodeId : false
                      });
                      if(result) {
                          return false;
@@ -205,7 +209,8 @@ export default [function(){
                 originalEdge: params.edgeType,
                 originalNodeObj: _.clone(params.nodesObj[params.nodeId]),
                 promptValues: {},
-                isRoot: params.isRoot ? params.isRoot : false
+                isRoot: params.isRoot ? params.isRoot : false,
+                //jobStatus: 'failed' successful waiting running pending
             };
 
             params.treeData.data.totalNodes++;
@@ -214,6 +219,10 @@ export default [function(){
 
             if(params.parentId) {
                 treeNode.originalParentId = params.parentId;
+            }
+
+            if(params.nodesObj[params.nodeId].summary_fields.job) {
+                treeNode.jobStatus = params.nodesObj[params.nodeId].summary_fields.job.status;
             }
 
             // Loop across the success nodes and add them recursively
@@ -250,6 +259,22 @@ export default [function(){
             });
 
             return treeNode;
+        },
+        updateStatusOfNode: function(params) {
+            // params.treeData
+            // params.nodeId
+            // params.status
+
+            let matchingNode = this.searchTree({
+                element: params.treeData.data,
+                matchingId: params.nodeId,
+                byNodeId: true
+            });
+
+            if(matchingNode) {
+                matchingNode.jobStatus = params.status;
+            }
+
         }
     };
 }];

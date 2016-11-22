@@ -282,6 +282,36 @@ export default [
                                 d3.select("#node-" + d.id + "-remove")
                                     .classed("removeHovering", false);
                             });
+
+                        thisNode.append("circle")
+                            .attr("class", function(d) {
+
+                                let statusClass = "WorkflowChart-nodeStatus ";
+
+                                switch(d.jobStatus) {
+                                    case "pending":
+                                        statusClass = "workflowChart-nodeStatus--running";
+                                        break;
+                                    case "waiting":
+                                        statusClass = "workflowChart-nodeStatus--running";
+                                        break;
+                                    case "running":
+                                        statusClass = "workflowChart-nodeStatus--running";
+                                        break;
+                                    case "successful":
+                                        statusClass = "workflowChart-nodeStatus--success";
+                                        break;
+                                    case "failed":
+                                        statusClass = "workflowChart-nodeStatus--failed";
+                                        break;
+                                }
+
+                                return statusClass;
+                            })
+                            .style("display", function(d) { return d.jobStatus ? null : "none"; })
+                            .attr("cy", 10)
+                            .attr("cx", 10)
+                            .attr("r", 6);
                     }
                 });
 
@@ -407,7 +437,7 @@ export default [
                         });
 
                 t.selectAll(".linkCircle")
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder) ? "none" : null; })
+                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .attr("cx", function(d) {
                         return (d.target.y + d.source.y + rectW) / 2;
                     })
@@ -416,7 +446,7 @@ export default [
                     });
 
                 t.selectAll(".linkCross")
-                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder) ? "none" : null; })
+                    .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; });
 
                 t.selectAll(".rect")
@@ -442,6 +472,53 @@ export default [
                         return (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update")) ? "P" : (d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? "I" : "");
                     })
                     .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
+
+                t.selectAll(".WorkflowChart-nodeStatus")
+                    .attr("class", function(d) {
+
+                        let statusClass = "WorkflowChart-nodeStatus ";
+
+                        switch(d.jobStatus) {
+                            case "pending":
+                                statusClass += "workflowChart-nodeStatus--running";
+                                break;
+                            case "waiting":
+                                statusClass += "workflowChart-nodeStatus--running";
+                                break;
+                            case "running":
+                                statusClass += "workflowChart-nodeStatus--running";
+                                break;
+                            case "successful":
+                                statusClass += "workflowChart-nodeStatus--success";
+                                break;
+                            case "failed":
+                                statusClass += "workflowChart-nodeStatus--failed";
+                                break;
+                        }
+
+                        return statusClass;
+                    })
+                    .style("display", function(d) { return d.jobStatus ? null : "none"; })
+                    .transition()
+                    .duration(0)
+                    .attr("r", 6)
+                    .each(function(d) {
+                        if(d.jobStatus && (d.jobStatus === "pending" || d.jobStatus === "waiting" || d.jobStatus === "running")) {
+                            // Pulse the circle
+                            var circle = d3.select(this);
+                			(function repeat() {
+                				circle = circle.transition()
+                					.duration(2000)
+                					.attr("r", 6)
+                					.transition()
+                					.duration(2000)
+                					.attr("r", 0)
+                					.ease('sine')
+                					.each("end", repeat);
+                			})();
+                        }
+                    });
+
             }
 
             function add_node() {

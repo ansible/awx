@@ -13,11 +13,12 @@ export default {
     url: '/workflows/:id',
     ncyBreadcrumb: {
         parent: 'jobs',
-        label: '{{ job.id }} - {{ job.name }}'
+        label: '{{ workflow.id }} - {{ workflow.name }}'
     },
     data: {
         socket: {
             "groups":{
+                "jobs": ["status_changed"],
                 "workflow_events": []
             }
         }

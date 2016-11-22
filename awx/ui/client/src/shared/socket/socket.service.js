@@ -93,6 +93,12 @@ export default
                     // ex: 'ws-jobs-<jobId>'
                     str = `ws-${data.group_name}-${data.job}`;
                 }
+                else if(data.group_name==="workflow_events"){
+                    // The naming scheme is "ws" then a
+                    // dash (-) and the group_name, then the job ID
+                    // ex: 'ws-jobs-<jobId>'
+                    str = `ws-${data.group_name}-${data.workflow_job_id}`;
+                }
                 else if(data.group_name==="ad_hoc_command_events"){
                     // The naming scheme is "ws" then a
                     // dash (-) and the group_name, then the job ID
