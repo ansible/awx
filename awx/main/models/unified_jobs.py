@@ -785,6 +785,12 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return None
 
     @property
+    def workflow_node_id(self):
+        if self.spawned_by_workflow:
+            return self.unified_job_node.pk
+        return None
+
+    @property
     def celery_task(self):
         try:
             if self.celery_task_id:
@@ -808,7 +814,11 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def websocket_emit_data(self):
         ''' Return extra data that should be included when submitting data to the browser over the websocket connection '''
-        return {'workflow_job_id': self.workflow_job_id}
+        websocket_data = dict()
+        if self.spawned_by_workflow:
+            websocket_data.update(dict(workflow_job_id=self.workflow_job_id,
+                                       workflow_node_id=self.workflow_node_id))
+        return websocket_data
 
     def websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
@@ -819,7 +829,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.spawned_by_workflow:
             status_data['group_name'] = "workflow_events"
             emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
-
 
     def notification_data(self):
         return dict(id=self.id,

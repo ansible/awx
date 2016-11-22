@@ -435,7 +435,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
         return False
 
     def websocket_emit_data(self):
-        return dict(project_id=self.project.id)
+        websocket_data = super(ProjectUpdate, self).websocket_emit_data()
+        websocket_data.update(dict(project_id=self.project.id))
+        return websocket_data
 
     @property
     def task_impact(self):

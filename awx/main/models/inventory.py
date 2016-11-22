@@ -1230,9 +1230,10 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
         return 'DEFAULT_INVENTORY_UPDATE_TIMEOUT'
 
     def websocket_emit_data(self):
+        websocket_data = super(InventoryUpdate, self).websocket_emit_data()
         if self.inventory_source.group is not None:
-            return dict(group_id=self.inventory_source.group.id)
-        return {}
+            websocket_data.update(dict(group_id=self.inventory_source.group.id))
+        return websocket_data
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
