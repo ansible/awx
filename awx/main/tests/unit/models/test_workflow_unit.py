@@ -3,7 +3,7 @@ import pytest
 from awx.main.models.jobs import JobTemplate
 from awx.main.models import Inventory, Credential, Project
 from awx.main.models.workflow import (
-    WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobInheritNodesMixin,
+    WorkflowJobTemplate, WorkflowJobTemplateNode, WorkflowJobOptions,
     WorkflowJob, WorkflowJobNode
 )
 import mock
@@ -22,8 +22,8 @@ class TestWorkflowJobInheritNodesMixin():
         def test__create_workflow_job_nodes(self, mocker, job_template_nodes):
             workflow_job_node_create = mocker.patch('awx.main.models.WorkflowJobTemplateNode.create_workflow_job_node')
 
-            mixin = WorkflowJobInheritNodesMixin()
-            mixin._create_workflow_job_nodes(job_template_nodes)
+            mixin = WorkflowJobOptions()
+            mixin._create_workflow_nodes(job_template_nodes)
 
             for job_template_node in job_template_nodes:
                 workflow_job_node_create.assert_any_call(workflow_job=mixin)
@@ -37,22 +37,30 @@ class TestWorkflowJobInheritNodesMixin():
         def job_nodes(self):
             return [WorkflowJobNode(id=i) for i in range(100, 120)]
 
-        def test__map_workflow_job_nodes(self, job_template_nodes, job_nodes):
-            mixin = WorkflowJobInheritNodesMixin()
+        def test__map_workflow_job_nodes(self, job_template_nodes, job_nodes, mocker):
+            mixin = WorkflowJob()
+            wj_node = WorkflowJobNode()
+            mocker.patch('awx.main.models.workflow.WorkflowJobTemplateNode.create_workflow_job_node',
+                         return_value=wj_node)
 
-            node_ids_map = mixin._map_workflow_job_nodes(job_template_nodes, job_nodes)
+            node_ids_map = mixin._create_workflow_nodes(job_template_nodes, user=None)
             assert len(node_ids_map) == len(job_template_nodes)
 
             for i, job_template_node in enumerate(job_template_nodes):
-                assert node_ids_map[job_template_node.id] == job_nodes[i].id
+                assert node_ids_map[job_template_node.id] == wj_node
 
     class TestInheritRelationship():
         @pytest.fixture
         def job_template_nodes(self, mocker):
-            nodes = [mocker.MagicMock(id=i) for i in range(0, 10)]
+            nodes = [mocker.MagicMock(id=i, pk=i) for i in range(0, 10)]
 
             for i in range(0, 9):
-                nodes[i].success_nodes = [mocker.MagicMock(id=i + 1)]
+                nodes[i].success_nodes = mocker.MagicMock(
+                    all=mocker.MagicMock(return_value=[mocker.MagicMock(id=i + 1, pk=i + 1)]))
+                nodes[i].always_nodes = mocker.MagicMock(all=mocker.MagicMock(return_value=[]))
+                nodes[i].failure_nodes = mocker.MagicMock(all=mocker.MagicMock(return_value=[]))
+                new_wj_node = mocker.MagicMock(success_nodes=mocker.MagicMock())
+                nodes[i].create_workflow_job_node = mocker.MagicMock(return_value=new_wj_node)
 
             return nodes
 
@@ -70,18 +78,13 @@ class TestWorkflowJobInheritNodesMixin():
 
 
         def test__inherit_relationship(self, mocker, job_template_nodes, job_nodes, job_nodes_dict):
-            mixin = WorkflowJobInheritNodesMixin()
+            wj = WorkflowJob()
 
-            mixin._get_workflow_job_node_by_id = lambda x: job_nodes_dict[x]
-            mixin._get_all_by_type = lambda x,node_type: x.success_nodes
+            node_ids_map = wj._create_workflow_nodes(job_template_nodes)
+            wj._inherit_node_relationships(job_template_nodes, node_ids_map)
 
-            node_ids_map = mixin._map_workflow_job_nodes(job_template_nodes, job_nodes)
-
-            for i, job_template_node in enumerate(job_template_nodes):
-                mixin._inherit_relationship(job_template_node, job_nodes[i], node_ids_map, 'success_nodes')
-
-            for i in range(0, 9):
-                job_nodes[i].success_nodes.add.assert_any_call(job_nodes[i + 1])
+            for i in range(0, 8):
+                node_ids_map[i].success_nodes.add.assert_any_call(node_ids_map[i + 1])
 
 
 @pytest.fixture

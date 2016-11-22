@@ -24,7 +24,7 @@ from awx.main.models.mixins import ResourceMixin
 from awx.main.task_engine import TaskEnhancer
 from awx.conf.license import LicenseForbids
 
-__all__ = ['get_user_queryset', 'check_user_access',
+__all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
            'user_accessible_objects',
            'user_admin_role', 'StateConflict',]
 
@@ -124,6 +124,20 @@ def check_user_access(user, model_class, action, *args, **kwargs):
     return False
 
 
+def check_user_access_with_errors(user, model_class, action, *args, **kwargs):
+    '''
+    Return T/F permission and summary of problems with the action.
+    '''
+    for access_class in access_registry.get(model_class, []):
+        access_instance = access_class(user, save_messages=True)
+        access_method = getattr(access_instance, 'can_%s' % action, None)
+        result = access_method(*args, **kwargs)
+        logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
+                     access_method.__name__, args, result)
+        return (result, access_instance.messages)
+    return (False, '')
+
+
 def get_user_capabilities(user, instance, **kwargs):
     '''
     Returns a dictionary of capabilities the user has on the particular
@@ -160,8 +174,11 @@ class BaseAccess(object):
 
     model = None
 
-    def __init__(self, user):
+    def __init__(self, user, save_messages=False):
         self.user = user
+        self.save_messages = save_messages
+        if save_messages:
+            self.messages = {}
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
@@ -329,8 +346,6 @@ class BaseAccess(object):
             # Aliases for going form UI language to API language
             if display_method == 'edit':
                 method = 'change'
-            elif display_method == 'copy':
-                method = 'add'
             elif display_method == 'adhoc':
                 method = 'run_ad_hoc_commands'
             else:
@@ -347,17 +362,12 @@ class BaseAccess(object):
                 user_capabilities['copy'] = user_capabilities['edit']
                 continue
 
-            # Preprocessing before the access method is called
-            data = {}
-            if method == 'add':
-                if isinstance(obj, JobTemplate):
-                    data['reference_obj'] = obj
-
             # Compute permission
+            data = {}
             access_method = getattr(self, "can_%s" % method)
             if method in ['change']: # 3 args
                 user_capabilities[display_method] = access_method(obj, data)
-            elif method in ['delete', 'run_ad_hoc_commands']:
+            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
                 user_capabilities[display_method] = access_method(obj)
             elif method in ['start']:
                 user_capabilities[display_method] = access_method(obj, validate_license=False)
@@ -1095,6 +1105,9 @@ class JobTemplateAccess(BaseAccess):
         else:
             return False
 
+    def can_copy(self, obj):
+        return self.can_add({'reference_obj': obj})
+
     def can_start(self, obj, validate_license=True):
         # Check license.
         if validate_license:
@@ -1487,7 +1500,7 @@ class WorkflowJobNodeAccess(BaseAccess):
         return False
 
 
-# TODO: revisit for survey logic, notification attachments?
+# TODO: notification attachments?
 class WorkflowJobTemplateAccess(BaseAccess):
     '''
     I can only see/manage Workflow Job Templates if I'm a super user
@@ -1519,36 +1532,32 @@ class WorkflowJobTemplateAccess(BaseAccess):
         if not data:  # So the browseable API will work
             return Organization.accessible_objects(self.user, 'admin_role').exists()
 
-        # if reference_obj is provided, determine if it can be coppied
-        reference_obj = data.pop('reference_obj', None)
-        if reference_obj:
-            for node in reference_obj.workflow_job_template_nodes.all():
-                if node.inventory and self.user not in node.inventory.use_role:
-                    return False
-                if node.credential and self.user not in node.credential.use_role:
-                    return False
-                if node.unified_job_template:
-                    if isinstance(node.unified_job_template, SystemJobTemplate):
-                        if not self.user.is_superuser:
-                            return False
-                    elif isinstance(node.unified_job_template, JobTemplate):
-                        if self.user not in node.unified_job_template.execute_role:
-                            return False
-                    elif isinstance(node.unified_job_template, Project):
-                        if self.user not in node.unified_job_template.update_role:
-                            return False
-                    elif isinstance(node.unified_job_template, InventorySource):
-                        if not self.user.can_access(InventorySource, 'start', node.unified_job_template):
-                            return False
-                    else:
-                        return False
-            return True
-
         # will check this if surveys are added to WFJT
         if 'survey_enabled' in data and data['survey_enabled']:
             self.check_license(feature='surveys')
 
         return self.check_related('organization', Organization, data, mandatory=True)
+
+    def can_copy(self, obj):
+        if self.save_messages:
+            wfjt_errors = {}
+            qs = obj.workflow_job_template_nodes
+            qs.select_related('unified_job_template', 'inventory', 'credential')
+            for node in qs.all():
+                node_errors = {}
+                if node.inventory and self.user not in node.inventory.use_role:
+                    node_errors['inventory'] = 'Prompted inventory %s can not be coppied.' % node.inventory.name
+                if node.credential and self.user not in node.credential.use_role:
+                    node_errors['credential'] = 'Prompted credential %s can not be coppied.' % node.credential.name
+                ujt = node.unified_job_template
+                if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
+                    node_errors['unified_job_template'] = (
+                        'Prompted %s %s can not be coppied.' % (ujt._meta.verbose_name_raw, ujt.name))
+                if node_errors:
+                    wfjt_errors[node.id] = node_errors
+            self.messages.update(wfjt_errors)
+
+        return self.check_related('organization', Organization, {}, obj=obj, mandatory=True)
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
@@ -1620,9 +1629,16 @@ class WorkflowJobAccess(BaseAccess):
             return self.user.is_superuser
         return self.user in obj.workflow_job_template.admin_role
 
-    # TODO: add support for relaunching workflow jobs
     def can_start(self, obj, validate_license=True):
-        return False
+        if validate_license:
+            self.check_license()
+            if obj.survey_enabled:
+                self.check_license(feature='surveys')
+
+        if self.user.is_superuser:
+            return True
+
+        return (obj.workflow_job_template and self.user in obj.workflow_job_template.execute_role)
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
@@ -1817,6 +1833,11 @@ class UnifiedJobTemplateAccess(BaseAccess):
         #)
 
         return qs.all()
+
+    def can_start(self, obj, validate_license=True):
+        access_class = access_registry.get(obj.__class__, [])[0]
+        access_instance = access_class(self.user)
+        return access_instance.can_start(obj, validate_license=validate_license)
 
 
 class UnifiedJobAccess(BaseAccess):

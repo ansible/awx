@@ -258,8 +258,8 @@ def test_user_capabilities_method():
         def can_change(self, obj, data):
             return 'bar'
 
-        def can_add(self, data):
-            return 'foobar'
+        def can_copy(self, obj):
+            return 'foo'
 
     user = User(username='auser')
     foo_access = FooAccess(user)
@@ -267,7 +267,7 @@ def test_user_capabilities_method():
     foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
     assert foo_capabilities == {
         'edit': 'bar',
-        'copy': 'foobar'
+        'copy': 'foo'
     }
 
 

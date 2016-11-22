@@ -261,7 +261,7 @@ def test_job_relaunch_copy_vars(job_with_links, machine_credential, inventory,
     job_with_links.limit = "my_server"
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
                       return_value=['inventory', 'credential', 'limit']):
-        second_job = job_with_links.copy()
+        second_job = job_with_links.copy_unified_job()
 
     # Check that job data matches the original variables
     assert second_job.credential == job_with_links.credential

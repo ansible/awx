@@ -47,13 +47,6 @@ class TestWorkflowJobTemplateAccess:
         assert org_admin in wfjt.execute_role
         assert org_admin in wfjt.read_role
 
-    def test_jt_blocks_copy(self, wfjt_with_nodes, org_admin):
-        """I want to copy a workflow JT in my organization, but someone
-        included a job template that I don't have access to, so I can
-        not copy the WFJT as-is"""
-        access = WorkflowJobTemplateAccess(org_admin)
-        assert not access.can_add({'reference_obj': wfjt_with_nodes})
-
 
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
@@ -77,3 +70,23 @@ class TestWorkflowJobAccess:
         workflow_job.save()
         access = WorkflowJobAccess(rando)
         assert access.can_cancel(workflow_job)
+
+    def test_workflow_copy_warnings_inv(self, wfjt, rando, inventory):
+        '''
+        The user `rando` does not have access to the prompted inventory in a
+        node inside the workflow - test surfacing this information
+        '''
+        wfjt.workflow_job_template_nodes.create(inventory=inventory)
+        access = WorkflowJobTemplateAccess(rando, save_messages=True)
+        assert not access.can_copy(wfjt)
+        warnings = access.messages
+        assert 1 in warnings
+        assert 'inventory' in warnings[1]
+
+    def test_workflow_copy_warnings_jt(self, wfjt, rando, job_template):
+        wfjt.workflow_job_template_nodes.create(unified_job_template=job_template)
+        access = WorkflowJobTemplateAccess(rando, save_messages=True)
+        assert not access.can_copy(wfjt)
+        warnings = access.messages
+        assert 1 in warnings
+        assert 'unified_job_template' in warnings[1]

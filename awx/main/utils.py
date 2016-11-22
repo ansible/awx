@@ -23,6 +23,7 @@ from decorator import decorator
 
 # Django
 from django.utils.translation import ugettext_lazy as _
+from django.db.models import ManyToManyField
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -38,7 +39,8 @@ logger = logging.getLogger('awx.main.utils')
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 'memoize',
            'get_ansible_version', 'get_ssh_version', 'get_awx_version', 'update_scm_url',
-           'get_type_for_model', 'get_model_for_type', 'cache_list_capabilities', 'to_python_boolean',
+           'get_type_for_model', 'get_model_for_type', 'copy_model_by_class',
+           'copy_m2m_relationships' ,'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
            'get_current_apps', 'set_current_apps', 'OutputEventFilter']
@@ -408,6 +410,66 @@ def model_to_dict(obj, serializer_mapping=None):
         else:
             attr_d[field.name] = "hidden"
     return attr_d
+
+
+def copy_model_by_class(obj1, Class2, fields, kwargs):
+    '''
+    Creates a new unsaved object of type Class2 using the fields from obj1
+    values in kwargs can override obj1
+    '''
+    create_kwargs = {}
+    for field_name in fields:
+        # Foreign keys can be specified as field_name or field_name_id.
+        id_field_name = '%s_id' % field_name
+        if hasattr(obj1, id_field_name):
+            if field_name in kwargs:
+                value = kwargs[field_name]
+            elif id_field_name in kwargs:
+                value = kwargs[id_field_name]
+            else:
+                value = getattr(obj1, id_field_name)
+            if hasattr(value, 'id'):
+                value = value.id
+            create_kwargs[id_field_name] = value
+        elif field_name in kwargs:
+            if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
+                create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
+            # We can't get a hold of django.db.models.fields.related.ManyRelatedManager to compare
+            # so this is the next best thing.
+            elif kwargs[field_name].__class__.__name__ is not 'ManyRelatedManager':
+                create_kwargs[field_name] = kwargs[field_name]
+        elif hasattr(obj1, field_name):
+            field_obj = obj1._meta.get_field_by_name(field_name)[0]
+            if not isinstance(field_obj, ManyToManyField):
+                create_kwargs[field_name] = getattr(obj1, field_name)
+
+    # Apply class-specific extra processing for origination of unified jobs
+    if hasattr(obj1, '_update_unified_job_kwargs') and obj1.__class__ != Class2:
+        new_kwargs = obj1._update_unified_job_kwargs(**create_kwargs)
+    else:
+        new_kwargs = create_kwargs
+
+    return Class2(**new_kwargs)
+
+
+def copy_m2m_relationships(obj1, obj2, fields, kwargs=None):
+    '''
+    In-place operation.
+    Given two saved objects, copies related objects from obj1
+    to obj2 to field of same name, if field occurs in `fields`
+    '''
+    for field_name in fields:
+        if hasattr(obj1, field_name):
+            field_obj = obj1._meta.get_field_by_name(field_name)[0]
+            if isinstance(field_obj, ManyToManyField):
+                # Many to Many can be specified as field_name
+                src_field_value = getattr(obj1, field_name)
+                if kwargs and field_name in kwargs:
+                    override_field_val = kwargs[field_name]
+                    if override_field_val.__class__.__name__ is 'ManyRelatedManager':
+                        src_field_value = override_field_val
+                dest_field = getattr(obj2, field_name)
+                dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
 
 
 def get_type_for_model(model):

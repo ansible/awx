@@ -10,6 +10,7 @@ import os
 import os.path
 from collections import OrderedDict
 from StringIO import StringIO
+from datetime import datetime
 
 # Django
 from django.conf import settings
@@ -29,7 +30,10 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
-from awx.main.utils import decrypt_field, _inventory_updates
+from awx.main.utils import (
+    decrypt_field, _inventory_updates,
+    copy_model_by_class, copy_m2m_relationships
+)
 from awx.main.redact import UriCleaner, REPLACE_STR
 from awx.main.consumers import emit_channel_notification
 from awx.main.fields import JSONField
@@ -303,46 +307,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         Create a new unified job based on this unified job template.
         '''
         unified_job_class = self._get_unified_job_class()
+        fields = self._get_unified_job_field_names()
+        unified_job = copy_model_by_class(self, unified_job_class, fields, kwargs)
+
+        # Set the unified job template back-link on the job
         parent_field_name = unified_job_class._get_parent_field_name()
-        kwargs.pop('%s_id' % parent_field_name, None)
-        create_kwargs = {}
-        m2m_fields = {}
-        if self.pk:
-            create_kwargs[parent_field_name] = self
-        for field_name in self._get_unified_job_field_names():
-            # Foreign keys can be specified as field_name or field_name_id.
-            id_field_name = '%s_id' % field_name
-            if hasattr(self, id_field_name):
-                if field_name in kwargs:
-                    value = kwargs[field_name]
-                elif id_field_name in kwargs:
-                    value = kwargs[id_field_name]
-                else:
-                    value = getattr(self, id_field_name)
-                if hasattr(value, 'id'):
-                    value = value.id
-                create_kwargs[id_field_name] = value
-            elif field_name in kwargs:
-                if field_name == 'extra_vars' and isinstance(kwargs[field_name], dict):
-                    create_kwargs[field_name] = json.dumps(kwargs['extra_vars'])
-                # We can't get a hold of django.db.models.fields.related.ManyRelatedManager to compare
-                # so this is the next best thing.
-                elif kwargs[field_name].__class__.__name__ is 'ManyRelatedManager':
-                    m2m_fields[field_name] = kwargs[field_name]
-                else:
-                    create_kwargs[field_name] = kwargs[field_name]
-            elif hasattr(self, field_name):
-                field_obj = self._meta.get_field_by_name(field_name)[0]
-                # Many to Many can be specified as field_name
-                if isinstance(field_obj, models.ManyToManyField):
-                    m2m_fields[field_name] = getattr(self, field_name)
-                else:
-                    create_kwargs[field_name] = getattr(self, field_name)
-        if hasattr(self, '_update_unified_job_kwargs'):
-            new_kwargs = self._update_unified_job_kwargs(**create_kwargs)
-        else:
-            new_kwargs = create_kwargs
-        unified_job = unified_job_class(**new_kwargs)
+        setattr(unified_job, parent_field_name, self)
+
         # For JobTemplate-based jobs with surveys, add passwords to list for perma-redaction
         if hasattr(self, 'survey_spec') and getattr(self, 'survey_enabled', False):
             password_list = self.survey_password_variables()
@@ -350,11 +321,31 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             for password in password_list:
                 hide_password_dict[password] = REPLACE_STR
             unified_job.survey_passwords = hide_password_dict
+
         unified_job.save()
-        for field_name, src_field_value in m2m_fields.iteritems():
-            dest_field = getattr(unified_job, field_name)
-            dest_field.add(*list(src_field_value.all().values_list('id', flat=True)))
+        # Labels coppied here
+        copy_m2m_relationships(self, unified_job, fields, kwargs=kwargs)
         return unified_job
+
+    @classmethod
+    def _get_unified_jt_copy_names(cls):
+        return cls._get_unified_job_field_names()
+
+    def copy_unified_jt(self):
+        '''
+        Returns saved object, including related fields.
+        Create a copy of this unified job template.
+        '''
+        unified_jt_class = self.__class__
+        fields = self._get_unified_jt_copy_names()
+        unified_jt = copy_model_by_class(self, unified_jt_class, fields, {})
+
+        time_now = datetime.now()
+        unified_jt.name = unified_jt.name + ' @ ' + time_now.strftime('%H:%M:%S %p')
+
+        unified_jt.save()
+        copy_m2m_relationships(self, unified_jt, fields)
+        return unified_jt
 
 
 class UnifiedJobTypeStringMixin(object):
@@ -552,6 +543,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
     def _get_parent_field_name(cls):
         return 'unified_job_template' # Override in subclasses.
 
+    @classmethod
+    def _get_unified_job_template_class(cls):
+        '''
+        Return subclass of UnifiedJobTemplate that applies to this unified job.
+        '''
+        raise NotImplementedError # Implement in subclass.
+
     def _global_timeout_setting(self):
         "Override in child classes, None value indicates this is not configurable"
         return None
@@ -665,6 +663,24 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             except Exception:
                 pass
         super(UnifiedJob, self).delete()
+
+    def copy_unified_job(self):
+        '''
+        Returns saved object, including related fields.
+        Create a copy of this unified job for the purpose of relaunch
+        '''
+        unified_job_class = self.__class__
+        unified_jt_class = self._get_unified_job_template_class()
+        parent_field_name = unified_job_class._get_parent_field_name()
+
+        fields = unified_jt_class._get_unified_job_field_names() + [parent_field_name]
+        unified_job = copy_model_by_class(self, unified_job_class, fields, {})
+        unified_job.job_type = 'relaunch'
+        unified_job.save()
+
+        # Labels coppied here
+        copy_m2m_relationships(self, unified_job, fields)
+        return unified_job
 
     def result_stdout_raw_handle(self, attempt=0):
         """Return a file-like object containing the standard out of the
