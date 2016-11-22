@@ -3026,6 +3026,32 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDet
     new_in_310 = True
 
 
+class WorkflowJobTemplateAccessList(ResourceAccessList):
+
+        model = User # needs to be User for AccessLists's
+        resource_model = WorkflowJobTemplate
+        new_in_310 = True
+
+
+class WorkflowJobTemplateActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = WorkflowJobTemplate
+    relationship = 'activitystream_set'
+    new_in_310 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
+
+        # Okay, let it through.
+        return super(WorkflowJobTemplateActivityStreamList, self).get(request, *args, **kwargs)
+
+
 # TODO:
 class WorkflowJobList(ListCreateAPIView):
 
@@ -3080,11 +3106,23 @@ class WorkflowJobNotificationsList(SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateAccessList(ResourceAccessList):
+class WorkflowJobActivityStreamList(SubListAPIView):
 
-        model = User # needs to be User for AccessLists's
-        resource_model = WorkflowJobTemplate
-        new_in_310 = True
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = WorkflowJob
+    relationship = 'activitystream_set'
+    new_in_310 = True
+
+    def get(self, request, *args, **kwargs):
+        # Sanity check: Does this license allow activity streams?
+        # If not, forbid this request.
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids(_('Your license does not allow use of '
+                                   'the activity stream.'))
+
+        # Okay, let it through.
+        return super(WorkflowJobActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class SystemJobTemplateList(ListAPIView):
