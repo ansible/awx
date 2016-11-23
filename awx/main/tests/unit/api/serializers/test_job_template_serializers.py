@@ -11,6 +11,7 @@ from awx.main.models import (
     Role,
     User,
     Job,
+    JobTemplate,
 )
 from rest_framework.test import APIRequestFactory
 
@@ -24,7 +25,9 @@ def mock_JT_resource_data():
 
 @pytest.fixture
 def job_template(mocker):
-    mock_jt = mocker.MagicMock(pk=5)
+    mock_jt = mocker.MagicMock(spec=JobTemplate)
+    mock_jt.pk = 5
+    mock_jt.host_config_key = '9283920492'
     mock_jt.resource_validation_data = mock_JT_resource_data
     return mock_jt
 
