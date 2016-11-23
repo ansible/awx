@@ -232,6 +232,7 @@ clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
 	rm -rf awx/lib/site-packages
 	rm -rf dist/*
 	rm -rf awx/job_status
+	rm -rf awx/job_output
 	rm -rf reports
 	rm -f awx/awx_test.sqlite3
 	rm -rf tmp
