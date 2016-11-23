@@ -33,21 +33,34 @@ describe('parseStdoutService', () => {
         });
     });
 
-    // describe('getLineClasses()', () => {
-    //     xit('creates a string that is used as a class', () => {
-    //         let headerEvent = {
-    //             event_name: 'playbook_on_task_start',
-    //             event_data: {
-    //                 play_uuid:"0f667a23-d9ab-4128-a735-80566bcdbca0",
-    //                 task_uuid: "80dd087c-268b-45e8-9aab-1083bcfd9364"
-    //             }
-    //         };
-    //         let lineNum = 3;
-    //         let line = "TASK [setup] *******************************************************************";
-    //         let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
-    //         expect(parseStdoutService.getLineClasses(headerEvent, line, lineNum)).toBe(styledLine);
-    //     });
-    // });
+    describe('getLineClasses()', () => {
+        xit('creates a string that is used as a class', () => {
+            let headerEvent = {
+                event_name: 'playbook_on_task_start',
+                event_data: {
+                    play_uuid:"0f667a23-d9ab-4128-a735-80566bcdbca0",
+                    task_uuid: "80dd087c-268b-45e8-9aab-1083bcfd9364"
+                }
+            };
+            let lineNum = 3;
+            let line = "TASK [setup] *******************************************************************";
+            let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
+            expect(parseStdoutService.getLineClasses(headerEvent, line, lineNum)).toBe(styledLine);
+        });
+    });
+
+    describe('getStartTime()', () => {
+        xit('creates returns a badge with the start time of the event', () => {
+            let headerEvent = {
+                event_name: 'playbook_on_play_start',
+                created: "2016-11-22T21:15:54.736Z"
+            };
+
+            let line = "PLAY [add hosts to inventory] **************************************************";
+            let badgeDiv = '<div class="badge JobResults-timeBadge ng-binding">13:15:54</div>';
+            expect(parseStdoutService.getStartTimeBadge(headerEvent, line)).toBe(badgeDiv);
+        });
+    });
 
     describe('getCollapseIcon()', () => {
         let emptySpan = `
@@ -83,13 +96,7 @@ describe('parseStdoutService', () => {
         data-uuid="task_1da9012d-18e6-4562-85cd-83cf10a97f86">
     </i>
 </span>`;
-// `<span class="JobResultsStdOut-lineExpander">
-//     <i class="JobResultsStdOut-lineExpanderIcon fa fa-caret-down expanderizer
-//         expanderizer--${expanderizerSpecifier} expanded"
-//         ng-click="toggleLine($event, '.${clickClass}')"
-//         data-uuid="${clickClass}">
-//     </i>
-// </span>`
+
             expect(parseStdoutService.getCollapseIcon(headerEvent, line))
                 .toBe(expandSpan);
         });
@@ -124,6 +131,8 @@ describe('parseStdoutService', () => {
                 .returnValue("");
             spyOn(parseStdoutService, 'prettify').and
                 .returnValue("prettified_line");
+            spyOn(parseStdoutService, 'getStartTimeBadge').and
+                .returnValue("");
 
             parseStdoutService.parseStdout(mockEvent);
 
@@ -137,6 +146,8 @@ describe('parseStdoutService', () => {
                 .toHaveBeenCalledWith(mockEvent, "prettified_line");
             expect(parseStdoutService.prettify)
                 .toHaveBeenCalledWith('line1');
+            expect(parseStdoutService.getStartTimeBadge)
+                .toHaveBeenCalledWith(mockEvent, 'line1');
 
             // get line arr should be called once for the event
             expect(parseStdoutService.getLineArr.calls.count())
@@ -165,13 +176,15 @@ describe('parseStdoutService', () => {
                 .returnValue("anchor_tag_dom");
             spyOn(parseStdoutService, 'prettify').and
                 .returnValue("prettified_line");
+            spyOn(parseStdoutService, 'getStartTimeBadge').and
+                .returnValue("");
 
             var returnedString = parseStdoutService.parseStdout(mockEvent);
 
             var expectedString = `
 <div class="JobResultsStdOut-aLineOfStdOutline_classes">
     <div class="JobResultsStdOut-lineNumberColumn">collapse_icon_dom13</div>
-    <div class="JobResultsStdOut-stdoutColumn">anchor_tag_dom</div>
+    <div class="JobResultsStdOut-stdoutColumn">anchor_tag_dom </div>
 </div>`;
             expect(returnedString).toBe(expectedString);
         });
