@@ -47,7 +47,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
         };
 
         $scope.submitJob = function(id) {
-            InitiatePlaybookRun({ scope: $scope, id: id });
+            InitiatePlaybookRun({ scope: $scope, id: id, job_type: 'job_template' });
         };
 
         $scope.scheduleJob = function(id) {

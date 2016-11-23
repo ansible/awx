@@ -56,7 +56,8 @@ export default
                 SurveyControllerInit({
                     scope: $scope,
                     parent_scope: $scope,
-                    id: id
+                    id: id,
+                    templateType: 'job_template'
                 });
             }
 
@@ -287,7 +288,7 @@ export default
             Wait('start');
 
             if ($scope.removeSurveySaved) {
-                $scope.rmoveSurveySaved();
+                $scope.removeSurveySaved();
             }
             $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
                 Wait('stop');
@@ -662,7 +663,8 @@ export default
 
                     InitiatePlaybookRun({
                         scope: $scope,
-                        id: id
+                        id: id,
+                        job_type: 'job_template'
                     });
                 }
             };

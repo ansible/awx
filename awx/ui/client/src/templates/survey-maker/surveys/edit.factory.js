@@ -3,7 +3,15 @@ export default
         return function(params) {
             var scope = params.scope,
                 id = params.id,
+                templateType = params.templateType,
+                url;
+
+            if(templateType === 'job_template'){
                 url = GetBasePath('job_templates') + id + '/survey_spec/';
+            }
+            else if(templateType === 'workflow_job_template') {
+                url = GetBasePath('workflow_job_templates') + id + '/survey_spec/';
+            }
 
             if (scope.removeDialogReady) {
                 scope.removeDialogReady();

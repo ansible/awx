@@ -43,7 +43,7 @@ export default
                 };
 
                 scope.launchJobTemplate = function(jobTemplateId){
-                    InitiatePlaybookRun({ scope: scope, id: jobTemplateId });
+                    InitiatePlaybookRun({ scope: scope, id: jobTemplateId, job_type: 'job_template' });
                 };
 
                 scope.editJobTemplate = function (jobTemplateId) {

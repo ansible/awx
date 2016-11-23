@@ -2,7 +2,7 @@
     <div class="JobSubmission-container">
         <div class="JobSubmission-header">
             <div class="JobSubmission-title">
-                <div class="JobSubmission-titleText">LAUNCH JOB<div class="JobSubmission-titleLockup"></div>{{job_template_data.name}}</div>
+                <div class="JobSubmission-titleText">LAUNCH JOB<div class="JobSubmission-titleLockup"></div>{{job_template_data.name || workflow_job_template_data.name}}</div>
             </div>
             <div class="JobSubmission-close">
                 <button class="JobSubmission-exit" ng-click="clearDialog()"><i class="fa fa-times-circle"></i></button>
@@ -229,12 +229,12 @@
         </div>
         <div class="JobSubmission-footerContainer">
             <div class="JobSubmission-footerPreview">
-                <div class="JobSubmission-previewItem">
+                <div class="JobSubmission-previewItem" ng-show="submitJobType === 'job_template'">
                     <div class="JobSubmission-previewItemTitle">INVENTORY</div>
                     <div ng-show="selected_inventory" ng-bind="selected_inventory.name"></div>
                     <div class="JobSubmission-previewItemNone" ng-show="!selected_inventory">None selected</div>
                 </div>
-                <div class="JobSubmission-previewItem">
+                <div class="JobSubmission-previewItem" ng-show="submitJobType === 'job_template'">
                     <div class="JobSubmission-previewItemTitle">CREDENTIAL</div>
                     <div ng-show="selected_credential" ng-bind="selected_credential.name"></div>
                     <div class="JobSubmission-previewItemNone" ng-show="!selected_credential">None selected</div>

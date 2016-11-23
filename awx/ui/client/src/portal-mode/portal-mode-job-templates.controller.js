@@ -18,7 +18,7 @@ export function PortalModeJobTemplatesController($scope, PortalJobTemplateList, 
     }
 
     $scope.submitJob = function(id) {
-        InitiatePlaybookRun({ scope: $scope, id: id });
+        InitiatePlaybookRun({ scope: $scope, id: id, job_type: 'job_template' });
     };
 
 }

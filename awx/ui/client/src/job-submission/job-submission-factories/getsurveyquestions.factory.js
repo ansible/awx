@@ -7,8 +7,16 @@ export default
             return function(params) {
                 var id= params.id,
                 scope = params.scope,
+                submitJobType = params.submitJobType,
                 i,
-                survey_url = GetBasePath('job_templates') + id + '/survey_spec/';
+                survey_url;
+
+                if(submitJobType === 'job_template') {
+                    survey_url = GetBasePath('job_templates') + id + '/survey_spec/';
+                }
+                else if(submitJobType === 'workflow_job_template') {
+                    survey_url = GetBasePath('workflow_job_templates') + id + '/survey_spec/';
+                }
 
                 Rest.setUrl(survey_url);
                 Rest.get()

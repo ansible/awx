@@ -66,6 +66,10 @@ describe('Controller: jobResultsController', () => {
                 .indexOf("/static/") !== -1))
                 .respond('');
 
+            $httpBackend
+                .whenGET('/api/')
+                .respond(200, '');
+
             $scope = $rootScope.$new();
             $rScope = $rootScope;
             q = $q;

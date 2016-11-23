@@ -373,23 +373,6 @@ export default
             },
 
             buttons: { //for now always generates <button> tags
-                add_survey: {
-                    ngClick: 'addSurvey()',
-                    ngShow: 'job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
-                    awFeature: 'surveys',
-                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
-                    dataPlacement: 'top'
-                },
-                edit_survey: {
-                    ngClick: 'editSurvey()',
-                    awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
-                view_survey: {
-                    ngClick: 'editSurvey()',
-                    awFeature: 'surveys',
-                    ngShow: 'job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
-                },
                 cancel: {
                     ngClick: 'formCancel()',
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
@@ -456,6 +439,32 @@ export default
                 },
                 "notifications": {
                     include: "NotificationsList"
+                }
+            },
+
+            relatedButtons: {
+                view_survey: {
+                    ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && survey_exists && !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    label: i18n._('View Survey'),
+                    class: 'Form-primaryButton'
+                },
+                add_survey: {
+                    ngClick: 'addSurvey()',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && !survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    awFeature: 'surveys',
+                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
+                    dataPlacement: 'top',
+                    label: i18n._('Add Survey'),
+                    class: 'Form-primaryButton'
+                },
+                edit_survey: {
+                    ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
+                    ngShow: '($state.is(\'templates.addJobTemplate\') || $state.is(\'templates.editJobTemplate\')) && job_type.value !== "scan" && survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    label: i18n._('Edit Survey'),
+                    class: 'Form-primaryButton'
                 }
             },
 

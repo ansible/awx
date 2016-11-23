@@ -43,7 +43,7 @@ export default
         variable: {
             realName: 'variable',
             type: 'custom',
-            control:'<label for="variable"><span class="Form-inputLabel prepend-asterisk"> ANSWER VARIABLE NAME</span>'+
+            control:'<label class="prepend-asterisk" for="variable"><span class="Form-inputLabel"> ANSWER VARIABLE NAME</span>'+
                 '<a id="awp-variable" href="" aw-pop-over="<p>The suggested format for variable names is lowercase and underscore-separated. Also note that this field cannot accept variable names with spaces.</p><p>For example: <br>foo_bar<br>'+
                 'user_id<br>host_name<br><div class=&quot;popover-footer&quot;><span class=&quot;key&quot;>esc</span> or click to close</div>" '+
                 'data-placement="right" data-container="body" popover-title="Answer Variable Name" class="help-link" data-original-title="" title="" tabindex="-1"><i class="fa fa-question-circle"></i></a> </label>'+
