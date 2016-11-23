@@ -4,7 +4,7 @@
 * All Rights Reserved
 *************************************************/
 
-export default ['$log', function($log){
+export default ['$log', 'moment', function($log, moment){
     var val = {
         // parses stdout string from api and formats various codes to the
         // correct dom structure
@@ -123,6 +123,27 @@ export default ['$log', function($log){
 
             return string;
         },
+        getStartTimeBadge: function(event, line){
+            // This will return a div with the badge class
+            // for the start time to show at the right hand
+            // side of each stdout header line.
+            // returns an empty string if not a header line
+            var emptySpan = "", time;
+            if ((event.event_name === "playbook_on_play_start" ||
+                event.event_name === "playbook_on_task_start") &&
+                line !== "") {
+                    time =  moment(event.created).format('HH:mm:ss');
+                    return `<div class="badge JobResults-timeBadge ng-binding">${time}</div>`;
+            }
+            else if(event.event_name === "playbook_on_stats" && line.indexOf("PLAY") > -1){
+                time =  moment(event.created).format('HH:mm:ss');
+                return `<div class="badge JobResults-timeBadge ng-binding">${time}</div>`;
+            }
+            else {
+                return emptySpan;
+            }
+
+        },
         // used to add expand/collapse icon next to line numbers of headers
         getCollapseIcon: function(event, line) {
             var clickClass,
@@ -195,7 +216,7 @@ export default ['$log', function($log){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getLineClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))}</div>
+    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))} ${this.getStartTimeBadge(event, lineArr[1] )}</div>
 </div>`;
                 });
 
