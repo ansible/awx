@@ -177,7 +177,7 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="WorkflowResults-statusResultIcon
-                            fa icon-job-{{ job.status }}">
+                            fa icon-job-{{ workflow.status }}">
                         </i>
                         {{ workflow.name }}
                     </div>
@@ -212,18 +212,6 @@
                             ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
-
-                        <!-- DOWNLOAD ACTION -->
-                        <a ng-show="workflow_status.status === 'failed' ||
-                            job_status.status === 'successful' ||
-                            job_status.status === 'canceled'"
-                            href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
-                            <button class="StandardOut-actionButton"
-                                aw-tool-tip="Download Output"
-                                data-placement="top">
-                                <i class="fa fa-download"></i>
-                            </button>
-                        </a>
 
                     </div>
                 </div>
