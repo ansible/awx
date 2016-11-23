@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements_ansible.txt requirements_ansible.in
 #
--e git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
+git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
 apache-libcloud==1.3.0
 appdirs==1.4.0            # via os-client-config, python-ironicclient
 azure-batch==1.0.0        # via azure
