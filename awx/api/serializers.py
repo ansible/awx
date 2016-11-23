@@ -1867,7 +1867,28 @@ class JobOptionsSerializer(LabelsListMixin, BaseSerializer):
         return super(JobOptionsSerializer, self).validate(attrs)
 
 
-class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
+class JobTemplateMixin(object):
+    '''
+    Provide recent jobs and survey details in summary_fields
+    '''
+
+    def _recent_jobs(self, obj):
+        if hasattr(obj, 'workflow_jobs'):
+            job_mgr = obj.workflow_jobs
+        else:
+            job_mgr = obj.jobs
+        return [{'id': x.id, 'status': x.status, 'finished': x.finished}
+                for x in job_mgr.all().order_by('-created')[:10]]
+
+    def get_summary_fields(self, obj):
+        d = super(JobTemplateMixin, self).get_summary_fields(obj)
+        if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
+            d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
+        d['recent_jobs'] = self._recent_jobs(obj)
+        return d
+
+
+class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobOptionsSerializer):
     show_capabilities = ['start', 'schedule', 'copy', 'edit', 'delete']
 
     status = serializers.ChoiceField(choices=JobTemplate.JOB_TEMPLATE_STATUS_CHOICES, read_only=True, required=False)
@@ -1896,16 +1917,6 @@ class JobTemplateSerializer(UnifiedJobTemplateSerializer, JobOptionsSerializer):
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
-
-    def _recent_jobs(self, obj):
-        return [{'id': x.id, 'status': x.status, 'finished': x.finished} for x in obj.jobs.all().order_by('-created')[:10]]
-
-    def get_summary_fields(self, obj):
-        d = super(JobTemplateSerializer, self).get_summary_fields(obj)
-        if obj.survey_spec is not None and ('name' in obj.survey_spec and 'description' in obj.survey_spec):
-            d['survey'] = dict(title=obj.survey_spec['name'], description=obj.survey_spec['description'])
-        d['recent_jobs'] = self._recent_jobs(obj)
-        return d
 
     def validate(self, attrs):
         survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
@@ -2202,7 +2213,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
         fields = ('can_cancel',)
 
 
-class WorkflowJobTemplateSerializer(LabelsListMixin, UnifiedJobTemplateSerializer):
+class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
     show_capabilities = ['start', 'edit', 'copy', 'delete']
 
     class Meta:
