@@ -216,8 +216,7 @@ export default ['$log', 'moment', function($log, moment){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getLineClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))}</div>
-    ${this.getStartTimeBadge(event, lineArr[1] )}
+    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))} ${this.getStartTimeBadge(event, lineArr[1] )}</div>
 </div>`;
                 });
 
