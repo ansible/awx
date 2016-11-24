@@ -105,8 +105,9 @@
  	margin-bottom: 8px;
 }
 .HostEvent .modal-body{
-    height: 480px;
+    max-height: 500px;
 	padding: 20px;
+    overflow-y: auto;
 }
 .HostEvent-nav{
 	padding-top: 12px;
@@ -149,4 +150,49 @@
 }
 .HostEvent-button:disabled {
 	pointer-events: all!important;
+}
+
+.HostEvent-stdout{
+    height:200px;
+    width:100%
+}
+
+.HostEvent-stdoutContainer {
+    height:200px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-style: normal;
+}
+
+.HostEvent-numberColumnPreload {
+    background-color: @default-no-items-bord;
+    height: 198px;
+    border-right: 1px solid #ccc;
+    width: 30px;
+    position: fixed;
+}
+
+.HostEvent-numberColumn {
+    background-color: @default-no-items-bord;
+    border-right: 1px solid #ccc;
+    border-bottom-left-radius: 5px;
+    color: #999;
+    font-family: monospace;
+    position: fixed;
+    padding: 4px 3px 0 5px;
+    text-align: right;
+    white-space: nowrap;
+    width: 30px;
+}
+
+.HostEvent-numberColumn--second{
+    padding-top:0px;
+}
+
+.HostEvent-stdoutColumn{
+    margin-left: 46px;
+    padding-top: 4px;
+    font-family: monospace;
 }

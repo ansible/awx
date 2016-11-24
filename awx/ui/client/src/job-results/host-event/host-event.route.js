@@ -44,14 +44,14 @@ var hostEventStdout = {
     name: 'jobDetail.host-event.stdout',
     url: '/stdout',
     controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-codemirror')
+        templateUrl: templateUrl('job-results/host-event/host-event-stdout')
 };
 
 var hostEventStderr = {
     name: 'jobDetail.host-event.stderr',
     url: '/stderr',
     controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-codemirror')
+    templateUrl: templateUrl('job-results/host-event/host-event-stdout')
 };
 
 

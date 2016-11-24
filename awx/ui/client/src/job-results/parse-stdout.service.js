@@ -69,7 +69,7 @@ export default ['$log', 'moment', function($log, moment){
                 return line;
             }
             else{
-                return `<a ui-sref="jobDetail.host-event.json({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top">${line}</a>`;
+                return `<a ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top">${line}</a>`;
             }
 
         },

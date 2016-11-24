@@ -45,13 +45,14 @@
         };
 
         var init = function(){
+            hostEvent.event_name = hostEvent.event;
             $scope.event = _.cloneDeep(hostEvent);
             $scope.hostResults = hostResults;
             $scope.json = JobDetailService.processJson(hostEvent);
 
             // grab standard out & standard error if present, and remove from the results displayed in the details panel
             if (hostEvent.stdout){
-                $scope.stdout = parseStdoutService.prettify(hostEvent.stdout, "unstyled");
+                $scope.stdout = parseStdoutService.prettify(hostEvent.stdout);
                 delete $scope.event.stdout;
             }
             if (hostEvent.stderr){
