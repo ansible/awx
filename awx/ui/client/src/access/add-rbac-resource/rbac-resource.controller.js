@@ -18,16 +18,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
     // the object permissions are being added to
     scope.object = scope.resourceData.data;
     // array for all possible roles for the object
-    scope.roles = Object
-        .keys(scope.object.summary_fields.object_roles)
-        .map(function(key) {
-            return {
-                value: scope.object.summary_fields
-                    .object_roles[key].id,
-                label: scope.object.summary_fields
-                    .object_roles[key].name
-            };
-        });
+    scope.roles = scope.object.summary_fields.object_roles;
 
     // TODO: get working with api
     // array w roles and descriptions for key
@@ -43,6 +34,11 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
         });
 
     scope.showKeyPane = false;
+
+    scope.removeObject = function(obj){
+        _.remove(scope.allSelected, {id: obj.id});
+        obj.isSelected = false;
+    };
 
     scope.toggleKeyPane = function() {
         scope.showKeyPane = !scope.showKeyPane;

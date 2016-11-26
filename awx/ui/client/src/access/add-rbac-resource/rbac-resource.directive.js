@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
-import addPermissionsController from './addPermissions.controller';
+import controller from './rbac-resource.controller';
 
 /* jshint unused: vars */
 export default ['templateUrl', '$state',
@@ -16,8 +16,8 @@ export default ['templateUrl', '$state',
                 teamsDataset: '=',
                 resourceData: '=',
             },
-            controller: addPermissionsController,
-            templateUrl: templateUrl('access/addPermissions/addPermissions'),
+            controller: controller,
+            templateUrl: templateUrl('access/add-rbac-resource/rbac-resource'),
             link: function(scope, element, attrs) {
                 scope.toggleFormTabs('users');
                 $('#add-permissions-modal').modal('show');

@@ -1,4 +1,4 @@
-@import "../../shared/branding/colors.default.less";
+@import "../shared/branding/colors.default.less";
 
 /** @define AddPermissions */
 
@@ -168,13 +168,14 @@
 .AddPermissions-keyToggle {
     margin-left: auto;
     text-transform: uppercase;
-    padding: 3px 9px;
-    font-size: 12px;
     background-color: @default-bg;
     border-radius: 5px;
     color: @default-interface-txt;
     border: 1px solid @d7grey;
     cursor: pointer;
+    width: 70px;
+    height: 34px;
+    line-height: 20px;
 }
 
 .AddPermissions-keyToggle:hover {
@@ -185,6 +186,9 @@
     background-color: @default-link;
     border-color: @default-link;
     color: @default-bg;
+    &:hover{
+     background-color: @default-link-hov;
+    }
 }
 
 .AddPermissions-keyPane {

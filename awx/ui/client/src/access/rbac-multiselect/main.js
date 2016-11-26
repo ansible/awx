@@ -4,12 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-import addPermissionsListDirective from './addPermissionsList.directive';
+import rbacMultiselectList from './rbac-multiselect-list.directive';
+import rbacMultiselectRole from './rbac-multiselect-role.directive';
 import teamsList from './permissionsTeams.list';
 import usersList from './permissionsUsers.list';
 
 export default
-    angular.module('addPermissionsListModule', [])
-        .directive('addPermissionsList', addPermissionsListDirective)
+    angular.module('rbacMultiselectModule', [])
+        .directive('rbacMultiselectList', rbacMultiselectList)
+        .directive('rbacMultiselectRole', rbacMultiselectRole)
         .factory('addPermissionsTeamsList', teamsList)
         .factory('addPermissionsUsersList', usersList);

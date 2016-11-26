@@ -5,7 +5,7 @@ export default
             return {
                 restrict: 'E',
                 scope: true,
-                templateUrl: templateUrl('access/roleList'),
+                templateUrl: templateUrl('access/rbac-role-list/roleList'),
                 link: function(scope, element, attrs) {
                     // given a list of roles (things like "project
                     // auditor") which are pulled from two different
