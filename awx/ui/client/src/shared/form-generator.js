@@ -1760,6 +1760,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (this.form.horizontal) {
                             html += "</div>\n";
                         }
+                        html += '</div>';
 
                     }
                 }

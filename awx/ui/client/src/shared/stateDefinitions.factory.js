@@ -230,7 +230,74 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          */
         generateFormListDefinitions: function(form, formStateDefinition) {
 
-            function buildPermissionDirective() {
+            function buildRbacUserTeamDirective(){
+                let states = [];
+
+                states.push($stateExtender.buildDefinition({
+                    name: `${formStateDefinition.name}.permissions.add`,
+                    squashSearchUrl: true,
+                    url: '/add-permissions',
+                    params: {
+                        project_search: {
+                            value: {order_by: 'name', page_size: '5'},
+                            dynamic: true
+                        },
+                        template_search: {
+                            value: {order_by: 'name', page_size: '5', type: 'workflow_job_template,job_template'}, // @issue and also system_job_template? 
+                            dynamic: true
+                        },
+                        inventory_search: {
+                            value: {order_by: 'name', page_size: '5'},
+                            dynamic: true
+                        },
+                        credential_search: {
+                            value: {order_by: 'name', page_size: '5'},
+                            dynamic: true
+                        }
+                    },
+                    views: {
+                        [`modal@${formStateDefinition.name}`]: {
+                            template: `<add-rbac-user-team resolve="$resolve"></add-rbac-user-team>`
+                        }
+                    },
+                    resolve: {
+                        templatesDataset: ['TemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        projectsDataset: ['ProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        inventoriesDataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#add-permissions-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                }));
+                return states;
+            }
+
+            function buildRbacResourceDirective() {
                 let states = [];
 
                 states.push($stateExtender.buildDefinition({
@@ -249,7 +316,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-permissions users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData"></add-permissions>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -282,7 +349,13 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 let states = [];
                 states.push(buildListDefinition(field));
                 if (field.iterator === 'permission' && field.actions && field.actions.add) {
-                    states.push(buildPermissionDirective());
+                    if (form.name === 'user' || form.name === 'team'){
+                        states.push(buildRbacUserTeamDirective());
+
+                    }
+                    else {
+                        states.push(buildRbacResourceDirective());
+                    }
                     states = _.flatten(states);
                 }
                 return states;
