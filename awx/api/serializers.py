@@ -598,6 +598,8 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = reverse('api:job_stdout', args=(obj.pk,))
         elif isinstance(obj, AdHocCommand):
             res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
+        if obj.source_workflow_job:
+            res['source_workflow_job'] = reverse('api:workflow_job_detail', args=(obj.source_workflow_job.pk,))
         return res
 
     def to_representation(self, obj):
