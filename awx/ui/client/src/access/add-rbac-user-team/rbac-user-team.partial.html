@@ -1,0 +1,175 @@
+<div id="add-permissions-modal" class="AddPermissions modal fade">
+    <div class="AddPermissions-backDrop is-loggedOut"></div>
+    <div class="AddPermissions-dialog">
+        <div class="AddPermissions-content is-loggedOut">
+            <!-- begin header -->
+            <div class="AddPermissions-header">
+                <div class="List-header">
+                    <div class="List-title">
+                        <div class="List-titleText ng-binding">
+                            {{ owner.name }}
+                            <div class="List-titleLockup"></div>
+                            Add Permissions
+                        </div>
+                    </div>
+                    <div class="Form-exitHolder">
+                        <button class="Form-exit" ng-click="closeModal()">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- end header -->
+            <div class="AddPermissions-body">
+                <!-- begin section 1 -->
+                <div class="AddPermissions-directions">
+                    <span class="AddPermissions-directionNumber">
+                        1
+                    </span>
+                    <div>
+                        Please select resources from the lists below.
+                    </div>
+                </div>
+
+                <div class="Form-tabHolder">
+                    <div class="Form-tab"
+                        ng-click="selectTab('templates')"
+                        ng-class="{'is-selected': tab.templates }">
+                        Templates
+                    </div>
+                    <div class="Form-tab"
+                        ng-click="selectTab('projects')"
+                        ng-class="{'is-selected': tab.projects}"
+                    >
+                        Projects
+                    </div>
+                    <div class="Form-tab"
+                        ng-click="selectTab('inventories')"
+                        ng-class="{'is-selected': tab.inventories}"
+                    >
+                        Inventories
+                    </div>
+                    <div class="Form-tab"
+                        ng-click="selectTab('credentials')"
+                        ng-class="{'is-selected': tab.credentials}"
+                    >
+                        Credentials
+                    </div>
+                </div>
+
+                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="tab.templates">
+                    <rbac-multiselect-list view="Templates" all-selected="allSelected" dataset="resolve.templatesDataset"></rbac-multiselect-list>
+                </div>
+                <div id="AddPermissions-projects" class="AddPermissions-list" ng-show="tab.projects">
+                    <rbac-multiselect-list view="Projects" all-selected="allSelected" dataset="resolve.projectsDataset"></rbac-multiselect-list>
+                </div>
+                <div id="AddPermissions-inventories" class="AddPermissions-list" ng-show="tab.inventories">
+                    <rbac-multiselect-list view="Inventories" all-selected="allSelected" dataset="resolve.inventoriesDataset"></rbac-multiselect-list>
+                </div>
+                <div id="AddPermissions-credentials" class="AddPermissions-list" ng-show="tab.credentials">
+                    <rbac-multiselect-list view="Credentials" all-selected="allSelected" dataset="resolve.credentialsDataset"></rbac-multiselect-list>
+                </div> 
+                <!-- end section 1 -->
+   
+                <!-- begin section 2 -->
+                <div ng-show="showSection2Container()">            
+                    <div class="AddPermissions-separator"></div>
+                    <div class="AddPermissions-directions">
+                        <span class="AddPermissions-directionNumber">
+                            2
+                        </span>
+                        Please assign roles to the selected resources
+                        <div class="AddPermissions-keyToggle btn"
+                            ng-class="{'is-active': showKeyPane}"
+                            ng-click="toggleKeyPane()">
+                            Key
+                        </div>
+                    </div>
+                    <div class="Form-tabHolder">
+                        <div class="Form-tab"
+                            ng-click="selectTab('templates')"
+                            ng-class="{'is-selected': tab.templates }"
+                            ng-show="showSection2Tab('templates')">
+                            Templates
+                        </div>
+                        <div class="Form-tab"
+                            ng-click="selectTab('projects')"
+                            ng-class="{'is-selected': tab.projects}"
+                            ng-show="showSection2Tab('projects')"
+                        >
+                            Projects
+                        </div>
+                        <div class="Form-tab"
+                            ng-click="selectTab('inventories')"
+                            ng-class="{'is-selected': tab.inventories}"
+                            ng-show="showSection2Tab('inventories')"
+                        >
+                            Inventories
+                        </div>
+                        <div class="Form-tab"
+                            ng-click="selectTab('credentials')"
+                            ng-class="{'is-selected': tab.credentials}"
+                            ng-show="showSection2Tab('credentials')"
+                        >
+                            Credentials
+                        </div>
+                    </div>
+                    <div class="AddPermissions-keyPane"
+                        ng-show="showKeyPane">
+                        <div class="AddPermissions-keyRow"
+                            ng-repeat="key in keys[currentTab()]">
+                            <div class="AddPermissions-keyName">
+                                {{ key.name }}
+                            </div>
+                            <div class="AddPermissions-keyDescription">
+                                {{ key.description || "No description provided" }}
+                            </div>
+                        </div>
+                    </div>
+                    <form name="multiselectRoles" novalidate>
+                        <!-- type of selected resources -->
+                        <div ng-repeat="(type, list) in selected">
+                            <!-- controllerAs: 'rbac' -->
+                            <div class="AddPermissions-roleRow"
+                                ng-repeat="resource in list"
+                                ng-show="tab[type]">
+                                <div class="AddPermissions-roleName">
+                                    <span class="AddPermissions-roleNameVal">
+                                        {{ resource.name }}
+                                    </span>
+                                    <span class="AddPermissions-roleType">
+                                        {{ resource.type }}
+                                    </span>
+                                </div>
+                                <rbac-multiselect-role class="AddPermissions-roleSelect" roles="resource.summary_fields.object_roles" model="resource.roles">
+                                </rbac-multiselect-role>
+                                <button class="AddPermissions-roleRemove"
+                                    ng-click="removeSelection(resource, type)">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- end section 2 -->
+            </div>
+            <!-- begin footer -->
+            <div class="AddPermissions-footer">
+                <div class="buttons Form-buttons AddPermissions-buttons">
+                    <button type="button"
+                        class="btn btn-sm Form-cancelButton"
+                        ng-click="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="button"
+                        class="btn btn-sm Form-saveButton"
+                        ng-click="saveForm()"
+                        ng-disabled="multiselectRoles.$invalid || !showSection2Container()">
+                        Save
+                    </button>
+                </div>
+            </div>
+            <!-- end footer -->
+        </div>
+   </div>
+</div>
