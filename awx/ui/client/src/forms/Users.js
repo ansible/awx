@@ -173,14 +173,13 @@ export default
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
                     search: {
                         page_size: '10',
-                        // @todo ask about name field / serializer on this endpoint
                         order_by: 'id'
                     },
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: i18n._('Granted permissions'),
+                    title: i18n._('Permissions'),
                     iterator: 'permission',
                     open: false,
                     index: false,
@@ -203,12 +202,16 @@ export default
                             noSort: true
                         },
                     },
-                    // @issue https://github.com/ansible/ansible-tower/issues/3487
-                    // actions: {
-                    //     add: {
-
-                    //     }
-                    // }
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Grant Permission'),
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            ngShow: '(puser_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        }
+                    },
                     fieldActions: {
                         "delete": {
                             label: i18n._('Remove'),

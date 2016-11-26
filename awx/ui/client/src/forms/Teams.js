@@ -115,7 +115,7 @@ export default
                         order_by: 'id'
                     },
                     type: 'collection',
-                    title: i18n._('Granted Permissions'),
+                    title: i18n._('Permissions'),
                     iterator: 'role',
                     open: false,
                     index: false,
