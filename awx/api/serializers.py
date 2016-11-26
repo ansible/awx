@@ -2234,6 +2234,7 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             notification_templates_success = reverse('api:workflow_job_template_notification_templates_success_list', args=(obj.pk,)),
             notification_templates_error = reverse('api:workflow_job_template_notification_templates_error_list', args=(obj.pk,)),
             access_list = reverse('api:workflow_job_template_access_list', args=(obj.pk,)),
+            object_roles = reverse('api:workflow_job_template_object_roles_list', args=(obj.pk,)),
             survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
         return res
