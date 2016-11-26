@@ -767,6 +767,16 @@ class OrganizationProjectsList(SubListCreateAttachDetachAPIView):
     parent_key = 'organization'
 
 
+class OrganizationWorkflowJobTemplatesList(SubListCreateAttachDetachAPIView):
+
+    model = WorkflowJobTemplate
+    serializer_class = WorkflowJobTemplateListSerializer
+    parent_model = Organization
+    relationship = 'workflows'
+    parent_key = 'organization'
+    new_in_310 = True
+
+
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
 
     model = Team

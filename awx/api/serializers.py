@@ -841,6 +841,7 @@ class OrganizationSerializer(BaseSerializer):
         res.update(dict(
             projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
             inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
+            workflow_job_templates = reverse('api:organization_workflow_job_templates_list', args=(obj.pk,)),
             users       = reverse('api:organization_users_list',          args=(obj.pk,)),
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
@@ -2237,6 +2238,8 @@ class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJo
             object_roles = reverse('api:workflow_job_template_object_roles_list', args=(obj.pk,)),
             survey_spec = reverse('api:workflow_job_template_survey_spec', args=(obj.pk,)),
         ))
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
 
     def validate_extra_vars(self, value):
