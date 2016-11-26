@@ -771,6 +771,7 @@ class OrganizationWorkflowJobTemplatesList(SubListCreateAttachDetachAPIView):
     parent_model = Organization
     relationship = 'workflows'
     parent_key = 'organization'
+    new_in_310 = True
 
 
 class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
