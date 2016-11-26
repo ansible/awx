@@ -116,6 +116,11 @@ class TaskManager():
             for spawn_node in spawn_nodes:
                 kv = spawn_node.get_job_kwargs()
                 job = spawn_node.unified_job_template.create_unified_job(**kv)
+                # source_workflow_job is a job-specific field rather than a field copied from job
+                # template, therefore does not fit into the copy routine and should be put outside
+                # of create_unified_job.
+                job.source_workflow_job = workflow_job
+                job.save()
                 spawn_node.job = job
                 spawn_node.save()
                 can_start = job.signal_start(**kv)

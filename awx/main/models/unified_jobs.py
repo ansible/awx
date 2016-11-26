@@ -528,7 +528,14 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         related_name='%(class)s_labels'
     )
-
+    source_workflow_job = models.ForeignKey(
+        'WorkflowJob',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='spawned_jobs',
+        on_delete=models.SET_NULL,
+    )
 
     def get_absolute_url(self):
         real_instance = self.get_real_instance()
