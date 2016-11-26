@@ -271,6 +271,7 @@ workflow_job_template_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/notification_templates_error/$',           'workflow_job_template_notification_templates_error_list'),
     url(r'^(?P<pk>[0-9]+)/notification_templates_success/$',         'workflow_job_template_notification_templates_success_list'),
     url(r'^(?P<pk>[0-9]+)/access_list/$',               'workflow_job_template_access_list'),
+    url(r'^(?P<pk>[0-9]+)/object_roles/$',              'workflow_job_template_object_roles_list'),
     url(r'^(?P<pk>[0-9]+)/labels/$',                    'workflow_job_template_label_list'),
 )
 

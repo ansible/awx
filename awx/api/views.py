@@ -3076,9 +3076,22 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDet
 
 class WorkflowJobTemplateAccessList(ResourceAccessList):
 
-        model = User # needs to be User for AccessLists's
-        resource_model = WorkflowJobTemplate
-        new_in_310 = True
+    model = User # needs to be User for AccessLists's
+    resource_model = WorkflowJobTemplate
+    new_in_310 = True
+
+
+class WorkflowJobTemplateObjectRolesList(SubListAPIView):
+
+    model = Role
+    serializer_class = RoleSerializer
+    parent_model = WorkflowJobTemplate
+    new_in_310 = True
+
+    def get_queryset(self):
+        po = self.get_parent_object()
+        content_type = ContentType.objects.get_for_model(self.parent_model)
+        return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
 class WorkflowJobTemplateActivityStreamList(SubListAPIView):
