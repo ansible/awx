@@ -13,7 +13,7 @@
 
 
 export function JobsListController($state, $rootScope, $log, $scope, $compile, $stateParams,
-    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset) {
+    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset, GetChoices) {
 
     ClearScope();
 
@@ -30,6 +30,38 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
         $scope.showJobType = true;
 
         _.forEach($scope[list.name], buildTooltips);
+        if ($scope.removeChoicesReady) {
+            $scope.removeChoicesReady();
+        }
+        $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
+            $scope[list.name].forEach(function(item, item_idx) {
+                var fld, field,
+                    itm = $scope[list.name][item_idx];
+
+                //if (item.type === 'inventory_update') {
+                //    itm.name = itm.name.replace(/^.*?:/,'').replace(/^: /,'');
+                //}
+
+                // Set the item type label
+                if (list.fields.type) {
+                    $scope.type_choices.every(function(choice) {
+                        if (choice.value === item.type) {
+                            itm.type_label = choice.label;
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+            });
+        });
+
+        GetChoices({
+            scope: $scope,
+            url: GetBasePath('unified_jobs'),
+            field: 'type',
+            variable: 'type_choices',
+            callback: 'choicesReady'
+        });
     }
 
     function buildTooltips(job) {
@@ -101,5 +133,5 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
 }
 
 JobsListController.$inject = ['$state', '$rootScope', '$log', '$scope', '$compile', '$stateParams',
-    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset'
+    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset', 'GetChoices'
 ];
