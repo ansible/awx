@@ -40,7 +40,7 @@ which users can administer the organization.
   If True, all users using social auth will automatically be added as admins
   of the organization.
   If False, no social auth users will be automatically added as admins of
-  the organiation.
+  the organization.
   If a string or list of strings, specifies the usernames and emails for
   users who will be added to the organization. Strings in the format
   "/<pattern>/<flags>" will be interpreted as JavaScript regular expressions and
@@ -286,7 +286,7 @@ register(
     field_class=fields.LDAPUserAttrMapField,
     default={},
     label=_('LDAP User Attribute Map'),
-    help_text=_('Mapping of LDAP user schema to Tower API user atrributes (key is '
+    help_text=_('Mapping of LDAP user schema to Tower API user attributes (key is '
                 'user attribute name, value is LDAP attribute name).  The default '
                 'setting is valid for ActiveDirectory but users with other LDAP '
                 'configurations may need to change the values (not the keys) of '
@@ -401,7 +401,7 @@ register(
                 '   If True, all users in LDAP will automatically be added as '
                 'admins of the organization.\n'
                 '   If False, no LDAP users will be automatically added as admins '
-                'of the organiation.\n'
+                'of the organization.\n'
                 '   If a string or list of strings, specifies the group DN(s) '
                 'that will be added of the organization if they match any of the '
                 'specified groups.\n'
