@@ -38,10 +38,6 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
                 var fld, field,
                     itm = $scope[list.name][item_idx];
 
-                //if (item.type === 'inventory_update') {
-                //    itm.name = itm.name.replace(/^.*?:/,'').replace(/^: /,'');
-                //}
-
                 // Set the item type label
                 if (list.fields.type) {
                     $scope.type_choices.every(function(choice) {
