@@ -7,12 +7,12 @@
 export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Alert',
     'TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
     'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'TemplatesService',
-    'QuerySet',
+    'QuerySet', 'GetChoices',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
         TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs
+        qs, GetChoices
     ) {
         ClearScope();
 
@@ -38,6 +38,34 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
             $rootScope.flashMessage = null;
+
+            if ($scope.removeChoicesReady) {
+                $scope.removeChoicesReady();
+            }
+            $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
+                $scope[list.name].forEach(function(item, item_idx) {
+                    var itm = $scope[list.name][item_idx];
+
+                    // Set the item type label
+                    if (list.fields.type) {
+                        $scope.type_choices.every(function(choice) {
+                            if (choice.value === item.type) {
+                                itm.type_label = choice.label;
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
+                });
+            });
+
+            GetChoices({
+                scope: $scope,
+                url: GetBasePath('unified_job_templates'),
+                field: 'type',
+                variable: 'type_choices',
+                callback: 'choicesReady'
+            });
         }
 
         $scope.$on(`ws-jobs`, function () {
