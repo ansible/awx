@@ -30,8 +30,7 @@ export default
             },
             type: {
                 label: i18n._('Type'),
-                searchType: 'select',
-                searchOptions: [], // will be set by Options call to job templates resource
+                ngBind: 'template.type_label',
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 hidden-xs'
             },
             description: {
