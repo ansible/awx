@@ -961,7 +961,13 @@ register(
 register(
     'SOCIAL_AUTH_SAML_ORG_INFO',
     field_class=fields.SAMLOrgInfoField,
-    default={},
+    default=collections.OrderedDict([
+        ('en-US', collections.OrderedDict([
+            ('name', 'example'),
+            ('displayname', 'Example'),
+            ('url', 'http://www.example.com'),
+        ])),
+    ]),
     label=_('SAML Service Provider Organization Info'),
     help_text=_('Configure this setting with information about your app.'),
     category=_('SAML'),
@@ -980,7 +986,10 @@ register(
     'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT',
     field_class=fields.SAMLContactField,
     allow_blank=True,
-    default={},
+    default=collections.OrderedDict([
+        ('givenName', 'Technical Contact'),
+        ('emailAddress', 'techsup@example.com'),
+    ]),
     label=_('SAML Service Provider Technical Contact'),
     help_text=_('Configure this setting with your contact information.'),
     category=_('SAML'),
@@ -996,7 +1005,10 @@ register(
     'SOCIAL_AUTH_SAML_SUPPORT_CONTACT',
     field_class=fields.SAMLContactField,
     allow_blank=True,
-    default={},
+    default=collections.OrderedDict([
+        ('givenName', 'Support Contact'),
+        ('emailAddress', 'support@example.com'),
+    ]),
     label=_('SAML Service Provider Support Contact'),
     help_text=_('Configure this setting with your contact information.'),
     category=_('SAML'),
