@@ -73,6 +73,7 @@ oslo.utils==3.18.0        # via osc-lib, oslo.serialization, python-cinderclient
 pbr==1.10.0               # via cliff, debtcollector, keystoneauth1, mock, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient, requestsexceptions, shade, stevedore
 positional==1.1.1         # via keystoneauth1, python-keystoneclient
 PrettyTable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-heatclient, python-ironicclient, python-magnumclient, python-novaclient, python-troveclient
+psutil==5.0.0
 pyasn1==0.1.9             # via cryptography
 pycparser==2.17           # via cffi
 pyparsing==2.1.10         # via cliff, cmd2, oslo.utils
