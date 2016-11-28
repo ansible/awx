@@ -2536,7 +2536,7 @@ class AdHocCommandEventSerializer(BaseSerializer):
         return res
 
     def to_representation(self, obj):
-        ret = super(JobEventSerializer, self).to_representation(obj)
+        ret = super(AdHocCommandEventSerializer, self).to_representation(obj)
         # Show full stdout for event detail view, truncate only for list view.
         if hasattr(self.context.get('view', None), 'retrieve'):
             return ret
