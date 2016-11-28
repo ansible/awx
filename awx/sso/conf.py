@@ -170,15 +170,14 @@ register(
 
 register(
     'AUTH_LDAP_SERVER_URI',
-    field_class=fields.URLField,
-    schemes=('ldap', 'ldaps'),
+    field_class=fields.LDAPServerURIField,
     allow_blank=True,
     default='',
     label=_('LDAP Server URI'),
     help_text=_('URI to connect to LDAP server, such as "ldap://ldap.example.com:389" '
-                '(non-SSL) or "ldaps://ldap.example.com:636" (SSL).  LDAP authentication '
-                'is disabled if this parameter is empty or your license does not '
-                'enable LDAP support.'),
+                '(non-SSL) or "ldaps://ldap.example.com:636" (SSL). Multiple LDAP '
+                'servers may be specified by separating with spaces or commas. LDAP '
+                'authentication is disabled if this parameter is empty.'),
     category=_('LDAP'),
     category_slug='ldap',
     placeholder='ldaps://ldap.example.com:636',

@@ -105,6 +105,18 @@ class AuthenticationBackendsField(fields.StringListField):
         return backends
 
 
+class LDAPServerURIField(fields.URLField):
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('schemes', ('ldap', 'ldaps'))
+        super(LDAPServerURIField, self).__init__(**kwargs)
+
+    def run_validators(self, value):
+        for url in filter(None, re.split(r'[, ]', (value or ''))):
+            super(LDAPServerURIField, self).run_validators(url)
+        return value
+
+
 class LDAPConnectionOptionsField(fields.DictField):
 
     default_error_messages = {
