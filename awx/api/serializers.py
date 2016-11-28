@@ -24,6 +24,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
+from django.utils.timezone import now
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -620,8 +621,13 @@ class UnifiedJobSerializer(BaseSerializer):
             ret = serializer.to_representation(obj)
         else:
             ret = super(UnifiedJobSerializer, self).to_representation(obj)
+
         if 'elapsed' in ret:
+            if obj and obj.pk and obj.started and not obj.finished:
+                td = now() - obj.started
+                ret['elapsed'] = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) / (10 ** 6 * 1.0)
             ret['elapsed'] = float(ret['elapsed'])
+
         return ret
 
     def get_result_stdout(self, obj):
