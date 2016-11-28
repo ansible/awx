@@ -5,7 +5,8 @@ export default
             var scope = params.scope,
                 id = params.id,
                 form = SurveyQuestionForm,
-                sce = params.sce;
+                sce = params.sce,
+                templateType = params.templateType;
             scope.sce = sce;
             scope.survey_questions = [];
             scope.answer_types=[
@@ -36,7 +37,8 @@ export default
                 // Goes out and fetches the existing survey and populates the preview
                 EditSurvey({
                     scope: scope,
-                    id: id
+                    id: id,
+                    templateType: templateType
                 });
             };
 
@@ -58,79 +60,63 @@ export default
             // goes out and cleans up the survey_questions on scope before destroying
             // the modal.
             scope.closeSurvey = function(id) {
-                if(scope.mode === 'add') {
-                    // Clear out any "unsaved" survey questions
-                    for (var i = scope.survey_questions.length - 1; i >= 0; i--) {
-                        if (scope.survey_questions[i].new_question) {
-                            scope.survey_questions.splice(i, 1);
-                        }
-                    }
-                }
-                else {
-                    // Clear out the whole array, this data gets pulled in each time the modal is opened
-                    scope.survey_questions = [];
-                }
+                // Clear out the whole array, this data gets pulled in each time the modal is opened
+                scope.survey_questions = [];
+
                 $('#' + id).dialog('destroy');
             };
 
-            // Gets called when a user actually hits the save button.  Functionality differs
-            // based on the mode.  scope.mode="add" cleans up scope.survey_questions and
-            // destroys the modal, holding the survey questions in memory.  scope.mode="edit"
-            // actually fires off the necessary server call(s) to add/update a survey.
             scope.saveSurvey = function() {
                 Wait('start');
-                if(scope.mode ==="add"){
-                    // Loop across the survey questions and remove any new_question flags
-                    angular.forEach(scope.survey_questions, function(question) {
-                        delete question.new_question;
-                    });
 
-                    $('#survey-modal-dialog').dialog('destroy');
-                    scope.survey_name = "";
-                    scope.survey_description = "";
-                    scope.$emit('SurveySaved');
-                }
-                else {
+                scope.survey_name = "";
+                scope.survey_description = "";
 
-                    scope.survey_name = "";
-                    scope.survey_description = "";
-
-                    var updateSurveyQuestions = function() {
+                var updateSurveyQuestions = function() {
+                    if(templateType === 'job_template') {
                         Rest.setUrl(GetBasePath('job_templates') + id + '/survey_spec/');
-                        return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
-                        .success(function () {
+                    }
+                    else if(templateType === 'workflow_job_template') {
+                        Rest.setUrl(GetBasePath('workflow_job_templates') + id + '/survey_spec/');
+                    }
+                    return Rest.post({name: scope.survey_name, description: scope.survey_description, spec: scope.survey_questions })
+                    .success(function () {
 
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Failed to add new survey. POST returned status: ' + status });
-                        });
-                    };
-
-                    var updateSurveyEnabled = function() {
-                        Rest.setUrl(GetBasePath('job_templates') + id+ '/');
-                        return Rest.patch({"survey_enabled": scope.survey_enabled})
-                        .success(function () {
-
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, form, {
-                                hdr: 'Error!',
-                                msg: 'Failed to save survey_enabled: GET status: ' + status
-                            });
-                        });
-                    };
-
-                    updateSurveyQuestions()
-                    .then(function() {
-                        return updateSurveyEnabled();
                     })
-                    .then(function() {
-                        scope.closeSurvey('survey-modal-dialog');
-                        scope.$emit('SurveySaved');
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                            msg: 'Failed to add new survey. POST returned status: ' + status });
                     });
+                };
 
-                }
+                var updateSurveyEnabled = function() {
+                    if(templateType === 'job_template') {
+                        Rest.setUrl(GetBasePath('job_templates') + id+ '/');
+                    }
+                    else if(templateType === 'workflow_job_template') {
+                        Rest.setUrl(GetBasePath('workflow_job_templates') + id+ '/');
+                    }
+                    return Rest.patch({"survey_enabled": scope.survey_enabled})
+                    .success(function () {
+
+                    })
+                    .error(function (data, status) {
+                        ProcessErrors(scope, data, status, form, {
+                            hdr: 'Error!',
+                            msg: 'Failed to save survey_enabled: GET status: ' + status
+                        });
+                    });
+                };
+
+                updateSurveyQuestions()
+                .then(function() {
+                    return updateSurveyEnabled();
+                })
+                .then(function() {
+                    scope.closeSurvey('survey-modal-dialog');
+                    scope.$emit('SurveySaved');
+                });
+
             };
 
             // Gets called when the user clicks the on/off toggle beside the survey modal title.
@@ -149,7 +135,7 @@ export default
                 // modal we need to make sure that scope.mode is still 'edit' after the Add Question form is injected.
                 // To avoid having to do this we'd need to track the job template mode in a variable other than scope.mode.
                 var tmpMode = scope.mode;
-                GenerateForm.inject(form, { id:'survey_maker_question_form', mode: 'add' , scope: scope, related: false});
+                GenerateForm.inject(form, { id:'survey_maker_question_form', mode: 'add' , scope: scope, related: false, noPanel: true});
                 scope.mode = tmpMode;
                 scope.clearQuestion();
             };

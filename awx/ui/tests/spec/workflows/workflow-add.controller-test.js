@@ -20,6 +20,7 @@ describe('Controller: WorkflowAdd', () => {
         ToJSON;
 
     beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('RestServices'));
     beforeEach(angular.mock.module('templates', ($provide) => {
 
         state = jasmine.createSpyObj('state', [
@@ -78,6 +79,10 @@ describe('Controller: WorkflowAdd', () => {
         createWorkflowJobTemplateDeferred = q.defer();
         ParseTypeChange = _ParseTypeChange_;
         ToJSON = _ToJSON_;
+
+        httpBackend
+            .whenGET('/api/')
+            .respond(200, '');
 
         TemplatesService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);
         TemplatesService.createWorkflowJobTemplate = jasmine.createSpy('createWorkflowJobTemplate').and.returnValue(createWorkflowJobTemplateDeferred.promise);

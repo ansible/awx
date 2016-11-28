@@ -26,6 +26,7 @@ export default
             activeEditState: 'templates.editWorkflowJobTemplate',
             tabs: true,
             detailsClick: "$state.go('templates.editWorkflowJobTemplate')",
+            include: ['/static/partials/survey-maker-modal.html'],
 
             fields: {
                 name: {
@@ -154,11 +155,18 @@ export default
             },
 
             relatedButtons: {
+                view_survey: {
+                    ngClick: 'editSurvey()',
+                    awFeature: 'surveys',
+                    ngShow: '($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\')) && survey_exists && !(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
+                    label: i18n._('View Survey'),
+                    class: 'Form-primaryButton'
+                },
                 add_survey: {
                     ngClick: 'addSurvey()',
-                    ngShow: '!survey_exists',
+                    ngShow: '!survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
                     awFeature: 'surveys',
-                    awToolTip: i18n._('Please save before adding a survey'),
+                    awToolTip: 'Surveys allow users to be prompted at job launch with a series of questions related to the job. This allows for variables to be defined that affect the playbook run at time of launch.',
                     dataPlacement: 'top',
                     label: i18n._('Add Survey'),
                     class: 'Form-primaryButton'
@@ -166,12 +174,13 @@ export default
                 edit_survey: {
                     ngClick: 'editSurvey()',
                     awFeature: 'surveys',
-                    ngShow: 'survey_exists',
+                    ngShow: 'survey_exists && ($state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\'))',
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 },
                 workflow_editor: {
                     ngClick: 'openWorkflowMaker()',
+                    ngShow: '$state.is(\'templates.addWorkflowJobTemplate\') || $state.is(\'templates.editWorkflowJobTemplate\')',
                     awToolTip: i18n._('Please save before defining the workflow graph'),
                     dataPlacement: 'top',
                     label: i18n._('Workflow Editor'),

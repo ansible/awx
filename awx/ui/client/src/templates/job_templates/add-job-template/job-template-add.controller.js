@@ -8,13 +8,13 @@
      [   '$filter', '$scope', '$rootScope', '$compile', '$location', '$log',
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
-        'Empty', 'ToJSON', 'CallbackHelpInit', 'initSurvey', 'Prompt', 'GetChoices', '$state',
+        'Empty', 'ToJSON', 'CallbackHelpInit', 'Prompt', 'GetChoices', '$state',
          'CreateSelect2', '$q',
          function(
              $filter, $scope, $rootScope, $compile,
              $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
-             Empty, ToJSON, CallbackHelpInit, SurveyControllerInit, Prompt, GetChoices,
+             Empty, ToJSON, CallbackHelpInit, Prompt, GetChoices,
              $state, CreateSelect2, $q
          ) {
 
@@ -54,10 +54,6 @@
                     default_val: false
                 });
                 CallbackHelpInit({ scope: $scope });
-                SurveyControllerInit({
-                    scope: $scope,
-                    parent_scope: $scope
-                });
             }
 
             callback = function() {

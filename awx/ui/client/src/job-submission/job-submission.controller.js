@@ -121,7 +121,8 @@ export default
             var launchJob = function() {
                 LaunchJob({
                     scope: $scope,
-                    url: launch_url
+                    url: launch_url,
+                    submitJobType: $scope.submitJobType
                 });
             };
 
@@ -144,7 +145,12 @@ export default
                     }
                 }
                 else {
-                    launch_url = GetBasePath('jobs') + $scope.submitJobId + '/relaunch/';
+                    if($scope.submitJobType && $scope.submitJobType === 'workflow_job_template') {
+                        launch_url = GetBasePath('workflow_jobs') + $scope.submitJobId + '/relaunch/';
+                    }
+                    else {
+                        launch_url = GetBasePath('jobs') + $scope.submitJobId + '/relaunch/';
+                    }
                 }
 
                 // Get the job or job_template record
@@ -388,7 +394,8 @@ export default
                 if($scope.survey_enabled) {
                     GetSurveyQuestions({
                         scope: $scope,
-                        id: $scope.submitJobId
+                        id: $scope.submitJobId,
+                        submitJobType: $scope.submitJobType
                     });
 
                 }

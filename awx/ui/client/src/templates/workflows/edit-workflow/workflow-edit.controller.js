@@ -33,9 +33,6 @@
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
 
-        // What is this used for?  Permissions?
-        $scope.can_edit = true;
-
         $scope.editRequests = [];
         $scope.associateRequests = [];
         $scope.disassociateRequests = [];
@@ -47,6 +44,13 @@
                 element:'#workflow_job_template_labels',
                 multiple: true,
                 addNew: true
+            });
+
+            SurveyControllerInit({
+                scope: $scope,
+                parent_scope: $scope,
+                id: id,
+                templateType: 'workflow_job_template'
             });
 
             Rest.setUrl('api/v1/labels');
@@ -140,6 +144,7 @@
                 let workflowJobTemplateData = data.data;
                 $scope.workflow_job_template_obj = workflowJobTemplateData;
                 $scope.name = workflowJobTemplateData.name;
+                $scope.can_edit = workflowJobTemplateData.summary_fields.user_capabilities.edit;
                 let fld, i;
                 for (fld in form.fields) {
                     if (fld !== 'variables' && fld !== 'survey' && workflowJobTemplateData[fld] !== null && workflowJobTemplateData[fld] !== undefined) {
@@ -356,12 +361,21 @@
         Wait('start');
 
         try {
-            for (fld in form.fields) {
-                data[fld] = $scope[fld];
-            }
+                for (fld in form.fields) {
+                    data[fld] = $scope[fld];
+                }
 
-            data.extra_vars = ToJSON($scope.parseType,
-                $scope.variables, true);
+                data.extra_vars = ToJSON($scope.parseType,
+                    $scope.variables, true);
+
+                // We only want to set the survey_enabled flag to
+                // true for this job template if a survey exists
+                // and it's been enabled.  By default,
+                // survey_enabled is explicitly set to true but
+                // if no survey is created then we don't want
+                // it enabled.
+                data.survey_enabled = ($scope.survey_enabled &&
+                    $scope.survey_exists) ? $scope.survey_enabled : false;
 
                 // The idea here is that we want to find the new option elements that also have a label that exists in the dom
                 $("#workflow_job_template_labels > option").filter("[data-select2-tag=true]").each(function(optionIndex, option) {
@@ -601,7 +615,6 @@
                                     });
                             });
                         });
-                        //$state.go('templates.editWorkflowJobTemplate', {id: id}, {reload: true});
                     });
                 }
 
@@ -632,6 +645,15 @@
                 callback: 'NotificationRefresh'
             });
         };
+
+        if ($scope.removeSurveySaved) {
+            $scope.removeSurveySaved();
+        }
+        $scope.removeSurveySaved = $scope.$on('SurveySaved', function() {
+            Wait('stop');
+            $scope.survey_exists = true;
+            $scope.invalid_survey = false;
+        });
 
         init();
     }

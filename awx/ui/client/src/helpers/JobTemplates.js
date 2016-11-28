@@ -156,7 +156,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   GetBasePath('job_templates') + id + '/callback/');
                                   master.callback_url = scope.callback_url;
 
-                                  scope.can_edit = data.summary_fields.can_edit;
+                                  scope.can_edit = data.summary_fields.user_capabilities.edit;
 
 
                                   if (scope.project === "" && scope.playbook === "") {

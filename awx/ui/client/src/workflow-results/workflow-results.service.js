@@ -101,7 +101,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
         },
         relaunchJob: function(scope) {
             InitiatePlaybookRun({ scope: scope, id: scope.workflow.id,
-                relaunch: true });
+                relaunch: true, job_type: 'workflow_job_template' });
         }
     };
     return val;

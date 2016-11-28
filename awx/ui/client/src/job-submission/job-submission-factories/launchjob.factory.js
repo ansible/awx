@@ -10,9 +10,17 @@ export default
                 var scope = params.scope,
                 job_launch_data = {},
                 url = params.url,
+                submitJobType = params.submitJobType,
                 vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 extra_vars;
+
+                if(submitJobType === 'job_template') {
+                    vars_url = GetBasePath('job_templates')+scope.job_template_id + '/';
+                }
+                else if(submitJobType === 'workflow_job_template') {
+                    vars_url = GetBasePath('workflow_job_templates')+scope.workflow_job_template_id + '/';
+                }
 
                 //found it easier to assume that there will be extra vars, and then check for a blank object at the end
                 job_launch_data.extra_vars = {};
