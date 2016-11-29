@@ -2379,7 +2379,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if self.instance is None and ('workflow_job_template' not in attrs or
                                       attrs['workflow_job_template'] is None):
             raise serializers.ValidationError({
-                "workflow_job_template": _("Workflow job template is missing during creation")
+                "workflow_job_template": _("Workflow job template is missing during creation.")
             })
         ujt_obj = attrs.get('unified_job_template', None)
         if isinstance(ujt_obj, (WorkflowJobTemplate, SystemJobTemplate)):
