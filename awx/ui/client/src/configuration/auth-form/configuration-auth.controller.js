@@ -92,9 +92,9 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: 'Github', value: 'github'},
-            {label: 'Github Org', value: 'github_org'},
-            {label: 'Github Team', value: 'github_team'},
+            {label: 'GitHub', value: 'github'},
+            {label: 'GitHub Org', value: 'github_org'},
+            {label: 'GitHub Team', value: 'github_team'},
             {label: 'Google OAuth2', value: 'google_oauth'},
             {label: 'LDAP', value: 'ldap'},
             {label: 'RADIUS', value: 'radius'},
