@@ -892,7 +892,9 @@ LOGGING = {
             'message_type': 'logstash',
             'fqdn': True,
             # 'tags': ['tower'],
-            'formatter': 'json'
+            'formatter': 'json',
+            'username': 'awx_logger',
+            'password': 'workflows',
         },
         'mail_admins': {
             'level': 'ERROR',

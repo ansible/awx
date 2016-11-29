@@ -23,6 +23,9 @@ from requests_futures.sessions import FuturesSession
 # Logstash
 from logstash import formatter
 
+# custom
+from requests.auth import HTTPBasicAuth
+
 
 ENABLED_LOGS = ['ansible']
 
@@ -61,19 +64,35 @@ def bg_cb(sess, resp):
 
 # add port for a generic handler
 class HTTPSHandler(logging.Handler):
-    def __init__(self, host, port=80, message_type='logstash', fqdn=False):
+    def __init__(self, host, fqdn=False, **kwargs):
         super(HTTPSHandler, self).__init__()
         self.host_saved = host
-        self.port = port
-        # self.port = port
-        self.message_type = message_type
         self.fqdn = fqdn
+        for fd in ['port', 'message_type', 'username', 'password']:
+            if fd in kwargs:
+                attr_name = fd
+                if fd == 'username':
+                    attr_name = 'user'
+                setattr(self, attr_name, kwargs[fd])
 
     def get_full_message(self, record):
         if record.exc_info:
             return '\n'.join(traceback.format_exception(*record.exc_info))
         else:
             return record.getMessage()
+
+    def add_auth_information(self, kwargs):
+        if self.message_type == 'logstash':
+            if not self.user:
+                # Logstash authentication not enabled
+                return kwargs
+            logstash_auth = HTTPBasicAuth(self.user, self.password)
+            kwargs['auth'] = logstash_auth
+        elif self.message_type == 'splunk':
+            auth_header = "Splunk %s" % self.token
+            headers = dict(Authorization=auth_header)
+            kwargs['headers'] = headers
+        return kwargs
 
     def emit(self, record):
         try:
@@ -94,7 +113,9 @@ class HTTPSHandler(logging.Handler):
                 host = 'http://%s' % self.host_saved
             if self.port != 80:
                 host = '%s:%s' % (host, str(self.port))
-            session.post(host, data=payload, background_callback=bg_cb)
+            bare_kwargs = dict(data=payload, background_callback=bg_cb)
+            kwargs = self.add_auth_information(bare_kwargs)
+            session.post(host, **kwargs)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
