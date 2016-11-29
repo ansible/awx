@@ -145,6 +145,7 @@ python-heatclient==1.6.0  # via shade
 python-ironicclient==1.8.0  # via shade
 python-keystoneclient==3.6.0  # via python-glanceclient, python-mistralclient, python-openstackclient, shade
 python-ldap==2.4.27       # via django-auth-ldap
+python-logstash==0.4.6
 python-magnumclient==2.3.1  # via shade
 python-memcached==1.58
 python-mistralclient==2.1.1  # via python-troveclient
