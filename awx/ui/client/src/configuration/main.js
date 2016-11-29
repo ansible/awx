@@ -11,6 +11,7 @@ import configurationController from './configuration.controller.js';
 
 // Import forms
 //authorization sub-forms
+import configurationAzureForm from './auth-form/sub-forms/auth-azure.form.js';
 import configurationGithubForm from './auth-form/sub-forms/auth-github.form.js';
 import configurationGithubOrgForm from './auth-form/sub-forms/auth-github-org.form';
 import configurationGithubTeamForm from './auth-form/sub-forms/auth-github-team.form';
@@ -27,6 +28,7 @@ export default
 angular.module('configuration', [])
     .controller('ConfigurationController', configurationController)
     //auth forms
+    .factory('configurationAzureForm', configurationAzureForm)
     .factory('configurationGithubForm', configurationGithubForm)
     .factory('configurationGithubOrgForm', configurationGithubOrgForm)
     .factory('configurationGithubTeamForm', configurationGithubTeamForm)
@@ -34,9 +36,11 @@ angular.module('configuration', [])
     .factory('configurationLdapForm', configurationLdapForm)
     .factory('configurationRadiusForm', configurationRadiusForm)
     .factory('configurationSamlForm', configurationSamlForm)
+    //other forms
     .factory('ConfigurationJobsForm', configurationJobsForm)
     .factory('ConfigurationSystemForm', configurationSystemForm)
     .factory('ConfigurationUiForm', configurationUiForm)
+    //helpers and services
     .factory('ConfigurationUtils', ConfigurationUtils)
     .service('ConfigurationService', configurationService)
     .run(['$stateExtender', function($stateExtender) {
