@@ -305,11 +305,27 @@
                     <!-- LABELS DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="labels && labels.length > 0">
-                        <label class="JobResults-resultRowLabel
-                            JobResults-resultRowLabel--fullWidth">
-                            Labels
-                        </label>
-                        <div class="LabelList
+                        <div class="JobResults-resultRow">
+                            <a class="JobResults-resultRowLabel
+                                JobResults-resultRowLabel--fullWidth"
+                                ng-show="lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="JobResults-expandArrow
+                                    fa fa-caret-right"></i>
+                            </a>
+                            <a class="JobResults-resultRowLabel
+                                JobResults-resultRowLabel--fullWidth"
+                                ng-show="!lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="JobResults-expandArrow
+                                    fa fa-caret-down"></i>
+                            </a>
+                        </div>
+                        <div id="job-results-labels" class="LabelList
                             JobResults-resultRowText
                             JobResults-resultRowText--fullWidth">
                             <div ng-repeat="label in labels"

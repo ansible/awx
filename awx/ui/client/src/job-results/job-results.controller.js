@@ -86,6 +86,18 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         jobResultsService.relaunchJob($scope);
     };
 
+    $scope.lessLabels = false;
+    $scope.toggleLessLabels = function() {
+        if (!$scope.lessLabels) {
+            $('#job-results-labels').slideUp(200);
+            $scope.lessLabels = true;
+        }
+        else {
+            $('#job-results-labels').slideDown(200);
+            $scope.lessLabels = false;
+        }
+    };
+
     // get initial count from resolve
     $scope.count = count.val;
     $scope.hostCount = getTotalHostCount(count.val);
