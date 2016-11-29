@@ -675,7 +675,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         fields = unified_jt_class._get_unified_job_field_names() + [parent_field_name]
         unified_job = copy_model_by_class(self, unified_job_class, fields, {})
-        unified_job.job_type = 'relaunch'
+        unified_job.launch_type = 'relaunch'
         unified_job.save()
 
         # Labels coppied here

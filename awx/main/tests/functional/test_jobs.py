@@ -10,6 +10,8 @@ def test_orphan_unified_job_creation(instance, inventory):
     assert job2.job_template is None
     assert job2.inventory == inventory
     assert job2.name == 'hi world'
+    assert job.job_type == job2.job_type
+    assert job2.launch_type == 'relaunch'
 
 
 @pytest.mark.django_db
