@@ -35,8 +35,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
         }
         $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
             $scope[list.name].forEach(function(item, item_idx) {
-                var fld, field,
-                    itm = $scope[list.name][item_idx];
+                var itm = $scope[list.name][item_idx];
 
                 // Set the item type label
                 if (list.fields.type) {
