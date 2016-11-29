@@ -133,6 +133,11 @@ class LoggedBasicAuthentication(authentication.BasicAuthentication):
             logger.debug(smart_text(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
         return ret
 
+    def authenticate_header(self, request):
+        if not settings.AUTH_BASIC_ENABLED:
+            return
+        return super(LoggedBasicAuthentication, self).authenticate_header(request)
+
 
 class TaskAuthentication(authentication.BaseAuthentication):
     '''
