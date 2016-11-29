@@ -45,6 +45,27 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
 
 
 @pytest.mark.django_db
+def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
+    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    get(url, user=admin, expect=404)
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    response = get(url, user=admin, expect=200)
+    # The PUT below will fail at the moment because AUTH_LDAP_GROUP_TYPE
+    # defaults to None but cannot be set to None.
+    # put(url, user=admin, data=response.data, expect=200)
+    delete(url, user=admin, expect=204)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': ''}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap.example.com'}, expect=400)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com:389'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com ldap://ldap2.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com,ldap://ldap2.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com, ldap://ldap2.example.com'}, expect=200)
+
+
+@pytest.mark.django_db
 def test_ui_settings(get, put, patch, delete, admin, enterprise_license):
     url = reverse('api:setting_singleton_detail', args=('ui',))
     response = get(url, user=admin, expect=200)
