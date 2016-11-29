@@ -168,6 +168,7 @@ rax-scheduled-images-python-novaclient-ext==0.3.1  # via rackspace-novaclient
 redbaron==0.6.2
 requests-oauthlib==0.7.0  # via msrest, python-social-auth
 requests==2.12.1          # via azure-servicebus, azure-servicemanagement-legacy, azure-storage, keystoneauth1, msrest, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-social-auth, python-swiftclient, python-troveclient, requests-oauthlib, slackclient
+requests-futures==0.9.7
 requestsexceptions==1.1.3  # via os-client-config, shade
 rfc3986==0.4.1            # via oslo.config
 rply==0.7.4               # via baron
