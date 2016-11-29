@@ -260,6 +260,7 @@ AUTHENTICATION_BACKENDS = (
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
     'social.backends.github.GithubTeamOAuth2',
+    'social.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
