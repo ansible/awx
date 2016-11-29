@@ -251,8 +251,25 @@ register(
 register(
     'LOG_AGGREGATOR_USERNAME',
     field_class=fields.CharField,
-    label=_('Logging Aggregator Receiver Username'),
-    help_text=_('Username for Logstash or others'),
+    label=_('Logging Aggregator Username to Authenticate With'),
+    help_text=_('Username for Logstash or others (basic auth)'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_PASSWORD',
+    field_class=fields.CharField,
+    label=_('Logging Aggregator Password to Authenticate With'),
+    help_text=_('Password for Logstash or others (basic auth)'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_LOGGERS',
+    field_class=fields.StringListField,
+    default=['awx', 'activity_stream', 'job_events', 'packages', 'services', 'ansible'],
+    label=_(''),
+    help_text=_(''),
     category=_('Logging'),
     category_slug='logging',
 )

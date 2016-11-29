@@ -25,6 +25,7 @@ from logstash import formatter
 
 # custom
 from requests.auth import HTTPBasicAuth
+from django.conf import settings as django_settings
 
 
 ENABLED_LOGS = ['ansible']
@@ -52,28 +53,42 @@ class TCPLogstashHandler(logging.handlers.SocketHandler, object):
         return self.formatter.format(record) + b'\n'
 
 
-# loggly
+# techniquest borrowed from the loggly library
 # https://github.com/varshneyjayant/loggly-python-handler
+# MIT License
 
-session = FuturesSession()
+# Translation of parameter names to names in Django settings
+PARAM_NAMES = {
+    'host': 'LOG_AGGREGATOR_HOST',
+    'port': 'LOG_AGGREGATOR_PORT',
+    'message_type': 'LOG_AGGREGATOR_TYPE',
+    'username': 'LOG_AGGREGATOR_USERNAME',
+    'password': 'LOG_AGGREGATOR_PASSWORD',
+}
+# TODO: figure out what to do with LOG_AGGREGATOR_LOGGERS (if anything)
 
 
 def bg_cb(sess, resp):
     """ Don't do anything with the response """
     pass
 
-# add port for a generic handler
 class HTTPSHandler(logging.Handler):
-    def __init__(self, host, fqdn=False, **kwargs):
+    def __init__(self, fqdn=False, **kwargs):
         super(HTTPSHandler, self).__init__()
-        self.host_saved = host
         self.fqdn = fqdn
-        for fd in ['port', 'message_type', 'username', 'password']:
-            if fd in kwargs:
+        for fd in PARAM_NAMES:
+            # settings values take precedence over the input params
+            settings_name = PARAM_NAMES[fd]
+            settings_val = getattr(django_settings, settings_name, None)
+            if settings_val:
+                setattr(self, fd, settings_val)
+            elif fd in kwargs:
                 attr_name = fd
-                if fd == 'username':
-                    attr_name = 'user'
-                setattr(self, attr_name, kwargs[fd])
+                setattr(self, fd, kwargs[fd])
+            else:
+                setattr(self, fd, None)
+        self.session = FuturesSession()
+        self.add_auth_information()
 
     def get_full_message(self, record):
         if record.exc_info:
@@ -81,18 +96,20 @@ class HTTPSHandler(logging.Handler):
         else:
             return record.getMessage()
 
-    def add_auth_information(self, kwargs):
+    def add_auth_information(self):
         if self.message_type == 'logstash':
-            if not self.user:
+            if not self.username:
                 # Logstash authentication not enabled
                 return kwargs
-            logstash_auth = HTTPBasicAuth(self.user, self.password)
-            kwargs['auth'] = logstash_auth
+            logstash_auth = HTTPBasicAuth(self.username, self.password)
+            self.session.auth = logstash_auth
         elif self.message_type == 'splunk':
+            ## Auth used by Splunk logger library
+            # self.session.auth = ('x', self.access_token)
+            # self.session.headers.update({'Content-Encoding': 'gzip'})
             auth_header = "Splunk %s" % self.token
             headers = dict(Authorization=auth_header)
-            kwargs['headers'] = headers
-        return kwargs
+            self.session.headers.update(headers)
 
     def emit(self, record):
         try:
@@ -108,14 +125,13 @@ class HTTPSHandler(logging.Handler):
                         break
                 if st_type not in ENABLED_LOGS:
                     return
-            host = self.host_saved
+            host = self.host
             if not host.startswith('http'):
-                host = 'http://%s' % self.host_saved
+                host = 'http://%s' % self.host
             if self.port != 80:
                 host = '%s:%s' % (host, str(self.port))
-            bare_kwargs = dict(data=payload, background_callback=bg_cb)
-            kwargs = self.add_auth_information(bare_kwargs)
-            session.post(host, **kwargs)
+            kwargs = dict(data=payload, background_callback=bg_cb)
+            self.session.post(host, **kwargs)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
