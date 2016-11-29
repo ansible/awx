@@ -15,9 +15,9 @@ def parse_config_file():
 
         project_id, access_token, api_domain = _parse_config_file_impl(filename)
 
-        if project_id is not None\
-        and access_token is not None\
-        and api_domain is not None:
+        if project_id is not None \
+           and access_token is not None \
+           and api_domain is not None:
             return project_id, access_token, api_domain
 
     else:

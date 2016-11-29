@@ -53,8 +53,6 @@ class FactBrokerWorker(ConsumerMixin):
         return (module, facts)
 
     def process_fact_message(self, body, message):
-        print body
-        print type(body)
         hostname = body['host']
         inventory_id = body['inventory_id']
         facts_data = body['facts']
