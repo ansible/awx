@@ -566,7 +566,7 @@ class UnifiedJobSerializer(BaseSerializer):
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'execution_node', 'result_traceback', 'source_workflow_job')
+                  'execution_node', 'result_traceback', 'workflow_job_id')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
@@ -598,8 +598,8 @@ class UnifiedJobSerializer(BaseSerializer):
             res['stdout'] = reverse('api:job_stdout', args=(obj.pk,))
         elif isinstance(obj, AdHocCommand):
             res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
-        if obj.source_workflow_job:
-            res['source_workflow_job'] = reverse('api:workflow_job_detail', args=(obj.source_workflow_job.pk,))
+        if obj.workflow_job_id:
+            res['source_worklflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job_id,))
         return res
 
     def to_representation(self, obj):
