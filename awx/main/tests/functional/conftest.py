@@ -9,6 +9,7 @@ from datetime import timedelta
 
 # Django
 from django.core.urlresolvers import resolve
+from django.core.cache import cache
 from django.utils.six.moves.urllib.parse import urlparse
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -45,6 +46,14 @@ from awx.main.models.notifications import (
     NotificationTemplate,
     Notification
 )
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    '''
+    Clear cache (local memory) for each test to prevent using cached settings.
+    '''
+    cache.clear()
 
 
 @pytest.fixture(scope="session", autouse=False)
