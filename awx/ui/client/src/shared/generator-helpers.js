@@ -327,7 +327,11 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     }
                     html += "\n";
                 }
-            } else {
+            }
+            else if(field.badgeCustom === true){
+                html += field.badgeIcon;
+            }
+            else {
                 if (field.badgeToolTip) {
                     html += "<a ";
                     html += (field.badgeNgHref) ? "ng-href=\"" + field.badgeNgHref + "\" " : "href=\"\"";

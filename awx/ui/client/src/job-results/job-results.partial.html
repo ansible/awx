@@ -97,6 +97,15 @@
                                 data-placement="top">
                                 {{ job.summary_fields.job_template.name }}
                             </a>
+                            <a href="{{ workflow_result_link }}"
+                                aw-tool-tip="View workflow results"
+                                data-placement="top"
+                                data-original-title="" title="">
+                                <i class="WorkflowBadge"
+                                    ng-show="job.launch_type === 'workflow' ">
+                                    W
+                                </i>
+                            </a>
                         </div>
                     </div>
 
