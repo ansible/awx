@@ -9,6 +9,7 @@ export default [
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'ParseTypeChange', 'ProcessErrors',
     'Wait', 'configDataResolve',
     //Form definitions
+    'configurationAzureForm',
     'configurationGithubForm',
     'configurationGithubOrgForm',
     'configurationGithubTeamForm',
@@ -24,6 +25,7 @@ export default [
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, ParseTypeChange, ProcessErrors,
         Wait, configDataResolve,
         //Form definitions
+        configurationAzureForm,
         configurationGithubForm,
         configurationGithubOrgForm,
         configurationGithubTeamForm,
@@ -38,6 +40,7 @@ export default [
         var vm = this;
 
         var formDefs = {
+            'azure': configurationAzureForm,
             'github': configurationGithubForm,
             'github_org': configurationGithubOrgForm,
             'github_team': configurationGithubTeamForm,
@@ -180,9 +183,9 @@ export default [
 
         function active(setForm) {
             if (setForm === 'auth') {
-                // Default to 'github' on first load
+                // Default to 'azure' on first load
                 if (formTracker.currentAuth === '') {
-                    formTracker.setCurrentAuth('github');
+                    formTracker.setCurrentAuth('azure');
                 } else {
                     // If returning to auth tab reset current form to previously viewed
                     formTracker.setCurrentAuth(formTracker.currentAuth);

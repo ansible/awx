@@ -10,6 +10,7 @@ export default [
     '$stateParams',
     '$timeout',
     '$q',
+    'configurationAzureForm',
     'configurationGithubForm',
     'configurationGithubOrgForm',
     'configurationGithubTeamForm',
@@ -28,6 +29,7 @@ export default [
         $stateParams,
         $timeout,
         $q,
+        configurationAzureForm,
         configurationGithubForm,
         configurationGithubOrgForm,
         configurationGithubTeamForm,
@@ -45,8 +47,8 @@ export default [
 
         var generator = GenerateForm;
         var formTracker = $scope.$parent.vm.formTracker;
-        var dropdownValue = 'github';
-        var activeAuthForm = 'github';
+        var dropdownValue = 'azure';
+        var activeAuthForm = 'azure';
 
         // Default active form
         if ($stateParams.currentTab === '' || $stateParams.currentTab === 'auth') {
@@ -92,9 +94,10 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: 'GitHub', value: 'github'},
-            {label: 'GitHub Org', value: 'github_org'},
-            {label: 'GitHub Team', value: 'github_team'},
+            {label: 'Azure', value: 'azure'},
+			{label: 'Github', value: 'github'},
+            {label: 'Github Org', value: 'github_org'},
+            {label: 'Github Team', value: 'github_team'},
             {label: 'Google OAuth2', value: 'google_oauth'},
             {label: 'LDAP', value: 'ldap'},
             {label: 'RADIUS', value: 'radius'},
@@ -107,27 +110,30 @@ export default [
         });
 
         var authForms = [{
-            formDef: configurationGithubForm,
-            id: 'auth-github-form'
-        }, {
-            formDef: configurationGithubOrgForm,
-            id: 'auth-github-org-form'
-        }, {
-            formDef: configurationGithubTeamForm,
-            id: 'auth-github-team-form'
-        }, {
-            formDef: configurationGoogleForm,
-            id: 'auth-google-form'
-        }, {
-            formDef: configurationLdapForm,
-            id: 'auth-ldap-form'
-        }, {
-            formDef: configurationRadiusForm,
-            id: 'auth-radius-form'
-        }, {
-            formDef: configurationSamlForm,
-            id: 'auth-saml-form'
-        }, ];
+                formDef: configurationAzureForm,
+                id: 'auth-azure-form'
+            }, {
+                formDef: configurationGithubForm,
+                id: 'auth-github-form'
+            }, {
+                formDef: configurationGithubOrgForm,
+                id: 'auth-github-org-form'
+            }, {
+                formDef: configurationGithubTeamForm,
+                id: 'auth-github-team-form'
+            }, {
+                formDef: configurationGoogleForm,
+                id: 'auth-google-form'
+            }, {
+                formDef: configurationLdapForm,
+                id: 'auth-ldap-form'
+            }, {
+                formDef: configurationRadiusForm,
+                id: 'auth-radius-form'
+            }, {
+                formDef: configurationSamlForm,
+                id: 'auth-saml-form'
+            }, ];
 
         var forms = _.pluck(authForms, 'formDef');
 
