@@ -49,7 +49,7 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     url = reverse('api:setting_singleton_detail', args=('ldap',))
     get(url, user=admin, expect=404)
     Setting.objects.create(key='LICENSE', value=enterprise_license)
-    response = get(url, user=admin, expect=200)
+    get(url, user=admin, expect=200)
     # The PUT below will fail at the moment because AUTH_LDAP_GROUP_TYPE
     # defaults to None but cannot be set to None.
     # put(url, user=admin, data=response.data, expect=200)
