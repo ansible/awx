@@ -6,10 +6,10 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent', 'hostResults',
-    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent, hostResults){
+    ['$stateParams', '$scope', '$state', 'Wait', 'jobResultsService', 'hostEvent', 'hostResults',
+    function($stateParams, $scope, $state, Wait, jobResultsService, hostEvent, hostResults){
 
-        $scope.processEventStatus = JobDetailService.processEventStatus;
+        $scope.processEventStatus = jobResultsService.processEventStatus;
         $scope.hostResults = [];
         // Avoid rendering objects in the details fieldset
         // ng-if="processResults(value)" via host-event-details.partial.html

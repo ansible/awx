@@ -13,14 +13,14 @@ var hostEventModal = {
     templateUrl: templateUrl('job-results/host-event/host-event-modal'),
     'abstract': false,
     resolve: {
-        hostEvent: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
-            return JobDetailService.getRelatedJobEvents($stateParams.id, {
+        hostEvent: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
+            return jobResultsService.getRelatedJobEvents($stateParams.id, {
                 id: $stateParams.eventId
             }).then(function(res) {
                 return res.data.results[0]; });
         }],
-        hostResults: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
-            return JobDetailService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
+        hostResults: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
+            return jobResultsService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
         }]
     },
     onExit: function() {
