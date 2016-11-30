@@ -426,7 +426,11 @@ var tower = angular.module('Tower', [
                 },
                 params: {
                     job_search: {
-                        value: { order_by: '-finished' }
+                        value: {
+                            not__launch_type: 'sync',
+                            order_by: '-finished'
+                        },
+                        squash: ''
                     }
                 },
                 data: {
