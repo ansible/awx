@@ -621,7 +621,7 @@ export default
             };
 
             $scope.formCancel = function () {
-                $state.go('jobTemplates');
+                $state.go('templates');
             };
 
             // Related set: Add button
