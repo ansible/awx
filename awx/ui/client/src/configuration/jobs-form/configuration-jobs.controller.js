@@ -47,7 +47,8 @@ export default [
                 name: key,
                 toggleSource: key,
                 dataPlacement: 'top',
-                dataTitle: $scope.$parent.configDataResolve[key].label
+                dataTitle: $scope.$parent.configDataResolve[key].label,
+                required: $scope.$parent.configDataResolve[key].required
             });
         }
 

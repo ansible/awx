@@ -16,7 +16,7 @@
                  ngChange: 'changedPendo()',
                  ngOptions: 'choice.label for choice in PENDO_TRACKING_STATE_options track by choice.value',
                  reset: 'PENDO_TRACKING_STATE'
-             },
+             }
          },
 
          buttons: {

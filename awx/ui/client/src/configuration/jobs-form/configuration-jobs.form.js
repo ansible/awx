@@ -60,7 +60,7 @@
              },
              save: {
                  ngClick: 'vm.formSave()',
-                // ngDisabled: true
+                 ngDisabled: true
              }
          }
      };
