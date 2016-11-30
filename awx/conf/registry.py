@@ -90,6 +90,9 @@ class SettingsRegistry(object):
             setting_names.append(setting)
         return setting_names
 
+    def is_setting_encrypted(self, setting):
+        return bool(self._registry.get(setting, {}).get('encrypted', False))
+
     def get_setting_field(self, setting, mixin_class=None, for_user=False, **kwargs):
         from django.conf import settings
         from rest_framework.fields import empty
@@ -104,6 +107,7 @@ class SettingsRegistry(object):
         depends_on = frozenset(field_kwargs.pop('depends_on', None) or [])
         placeholder = field_kwargs.pop('placeholder', empty)
         feature_required = field_kwargs.pop('feature_required', empty)
+        encrypted = bool(field_kwargs.pop('encrypted', False))
         if getattr(field_kwargs.get('child', None), 'source', None) is not None:
             field_kwargs['child'].source = None
         field_instance = field_class(**field_kwargs)
@@ -114,6 +118,7 @@ class SettingsRegistry(object):
             field_instance.placeholder = placeholder
         if feature_required is not empty:
             field_instance.feature_required = feature_required
+        field_instance.encrypted = encrypted
         original_field_instance = field_instance
         if field_class != original_field_class:
             original_field_instance = original_field_class(**field_kwargs)

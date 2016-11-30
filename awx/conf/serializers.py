@@ -45,6 +45,8 @@ class SettingFieldMixin(object):
     """Mixin to use a registered setting field class for API display/validation."""
 
     def to_representation(self, obj):
+        if getattr(self, 'encrypted', False) and isinstance(obj, basestring) and obj:
+            return '$encrypted$'
         return obj
 
     def to_internal_value(self, value):

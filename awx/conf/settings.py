@@ -15,6 +15,7 @@ from django.db import ProgrammingError, OperationalError
 from rest_framework.fields import empty, SkipField
 
 # Tower
+from awx.main.utils import decrypt_field
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 
@@ -121,7 +122,11 @@ class SettingsWrapper(UserSettingsHolder):
         for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
             if settings_to_cache[setting.key] != SETTING_CACHE_NOTSET:
                 continue
-            settings_to_cache[setting.key] = self._get_cache_value(setting.value)
+            if settings_registry.is_setting_encrypted(setting.key):
+                value = decrypt_field(setting, 'value')
+            else:
+                value = setting.value
+            settings_to_cache[setting.key] = self._get_cache_value(value)
         # Load field default value for any settings not found in the database.
         if SETTING_CACHE_DEFAULTS:
             for key, value in settings_to_cache.items():
@@ -159,7 +164,10 @@ class SettingsWrapper(UserSettingsHolder):
             if not field.read_only:
                 setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
             if setting:
-                value = setting.value
+                if getattr(field, 'encrypted', False):
+                    value = decrypt_field(setting, 'value')
+                else:
+                    value = setting.value
             else:
                 value = SETTING_CACHE_NOTSET
                 if SETTING_CACHE_DEFAULTS:
