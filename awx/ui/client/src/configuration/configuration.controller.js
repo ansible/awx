@@ -284,7 +284,12 @@ export default [
                     if($scope[key] === null) {
                         payload[key] = null;
                     } else if($scope[key][0] && $scope[key][0].value !== undefined) {
-                        payload[key] = _.map($scope[key], 'value').join(',');
+                        if(multiselectDropdowns.indexOf(key) !== -1) {
+                            // Handle AD_HOC_COMMANDS
+                            payload[key] = ConfigurationUtils.listToArray(_.map($scope[key], 'value').join(','));
+                        } else {
+                            payload[key] = _.map($scope[key], 'value').join(',');
+                        }
                     } else {
                         payload[key] = $scope[key].value;
                     }

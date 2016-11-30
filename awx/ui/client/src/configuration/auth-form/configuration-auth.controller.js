@@ -158,7 +158,8 @@ export default [
                 toggleSource: key,
                 dataPlacement: 'top',
                 placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
-                dataTitle: $scope.$parent.configDataResolve[key].label
+                dataTitle: $scope.$parent.configDataResolve[key].label,
+                required: $scope.$parent.configDataResolve[key].required
             });
         }
 

@@ -14,8 +14,6 @@ export default function() {
             TOWER_URL_BASE: {
                 type: 'text',
                 reset: 'TOWER_URL_BASE',
-                addRequired: false,
-                editRequird: false,
             },
             TOWER_ADMIN_ALERTS: {
                 type: 'toggleSwitch',

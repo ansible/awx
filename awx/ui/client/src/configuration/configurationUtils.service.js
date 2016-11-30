@@ -13,7 +13,11 @@ export default [
                     //Parse multiline input
                     return input.replace(/^\s+|\s+$/g, "").split('\n');
                 } else {
-                    return input.replace(/^\s+|\s+$/g, "").split(/\s*,\s*/);
+                    if (input === '') {
+                        return [];
+                    } else {
+                        return input.replace(/^\s+|\s+$/g, "").split(/\s*,\s*/);
+                    }
                 }
             },
 
@@ -41,15 +45,15 @@ export default [
             },
 
             formatPlaceholder: function(input) {
-                if(input !== null && typeof input === 'object') {
-                    if(Array.isArray(input)) {
+                if (input !== null && typeof input === 'object') {
+                    if (Array.isArray(input)) {
                         var multiLineInput = false;
                         _.each(input, function(statement) {
-                            if(statement.indexOf(',') !== -1) {
+                            if (statement.indexOf(',') !== -1) {
                                 multiLineInput = true;
                             }
                         });
-                        if(multiLineInput === false) {
+                        if (multiLineInput === false) {
                             return input.join(', ');
                         } else {
                             return input.join('\n');

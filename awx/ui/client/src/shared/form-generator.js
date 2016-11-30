@@ -282,22 +282,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     $(this).remove();
                 });
 
-                // // Prepend an asterisk to required field label
-                // $('.form-control[required], input[type="radio"][required]').each(function () {
-                //     var label, span;
-                //     if (Empty($(this).attr('aw-required-when'))) {
-                //         label = $(this).closest('.form-group').find('label').first();
-                //         if (label.length > 0) {
-                //             span = label.children('span');
-                //             if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
-                //                 span.first().addClass('prepend-asterisk');
-                //             } else if (span.length <= 0 && !label.first().hasClass('prepend-asterisk')) {
-                //                 label.first().addClass('prepend-asterisk');
-                //             }
-                //         }
-                //     }
-                // });
-
                 try {
                     $('#help-modal').empty().dialog('destroy');
                 } catch (e) {
