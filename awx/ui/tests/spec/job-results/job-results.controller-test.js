@@ -130,7 +130,6 @@ describe('Controller: jobResultsController', () => {
     describe('getTowerLinks()', () => {
         beforeEach(() => {
             jobData.related = {
-                "job_template": "api/v1/job_templates/12",
                 "created_by": "api/v1/users/12",
                 "inventory": "api/v1/inventories/12",
                 "project": "api/v1/projects/12",
@@ -143,7 +142,6 @@ describe('Controller: jobResultsController', () => {
         });
 
         it('should transform related links and set to scope var', () => {
-            expect($scope.job_template_link).toBe('/#/job_templates/12');
             expect($scope.created_by_link).toBe('/#/users/12');
             expect($scope.inventory_link).toBe('/#/inventories/12');
             expect($scope.project_link).toBe('/#/projects/12');
