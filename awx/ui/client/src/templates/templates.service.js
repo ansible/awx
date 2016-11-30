@@ -185,6 +185,22 @@ export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
 
           Rest.setUrl(url);
           return Rest.get();
+      },
+      getWorkflowCopy: function(id) {
+          let url = GetBasePath('workflow_job_templates');
+
+          url = url + id + '/copy';
+
+          Rest.setUrl(url);
+          return Rest.get();
+      },
+      copyWorkflow: function(id) {
+          let url = GetBasePath('workflow_job_templates');
+
+          url = url + id + '/copy';
+
+          Rest.setUrl(url);
+          return Rest.post();
       }
     };
 }];

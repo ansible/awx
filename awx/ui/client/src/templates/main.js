@@ -17,6 +17,7 @@ import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
 import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
+import templateCopyService from './copy-template/templay-copy.service';
 
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
@@ -25,6 +26,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
+    .service('TemplateCopyService', templateCopyService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,

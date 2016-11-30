@@ -98,7 +98,7 @@ export default
             },
             copy: {
                 label: i18n._('Copy'),
-                'ui-sref': 'templates.copy({id: template.id})',
+                ngClick: 'copyTemplate(template)',
                 "class": 'btn-danger btn-xs',
                 awToolTip: i18n._('Copy template'),
                 dataPlacement: 'top',
