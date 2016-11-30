@@ -41,6 +41,17 @@ export default
                 label: 'Name',
                 columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(job)",
+                badgePlacement: 'right',
+                badgeCustom: true,
+                badgeIcon: `<a href="{{ workflow_result_link }}"
+                    aw-tool-tip="View workflow results"
+                    data-placement="top"
+                    data-original-title="" title="">
+                    <i class="WorkflowBadge"
+                        ng-show="job.launch_type === 'workflow' ">
+                        W
+                    </i>
+                </a>`
             },
             type: {
                 label: 'Type',
