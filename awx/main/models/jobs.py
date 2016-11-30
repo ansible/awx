@@ -1164,7 +1164,7 @@ class JobEvent(CreatedModifiedModel):
         # Save UUID and parent UUID for determining parent-child relationship.
         job_event_uuid = kwargs.get('uuid', None)
         parent_event_uuid = kwargs.get('parent_uuid', None)
-        artifact_data = kwargs.get('artifact_data', None)
+        artifact_dict = kwargs.get('artifact_data', None)
 
         # Sanity check: Don't honor keys that we don't recognize.
         valid_keys = {'job_id', 'event', 'event_data', 'playbook', 'play',
@@ -1194,8 +1194,7 @@ class JobEvent(CreatedModifiedModel):
             cache.set(cache_key, job_event.id, 300)
 
         # Save artifact data to parent job (if provided).
-        if artifact_data:
-            artifact_dict = json.loads(artifact_data)
+        if artifact_dict:
             event_data = kwargs.get('event_data', None)
             if event_data and isinstance(event_data, dict):
                 res = event_data.get('res', None)
