@@ -40,6 +40,10 @@ def handle_setting_change(key, for_delete=False):
             value=getattr(settings, setting_key, None),
             enter=not bool(for_delete),
         )
+        # TODO: Move logic to task to run on all cluster nodes
+        if setting_key.startswith('LOG_AGGREGATOR_'):
+            settings.LOGGING_CONFIG = None
+            logging.config.dictConfig(settings.LOGGING)
 
 
 @receiver(post_save, sender=Setting)

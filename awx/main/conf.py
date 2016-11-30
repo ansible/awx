@@ -227,6 +227,7 @@ register(
 register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
+    allow_null=True,
     label=_('Logging Aggregator Receiving Host'),
     help_text=_('External host maintain a log collector to send logs to'),
     category=_('Logging'),
@@ -234,7 +235,8 @@ register(
 )
 register(
     'LOG_AGGREGATOR_PORT',
-    field_class=fields.CharField,
+    field_class=fields.IntegerField,
+    allow_null=True,
     label=_('Logging Aggregator Receiving Port'),
     help_text=_('Port that the log collector is listening on'),
     category=_('Logging'),
@@ -242,7 +244,9 @@ register(
 )
 register(
     'LOG_AGGREGATOR_TYPE',
-    field_class=fields.CharField,
+    field_class=fields.ChoiceField,
+    choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
+    allow_null=True,
     label=_('Logging Aggregator Type: Logstash, Loggly, Datadog, etc'),
     help_text=_('The type of log aggregator service to format messages for'),
     category=_('Logging'),
@@ -251,6 +255,7 @@ register(
 register(
     'LOG_AGGREGATOR_USERNAME',
     field_class=fields.CharField,
+    allow_null=True,
     label=_('Logging Aggregator Username to Authenticate With'),
     help_text=_('Username for Logstash or others (basic auth)'),
     category=_('Logging'),
@@ -259,6 +264,7 @@ register(
 register(
     'LOG_AGGREGATOR_PASSWORD',
     field_class=fields.CharField,
+    allow_null=True,
     label=_('Logging Aggregator Password to Authenticate With'),
     help_text=_('Password for Logstash or others (basic auth)'),
     category=_('Logging'),
@@ -267,9 +273,15 @@ register(
 register(
     'LOG_AGGREGATOR_LOGGERS',
     field_class=fields.StringListField,
-    default=['awx', 'activity_stream', 'job_events', 'packages', 'services', 'ansible'],
-    label=_(''),
-    help_text=_(''),
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking'],
+    label=_('Loggers to send data to the log aggregator from'),
+    help_text=_('List of loggers that will send HTTP logs to the collector, these can '
+                'include any or all of: \n'
+                'activity_stream - logs duplicate to records entered in activity stream\n'
+                'job_events - callback data from Ansible job events\n'
+                'system_tracking - data generated from scan jobs\n'
+                'Sending generic Tower logs must be configured through local_settings.py'
+                'instead of this mechanism.'),
     category=_('Logging'),
     category_slug='logging',
 )
