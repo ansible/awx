@@ -9,13 +9,21 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
             }
         };
 
-        $scope.job_template_link = getTowerLink('job_template');
+        $scope.job_template_link = `/#/templates/job_template/${$scope.job.summary_fields.job_template.id}`;
         $scope.created_by_link = getTowerLink('created_by');
         $scope.inventory_link = getTowerLink('inventory');
         $scope.project_link = getTowerLink('project');
         $scope.machine_credential_link = getTowerLink('credential');
         $scope.cloud_credential_link = getTowerLink('cloud_credential');
         $scope.network_credential_link = getTowerLink('network_credential');
+        if(jobData.summary_fields && jobData.summary_fields.project_update &&
+            jobData.summary_fields.project_update.status){
+             $scope.project_status = jobData.summary_fields.project_update.status;
+        }
+        if(jobData.summary_fields && jobData.summary_fields.project_update &&
+            jobData.summary_fields.project_update.id){
+            $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+        }
     };
 
     // uses options to set scope variables to their readable string
@@ -46,14 +54,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.jobOptions = jobDataOptions.actions.GET;
     $scope.labels = jobLabels;
     $scope.jobFinished = jobFinished;
-    if(jobData.summary_fields && jobData.summary_fields.project_update &&
-        jobData.summary_fields.project_update.status){
-         $scope.project_status = jobData.summary_fields.project_update.status;
-    }
-    if(jobData.summary_fields && jobData.summary_fields.project_update &&
-        jobData.summary_fields.project_update.id){
-        $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
-    }
 
     // turn related api browser routes into tower routes
     getTowerLinks();
