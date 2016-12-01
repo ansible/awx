@@ -787,6 +787,7 @@ class RunJob(BaseTask):
         env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
+        env['TOWER_HOST'] = settings.TOWER_URL_BASE
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
