@@ -81,7 +81,7 @@ describe('Controller: WorkflowAdd', () => {
         ToJSON = _ToJSON_;
 
         httpBackend
-            .whenGET('/api/')
+            .whenGET('/api')
             .respond(200, '');
 
         TemplatesService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);

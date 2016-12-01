@@ -67,7 +67,7 @@ describe('Controller: jobResultsController', () => {
                 .respond('');
 
             $httpBackend
-                .whenGET('/api/')
+                .whenGET('/api')
                 .respond(200, '');
 
             $scope = $rootScope.$new();

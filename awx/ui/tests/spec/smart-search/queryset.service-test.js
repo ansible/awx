@@ -29,7 +29,7 @@ describe('Service: QuerySet', () => {
         // @todo: improve appsource
         // provide api version via package.json config block
         $httpBackend
-            .whenGET('/api/')
+            .whenGET('/api')
             .respond(200, '');
     }));
 
