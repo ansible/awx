@@ -22,10 +22,11 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // Removes state definition defaults and pagination terms
         function stripDefaultParams(params) {
-            return _.pick(params, (value, key) => {
+            let stripped =_.pick(params, (value, key) => {
                 // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
                 return defaults[key] !== value && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
             });
+            return _(stripped).map(qs.decodeParam).flatten().value();
         }
 
         // searchable relationships
@@ -53,8 +54,16 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
         };
 
         // remove tag, merge new queryset, $state.go
-        $scope.remove = function(key) {
-            delete queryset[key];
+        $scope.remove = function(index) {
+            let removed = qs.encodeParam($scope.searchTags.splice(index, 1)[0]);
+            _.each(removed, (value, key) => {
+                if (Array.isArray(queryset[key])){
+                    _.remove(queryset[key], (item) => item === value);
+                }
+                else {
+                    delete queryset[key];
+                }
+            });
             $state.go('.', {
                 [$scope.iterator + '_search']: queryset });
             qs.search(path, queryset).then((res) => {
@@ -91,7 +100,16 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             }
 
             params.page = '1';
-            queryset = _.merge(queryset, params);
+            queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
+                if (object[key] && object[key] !== sourceValue){
+                    return [object[key], sourceValue]; 
+                }
+                else {
+                    // // https://lodash.com/docs/3.10.1#merge
+                    // If customizer fn returns undefined merging is handled by default _.merge algorithm
+                    return undefined; 
+                }
+            });
             // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
             // This transition will not reload controllers/resolves/views
             // but will register new $stateParams[$scope.iterator + '_search'] terms
@@ -104,10 +122,6 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
             $scope.searchTerm = null;
             $scope.searchTags = stripDefaultParams(queryset);
-        };
-
-        $scope.decodeParam = function(key, value) {
-            return qs.decodeParam(key, value);
         };
     }
 ];

@@ -249,7 +249,7 @@ var tower = angular.module('Tower', [
                 },
                 // decoding
                 // from "_search=operator:key:compator=value& ... "
-                // to "_search=operator:key:compator=value& ... "
+                // to {operator__key1__comparator=value, ... }
                 decode: function(item) {
                     return QuerySet.$get().decodeArr(item);
                 },

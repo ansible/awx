@@ -51,10 +51,19 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
             encodeQueryset(params) {
                 let queryset;
                 queryset = _.reduce(params, (result, value, key) => {
-                    return result + `${key}=${value}&`;
+                    return result + encodeTerm(value, key);
                 }, '');
                 queryset = queryset.substring(0, queryset.length - 1);
                 return angular.isObject(params) ? `?${queryset}` : '';
+
+                function encodeTerm(value, key){
+                    if (Array.isArray(value)){
+                        return _.map(value, (item) => `${key}=${item}`).join('&') + '&';
+                    }
+                    else {
+                        return `${key}=${value}&`;
+                    }
+                }
             },
             // encodes a ui smart-search param to a django-friendly param
             // operand:key:comparator:value => {operand__key__comparator: value}
@@ -62,19 +71,42 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 let split = param.split(':');
                 return {[split.slice(0,split.length -1).join('__')] : split[split.length-1]};
             },
-            // decodes a django queryset param into ui smart-search param
-            decodeParam(key, value){
-                return `${key.split('__').join(':')}:${value}`;
+            // decodes a django queryset param into a ui smart-search tag or set of tags
+            decodeParam(value, key){
+                if (Array.isArray(value)){
+                    return _.map(value, (item) => {
+                        return `${key.split('__').join(':')}:${item}`;
+                    });                    
+                }
+                else { 
+                    return `${key.split('__').join(':')}:${value}`;
+                }
             },
 
             // encodes a django queryset for ui-router's URLMatcherFactory
-            // {operand__key__comparator: value, } => 'operand:key:comparator:value,...'
+            // {operand__key__comparator: value, } => 'operand:key:comparator:value;...'
+            // value.isArray expands to:
+            // {operand__key__comparator: [value1, value2], } => 'operand:key:comparator:value1;operand:key:comparator:value1...'
             encodeArr(params) {
                 let url;
                 url = _.reduce(params, (result, value, key) => {
-                    return result.concat(`${key}:${value}`);
+                    return result.concat(encodeUrlString(value, key));
                 }, []);
+
                 return url.join(';');
+
+                // {key:'value'} => 'key:value'
+                // {key: [value1, value2, ...]} => ['key:value1', 'key:value2']
+                function encodeUrlString(value, key){
+                    if (Array.isArray(value)){
+                        return _.map(value, (item) => {
+                            return `${key}:${item}`;
+                        });
+                    }
+                    else {
+                        return `${key}:${value}`;
+                    }
+                }
             },
 
             // decodes a django queryset for ui-router's URLMatcherFactory
@@ -84,7 +116,15 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 _.forEach(arr.split(';'), (item) => {
                     let key = item.split(':')[0],
                         value = item.split(':')[1];
-                    params[key] = value;
+                    if(!params[key]){
+                        params[key] = value;
+                    }
+                    else if (Array.isArray(params[key])){
+                        params[key].push(value);
+                    }
+                    else {
+                        params[key] = [params[key], value];
+                    }
                 });
                 return params;
             },
