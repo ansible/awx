@@ -566,7 +566,7 @@ class UnifiedJobSerializer(BaseSerializer):
         fields = ('*', 'unified_job_template', 'launch_type', 'status',
                   'failed', 'started', 'finished', 'elapsed', 'job_args',
                   'job_cwd', 'job_env', 'job_explanation', 'result_stdout',
-                  'execution_node', 'result_traceback', 'workflow_job_id')
+                  'execution_node', 'result_traceback')
         extra_kwargs = {
             'unified_job_template': {
                 'source': 'unified_job_template_id',
@@ -601,6 +601,18 @@ class UnifiedJobSerializer(BaseSerializer):
         if obj.workflow_job_id:
             res['source_worklflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job_id,))
         return res
+
+    def get_summary_fields(self, obj):
+        summary_fields = super(UnifiedJobSerializer, self).get_summary_fields(obj)
+        if obj.spawned_by_workflow:
+            summary_fields['source_worklflow_job'] = {}
+            summary_obj = obj.unified_job_node.workflow_job
+            for field in SUMMARIZABLE_FK_FIELDS['job']:
+                val = getattr(summary_obj, field, None)
+                if val is not None:
+                    summary_fields['source_worklflow_job'][field] = val
+
+        return summary_fields
 
     def to_representation(self, obj):
         serializer_class = None
