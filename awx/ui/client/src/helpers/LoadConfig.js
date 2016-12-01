@@ -85,11 +85,19 @@ angular.module('LoadConfigHelper', ['Utilities'])
                     if(response.custom_logo) {
                         configSettings.custom_logo = true;
                         $rootScope.custom_logo = response.custom_logo;
-                        configInit();
                     } else {
                         configSettings.custom_logo = false;
-                        configInit();
                     }
+
+                    if(response.custom_login_info) {
+                        configSettings.custom_login_info = response.custom_login_info;
+                        $rootScope.custom_login_info = response.custom_login_info;
+                    } else {
+                        configSettings.custom_login_info = false;
+                    }
+
+                    configInit();
+
                 }).error(function(error) {
                     console.log(error);
                 });
