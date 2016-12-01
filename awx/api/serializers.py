@@ -2517,6 +2517,9 @@ class JobEventSerializer(BaseSerializer):
         # Show full stdout for event detail view, truncate only for list view.
         if hasattr(self.context.get('view', None), 'retrieve'):
             return ret
+        # Show full stdout for playbook_on_* events.
+        if obj and obj.event.startswith('playbook_on'):
+            return ret
         max_bytes = settings.EVENT_STDOUT_MAX_BYTES_DISPLAY
         if max_bytes > 0 and 'stdout' in ret and len(ret['stdout']) >= max_bytes:
             ret['stdout'] = ret['stdout'][:(max_bytes - 1)] + u'\u2026'
