@@ -859,7 +859,7 @@ class InventorySourceOptions(BaseModel):
         default=False,
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
-    timeout = models.PositiveIntegerField(
+    timeout = models.IntegerField(
         blank=True,
         default=0,
     )
@@ -1309,4 +1309,3 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self):
         return reverse('api:inventory_script_detail', args=(self.pk,))
-

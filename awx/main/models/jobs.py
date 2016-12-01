@@ -148,9 +148,9 @@ class JobOptions(BaseModel):
     allow_simultaneous = models.BooleanField(
         default=False,
     )
-    timeout = models.PositiveIntegerField(
+    timeout = models.IntegerField(
         blank=True,
-        default=0, 
+        default=0,
     )
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)

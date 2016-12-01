@@ -51,7 +51,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
-                            get_system_task_capacity, OutputEventFilter) 
+                            get_system_task_capacity, OutputEventFilter)
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -524,6 +524,7 @@ class BaseTask(Task):
             global_timeout = getattr(settings, global_timeout_setting_name, 0)
             local_timeout = getattr(instance, 'timeout', 0)
             job_timeout = global_timeout if local_timeout == 0 else local_timeout
+            job_timeout = 0 if local_timeout < 0 else job_timeout
         else:
             job_timeout = 0
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
@@ -986,7 +987,7 @@ class RunJob(BaseTask):
         Wrap stdout file object to capture events.
         '''
         stdout_handle = super(RunJob, self).get_stdout_handle(instance)
-        
+
         if getattr(settings, 'USE_CALLBACK_QUEUE', False):
             dispatcher = CallbackQueueDispatcher()
 
