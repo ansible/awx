@@ -39,7 +39,7 @@
                 return Rest.post(data.results[0])
                     .success(function(job_template_res){
                         // also copy any associated survey_spec
-                        if (data.results[0].related.survey_spec){
+                        if (data.results[0].summary_fields.survey){
                             return self.copySurvey(data.results[0], job_template_res).success( () => job_template_res);
                         }
                         else{
@@ -54,6 +54,22 @@
             buildName: function(name){
                 var result = name.split('@')[0];
                 return result;
+            },
+            getWorkflowCopy: function(id) {
+                let url = GetBasePath('workflow_job_templates');
+
+                url = url + id + '/copy';
+
+                Rest.setUrl(url);
+                return Rest.get();
+            },
+            copyWorkflow: function(id) {
+                let url = GetBasePath('workflow_job_templates');
+
+                url = url + id + '/copy';
+
+                Rest.setUrl(url);
+                return Rest.post();
             }
         };
     }

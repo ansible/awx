@@ -9,7 +9,6 @@ import surveyMaker from './survey-maker/main';
 import templatesList from './list/main';
 import jobTemplatesAdd from './job_templates/add-job-template/main';
 import jobTemplatesEdit from './job_templates/edit-job-template/main';
-import jobTemplatesCopy from './job_templates/copy-job-template/main';
 import workflowAdd from './workflows/add-workflow/main';
 import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
@@ -17,14 +16,16 @@ import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
 import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
+import templateCopyService from './copy-template/template-copy.service';
 
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
-        jobTemplatesEdit.name, jobTemplatesCopy.name, labels.name, workflowAdd.name, workflowEdit.name,
+        jobTemplatesEdit.name, labels.name, workflowAdd.name, workflowEdit.name,
         workflowChart.name, workflowMaker.name
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
+    .service('TemplateCopyService', templateCopyService)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,

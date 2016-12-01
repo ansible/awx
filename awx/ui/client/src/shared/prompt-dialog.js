@@ -47,7 +47,7 @@ angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
 
                 cls = (params['class'] === null || params['class'] === undefined) ? 'Modal-errorButton' : params['class'];
 
-                $('#prompt_action_btn').removeClass(cls).addClass(cls);
+                $('#prompt_action_btn').removeClass('Modal-errorButton Modal-primaryButton').addClass(cls);
 
                 // bootstrap modal's have an open defect with disallowing tab index's of the background of the modal
                 // This will keep the tab indexing on the modal's focus. This is to fix an issue with tabbing working when

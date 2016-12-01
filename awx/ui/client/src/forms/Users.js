@@ -27,21 +27,21 @@ export default
                 first_name: {
                     label: i18n._('First Name'),
                     type: 'text',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     capitalize: true
                 },
                 last_name: {
                     label: i18n._('Last Name'),
                     type: 'text',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     capitalize: true
                 },
                 email: {
                     label: i18n._('Email'),
                     type: 'email',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)',
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
                     required: true,
                     autocomplete: false
                 },
@@ -53,7 +53,7 @@ export default
                         init: true
                     },
                     autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
                     label: i18n._('Organization'),
@@ -64,7 +64,7 @@ export default
                     sourceField: 'name',
                     required: true,
                     excludeMode: 'edit',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password: {
                     label: i18n._('Password'),
@@ -76,7 +76,7 @@ export default
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
                     chkPass: true,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password_confirm: {
                     label: i18n._('Confirm Password'),
@@ -88,7 +88,7 @@ export default
                     awPassMatch: true,
                     associated: 'password',
                     autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 user_type: {
                     label: i18n._('User Type'),
@@ -97,23 +97,23 @@ export default
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
             },
 
             buttons: {
                 cancel: {
                     ngClick: 'formCancel()',
-                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 close: {
                     ngClick: 'formCancel()',
-                    ngShow: '!(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
                     ngDisabled: true,
-                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || !canAdd)'
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
