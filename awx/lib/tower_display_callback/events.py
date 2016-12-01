@@ -123,7 +123,7 @@ class EventContext(object):
     def get_end_dict(self):
         return {}
 
-    def dump(self, fileobj, data, max_width=78):
+    def dump(self, fileobj, data, max_width=78, flush=False):
         b64data = base64.b64encode(json.dumps(data))
         with self.display_lock:
             fileobj.write(u'\x1b[K')
@@ -132,12 +132,14 @@ class EventContext(object):
                 escaped_chunk = u'{}\x1b[{}D'.format(chunk, len(chunk))
                 fileobj.write(escaped_chunk)
             fileobj.write(u'\x1b[K')
+            if flush:
+                fileobj.flush()
 
     def dump_begin(self, fileobj):
         self.dump(fileobj, self.get_begin_dict())
 
     def dump_end(self, fileobj):
-        self.dump(fileobj, self.get_end_dict())
+        self.dump(fileobj, self.get_end_dict(), flush=True)
 
 
 event_context = EventContext()

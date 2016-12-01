@@ -28,9 +28,14 @@ import psutil
 
 __all__ = []
 
+main_pid = os.getpid()
+
 
 @atexit.register
 def terminate_ssh_control_masters():
+    # Only run this cleanup from the main process.
+    if os.getpid() != main_pid:
+        return
     # Determine if control persist is being used and if any open sockets
     # exist after running the playbook.
     cp_path = os.environ.get('ANSIBLE_SSH_CONTROL_PATH', '')
