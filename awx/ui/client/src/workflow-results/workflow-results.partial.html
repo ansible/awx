@@ -197,7 +197,7 @@
                             Elapsed
                         </div>
                         <span class="badge List-titleBadge">
-                            {{ job.elapsed * 1000 }}
+                            {{ workflow.elapsed * 1000 | duration: "hh:mm:ss"}}
                         </span>
                     </div>
 
