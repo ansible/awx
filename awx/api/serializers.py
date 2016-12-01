@@ -981,7 +981,7 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         fields = ('playbooks',)
 
     def get_playbooks(self, obj):
-        return obj.playbook_files
+        return obj.playbook_files if obj.scm_type else obj.playbooks
 
     @property
     def data(self):
