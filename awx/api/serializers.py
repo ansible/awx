@@ -599,18 +599,18 @@ class UnifiedJobSerializer(BaseSerializer):
         elif isinstance(obj, AdHocCommand):
             res['stdout'] = reverse('api:ad_hoc_command_stdout', args=(obj.pk,))
         if obj.workflow_job_id:
-            res['source_worklflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job_id,))
+            res['source_workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job_id,))
         return res
 
     def get_summary_fields(self, obj):
         summary_fields = super(UnifiedJobSerializer, self).get_summary_fields(obj)
         if obj.spawned_by_workflow:
-            summary_fields['source_worklflow_job'] = {}
+            summary_fields['source_workflow_job'] = {}
             summary_obj = obj.unified_job_node.workflow_job
             for field in SUMMARIZABLE_FK_FIELDS['job']:
                 val = getattr(summary_obj, field, None)
                 if val is not None:
-                    summary_fields['source_worklflow_job'][field] = val
+                    summary_fields['source_workflow_job'][field] = val
 
         return summary_fields
 

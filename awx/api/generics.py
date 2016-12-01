@@ -241,10 +241,7 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
 
     def get_queryset(self):
-        qs = self.request.user.get_queryset(self.model)
-        if getattr(self.model, 'spawned_by_workflow', False):
-            qs = qs.select_related('unified_job_node__workflow_job')
-        return qs
+        return self.request.user.get_queryset(self.model)
 
     def paginate_queryset(self, queryset):
         page = super(ListAPIView, self).paginate_queryset(queryset)
