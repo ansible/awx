@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [
-    function() {
+export default [ '$state',
+    function($state) {
 
     return {
         scope: {
@@ -13,7 +13,8 @@ export default [
             canAddWorkflowJobTemplate: '=',
             addNode: '&',
             editNode: '&',
-            deleteNode: '&'
+            deleteNode: '&',
+            mode: '@'
         },
         restrict: 'E',
         link: function(scope, element) {
@@ -64,8 +65,11 @@ export default [
             // TODO: this function is hacky and we need to come up with a better solution
             // see: http://stackoverflow.com/questions/15975440/add-ellipses-to-overflowing-text-in-svg#answer-27723752
             function wrap(text) {
-                if(text && text.length > 15) {
-                    return text.substring(0,15) + '...';
+
+                let maxLength = scope.mode === 'details' ? 14 : 15;
+
+                if(text && text.length > maxLength) {
+                    return text.substring(0,maxLength) + '...';
                 }
                 else {
                     return text;
@@ -156,11 +160,12 @@ export default [
                             .attr("class", function(d) {
                                 return d.placeholder ? "rect placeholder" : "rect";
                             });
+
                         thisNode.append("text")
-                            .attr("x", rectW / 2)
-                            .attr("y", rectH / 2)
+                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
+                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
                             .attr("dy", ".35em")
-                            .attr("text-anchor", "middle")
+                            .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
                             .attr("class", "WorkflowChart-defaultText WorkflowChart-nameText")
                             .text(function (d) {
                                 return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
@@ -199,6 +204,16 @@ export default [
                                         .classed("hovering", false);
                                 }
                             });
+                        thisNode.append("text")
+                            .attr("x", rectW - 50)
+                            .attr("y", rectH - 10)
+                            .attr("dy", ".35em")
+                            .attr("class", "WorkflowChart-detailsLink")
+                            .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; })
+                            .text(function () {
+                                return "DETAILS";
+                            })
+                            .call(details);
                         thisNode.append("circle")
                             .attr("id", function(d){return "node-" + d.id + "-add";})
                             .attr("cx", rectW)
@@ -288,27 +303,29 @@ export default [
 
                                 let statusClass = "WorkflowChart-nodeStatus ";
 
-                                switch(d.jobStatus) {
-                                    case "pending":
-                                        statusClass = "workflowChart-nodeStatus--running";
-                                        break;
-                                    case "waiting":
-                                        statusClass = "workflowChart-nodeStatus--running";
-                                        break;
-                                    case "running":
-                                        statusClass = "workflowChart-nodeStatus--running";
-                                        break;
-                                    case "successful":
-                                        statusClass = "workflowChart-nodeStatus--success";
-                                        break;
-                                    case "failed":
-                                        statusClass = "workflowChart-nodeStatus--failed";
-                                        break;
+                                if(d.job){
+                                    switch(d.job.jobStatus) {
+                                        case "pending":
+                                            statusClass = "workflowChart-nodeStatus--running";
+                                            break;
+                                        case "waiting":
+                                            statusClass = "workflowChart-nodeStatus--running";
+                                            break;
+                                        case "running":
+                                            statusClass = "workflowChart-nodeStatus--running";
+                                            break;
+                                        case "successful":
+                                            statusClass = "workflowChart-nodeStatus--success";
+                                            break;
+                                        case "failed":
+                                            statusClass = "workflowChart-nodeStatus--failed";
+                                            break;
+                                    }
                                 }
 
                                 return statusClass;
                             })
-                            .style("display", function(d) { return d.jobStatus ? null : "none"; })
+                            .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
                             .attr("cy", 10)
                             .attr("cx", 10)
                             .attr("r", 6);
@@ -456,11 +473,6 @@ export default [
                         return d.placeholder ? "rect placeholder" : "rect";
                     });
 
-                t.selectAll(".WorkflowChart-nameText")
-                    .text(function (d) {
-                        return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? wrap(d.unifiedJobTemplate.name) : "";
-                    });
-
                 t.selectAll(".node")
                     .attr("transform", function(d) {d.px = d.x; d.py = d.y; return "translate(" + d.y + "," + d.x + ")"; });
 
@@ -478,32 +490,34 @@ export default [
 
                         let statusClass = "WorkflowChart-nodeStatus ";
 
-                        switch(d.jobStatus) {
-                            case "pending":
-                                statusClass += "workflowChart-nodeStatus--running";
-                                break;
-                            case "waiting":
-                                statusClass += "workflowChart-nodeStatus--running";
-                                break;
-                            case "running":
-                                statusClass += "workflowChart-nodeStatus--running";
-                                break;
-                            case "successful":
-                                statusClass += "workflowChart-nodeStatus--success";
-                                break;
-                            case "failed":
-                                statusClass += "workflowChart-nodeStatus--failed";
-                                break;
+                        if(d.job){
+                            switch(d.job.jobStatus) {
+                                case "pending":
+                                    statusClass += "workflowChart-nodeStatus--running";
+                                    break;
+                                case "waiting":
+                                    statusClass += "workflowChart-nodeStatus--running";
+                                    break;
+                                case "running":
+                                    statusClass += "workflowChart-nodeStatus--running";
+                                    break;
+                                case "successful":
+                                    statusClass += "workflowChart-nodeStatus--success";
+                                    break;
+                                case "failed":
+                                    statusClass += "workflowChart-nodeStatus--failed";
+                                    break;
+                            }
                         }
 
                         return statusClass;
                     })
-                    .style("display", function(d) { return d.jobStatus ? null : "none"; })
+                    .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
                     .transition()
                     .duration(0)
                     .attr("r", 6)
                     .each(function(d) {
-                        if(d.jobStatus && (d.jobStatus === "pending" || d.jobStatus === "waiting" || d.jobStatus === "running")) {
+                        if(d.job && d.job.jobStatus && (d.job.jobStatus === "pending" || d.job.jobStatus === "waiting" || d.job.jobStatus === "running")) {
                             // Pulse the circle
                             var circle = d3.select(this);
                 			(function repeat() {
@@ -518,6 +532,18 @@ export default [
                 			})();
                         }
                     });
+
+                t.selectAll(".WorkflowChart-nameText")
+                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
+                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
+                    .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
+                    .text(function (d) {
+                        return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? wrap(d.unifiedJobTemplate.name) : "";
+                    });
+
+                t.selectAll(".WorkflowChart-detailsLink")
+                    .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; });
+
 
             }
 
@@ -559,6 +585,28 @@ export default [
                         scope.editNode({
                             nodeToEdit: d
                         });
+                    }
+                });
+            }
+
+            function details() {
+                this.on("mouseover", function() {
+                    d3.select(this).style("text-decoration", "underline");
+                });
+                this.on("mouseout", function() {
+                    d3.select(this).style("text-decoration", null);
+                });
+                this.on("click", function(d) {
+                    if(d.job.unified_job_id && d.unifiedJobTemplate) {
+                        if(d.unifiedJobTemplate.unified_job_type === 'job') {
+                            $state.go('jobDetail', {id: d.job.unified_job_id});
+                        }
+                        else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
+                            $state.go('inventorySyncStdout', {id: d.job.unified_job_id});
+                        }
+                        else if(d.unifiedJobTemplate.unified_job_type === 'project_update') {
+                            $state.go('scmUpdateStdout', {id: d.job.unified_job_id});
+                        }
                     }
                 });
             }

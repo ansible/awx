@@ -60,7 +60,7 @@
                     <span class="badge List-titleBadge" ng-bind="treeData.data.totalNodes"></span>
                 </div>
             </div>
-            <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" can-add-workflow-job-template="canAddWorkflowJobTemplate" class="WorkflowMaker-chart"></workflow-chart>
+            <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="edit" class="WorkflowMaker-chart"></workflow-chart>
         </div>
         <div class="WorkflowMaker-contentRight">
             <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited && nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "ADD A TEMPLATE"}}</div>

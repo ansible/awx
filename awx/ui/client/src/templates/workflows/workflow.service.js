@@ -221,7 +221,10 @@ export default [function(){
             }
 
             if(params.nodesObj[params.nodeId].summary_fields.job) {
-                treeNode.jobStatus = params.nodesObj[params.nodeId].summary_fields.job.status;
+                treeNode.job = {
+                    jobStatus: params.nodesObj[params.nodeId].summary_fields.job.status,
+                    unified_job_id: params.nodesObj[params.nodeId].summary_fields.job.id
+                };
             }
 
             // Loop across the success nodes and add them recursively
@@ -271,7 +274,10 @@ export default [function(){
             });
 
             if(matchingNode) {
-                matchingNode.jobStatus = params.status;
+                matchingNode.job = {
+                    jobStatus: params.status,
+                    unified_job_id: params.unified_job_id
+                };
             }
 
         }
