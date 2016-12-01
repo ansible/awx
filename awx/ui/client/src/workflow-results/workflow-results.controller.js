@@ -118,7 +118,8 @@ export default ['workflowData',
             WorkflowService.updateStatusOfNode({
                 treeData: $scope.treeData,
                 nodeId: data.workflow_node_id,
-                status: data.status
+                status: data.status,
+                unified_job_id: data.unified_job_id
             });
 
             $scope.$broadcast("refreshWorkflowChart");
