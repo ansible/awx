@@ -124,6 +124,18 @@ def team_member(user, team):
     return ret
 
 
+@pytest.fixture(scope="session", autouse=True)
+def project_playbooks():
+    '''
+    Return playbook_files as playbooks for manual projects when testing.
+    '''
+    class PlaybooksMock(mock.PropertyMock):
+        def __get__(self, obj, obj_type):
+            return obj.playbook_files
+    mocked = mock.patch.object(Project, 'playbooks', new_callable=PlaybooksMock)
+    mocked.start()
+
+
 @pytest.fixture
 @mock.patch.object(Project, "update", lambda self, **kwargs: None)
 def project(instance, organization):
