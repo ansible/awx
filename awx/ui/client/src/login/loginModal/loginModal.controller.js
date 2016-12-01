@@ -99,7 +99,6 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
             scope.customLogo = "tower-logo-login.svg";
             scope.customLogoPresent = false;
         }
-
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
         scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
     });

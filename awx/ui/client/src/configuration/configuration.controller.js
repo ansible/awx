@@ -232,6 +232,29 @@ export default [
             }
         };
 
+        function loginUpdate() {
+            // Updates the logo and app config so that logos and info are properly shown
+            // on logout after modifying.
+            if($scope.CUSTOM_LOGO) {
+                $rootScope.custom_logo = $scope.CUSTOM_LOGO;
+                global.$AnsibleConfig.custom_logo = true;
+            } else {
+                $rootScope.custom_logo = '';
+                global.$AnsibleConfig.custom_logo = false;
+            }
+
+            if($scope.CUSTOM_LOGIN_INFO) {
+                $rootScope.custom_login_info = $scope.CUSTOM_LOGIN_INFO;
+                global.$AnsibleConfig.custom_login_info = $scope.CUSTOM_LOGIN_INFO;
+            } else {
+                $rootScope.custom_login_info = '';
+                global.$AnsibleConfig.custom_login_info = false;
+            }
+
+            Store('AnsibleConfig', global.$AnsibleConfig);
+
+            $scope.$broadcast('loginUpdated');
+        }
 
         $scope.resetValue = function(key) {
             Wait('start');
@@ -273,21 +296,6 @@ export default [
             if (!$scope.$$phase) {
                 $scope.$digest();
             }
-        }
-
-        function loginUpdate() {
-            // Updates the logo and app config so that logos are properly shown
-            // on logout after modifying.
-            if($scope.CUSTOM_LOGO) {
-                $rootScope.custom_logo = $scope.$parent.CUSTOM_LOGO;
-                global.$AnsibleConfig.custom_logo = true;
-                Store('AnsibleConfig', global.$AnsibleConfig);
-            } else {
-                $rootScope.custom_logo = '';
-                global.$AnsibleConfig.custom_logo = false;
-                Store('AnsibleConfig', global.$AnsibleConfig);
-            }
-            $scope.$broadcast('loginUpdated');
         }
 
         // Some dropdowns are listed as "list" type in the API even though they're a dropdown:

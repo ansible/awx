@@ -22,6 +22,11 @@ export default function() {
                 reset: 'CUSTOM_LOGO',
                 control: `<image-upload key="CUSTOM_LOGO"></image-upload>`
             },
+            CUSTOM_LOGIN_INFO: {
+                type: 'textarea',
+                reset: 'CUSTOM_LOGIN_INFO',
+                rows: 6
+            }
         },
 
         buttons: {
