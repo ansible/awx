@@ -93,7 +93,7 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
 
     $rootScope.loginConfig.promise.then(function () {
         if ($AnsibleConfig.custom_logo) {
-            scope.customLogo = "custom_console_logo.png";
+            scope.customLogo = $rootScope.custom_logo;
             scope.customLogoPresent = true;
         } else {
             scope.customLogo = "tower-logo-login.svg";

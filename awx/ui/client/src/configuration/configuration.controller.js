@@ -5,8 +5,8 @@
  *************************************************/
 
 export default [
-    '$scope', '$state', '$stateParams', '$timeout', '$q', 'Alert', 'ClearScope',
-    'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'ParseTypeChange', 'ProcessErrors',
+    '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert', 'ClearScope',
+    'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'ParseTypeChange', 'ProcessErrors', 'Store',
     'Wait', 'configDataResolve',
     //Form definitions
     'configurationAzureForm',
@@ -21,8 +21,8 @@ export default [
     'ConfigurationSystemForm',
     'ConfigurationUiForm',
     function(
-        $scope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
-        ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, ParseTypeChange, ProcessErrors,
+        $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
+        ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, ParseTypeChange, ProcessErrors, Store,
         Wait, configDataResolve,
         //Form definitions
         configurationAzureForm,
@@ -241,6 +241,7 @@ export default [
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
+                    loginUpdate();
                 })
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
@@ -272,6 +273,21 @@ export default [
             if (!$scope.$$phase) {
                 $scope.$digest();
             }
+        }
+
+        function loginUpdate() {
+            // Updates the logo and app config so that logos are properly shown
+            // on logout after modifying.
+            if($scope.CUSTOM_LOGO) {
+                $rootScope.custom_logo = $scope.$parent.CUSTOM_LOGO;
+                global.$AnsibleConfig.custom_logo = true;
+                Store('AnsibleConfig', global.$AnsibleConfig);
+            } else {
+                $rootScope.custom_logo = '';
+                global.$AnsibleConfig.custom_logo = false;
+                Store('AnsibleConfig', global.$AnsibleConfig);
+            }
+            $scope.$broadcast('loginUpdated');
         }
 
         // Some dropdowns are listed as "list" type in the API even though they're a dropdown:
@@ -316,6 +332,7 @@ export default [
             Wait('start');
             ConfigurationService.patchConfiguration(payload)
                 .then(function(data) {
+                    loginUpdate();
                     saveDeferred.resolve(data);
                     $scope[formTracker.currentFormName()].$setPristine();
                 })
@@ -333,6 +350,8 @@ export default [
 
             return saveDeferred.promise;
         };
+
+
 
         $scope.toggleForm = function(key) {
             $scope[key] = !$scope[key];
