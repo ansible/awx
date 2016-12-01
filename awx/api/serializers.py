@@ -2490,16 +2490,15 @@ class JobEventSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
-            job = reverse('api:job_detail', args=(obj.job.pk,)),
-            #children = reverse('api:job_event_children_list', args=(obj.pk,)),
+            job = reverse('api:job_detail', args=(obj.job_id,)),
         ))
-        if obj.parent:
-            res['parent'] = reverse('api:job_event_detail', args=(obj.parent.pk,))
-        if obj.children.count():
+        if obj.parent_id:
+            res['parent'] = reverse('api:job_event_detail', args=(obj.parent_id,))
+        if obj.children.exists():
             res['children'] = reverse('api:job_event_children_list', args=(obj.pk,))
-        if obj.host:
-            res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
-        if obj.hosts.count():
+        if obj.host_id:
+            res['host'] = reverse('api:host_detail', args=(obj.host_id,))
+        if obj.hosts.exists():
             res['hosts'] = reverse('api:job_event_hosts_list', args=(obj.pk,))
         return res
 
