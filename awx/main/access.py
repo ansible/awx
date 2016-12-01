@@ -1843,12 +1843,11 @@ class UnifiedJobAccess(BaseAccess):
         qs = qs.select_related(
             'created_by',
             'modified_by',
+            'unified_job_node__workflow_job',
         )
         qs = qs.prefetch_related(
             'unified_job_template',
         )
-        if self.model.spawned_by_workflow:
-            qs = qs.select_related('unified_job_node__workflow_job')
 
         # WISH - sure would be nice if the following worked, but it does not.
         # In the future, as django and polymorphic libs are upgraded, try again.
