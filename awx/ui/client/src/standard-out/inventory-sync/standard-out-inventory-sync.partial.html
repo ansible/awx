@@ -21,6 +21,15 @@
                             <a href="{{inv_manage_group_link}}">
                                 {{ inventory_source_name }}
                             </a>
+                            <a href="{{ workflow_result_link }}"
+                                aw-tool-tip="View workflow results"
+                                data-placement="top"
+                                data-original-title="" title="">
+                                <i class="WorkflowBadge"
+                                    ng-show="job.launch_type === 'workflow' ">
+                                    W
+                                </i>
+                            </a>
                         </div>
                     </div>
 
