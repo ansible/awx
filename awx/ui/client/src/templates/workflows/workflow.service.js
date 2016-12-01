@@ -203,7 +203,6 @@ export default [function(){
                 canAddTo: true,
                 placeholder: false,
                 edgeType: params.edgeType,
-                unifiedJobTemplate: _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template),
                 isNew: false,
                 edited: false,
                 originalEdge: params.edgeType,
@@ -225,6 +224,10 @@ export default [function(){
                     jobStatus: params.nodesObj[params.nodeId].summary_fields.job.status,
                     unified_job_id: params.nodesObj[params.nodeId].summary_fields.job.id
                 };
+            }
+
+            if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
+                treeNode.unifiedJobTemplate = _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template);
             }
 
             // Loop across the success nodes and add them recursively
