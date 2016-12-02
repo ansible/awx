@@ -64,12 +64,12 @@ export default ['$log', 'moment', function($log, moment){
             return line;
         },
         // adds anchor tags and tooltips to host status lines
-        getAnchorTags: function(event, line){
+        getAnchorTags: function(event){
             if(event.event_name.indexOf("runner_") === -1){
-                return line;
+                return `"`;
             }
             else{
-                return `<a ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top">${line}</a>`;
+                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
             }
 
         },
@@ -104,7 +104,8 @@ export default ['$log', 'moment', function($log, moment){
                 if (event.event_data.play_uuid) {
                     string += " play_" + event.event_data.play_uuid;
                 }
-            } else {
+            } else if (event.event_name !== "playbook_on_stats"){
+                string += " not_skeleton";
                 // host status or debug line
 
                 // these get classed by their parent play if applicable
@@ -216,7 +217,7 @@ export default ['$log', 'moment', function($log, moment){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getLineClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))} ${this.getStartTimeBadge(event, lineArr[1] )}</div>
+    <div class="JobResultsStdOut-stdoutColumn${this.getAnchorTags(event)}>${this.prettify(lineArr[1])} ${this.getStartTimeBadge(event, lineArr[1])}</div>
 </div>`;
                 });
 
