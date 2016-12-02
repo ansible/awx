@@ -211,6 +211,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     feature_required='ldap',
+    encrypted=True,
 )
 
 register(
@@ -511,6 +512,7 @@ register(
     category=_('RADIUS'),
     category_slug='radius',
     feature_required='enterprise_auth',
+    encrypted=True,
 )
 
 ###############################################################################
@@ -552,6 +554,7 @@ register(
     category=_('Google OAuth2'),
     category_slug='google-oauth2',
     placeholder='q2fMVCmEregbg-drvebPp8OW',
+    encrypted=True,
 )
 
 register(
@@ -641,6 +644,7 @@ register(
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub developer application.'),
     category=_('GitHub OAuth2'),
     category_slug='github',
+    encrypted=True,
 )
 
 register(
@@ -704,6 +708,7 @@ register(
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub organization application.'),
     category=_('GitHub Organization OAuth2'),
     category_slug='github-org',
+    encrypted=True,
 )
 
 register(
@@ -778,6 +783,7 @@ register(
     help_text=_('The OAuth2 secret (Client Secret) from your GitHub organization application.'),
     category=_('GitHub Team OAuth2'),
     category_slug='github-team',
+    encrypted=True,
 )
 
 register(
@@ -852,6 +858,7 @@ register(
     help_text=_('The OAuth2 secret (Client Secret) from your Azure AD application.'),
     category=_('Azure AD OAuth2'),
     category_slug='azuread-oauth2',
+    encrypted=True,
 )
 
 register(
@@ -955,6 +962,7 @@ register(
     category=_('SAML'),
     category_slug='saml',
     feature_required='enterprise_auth',
+    encrypted=True,
 )
 
 register(

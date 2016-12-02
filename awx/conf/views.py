@@ -103,6 +103,8 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
         for key, value in serializer.validated_data.items():
             if key == 'LICENSE':
                 continue
+            if settings_registry.is_setting_encrypted(key) and isinstance(value, basestring) and value.startswith('$encrypted$'):
+                continue
             setattr(serializer.instance, key, value)
             setting = settings_qs.filter(key=key).order_by('pk').first()
             if not setting:

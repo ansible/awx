@@ -66,6 +66,40 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
 
 
 @pytest.mark.django_db
+def test_radius_settings(get, put, patch, delete, admin, enterprise_license, settings):
+    url = reverse('api:setting_singleton_detail', args=('radius',))
+    get(url, user=admin, expect=404)
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    response = get(url, user=admin, expect=200)
+    put(url, user=admin, data=response.data, expect=200)
+    # Set secret via the API.
+    patch(url, user=admin, data={'RADIUS_SECRET': 'mysecret'}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret'
+    # Set secret via settings wrapper.
+    settings_wrapper = settings._awx_conf_settings
+    settings_wrapper.RADIUS_SECRET = 'mysecret2'
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret2'
+    # If we send back $encrypted$, the setting is not updated.
+    patch(url, user=admin, data={'RADIUS_SECRET': '$encrypted$'}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret2'
+    # If we send an empty string, the setting is also set to an empty string.
+    patch(url, user=admin, data={'RADIUS_SECRET': ''}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == ''
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value == ''
+    assert settings.RADIUS_SECRET == ''
+
+
+@pytest.mark.django_db
 def test_ui_settings(get, put, patch, delete, admin, enterprise_license):
     url = reverse('api:setting_singleton_detail', args=('ui',))
     response = get(url, user=admin, expect=200)
