@@ -9,6 +9,7 @@ import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
+from kombu.common import Broadcast
 
 # global settings
 from django.conf import global_settings
@@ -373,6 +374,7 @@ CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
     Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
+    Broadcast('broadcast_all')
     # Projects use a fanout queue, this isn't super well supported
 )
 CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
@@ -843,7 +845,7 @@ LOGGING = {
             'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
         },
         'json': {
-            '()': 'awx.main.log_utils.formatters.LogstashFormatter'
+            '()': 'awx.main.utils.formatters.LogstashFormatter'
         }
     },
     'handlers': {
@@ -867,7 +869,7 @@ LOGGING = {
             'formatter': 'simple',
         },
         'http_receiver': {
-            'class': 'awx.main.log_utils.handlers.HTTPSHandler',
+            'class': 'awx.main.utils.handlers.HTTPSHandler',
             'level': 'INFO',
             'formatter': 'json',
             'host': '',

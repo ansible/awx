@@ -3,17 +3,16 @@ import logging
 
 # Django
 from django.conf import settings
-from django.core.cache import cache
 from django.core.signals import setting_changed
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
-from django.utils.log import configure_logging
 
 # Tower
 import awx.main.signals
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingSerializer
+from awx.main.tasks import clear_cache_keys
 
 logger = logging.getLogger('awx.conf.signals')
 
@@ -26,12 +25,16 @@ def handle_setting_change(key, for_delete=False):
     # When a setting changes or is deleted, remove its value from cache along
     # with any other settings that depend on it.
     setting_keys = [key]
+    setting_key_dict = {}
+    setting_key_dict[key] = key
     for dependent_key in settings_registry.get_dependent_settings(key):
         # Note: Doesn't handle multiple levels of dependencies!
         setting_keys.append(dependent_key)
+        setting_key_dict[dependent_key] = dependent_key
     cache_keys = set([Setting.get_cache_key(k) for k in setting_keys])
-    logger.debug('cache delete_many(%r)', cache_keys)
-    cache.delete_many(cache_keys)
+    logger.debug('sending signals to delete cache keys(%r)', cache_keys)
+    # cache.delete_many(cache_keys)
+    clear_cache_keys.delay(setting_key_dict)
 
     # Send setting_changed signal with new value for each setting.
     for setting_key in setting_keys:
@@ -41,11 +44,6 @@ def handle_setting_change(key, for_delete=False):
             value=getattr(settings, setting_key, None),
             enter=not bool(for_delete),
         )
-        # TODO: Move logic to task to run on all cluster nodes
-        if setting_key.startswith('LOG_AGGREGATOR_'):
-            configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
-            # settings.LOGGING_CONFIG = None
-            # logging.config.dictConfig(settings.LOGGING)
 
 
 @receiver(post_save, sender=Setting)
