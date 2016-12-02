@@ -94,7 +94,7 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: 'Azure', value: 'azure'},
+            {label: 'Azure AD', value: 'azure'},
 			{label: 'Github', value: 'github'},
             {label: 'Github Org', value: 'github_org'},
             {label: 'Github Team', value: 'github_team'},
