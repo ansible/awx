@@ -1,0 +1,12 @@
+version: '2'
+services:
+  # Tower Development Cluster
+  tower_1:
+    links:
+      - logstash
+  tower_2:
+    links:
+      - logstash
+  tower_3:
+    links:
+      - logstash

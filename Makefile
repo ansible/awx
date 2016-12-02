@@ -433,7 +433,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -877,6 +877,21 @@ docker-clean:
 	-docker images | grep "tower_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
+
+# Docker Development Environment with Elastic Stack Connected
+docker-compose-elk: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+
+docker-compose-cluster-elk: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+
+clean-elk:
+	docker stop tools_kibana_1
+	docker stop tools_logstash_1
+	docker stop tools_elasticsearch_1
+	docker rm tools_logstash_1
+	docker rm tools_elasticsearch_1
+	docker rm tools_kibana_1
 
 mongo-debug-ui:
 	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express

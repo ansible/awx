@@ -223,3 +223,85 @@ register(
     category=_('Jobs'),
     category_slug='jobs',
 )
+
+register(
+    'LOG_AGGREGATOR_HOST',
+    field_class=fields.CharField,
+    allow_null=True,
+    label=_('Logging Aggregator Receiving Host'),
+    help_text=_('External host maintain a log collector to send logs to'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_PORT',
+    field_class=fields.IntegerField,
+    allow_null=True,
+    label=_('Logging Aggregator Receiving Port'),
+    help_text=_('Port that the log collector is listening on'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_TYPE',
+    field_class=fields.ChoiceField,
+    choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
+    allow_null=True,
+    label=_('Logging Aggregator Type: Logstash, Loggly, Datadog, etc'),
+    help_text=_('The type of log aggregator service to format messages for'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_USERNAME',
+    field_class=fields.CharField,
+    allow_null=True,
+    label=_('Logging Aggregator Username to Authenticate With'),
+    help_text=_('Username for Logstash or others (basic auth)'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_PASSWORD',
+    field_class=fields.CharField,
+    allow_null=True,
+    label=_('Logging Aggregator Password to Authenticate With'),
+    help_text=_('Password for Logstash or others (basic auth)'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_LOGGERS',
+    field_class=fields.StringListField,
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking'],
+    label=_('Loggers to send data to the log aggregator from'),
+    help_text=_('List of loggers that will send HTTP logs to the collector, these can '
+                'include any or all of: \n'
+                'activity_stream - logs duplicate to records entered in activity stream\n'
+                'job_events - callback data from Ansible job events\n'
+                'system_tracking - data generated from scan jobs\n'
+                'Sending generic Tower logs must be configured through local_settings.py'
+                'instead of this mechanism.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Flag denoting to send individual messages for each fact in system tracking'),
+    help_text=_('If not set, the data from system tracking will be sent inside '
+                'of a single dictionary, but if set, separate requests will be sent '
+                'for each package, service, etc. that is found in the scan.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Flag denoting whether to use the external logger system'),
+    help_text=_('If not set, only normal settings data will be used to configure loggers.'),
+    category=_('Logging'),
+    category_slug='logging',
+)

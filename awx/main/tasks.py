@@ -42,6 +42,8 @@ from django.utils.encoding import smart_str
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from django.core.cache import cache
+from django.utils.log import configure_logging
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
@@ -81,6 +83,22 @@ def celery_startup(conf=None, **kwargs):
             sch.save()
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
+
+
+@task(queue='broadcast_all')
+def clear_cache_keys(cache_keys):
+    set_of_keys = set([key for key in cache_keys])
+    logger.debug('cache delete_many(%r)', set_of_keys)
+    cache.delete_many(set_of_keys)
+    for setting_key in set_of_keys:
+        if setting_key.startswith('LOG_AGGREGATOR_'):
+            LOGGING = settings.LOGGING
+            if settings.LOG_AGGREGATOR_ENABLED:
+                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
+            else:
+                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSNullHandler'
+            configure_logging(settings.LOGGING_CONFIG, LOGGING)
+            break
 
 
 @task(queue='default')

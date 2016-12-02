@@ -43,6 +43,7 @@ from awx.main.consumers import emit_channel_notification
 
 
 logger = logging.getLogger('awx.main.models.jobs')
+analytics_logger = logging.getLogger('awx.analytics.job_events')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent', 'SystemJobOptions', 'SystemJobTemplate', 'SystemJob']
 
@@ -1185,6 +1186,8 @@ class JobEvent(CreatedModifiedModel):
                     cache.set(cache_key, parent_id, 300)
             if parent_id:
                 kwargs['parent_id'] = parent_id
+
+        analytics_logger.info('Job event data saved.', extra=dict(event_model_data=kwargs))
 
         job_event = JobEvent.objects.create(**kwargs)
 

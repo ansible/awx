@@ -9,6 +9,7 @@ import djcelery
 from datetime import timedelta
 
 from kombu import Queue, Exchange
+from kombu.common import Broadcast
 
 # global settings
 from django.conf import global_settings
@@ -374,6 +375,7 @@ CELERY_QUEUES = (
     Queue('default', Exchange('default'), routing_key='default'),
     Queue('jobs', Exchange('jobs'), routing_key='jobs'),
     Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
+    Broadcast('broadcast_all')
     # Projects use a fanout queue, this isn't super well supported
 )
 CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
@@ -824,6 +826,8 @@ TOWER_URL_BASE = "https://towerhost"
 
 TOWER_SETTINGS_MANIFEST = {}
 
+LOG_AGGREGATOR_ENABLED = False
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
@@ -843,6 +847,9 @@ LOGGING = {
         'simple': {
             'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
         },
+        'json': {
+            '()': 'awx.main.utils.formatters.LogstashFormatter'
+        }
     },
     'handlers': {
         'console': {
@@ -863,6 +870,12 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.NullHandler',
             'formatter': 'simple',
+        },
+        'http_receiver': {
+            'class': 'awx.main.utils.handlers.HTTPSNullHandler',
+            'level': 'INFO',
+            'formatter': 'json',
+            'host': '',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -940,7 +953,6 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
-            'propagate': False,
         },
         'rest_framework.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
@@ -955,29 +967,30 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'awx.conf': {
-            'handlers': ['console', 'file', 'tower_warnings'],
+            'handlers': ['null'],
             'level': 'WARNING',
-            'propagate': False,
+        },
+        'awx.conf.settings': {
+            'handlers': ['null'],
+            'level': 'WARNING',
+        },
+        'awx.main': {
+            'handlers': ['null']
         },
         'awx.main.commands.run_callback_receiver': {
-            'handlers': ['console', 'file', 'callback_receiver'],
-            'propagate': False
-        },
-        'awx.main.commands.run_socketio_service': {
-            'handlers': ['console', 'file', 'socketio_service'],
-            'propagate': False
+            'handlers': ['callback_receiver'],
         },
         'awx.main.tasks': {
-            'handlers': ['console', 'file', 'task_system'],
-            'propagate': False
+            'handlers': ['task_system']
         },
         'awx.main.scheduler': {
-            'handlers': ['console', 'file', 'task_system'],
-            'propagate': False
+            'handlers': ['task_system'],
+        },
+        'awx.main.consumers': {
+            'handlers': ['null']
         },
         'awx.main.commands.run_fact_cache_receiver': {
-            'handlers': ['console', 'file', 'fact_receiver'],
-            'propagate': False
+            'handlers': ['fact_receiver'],
         },
         'awx.main.access': {
             'handlers': ['null'],
@@ -990,6 +1003,23 @@ LOGGING = {
         'awx.api.permissions': {
             'handlers': ['null'],
             'propagate': False,
+        },
+        'awx.analytics': {
+            'handlers': ['null'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'awx.analytics.job_events': {
+            'handlers': ['null'],
+            'level': 'INFO'
+        },
+        'awx.analytics.activity_stream': {
+            'handlers': ['null'],
+            'level': 'INFO'
+        },
+        'awx.analytics.system_tracking': {
+            'handlers': ['null'],
+            'level': 'INFO'
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],

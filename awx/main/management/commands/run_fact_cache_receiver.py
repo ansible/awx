@@ -18,6 +18,7 @@ from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
+analytics_logger = logging.getLogger('awx.analytics.system_tracking')
 
 
 class FactBrokerWorker(ConsumerMixin):
@@ -51,8 +52,6 @@ class FactBrokerWorker(ConsumerMixin):
         return (module, facts)
 
     def process_fact_message(self, body, message):
-        print body
-        print type(body)
         hostname = body['host']
         inventory_id = body['inventory_id']
         facts_data = body['facts']
@@ -83,6 +82,8 @@ class FactBrokerWorker(ConsumerMixin):
             # Create new Fact entry
             fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
             logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
+            analytics_logger.info('Received message with fact data', extra=dict(
+                module_name=module_name, facts_data=facts))
         return fact_obj
 
 
