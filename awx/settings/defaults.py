@@ -842,19 +842,9 @@ LOGGING = {
         'simple': {
             'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
         },
-        'logstash': {
-            '()': 'awx.main.log_utils.formatters.LogstashFormatter'
-        },
         'json': {
             '()': 'awx.main.log_utils.formatters.LogstashFormatter'
         }
-        # From loggly examples
-        # 'json': {
-        #     'format': '{ "loggerName":"%(name)s", "asciTime":"%(asctime)s", "fileName":"%(filename)s", "logRecordCreationTime":"%(created)f", "functionName":"%(funcName)s", "levelNo":"%(levelno)s", "lineNo":"%(lineno)d", "time":"%(msecs)d", "levelName":"%(levelname)s", "message":"%(message)s"}',
-        # },
-        # 'json': { 
-        #     'format': '{"message": %(message)s}',
-        # },
     },
     'handlers': {
         'console': {
@@ -881,20 +871,6 @@ LOGGING = {
             'level': 'INFO',
             'formatter': 'json',
             'host': '',
-        },
-        'logstash': {
-            'level': 'INFO',
-            'class': 'awx.main.log_utils.handlers.HTTPSHandler',
-            'host': 'logstash',   # IP/name of our Logstash EC2 instance
-            'port': 8085,
-            # 'port': 5000,
-            # 'version': 1,
-            'message_type': 'logstash',
-            'fqdn': True,
-            # 'tags': ['tower'],
-            'formatter': 'json',
-            'username': 'awx_logger',
-            'password': 'workflows',
         },
         'mail_admins': {
             'level': 'ERROR',

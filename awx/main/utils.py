@@ -17,7 +17,6 @@ import urlparse
 import threading
 import contextlib
 import tempfile
-from copy import copy
 
 # Decorator
 from decorator import decorator
@@ -825,64 +824,3 @@ class OutputEventFilter(object):
             self._current_event_data = next_event_data
         else:
             self._current_event_data = None
-
-def format_for_log(raw_data, kind=None, **kwargs):
-    '''
-    Process dictionaries from various contexts (job events, activity stream
-    changes, etc.) to give meaningful information
-    Output a dictionary which will be passed in logstash or syslog format
-    to the logging receiver
-    '''
-    rename_fields = set((
-        'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
-        'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
-        'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
-        'processName', 'relativeCreated', 'thread', 'threadName', 'extra',
-        'auth_token', 'tags', 'host', 'host_id', 'level', 'port', 'uuid'))
-    data = copy(raw_data)
-    if isinstance(data, basestring):
-        data = json.loads(data)
-    data.update(kwargs)
-    skip_fields = ('res', 'password', 'event_data', 'stdout')
-    data_for_log = {}
-
-    def index_by_name(alist):
-        """Takes a list of dictionaries with `name` as a key in each dict
-        and returns a dictionary indexed by those names"""
-        adict = {}
-        for item in alist:
-            subdict = copy(item)
-            name = subdict.pop('name', None)
-            if name:
-                # Logstash v2 can not accept '.' in a name
-                name = name.replace('.', '_')
-                adict[name] = subdict
-        return adict
-
-    if kind == 'event':
-        data.update(data.get('event_data', {}))
-        for fd in data:
-            if fd in skip_fields:
-                continue
-            key = fd
-            if fd in rename_fields:
-                key = 'event_%s' % fd
-            if type(data[fd]) is dict:
-                data_for_log[key] = len(data[fd])
-            else:
-                data_for_log[key] = data[fd]
-    elif kind == 'fact':
-        if 'services' in data:
-            data_for_log['services'] = index_by_name(data['services'])
-        elif 'packages' in data:
-            data_for_log['packages'] = index_by_name(data['packages'])
-        elif 'files' in data:
-            data_for_log['files'] = index_by_name(data['files'])
-        elif 'ansible' in data:
-            data_for_log['ansible'] = data['ansible']
-            # Remove sub-keys with data type conflicts in elastic search
-            data_for_log['ansible'].pop('ansible_python_version', None)
-            data_for_log['ansible']['ansible_python'].pop('version_info', None)
-        else:
-            data_for_log['facts'] = data
-    return data_for_log

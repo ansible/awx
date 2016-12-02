@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.core.signals import setting_changed
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
+from django.utils.log import configure_logging
 
 # Tower
 import awx.main.signals
@@ -42,8 +43,9 @@ def handle_setting_change(key, for_delete=False):
         )
         # TODO: Move logic to task to run on all cluster nodes
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            settings.LOGGING_CONFIG = None
-            logging.config.dictConfig(settings.LOGGING)
+            configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+            # settings.LOGGING_CONFIG = None
+            # logging.config.dictConfig(settings.LOGGING)
 
 
 @receiver(post_save, sender=Setting)

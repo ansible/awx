@@ -3,22 +3,10 @@
 
 from logstash.formatter import LogstashFormatterVersion1
 from django.conf import settings
+from copy import copy
+import json
+import time
 
-
-# # Loggly example
-# 'json': {
-#     'format': '{ 
-#     "loggerName":"%(name)s", 
-#     "asciTime":"%(asctime)s", 
-#     "fileName":"%(filename)s", 
-#     "logRecordCreationTime":"%(created)f", 
-#     "functionName":"%(funcName)s", 
-#     "levelNo":"%(levelno)s", 
-#     "lineNo":"%(lineno)d", 
-#     "time":"%(msecs)d", 
-#     "levelName":"%(levelname)s", 
-#     "message":"%(message)s"}',
-# },
 
 class LogstashFormatter(LogstashFormatterVersion1):
     def __init__(self, **kwargs):
@@ -26,27 +14,97 @@ class LogstashFormatter(LogstashFormatterVersion1):
         self.host_id = settings.CLUSTER_HOST_ID
         return ret
 
+    def reformat_data_for_log(self, raw_data, kind=None):
+        '''
+        Process dictionaries from various contexts (job events, activity stream
+        changes, etc.) to give meaningful information
+        Output a dictionary which will be passed in logstash or syslog format
+        to the logging receiver
+        '''
+        if kind == 'activity_stream':
+            return raw_data
+        rename_fields = set((
+            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
+            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
+            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
+            'processName', 'relativeCreated', 'thread', 'threadName', 'extra',
+            'auth_token', 'tags', 'host', 'host_id', 'level', 'port', 'uuid'))
+        if kind == 'system_tracking':
+            data = copy(raw_data['facts_data'])
+        elif kind == 'job_events':
+            data = copy(raw_data['event_model_data'])
+        else:
+            data = copy(raw_data)
+        if isinstance(data, basestring):
+            data = json.loads(data)
+        skip_fields = ('res', 'password', 'event_data', 'stdout')
+        data_for_log = {}
+
+        def index_by_name(alist):
+            """Takes a list of dictionaries with `name` as a key in each dict
+            and returns a dictionary indexed by those names"""
+            adict = {}
+            for item in alist:
+                subdict = copy(item)
+                if 'name' in subdict:
+                    name = subdict.get('name', None)
+                elif 'path' in subdict:
+                    name = subdict.get('path', None)
+                if name:
+                    # Logstash v2 can not accept '.' in a name
+                    name = name.replace('.', '_')
+                    adict[name] = subdict
+            return adict
+
+        if kind == 'job_events':
+            data.update(data.get('event_data', {}))
+            for fd in data:
+                if fd in skip_fields:
+                    continue
+                key = fd
+                if fd in rename_fields:
+                    key = 'event_%s' % fd
+                val = data[fd]
+                if key.endswith('created'):
+                    time_float = time.mktime(data[fd].timetuple())
+                    val = self.format_timestamp(time_float)
+                data_for_log[key] = val
+        elif kind == 'system_tracking':
+            module_name = raw_data['module_name']
+            if module_name in ['services', 'packages', 'files']:
+                data_for_log[module_name] = index_by_name(data)
+            elif module_name == 'ansible':
+                data_for_log['ansible'] = data
+                # Remove sub-keys with data type conflicts in elastic search
+                data_for_log['ansible'].pop('ansible_python_version', None)
+                data_for_log['ansible']['ansible_python'].pop('version_info', None)
+            else:
+                data_for_log['facts'] = data
+            data_for_log['module_name'] = module_name
+        return data_for_log
+
     def get_extra_fields(self, record):
         fields = super(LogstashFormatter, self).get_extra_fields(record)
-        fields['cluster_host_id'] = self.host_id
+        if record.name.startswith('awx.analytics'):
+            log_kind = record.name.split('.')[-1]
+            fields = self.reformat_data_for_log(fields, kind=log_kind)
         return fields
 
     def format(self, record):
-        # Create message dict
-        # message = record.getMessage()
-        # print ' message ' + str(message)
         message = {
+            # Fields not included, but exist in related logs
+            # 'path': record.pathname
+            # '@version': '1', # from python-logstash
+            # 'tags': self.tags,
             '@timestamp': self.format_timestamp(record.created),
-            '@version': '1',
             'message': record.getMessage(),
             'host': self.host,
-            'path': record.pathname,
-            'tags': self.tags,
             'type': self.message_type,
 
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,
+            'cluster_host_id': self.host_id
         }
 
         # Add extra fields

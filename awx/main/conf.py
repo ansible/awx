@@ -285,3 +285,14 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Flag denoting to send individual messages for each fact in system tracking'),
+    help_text=_('If not set, the data from system tracking will be sent inside '
+                'of a single dictionary, but if set, separate requests will be sent '
+                'for each package, service, etc. that is found in the scan.'),
+    category=_('Logging'),
+    category_slug='logging',
+)

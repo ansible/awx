@@ -24,11 +24,10 @@ from requests_futures.sessions import FuturesSession
 from logstash import formatter
 
 # custom
+from copy import copy
 from requests.auth import HTTPBasicAuth
 from django.conf import settings as django_settings
 
-
-ENABLED_LOGS = ['ansible']
 
 # Logstash
 # https://github.com/vklochan/python-logstash
@@ -64,13 +63,15 @@ PARAM_NAMES = {
     'message_type': 'LOG_AGGREGATOR_TYPE',
     'username': 'LOG_AGGREGATOR_USERNAME',
     'password': 'LOG_AGGREGATOR_PASSWORD',
+    'enabled_loggers': 'LOG_AGGREGATOR_LOGGERS',
+    'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
 }
 # TODO: figure out what to do with LOG_AGGREGATOR_LOGGERS (if anything)
 
 
-def bg_cb(sess, resp):
-    """ Don't do anything with the response """
+def unused_callback(sess, resp):
     pass
+
 
 class HTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
@@ -83,7 +84,6 @@ class HTTPSHandler(logging.Handler):
             if settings_val:
                 setattr(self, fd, settings_val)
             elif fd in kwargs:
-                attr_name = fd
                 setattr(self, fd, kwargs[fd])
             else:
                 setattr(self, fd, None)
@@ -100,37 +100,53 @@ class HTTPSHandler(logging.Handler):
         if self.message_type == 'logstash':
             if not self.username:
                 # Logstash authentication not enabled
-                return kwargs
+                return
             logstash_auth = HTTPBasicAuth(self.username, self.password)
             self.session.auth = logstash_auth
         elif self.message_type == 'splunk':
-            ## Auth used by Splunk logger library
-            # self.session.auth = ('x', self.access_token)
-            # self.session.headers.update({'Content-Encoding': 'gzip'})
-            auth_header = "Splunk %s" % self.token
-            headers = dict(Authorization=auth_header)
+            auth_header = "Splunk %s" % self.password
+            headers = {
+                "Authorization": auth_header,
+                "Content-Type": "application/json"
+            }
             self.session.headers.update(headers)
 
     def emit(self, record):
+        if (self.host == '' or self.enabled_loggers is None or
+                record.name.split('.')[-1] not in self.enabled_loggers):
+            return
         try:
             payload = self.format(record)
-            # TODO: move this enablement logic to rely on individual loggers once
-            # the enablement config variable is hooked up
-            payload_data = json.loads(payload)
-            if payload_data['logger_name'].startswith('awx.analytics.system_tracking'):
-                st_type = None
-                for fd in ['services', 'packages', 'files', 'ansible']:
-                    if fd in payload_data:
-                        st_type = fd
-                        break
-                if st_type not in ENABLED_LOGS:
-                    return
             host = self.host
             if not host.startswith('http'):
                 host = 'http://%s' % self.host
-            if self.port != 80:
+            if self.port != 80 and self.port is not None:
                 host = '%s:%s' % (host, str(self.port))
-            kwargs = dict(data=payload, background_callback=bg_cb)
+
+            # Special action for System Tracking, queue up multiple log messages
+            if self.indv_facts:
+                payload_data = json.loads(payload)
+                if record.name.startswith('awx.analytics.system_tracking'):
+                    module_name = payload_data['module_name']
+                    if module_name in ['services', 'packages', 'files']:
+                        facts_dict = payload_data.pop(module_name)
+                        for key in facts_dict:
+                            fact_payload = copy(payload_data)
+                            fact_payload.update(facts_dict[key])
+                            kwargs = dict(data=json.dumps(fact_payload), background_callback=unused_callback)
+                            self.session.post(host, **kwargs)
+                        return
+
+            kwargs = dict(data=payload, background_callback=unused_callback)
+            # # splunk doesn't take "@" in the keys
+            # if self.message_type == 'splunk':
+            #     payload_dict = json.loads(payload)
+            #     new_dict = {}
+            #     for key in payload_dict:
+            #         new_key = key.replace('@', '')
+            #         new_dict[new_key] = payload_dict[key]
+            #     new_payload = json.dumps(new_dict)
+            #     kwargs['data'] = json.dumps(new_dict)
             self.session.post(host, **kwargs)
         except (KeyboardInterrupt, SystemExit):
             raise
@@ -162,9 +178,7 @@ class SplunkLogger(logging.Handler):
     def _set_auth(self, access_token, project_id, api_domain):
         # The access token and project id passed as parameter override the ones
         # configured in the .splunk_logger file.
-        if access_token is not None\
-        and project_id is not None\
-        and api_domain is not None:
+        if access_token is not None and project_id is not None and api_domain is not None:
             self.project_id = project_id
             self.access_token = access_token
             self.api_domain = api_domain
@@ -173,9 +187,7 @@ class SplunkLogger(logging.Handler):
             # Try to get the credentials form the configuration file
             self.project_id, self.access_token, self.api_domain = parse_config_file()
 
-            if self.project_id is None\
-            or self.access_token is None\
-            or self.api_domain is None:
+            if self.project_id is None or self.access_token is None or self.api_domain is None:
                 # Try to get the credentials form the environment variables
                 self.project_id, self.access_token, self.api_domain = get_config_from_env()
 

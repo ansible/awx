@@ -20,7 +20,7 @@ from crum.signals import current_user_getter
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
-from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates, format_for_log
+from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
 
 from awx.main.consumers import emit_channel_notification
@@ -28,7 +28,6 @@ from awx.main.consumers import emit_channel_notification
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
-analytics_logger = logging.getLogger('awx.analytics.activity_stream')
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
@@ -370,15 +369,11 @@ def activity_stream_create(sender, instance, created, **kwargs):
         if type(instance) == Job:
             if 'extra_vars' in changes:
                 changes['extra_vars'] = instance.display_extra_vars()
-        changes_dict = json.dumps(changes)
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=changes_dict)
+            changes=json.dumps(changes))
         activity_entry.save()
-        # analytics_logger.info('Activity Stream create entry for %s' % str(object1),
-        #                       extra=format_for_log(changes, kind='activity_stream',
-        #                       actor=activity_entry.actor, operation='update', object1=object1))
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.
@@ -406,9 +401,6 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-    # analytics_logger.info('Activity Stream update entry for %s' % str(object1),
-    #                       extra=format_for_log(changes, kind='activity_stream',
-    #                       actor=activity_entry.actor, operation='update', object1=object1))
     if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         getattr(activity_entry, object1).add(instance)
 

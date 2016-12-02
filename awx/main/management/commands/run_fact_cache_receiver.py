@@ -16,10 +16,9 @@ from django.utils import timezone
 # AWX
 from awx.main.models.fact import Fact
 from awx.main.models.inventory import Host
-from awx.main.utils import format_for_log
 
 logger = logging.getLogger('awx.main.commands.run_fact_cache_receiver')
-data_logger = logging.getLogger('awx.analytics.system_tracking')
+analytics_logger = logging.getLogger('awx.analytics.system_tracking')
 
 
 class FactBrokerWorker(ConsumerMixin):
@@ -83,7 +82,8 @@ class FactBrokerWorker(ConsumerMixin):
             # Create new Fact entry
             fact_obj = Fact.add_fact(host_obj.id, module_name, self.timestamp, facts)
             logger.info('Created new fact <fact_id, module> <%s, %s>' % (fact_obj.id, module_name))
-            data_logger.info('Received message with fact data', extra=format_for_log({module_name: facts}, kind="fact"))
+            analytics_logger.info('Received message with fact data', extra=dict(
+                module_name=module_name, facts_data=facts))
         return fact_obj
 
 

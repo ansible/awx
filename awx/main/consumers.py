@@ -11,6 +11,7 @@ from awx.main.models.organization import AuthToken
 
 logger = logging.getLogger('awx.main.consumers')
 
+
 def discard_groups(message):
     if 'groups' in message.channel_session:
         for group in message.channel_session['groups']:

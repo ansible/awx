@@ -2,6 +2,8 @@
 from django.apps import AppConfig
 # from django.core import checks
 from django.utils.translation import ugettext_lazy as _
+from django.utils.log import configure_logging
+from django.conf import settings
 
 
 class ConfConfig(AppConfig):
@@ -13,4 +15,5 @@ class ConfConfig(AppConfig):
         self.module.autodiscover()
         from .settings import SettingsWrapper
         SettingsWrapper.initialize()
+        configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
         # checks.register(SettingsWrapper._check_settings)
