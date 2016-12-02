@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.core.signals import setting_changed
 from django.db.models.signals import post_save, pre_delete, post_delete
+from django.core.cache import cache
 from django.dispatch import receiver
 
 # Tower
@@ -33,7 +34,7 @@ def handle_setting_change(key, for_delete=False):
         setting_key_dict[dependent_key] = dependent_key
     cache_keys = set([Setting.get_cache_key(k) for k in setting_keys])
     logger.debug('sending signals to delete cache keys(%r)', cache_keys)
-    # cache.delete_many(cache_keys)
+    cache.delete_many(cache_keys)
     clear_cache_keys.delay(setting_key_dict)
 
     # Send setting_changed signal with new value for each setting.
