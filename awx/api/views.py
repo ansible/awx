@@ -3046,6 +3046,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     parent_model = WorkflowJobTemplate
     relationship = 'workflow_jobs'
     parent_key = 'workflow_job_template'
+    new_in_310 = True
 
 
 class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
@@ -3057,6 +3058,7 @@ class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
     parent_model = WorkflowJobTemplate
     relationship = 'schedules'
     parent_key = 'unified_job_template'
+    new_in_310 = True
 
 
 class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
