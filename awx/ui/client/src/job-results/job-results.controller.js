@@ -64,17 +64,25 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
     // turn related api browser routes into tower routes
     getTowerLinks();
+    
+    // the links below can't be set in getTowerLinks because the
+    // links on the UI don't directly match the corresponding URL
+    // on the API browser
     if(jobData.summary_fields && jobData.summary_fields.job_template &&
         jobData.summary_fields.job_template.id){
             $scope.job_template_link = `/#/templates/job_template/${$scope.job.summary_fields.job_template.id}`;
     }
     if(jobData.summary_fields && jobData.summary_fields.project_update &&
         jobData.summary_fields.project_update.status){
-         $scope.project_status = jobData.summary_fields.project_update.status;
+            $scope.project_status = jobData.summary_fields.project_update.status;
     }
     if(jobData.summary_fields && jobData.summary_fields.project_update &&
         jobData.summary_fields.project_update.id){
-        $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+            $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+    }
+    if(jobData.summary_fields && jobData.summary_fields.source_workflow_job &&
+        jobData.summary_fields.source_workflow_job.id){
+            $scope.workflow_result_link = `/#/workflows/${jobData.summary_fields.source_workflow_job.id}`;
     }
 
     // use options labels to manipulate display of details
