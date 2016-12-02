@@ -177,8 +177,7 @@ export default
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
                     url = params.url || null,
                     scheduler;
-
-                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories') {
+                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories' && !url) {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
                 else if(base === "inventories"){

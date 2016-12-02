@@ -22,25 +22,56 @@ export default
 
             // job templates
             $stateExtender.addState({
+                searchPrefix: 'schedule',
                 name: 'jobTemplateSchedules',
                 route: '/templates/job_template/:id/schedules',
-                templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerListController',
                 data: {
                     activityStream: true,
                     activityStreamTarget: 'job_template',
                     activityStreamId: 'id'
                 },
                 ncyBreadcrumb: {
-                    parent: 'templates.editJobTemplate',
+                    parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
                     label: 'SCHEDULES'
+                },
+                resolve: {
+                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = `${GetBasePath('job_templates')}${$stateParams.id}/schedules`;
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+                        let path = `${GetBasePath('job_templates')}${$stateParams.id}`;
+                        Rest.setUrl(path);
+                        return Rest.get(path).then((res) => res.data);
+                    }]
+                },
+                views: {
+                    '@': {
+                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                            // include name of parent resource in listTitle
+                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            let html = generateList.build({
+                                list: SchedulesList,
+                                mode: 'edit'
+                            });
+                            html = generateList.wrapPanel(html);
+                            return generateList.insertFormView() + html;
+                        },
+                        controller: 'schedulerListController'
+                    }
                 }
             });
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.add',
                 route: '/add',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
+                views: {
+                    'form': {
+                        controller: 'schedulerAddController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
                     parent: 'jobTemplateSchedules',
                     label: 'CREATE SCHEDULE'
@@ -49,8 +80,12 @@ export default
             $stateExtender.addState({
                 name: 'jobTemplateSchedules.edit',
                 route: '/:schedule_id',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
+                views: {
+                    'form': {
+                        controller: 'schedulerEditController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
                     parent: 'jobTemplateSchedules',
                     label: '{{schedule_obj.name}}'
@@ -59,6 +94,7 @@ export default
 
             // workflows
             $stateExtender.addState({
+                searchPrefix: 'schedule',
                 name: 'workflowJobTemplateSchedules',
                 route: '/templates/workflow_job_template/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
@@ -69,15 +105,47 @@ export default
                     activityStreamId: 'id'
                 },
                 ncyBreadcrumb: {
-                    parent: 'templates.editWorkflowJobTemplate',
+                    parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
                     label: 'SCHEDULES'
+                },
+                resolve: {
+                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}/schedules`;
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+                        let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}`;
+                        Rest.setUrl(path);
+                        return Rest.get(path).then((res) => res.data);
+                    }]
+                },
+                views: {
+                    '@': {
+                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                            // include name of parent resource in listTitle
+                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            let html = generateList.build({
+                                list: SchedulesList,
+                                mode: 'edit'
+                            });
+                            html = generateList.wrapPanel(html);
+                            return generateList.insertFormView() + html;
+                        },
+                        controller: 'schedulerListController'
+                    }
                 }
             });
             $stateExtender.addState({
                 name: 'workflowJobTemplateSchedules.add',
                 route: '/add',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
+                views: {
+                    'form': {
+                        controller: 'schedulerAddController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
                     parent: 'workflowJobTemplateSchedules',
                     label: 'CREATE SCHEDULE'
@@ -86,8 +154,12 @@ export default
             $stateExtender.addState({
                 name: 'workflowJobTemplateSchedules.edit',
                 route: '/:schedule_id',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
+                views: {
+                    'form': {
+                        controller: 'schedulerEditController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
                     parent: 'workflowJobTemplateSchedules',
                     label: '{{schedule_obj.name}}'
@@ -95,7 +167,7 @@ export default
             });
             // projects
             $stateExtender.addState({
-            	searchPrefix: 'schedule',
+                searchPrefix: 'schedule',
                 name: 'projectSchedules',
                 route: '/projects/:id/schedules',
                 data: {
