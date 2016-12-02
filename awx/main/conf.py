@@ -296,3 +296,12 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+register(
+    'LOG_AGGREGATOR_ENABLED',
+    field_class=fields.BooleanField,
+    default=False,
+    label=_('Flag denoting whether to use the external logger system'),
+    help_text=_('If not set, only normal settings data will be used to configure loggers.'),
+    category=_('Logging'),
+    category_slug='logging',
+)

@@ -23,7 +23,7 @@ from socketio import socketio_manage
 from socketio.server import SocketIOServer
 from socketio.namespace import BaseNamespace
 
-logger = logging.getLogger('awx.main.consumers')
+logger = logging.getLogger('awx.main.commands.run_socketio_service')
 
 
 class SocketSession(object):

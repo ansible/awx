@@ -92,7 +92,12 @@ def clear_cache_keys(cache_keys):
     cache.delete_many(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+            LOGGING = settings.LOGGING
+            if settings.LOG_AGGREGATOR_ENABLED:
+                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
+            else:
+                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSNullHandler'
+            configure_logging(settings.LOGGING_CONFIG, LOGGING)
             break
 
 

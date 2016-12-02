@@ -15,5 +15,8 @@ class ConfConfig(AppConfig):
         self.module.autodiscover()
         from .settings import SettingsWrapper
         SettingsWrapper.initialize()
-        configure_logging(settings.LOGGING_CONFIG, settings.LOGGING)
+        if settings.LOG_AGGREGATOR_ENABLED:
+            LOGGING = settings.LOGGING
+            LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
+            configure_logging(settings.LOGGING_CONFIG, LOGGING)
         # checks.register(SettingsWrapper._check_settings)

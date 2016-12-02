@@ -14,6 +14,7 @@ from requests_futures.sessions import FuturesSession
 
 # custom
 from django.conf import settings as django_settings
+from django.utils.log import NullHandler
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -34,6 +35,13 @@ PARAM_NAMES = {
 
 def unused_callback(sess, resp):
     pass
+
+
+class HTTPSNullHandler(NullHandler):
+    "Placeholder null handler to allow loading without database access"
+
+    def __init__(self, host, **kwargs):
+        return super(HTTPSNullHandler, self).__init__()
 
 
 class HTTPSHandler(logging.Handler):

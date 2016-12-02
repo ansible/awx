@@ -825,6 +825,8 @@ TOWER_URL_BASE = "https://towerhost"
 
 TOWER_SETTINGS_MANIFEST = {}
 
+LOG_AGGREGATOR_ENABLED = False
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
@@ -869,7 +871,7 @@ LOGGING = {
             'formatter': 'simple',
         },
         'http_receiver': {
-            'class': 'awx.main.utils.handlers.HTTPSHandler',
+            'class': 'awx.main.utils.handlers.HTTPSNullHandler',
             'level': 'INFO',
             'formatter': 'json',
             'host': '',
