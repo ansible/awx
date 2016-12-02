@@ -25,6 +25,17 @@
                     var options = [],
                         error = "";
 
+                    function parseAzure(option) {
+                        var newOption = {};
+
+                        newOption.type = "azure";
+                        newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-microsoft";
+                        newOption.link = option.login_url;
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "Azure AD");
+
+                        return newOption;
+                    }
+
                     function parseGoogle(option) {
                         var newOption = {};
 
@@ -78,7 +89,9 @@
 
                         // set up the particular tooltip, icon, etc.
                         // needed by the login type
-                        if (key.split("-")[0] === "google") {
+                        if (key.split("-")[0] === "azuread") {
+                            finalOption = parseAzure(option, key);
+                        } else if (key.split("-")[0] === "google") {
                             finalOption = parseGoogle(option, key);
                         } else if (key.split("-")[0] === "github") {
                             finalOption = parseGithub(option, key);
