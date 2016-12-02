@@ -9,6 +9,7 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 export default {
     name: 'jobDetail',
     url: '/jobs/:id',
+    searchPrefix: 'job_event',
     ncyBreadcrumb: {
         parent: 'jobs',
         label: '{{ job.id }} - {{ job.name }}'
@@ -19,6 +20,16 @@ export default {
                 "jobs": ["status_changed", "summary"],
                 "job_events": []
             }
+        }
+    },
+    params: {
+        job_event_search: {
+            value: {
+                order_by: 'id',
+                not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
+            },
+            dynamic: true,
+            squash: ''
         }
     },
     resolve: {
@@ -42,6 +53,12 @@ export default {
                 });
             return val.promise;
         }],
+        Dataset: ['QuerySet', '$stateParams', 'jobData',
+            function(qs, $stateParams, jobData) {
+                let path = jobData.related.job_events;
+                return qs.search(path, $stateParams[`job_event_search`]);
+            }
+        ],
         // used to signify if job is completed or still running
         jobFinished: ['jobData', function(jobData) {
             if (jobData.finished) {
@@ -147,11 +164,6 @@ export default {
                 });
             return val.promise;
         }],
-        // This clears out the event queue, otherwise it'd be full of events
-        // for previous job results the user had navigated to
-        eventQueueInit: ['eventQueue', function(eventQueue) {
-            eventQueue.initialize();
-        }]
     },
     templateUrl: templateUrl('job-results/job-results'),
     controller: 'jobResultsController'

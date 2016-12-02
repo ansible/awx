@@ -3,13 +3,16 @@
 @breakpoint-md: 1200px;
 
 .JobResultsStdOut {
-    height: ~"calc(100% - 70px)";
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .JobResultsStdOut-toolbar {
+    flex: initial;
     display: flex;
-    height: 38px;
-    margin-top: 15px;
     border: 1px solid @default-list-header-bg;
     border-bottom: 0px;
     border-radius: 5px;
@@ -28,7 +31,7 @@
     display: flex;
     justify-content: space-between;
     width: 70px;
-    padding-bottom: 0px;
+    padding-bottom: 10px;
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 10px;
@@ -106,21 +109,18 @@
 }
 
 .JobResultsStdOut-stdoutContainer {
-    height: ~"calc(100% - 48px)";
-    background-color: @default-no-items-bord;
+    flex: 1;
+    position: relative;
+    background-color: #F6F6F6;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
 .JobResultsStdOut-numberColumnPreload {
     background-color: @default-list-header-bg;
+    position: absolute;
+    height: 100%;
     width: 70px;
-    position: fixed;
-    top: 148px;
-    bottom: 20px;
-    margin-top: 65px;
-    margin-bottom: 65px;
-
 }
 
 .JobResultsStdOut-aLineOfStdOut {
@@ -171,6 +171,10 @@
     width:100%;
 }
 
+.JobResultsStdOut-stdoutColumn {
+    cursor: pointer;
+}
+
 .JobResultsStdOut-aLineOfStdOut:hover,
 .JobResultsStdOut-aLineOfStdOut:hover .JobResultsStdOut-lineNumberColumn {
     background-color: @default-bg;
@@ -197,6 +201,7 @@
 .JobResultsStdOut-followAnchor {
     height: 20px;
     width: 100%;
+    border-left: 70px solid @default-list-header-bg;
 }
 
 .JobResultsStdOut-toTop {
