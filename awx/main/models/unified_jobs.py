@@ -520,7 +520,6 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         related_name='%(class)s_labels'
     )
 
-
     def get_absolute_url(self):
         real_instance = self.get_real_instance()
         if real_instance != self:

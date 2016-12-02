@@ -1865,6 +1865,7 @@ class UnifiedJobAccess(BaseAccess):
         qs = qs.select_related(
             'created_by',
             'modified_by',
+            'unified_job_node__workflow_job',
         )
         qs = qs.prefetch_related(
             'unified_job_template',
