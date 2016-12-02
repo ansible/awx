@@ -3510,6 +3510,7 @@ class JobJobEventsList(BaseJobEventsList):
         qs = qs.prefetch_related('hosts', 'children')
         if self.request.user.is_superuser or self.request.user.is_system_auditor:
             return qs.all()
+        host_qs = self.request.user.get_queryset(Host)
         return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs))
 
 
