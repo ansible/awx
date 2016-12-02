@@ -228,107 +228,108 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
 
                     let formValues = {};
 
-                    // build any prompt values
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_credential_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.credential) {
-                            formValues.credential_name = $scope.nodeBeingEdited.promptValues.credential.name;
-                            formValues.credential = $scope.nodeBeingEdited.promptValues.credential.id;
-                        } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential) {
-                            formValues.credential_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name : null;
-                            formValues.credential = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id : null;
-                        } else {
-                            formValues.credential_name = null;
-                            formValues.credential = null;
-                        }
-                    }
-
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_inventory_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.inventory) {
-                            formValues.inventory_name = $scope.nodeBeingEdited.promptValues.inventory.name;
-                            formValues.inventory = $scope.nodeBeingEdited.promptValues.inventory.id;
-                        } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory) {
-                            formValues.inventory_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name : null;
-                            formValues.inventory = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id : null;
-                        } else {
-                            formValues.inventory_name = null;
-                            formValues.inventory = null;
-                        }
-                    }
-
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_job_type_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.job_type) {
-                            formValues.job_type = {
-                                value: $scope.nodeBeingEdited.promptValues.job_type
-                            };
-                        } else if ($scope.nodeBeingEdited.originalNodeObj.job_type) {
-                            formValues.job_type = {
-                                value: $scope.nodeBeingEdited.originalNodeObj.job_type
-                            };
-                        } else if ($scope.nodeBeingEdited.unifiedJobTemplate.job_type) {
-                            formValues.job_type = {
-                                value: $scope.nodeBeingEdited.unifiedJobTemplate.job_type
-                            };
-                        } else {
-                            formValues.job_type = {
-                                value: null
-                            };
+                    if($scope.nodeBeingEdited.unifiedJobTemplate){
+                        // build any prompt values
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_credential_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.credential) {
+                                formValues.credential_name = $scope.nodeBeingEdited.promptValues.credential.name;
+                                formValues.credential = $scope.nodeBeingEdited.promptValues.credential.id;
+                            } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential) {
+                                formValues.credential_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.name : null;
+                                formValues.credential = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.credential.id : null;
+                            } else {
+                                formValues.credential_name = null;
+                                formValues.credential = null;
+                            }
                         }
 
-                    }
-
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_limit_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.limit === 'string') {
-                            formValues.limit = $scope.nodeBeingEdited.promptValues.limit;
-                        } else if (typeof $scope.nodeBeingEdited.originalNodeObj.limit === 'string') {
-                            formValues.limit = $scope.nodeBeingEdited.originalNodeObj.limit;
-                        } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.limit === 'string') {
-                            formValues.limit = $scope.nodeBeingEdited.unifiedJobTemplate.limit;
-                        } else {
-                            formValues.limit = null;
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_inventory_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.inventory) {
+                                formValues.inventory_name = $scope.nodeBeingEdited.promptValues.inventory.name;
+                                formValues.inventory = $scope.nodeBeingEdited.promptValues.inventory.id;
+                            } else if ($scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory) {
+                                formValues.inventory_name = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.name : null;
+                                formValues.inventory = $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id ? $scope.nodeBeingEdited.unifiedJobTemplate.summary_fields.inventory.id : null;
+                            } else {
+                                formValues.inventory_name = null;
+                                formValues.inventory = null;
+                            }
                         }
-                    }
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_skip_tags_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.skip_tags === 'string') {
-                            formValues.skip_tags = $scope.nodeBeingEdited.promptValues.skip_tags;
-                        } else if (typeof $scope.nodeBeingEdited.originalNodeObj.skip_tags === 'string') {
-                            formValues.skip_tags = $scope.nodeBeingEdited.originalNodeObj.skip_tags;
-                        } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags === 'string') {
-                            formValues.skip_tags = $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags;
-                        } else {
-                            formValues.skip_tags = null;
+
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_job_type_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && $scope.nodeBeingEdited.promptValues.job_type) {
+                                formValues.job_type = {
+                                    value: $scope.nodeBeingEdited.promptValues.job_type
+                                };
+                            } else if ($scope.nodeBeingEdited.originalNodeObj.job_type) {
+                                formValues.job_type = {
+                                    value: $scope.nodeBeingEdited.originalNodeObj.job_type
+                                };
+                            } else if ($scope.nodeBeingEdited.unifiedJobTemplate.job_type) {
+                                formValues.job_type = {
+                                    value: $scope.nodeBeingEdited.unifiedJobTemplate.job_type
+                                };
+                            } else {
+                                formValues.job_type = {
+                                    value: null
+                                };
+                            }
+
                         }
-                    }
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_tags_on_launch) {
-                        if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.job_tags === 'string') {
-                            formValues.job_tags = $scope.nodeBeingEdited.promptValues.job_tags;
-                        } else if (typeof $scope.nodeBeingEdited.originalNodeObj.job_tags === 'string') {
-                            formValues.job_tags = $scope.nodeBeingEdited.originalNodeObj.job_tags;
-                        } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.job_tags === 'string') {
-                            formValues.job_tags = $scope.nodeBeingEdited.unifiedJobTemplate.job_tags;
-                        } else {
-                            formValues.job_tags = null;
+
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_limit_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.limit === 'string') {
+                                formValues.limit = $scope.nodeBeingEdited.promptValues.limit;
+                            } else if (typeof $scope.nodeBeingEdited.originalNodeObj.limit === 'string') {
+                                formValues.limit = $scope.nodeBeingEdited.originalNodeObj.limit;
+                            } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.limit === 'string') {
+                                formValues.limit = $scope.nodeBeingEdited.unifiedJobTemplate.limit;
+                            } else {
+                                formValues.limit = null;
+                            }
                         }
-                    }
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_skip_tags_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.skip_tags === 'string') {
+                                formValues.skip_tags = $scope.nodeBeingEdited.promptValues.skip_tags;
+                            } else if (typeof $scope.nodeBeingEdited.originalNodeObj.skip_tags === 'string') {
+                                formValues.skip_tags = $scope.nodeBeingEdited.originalNodeObj.skip_tags;
+                            } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags === 'string') {
+                                formValues.skip_tags = $scope.nodeBeingEdited.unifiedJobTemplate.skip_tags;
+                            } else {
+                                formValues.skip_tags = null;
+                            }
+                        }
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.ask_tags_on_launch) {
+                            if ($scope.nodeBeingEdited.promptValues && typeof $scope.nodeBeingEdited.promptValues.job_tags === 'string') {
+                                formValues.job_tags = $scope.nodeBeingEdited.promptValues.job_tags;
+                            } else if (typeof $scope.nodeBeingEdited.originalNodeObj.job_tags === 'string') {
+                                formValues.job_tags = $scope.nodeBeingEdited.originalNodeObj.job_tags;
+                            } else if (typeof $scope.nodeBeingEdited.unifiedJobTemplate.job_tags === 'string') {
+                                formValues.job_tags = $scope.nodeBeingEdited.unifiedJobTemplate.job_tags;
+                            } else {
+                                formValues.job_tags = null;
+                            }
+                        }
 
-                    if ($scope.nodeBeingEdited.unifiedJobTemplate.type === "job_template") {
-                        $scope.workflowMakerFormConfig.activeTab = "jobs";
-                    }
-
-                    $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
-
-                    switch ($scope.nodeBeingEdited.unifiedJobTemplate.type) {
-                        case "job_template":
+                        if ($scope.nodeBeingEdited.unifiedJobTemplate.type === "job_template") {
                             $scope.workflowMakerFormConfig.activeTab = "jobs";
-                            break;
-                        case "project":
-                            $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                            break;
-                        case "inventory_source":
-                            $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                            break;
+                        }
+
+                        $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
+
+                        switch ($scope.nodeBeingEdited.unifiedJobTemplate.type) {
+                            case "job_template":
+                                $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                break;
+                            case "project":
+                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                break;
+                            case "inventory_source":
+                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                break;
+                        }
                     }
 
-                    //formValues.edgeType = $scope.nodeBeingEdited.edgeType;
                     $scope.showTypeOptions = (parent && parent.isStartNode) ? false : true;
 
                     $scope.$broadcast('setEdgeType', $scope.nodeBeingEdited.edgeType);
@@ -344,7 +345,7 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                 // Determine whether or not we need to go out and GET this nodes unified job template
                 // in order to determine whether or not prompt fields are needed
 
-                if (!$scope.nodeBeingEdited.isNew && !$scope.nodeBeingEdited.edited && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type === 'job') {
+                if (!$scope.nodeBeingEdited.isNew && !$scope.nodeBeingEdited.edited && $scope.nodeBeingEdited.unifiedJobTemplate && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type && $scope.nodeBeingEdited.unifiedJobTemplate.unified_job_type === 'job') {
                     // This is a node that we got back from the api with an incomplete
                     // unified job template so we're going to pull down the whole object
 

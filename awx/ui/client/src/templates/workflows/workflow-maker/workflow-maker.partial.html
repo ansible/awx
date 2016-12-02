@@ -63,7 +63,7 @@
             <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="edit" class="WorkflowMaker-chart"></workflow-chart>
         </div>
         <div class="WorkflowMaker-contentRight">
-            <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited && nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "ADD A TEMPLATE"}}</div>
+            <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited) ? ((nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "EDIT TEMPLATE") : "ADD A TEMPLATE"}}</div>
             <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'">Please hover over a template and click the Add button.</div>
             <div class="WorkflowMaker-form" ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'">
                 <div class="Form-tabHolder">

@@ -171,6 +171,17 @@ export default [ '$state',
                                 return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                             }).each(wrap);
 
+                        thisNode.append("foreignObject")
+                            .attr("x", 17)
+                            .attr("y", 22)
+                            .attr("dy", ".35em")
+                            .attr("text-anchor", "middle")
+                            .attr("class", "WorkflowChart-defaultText WorkflowChart-incompleteText")
+                            .html(function () {
+                                return "<span class=\"WorkflowChart-incompleteIcon\">\uf06a</span><span> INCOMPLETE</span>";
+                            })
+                            .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
+
                         thisNode.append("circle")
                             .attr("cy", rectH)
                             .attr("r", 10)
@@ -544,6 +555,8 @@ export default [ '$state',
                 t.selectAll(".WorkflowChart-detailsLink")
                     .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; });
 
+                t.selectAll(".WorkflowChart-incompleteText")
+                    .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
             }
 
