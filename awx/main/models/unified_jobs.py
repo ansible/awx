@@ -341,7 +341,7 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         unified_jt = copy_model_by_class(self, unified_jt_class, fields, {})
 
         time_now = datetime.now()
-        unified_jt.name = unified_jt.name.split('@', 1)[0] + ' @ ' + time_now.strftime('%H:%M:%S %p')
+        unified_jt.name = unified_jt.name.split('@', 1)[0] + ' @ ' + time_now.strftime('%I:%M:%S %p')
 
         unified_jt.save()
         copy_m2m_relationships(self, unified_jt, fields)
