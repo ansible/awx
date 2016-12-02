@@ -106,7 +106,7 @@ class ProjectOptions(models.Model):
         default=None,
         on_delete=models.SET_NULL,
     )
-    timeout = models.PositiveIntegerField(
+    timeout = models.IntegerField(
         blank=True,
         default=0,
     )
