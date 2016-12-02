@@ -2781,15 +2781,15 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
         return None
 
 
-class WorkflowJobTemplateNodeSuccessNodesList(WorkflowsEnforcementMixin, WorkflowJobTemplateNodeChildrenBaseList):
+class WorkflowJobTemplateNodeSuccessNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'success_nodes'
 
 
-class WorkflowJobTemplateNodeFailureNodesList(WorkflowsEnforcementMixin, WorkflowJobTemplateNodeChildrenBaseList):
+class WorkflowJobTemplateNodeFailureNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'failure_nodes'
 
 
-class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowsEnforcementMixin, WorkflowJobTemplateNodeChildrenBaseList):
+class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowJobTemplateNodeChildrenBaseList):
     relationship = 'always_nodes'
 
 
@@ -2811,15 +2811,15 @@ class WorkflowJobNodeChildrenBaseList(WorkflowsEnforcementMixin, SubListAPIView)
         return getattr(parent, self.relationship).all()
 
 
-class WorkflowJobNodeSuccessNodesList(WorkflowsEnforcementMixin, WorkflowJobNodeChildrenBaseList):
+class WorkflowJobNodeSuccessNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'success_nodes'
 
 
-class WorkflowJobNodeFailureNodesList(WorkflowsEnforcementMixin, WorkflowJobNodeChildrenBaseList):
+class WorkflowJobNodeFailureNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'failure_nodes'
 
 
-class WorkflowJobNodeAlwaysNodesList(WorkflowsEnforcementMixin, WorkflowJobNodeChildrenBaseList):
+class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'always_nodes'
 
 
