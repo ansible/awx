@@ -296,7 +296,7 @@ class ParentMixin(object):
             raise PermissionDenied()
 
 
-class SubListAPIView(ListAPIView, ParentMixin):
+class SubListAPIView(ParentMixin, ListAPIView):
     # Base class for a read-only sublist view.
 
     # Subclasses should define at least:
@@ -501,7 +501,7 @@ class DeleteLastUnattachLabelMixin(object):
         return res
 
 
-class SubDetailAPIView(generics.RetrieveAPIView, GenericAPIView, ParentMixin):
+class SubDetailAPIView(ParentMixin, generics.RetrieveAPIView, GenericAPIView):
     pass
 
 
