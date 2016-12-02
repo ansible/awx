@@ -47,6 +47,7 @@ export default ['$scope', '$rootScope', '$location', '$log', '$stateParams',
                 }
                 $scope.organization_obj = data;
                 $scope.$emit('organizationLoaded');
+                Wait('stop');
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, form, {

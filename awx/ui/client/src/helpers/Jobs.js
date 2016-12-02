@@ -125,9 +125,9 @@ export default
         };
     }])
 
-    .factory('DeleteJob', ['Find', 'GetBasePath', 'Rest', 'Wait',
+    .factory('DeleteJob', ['$state', 'Find', 'GetBasePath', 'Rest', 'Wait',
     'ProcessErrors', 'Prompt', 'Alert', '$filter',
-    function(Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
+    function($state, Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
         $filter){
         return function(params) {
             var scope = params.scope,
@@ -176,8 +176,8 @@ export default
                                 scope.$emit(callback, action_label);
                             }
                             else {
-                                // @issue: OLD SEARCH
-                                // scope.search(scope.iterator);
+                                $state.reload();
+                                Wait('stop');
                             }
                         })
                         .error(function(obj, status) {
@@ -198,8 +198,8 @@ export default
                                 scope.$emit(callback, action_label);
                             }
                             else {
-                                // @issue: OLD SEARCH
-                                // scope.search(scope.iterator);
+                                $state.reload();
+                                Wait('stop');
                             }
                         })
                         .error(function (obj, status) {

@@ -162,11 +162,11 @@
                  Rest.destroy()
                      .success(function() {
                          if (parseInt($state.params.notification_template_id) === id) {
-                             $state.go("^", null, { reload: true });
+                            $state.go("^", null, { reload: true });
                          } else {
-                             // @issue: OLD SEARCH
-                             // $scope.search(list.iterator);
+                            $state.go('.', null, {reload: true});
                          }
+                         Wait('stop');
                      })
                      .error(function(data, status) {
                          ProcessErrors($scope, data, status, null, {

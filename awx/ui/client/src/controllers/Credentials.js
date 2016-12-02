@@ -52,13 +52,12 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function() {
-
                     if (parseInt($state.params.credential_id) === id) {
                         $state.go("^", null, { reload: true });
                     } else {
-                        // @issue: OLD SEARCH
-                        // $scope.search(list.iterator);
+                        $state.go('.', null, {reload: true});
                     }
+                    Wait('stop');
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, {
@@ -302,6 +301,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
             Rest.get()
                 .success(function(data) {
                     $scope.canShareCredential = (data.count) ? true : false;
+                    Wait('stop');
                 }).error(function(data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to find if users is admin of org' + status });
                 });
@@ -462,6 +462,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                 $scope.credential_obj = data;
 
                 $scope.$emit('credentialLoaded');
+                Wait('stop');
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, form, {

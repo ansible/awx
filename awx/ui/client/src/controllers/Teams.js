@@ -173,6 +173,7 @@ export function TeamsEdit($scope, $rootScope, $stateParams,
             $scope.organization_name = data.summary_fields.organization.name;
 
             $scope.team_obj = data;
+            Wait('stop');
         });
 
         $scope.$watch('team_obj.summary_fields.user_capabilities.edit', function(val) {

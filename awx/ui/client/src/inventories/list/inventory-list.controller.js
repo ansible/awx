@@ -274,8 +274,8 @@ function InventoriesList($scope, $rootScope, $location, $log,
                     if (parseInt($state.params.inventory_id) === id) {
                         $state.go("^", null, {reload: true});
                     } else {
-                        // @issue: OLD SEARCH
-                        // $scope.search(list.iterator);
+                       $state.go('.', null, {reload: true});
+                       Wait('stop');
                     }
                 })
                 .error(function (data, status) {

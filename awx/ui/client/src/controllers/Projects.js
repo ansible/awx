@@ -551,6 +551,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 $scope.project_obj = data;
                 $scope.name = data.name;
                 $scope.$emit('projectLoaded');
+                Wait('stop');
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
