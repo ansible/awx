@@ -18,8 +18,8 @@ workflow_job_template. The response will include the following fields:
   this workflow_job_template (JSON object, read-only)
 
 Make a POST request to this resource to launch the workflow_job_template. If any
-passwords, inventory, or extra variables (extra_vars) are required, they must
-be passed via POST data, with extra_vars given as a YAML or JSON string and
+credential, inventory, project or extra variables (extra_vars) are required, they
+must be passed via POST data, with extra_vars given as a YAML or JSON string and
 escaped parentheses.
 
 If successful, the response status code will be 201.  If any required passwords
