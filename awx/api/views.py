@@ -88,6 +88,36 @@ def api_exception_handler(exc, context):
     return exception_handler(exc, context)
 
 
+class ActivityStreamEnforcementMixin(object):
+    '''
+    Mixin to check that license supports activity streams.
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled('activity_streams'):
+            raise LicenseForbids(_('Your license does not allow use of the activity stream.'))
+        return super(ActivityStreamEnforcementMixin, self).check_permissions(request)
+
+
+class SystemTrackingEnforcementMixin(object):
+    '''
+    Mixin to check that license supports system tracking.
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled('system_tracking'):
+            raise LicenseForbids(_('Your license does not permit use of system tracking.'))
+        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
+
+
+class WorkflowsEnforcementMixin(object):
+    '''
+    Mixin to check that license supports workflows.
+    '''
+    def check_permissions(self, request):
+        if not feature_enabled('workflows'):
+            raise LicenseForbids(_('Your license does not allow use of workflows.'))
+        return super(WorkflowsEnforcementMixin, self).check_permissions(request)
+
+
 class ApiRootView(APIView):
 
     authentication_classes = []
@@ -795,23 +825,13 @@ class OrganizationTeamsList(SubListCreateAttachDetachAPIView):
     parent_key = 'organization'
 
 
-class OrganizationActivityStreamList(SubListAPIView):
+class OrganizationActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Organization
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(OrganizationActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class OrganizationNotificationTemplatesList(SubListCreateAttachDetachAPIView):
@@ -960,23 +980,13 @@ class TeamProjectsList(SubListAPIView):
         return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in proj_roles])
 
 
-class TeamActivityStreamList(SubListAPIView):
+class TeamActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Team
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(TeamActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1061,23 +1071,13 @@ class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
     new_in_148 = True
 
 
-class ProjectActivityStreamList(SubListAPIView):
+class ProjectActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Project
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(ProjectActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1348,23 +1348,13 @@ class UserAdminOfOrganizationsList(OrganizationCountsMixin, SubListAPIView):
         return my_qs & user_qs
 
 
-class UserActivityStreamList(SubListAPIView):
+class UserActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = User
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(UserActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1509,23 +1499,13 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = CredentialSerializer
 
 
-class CredentialActivityStreamList(SubListAPIView):
+class CredentialActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Credential
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(CredentialActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class CredentialAccessList(ResourceAccessList):
@@ -1606,23 +1586,13 @@ class InventoryDetail(RetrieveUpdateDestroyAPIView):
                 return super(InventoryDetail, self).destroy(request, *args, **kwargs)
 
 
-class InventoryActivityStreamList(SubListAPIView):
+class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Inventory
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(InventoryActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1750,23 +1720,13 @@ class HostInventorySourcesList(SubListAPIView):
     new_in_148 = True
 
 
-class HostActivityStreamList(SubListAPIView):
+class HostActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Host
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(HostActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -1775,18 +1735,7 @@ class HostActivityStreamList(SubListAPIView):
         return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
 
 
-class SystemTrackingEnforcementMixin(APIView):
-    '''
-    Use check_permissions instead of initial() because it's in the OPTION's path as well
-    '''
-    def check_permissions(self, request):
-        if not feature_enabled("system_tracking"):
-            raise LicenseForbids(_("Your license does not permit use "
-                                   "of system tracking."))
-        return super(SystemTrackingEnforcementMixin, self).check_permissions(request)
-
-
-class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMixin):
+class HostFactVersionsList(SystemTrackingEnforcementMixin, ParentMixin, ListAPIView):
 
     model = Fact
     serializer_class = FactVersionSerializer
@@ -1812,7 +1761,7 @@ class HostFactVersionsList(ListAPIView, ParentMixin, SystemTrackingEnforcementMi
         return Response(dict(results=self.serializer_class(queryset, many=True).data))
 
 
-class HostFactCompareView(SubDetailAPIView, SystemTrackingEnforcementMixin):
+class HostFactCompareView(SystemTrackingEnforcementMixin, SubDetailAPIView):
 
     model = Fact
     new_in_220 = True
@@ -1946,23 +1895,13 @@ class GroupInventorySourcesList(SubListAPIView):
     new_in_148 = True
 
 
-class GroupActivityStreamList(SubListAPIView):
+class GroupActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Group
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(GroupActivityStreamList, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -2204,23 +2143,13 @@ class InventorySourceSchedulesList(SubListCreateAttachDetachAPIView):
     new_in_148 = True
 
 
-class InventorySourceActivityStreamList(SubListAPIView):
+class InventorySourceActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = InventorySource
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(InventorySourceActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -2514,29 +2443,19 @@ class JobTemplateSurveySpec(GenericAPIView):
         return Response()
 
 
-class WorkflowJobTemplateSurveySpec(JobTemplateSurveySpec):
+class WorkflowJobTemplateSurveySpec(WorkflowsEnforcementMixin, JobTemplateSurveySpec):
 
     model = WorkflowJobTemplate
     parent_model = WorkflowJobTemplate
 
 
-class JobTemplateActivityStreamList(SubListAPIView):
+class JobTemplateActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = JobTemplate
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(JobTemplateActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -2771,28 +2690,28 @@ class JobTemplateObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
-class WorkflowJobNodeList(ListAPIView):
+class WorkflowJobNodeList(WorkflowsEnforcementMixin, ListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
     new_in_310 = True
 
 
-class WorkflowJobNodeDetail(RetrieveAPIView):
+class WorkflowJobNodeDetail(WorkflowsEnforcementMixin, RetrieveAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeDetailSerializer
     new_in_310 = True
 
 
-class WorkflowJobTemplateNodeList(ListCreateAPIView):
+class WorkflowJobTemplateNodeList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
     new_in_310 = True
 
 
-class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
+class WorkflowJobTemplateNodeDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeDetailSerializer
@@ -2809,7 +2728,7 @@ class WorkflowJobTemplateNodeDetail(RetrieveUpdateDestroyAPIView):
         return super(WorkflowJobTemplateNodeDetail, self).update_raw_data(data)
 
 
-class WorkflowJobTemplateNodeChildrenBaseList(EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, EnforceParentRelationshipMixin, SubListCreateAttachDetachAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
@@ -2881,7 +2800,7 @@ class WorkflowJobTemplateNodeAlwaysNodesList(WorkflowJobTemplateNodeChildrenBase
     relationship = 'always_nodes'
 
 
-class WorkflowJobNodeChildrenBaseList(SubListAPIView):
+class WorkflowJobNodeChildrenBaseList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
@@ -2912,7 +2831,7 @@ class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
 
 
 # TODO:
-class WorkflowJobTemplateList(ListCreateAPIView):
+class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateListSerializer
@@ -2931,7 +2850,7 @@ class WorkflowJobTemplateList(ListCreateAPIView):
 
 
 # TODO:
-class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
+class WorkflowJobTemplateDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplate
     serializer_class = WorkflowJobTemplateSerializer
@@ -2939,7 +2858,7 @@ class WorkflowJobTemplateDetail(RetrieveUpdateDestroyAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateCopy(GenericAPIView):
+class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
 
     model = WorkflowJobTemplate
     parent_model = WorkflowJobTemplate
@@ -2965,12 +2884,12 @@ class WorkflowJobTemplateCopy(GenericAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class WorkflowJobTemplateLabelList(JobTemplateLabelList):
+class WorkflowJobTemplateLabelList(WorkflowsEnforcementMixin, JobTemplateLabelList):
     parent_model = WorkflowJobTemplate
     new_in_310 = True
 
 
-class WorkflowJobTemplateLaunch(RetrieveAPIView):
+class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
 
 
     model = WorkflowJobTemplate
@@ -3010,7 +2929,7 @@ class WorkflowJobTemplateLaunch(RetrieveAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class WorkflowJobRelaunch(GenericAPIView):
+class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
 
     model = WorkflowJob
     serializer_class = EmptySerializer
@@ -3030,7 +2949,7 @@ class WorkflowJobRelaunch(GenericAPIView):
 
 
 # TODO:
-class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
+class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
@@ -3046,7 +2965,7 @@ class WorkflowJobTemplateWorkflowNodesList(SubListCreateAPIView):
 
 
 # TODO:
-class WorkflowJobTemplateJobsList(SubListAPIView):
+class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
@@ -3056,7 +2975,7 @@ class WorkflowJobTemplateJobsList(SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
 
     view_name = _("Workflow Job Template Schedules")
 
@@ -3068,7 +2987,7 @@ class WorkflowJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesAnyList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
 
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
@@ -3077,7 +2996,7 @@ class WorkflowJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachA
     new_in_310 = True
 
 
-class WorkflowJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesErrorList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
 
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
@@ -3086,7 +3005,7 @@ class WorkflowJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetac
     new_in_310 = True
 
 
-class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
 
     model = NotificationTemplate
     serializer_class = NotificationTemplateSerializer
@@ -3095,14 +3014,14 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDet
     new_in_310 = True
 
 
-class WorkflowJobTemplateAccessList(ResourceAccessList):
+class WorkflowJobTemplateAccessList(WorkflowsEnforcementMixin, ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
     resource_model = WorkflowJobTemplate
     new_in_310 = True
 
 
-class WorkflowJobTemplateObjectRolesList(SubListAPIView):
+class WorkflowJobTemplateObjectRolesList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = Role
     serializer_class = RoleSerializer
@@ -3115,7 +3034,7 @@ class WorkflowJobTemplateObjectRolesList(SubListAPIView):
         return Role.objects.filter(content_type=content_type, object_id=po.pk)
 
 
-class WorkflowJobTemplateActivityStreamList(SubListAPIView):
+class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
@@ -3123,19 +3042,9 @@ class WorkflowJobTemplateActivityStreamList(SubListAPIView):
     relationship = 'activitystream_set'
     new_in_310 = True
 
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(WorkflowJobTemplateActivityStreamList, self).get(request, *args, **kwargs)
-
 
 # TODO:
-class WorkflowJobList(ListCreateAPIView):
+class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobListSerializer
@@ -3143,14 +3052,14 @@ class WorkflowJobList(ListCreateAPIView):
 
 
 # TODO:
-class WorkflowJobDetail(RetrieveDestroyAPIView):
+class WorkflowJobDetail(WorkflowsEnforcementMixin, RetrieveDestroyAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobSerializer
     new_in_310 = True
 
 
-class WorkflowJobWorkflowNodesList(SubListAPIView):
+class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
@@ -3161,7 +3070,7 @@ class WorkflowJobWorkflowNodesList(SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobCancel(RetrieveAPIView):
+class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
 
     model = WorkflowJob
     serializer_class = WorkflowJobCancelSerializer
@@ -3179,7 +3088,7 @@ class WorkflowJobCancel(RetrieveAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
 
 
-class WorkflowJobNotificationsList(SubListAPIView):
+class WorkflowJobNotificationsList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = Notification
     serializer_class = NotificationSerializer
@@ -3188,23 +3097,13 @@ class WorkflowJobNotificationsList(SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobActivityStreamList(SubListAPIView):
+class WorkflowJobActivityStreamList(WorkflowsEnforcementMixin, ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = WorkflowJob
     relationship = 'activitystream_set'
     new_in_310 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(WorkflowJobActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class SystemJobTemplateList(ListAPIView):
@@ -3320,27 +3219,17 @@ class JobLabelList(SubListAPIView):
     parent_key = 'job'
 
 
-class WorkflowJobLabelList(JobLabelList):
+class WorkflowJobLabelList(WorkflowsEnforcementMixin, JobLabelList):
     parent_model = WorkflowJob
 
 
-class JobActivityStreamList(SubListAPIView):
+class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = Job
     relationship = 'activitystream_set'
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(JobActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class JobStart(GenericAPIView):
@@ -3916,23 +3805,13 @@ class AdHocCommandAdHocCommandEventsList(BaseAdHocCommandEventsList):
     new_in_220 = True
 
 
-class AdHocCommandActivityStreamList(SubListAPIView):
+class AdHocCommandActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     parent_model = AdHocCommand
     relationship = 'activitystream_set'
     new_in_220 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(AdHocCommandActivityStreamList, self).get(request, *args, **kwargs)
 
 
 class AdHocCommandNotificationsList(SubListAPIView):
@@ -4170,38 +4049,18 @@ class LabelDetail(RetrieveUpdateAPIView):
     new_in_300 = True
 
 
-class ActivityStreamList(SimpleListAPIView):
+class ActivityStreamList(ActivityStreamEnforcementMixin, SimpleListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     new_in_145 = True
 
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
 
-        # Okay, let it through.
-        return super(ActivityStreamList, self).get(request, *args, **kwargs)
-
-
-class ActivityStreamDetail(RetrieveAPIView):
+class ActivityStreamDetail(ActivityStreamEnforcementMixin, RetrieveAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
     new_in_145 = True
-
-    def get(self, request, *args, **kwargs):
-        # Sanity check: Does this license allow activity streams?
-        # If not, forbid this request.
-        if not feature_enabled('activity_streams'):
-            raise LicenseForbids(_('Your license does not allow use of '
-                                   'the activity stream.'))
-
-        # Okay, let it through.
-        return super(ActivityStreamDetail, self).get(request, *args, **kwargs)
 
 
 class RoleList(ListAPIView):
