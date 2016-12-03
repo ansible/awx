@@ -4,6 +4,15 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+
+# NOTE: I thought we had to pull these guys out but I can't remember why
+#       and without them we get segfaults
+git+https://github.com/ansible/ansiconv.git@tower_1.0.0#egg=ansiconv
+git+https://github.com/ansible/django-qsstats-magic.git@tower_0.7.2#egg=django-qsstats-magic
+git+https://github.com/ansible/dm.xmlsec.binding.git@master#egg=dm.xmlsec.binding
+git+https://github.com/ansible/django-jsonbfield@master#egg=jsonbfield
+git+https://github.com/chrismeyersfsu/pyrax@tower#egg=pyrax
+
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
 apache-libcloud==1.3.0
@@ -94,7 +103,7 @@ jsonschema==2.5.1         # via python-designateclient, python-ironicclient, war
 keyring==10.0.2           # via msrest
 keystoneauth1==2.15.0     # via openstacksdk, os-client-config, osc-lib, python-cinderclient, python-designateclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient, shade
 kombu==3.0.35             # via asgi-amqp, celery
-lxml==3.6.4
+#lxml==3.6.4
 M2Crypto==0.25.1
 Markdown==2.6.7
 mock==2.0.0
