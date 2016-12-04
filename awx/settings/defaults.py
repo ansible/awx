@@ -900,15 +900,6 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
-        'socketio_service': {
-            'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'socketio_service.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
-            'formatter':'simple',
-        },
         'task_system': {
             'level': 'INFO',
             'class':'logging.handlers.RotatingFileHandler',
