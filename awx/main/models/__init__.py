@@ -81,7 +81,7 @@ def user_is_system_auditor(user):
                 singleton_name='system_auditor', role_field='system_auditor').exists()
         else:
             # Odd case where user is unsaved, this should never be relied on
-            user._is_system_auditor = False
+            return False
     return user._is_system_auditor
 
 
