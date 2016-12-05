@@ -2237,7 +2237,7 @@ class SystemJobCancelSerializer(SystemJobSerializer):
 
 
 class WorkflowJobTemplateSerializer(JobTemplateMixin, LabelsListMixin, UnifiedJobTemplateSerializer):
-    show_capabilities = ['start', 'edit', 'copy', 'delete']
+    show_capabilities = ['start', 'schedule', 'edit', 'copy', 'delete']
 
     class Meta:
         model = WorkflowJobTemplate
