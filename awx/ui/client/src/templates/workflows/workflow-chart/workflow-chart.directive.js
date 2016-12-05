@@ -119,8 +119,7 @@ export default [ '$state',
                     .attr("class", "node")
                     .attr("id", function(d){return "node-" + d.id;})
                     .attr("parent", function(d){return d.parent ? d.parent.id : null;})
-                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-                    .attr("fill", "red");
+                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
                 nodeEnter.each(function(d) {
                     let thisNode = d3.select(this);
@@ -170,6 +169,16 @@ export default [ '$state',
                             .text(function (d) {
                                 return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                             }).each(wrap);
+
+                        thisNode.append("foreignObject")
+                             .attr("x", 43)
+                             .attr("y", 45)
+                             .style("font-size","0.7em")
+                             .attr("class", "WorkflowChart-conflictText")
+                             .html(function () {
+                                 return "<span class=\"WorkflowChart-conflictIcon\">\uf06a</span><span> EDGE CONFLICT</span>";
+                             })
+                             .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
                         thisNode.append("foreignObject")
                             .attr("x", 17)
@@ -347,7 +356,7 @@ export default [ '$state',
 
                 let link = svgGroup.selectAll("g.link")
                     .data(links, function(d) {
-                        return d.target.id;
+                        return d.source.id + "-" + d.target.id;
                     });
 
                 let linkEnter = link.enter().append("g")
@@ -485,6 +494,7 @@ export default [ '$state',
                     });
 
                 t.selectAll(".node")
+                    .attr("parent", function(d){return d.parent ? d.parent.id : null;})
                     .attr("transform", function(d) {d.px = d.x; d.py = d.y; return "translate(" + d.y + "," + d.x + ")"; });
 
                 t.selectAll(".WorkflowChart-nodeTypeCircle")
@@ -557,6 +567,9 @@ export default [ '$state',
 
                 t.selectAll(".WorkflowChart-incompleteText")
                     .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
+
+                t.selectAll(".WorkflowChart-conflictText")
+                    .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
             }
 
