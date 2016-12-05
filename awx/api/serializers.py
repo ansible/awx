@@ -250,6 +250,7 @@ class BaseSerializer(serializers.ModelSerializer):
             'project_update': _('SCM Update'),
             'inventory_update': _('Inventory Sync'),
             'system_job': _('Management Job'),
+            'workflow_job': _('Workflow Job'),
         }
         choices = []
         for t in self.get_types():
@@ -666,7 +667,7 @@ class UnifiedJobListSerializer(UnifiedJobSerializer):
 
     def get_types(self):
         if type(self) is UnifiedJobListSerializer:
-            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job']
+            return ['project_update', 'inventory_update', 'job', 'ad_hoc_command', 'system_job', 'workflow_job']
         else:
             return super(UnifiedJobListSerializer, self).get_types()
 
