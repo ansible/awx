@@ -20,7 +20,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_text
 from django.apps import apps
-from django.core.exceptions import ObjectDoesNotExist
 
 # Django-Polymorphic
 from polymorphic import PolymorphicModel
@@ -783,7 +782,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.spawned_by_workflow:
             try:
                 return self.unified_job_node.workflow_job.pk
-            except ObjectDoesNotExist:
+            except UnifiedJob.unified_job_node.RelatedObjectDoesNotExist:
                 pass
         return None
 
@@ -792,7 +791,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.spawned_by_workflow:
             try:
                 return self.unified_job_node.pk
-            except ObjectDoesNotExist:
+            except UnifiedJob.unified_job_node.RelatedObjectDoesNotExist:
                 pass
         return None
 

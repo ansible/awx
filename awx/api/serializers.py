@@ -609,7 +609,7 @@ class UnifiedJobSerializer(BaseSerializer):
             summary_fields['source_workflow_job'] = {}
             try:
                 summary_obj = obj.unified_job_node.workflow_job
-            except ObjectDoesNotExist:
+            except UnifiedJob.unified_job_node.RelatedObjectDoesNotExist:
                 return summary_fields
 
             for field in SUMMARIZABLE_FK_FIELDS['job']:
