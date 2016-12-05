@@ -1762,9 +1762,9 @@ class CredentialSerializerCreate(CredentialSerializer):
                     'do not give either user or organization. Only valid for creation.'))
     organization = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
-        required=False, default=None, write_only=True, allow_null=True,
-        help_text=_('Write-only field used to add organization to owner role. If provided, '
-                    'do not give either team or team. Only valid for creation.'))
+        required=False, default=None, allow_null=True,
+        help_text=_('Inherit permissions from organization roles. If provided on creation, '
+                    'do not give either user or team.'))
 
     class Meta:
         model = Credential
