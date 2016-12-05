@@ -608,7 +608,11 @@ class UnifiedJobSerializer(BaseSerializer):
         summary_fields = super(UnifiedJobSerializer, self).get_summary_fields(obj)
         if obj.spawned_by_workflow:
             summary_fields['source_workflow_job'] = {}
-            summary_obj = obj.unified_job_node.workflow_job
+            try:
+                summary_obj = obj.unified_job_node.workflow_job
+            except UnifiedJob.unified_job_node.RelatedObjectDoesNotExist:
+                return summary_fields
+
             for field in SUMMARIZABLE_FK_FIELDS['job']:
                 val = getattr(summary_obj, field, None)
                 if val is not None:
