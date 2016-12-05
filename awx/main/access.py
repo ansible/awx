@@ -837,15 +837,7 @@ class CredentialAccess(BaseAccess):
     def can_change(self, obj, data):
         if not obj:
             return False
-
-        # Cannot change the organization for a credential after it's been created
-        if data and 'organization' in data:
-            organization_pk = get_pk_from_dict(data, 'organization')
-            if (organization_pk and (not obj.organization or organization_pk != obj.organization.id)) \
-                    or (not organization_pk and obj.organization):
-                return False
-
-        return self.user in obj.admin_role
+        return self.user in obj.admin_role and self.check_related('organization', Organization, data, obj=obj)
 
     def can_delete(self, obj):
         # Unassociated credentials may be marked deleted by anyone, though we
