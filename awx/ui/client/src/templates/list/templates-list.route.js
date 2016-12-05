@@ -11,6 +11,8 @@ export default {
         label: "TEMPLATES"
     },
     data: {
+        activityStream: true,
+        activityStreamTarget: 'template',
         socket: {
             "groups": {
                 "jobs": ["status_changed"]

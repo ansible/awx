@@ -16,8 +16,8 @@ export default {
             value: {
                 // default params will not generate search tags
                 order_by: '-timestamp',
-                or__object1: null,
-                or__object2: null
+                or__object1_in: null,
+                or__object2_in: null
             }
         }
     },

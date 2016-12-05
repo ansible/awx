@@ -283,11 +283,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     else {
                         // We just have a type
                         if ($state.params.target === 'inventory_script') {
-                            defaultUrl += '?or__object1=custom_inventory_script&or__object2=custom_inventory_script';
+                            defaultUrl += '?or__object1__in=custom_inventory_script&or__object2__in=custom_inventory_script';
                         } else if ($state.params.target === 'management_job') {
-                            defaultUrl += '?or__object1=job&or__object2=job';
+                            defaultUrl += '?or__object1__in=job&or__object2__in=job';
+                        } else if ($state.params.target === 'template') {
+                            defaultUrl += '?or__object1__in=job_template,workflow_job_template&or__object2__in=job_template,workflow_job_template';
                         } else {
-                            defaultUrl += '?or__object1=' + $state.params.target + '&or__object2=' + $state.params.target;
+                            defaultUrl += '?or__object1__in=' + $state.params.target + '&or__object2__in=' + $state.params.target;
                         }
                     }
                 }
