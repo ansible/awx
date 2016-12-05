@@ -87,3 +87,21 @@ class TestCreateDependentInventoryUpdate():
         scheduler._schedule()
 
         scheduler.start_task.assert_called_with(waiting_inventory_update, [pending_job])
+
+
+class TestCaptureChainFailureDependencies():
+    @pytest.fixture
+    def inventory_id_sources(self, inventory_source_factory):
+        return [
+            (1,  [inventory_source_factory(id=1)]),
+        ]
+
+    def test(self, scheduler_factory, pending_job, waiting_inventory_update, inventory_id_sources):
+        scheduler = scheduler_factory(tasks=[pending_job], 
+                                      create_inventory_update=waiting_inventory_update,
+                                      inventory_sources=inventory_id_sources)
+
+        scheduler._schedule()
+
+        scheduler.capture_chain_failure_dependencies.assert_called_with(pending_job, [waiting_inventory_update])
+
