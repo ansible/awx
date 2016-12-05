@@ -45,3 +45,18 @@ def test_role_team_view_access(rando, team, inventory, mocker, post):
     mock_access.assert_called_once_with(
         inventory.admin_role, team, 'member_role.parents', data,
         skip_sub_obj_read_check=False)
+
+
+@pytest.mark.django_db
+def test_org_associate_with_junk_data(rando, admin_user, organization, post):
+    """
+    Assure that post-hoc enforcement of auditor role
+    will turn off if the action is an association
+    """
+    user_data = {'is_system_auditor': True, 'id': rando.pk}
+    post(url=reverse('api:organization_users_list', args=(organization.pk,)),
+         data=user_data, expect=204, user=admin_user)
+    # assure user is now an org member
+    assert rando in organization.member_role
+    # assure that this did not also make them a system auditor
+    assert not rando.is_system_auditor
