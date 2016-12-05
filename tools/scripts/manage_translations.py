@@ -11,38 +11,56 @@
 # * update: check for new strings in ansible-tower catalogs, and
 #           output how much strings are new/changed.
 #
-# * stats: output statistics for each language
-#
-# * pull: pull/fetch translations from Zanata
+# * stats: output translation statistics at Zanata
 #
 # * push: update resources in Zanata with the local files
 #
-# Each command support the --lang option to limit their operation to
-# the specified language(s). For example,
-# to pull translations for Japanese and French, run:
+# * pull: pull/fetch translations from Zanata
 #
-#  $ python tools/scripts/manage_translations.py pull --lang ja,fr
+# Each command support the --lang option to limit their operation to
+# the specified language(s). Use --both option to include UI also.
+# For examples,
+#
+# to update django.pot file, run:
+#  $ python tools/scripts/manage_translations.py update
+#
+# to update both pot files, run:
+#  $ python tools/scripts/manage_translations.py update --both
+#
+# to push both pot files (update also), run:
+#  $ python tools/scripts/manage_translations.py push --both
+#
+# to pull both translations for Japanese and French, run:
+#  $ python tools/scripts/manage_translations.py pull --both --lang ja,fr
+#
+# to see translations stats at Zanata for Japanese, run:
+#  $ python tools/scripts/manage_translations.py pull --both --lang ja
 
+# python
 import os
 from argparse import ArgumentParser
 from subprocess import PIPE, Popen
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import ParseError
 
+# django
 import django
 from django.conf import settings
 from django.core.management import call_command
 
-
-PROJECT_CONFIG = "tools/scripts/zanata_config/backend-translations.xml"
+ZNTA_CONFIG_FRONTEND_TRANS = "tools/scripts/zanata_config/frontend-translations.xml"
+ZNTA_CONFIG_BACKEND_TRANS = "tools/scripts/zanata_config/backend-translations.xml"
 MIN_TRANS_PERCENT_SETTING = False
 MIN_TRANS_PERCENT = '10'
 
 
-def _get_zanata_project_url():
+def _print_zanata_project_url(project_config):
+    """
+    Browser-able Zanata project URL
+    """
     project_url = ''
     try:
-        zanata_config = ET.parse(PROJECT_CONFIG).getroot()
+        zanata_config = ET.parse(project_config).getroot()
         server_url = zanata_config.getchildren()[0].text
         project_id = zanata_config.getchildren()[1].text
         version_id = zanata_config.getchildren()[2].text
@@ -50,10 +68,13 @@ def _get_zanata_project_url():
         project_url = server_url + middle_url + project_id + "/" + version_id + "/documents"
     except (ParseError, IndexError):
         print("Please re-check zanata project configuration.")
-    return project_url
+    print("Zanata URL: %s\n" % project_url)
 
 
 def _handle_response(output, errors):
+    """
+    Prints response received from Zanata client
+    """
     if not errors and '\n' in output:
         for response in output.split('\n'):
             print(response)
@@ -84,10 +105,16 @@ def pull(lang=None, both=None):
 
     if MIN_TRANS_PERCENT_SETTING:
         command += " --min-doc-percent " + MIN_TRANS_PERCENT
-    if lang:
+    if lang and len(lang) > 0:
         command += " --lang %s" % lang[0]
 
-    p = Popen(command % {'config': PROJECT_CONFIG},
+    if both:
+        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS},
+                  stdout=PIPE, stderr=PIPE, shell=True)
+        output, errors = p.communicate()
+        _handle_response(output, errors)
+
+    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS},
               stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
     _handle_response(output, errors)
@@ -95,27 +122,41 @@ def pull(lang=None, both=None):
 
 def push(lang=None, both=None):
     """
-    Push django.pot to Zanata
+    Push .pot to Zanata
     At Zanata:
-        (1) project_type should be podir - {locale}/{filename}.po format
-        (2) only required languages should be kept enabled
+        (1) for angularjs - project_type should be gettext - {locale}.po format
+        (2) for django - project_type should be podir - {locale}/{filename}.po format
+        (3) only required languages should be kept enabled
     """
-    p = Popen("zanata push --project-config %(config)s --push-type source --disable-ssl-cert" %
-              {'config': PROJECT_CONFIG}, stdout=PIPE, stderr=PIPE, shell=True)
+
+    command = "zanata push --project-config %(config)s --force --disable-ssl-cert"
+
+    if both:
+        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS}, stdout=PIPE, stderr=PIPE, shell=True)
+        output, errors = p.communicate()
+        if _handle_response(output, errors):
+            _print_zanata_project_url(ZNTA_CONFIG_FRONTEND_TRANS)
+
+    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS}, stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
     if _handle_response(output, errors):
-        print("Zanata URL: %s\n" % _get_zanata_project_url())
+        _print_zanata_project_url(ZNTA_CONFIG_BACKEND_TRANS)
 
 
 def stats(lang=None, both=None):
     """
     Get translation stats from Zanata
     """
-    command = "zanata stats --project-config %(config)s --disable-ssl-cert"
-    if lang:
-        command += " --lang %s" % lang[0]
+    command = "zanata stats --project-config %(config)s --lang %(lang)s --disable-ssl-cert --word"
+    lang = lang[0] if lang and len(lang) > 0 else 'en-us'
 
-    p = Popen(command % {'config': PROJECT_CONFIG},
+    if both:
+        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS, 'lang': lang},
+                  stdout=PIPE, stderr=PIPE, shell=True)
+        output, errors = p.communicate()
+        _handle_response(output, errors)
+
+    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS, 'lang': lang},
               stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
     _handle_response(output, errors)
@@ -124,7 +165,7 @@ def stats(lang=None, both=None):
 def update(lang=None, both=None):
     """
     Update (1) awx/locale/django.pot and/or
-     (2) awx/ui/po/ansible-tower.pot files with
+     (2) awx/ui/po/ansible-tower-ui.pot files with
     new/updated translatable strings.
     """
     settings.configure()
@@ -140,7 +181,7 @@ def update(lang=None, both=None):
     print("Django...")
     lang = (lang[0].split(',') if ',' in lang[0] else lang) if lang else []
     os.chdir(os.path.join(os.getcwd(), 'awx'))
-    call_command('makemessages', '--keep-pot', locale=lang)
+    call_command('makemessages', '--keep-pot', locale=lang or ['en-us'])
     # Output changed stats
     _check_diff(os.path.join(os.getcwd(), 'locale'))
 

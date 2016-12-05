@@ -116,7 +116,7 @@ register(
 register(
     'AWX_PROOT_ENABLED',
     field_class=fields.BooleanField,
-    label=_('Enable job isloation'),
+    label=_('Enable job isolation'),
     help_text=_('Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information.'),
     category=_('Jobs'),
     category_slug='jobs',
