@@ -1159,8 +1159,11 @@ class ProjectUpdateDetail(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if obj.unified_job_node.filter(workflow_job__status__in=ACTIVE_STATES).exists():
-            raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        try:
+            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        except ProjectUpdate.unified_job_node.RelatedObjectDoesNotExist:
+            pass
         return super(ProjectUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
@@ -2239,8 +2242,11 @@ class InventoryUpdateDetail(RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if obj.unified_job_node.filter(workflow_job__status__in=ACTIVE_STATES).exists():
-            raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        try:
+            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        except InventoryUpdate.unified_job_node.RelatedObjectDoesNotExist:
+            pass
         return super(InventoryUpdateDetail, self).destroy(request, *args, **kwargs)
 
 
@@ -3205,8 +3211,11 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
-        if obj.unified_job_node.filter(workflow_job__status__in=ACTIVE_STATES).exists():
-            raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        try:
+            if obj.unified_job_node.workflow_job.status in ACTIVE_STATES:
+                raise PermissionDenied(detail=_('Cannot delete job resource when associated workflow job is running.'))
+        except Job.unified_job_node.RelatedObjectDoesNotExist:
+            pass
         return super(JobDetail, self).destroy(request, *args, **kwargs)
 
 
