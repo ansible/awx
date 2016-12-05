@@ -9,7 +9,7 @@ from awx.main.models import Role, User, Organization, Inventory
 
 
 @pytest.mark.django_db
-class TestSysAuditor(TransactionTestCase):
+class TestSysAuditorTransactional(TransactionTestCase):
     def rando(self):
         return User.objects.create(username='rando', password='rando', email='rando@com.com')
 
@@ -40,6 +40,10 @@ class TestSysAuditor(TransactionTestCase):
         rando.is_system_auditor = False
         assert not rando.is_system_auditor
 
+
+@pytest.mark.django_db
+def test_system_auditor_is_system_auditor(system_auditor):
+    assert system_auditor.is_system_auditor
 
 
 @pytest.mark.django_db

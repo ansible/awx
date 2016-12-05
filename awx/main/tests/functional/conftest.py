@@ -41,7 +41,7 @@ from awx.main.models.organization import (
     Permission,
     Team,
 )
-
+from awx.main.models.rbac import Role
 from awx.main.models.notifications import (
     NotificationTemplate,
     Notification
@@ -260,6 +260,13 @@ def job_template_with_survey_passwords(job_template_with_survey_passwords_factor
 @pytest.fixture
 def admin(user):
     return user('admin', True)
+
+
+@pytest.fixture
+def system_auditor(user):
+    u = user(False)
+    Role.singleton('system_auditor').members.add(u)
+    return u
 
 
 @pytest.fixture
