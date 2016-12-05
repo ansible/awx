@@ -26,8 +26,8 @@ export default
                                 if(streamConfig.activityStreamTarget) {
                                     stateGoParams.target = streamConfig.activityStreamTarget;
                                     stateGoParams.activity_search = {
-                                        or__object1: streamConfig.activityStreamTarget,
-                                        or__object2: streamConfig.activityStreamTarget,
+                                        or__object1__in: streamConfig.activityStreamTarget === 'template' ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
+                                        or__object2__in: streamConfig.activityStreamTarget === 'template' ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
                                         order_by: '-timestamp',
                                         page_size: '20',
                                     };

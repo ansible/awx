@@ -52,6 +52,12 @@ export default
                         case 'host':
                             rtnTitle = 'HOSTS';
                             break;
+                        case 'template':
+                            rtnTitle = 'TEMPLATES';
+                            break;
+                        case 'workflow_job_template':
+                            rtnTitle = 'WORKFLOW JOB TEMPLATES';
+                            break;
                     }
 
                     return rtnTitle;

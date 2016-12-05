@@ -26,7 +26,9 @@ export default ['templateUrl', function(templateUrl) {
                 {label: 'Projects', value: 'project'},
                 {label: 'Schedules', value: 'schedule'},
                 {label: 'Teams', value: 'team'},
-                {label: 'Users', value: 'user'}
+                {label: 'Templates', value: 'template'},
+                {label: 'Users', value: 'user'},
+                {label: 'Workflow Job Templates', value: 'workflow_job_template'}
             ];
 
             CreateSelect2({
@@ -41,8 +43,8 @@ export default ['templateUrl', function(templateUrl) {
                 }
                 else {
                     let search =  _.merge($stateParams.activity_search, {
-                        or__object1: $scope.streamTarget,
-                        or__object2: $scope.streamTarget
+                        or__object1__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget
                     });
                     // Attach the taget to the query parameters
                     $state.go('activityStream', {target: $scope.streamTarget, activity_search: search});
