@@ -386,8 +386,9 @@ var tower = angular.module('Tower', [
             $rootScope.$stateParams = $stateParams;
 
             $state.defaultErrorHandler(function() {
-                // Do not log transitionTo errors
-                // $log.debug("transitionTo error: " + error );
+                // Do not log transitionTo errors. This function,
+                // left empty, will prevent errors being displayed on the
+                // JS console that are caused by ui-router transitions. 
             });
 
             I18NInit();
