@@ -110,7 +110,7 @@ class BaseCallbackModule(CallbackBase):
         event_data.setdefault('uuid', str(uuid.uuid4()))
 
         if 'res' in event_data:
-            event_data['res'] = self.censor_result(copy.deepcopy(event_data['res']))
+            event_data['res'] = self.censor_result(copy.copy(event_data['res']))
             res = event_data.get('res', None)
             if res and isinstance(res, dict):
                 if 'artifact_data' in res:
