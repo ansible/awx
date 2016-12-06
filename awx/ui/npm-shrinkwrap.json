@@ -61,13 +61,13 @@
     },
     "angular-breadcrumb": {
       "version": "0.4.1",
-      "from": "leigh-johnson/angular-breadcrumb#0.4.1",
-      "resolved": "git://github.com/leigh-johnson/angular-breadcrumb.git#6c2b1ad45ad5fbe7adf39af1ef3b294ca8e207a9"
+      "from": "ansible/angular-breadcrumb#0.4.1",
+      "resolved": "git://github.com/ansible/angular-breadcrumb.git#6c2b1ad45ad5fbe7adf39af1ef3b294ca8e207a9"
     },
     "angular-codemirror": {
       "version": "1.0.4",
-      "from": "chouseknecht/angular-codemirror#1.0.4",
-      "resolved": "git://github.com/chouseknecht/angular-codemirror.git#75c3a2d0ccdf2e4c836fab7d7617d5db6c585c1b",
+      "from": "ansible/angular-codemirror#1.0.4",
+      "resolved": "git://github.com/ansible/angular-codemirror.git#75c3a2d0ccdf2e4c836fab7d7617d5db6c585c1b",
       "dependencies": {
         "angular": {
           "version": "1.4.7",
@@ -83,8 +83,8 @@
     },
     "angular-drag-and-drop-lists": {
       "version": "1.4.0",
-      "from": "leigh-johnson/angular-drag-and-drop-lists#1.4.0",
-      "resolved": "git://github.com/leigh-johnson/angular-drag-and-drop-lists.git#4d32654ab7159689a7767b9be8fc85f9812ca5a8"
+      "from": "ansible/angular-drag-and-drop-lists#1.4.0",
+      "resolved": "git://github.com/ansible/angular-drag-and-drop-lists.git#4d32654ab7159689a7767b9be8fc85f9812ca5a8"
     },
     "angular-duration-format": {
       "version": "1.0.1",
@@ -147,8 +147,8 @@
     },
     "angular-scheduler": {
       "version": "0.1.0",
-      "from": "chouseknecht/angular-scheduler#0.1.0",
-      "resolved": "git://github.com/chouseknecht/angular-scheduler.git#784693054597b9a1c1e49efb4cf94e9054b92e66",
+      "from": "ansible/angular-scheduler#0.1.0",
+      "resolved": "git://github.com/ansible/angular-scheduler.git#784693054597b9a1c1e49efb4cf94e9054b92e66",
       "dependencies": {
         "angular-tz-extensions": {
           "version": "0.3.11",
@@ -171,13 +171,18 @@
           "version": "3.8.0",
           "from": "lodash@>=3.8.0 <3.9.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.8.0.tgz"
+        },
+        "timezone-js": {
+          "version": "0.4.14",
+          "from": "leigh-johnson/timezone-js#0.4.14",
+          "resolved": "git://github.com/leigh-johnson/timezone-js.git#6937de14ce0c193961538bb5b3b12b7ef62a358f"
         }
       }
     },
     "angular-tz-extensions": {
       "version": "0.3.11",
-      "from": "chouseknecht/angular-tz-extensions#0.3.12",
-      "resolved": "git://github.com/chouseknecht/angular-tz-extensions.git#938577310ff9a343eae1348aa04a3ed1a96d097f",
+      "from": "ansible/angular-tz-extensions#0.3.13",
+      "resolved": "git://github.com/ansible/angular-tz-extensions.git#33caaa9ccf5dfe29a95962c17c3c9e6b9775be35",
       "dependencies": {
         "angular": {
           "version": "1.4.7",
@@ -188,6 +193,11 @@
           "version": "3.1.1",
           "from": "jquery@>=3.1.0 <4.0.0",
           "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.1.1.tgz"
+        },
+        "timezone-js": {
+          "version": "0.4.14",
+          "from": "ansible/timezone-js#0.4.14",
+          "resolved": "git://github.com/ansible/timezone-js.git#6937de14ce0c193961538bb5b3b12b7ef62a358f"
         }
       }
     },
@@ -3643,8 +3653,8 @@
     },
     "ng-toast": {
       "version": "2.0.0",
-      "from": "leigh-johnson/ngToast#2.0.1",
-      "resolved": "git://github.com/leigh-johnson/ngToast.git#fea95bb34d27687e414619b4f72c11735d909f93"
+      "from": "ansible/ngToast#2.0.1",
+      "resolved": "git://github.com/ansible/ngToast.git#fea95bb34d27687e414619b4f72c11735d909f93"
     },
     "node-libs-browser": {
       "version": "0.6.0",
@@ -3710,8 +3720,8 @@
     },
     "nvd3": {
       "version": "1.7.1",
-      "from": "leigh-johnson/nvd3#1.7.1",
-      "resolved": "git://github.com/leigh-johnson/nvd3.git#a28bcd494a1df0677be7cf2ebc0578f44eb21102",
+      "from": "ansible/nvd3#1.7.1",
+      "resolved": "git://github.com/ansible/nvd3.git#a28bcd494a1df0677be7cf2ebc0578f44eb21102",
       "dependencies": {
         "d3": {
           "version": "3.3.13",
@@ -3783,7 +3793,14 @@
     "optimist": {
       "version": "0.6.1",
       "from": "optimist@>=0.6.1 <0.7.0",
-      "resolved": "https://registry.npmjs.org/optimist/-/optimist-0.6.1.tgz"
+      "resolved": "https://registry.npmjs.org/optimist/-/optimist-0.6.1.tgz",
+      "dependencies": {
+        "minimist": {
+          "version": "0.0.10",
+          "from": "minimist@>=0.0.1 <0.1.0",
+          "resolved": "https://registry.npmjs.org/minimist/-/minimist-0.0.10.tgz"
+        }
+      }
     },
     "optionator": {
       "version": "0.8.2",
@@ -4745,8 +4762,8 @@
     },
     "timezone-js": {
       "version": "0.4.14",
-      "from": "leigh-johnson/timezone-js#0.4.14",
-      "resolved": "git://github.com/leigh-johnson/timezone-js.git#6937de14ce0c193961538bb5b3b12b7ef62a358f"
+      "from": "ansible/timezone-js",
+      "resolved": "git://github.com/ansible/timezone-js.git#6937de14ce0c193961538bb5b3b12b7ef62a358f"
     },
     "tiny-lr": {
       "version": "0.2.1",
