@@ -83,7 +83,11 @@ class MetadataView(View):
             'saml',
             redirect_uri=complete_url,
         )
-        metadata, errors = saml_backend.generate_metadata_xml()
+        try:
+            metadata, errors = saml_backend.generate_metadata_xml()
+        except Exception as e:
+            logger.exception('unable to generate SAML metadata')
+            errors = e
         if not errors:
             return HttpResponse(content=metadata, content_type='text/xml')
         else:
