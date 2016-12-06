@@ -431,6 +431,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         default='',
         editable=False,
+        help_text=_("The Tower node the job executed on."),
     )
     notifications = models.ManyToManyField(
         'Notification',
@@ -456,16 +457,19 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         null=True,
         default=None,
         editable=False,
+        help_text=_("The date and time the job was queued for starting."),
     )
     finished = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
+        help_text=_("The date and time the job finished execution."),
     )
     elapsed = models.DecimalField(
         max_digits=12,
         decimal_places=3,
         editable=False,
+        help_text=_("Elapsed time in seconds that the job ran."),
     )
     job_args = models.TextField(
         blank=True,
@@ -487,6 +491,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         blank=True,
         default='',
         editable=False,
+        help_text=_("A status field to indicate the state of the job if it wasn't able to run and capture stdout"),
     )
     start_args = models.TextField(
         blank=True,
