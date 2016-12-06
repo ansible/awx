@@ -342,6 +342,7 @@ class Host(CommonModelNameNotUnique):
         max_length=1024,
         blank=True,
         default='',
+        help_text=_('The value used by the remote inventory source to uniquely identify the host'),
     )
     variables = models.TextField(
         blank=True,

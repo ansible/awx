@@ -78,12 +78,14 @@ class ProjectOptions(models.Model):
         blank=True,
         default='',
         verbose_name=_('SCM Type'),
+        help_text=_("Specifies the source control system used to store the project."),
     )
     scm_url = models.CharField(
         max_length=1024,
         blank=True,
         default='',
         verbose_name=_('SCM URL'),
+        help_text=_("The location where the project is stored."),
     )
     scm_branch = models.CharField(
         max_length=256,
@@ -94,9 +96,11 @@ class ProjectOptions(models.Model):
     )
     scm_clean = models.BooleanField(
         default=False,
+        help_text=_('Discard any local changes before syncing the project.'),
     )
     scm_delete_on_update = models.BooleanField(
         default=False,
+        help_text=_('Delete the project before syncing.'),
     )
     credential = models.ForeignKey(
         'Credential',
@@ -109,6 +113,7 @@ class ProjectOptions(models.Model):
     timeout = models.IntegerField(
         blank=True,
         default=0,
+        help_text=_("The amount of time to run before the task is canceled."),
     )
 
     def clean_scm_type(self):
@@ -221,10 +226,13 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     )
     scm_update_on_launch = models.BooleanField(
         default=False,
+        help_text=_('Update the project when a job is launched that uses the project.'),
     )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
+        help_text=_('The number of seconds after the last project update ran that a new'
+                    'project update will be launched as a job dependency.'),
     )
 
     scm_revision = models.CharField(
