@@ -114,7 +114,7 @@ UsersList.$inject = ['$scope', '$rootScope', '$stateParams',
 
 export function UsersAdd($scope, $rootScope, $stateParams, UserForm,
     GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, ResetForm, Wait, CreateSelect2, $state, $location) {
+    GetBasePath, ResetForm, Wait, CreateSelect2, $state, $location, i18n) {
 
     ClearScope();
 

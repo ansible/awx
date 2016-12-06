@@ -1186,9 +1186,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-minmax-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " +
                                 this.form.name + '_form.' + fld + ".$error.max\">";
                             if (field.max !== undefined) {
-                                html += i18n.sprintf(i18n._("Please enter a number greater than %d and less than %d."), field.min, field.max)
+                                html += i18n.sprintf(i18n._("Please enter a number greater than %d and less than %d."), field.min, field.max);
                             } else {
-                                html += i18n.sprintf(i18n._("Please enter a number greater than %d.", field.min)
+                                html += i18n.sprintf(i18n._("Please enter a number greater than %d."), field.min);
                             }
                             html += "</div>\n";
                         }
@@ -1295,7 +1295,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (field.required || field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
                                 this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + i18n._("Please select a value.)" + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + i18n._("Please select a value.") + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
                             fld + "_api_error\"></div>\n";

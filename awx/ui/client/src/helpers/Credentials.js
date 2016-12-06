@@ -223,8 +223,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
-         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
+.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state', 'i18n',
+         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state, i18n) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,

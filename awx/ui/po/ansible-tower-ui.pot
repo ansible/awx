@@ -120,6 +120,7 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:459
 #: client/src/forms/Workflows.js:171
+#: client/src/shared/form-generator.js:1703
 msgid "Add Survey"
 msgstr ""
 
@@ -145,6 +146,10 @@ msgstr ""
 
 #: client/src/forms/Teams.js:84
 msgid "Add user to team"
+msgstr ""
+
+#: client/src/shared/form-generator.js:1450
+msgid "Admin"
 msgstr ""
 
 #: client/src/dashboard/graphs/dashboard-graphs.partial.html:37
@@ -192,6 +197,10 @@ msgstr ""
 #: client/src/forms/Credentials.js:310
 #: client/src/forms/Credentials.js:395
 msgid "Ask at runtime?"
+msgstr ""
+
+#: client/src/shared/form-generator.js:1452
+msgid "Auditor"
 msgstr ""
 
 #: client/src/forms/Credentials.js:73
@@ -256,6 +265,10 @@ msgstr ""
 msgid "Call to get project failed. GET status:"
 msgstr ""
 
+#: client/src/shared/form-generator.js:1691
+msgid "Cancel"
+msgstr ""
+
 #: client/src/controllers/Projects.js:196
 msgid "Cancel Not Allowed"
 msgstr ""
@@ -266,6 +279,10 @@ msgstr ""
 
 #: client/src/controllers/Projects.js:53
 msgid "Canceled. Click for details"
+msgstr ""
+
+#: client/src/shared/form-generator.js:1084
+msgid "Choose a %s"
 msgstr ""
 
 #: client/src/license/license.partial.html:97
@@ -298,6 +315,10 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:328
 msgid "Client Secret"
+msgstr ""
+
+#: client/src/shared/form-generator.js:1695
+msgid "Close"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:164
@@ -525,6 +546,7 @@ msgid "Destination SMS Number"
 msgstr ""
 
 #: client/src/license/license.partial.html:5
+#: client/src/shared/form-generator.js:1481
 msgid "Details"
 msgstr ""
 
@@ -563,6 +585,7 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:466
 #: client/src/forms/Workflows.js:178
+#: client/src/shared/form-generator.js:1707
 msgid "Edit Survey"
 msgstr ""
 
@@ -990,6 +1013,7 @@ msgstr ""
 
 #: client/src/lists/PortalJobTemplates.js:39
 #: client/src/lists/Templates.js:83
+#: client/src/shared/form-generator.js:1699
 msgid "Launch"
 msgstr ""
 
@@ -1035,6 +1059,10 @@ msgstr ""
 
 #: client/src/shared/socket/socket.service.js:184
 msgid "Live events: error connecting to the Tower server."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1962
+msgid "Loading..."
 msgstr ""
 
 #: client/src/main-menu/main-menu.partial.html:188
@@ -1240,6 +1268,14 @@ msgstr ""
 msgid "Number associated with the \"Messaging Service\" in Twilio."
 msgstr ""
 
+#: client/src/shared/form-generator.js:547
+msgid "OFF"
+msgstr ""
+
+#: client/src/shared/form-generator.js:545
+msgid "ON"
+msgstr ""
+
 #: client/src/organizations/list/organizations-list.partial.html:6
 msgid "ORGANIZATIONS"
 msgstr ""
@@ -1301,6 +1337,7 @@ msgid "PASSWORD"
 msgstr ""
 
 #: client/src/organizations/list/organizations-list.partial.html:44
+#: client/src/shared/form-generator.js:1865
 #: client/src/shared/list-generator/list-generator.factory.js:245
 msgid "PLEASE ADD ITEMS TO THIS LIST"
 msgstr ""
@@ -1404,12 +1441,40 @@ msgstr ""
 msgid "Please click the button below to visit Ansible's website to get a Tower license key."
 msgstr ""
 
+#: client/src/shared/form-generator.js:828
+#: client/src/shared/form-generator.js:953
+msgid "Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1189
+msgid "Please enter a number greater than %d and less than %d."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1191
+msgid "Please enter a number greater than %d."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1183
+msgid "Please enter a number."
+msgstr ""
+
 #: client/src/login/loginModal/loginModal.partial.html:78
 msgid "Please enter a password."
 msgstr ""
 
 #: client/src/login/loginModal/loginModal.partial.html:58
 msgid "Please enter a username."
+msgstr ""
+
+#: client/src/shared/form-generator.js:818
+#: client/src/shared/form-generator.js:943
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1044
+#: client/src/shared/form-generator.js:813
+#: client/src/shared/form-generator.js:938
+msgid "Please enter a value."
 msgstr ""
 
 #: client/src/lists/CompletedJobs.js:13
@@ -1455,12 +1520,31 @@ msgstr ""
 msgid "Please select a Machine Credential or check the Prompt on launch option."
 msgstr ""
 
+#: client/src/shared/form-generator.js:1224
+msgid "Please select a number between"
+msgstr ""
+
+#: client/src/shared/form-generator.js:1220
+msgid "Please select a number."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1111
+#: client/src/shared/form-generator.js:1180
+#: client/src/shared/form-generator.js:1298
+#: client/src/shared/form-generator.js:1403
+msgid "Please select a value."
+msgstr ""
+
 #: client/src/forms/JobTemplates.js:83
 msgid "Please select an Inventory or check the Prompt on launch option."
 msgstr ""
 
 #: client/src/forms/WorkflowMaker.js:86
 msgid "Please select an Inventory."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1217
+msgid "Please select at least one value."
 msgstr ""
 
 #: client/src/notifications/shared/type-change.service.js:27
@@ -1710,6 +1794,10 @@ msgstr ""
 msgid "Satellite 6 Host"
 msgstr ""
 
+#: client/src/shared/form-generator.js:1687
+msgid "Save"
+msgstr ""
+
 #: client/src/license/license.partial.html:122
 msgid "Save successful!"
 msgstr ""
@@ -1799,6 +1887,10 @@ msgstr ""
 
 #: client/src/main-menu/main-menu.partial.html:147
 msgid "Settings"
+msgstr ""
+
+#: client/src/shared/form-generator.js:843
+msgid "Show"
 msgstr ""
 
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:34
@@ -1953,6 +2045,10 @@ msgstr ""
 msgid "Test notification"
 msgstr ""
 
+#: client/src/shared/form-generator.js:1409
+msgid "That value was not found.  Please enter or select a valid value."
+msgstr ""
+
 #: client/src/helpers/Credentials.js:105
 msgid "The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as:"
 msgstr ""
@@ -2013,6 +2109,11 @@ msgstr ""
 msgid "This user is not a member of any teams"
 msgstr ""
 
+#: client/src/shared/form-generator.js:823
+#: client/src/shared/form-generator.js:948
+msgid "This value does not match the password you entered previously.  Please confirm that password."
+msgstr ""
+
 #: client/src/dashboard/lists/jobs/jobs-list.partial.html:14
 msgid "Time"
 msgstr ""
@@ -2027,6 +2128,10 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:126
 msgid "To learn more about the IAM STS Token, refer to the %sAmazon documentation%s."
+msgstr ""
+
+#: client/src/shared/form-generator.js:848
+msgid "Toggle the display of plaintext."
 msgstr ""
 
 #: client/src/notifications/shared/type-change.service.js:34
@@ -2202,6 +2307,7 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:450
 #: client/src/forms/Workflows.js:162
+#: client/src/shared/form-generator.js:1711
 msgid "View Survey"
 msgstr ""
 
@@ -2271,6 +2377,7 @@ msgid "When this template is submitted as a job, setting the type to %s will exe
 msgstr ""
 
 #: client/src/forms/Workflows.js:186
+#: client/src/shared/form-generator.js:1715
 msgid "Workflow Editor"
 msgstr ""
 
@@ -2290,12 +2397,36 @@ msgstr ""
 msgid "You do not have permission to add a user."
 msgstr ""
 
+#: client/src/shared/form-generator.js:960
+msgid "Your password must be %d characters long."
+msgstr ""
+
+#: client/src/shared/form-generator.js:965
+msgid "Your password must contain a lowercase letter."
+msgstr ""
+
+#: client/src/shared/form-generator.js:975
+msgid "Your password must contain a number."
+msgstr ""
+
+#: client/src/shared/form-generator.js:970
+msgid "Your password must contain an uppercase letter."
+msgstr ""
+
+#: client/src/shared/form-generator.js:980
+msgid "Your password must contain one of the following characters: %s"
+msgstr ""
+
 #: client/src/controllers/Projects.js:176
 msgid "Your request to cancel the update was submitted to the task manager."
 msgstr ""
 
 #: client/src/login/loginModal/loginModal.partial.html:22
 msgid "Your session timed out due to inactivity. Please sign in."
+msgstr ""
+
+#: client/src/shared/form-generator.js:1224
+msgid "and"
 msgstr ""
 
 #: client/src/forms/Credentials.js:139
