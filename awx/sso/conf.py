@@ -924,13 +924,12 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_SP_ENTITY_ID',
-    field_class=fields.URLField,
-    schemes=('http', 'https'),
+    field_class=fields.CharField,
     allow_blank=True,
     default='',
     label=_('SAML Service Provider Entity ID'),
-    help_text=_('Set to a URL for a domain name you own (does not need to be a '
-                'valid URL; only used as a unique ID).'),
+    help_text=_('The application-defined unique identifier used as the '
+                'audience of the SAML service provider (SP) configuration.'),
     category=_('SAML'),
     category_slug='saml',
     feature_required='enterprise_auth',
