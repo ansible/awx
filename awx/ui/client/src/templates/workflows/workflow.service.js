@@ -46,6 +46,8 @@ export default [function(){
                         child.edgeType = "always";
                     }
 
+                    child.parent = parentNode;
+
                     parentNode.children.push(child);
                 });
             }
@@ -81,9 +83,10 @@ export default [function(){
             if(params.betweenTwoNodes) {
                 _.forEach(parentNode.children, function(child, index) {
                     if(child.id === params.parent.target.id) {
-                        placeholder.children.push(angular.copy(child));
+                        placeholder.children.push(child);
                         parentNode.children[index] = placeholder;
                         placeholderRef = parentNode.children[index];
+                        child.parent = parentNode.children[index];
                         return false;
                     }
                 });
@@ -102,6 +105,7 @@ export default [function(){
         },
         getSiblingConnectionTypes: function(params) {
             // params.parentId
+            // params.childId
             // params.tree
 
             let siblingConnectionTypes = {};
@@ -114,7 +118,7 @@ export default [function(){
             if(parentNode.children && parentNode.children.length > 0) {
                 // Loop across them and add the types as keys to siblingConnectionTypes
                 _.forEach(parentNode.children, function(child) {
-                    if(!child.placeholder && child.edgeType) {
+                    if(child.id !== params.childId && !child.placeholder && child.edgeType) {
                         siblingConnectionTypes[child.edgeType] = true;
                     }
                 });
@@ -283,6 +287,40 @@ export default [function(){
                 };
             }
 
+        },
+        checkForEdgeConflicts: function(params) {
+            //params.treeData
+            //params.edgeFlags
+
+            let hasAlways = false;
+            let hasSuccessFailure = false;
+            let _this = this;
+
+            _.forEach(params.treeData.children, function(child) {
+                // Flip the flag to false for now - we'll set it to true later on
+                // if we detect a conflict
+                child.edgeConflict = false;
+                if(child.edgeType === 'always') {
+                    hasAlways = true;
+                }
+                else if(child.edgeType === 'success' || child.edgeType === 'failure') {
+                    hasSuccessFailure = true;
+                }
+
+                _this.checkForEdgeConflicts({
+                    treeData: child,
+                    edgeFlags: params.edgeFlags
+                });
+            });
+
+            if(hasAlways && hasSuccessFailure) {
+                // We have a conflict
+                _.forEach(params.treeData.children, function(child) {
+                    child.edgeConflict = true;
+                });
+
+                params.edgeFlags.conflict = true;
+            }
         }
     };
 }];

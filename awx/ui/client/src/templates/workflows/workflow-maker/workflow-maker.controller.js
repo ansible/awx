@@ -29,6 +29,12 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
             value: "check"
         }];
 
+        $scope.edgeFlags = {
+             conflict: false,
+             typeRestriction: null,
+             showTypeOptions: false
+         };
+
         function init() {
             $scope.treeDataMaster = angular.copy($scope.treeData.data);
             $scope.$broadcast("refreshWorkflowChart");
@@ -36,7 +42,7 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
 
         function resetNodeForm() {
             $scope.workflowMakerFormConfig.nodeMode = "idle";
-            $scope.showTypeOptions = false;
+            $scope.edgeFlags.showTypeOptions = false;
             delete $scope.selectedTemplate;
             delete $scope.workflow_job_templates;
             delete $scope.workflow_projects;
@@ -44,7 +50,7 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
             delete $scope.placeholderNode;
             delete $scope.betweenTwoNodes;
             $scope.nodeBeingEdited = null;
-            $scope.edgeTypeRestriction = null;
+            $scope.edgeFlags.typeRestriction = null;
             $scope.workflowMakerFormConfig.activeTab = "jobs";
         }
 
@@ -89,7 +95,8 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
 
             let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
                 tree: $scope.treeData.data,
-                parentId: betweenTwoNodes ? parent.source.id : parent.id
+                parentId: betweenTwoNodes ? parent.source.id : parent.id,
+                childId: $scope.placeholderNode.id
             });
 
             // Set the default to success
@@ -99,20 +106,26 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                 // We don't want to give the user the option to select
                 // a type as this node will always be executed
                 edgeType = "always";
-                $scope.showTypeOptions = false;
+                $scope.edgeFlags.showTypeOptions = false;
             } else {
                 if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
-                    // This is a problem...
+                    // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
+                    $scope.edgeFlags.typeRestriction = null;
                 } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) {
-                    $scope.edgeTypeRestriction = "successFailure";
+                    $scope.edgeFlags.typeRestriction = "successFailure";
                     edgeType = "success";
                 } else if (_.includes(siblingConnectionTypes, "always")) {
-                    $scope.edgeTypeRestriction = "always";
+                    $scope.edgeFlags.typeRestriction = "always";
                     edgeType = "always";
+                } else {
+                    $scope.edgeFlags.typeRestriction = null;
                 }
 
-                $scope.showTypeOptions = true;
+                $scope.edgeFlags.showTypeOptions = true;
             }
+
+            // Reset the edgeConflict flag
+            resetEdgeConflict();
 
             $scope.$broadcast("setEdgeType", edgeType);
             $scope.$broadcast("refreshWorkflowChart");
@@ -181,6 +194,9 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                 }
             }
 
+            // Reset the edgeConflict flag
+            resetEdgeConflict();
+
             $scope.$broadcast("refreshWorkflowChart");
         };
 
@@ -195,6 +211,9 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                 $scope.nodeBeingEdited.isActiveEdit = false;
             }
 
+            // Reset the edgeConflict flag
+            resetEdgeConflict();
+
             // Reset the form
             resetNodeForm();
 
@@ -208,6 +227,12 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
             if (!$scope.nodeBeingEdited || ($scope.nodeBeingEdited && $scope.nodeBeingEdited.id !== nodeToEdit.id)) {
                 if ($scope.placeholderNode || $scope.nodeBeingEdited) {
                     $scope.cancelNodeForm();
+
+                    // Refresh this object as the parent has changed
+                    nodeToEdit = WorkflowService.searchTree({
+                        element: $scope.treeData.data,
+                        matchingId: nodeToEdit.id
+                    });
                 }
 
                 $scope.workflowMakerFormConfig.nodeMode = "edit";
@@ -330,7 +355,30 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                         }
                     }
 
-                    $scope.showTypeOptions = (parent && parent.isStartNode) ? false : true;
+                    let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({
+                         tree: $scope.treeData.data,
+                         parentId: parent.id,
+                         childId: nodeToEdit.id
+                     });
+
+                     if (parent && parent.isStartNode) {
+                         // We don't want to give the user the option to select
+                         // a type as this node will always be executed
+                         $scope.edgeFlags.showTypeOptions = false;
+                     } else {
+                         if ((_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure")) && _.includes(siblingConnectionTypes, "always")) {
+                             // This is a conflicted scenario but we'll just let the user keep building - they will have to remediate before saving
+                             $scope.edgeFlags.typeRestriction = null;
+                         } else if (_.includes(siblingConnectionTypes, "success") || _.includes(siblingConnectionTypes, "failure") && (nodeToEdit.edgeType === "success" || nodeToEdit.edgeType === "failure")) {
+                             $scope.edgeFlags.typeRestriction = "successFailure";
+                         } else if (_.includes(siblingConnectionTypes, "always") && nodeToEdit.edgeType === "always") {
+                             $scope.edgeFlags.typeRestriction = "always";
+                         } else {
+                             $scope.edgeFlags.typeRestriction = null;
+                         }
+
+                         $scope.edgeFlags.showTypeOptions = true;
+                     }
 
                     $scope.$broadcast('setEdgeType', $scope.nodeBeingEdited.edgeType);
 
@@ -441,6 +489,9 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                     resetNodeForm();
                 }
 
+                // Reset the edgeConflict flag
+                resetEdgeConflict();
+
                 resetDeleteNode();
 
                 $scope.$broadcast("refreshWorkflowChart");
@@ -514,6 +565,15 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                 activeTab: $scope.workflowMakerFormConfig.activeTab
             });
         };
+
+        function resetEdgeConflict(){
+            $scope.edgeFlags.conflict = false;
+
+            WorkflowService.checkForEdgeConflicts({
+                treeData: $scope.treeData.data,
+                edgeFlags: $scope.edgeFlags
+            });
+        }
 
         init();
 
