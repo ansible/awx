@@ -41,6 +41,7 @@ make migrate
 make init
 
 mkdir -p /tower_devel/awx/public/static
+mkdir -p /tower_devel/awx/ui/static
 
 # Start the service
 make honcho
