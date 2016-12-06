@@ -66,14 +66,14 @@ export default
                     $scope.newLicense.file = JSON.parse(raw.result);
                 }
                 catch(err) {
-                    ProcessErrors($rootScope, null, null, null, {msg: 'Invalid file format. Please upload valid JSON.'});
+                    ProcessErrors($rootScope, null, null, null, {msg: i18n._('Invalid file format. Please upload valid JSON.')});
                 }
             };
             try {
                 raw.readAsText(event.target.files[0]);
             }
             catch(err) {
-                ProcessErrors($rootScope, null, null, null, {msg: 'Invalid file format. Please upload valid JSON.'});
+                ProcessErrors($rootScope, null, null, null, {msg: i18n._('Invalid file format. Please upload valid JSON.')});
             }
         };
         // HTML5 spec doesn't provide a way to customize file input css

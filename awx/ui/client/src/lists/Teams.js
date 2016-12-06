@@ -15,8 +15,7 @@ export default
         selectTitle: i18n._('Add Team'),
         editTitle: i18n._('Teams'),
         listTitle: i18n._('Teams'),
-        selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
-            "button to create a new team.",
+        selectInstructions: i18n.sprintf(i18n._("Click on a row to select it, and click Finished when done. Click the %s button to create a new team."), "<i class=\"icon-plus\"></i> "),
         index: false,
         hover: true,
 

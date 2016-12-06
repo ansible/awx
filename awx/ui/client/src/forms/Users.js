@@ -136,10 +136,10 @@ export default
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
@@ -157,14 +157,14 @@ export default
                     open: false,
                     index: false,
                     actions: {},
-                    emptyListText: 'This user is not a member of any teams',
+                    emptyListText: i18n._('This user is not a member of any teams'),
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct

@@ -38,7 +38,7 @@ export default [ 'i18n', function(i18n){
                 ngClick: 'editHost(host.id)'
             },
             inventory_name: {
-                label: 'Inventory',
+                label: i18n._('Inventory'),
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
@@ -46,13 +46,13 @@ export default [ 'i18n', function(i18n){
                 searchable: false
             },
             enabled: {
-                label: 'Status',
+                label: i18n._('Status'),
                 columnClass: 'List-staticColumn--toggle',
                 type: 'toggle',
                 ngClick: 'toggleHostEnabled(host)',
                 nosort: true,
-                awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
-                dataTitle: 'Host Enabled',
+                awToolTip: "<p>" + i18n._("Indicates if a host is available and should be included in running jobs.") + "</p><p>" + i18n._("For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.") + "</p>",
+                dataTitle: i18n._('Host Enabled'),
             }
         },
 
@@ -60,10 +60,10 @@ export default [ 'i18n', function(i18n){
 
             columnClass: 'col-lg-2 col-md-3 col-sm-3 col-xs-4',
             edit: {
-                label: 'Edit',
+                label: i18n._('Edit'),
                 ngClick: 'editHost(host.id)',
                 icon: 'icon-edit',
-                awToolTip: 'Edit host',
+                awToolTip: i18n._('Edit host'),
                 dataPlacement: 'top'
             }
         },

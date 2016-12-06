@@ -16,8 +16,7 @@ export default
         selectTitle: i18n._('Template'),
         editTitle: i18n._('Templates'),
         listTitle: i18n._('Templates'),
-        selectInstructions: "Click on a row to select it, and click Finished when done. Use the <i class=\"icon-plus\"></i> " +
-            "button to create a new job template.",
+        selectInstructions: i18n.sprintf(i18n._("Click on a row to select it, and click Finished when done. Use the %s button to create a new job template."), "<i class=\"icon-plus\"></i> "),
         index: false,
         hover: true,
 
@@ -62,12 +61,12 @@ export default
                 buttonContent: i18n._('ADD'),
                 options: [
                     {
-                        optionContent: 'Job Template',
+                        optionContent: i18n._('Job Template'),
                         optionSref: 'templates.addJobTemplate',
                         ngShow: 'canAddJobTemplate'
                     },
                     {
-                        optionContent: 'Workflow Job Template',
+                        optionContent: i18n._('Workflow Job Template'),
                         optionSref: 'templates.addWorkflowJobTemplate',
                         ngShow: 'canAddWorkflowJobTemplate'
                     }

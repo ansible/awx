@@ -49,7 +49,7 @@ export default
 
         actions: {
             add: {
-                label: 'Create New',
+                label: i18n._('Create New'),
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations', 'users'], // base path must be in list, or action not available

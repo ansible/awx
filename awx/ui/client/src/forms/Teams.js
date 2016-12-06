@@ -80,7 +80,7 @@ export default
                         add: {
                             // @issue https://github.com/ansible/ansible-tower/issues/3487
                             //ngClick: "addPermissionWithoutTeamTab",
-                            label: 'Add',
+                            label: i18n._('Add'),
                             awToolTip: i18n._('Add user to team'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD'),

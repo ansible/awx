@@ -20,7 +20,7 @@ export default
             addTitle: i18n._('New Job Template'),
             editTitle: '{{ name }}',
             name: 'job_template',
-            breadcrumbName: 'JOB TEMPLATE',
+            breadcrumbName: i18n._('JOB TEMPLATE'),
             basePath: 'job_templates',
             // the top-most node of generated state tree
             stateTree: 'templates',
@@ -80,7 +80,7 @@ export default
                         reqExpression: '!ask_inventory_on_launch',
                         alwaysShowAsterisk: true
                     },
-                    requiredErrorMsg: "Please select an Inventory or check the Prompt on launch option.",
+                    requiredErrorMsg: i18n._("Please select an Inventory or check the Prompt on launch option."),
                     column: 1,
                     awPopOver: "<p>" + i18n._("Select the inventory containing the hosts you want this job to manage.") + "</p>",
                     dataTitle: i18n._('Inventory'),
@@ -96,7 +96,7 @@ export default
                 project: {
                     label: i18n._('Project'),
                     labelAction: {
-                        label: 'RESET',
+                        label: i18n._('RESET'),
                         ngClick: 'resetProjectToDefault()',
                         'class': "{{!(job_type.value === 'scan' && project_name !== 'Default') ? 'hidden' : ''}}",
                     },
@@ -147,7 +147,7 @@ export default
                         reqExpression: '!ask_credential_on_launch',
                         alwaysShowAsterisk: true
                     },
-                    requiredErrorMsg: "Please select a Machine Credential or check the Prompt on launch option.",
+                    requiredErrorMsg: i18n._("Please select a Machine Credential or check the Prompt on launch option."),
                     column: 1,
                     awPopOver: "<p>" + i18n._("Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " +
                      " the username and SSH key or password that Ansible will need to log into the remote hosts.") + "</p>",
@@ -409,9 +409,9 @@ export default
                         add: {
                             ngClick: "$state.go('.add')",
                             label: 'Add',
-                            awToolTip: 'Add a permission',
+                            awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD',
+                            buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                         }
                     },

@@ -116,8 +116,8 @@
                     return {"options": options, "error": error};
                 })
                 .catch(function (data) {
-                    ProcessErrors(scope, data.data, data.status, null, { hdr: 'Error!',
-                            msg: 'Failed to get third-party login types.  Returned status: ' + data.status });
+                    ProcessErrors(scope, data.data, data.status, null, { hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to get third-party login types.  Returned status: ') + data.status });
                 });
         };
     }];

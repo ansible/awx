@@ -281,7 +281,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
             .success(function(data) {
                 if (!data.actions.POST) {
                     $state.go("^");
-                    Alert('Permission Error', 'You do not have permission to add a project.', 'alert-info');
+                    Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
                 }
         });
 
@@ -465,7 +465,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             });
             $scope.project_local_paths = opts;
             $scope.local_path = $scope.project_local_paths[0];
-            $scope.base_dir = 'You do not have access to view this property';
+            $scope.base_dir = i18n._('You do not have access to view this property');
             $scope.$emit('pathsReady');
         }
 
@@ -555,7 +555,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
-                    msg: i18n._('Failed to retrieve project: ') + id + i18n._('. GET status: ') + status
+                    msg: i18n.sprintf(i18n._('Failed to retrieve project: %s. GET status: '), id) + status
                 });
             });
     });
@@ -620,7 +620,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 $state.go($state.current, {}, { reload: true });
             })
             .error(function(data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
+                ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Failed to update project: %s. PUT status: '), id) + status });
             });
     };
 
@@ -638,7 +638,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 })
                 .error(function(data, status) {
                     $('#prompt-modal').modal('hide');
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                    ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST returned status: '), url) + status });
                 });
         };
 
@@ -646,7 +646,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             hdr: i18n._('Delete'),
             body: '<div class="Prompt-bodyQuery">' + i18n.sprintf(i18n._('Are you sure you want to remove the %s below from %s?'), title, $scope.name) + '</div>' + '<div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
     };
 
@@ -654,7 +654,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
-            $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
+            $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? i18n._('Revision #') : i18n._('SCM Branch');
         }
 
         // Dynamically update popover values
@@ -690,7 +690,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.project_obj.scm_type === "Manual" || Empty($scope.project_obj.scm_type)) {
             // ignore
         } else if ($scope.project_obj.status === 'updating' || $scope.project_obj.status === 'running' || $scope.project_obj.status === 'pending') {
-            Alert('Update in Progress', i18n._('The SCM update process is running.'), 'alert-info');
+            Alert(i18n._('Update in Progress'), i18n._('The SCM update process is running.'), 'alert-info');
         } else {
             ProjectUpdate({ scope: $scope, project_id: $scope.project_obj.id });
         }

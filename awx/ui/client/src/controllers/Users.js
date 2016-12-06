@@ -91,17 +91,17 @@ export function UsersList($scope, $rootScope, $stateParams,
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
+                        hdr: i18n._('Error!'),
+                        msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status
                     });
                 });
         };
 
         Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the user below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            hdr: i18n._('Delete'),
+            body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the user below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
     };
 }
@@ -138,7 +138,7 @@ export function UsersAdd($scope, $rootScope, $stateParams, UserForm,
             .success(function(data) {
                 if (!data.actions.POST) {
                     $state.go("^");
-                    Alert('Permission Error', 'You do not have permission to add a user.', 'alert-info');
+                    Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a user.'), 'alert-info');
                 }
             });
 
@@ -171,7 +171,7 @@ export function UsersAdd($scope, $rootScope, $stateParams, UserForm,
                     .success(function(data) {
                         var base = $location.path().replace(/^\//, '').split('/')[0];
                         if (base === 'users') {
-                            $rootScope.flashMessage = 'New user successfully created!';
+                            $rootScope.flashMessage = i18n._('New user successfully created!');
                             $rootScope.$broadcast("EditIndicatorChange", "users", data.id);
                             $state.go('users.edit', { user_id: data.id }, { reload: true });
                         } else {
@@ -179,10 +179,10 @@ export function UsersAdd($scope, $rootScope, $stateParams, UserForm,
                         }
                     })
                     .error(function(data, status) {
-                        ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
+                        ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'), msg: i18n._('Failed to add new user. POST returned status: ') + status });
                     });
             } else {
-                $scope.organization_name_api_error = 'A value is required';
+                $scope.organization_name_api_error = i18n._('A value is required');
             }
         }
     };
@@ -264,9 +264,8 @@ export function UsersEdit($scope, $rootScope, $location,
             })
             .error(function(data, status) {
                 ProcessErrors($scope, data, status, null, {
-                    hdr: 'Error!',
-                    msg: 'Failed to retrieve user: ' +
-                        $stateParams.id + '. GET status: ' + status
+                    hdr: i18n._('Error!'),
+                    msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
                 });
             });
     }
@@ -319,9 +318,8 @@ export function UsersEdit($scope, $rootScope, $location,
                 })
                 .error(function(data, status) {
                     ProcessErrors($scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to retrieve user: ' +
-                            $stateParams.id + '. GET status: ' + status
+                        hdr: i18n._('Error!'),
+                        msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
                     });
                 });
         }
