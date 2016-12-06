@@ -385,6 +385,10 @@ var tower = angular.module('Tower', [
             };
             $rootScope.$stateParams = $stateParams;
 
+            $state.defaultErrorHandler(function(error) {
+                $log.debug(`$state.defaultErrorHandler: ${error}`);
+            });
+
             I18NInit();
             $stateExtender.addState({
                 name: 'dashboard',
@@ -681,9 +685,52 @@ var tower = angular.module('Tower', [
 
                 $rootScope.crumbCache = [];
 
-                // $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
-                //     SocketService.subscribe(toState, toParams);
-                // });
+                $rootScope.$on("$stateChangeStart", function (event, next) {
+                    // Remove any lingering intervals
+                    // except on jobDetails.* states
+                    var jobDetailStates = [
+                        'jobDetail',
+                        'jobDetail.host-summary',
+                        'jobDetail.host-event.details',
+                        'jobDetail.host-event.json',
+                        'jobDetail.host-events',
+                        'jobDetail.host-event.stdout'
+                    ];
+                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
+                        window.clearInterval($rootScope.jobDetailInterval);
+                    }
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
+                        window.clearInterval($rootScope.jobStdOutInterval);
+                    }
+
+                    // On each navigation request, check that the user is logged in
+                    if (!/^\/(login|logout)/.test($location.path())) {
+                        // capture most recent URL, excluding login/logout
+                        $rootScope.lastPath = $location.path();
+                        $rootScope.enteredPath = $location.path();
+                        $cookieStore.put('lastPath', $location.path());
+                    }
+
+                    if (Authorization.isUserLoggedIn() === false) {
+                        if (next.name !== "signIn") {
+                            $state.go('signIn');
+                        }
+                    } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
+                      // gets here on timeout
+                        if (next.name !== "signIn") {
+                            $state.go('signIn');
+                        }
+                    } else {
+                        if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
+                            Authorization.restoreUserInfo(); //user must have hit browser refresh
+                        }
+                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test(event);
+                        }
+                    }
+                    activateTab();
+                });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
 
