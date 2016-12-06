@@ -139,7 +139,7 @@ describe('Controller: jobResultsController', () => {
         });
     };
 
-    beforeEach(angular.mock.module('Tower'));
+    beforeEach(angular.mock.module('shared'));
 
     let bootstrapTest = () => {
         provideVals();
