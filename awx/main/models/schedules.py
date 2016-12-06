@@ -66,29 +66,29 @@ class Schedule(CommonModel):
     )
     enabled = models.BooleanField(
         default=True,
-        help_text=_("Enables processing of this schedule by Tower")
+        help_text=_("Enables processing of this schedule by Tower.")
     )
     dtstart = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
-        help_text=_("The first occurrence of the schedule occurs on or after this time")
+        help_text=_("The first occurrence of the schedule occurs on or after this time.")
     )
     dtend = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
-        help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires")
+        help_text=_("The last occurrence of the schedule occurs before this time, aftewards the schedule expires.")
     )
     rrule = models.CharField(
         max_length=255,
-        help_text=_("A value representing the schedules iCal recurrence rule")
+        help_text=_("A value representing the schedules iCal recurrence rule.")
     )
     next_run = models.DateTimeField(
         null=True,
         default=None,
         editable=False,
-        help_text=_("The next time that the scheduled action will run")
+        help_text=_("The next time that the scheduled action will run.")
     )
     extra_data = JSONField(
         blank=True,
