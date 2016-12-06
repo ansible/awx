@@ -10,9 +10,8 @@ DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
-COMPOSE_TAG ?= devel
 # NOTE: This defaults the container image version to the branch that's active
-# COMPOSE_TAG ?= $(GIT_BRANCH)
+COMPOSE_TAG ?= $(GIT_BRANCH)
 
 COMPOSE_HOST ?= $(shell hostname)
 
