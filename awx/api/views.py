@@ -227,6 +227,11 @@ class ApiV1ConfigView(APIView):
     permission_classes = (IsAuthenticated,)
     view_name = _('Configuration')
 
+    def check_permissions(self, request):
+        super(ApiV1ConfigView, self).check_permissions(request)
+        if not request.user.is_superuser and request.method.lower() not in {'options', 'head', 'get'}:
+            self.permission_denied(request)  # Raises PermissionDenied exception.
+
     def get(self, request, format=None):
         '''Return various sitewide configuration settings.'''
 
@@ -272,8 +277,6 @@ class ApiV1ConfigView(APIView):
         return Response(data)
 
     def post(self, request):
-        if not request.user.is_superuser:
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
         if not isinstance(request.data, dict):
             return Response({"error": _("Invalid license data")}, status=status.HTTP_400_BAD_REQUEST)
         if "eula_accepted" not in request.data:
@@ -312,9 +315,6 @@ class ApiV1ConfigView(APIView):
         return Response({"error": _("Invalid license")}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        if not request.user.is_superuser:
-            return Response(None, status=status.HTTP_404_NOT_FOUND)
-
         try:
             settings.LICENSE = {}
             return Response(status=status.HTTP_204_NO_CONTENT)
