@@ -42,10 +42,10 @@ export default
 					if(license === null || !$rootScope.license_tested){
 						if(this.valid(license) === false) {
 							$rootScope.licenseMissing = true;
+							$state.go('license');
 							if(event){
 								event.preventDefault();
 							}
-							$state.go('license');
 						}
 						else {
 							$rootScope.licenseMissing = false;
@@ -53,7 +53,7 @@ export default
 					}
 					else if(this.valid(license) === false) {
 						$rootScope.licenseMissing = true;
-						$state.transitionTo('license');
+						$state.go('license');
 						if(event){
 							event.preventDefault();
 						}
