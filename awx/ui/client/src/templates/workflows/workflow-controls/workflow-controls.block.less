@@ -1,0 +1,69 @@
+@import "./client/src/shared/branding/colors.default.less";
+
+.WorkflowControls {
+    display: flex;
+}
+
+.WorkflowControls-Zoom {
+    display: flex;
+    flex: 1 0 auto;
+}
+.WorkflowControls-Pan {
+    flex: 0 0 85px;
+}
+.WorkflowControls-Pan--button {
+    color: @default-icon;
+    font-size: 1.5em;
+}
+.WorkflowControls-Pan--button:hover {
+    color: @default-link-hov;
+}
+.WorkflowControls-Pan--home {
+    position: relative;
+    top: 9px;
+    right: 38px;
+    font-size: 1em;
+}
+.WorkflowControls-Pan--up {
+    position: relative;
+    top: -4px;
+    left: 16px;
+}
+.WorkflowControls-Pan--down {
+    position: relative;
+    top: 25px;
+    right: 0px;
+}
+.WorkflowControls-Pan--right {
+    position: relative;
+    top: 12px;
+    right: 7px;
+}
+.WorkflowControls-Pan--left {
+    position: relative;
+    top: 12px;
+    right: 31px;
+}
+.WorkflowControls-Zoom--button {
+    line-height: 60px;
+    color: @default-icon;
+}
+.WorkflowControls-Zoom--button:hover {
+    color: @default-link-hov;
+}
+.WorkflowControls-Zoom--minus {
+    margin-left: 20px;
+    padding-right: 8px;
+}
+.WorkflowControls-Zoom--plus {
+    padding-left: 8px;
+}
+.WorkflowControls-zoomSlider {
+    width: 150px;
+}
+.WorkflowControls-zoomPercentage {
+    text-align: center;
+    font-size: 0.7em;
+    height: 24px;
+    line-height: 24px;
+}
