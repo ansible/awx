@@ -12,6 +12,7 @@
      'ConfigurationService',
      'CreateSelect2',
      'GenerateForm',
+     'i18n',
      function(
         $scope,
         $state,
@@ -19,7 +20,8 @@
         ConfigurationUiForm,
         ConfigurationService,
         CreateSelect2,
-        GenerateForm
+        GenerateForm,
+        i18n
      ) {
          var uiVm = this;
          var generator = GenerateForm;
@@ -71,7 +73,7 @@
                  CreateSelect2({
                      element: '#configuration_ui_template_PENDO_TRACKING_STATE',
                      multiple: false,
-                     placeholder: 'Select commands',
+                     placeholder: i18n._('Select commands'),
                      opts: [{
                          id: $scope.$parent.PENDO_TRACKING_STATE,
                          text: $scope.$parent.PENDO_TRACKING_STATE

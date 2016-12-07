@@ -13,6 +13,7 @@ export default [
     'ConfigurationUtils',
     'CreateSelect2',
     'GenerateForm',
+    'i18n',
     function(
         $scope,
         $state,
@@ -21,7 +22,8 @@ export default [
         ConfigurationService,
         ConfigurationUtils,
         CreateSelect2,
-        GenerateForm
+        GenerateForm,
+        i18n
     ) {
         var jobsVm = this;
         var generator = GenerateForm;
@@ -76,7 +78,7 @@ export default [
                 CreateSelect2({
                     element: '#configuration_jobs_template_AD_HOC_COMMANDS',
                     multiple: true,
-                    placeholder: 'Select commands',
+                    placeholder: i18n._('Select commands'),
                     opts: opts
                 });
             }

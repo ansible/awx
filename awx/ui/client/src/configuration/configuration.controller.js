@@ -6,7 +6,7 @@
 
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert', 'ClearScope',
-    'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'ParseTypeChange', 'ProcessErrors', 'Store',
+    'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
     'Wait', 'configDataResolve',
     //Form definitions
     'configurationAzureForm',
@@ -22,7 +22,7 @@ export default [
     'ConfigurationUiForm',
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
-        ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, ParseTypeChange, ProcessErrors, Store,
+        ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
         Wait, configDataResolve,
         //Form definitions
         configurationAzureForm,
@@ -153,10 +153,10 @@ export default [
             if(!$scope[formTracker.currentFormName()].$dirty) {
                 active(setForm);
             } else {
-                    var msg = 'You have unsaved changes. Would you like to proceed <strong>without</strong> saving?';
-                    var title = 'Warning: Unsaved Changes';
+                    var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
+                    var title = i18n._('Warning: Unsaved Changes');
                     var buttons = [{
-                        label: "Discard changes",
+                        label: i18n._("Discard changes"),
                         "class": "btn Form-cancelButton",
                         "id": "formmodal-cancel-button",
                         onClick: function() {
@@ -167,7 +167,7 @@ export default [
                             active(setForm);
                         }
                     }, {
-                        label: "Save changes",
+                        label: i18n._("Save changes"),
                         onClick: function() {
                             vm.formSave();
                             $scope[formTracker.currentFormName()].$setPristine();
@@ -206,10 +206,10 @@ export default [
 
         var formCancel = function() {
             if ($scope[formTracker.currentFormName()].$dirty === true) {
-                var msg = 'You have unsaved changes. Would you like to proceed <strong>without</strong> saving?';
-                var title = 'Warning: Unsaved Changes';
+                var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
+                var title = i18n._('Warning: Unsaved Changes');
                 var buttons = [{
-                    label: "Discard changes",
+                    label: i18n._("Discard changes"),
                     "class": "btn Form-cancelButton",
                     "id": "formmodal-cancel-button",
                     onClick: function() {
@@ -217,7 +217,7 @@ export default [
                         $state.go('setup');
                     }
                 }, {
-                    label: "Save changes",
+                    label: i18n._("Save changes"),
                     onClick: function() {
                         $scope.formSave();
                         $('#FormModal-dialog').dialog('close');
@@ -269,8 +269,8 @@ export default [
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: 'Error!',
-                            msg: 'There was an error resetting value. Returned status: ' + error.detail
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('There was an error resetting value. Returned status: ') + error.detail
                         });
 
                 })
@@ -347,8 +347,8 @@ export default [
                 .catch(function(error, status) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: 'Error!',
-                            msg: 'Failed to save settings. Returned status: ' + status
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to save settings. Returned status: ') + status
                         });
                     saveDeferred.reject(error);
                 })
@@ -375,8 +375,8 @@ export default [
                     $scope[key] = !$scope[key];
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: 'Error!',
-                            msg: 'Failed to save toggle settings. Returned status: ' + error.detail
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to save toggle settings. Returned status: ') + error.detail
                         });
                 })
                 .finally(function() {
@@ -394,8 +394,8 @@ export default [
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],
                         {
-                            hdr: 'Error!',
-                            msg: 'There was an error resetting values. Returned status: ' + error.detail
+                            hdr: i18n._('Error!'),
+                            msg: i18n._('There was an error resetting values. Returned status: ') + error.detail
                         });
                 })
                 .finally(function() {
@@ -405,14 +405,14 @@ export default [
 
         var resetAllConfirm = function() {
             var buttons = [{
-                label: "Cancel",
+                label: i18n._("Cancel"),
                 "class": "btn btn-default",
                 "id": "formmodal-cancel-button",
                 onClick: function() {
                     $('#FormModal-dialog').dialog('close');
                 }
             }, {
-                label: "Confirm Reset",
+                label: i18n._("Confirm Reset"),
                 onClick: function() {
                     resetAll();
                     $('#FormModal-dialog').dialog('close');
@@ -420,8 +420,8 @@ export default [
                 "class": "btn btn-primary",
                 "id": "formmodal-reset-button"
             }];
-            var msg = 'This will reset all configuration values to their factory defaults. Are you sure you want to proceed?';
-            var title = 'Confirm factory reset';
+            var msg = i18n._('This will reset all configuration values to their factory defaults. Are you sure you want to proceed?');
+            var title = i18n._('Confirm factory reset');
             triggerModal(msg, title, buttons);
         };
 

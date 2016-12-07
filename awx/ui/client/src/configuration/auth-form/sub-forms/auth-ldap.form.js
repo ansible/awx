@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
         // editTitle: 'Authorization Configuration',
         name: 'configuration_ldap_template',
@@ -84,7 +84,7 @@ export default function() {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: 'Reset All',
+                label: i18n._('Reset All'),
                 class: 'Form-button--left Form-cancelButton'
             },
             cancel: {
@@ -97,3 +97,4 @@ export default function() {
         }
     };
 }
+];
