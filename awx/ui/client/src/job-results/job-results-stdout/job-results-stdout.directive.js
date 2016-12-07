@@ -12,7 +12,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
         templateUrl: templateUrl('job-results/job-results-stdout/job-results-stdout'),
         restrict: 'E',
         link: function(scope, element) {
-
+            scope.stdoutContainerAvailable.resolve("container available");
             // utility function used to find the top visible line and
             // parent header in the pane
             //

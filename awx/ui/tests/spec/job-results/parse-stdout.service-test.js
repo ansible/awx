@@ -143,7 +143,7 @@ describe('parseStdoutService', () => {
             expect(parseStdoutService.getCollapseIcon)
                 .toHaveBeenCalledWith(mockEvent, 'line1');
             expect(parseStdoutService.getAnchorTags)
-                .toHaveBeenCalledWith(mockEvent, "prettified_line");
+                .toHaveBeenCalledWith(mockEvent);
             expect(parseStdoutService.prettify)
                 .toHaveBeenCalledWith('line1');
             expect(parseStdoutService.getStartTimeBadge)
@@ -173,7 +173,7 @@ describe('parseStdoutService', () => {
             spyOn(parseStdoutService, 'getCollapseIcon').and
                 .returnValue("collapse_icon_dom");
             spyOn(parseStdoutService, 'getAnchorTags').and
-                .returnValue("anchor_tag_dom");
+                .returnValue(`" anchor_tag_dom`);
             spyOn(parseStdoutService, 'prettify').and
                 .returnValue("prettified_line");
             spyOn(parseStdoutService, 'getStartTimeBadge').and
@@ -184,7 +184,7 @@ describe('parseStdoutService', () => {
             var expectedString = `
 <div class="JobResultsStdOut-aLineOfStdOutline_classes">
     <div class="JobResultsStdOut-lineNumberColumn">collapse_icon_dom13</div>
-    <div class="JobResultsStdOut-stdoutColumn">anchor_tag_dom </div>
+    <div class="JobResultsStdOut-stdoutColumn" anchor_tag_dom>prettified_line </div>
 </div>`;
             expect(returnedString).toBe(expectedString);
         });

@@ -484,7 +484,7 @@
 
         <!-- RIGHT PANE -->
         <div class="JobResults-rightSide">
-            <div class="Panel">
+            <div class="Panel JobResults-panelRight">
 
                 <!-- RIGHT PANE HEADER -->
                 <div class="StandardOut-panelHeader">
@@ -517,8 +517,16 @@
                         <div class="JobResults-badgeTitle">
                             Hosts
                         </div>
-                        <span class="badge List-titleBadge">
+                        <span class="badge List-titleBadge"
+                            ng-if="jobFinished">
                             {{ hostCount || 0}}
+                        </span>
+
+                        <span class="badge List-titleBadge"
+                            aw-tool-tip="The host count will update when the job is complete."
+                            data-placement="top"
+                            ng-if="!jobFinished">
+                            <i class="fa fa-ellipsis-h"></i>
                         </span>
 
                         <!-- ELAPSED TIME -->
@@ -557,6 +565,15 @@
                     </div>
                 </div>
                 <host-status-bar></host-status-bar>
+                <smart-search
+                    django-model="job_events"
+                    base-path="{{list.basePath}}"
+                    iterator="job_event"
+                    list="list"
+                    collection="job_events"
+                    dataset="job_event_dataset"
+                    search-tags="searchTags">
+                </smart-search>
                 <job-results-standard-out></job-results-standard-out>
             </div>
 
