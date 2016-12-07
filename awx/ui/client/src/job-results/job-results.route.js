@@ -8,7 +8,7 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 
 export default {
     name: 'jobDetail',
-    url: '/jobs/:id',
+    url: '/jobs/{id: int}',
     searchPrefix: 'job_event',
     ncyBreadcrumb: {
         parent: 'jobs',
