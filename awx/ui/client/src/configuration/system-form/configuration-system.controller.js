@@ -5,9 +5,9 @@
  *************************************************/
 
 export default [
-    '$scope', '$state', 'AngularCodeMirror', 'ConfigurationSystemForm', 'ConfigurationService', 'ConfigurationUtils', 'GenerateForm', 'ParseTypeChange',
+    '$scope', '$state', 'AngularCodeMirror', 'ConfigurationSystemForm', 'ConfigurationService', 'ConfigurationUtils', 'GenerateForm',
     function(
-        $scope, $state, AngularCodeMirror, ConfigurationSystemForm, ConfigurationService, ConfigurationUtils, GenerateForm, ParseTypeChange
+        $scope, $state, AngularCodeMirror, ConfigurationSystemForm, ConfigurationService, ConfigurationUtils, GenerateForm
     ) {
         var systemVm = this;
         var generator = GenerateForm;
