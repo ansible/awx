@@ -50,6 +50,8 @@ class SettingFieldMixin(object):
         return obj
 
     def to_internal_value(self, value):
+        if getattr(self, 'encrypted', False) and isinstance(value, basestring) and value.startswith('$encrypted$'):
+            raise serializers.SkipField()
         obj = super(SettingFieldMixin, self).to_internal_value(value)
         return super(SettingFieldMixin, self).to_representation(obj)
 
