@@ -939,6 +939,10 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
             data = dict(msg=_("You cannot assign an Organization role as a child role for a Team."))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+        if role.is_singleton():
+            data = dict(msg=_("You cannot grant system-level permissions to a team."))
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
         credential_content_type = ContentType.objects.get_for_model(Credential)
         if role.content_type == credential_content_type:
@@ -4179,6 +4183,11 @@ class RoleTeamsList(SubListAPIView):
         action = 'attach'
         if request.data.get('disassociate', None):
             action = 'unattach'
+
+        if role.is_singleton() and action == 'attach':
+            data = dict(msg=_("You cannot grant system-level permissions to a team."))
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         if not request.user.can_access(self.parent_model, action, role, team,
                                        self.relationship, request.data,
                                        skip_sub_obj_read_check=False):
