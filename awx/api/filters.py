@@ -19,6 +19,7 @@ from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
 from awx.main.utils import get_type_for_model, to_python_boolean
+from awx.main.models.rbac import RoleAncestorEntry
 
 
 class MongoFilterBackend(BaseFilterBackend):
@@ -158,6 +159,7 @@ class FieldLookupBackend(BaseFilterBackend):
             and_filters = []
             or_filters = []
             chain_filters = []
+            role_filters = []
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
@@ -173,6 +175,18 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key.endswith('__int'):
                     key = key[:-5]
                     q_int = True
+
+                # RBAC filtering
+                if key == 'role_level':
+                    model = queryset.model
+                    role_filters.append(
+                        Q(pk__in=RoleAncestorEntry.objects.filter(
+                            ancestor__in=request.user.roles.all(),
+                            content_type_id=ContentType.objects.get_for_model(model).id,
+                            role_field=values[0]
+                        ).values_list('object_id').distinct())
+                    )
+                    continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
                 # precede not__).
@@ -204,13 +218,15 @@ class FieldLookupBackend(BaseFilterBackend):
                         and_filters.append((q_not, new_key, value))
 
             # Now build Q objects for database query filter.
-            if and_filters or or_filters or chain_filters:
+            if and_filters or or_filters or chain_filters or role_filters:
                 args = []
                 for n, k, v in and_filters:
                     if n:
                         args.append(~Q(**{k:v}))
                     else:
                         args.append(Q(**{k:v}))
+                for q in role_filters:
+                    args.append(q)
                 if or_filters:
                     q = Q()
                     for n,k,v in or_filters:
