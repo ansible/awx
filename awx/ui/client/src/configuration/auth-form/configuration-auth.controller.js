@@ -136,7 +136,6 @@ export default [
             }, ];
 
         var forms = _.pluck(authForms, 'formDef');
-
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
@@ -154,6 +153,8 @@ export default [
                 }
                 addFieldInfo(form, key);
             });
+            // Disable the save button for non-superusers
+            form.buttons.save.disabled = 'vm.updateProhibited';
         });
 
         function addFieldInfo(form, key) {
@@ -165,7 +166,7 @@ export default [
                 dataPlacement: 'top',
                 placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
                 dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required
+                required: $scope.$parent.configDataResolve[key].required,
             });
         }
 

@@ -18,6 +18,9 @@ export default [
             addFieldInfo(form, key);
         });
 
+        // Disable the save button for non-superusers
+        form.buttons.save.disabled = 'vm.updateProhibited';
+
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
                 awPopOver: $scope.$parent.configDataResolve[key].help_text,
@@ -39,27 +42,14 @@ export default [
 
 
         $scope.$on('populated', function() {
-
-            // var fld = 'LICENSE';
-            // var readOnly = true;
-            // $scope.$parent[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
-            // $scope.$parent[fld + 'codeMirror'].addModes($AnsibleConfig.variable_edit_modes);
-            // $scope.$parent[fld + 'codeMirror'].showTextArea({
+            // $scope.$parent.parseType = 'json';
+            // ParseTypeChange({
             //     scope: $scope.$parent,
-            //     model: fld,
-            //     element: "configuration_system_template_LICENSE",
-            //     lineNumbers: true,
-            //     mode: 'json',
+            //     variable: 'LICENSE',
+            //     parse_variable: 'parseType',
+            //     field_id: 'configuration_system_template_LICENSE',
+            //     readOnly: true
             // });
-
-            $scope.$parent.parseType = 'json';
-            ParseTypeChange({
-                scope: $scope.$parent,
-                variable: 'LICENSE',
-                parse_variable: 'parseType',
-                field_id: 'configuration_system_template_LICENSE',
-                readOnly: true
-            });
         });
 
         angular.extend(systemVm, {

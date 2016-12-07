@@ -43,6 +43,9 @@
              addFieldInfo(form, key);
          });
 
+         // Disable the save button for non-superusers
+         form.buttons.save.disabled = 'vm.updateProhibited';
+
          function addFieldInfo(form, key) {
              _.extend(form.fields[key], {
                  awPopOver: $scope.$parent.configDataResolve[key].help_text,

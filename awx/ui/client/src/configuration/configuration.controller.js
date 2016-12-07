@@ -425,16 +425,58 @@ export default [
             triggerModal(msg, title, buttons);
         };
 
+        var show_auditor_bar;
+        if($rootScope.user_is_system_auditor && Store('show_auditor_bar') !== false) {
+            show_auditor_bar = true;
+        } else {
+            show_auditor_bar = false;
+        }
+
+        var updateMessageBarPrefs = function() {
+            vm.show_auditor_bar = false;
+            Store('show_auditor_bar', vm.show_auditor_bar);
+        };
+
+        var closeMessageBar = function() {
+            var msg = 'Are you sure you want to hide the notification bar?';
+            var title = 'Warning: Closing notification bar';
+            var buttons = [{
+                label: "Cancel",
+                "class": "btn Form-cancelButton",
+                "id": "formmodal-cancel-button",
+                onClick: function() {
+                    $('#FormModal-dialog').dialog('close');
+                }
+            }, {
+                label: "OK",
+                onClick: function() {
+                    $('#FormModal-dialog').dialog('close');
+                    updateMessageBarPrefs();
+                },
+                "class": "btn btn-primary",
+                "id": "formmodal-save-button"
+            }];
+            triggerModal(msg, title, buttons);
+        };
+
+        var updateProhibited = true;
+        if($rootScope.user_is_superuser) {
+            updateProhibited = false;
+        }
+
         angular.extend(vm, {
             activeTab: activeTab,
             activeTabCheck: activeTabCheck,
+            closeMessageBar: closeMessageBar,
             currentForm: currentForm,
             formCancel: formCancel,
             formTracker: formTracker,
             formSave: formSave,
             populateFromApi: populateFromApi,
             resetAllConfirm: resetAllConfirm,
-            triggerModal: triggerModal
+            show_auditor_bar: show_auditor_bar,
+            triggerModal: triggerModal,
+            updateProhibited: updateProhibited
         });
     }
 ];

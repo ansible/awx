@@ -4,19 +4,27 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
-    function(GetBasePath, ProcessErrors, $q, $http, Rest) {
+export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
+    function($rootScope, GetBasePath, ProcessErrors, $q, $http, Rest) {
         var url = GetBasePath('settings');
 
         return {
             getConfigurationOptions: function() {
                 var deferred = $q.defer();
+                var returnData;
+
                 Rest.setUrl(url + '/all');
                 Rest.options()
                     .success(function(data) {
-                        var returnData = data.actions.PUT;
+                        if($rootScope.is_superuser) {
+                            returnData = data.actions.PUT;
+                        } else {
+                            returnData = data.actions.GET;
+                        }
+
                         //LICENSE is read only, returning here explicitly for display
-                        returnData.LICENSE = data.actions.GET.LICENSE;
+                        // Removing LICENSE display until 3.2 or later
+                        //returnData.LICENSE = data.actions.GET.LICENSE;
                         deferred.resolve(returnData);
                     })
                     .error(function(error) {

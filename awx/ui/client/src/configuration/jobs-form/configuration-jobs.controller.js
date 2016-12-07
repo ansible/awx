@@ -34,6 +34,9 @@ export default [
                 value: command
             });
         });
+        
+        // Disable the save button for non-superusers
+        form.buttons.save.disabled = 'vm.updateProhibited';
 
         var keys = _.keys(form.fields);
         _.each(keys, function(key) {

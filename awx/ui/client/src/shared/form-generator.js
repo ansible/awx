@@ -1733,14 +1733,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     if (btn !== 'reset') {
                                         //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
 
-                                        html += "ng-disabled=\"" + ngDisabled;
-                                        //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                        html += "\" ";
+                                        if (button.disabled && button.disable !== true) {
+                                            // Allow disabled to overrule ng-disabled. Used for permissions.
+                                            // Example: system auditor can view but not update. Form validity
+                                            // is no longer a concern but ng-disabled will update disabled
+                                            // status on render so we stop applying it here.
+                                        } else {
+                                            html += "ng-disabled=\"" + ngDisabled;
+                                            //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                            html += "\" ";
+                                        }
+
                                     } else {
                                         //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
                                         //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
                                         //html += "\" ";
                                     }
+                                }
+                                if (button.disabled && button.disable !== true) {
+                                    html += ` disabled="disabled" `;
                                 }
                                 if(button.awToolTip) {
                                     html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
