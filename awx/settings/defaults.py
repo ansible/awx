@@ -999,7 +999,7 @@ LOGGING = {
             'propagate': False,
         },
         'awx.analytics': {
-            'handlers': ['null'],
+            'handlers': ['http_receiver'],
             'level': 'INFO',
             'propagate': False
         },

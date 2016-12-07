@@ -85,6 +85,10 @@ def celery_startup(conf=None, **kwargs):
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 
+def uwsgi_reload():
+    os.system("echo r > /tmp/awxfifo")
+
+
 @task(queue='broadcast_all')
 def clear_cache_keys(cache_keys):
     set_of_keys = set([key for key in cache_keys])
@@ -92,12 +96,7 @@ def clear_cache_keys(cache_keys):
     cache.delete_many(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            LOGGING = settings.LOGGING
-            if settings.LOG_AGGREGATOR_ENABLED:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-            else:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSNullHandler'
-            configure_logging(settings.LOGGING_CONFIG, LOGGING)
+            uwsgi_reload()
             break
 
 
