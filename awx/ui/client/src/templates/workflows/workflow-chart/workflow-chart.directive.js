@@ -14,15 +14,11 @@ export default [ '$state',
             addNode: '&',
             editNode: '&',
             deleteNode: '&',
+            workflowZoomed: '&',
             mode: '@'
         },
         restrict: 'E',
         link: function(scope, element) {
-
-            scope.$watch('canAddWorkflowJobTemplate', function() {
-                // Redraw the graph if permissions change
-                update();
-            });
 
             let margin = {top: 20, right: 20, bottom: 20, left: 20},
                 width = 950,
@@ -31,8 +27,7 @@ export default [ '$state',
                 rectW = 120,
                 rectH = 60,
                 rootW = 60,
-                rootH = 40,
-                m = [40, 240, 40, 240];
+                rootH = 40;
 
             let tree = d3.layout.tree()
                     .size([height, width]);
@@ -40,6 +35,19 @@ export default [ '$state',
             let line = d3.svg.line()
                      .x(function(d){return d.x;})
                      .y(function(d){return d.y;});
+
+            let zoomObj = d3.behavior.zoom().scaleExtent([0.5, 2]);
+
+            let baseSvg = d3.select(element[0]).append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("class", "WorkflowChart-svg")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(zoomObj
+                    .on("zoom", naturalZoom)
+                );
+
+            let svgGroup = baseSvg.append("g");
 
             function lineData(d){
 
@@ -76,33 +84,55 @@ export default [ '$state',
                 }
             }
 
-            let baseSvg = d3.select(element[0]).append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("class", "WorkflowChart-svg")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                .call(d3.behavior.zoom()
-                    .scaleExtent([0.5, 5])
-                    .on("zoom", zoom)
-                );
-
-            let svgGroup = baseSvg.append("g");
-
-            function zoom() {
+            // This is the zoom function called by using the mousewheel/click and drag
+            function naturalZoom() {
                 let scale = d3.event.scale,
-                    translation = d3.event.translate,
-                    tbound = -height * scale,
-                    bbound = height * scale,
-                    lbound = (-width + m[1]) * scale,
-                    rbound = (width - m[3]) * scale;
-                  // limit translation to thresholds
-                  translation = [
-                      Math.max(Math.min(translation[0], rbound), lbound),
-                      Math.max(Math.min(translation[1], bbound), tbound)
-                  ];
-
+                    translation = d3.event.translate;
 
                 svgGroup.attr("transform", "translate(" + translation + ")scale(" + scale + ")");
+
+                scope.workflowZoomed({
+                    zoom: scale
+                });
+            }
+
+            // This is the zoom that gets called when the user interacts with the manual zoom controls
+            function manualZoom(zoom) {
+                let scale = zoom / 100,
+                translation = zoomObj.translate(),
+                origZoom = zoomObj.scale(),
+                unscaledOffsetX = (translation[0] + ((width*origZoom) - width)/2)/origZoom,
+                unscaledOffsetY = (translation[1] + ((height*origZoom) - height)/2)/origZoom,
+                translateX = unscaledOffsetX*scale - ((scale*width)-width)/2,
+                translateY = unscaledOffsetY*scale - ((scale*height)-height)/2;
+
+                svgGroup.attr("transform", "translate(" + [translateX, translateY] + ")scale(" + scale + ")");
+                zoomObj.scale(scale);
+                zoomObj.translate([translateX, translateY]);
+            }
+
+            function manualPan(direction) {
+                let scale = zoomObj.scale(),
+                    distance = 150 * scale,
+                    translateX,
+                    translateY,
+                    translateCoords = zoomObj.translate();
+                if (direction === 'left' || direction === 'right') {
+                    translateX = direction === 'left' ? translateCoords[0] - distance : translateCoords[0] + distance;
+                    translateY = translateCoords[1];
+                } else if (direction === 'up' || direction === 'down') {
+                    translateX = translateCoords[0];
+                    translateY = direction === 'up' ? translateCoords[1] - distance : translateCoords[1] + distance;
+                }
+                svgGroup.attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + scale + ")");
+                zoomObj.translate([translateX, translateY]);
+            }
+
+            function resetZoomAndPan() {
+                svgGroup.attr("transform", "translate(" + 0 + "," + 0 + ")scale(" + 1 + ")");
+                // Update the zoomObj
+                zoomObj.scale(1);
+                zoomObj.translate([0,0]);
             }
 
             function update() {
@@ -637,8 +667,25 @@ export default [ '$state',
                 });
             }
 
+            scope.$watch('canAddWorkflowJobTemplate', function() {
+                // Redraw the graph if permissions change
+                update();
+            });
+
             scope.$on('refreshWorkflowChart', function(){
                 update();
+            });
+
+            scope.$on('panWorkflowChart', function(evt, params) {
+                manualPan(params.direction);
+            });
+
+            scope.$on('resetWorkflowChart', function(){
+                resetZoomAndPan();
+            });
+
+            scope.$on('zoomWorkflowChart', function(evt, params) {
+                manualZoom(params.zoom);
             });
 
         }
