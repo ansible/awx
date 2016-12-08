@@ -178,14 +178,7 @@ class FieldLookupBackend(BaseFilterBackend):
 
                 # RBAC filtering
                 if key == 'role_level':
-                    model = queryset.model
-                    role_filters.append(
-                        Q(pk__in=RoleAncestorEntry.objects.filter(
-                            ancestor__in=request.user.roles.all(),
-                            content_type_id=ContentType.objects.get_for_model(model).id,
-                            role_field=values[0]
-                        ).values_list('object_id').distinct())
-                    )
+                    role_filters.append(values[0])
                     continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
@@ -225,8 +218,14 @@ class FieldLookupBackend(BaseFilterBackend):
                         args.append(~Q(**{k:v}))
                     else:
                         args.append(Q(**{k:v}))
-                for q in role_filters:
-                    args.append(q)
+                for role_name in role_filters:
+                    args.append(
+                        Q(pk__in=RoleAncestorEntry.objects.filter(
+                            ancestor__in=request.user.roles.all(),
+                            content_type_id=ContentType.objects.get_for_model(queryset.model).id,
+                            role_field=role_name
+                        ).values_list('object_id').distinct())
+                    )
                 if or_filters:
                     q = Q()
                     for n,k,v in or_filters:
