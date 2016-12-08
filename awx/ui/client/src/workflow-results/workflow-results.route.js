@@ -18,8 +18,7 @@ export default {
     data: {
         socket: {
             "groups":{
-                "jobs": ["status_changed"],
-                "workflow_events": []
+                "jobs": ["status_changed"]
             }
         }
     },
@@ -59,6 +58,18 @@ export default {
                         // TODO: handle this
                         //defer.resolve(data);
                     });
+            return defer.promise;
+        }],
+        // after the GET for the workflow & it's nodes, this helps us keep the
+        // status bar from flashing as rest data comes in.  If the workflow
+        //  is finished and there's a playbook_on_stats event, go ahead and
+        // resolve the count so you don't get that flashing!
+        count: ['workflowData', 'workflowNodes', 'workflowResultsService', 'Rest', '$q', function(workflowData, workflowNodes, workflowResultsService, Rest, $q) {
+            var defer = $q.defer();
+            defer.resolve({
+                val: workflowResultsService
+                    .getCounts(workflowNodes),
+                        countFinished: true});
             return defer.promise;
         }],
         // GET for the particular jobs labels to be displayed in the

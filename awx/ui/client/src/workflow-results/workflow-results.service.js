@@ -7,6 +7,31 @@
 
 export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun) {
     var val = {
+        getCounts: function(workflowNodes){
+            var nodeArr = [];
+            workflowNodes.forEach(node => {
+                if(node && node.summary_fields && node.summary_fields.job && node.summary_fields.job.status){
+                    nodeArr.push(node.summary_fields.job.status);
+                }
+            });
+            // use the workflow nodes data populate above to get the count
+            var count = {
+                successful : _.filter(nodeArr, function(o){
+                    return o === "successful";
+                }),
+                failed : _.filter(nodeArr, function(o){
+                    return o === "failed" || o === "error" || o === "canceled";
+                })
+            };
+
+            // turn the count into an actual count, rather than a list of
+            // statuses
+            Object.keys(count).forEach(key => {
+                count[key] = count[key].length;
+            });
+
+            return count;
+        },
         deleteJob: function(workflow) {
             Prompt({
                 hdr: 'Delete Job',

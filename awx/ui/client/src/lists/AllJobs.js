@@ -43,7 +43,7 @@ export default
                 ngClick: "viewJobDetails(job)",
                 badgePlacement: 'right',
                 badgeCustom: true,
-                badgeIcon: `<a href="{{ workflow_result_link }}"
+                badgeIcon: `<a href="{{ job.workflow_result_link }}"
                     aw-tool-tip="View workflow results"
                     data-placement="top"
                     data-original-title="" title="">

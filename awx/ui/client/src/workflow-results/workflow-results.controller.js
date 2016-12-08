@@ -7,6 +7,8 @@ export default ['workflowData',
     'ParseTypeChange',
     'ParseVariableString',
     'WorkflowService',
+    'count',
+    '$state',
     function(workflowData,
         workflowResultsService,
         workflowDataOptions,
@@ -15,7 +17,9 @@ export default ['workflowData',
         $scope,
         ParseTypeChange,
         ParseVariableString,
-        WorkflowService
+        WorkflowService,
+        count,
+        $state
     ) {
 
         var getTowerLinks = function() {
@@ -57,6 +61,7 @@ export default ['workflowData',
             $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
+            $scope.count = count.val;
 
             // turn related api browser routes into tower routes
             getTowerLinks();
@@ -113,22 +118,38 @@ export default ['workflowData',
 
         init();
 
-        $scope.$on(`ws-workflow_events-${$scope.workflow.id}`, function(e, data) {
-
-            WorkflowService.updateStatusOfNode({
-                treeData: $scope.treeData,
-                nodeId: data.workflow_node_id,
-                status: data.status,
-                unified_job_id: data.unified_job_id
-            });
-
-            $scope.$broadcast("refreshWorkflowChart");
-        });
-
         // Processing of job-status messages from the websocket
         $scope.$on(`ws-jobs`, function(e, data) {
+            // Update the workflow job's unified job:
             if (parseInt(data.unified_job_id, 10) === parseInt($scope.workflow.id,10)) {
-                $scope.workflow.status = data.status;
+                    $scope.workflow.status = data.status;
+
+                    if(data.status === "successful" || data.status === "failed"){
+                        $state.go('.', null, { reload: true });
+                    }
+            }
+            // Update the jobs spawned by the workflow:
+            if(data.hasOwnProperty('workflow_job_id') &&
+                parseInt(data.workflow_job_id, 10) === parseInt($scope.workflow.id,10)){
+
+                    WorkflowService.updateStatusOfNode({
+                        treeData: $scope.treeData,
+                        nodeId: data.workflow_node_id,
+                        status: data.status,
+                        unified_job_id: data.unified_job_id
+                    });
+
+                    $scope.workflow_nodes.forEach(node => {
+                        if(parseInt(node.id) === parseInt(data.workflow_node_id)){
+                            node.summary_fields.job = {
+                                    status: data.status
+                            };
+                        }
+                    });
+
+                    $scope.count = workflowResultsService
+                        .getCounts($scope.workflow_nodes);
+                    $scope.$broadcast("refreshWorkflowChart");
             }
         });
 }];

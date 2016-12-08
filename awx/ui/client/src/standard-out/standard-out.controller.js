@@ -58,6 +58,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.credential_name = (data.summary_fields.credential) ? data.summary_fields.credential.name : '';
                 $scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
                 $scope.cloud_credential_url = (data.cloud_credential) ? '/#/credentials/' + data.cloud_credential : '';
+                if(data.summary_fields && data.summary_fields.source_workflow_job &&
+                    data.summary_fields.source_workflow_job.id){
+                        $scope.workflow_result_link = `/#/workflows/${data.summary_fields.source_workflow_job.id}`;
+                }
                 $scope.playbook = data.playbook;
                 $scope.credential = data.credential;
                 $scope.cloud_credential = data.cloud_credential;
