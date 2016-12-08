@@ -492,6 +492,21 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                             column-custom-class="${customClass}">
                         </th>`;
 
+                    if(list.fields.info) {
+                        customClass = list.fields.name.modalColumnClass || '';
+                        html += `<th
+                                    class="List-tableHeader--info"
+                                    base-path="${list.basePath || list.name}"
+                                    collection="${list.name}"
+                                    dataset="${list.iterator}_dataset"
+                                    column-sort
+                                    column-field="info"
+                                    column-iterator="${list.iterator}"
+                                    column-no-sort="${list.fields.info.nosort}"
+                                    column-label="${list.fields.info.label}"
+                                    column-custom-class="${customClass}">
+                                </th>`;
+                    }
                 }
                 if (options.mode === 'select') {
                     html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";

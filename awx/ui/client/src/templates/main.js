@@ -343,9 +343,16 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                 delete list.fields.smart_status;
                                 delete list.fields.labels;
                                 delete list.fieldActions;
-                                list.fields.name.columnClass = "col-md-11";
+                                list.fields.name.columnClass = "col-md-8";
                                 list.iterator = 'job_template';
                                 list.name = 'job_templates';
+                                list.fields.info = {
+                                    ngInclude: "'/static/partials/job-template-details.html'",
+                                    type: 'template',
+                                    columnClass: 'col-md-3',
+                                    label: '',
+                                    nosort: true
+                                };
 
                                 return list;
                             }

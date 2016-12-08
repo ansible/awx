@@ -43,7 +43,7 @@ table, tbody {
     border-top-right-radius: 5px;
 }
 
-.List-tableHeader--actions {
+.List-tableHeader--info, .List-tableHeader--actions {
     text-align: right;
 }
 
@@ -385,6 +385,21 @@ table, tbody {
     border-top: 4px dashed;
     border-right: 4px solid transparent;
     border-left: 4px solid transparent;
+}
+
+.List-infoCell {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+.List-infoCell a {
+    color: @default-icon;
+}
+
+.List-infoCell a:hover, .List-infoCell a:focus {
+    color: @default-interface-txt;
 }
 
 @media (max-width: 991px) {
