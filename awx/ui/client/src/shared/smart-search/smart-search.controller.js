@@ -24,7 +24,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
         function stripDefaultParams(params) {
             let stripped =_.pick(params, (value, key) => {
                 // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
-                return defaults[key] !== value && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
+                return defaults[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
             });
             return _(stripped).map(qs.decodeParam).flatten().value();
         }
