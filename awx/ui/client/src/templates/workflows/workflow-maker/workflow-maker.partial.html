@@ -64,7 +64,7 @@
         </div>
         <div class="WorkflowMaker-contentRight">
             <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited) ? ((nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "EDIT TEMPLATE") : "ADD A TEMPLATE"}}</div>
-            <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'">Please hover over a template and click the Add button.</div>
+            <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'" ng-bind="treeData.data.totalNodes === 0 ? 'Please click the start button to build your workflow.' : 'Please hover over a template for additional options.'"></div>
             <div class="WorkflowMaker-form" ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'">
                 <div class="Form-tabHolder">
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'jobs'}" ng-click="toggleFormTab('jobs')">JOBS</div>
