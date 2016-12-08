@@ -2420,7 +2420,7 @@ class WorkflowJobNodeSerializer(WorkflowNodeBaseSerializer):
         res['failure_nodes'] = reverse('api:workflow_job_node_failure_nodes_list', args=(obj.pk,))
         res['always_nodes'] = reverse('api:workflow_job_node_always_nodes_list', args=(obj.pk,))
         if obj.job:
-            res['job'] = reverse('api:job_detail', args=(obj.job.pk,))
+            res['job'] = obj.job.get_absolute_url()
         if obj.workflow_job:
             res['workflow_job'] = reverse('api:workflow_job_detail', args=(obj.workflow_job.pk,))
         return res
