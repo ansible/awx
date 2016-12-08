@@ -14,6 +14,7 @@ import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
 import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
+import workflowControls from './workflows/workflow-controls/main';
 import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
 import templateCopyService from './copy-template/template-copy.service';
@@ -21,7 +22,7 @@ import templateCopyService from './copy-template/template-copy.service';
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
         jobTemplatesEdit.name, labels.name, workflowAdd.name, workflowEdit.name,
-        workflowChart.name, workflowMaker.name
+        workflowChart.name, workflowMaker.name, workflowControls.name
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)

@@ -62,6 +62,7 @@ export default ['workflowData',
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
             $scope.count = count.val;
+            $scope.showManualControls = false;
 
             // turn related api browser routes into tower routes
             getTowerLinks();
@@ -114,6 +115,32 @@ export default ['workflowData',
 
         $scope.relaunchJob = function() {
             workflowResultsService.relaunchJob($scope);
+        };
+
+        $scope.toggleManualControls = function() {
+            $scope.showManualControls = !$scope.showManualControls;
+        };
+
+        $scope.panChart = function(direction) {
+            $scope.$broadcast('panWorkflowChart', {
+                direction: direction
+            });
+        };
+
+        $scope.zoomChart = function(zoom) {
+            $scope.$broadcast('zoomWorkflowChart', {
+                zoom: zoom
+            });
+        };
+
+        $scope.resetChart = function() {
+            $scope.$broadcast('resetWorkflowChart');
+        };
+
+        $scope.workflowZoomed = function(zoom) {
+            $scope.$broadcast('workflowZoomed', {
+                zoom: zoom
+            });
         };
 
         init();
