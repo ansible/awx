@@ -2561,7 +2561,7 @@ class JobTemplateCallback(GenericAPIView):
             return set([hosts.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
-        # Next, try matching based on name or ansible_ssh_host variable.
+        # Next, try matching based on name or ansible_host variables.
         matches = set()
         for host in hosts:
             for host_var in ['ansible_ssh_host', 'ansible_host']:
