@@ -39,7 +39,7 @@ export default ['templateUrl', function(templateUrl) {
             $scope.changeStreamTarget = function(){
                 if($scope.streamTarget && $scope.streamTarget === 'dashboard') {
                     // Just navigate to the base activity stream
-                    $state.go('activityStream');
+                    $state.go('activityStream', {target: null, activity_search: {page_size:"20", order_by: '-timestamp'}});
                 }
                 else {
                     let search =  _.merge($stateParams.activity_search, {
