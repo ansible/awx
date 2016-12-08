@@ -2561,23 +2561,25 @@ class JobTemplateCallback(GenericAPIView):
             return set([hosts.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
-        # Next, try matching based on name or ansible_ssh_host variable.
+        # Next, try matching based on name or ansible_host variables.
         matches = set()
         for host in hosts:
-            ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
-            if ansible_ssh_host in remote_hosts:
-                matches.add(host)
-            if host.name != ansible_ssh_host and host.name in remote_hosts:
-                matches.add(host)
+            for host_var in ['ansible_ssh_host', 'ansible_host']:
+                ansible_host = host.variables_dict.get(host_var, '')
+                if ansible_host in remote_hosts:
+                    matches.add(host)
+                if host.name != ansible_host and host.name in remote_hosts:
+                    matches.add(host)
         if len(matches) == 1:
             return matches
 
         # Try to resolve forward addresses for each host to find matches.
         for host in hosts:
             hostnames = set([host.name])
-            ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
-            if ansible_ssh_host:
-                hostnames.add(ansible_ssh_host)
+            for host_var in ['ansible_ssh_host', 'ansible_host']:
+                ansible_host = host.variables_dict.get(host_var, '')
+                if ansible_host:
+                    hostnames.add(ansible_host)
             for hostname in hostnames:
                 try:
                     result = socket.getaddrinfo(hostname, None)
