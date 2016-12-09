@@ -110,11 +110,7 @@ class BaseCallbackModule(CallbackBase):
         event_data.setdefault('uuid', str(uuid.uuid4()))
 
         if 'res' in event_data:
-            event_data['res'] = self.censor_result(copy.copy(event_data['res']))
-            res = event_data.get('res', None)
-            if res and isinstance(res, dict):
-                if 'artifact_data' in res:
-                    event_data['artifact_data'] = res['artifact_data']
+            event_data['res'] = self.censor_result(copy.deepcopy(event_data['res']))
 
         if event not in self.EVENTS_WITHOUT_TASK:
             task = event_data.pop('task', None)
@@ -329,6 +325,7 @@ class BaseCallbackModule(CallbackBase):
             ok=stats.ok,
             processed=stats.processed,
             skipped=stats.skipped,
+            artifact_data=stats.custom,
         )
         with self.capture_event_data('playbook_on_stats', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_stats(stats)
