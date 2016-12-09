@@ -6,6 +6,7 @@
 
 export default [
     '$scope',
+    '$rootScope',
     '$state',
     '$stateParams',
     '$timeout',
@@ -25,6 +26,7 @@ export default [
     'ParseTypeChange',
     function(
         $scope,
+        $rootScope,
         $state,
         $stateParams,
         $timeout,
@@ -167,6 +169,7 @@ export default [
                 placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
                 dataTitle: $scope.$parent.configDataResolve[key].label,
                 required: $scope.$parent.configDataResolve[key].required,
+                ngDisabled: $rootScope.user_is_system_auditor
             });
         }
 

@@ -362,6 +362,12 @@ export default [
 
 
         $scope.toggleForm = function(key) {
+            if($rootScope.user_is_system_auditor) {
+                // Block system auditors from making changes
+                event.preventDefault();
+                return;
+            }
+
             $scope[key] = !$scope[key];
             Wait('start');
             var payload = {};

@@ -5,9 +5,10 @@
  *************************************************/
 
 export default [
-    '$scope', '$state', 'AngularCodeMirror', 'ConfigurationSystemForm', 'ConfigurationService', 'ConfigurationUtils', 'GenerateForm',
+    '$rootScope', '$scope', '$state', 'AngularCodeMirror', 'Authorization', 'ConfigurationSystemForm', 'ConfigurationService',
+    'ConfigurationUtils', 'GenerateForm',
     function(
-        $scope, $state, AngularCodeMirror, ConfigurationSystemForm, ConfigurationService, ConfigurationUtils, GenerateForm
+        $rootScope, $scope, $state, AngularCodeMirror, Authorization, ConfigurationSystemForm, ConfigurationService, ConfigurationUtils, GenerateForm
     ) {
         var systemVm = this;
         var generator = GenerateForm;
@@ -29,7 +30,8 @@ export default [
                 toggleSource: key,
                 dataPlacement: 'top',
                 dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required
+                required: $scope.$parent.configDataResolve[key].required,
+                ngDisabled: $rootScope.user_is_system_auditor
             });
         }
 
@@ -38,18 +40,6 @@ export default [
             mode: 'edit',
             scope: $scope.$parent,
             related: true
-        });
-
-
-        $scope.$on('populated', function() {
-            // $scope.$parent.parseType = 'json';
-            // ParseTypeChange({
-            //     scope: $scope.$parent,
-            //     variable: 'LICENSE',
-            //     parse_variable: 'parseType',
-            //     field_id: 'configuration_system_template_LICENSE',
-            //     readOnly: true
-            // });
         });
 
         angular.extend(systemVm, {

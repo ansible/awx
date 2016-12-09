@@ -6,6 +6,7 @@
 
 export default [
     '$scope',
+    '$rootScope',
     '$state',
     '$timeout',
     'ConfigurationJobsForm',
@@ -15,6 +16,7 @@ export default [
     'GenerateForm',
     function(
         $scope,
+        $rootScope,
         $state,
         $timeout,
         ConfigurationJobsForm,
@@ -34,7 +36,7 @@ export default [
                 value: command
             });
         });
-        
+
         // Disable the save button for non-superusers
         form.buttons.save.disabled = 'vm.updateProhibited';
 
@@ -51,7 +53,8 @@ export default [
                 toggleSource: key,
                 dataPlacement: 'top',
                 dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required
+                required: $scope.$parent.configDataResolve[key].required,
+                ngDisabled: $rootScope.user_is_system_auditor
             });
         }
 

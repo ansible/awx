@@ -6,6 +6,7 @@
 
  export default [
      '$scope',
+     '$rootScope',
      '$state',
      '$timeout',
      'ConfigurationUiForm',
@@ -14,6 +15,7 @@
      'GenerateForm',
      function(
         $scope,
+        $rootScope,
         $state,
         $timeout,
         ConfigurationUiForm,
@@ -54,7 +56,8 @@
                  toggleSource: key,
                  dataPlacement: 'top',
                  dataTitle: $scope.$parent.configDataResolve[key].label,
-                 required: $scope.$parent.configDataResolve[key].required
+                 required: $scope.$parent.configDataResolve[key].required,
+                 ngDisabled: $rootScope.user_is_system_auditor
              });
          }
 
