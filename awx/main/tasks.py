@@ -43,7 +43,6 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
-from django.utils.log import configure_logging
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
