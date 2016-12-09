@@ -86,7 +86,8 @@ def celery_startup(conf=None, **kwargs):
 
 
 def uwsgi_reload():
-    os.system("echo r > /tmp/awxfifo")
+    "Does chain reload of uWSGI"
+    os.system("echo c > /tmp/awxfifo")
 
 
 @task(queue='broadcast_all')
