@@ -13,7 +13,7 @@
   },
   "engines": {
     "node": "^6.3.1",
-    "npm": "3.10.7"
+    "npm": "^3.10.3"
   },
   "scripts": {
     "build-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev;",
