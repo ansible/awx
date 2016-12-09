@@ -117,10 +117,6 @@ class DependencyGraph(object):
         if not latest_inventory_update:
             return True
 
-        # TODO: Other finished, failed cases? i.e. error ?
-        if latest_inventory_update['status'] in ['failed', 'canceled']:
-            return True
-
         '''
         This is a bit of fuzzy logic.
         If the latest inventory update has a created time == job_created_time-2
@@ -138,7 +134,11 @@ class DependencyGraph(object):
         timeout_seconds = timedelta(seconds=latest_inventory_update['inventory_source__update_cache_timeout'])
         if (latest_inventory_update['finished'] + timeout_seconds) < now:
             return True
-        
+
+        if latest_inventory_update['inventory_source__update_on_launch'] is True and \
+                latest_inventory_update['status'] in ['failed', 'canceled', 'error']:
+            return True
+
         return False
 
     def mark_system_job(self):

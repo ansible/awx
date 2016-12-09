@@ -26,6 +26,22 @@ def successful_inventory_update_latest_cache_expired(inventory_update_latest_fac
     return iu
 
 
+@pytest.fixture
+def failed_inventory_update_latest_cache_zero(failed_inventory_update_latest):
+    iu = failed_inventory_update_latest
+    iu['inventory_source__update_cache_timeout'] = 0
+    iu['inventory_source__update_on_launch'] = True
+    iu['finished'] = iu['created'] + timedelta(seconds=2)
+    iu['status'] = 'failed'
+    return iu
+
+
+@pytest.fixture
+def failed_inventory_update_latest_cache_non_zero(failed_inventory_update_latest_cache_zero):
+    failed_inventory_update_latest_cache_zero['inventory_source__update_cache_timeout'] = 10000000
+    return failed_inventory_update_latest_cache_zero
+
+
 class TestStartInventoryUpdate():
     def test_pending(self, scheduler_factory, pending_inventory_update):
         scheduler = scheduler_factory(tasks=[pending_inventory_update])
@@ -79,9 +95,18 @@ class TestCreateDependentInventoryUpdate():
 
         scheduler.start_task.assert_called_with(waiting_inventory_update, [pending_job])
 
-    def test_last_update_failed(self, scheduler_factory, pending_job, failed_inventory_update, failed_inventory_update_latest, waiting_inventory_update, inventory_id_sources):
+    def test_last_update_timeout_zero_failed(self, scheduler_factory, pending_job, failed_inventory_update, failed_inventory_update_latest_cache_zero, waiting_inventory_update, inventory_id_sources):
         scheduler = scheduler_factory(tasks=[failed_inventory_update, pending_job], 
-                                      latest_inventory_updates=[failed_inventory_update_latest], 
+                                      latest_inventory_updates=[failed_inventory_update_latest_cache_zero], 
+                                      create_inventory_update=waiting_inventory_update,
+                                      inventory_sources=inventory_id_sources)
+        scheduler._schedule()
+
+        scheduler.start_task.assert_called_with(waiting_inventory_update, [pending_job])
+
+    def test_last_update_timeout_non_zero_failed(self, scheduler_factory, pending_job, failed_inventory_update, failed_inventory_update_latest_cache_non_zero, waiting_inventory_update, inventory_id_sources):
+        scheduler = scheduler_factory(tasks=[failed_inventory_update, pending_job], 
+                                      latest_inventory_updates=[failed_inventory_update_latest_cache_non_zero], 
                                       create_inventory_update=waiting_inventory_update,
                                       inventory_sources=inventory_id_sources)
         scheduler._schedule()

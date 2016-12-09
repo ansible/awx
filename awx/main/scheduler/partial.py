@@ -184,6 +184,7 @@ class InventoryUpdateLatestDict(InventoryUpdateDict):
     FIELDS = (
         'id', 'status', 'created', 'celery_task_id', 'inventory_source_id', 
         'finished', 'inventory_source__update_cache_timeout', 'launch_type',
+        'inventory_source__update_on_launch',
     )
     model = InventoryUpdate
 

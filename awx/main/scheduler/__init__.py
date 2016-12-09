@@ -276,6 +276,9 @@ class TaskManager():
                 dependencies.append(project_task)
                 # Inventory created 2 seconds behind job
 
+            '''
+            Inventory may have already been synced from a provision callback.
+            '''
             inventory_sources_already_updated = task.get_inventory_sources_already_updated()
 
             for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
