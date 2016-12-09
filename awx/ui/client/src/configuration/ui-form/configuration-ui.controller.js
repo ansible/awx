@@ -6,6 +6,7 @@
 
  export default [
      '$scope',
+     '$rootScope',
      '$state',
      '$timeout',
      'ConfigurationUiForm',
@@ -15,6 +16,7 @@
      'i18n',
      function(
         $scope,
+        $rootScope,
         $state,
         $timeout,
         ConfigurationUiForm,
@@ -45,6 +47,9 @@
              addFieldInfo(form, key);
          });
 
+         // Disable the save button for non-superusers
+         form.buttons.save.disabled = 'vm.updateProhibited';
+
          function addFieldInfo(form, key) {
              _.extend(form.fields[key], {
                  awPopOver: $scope.$parent.configDataResolve[key].help_text,
@@ -53,7 +58,8 @@
                  toggleSource: key,
                  dataPlacement: 'top',
                  dataTitle: $scope.$parent.configDataResolve[key].label,
-                 required: $scope.$parent.configDataResolve[key].required
+                 required: $scope.$parent.configDataResolve[key].required,
+                 ngDisabled: $rootScope.user_is_system_auditor
              });
          }
 

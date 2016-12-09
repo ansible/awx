@@ -27,12 +27,12 @@ export default ['i18n', function(i18n) {
             ORG_ADMINS_CAN_SEE_ALL_USERS: {
                 type: 'toggleSwitch',
             },
-            LICENSE: {
-                type: 'textarea',
-                rows: 6,
-                codeMirror: true,
-                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
-            }
+            // LICENSE: {
+            //     type: 'textarea',
+            //     rows: 6,
+            //     codeMirror: true,
+            //     class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            // }
         },
 
         buttons: {

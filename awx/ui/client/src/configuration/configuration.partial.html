@@ -1,3 +1,9 @@
+<div class="Section-messageBar" ng-if="vm.show_auditor_bar">
+    <i class="fa fa-warning"></i>
+    System auditors have read-only permissions in this section.
+    <button class="Section-messageBar--close" ng-click="vm.closeMessageBar()"><i class="fa fa-times-circle"></i></button>
+</div>
+
 <div class="tab-pane" id="configuration-panel">
     <div ng-cloak id="htmlTemplate" class="Panel">
         <div class="Form-header">

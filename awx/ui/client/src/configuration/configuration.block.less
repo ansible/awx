@@ -1,4 +1,5 @@
 @import "./client/src/shared/branding/colors.default.less";
+@import "../shared/branding/colors.less";
 
 .Form-resetValue, .Form-resetFile {
     text-transform: uppercase;
@@ -48,4 +49,25 @@ input#filePickerText {
     cursor: default;
     border-radius: 0 5px 5px 0;
     background-color: #fff;
+}
+
+// Messagebar for system auditor role notifications
+.Section-messageBar {
+    width: 120%;
+    margin-left: -20px;
+    padding: 10px;
+    color: @white;
+    background-color: @default-link;
+}
+
+.Section-messageBar--close {
+    position: absolute;
+    right: 0;
+    background: none;
+    border: none;
+    color: @info-close;
+}
+
+.Section-messageBar--close:hover {
+    color: @white;
 }
