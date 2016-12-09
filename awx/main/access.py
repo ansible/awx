@@ -1624,8 +1624,6 @@ class WorkflowJobAccess(BaseAccess):
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
-            if obj.survey_enabled:
-                self.check_license(feature='surveys')
 
         if self.user.is_superuser:
             return True
