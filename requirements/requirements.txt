@@ -164,7 +164,6 @@ python-swiftclient==3.2.0  # via python-heatclient, python-troveclient, shade
 python-troveclient==2.6.0  # via shade
 pytz==2016.7              # via babel, celery, irc, oslo.serialization, oslo.utils, tempora, twilio
 PyYAML==3.12              # via cliff, djangorestframework-yaml, os-client-config, psphere, python-heatclient, python-ironicclient, python-mistralclient
-pyzmq==14.5.0
 rackspace-auth-openstack==1.3  # via rackspace-novaclient
 rackspace-novaclient==2.1
 rax-default-network-flags-python-novaclient-ext==0.4.0  # via rackspace-novaclient
