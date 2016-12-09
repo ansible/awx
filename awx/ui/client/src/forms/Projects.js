@@ -79,7 +79,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>' + i18n._('Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
+                    '<p>' + i18n.sprintf(i18n._('Change %s under "Configure Tower" to change this location.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
@@ -95,9 +95,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
-                awPopOver: '<p>' + i18n._('Select from the list of directories found in the base path.' +
-                    'Together the base path and the playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
+                awPopOver: '<p>' + i18n._('Select from the list of directories found in the Project Base Path. ' +
+                    'Together the base path and the playbook directory provide the full path used to locate playbooks.') + '</p>',
                 dataTitle: i18n._('Project Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
