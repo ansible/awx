@@ -1362,7 +1362,6 @@ class SystemJobAccess(BaseAccess):
         return False # no relaunching of system jobs
 
 
-# TODO:
 class WorkflowJobTemplateNodeAccess(BaseAccess):
     '''
     I can see/use a WorkflowJobTemplateNode if I have read permission
@@ -1408,6 +1407,8 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         if not data:  # So the browseable API will work
             return True
         if not self.check_related('workflow_job_template', WorkflowJobTemplate, data, mandatory=True):
+            return False
+        if not self.check_related('unified_job_template', UnifiedJobTemplate, data):
             return False
         if not self.can_use_prompted_resources(data):
             return False
