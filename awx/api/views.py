@@ -1024,6 +1024,7 @@ class ProjectList(ListCreateAPIView):
             'update_role',
             'read_role',
         )
+        projects_qs = projects_qs.prefetch_related('last_job', 'created_by')
         return projects_qs
 
 
@@ -1579,6 +1580,7 @@ class InventoryList(ListCreateAPIView):
     def get_queryset(self):
         qs = Inventory.accessible_objects(self.request.user, 'read_role')
         qs = qs.select_related('admin_role', 'read_role', 'update_role', 'use_role', 'adhoc_role')
+        qs = qs.prefetch_related('created_by', 'modified_by', 'organization')
         return qs
 
 

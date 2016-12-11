@@ -1808,6 +1808,9 @@ class UnifiedJobTemplateAccess(BaseAccess):
             'created_by',
             'modified_by',
             'next_schedule',
+        )
+        # prefetch last/current jobs so we get the real instance
+        qs = qs.prefetch_related(
             'last_job',
             'current_job',
         )
