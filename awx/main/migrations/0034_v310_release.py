@@ -31,14 +31,6 @@ class Migration(migrations.Migration):
             name='allow_simultaneous',
             field=models.BooleanField(default=False),
         ),
-        # Remove Tower settings, these settings are now in separate awx.conf app.
-        migrations.RemoveField(
-            model_name='towersettings',
-            name='user',
-        ),
-        migrations.DeleteModel(
-            name='TowerSettings',
-        ),
         # Job Event UUID
         migrations.AddField(
             model_name='jobevent',
