@@ -86,6 +86,19 @@ class TestWorkflowJobAccess:
         access = WorkflowJobAccess(rando)
         assert access.can_cancel(workflow_job)
 
+    def test_copy_permissions_org_admin(self, wfjt, org_admin, org_member):
+        admin_access = WorkflowJobTemplateAccess(org_admin)
+        assert admin_access.can_copy(wfjt)
+
+    def test_copy_permissions_user(self, wfjt, org_admin, org_member):
+        '''
+        Only org admins are able to add WFJTs, only org admins
+        are able to copy them
+        '''
+        wfjt.admin_role.members.add(org_member)
+        member_access = WorkflowJobTemplateAccess(org_member)
+        assert not member_access.can_copy(wfjt)
+
     def test_workflow_copy_warnings_inv(self, wfjt, rando, inventory):
         '''
         The user `rando` does not have access to the prompted inventory in a

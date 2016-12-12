@@ -2889,11 +2889,13 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if not request.user.can_access(self.model, 'copy', obj):
-            return PermissionDenied()
-        new_wfjt = obj.user_copy(request.user)
+            raise PermissionDenied()
+        new_obj = obj.user_copy(request.user)
+        if request.user not in new_obj.admin_role:
+            new_obj.admin_role.members.add(request.user)
         data = OrderedDict()
         data.update(WorkflowJobTemplateSerializer(
-            new_wfjt, context=self.get_serializer_context()).to_representation(new_wfjt))
+            new_obj, context=self.get_serializer_context()).to_representation(new_obj))
         return Response(data, status=status.HTTP_201_CREATED)
 
 
