@@ -16,7 +16,7 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
                 Rest.setUrl(url + '/all');
                 Rest.options()
                     .success(function(data) {
-                        if($rootScope.is_superuser) {
+                        if($rootScope.user_is_superuser) {
                             returnData = data.actions.PUT;
                         } else {
                             returnData = data.actions.GET;
