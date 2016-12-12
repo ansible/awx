@@ -190,7 +190,7 @@ export default [ '$state',
                             .text(function () { return "START"; })
                             .call(add_node);
                     }
-                    else {//d.isActiveEdit
+                    else {
                         thisNode.append("rect")
                             .attr("width", rectW)
                             .attr("height", rectH)
