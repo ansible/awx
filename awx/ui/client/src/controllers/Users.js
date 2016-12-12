@@ -201,7 +201,7 @@ export function UsersAdd($scope, $rootScope, $stateParams, UserForm,
 
 UsersAdd.$inject = ['$scope', '$rootScope', '$stateParams', 'UserForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
-    'ResetForm', 'Wait', 'CreateSelect2', '$state', '$location'
+    'ResetForm', 'Wait', 'CreateSelect2', '$state', '$location', 'i18n'
 ];
 
 export function UsersEdit($scope, $rootScope, $location,
