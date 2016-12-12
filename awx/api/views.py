@@ -534,7 +534,7 @@ class AuthView(APIView):
                     saml_backend_data = dict(backend_data.items())
                     saml_backend_data['login_url'] = '%s?idp=%s' % (login_url, idp)
                     full_backend_name = '%s:%s' % (name, idp)
-                    if err_backend == full_backend_name and err_message:
+                    if (err_backend == full_backend_name or err_backend == name) and err_message:
                         saml_backend_data['error'] = err_message
                     data[full_backend_name] = saml_backend_data
             else:
