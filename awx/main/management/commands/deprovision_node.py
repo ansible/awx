@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 from awx.main.models import Instance
 
@@ -16,8 +16,9 @@ class Command(BaseCommand):
                     help='Hostname used during provisioning'),
     )
 
-    def handle(self, **options):
-        # Get the instance.
+    def handle(self, *args, **options):
+        if not options.get('name'):
+            raise CommandError("--name is a required argument")
         instance = Instance.objects.filter(hostname=options.get('name'))
         if instance.exists():
             instance.delete()
