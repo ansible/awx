@@ -147,11 +147,27 @@
                     <!-- LABELS DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="labels && labels.length > 0">
-                        <label class="WorkflowResults-resultRowLabel
-                            WorkflowResults-resultRowLabel--fullWidth">
-                            Labels
-                        </label>
-                        <div class="LabelList
+                        <div class="WorkflowResults-resultRow">
+                            <a class="WorkflowResults-resultRowLabel
+                                WorkflowResults-resultRowLabel--fullWidth"
+                                ng-show="lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="WorkflowResults-expandArrow
+                                    fa fa-caret-right"></i>
+                            </a>
+                            <a class="WorkflowResults-resultRowLabel
+                                WorkflowResults-resultRowLabel--fullWidth"
+                                ng-show="!lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="WorkflowResults-expandArrow
+                                    fa fa-caret-down"></i>
+                            </a>
+                        </div>
+                        <div id="workflow-results-labels" class="LabelList
                             WorkflowResults-resultRowText
                             WorkflowResults-resultRowText--fullWidth">
                             <div ng-repeat="label in labels"
@@ -164,6 +180,8 @@
                             </div>
                         </div>
                     </div>
+                    <!-- end of labels--> 
+
                 </div>
 
             </div>
