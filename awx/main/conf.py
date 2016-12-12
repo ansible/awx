@@ -265,6 +265,7 @@ register(
     'LOG_AGGREGATOR_PASSWORD',
     field_class=fields.CharField,
     allow_null=True,
+    encrypted=True,
     label=_('Logging Aggregator Password to Authenticate With'),
     help_text=_('Password for Logstash or others (basic auth)'),
     category=_('Logging'),
