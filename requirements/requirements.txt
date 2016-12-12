@@ -19,6 +19,7 @@ apache-libcloud==1.3.0
 appdirs==1.4.0            # via os-client-config, python-ironicclient, rply
 asgi-amqp==0.3.1
 asgiref==1.0.0            # via asgi-amqp, channels, daphne
+attrs==16.3.0             # via twisted service_identity module
 autobahn==0.16.1          # via daphne
 azure-batch==1.0.0        # via azure
 azure-common==1.1.4       # via azure-batch, azure-mgmt-batch, azure-mgmt-compute, azure-mgmt-keyvault, azure-mgmt-logic, azure-mgmt-network, azure-mgmt-redis, azure-mgmt-resource, azure-mgmt-scheduler, azure-mgmt-storage, azure-servicebus, azure-servicemanagement-legacy, azure-storage
@@ -135,6 +136,7 @@ psphere==0.5.2
 psutil==5.0.0
 psycopg2==2.6.2
 pyasn1==0.1.9             # via cryptography
+pyasn1-modules==0.0.8     # via twisted service_identity module
 pycparser==2.17           # via cffi
 pygerduty==0.35.1
 PyJWT==1.4.2              # via python-social-auth
@@ -176,6 +178,7 @@ requestsexceptions==1.1.3  # via os-client-config, shade
 rfc3986==0.4.1            # via oslo.config
 rply==0.7.4               # via baron
 secretstorage==2.3.1      # via keyring
+service-identity==16.0.0  # via twisted
 shade==1.13.1
 simplejson==3.10.0        # via osc-lib, python-cinderclient, python-neutronclient, python-novaclient, python-troveclient
 six==1.10.0               # via asgi-amqp, asgiref, autobahn, cliff, cryptography, debtcollector, django-extensions, irc, jaraco.classes, jaraco.collections, jaraco.itertools, jaraco.logging, jaraco.stream, keystoneauth1, mock, more-itertools, openstacksdk, osc-lib, oslo.config, oslo.i18n, oslo.serialization, oslo.utils, pygerduty, pyopenssl, pyrad, python-cinderclient, python-dateutil, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-memcached, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-social-auth, python-swiftclient, python-troveclient, shade, slackclient, stevedore, tempora, twilio, txaio, warlock, websocket-client
