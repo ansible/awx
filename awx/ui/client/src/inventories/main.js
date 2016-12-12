@@ -83,7 +83,7 @@ angular.module('inventory', [
                                     mode: 'edit'
                                 });
                                 html = generateList.wrapPanel(html);
-                                return html;
+                                return generateList.insertFormView() + html;
                             },
                             controller: 'schedulerListController'
                         }

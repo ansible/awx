@@ -238,13 +238,13 @@ export default
             // upcoming scheduled jobs
             $stateExtender.addState({
                 searchPrefix: 'schedule',
-                name: 'jobs.scheduled',
-                route: '/scheduled',
+                name: 'jobs.schedules',
+                route: '/schedules',
                 params: {
                     schedule_search: {
                         value: {
                             next_run__isnull: 'false',
-                            order_by: 'next_run'
+                            order_by: 'unified_job_template__polymorphic_ctype__model'
                         }
                     }
                 },
@@ -258,13 +258,16 @@ export default
                     label: 'SCHEDULED'
                 },
                 resolve: {
+                    SchedulesList: ['ScheduledJobsList', function(list){
+                        return list;
+                    }],
                     Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = GetBasePath('schedules');
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
                         }
                     ],
-                    ParentObject: [() =>{return null;}]
+                    ParentObject: [() =>{return {endpoint:'/api/v1/schedules'}; }],
                 },
                 views: {
                     'list@jobs': {

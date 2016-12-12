@@ -31,7 +31,7 @@ export default [
         function init() {
             if (ParentObject){
                 $scope.parentObject = ParentObject;
-                scheduleEndpoint = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
+                scheduleEndpoint = ParentObject.endpoint|| ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
                 $scope.canAdd = false;
                 rbacUiControlService.canAdd(scheduleEndpoint)
                     .then(function(canAdd) {
@@ -67,8 +67,77 @@ export default [
             $state.go('.add');
         };
 
-        $scope.editSchedule = function(schedule_id) {
-            $state.go('.edit', { schedule_id: schedule_id });
+        $scope.editSchedule = function(schedule) {
+            if ($state.is('jobs.schedules')){
+                routeToScheduleForm(schedule, 'edit');
+            }
+            else {
+                $state.go('.edit', { schedule_id: schedule.id });
+            }
+
+            function buildStateMap(schedule){
+
+                let deferred = $q.defer();
+
+                switch(schedule.summary_fields.unified_job_template.unified_job_type){
+                    case 'inventory_update':
+                        Rest.setUrl(schedule.related.unified_job_template);
+                        Rest.get().then( (res) => {
+                            deferred.resolve({
+                                name: 'inventoryManage.editGroup.schedules.edit',
+                                params: {
+                                    group_id: res.data.group,
+                                    inventory_id: res.data.inventory,
+                                    schedule_id: schedule.id,
+                                }
+                            });
+                        });
+                        break;
+
+                    case 'project_update':
+                        deferred.resolve({
+                            name: 'projectSchedules.edit',
+                            params: {
+                                id: schedule.unified_job_template,
+                                schedule_id: schedule.id                                
+                            }
+                        });
+                        break;
+
+                    case 'system_job':
+                        deferred.resolve({
+                            name: 'managementJobSchedules.edit',
+                            params: {
+                                id: schedule.unified_job_template,
+                                schedule_id: schedule.id                                
+                            }
+                        });
+                        break;
+                }
+
+                return deferred.promise;
+            }
+
+            function routeToScheduleForm(schedule){
+
+                buildStateMap(schedule).then( (state) =>{
+                    $state.go(state.name, state.params).catch((err) =>{
+                        // stateDefinition.lazyLoad'd state name matcher is not configured to match inventoryManage.* state names
+                        // However, the stateDefinition.lazyLoad url matcher will load the correct tree.
+                        // Expected error:
+                        // Transition rejection error
+                        // type: 4  // SUPERSEDED = 2, ABORTED = 3, INVALID = 4, IGNORED = 5, ERROR = 6
+                        // detail : "Could not resolve 'inventoryManage.editGroup.schedules.edit' from state 'jobs.schedules'"
+                        // message: "This transition is invalid"
+                        if (err.type === 4 && err.detail.includes('inventoryManage.editGroup.schedules.edit')){
+                            $location.path(`/inventories/${state.params.inventory_id}/manage/edit-group/${state.params.group_id}/schedules/${state.params.schedule_id}`);
+                        }
+                        else {
+                            throw err;
+                        }
+                    });
+                });                
+            }
         };
 
         $scope.toggleSchedule = function(event, id) {
