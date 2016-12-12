@@ -55,6 +55,21 @@ class TestWorkflowJobTemplateNodeAccess:
         access = WorkflowJobTemplateNodeAccess(org_admin)
         assert not access.can_change(wfjt_node, {'job_type': 'scan'})
 
+    def test_add_JT_no_start_perm(self, wfjt, job_template, rando):
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateAccess(rando)
+        job_template.read_role.members.add(rando)
+        assert not access.can_add({
+            'workflow_job_template': wfjt.pk,
+            'unified_job_template': job_template.pk})
+
+    def test_remove_unwanted_foreign_node(self, wfjt_node, job_template, rando):
+        wfjt = wfjt_node.workflow_job_template
+        wfjt.admin_role.members.add(rando)
+        wfjt_node.unified_job_template = job_template
+        access = WorkflowJobTemplateNodeAccess(rando)
+        assert access.can_delete(wfjt_node)
+
 
 @pytest.mark.django_db
 class TestWorkflowJobAccess:
