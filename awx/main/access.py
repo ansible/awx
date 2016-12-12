@@ -1549,7 +1549,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
                     wfjt_errors[node.id] = node_errors
             self.messages.update(wfjt_errors)
 
-        return self.check_related('organization', Organization, {}, obj=obj, mandatory=True)
+        return self.check_related('organization', Organization, {'reference_obj': obj}, mandatory=True)
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
