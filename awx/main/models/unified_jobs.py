@@ -122,10 +122,6 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         default=None,
         editable=False,
     )
-    has_schedules = models.BooleanField(
-        default=False,
-        editable=False,
-    )
     #on_missed_schedule = models.CharField(
     #    max_length=32,
     #    choices=[],

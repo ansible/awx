@@ -519,7 +519,7 @@ class UnifiedJobTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = UnifiedJobTemplate
-        fields = ('*', 'last_job_run', 'last_job_failed', 'has_schedules',
+        fields = ('*', 'last_job_run', 'last_job_failed',
                   'next_job_run', 'status')
 
     def get_related(self, obj):
