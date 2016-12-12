@@ -354,6 +354,10 @@ class UnifiedJobTypeStringMixin(object):
         return ''.join(x.capitalize() or '_' for x in word.split('_'))
 
     @classmethod
+    def _camel_to_underscore(cls, word):
+        return re.sub('(?!^)([A-Z]+)', r'_\1', word).lower()
+
+    @classmethod
     def _model_type(cls, job_type):
         # Django >= 1.9
         #app = apps.get_app_config('main')
@@ -370,6 +374,9 @@ class UnifiedJobTypeStringMixin(object):
         if not model:
             return None
         return model.objects.get(id=job_id)
+
+    def model_to_str(self):
+        return UnifiedJobTypeStringMixin._camel_to_underscore(self.__class__.__name__)
 
 
 class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique, UnifiedJobTypeStringMixin):

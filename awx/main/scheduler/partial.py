@@ -1,6 +1,7 @@
 
 # Python
 import json
+import itertools
 
 # AWX
 from awx.main.utils import decrypt_field_value
@@ -61,13 +62,36 @@ class PartialModelDict(object):
     def task_impact(self):
         raise RuntimeError("Inherit and implement me")
 
+    @classmethod
+    def merge_values(cls, values):
+        grouped_results = itertools.groupby(values, key=lambda value: value['id'])
+
+        merged_values = []
+        for k, g in grouped_results:
+            print k
+            groups = list(g)
+            merged_value = {}
+            for group in groups:
+                for key, val in group.iteritems():
+                    if not merged_value.get(key):
+                        merged_value[key] = val
+                    elif val != merged_value[key]:
+                        if isinstance(merged_value[key], list):
+                            if val not in merged_value[key]:
+                                merged_value[key].append(val)
+                        else:
+                            old_val = merged_value[key]
+                            merged_value[key] = [old_val, val]
+            merged_values.append(merged_value)
+        return merged_values
+
 
 class JobDict(PartialModelDict):
     FIELDS = (
         'id', 'status', 'job_template_id', 'inventory_id', 'project_id', 
         'launch_type', 'limit', 'allow_simultaneous', 'created', 
         'job_type', 'celery_task_id', 'project__scm_update_on_launch',
-        'forks', 'start_args',
+        'forks', 'start_args', 'dependent_jobs__id',
     )
     model = Job
 
@@ -84,6 +108,14 @@ class JobDict(PartialModelDict):
             return []
         start_args = start_args or {}
         return start_args.get('inventory_sources_already_updated', [])
+
+    @classmethod
+    def filter_partial(cls, status=[]):
+        kv = {
+            'status__in': status
+        }
+        merged = PartialModelDict.merge_values(cls.model.objects.filter(**kv).values(*cls.get_db_values()))
+        return [cls(o) for o in merged]
 
 
 class ProjectUpdateDict(PartialModelDict):
@@ -134,7 +166,8 @@ class InventoryUpdateDict(PartialModelDict):
     #'inventory_source__update_on_launch', 
     #'inventory_source__update_cache_timeout',
     FIELDS = (
-        'id', 'status', 'created', 'celery_task_id', 'inventory_source_id', 'inventory_source__inventory_id',
+        'id', 'status', 'created', 'celery_task_id', 'inventory_source_id',
+        'inventory_source__inventory_id',
     )
     model = InventoryUpdate
 
@@ -151,6 +184,7 @@ class InventoryUpdateLatestDict(InventoryUpdateDict):
     FIELDS = (
         'id', 'status', 'created', 'celery_task_id', 'inventory_source_id', 
         'finished', 'inventory_source__update_cache_timeout', 'launch_type',
+        'inventory_source__update_on_launch',
     )
     model = InventoryUpdate
 
@@ -217,7 +251,7 @@ class SystemJobDict(PartialModelDict):
 
 class AdHocCommandDict(PartialModelDict):
     FIELDS = (
-        'id', 'created', 'status', 'inventory_id',
+        'id', 'created', 'status', 'inventory_id', 'dependent_jobs__id',
     )
     model = AdHocCommand
 

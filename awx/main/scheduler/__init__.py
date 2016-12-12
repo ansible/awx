@@ -166,6 +166,9 @@ class TaskManager():
 
         return (active_task_queues, active_tasks)
 
+    def get_dependent_jobs_for_inv_and_proj_update(self, job_obj):
+        return [{'type': j.model_to_str(), 'id': j.id} for j in job_obj.dependent_jobs.all()]
+
     def start_task(self, task, dependent_tasks=[]):
         from awx.main.tasks import handle_work_error, handle_work_success
 
@@ -179,6 +182,17 @@ class TaskManager():
         success_handler = handle_work_success.s(task_actual=task_actual)
 
         job_obj = task.get_full()
+        '''
+        This is to account for when there isn't enough capacity to execute all
+        dependent jobs (i.e. proj or inv update) within the same schedule() 
+        call.
+        
+        Proceeding calls to schedule() need to recontruct the proj or inv
+        update -> job fail logic dependency. The below call recontructs that
+        failure dependency.
+        '''
+        if len(dependencies) == 0:
+            dependencies = self.get_dependent_jobs_for_inv_and_proj_update(job_obj)
         job_obj.status = 'waiting'
 
         (start_status, opts) = job_obj.pre_start()
@@ -230,16 +244,41 @@ class TaskManager():
 
         return inventory_task
 
+    '''
+    Since we are dealing with partial objects we don't get to take advantage
+    of Django to resolve the type of related Many to Many field dependent_job.
+
+    Hence the, potentional, double query in this method.
+    '''
+    def get_related_dependent_jobs_as_patials(self, job_ids):
+        dependent_partial_jobs = []
+        for id in job_ids:
+            if ProjectUpdate.objects.filter(id=id).exists():
+                dependent_partial_jobs.append(ProjectUpdateDict({"id": id}).refresh_partial())
+            elif InventoryUpdate.objects.filter(id=id).exists():
+                dependent_partial_jobs.append(InventoryUpdateDict({"id": id}).refresh_partial())
+        return dependent_partial_jobs
+
+    def capture_chain_failure_dependencies(self, task, dependencies):
+        for dep in dependencies:
+            dep_obj = task.get_full()
+            dep_obj.dependent_jobs.add(task['id'])
+            dep_obj.save()
+
     def generate_dependencies(self, task):
         dependencies = []
         # TODO: What if the project is null ?
         if type(task) is JobDict:
+
             if task['project__scm_update_on_launch'] is True and \
                     self.graph.should_update_related_project(task):
                 project_task = self.create_project_update(task)
                 dependencies.append(project_task)
                 # Inventory created 2 seconds behind job
 
+            '''
+            Inventory may have already been synced from a provision callback.
+            '''
             inventory_sources_already_updated = task.get_inventory_sources_already_updated()
 
             for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
@@ -248,6 +287,8 @@ class TaskManager():
                 if self.graph.should_update_related_inventory_source(task, inventory_source_task['id']):
                     inventory_task = self.create_inventory_update(task, inventory_source_task)
                     dependencies.append(inventory_task)
+
+        self.capture_chain_failure_dependencies(task, dependencies)
         return dependencies
 
     def process_latest_project_updates(self, latest_project_updates):
