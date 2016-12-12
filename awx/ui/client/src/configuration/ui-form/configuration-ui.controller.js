@@ -47,8 +47,8 @@
              addFieldInfo(form, key);
          });
 
-         // Disable the save button for non-superusers
-         form.buttons.save.disabled = 'vm.updateProhibited';
+         // Disable the save button for system auditors
+         form.buttons.save.disabled = $rootScope.user_is_system_auditor;
 
          function addFieldInfo(form, key) {
              _.extend(form.fields[key], {
