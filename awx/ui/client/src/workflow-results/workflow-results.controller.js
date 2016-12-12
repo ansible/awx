@@ -121,6 +121,18 @@ export default ['workflowData',
             $scope.showManualControls = !$scope.showManualControls;
         };
 
+        $scope.lessLabels = false;
+        $scope.toggleLessLabels = function() {
+            if (!$scope.lessLabels) {
+                $('#workflow-results-labels').slideUp(200);
+                $scope.lessLabels = true;
+            }
+            else {
+                $('#workflow-results-labels').slideDown(200);
+                $scope.lessLabels = false;
+            }
+        };
+
         $scope.panChart = function(direction) {
             $scope.$broadcast('panWorkflowChart', {
                 direction: direction
