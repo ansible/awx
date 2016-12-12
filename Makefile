@@ -406,7 +406,7 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/tmp/awxfifo --lazy-apps
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \

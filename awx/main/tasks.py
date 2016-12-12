@@ -43,7 +43,6 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
-from django.utils.log import configure_logging
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
@@ -85,6 +84,14 @@ def celery_startup(conf=None, **kwargs):
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 
+def uwsgi_reload():
+    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
+    logger.warn('Initiating uWSGI chain reload of server')
+    TRIGGER_CHAIN_RELOAD = 'c'
+    with open('/tmp/awxfifo', 'w') as awxfifo:
+        awxfifo.write(TRIGGER_CHAIN_RELOAD)
+
+
 @task(queue='broadcast_all')
 def clear_cache_keys(cache_keys):
     set_of_keys = set([key for key in cache_keys])
@@ -92,12 +99,7 @@ def clear_cache_keys(cache_keys):
     cache.delete_many(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            LOGGING = settings.LOGGING
-            if settings.LOG_AGGREGATOR_ENABLED:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-            else:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSNullHandler'
-            configure_logging(settings.LOGGING_CONFIG, LOGGING)
+            uwsgi_reload()
             break
 
 
