@@ -39,8 +39,8 @@ export default [
             });
         });
 
-        // Disable the save button for non-superusers
-        form.buttons.save.disabled = 'vm.updateProhibited';
+        // Disable the save button for system auditors
+        form.buttons.save.disabled = $rootScope.user_is_system_auditor;
 
         var keys = _.keys(form.fields);
         _.each(keys, function(key) {

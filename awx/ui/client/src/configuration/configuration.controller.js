@@ -465,11 +465,6 @@ export default [
             triggerModal(msg, title, buttons);
         };
 
-        var updateProhibited = true;
-        if($rootScope.user_is_superuser) {
-            updateProhibited = false;
-        }
-
         angular.extend(vm, {
             activeTab: activeTab,
             activeTabCheck: activeTabCheck,
@@ -482,7 +477,6 @@ export default [
             resetAllConfirm: resetAllConfirm,
             show_auditor_bar: show_auditor_bar,
             triggerModal: triggerModal,
-            updateProhibited: updateProhibited
         });
     }
 ];
