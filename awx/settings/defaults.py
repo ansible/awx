@@ -538,7 +538,7 @@ CAPTURE_JOB_EVENT_HOSTS = False
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_ENABLED = False
+AWX_PROOT_ENABLED = True
 
 # Command/path to bubblewrap.
 AWX_PROOT_CMD = 'bwrap'
