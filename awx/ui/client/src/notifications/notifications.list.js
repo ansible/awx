@@ -18,7 +18,7 @@ export default ['i18n', function(i18n){
         iterator: 'notification',
         index: false,
         hover: false,
-        emptyListText: "This list is populated by notification templates added from the&nbsp;<a ui-sref='notifications.add'>Notifications</a>&nbsp;section",
+        emptyListText: i18n.sprintf(i18n._("This list is populated by notification templates added from the %sNotifications%s section"), "&nbsp;<a ui-sref='notifications.add'>", "</a>&nbsp;"),
         basePath: 'notification_templates',
         fields: {
             name: {
@@ -60,7 +60,7 @@ export default ['i18n', function(i18n){
         },
         actions: {
             add: {
-                label: 'Add Notification',
+                label: i18n._('Add Notification'),
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addNotificationTemplate()',
                 awToolTip: i18n._('Create a new notification template'),

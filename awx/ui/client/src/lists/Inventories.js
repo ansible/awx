@@ -15,8 +15,7 @@ export default
         selectTitle: i18n._('Add Inventories'),
         editTitle: i18n._('Inventories'),
         listTitle: i18n._('Inventories'),
-        selectInstructions: "Click on a row to select it, and click Finished when done. Click the <i class=\"icon-plus\"></i> " +
-            "button to create a new inventory.",
+        selectInstructions: i18n.sprintf(i18n._("Click on a row to select it, and click Finished when done. Click the %s button to create a new inventory."), "<i class=\"icon-plus\"></i> "),
         index: false,
         hover: true,
         basePath: 'inventory',

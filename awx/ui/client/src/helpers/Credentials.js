@@ -223,8 +223,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
-         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
+.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state', 'i18n',
+         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state, i18n) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -305,12 +305,12 @@ angular.module('CredentialsHelper', ['Utilities'])
                          // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
                          // error is never shown.  In the future, the API will hopefully either behave or respond differently.
                          if(status && status === 400 && data && data.ssh_key_unlock && (scope.kind.value === 'gce' || scope.kind.value === 'azure')) {
-                             scope.ssh_key_data_api_error = "Encrypted credentials are not supported.";
+                             scope.ssh_key_data_api_error = i18n._("Encrypted credentials are not supported.");
                          }
                          else {
                              ProcessErrors(scope, data, status, form, {
-                                 hdr: 'Error!',
-                                 msg: 'Failed to create new Credential. POST status: ' + status
+                                 hdr: i18n._('Error!'),
+                                 msg: i18n._('Failed to create new Credential. POST status: ') + status
                              });
                          }
                      });
@@ -325,8 +325,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      .error(function (data, status) {
                          Wait('stop');
                          ProcessErrors(scope, data, status, form, {
-                             hdr: 'Error!',
-                             msg: 'Failed to update Credential. PUT status: ' + status
+                             hdr: i18n._('Error!'),
+                             msg: i18n._('Failed to update Credential. PUT status: ') + status
                          });
                      });
                 }
