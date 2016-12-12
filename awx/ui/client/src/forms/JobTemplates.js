@@ -20,7 +20,7 @@ export default
             addTitle: i18n._('New Job Template'),
             editTitle: '{{ name }}',
             name: 'job_template',
-            breadcrumbName: 'JOB TEMPLATE',
+            breadcrumbName: i18n._('JOB TEMPLATE'),
             basePath: 'job_templates',
             // the top-most node of generated state tree
             stateTree: 'templates',

@@ -401,8 +401,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         }
                     },
                     resolve: {
-                        ListDefinition: ['InventoryList', function(list) {
+                        ListDefinition: ['InventoryList', function(InventoryList) {
                             // mutate the provided list definition here
+                            let list = _.cloneDeep(InventoryList);
+                            list.lookupConfirmText = 'SELECT';
                             return list;
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -451,8 +453,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         }
                     },
                     resolve: {
-                        ListDefinition: ['CredentialList', function(list) {
-                            // mutate the provided list definition here
+                        ListDefinition: ['CredentialList', function(CredentialList) {
+                            let list = _.cloneDeep(CredentialList);
+                            list.lookupConfirmText = 'SELECT';
                             return list;
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',

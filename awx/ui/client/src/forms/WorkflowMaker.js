@@ -170,7 +170,7 @@ export default
                     ngClick: 'cancelNodeForm()',
                     ngShow: '!canAddWorkflowJobTemplate'
                 },
-                save: {
+                select: {
                     ngClick: 'saveNodeForm()',
                     ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate",
                     ngShow: 'canAddWorkflowJobTemplate'

@@ -84,6 +84,25 @@ export default [ '$state',
                 }
             }
 
+            function rounded_rect(x, y, w, h, r, tl, tr, bl, br) {
+                var retval;
+                retval  = "M" + (x + r) + "," + y;
+                retval += "h" + (w - 2*r);
+                if (tr) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + r; }
+                else { retval += "h" + r; retval += "v" + r; }
+                retval += "v" + (h - 2*r);
+                if (br) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + r; }
+                else { retval += "v" + r; retval += "h" + -r; }
+                retval += "h" + (2*r - w);
+                if (bl) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + -r; }
+                else { retval += "h" + -r; retval += "v" + -r; }
+                retval += "v" + (2*r - h);
+                if (tl) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + -r; }
+                else { retval += "v" + -r; retval += "h" + r; }
+                retval += "z";
+                return retval;
+            }
+
             // This is the zoom function called by using the mousewheel/click and drag
             function naturalZoom() {
                 let scale = d3.event.scale,
@@ -163,32 +182,45 @@ export default [ '$state',
                             .attr("fill", "#5cb85c")
                             .attr("class", "WorkflowChart-rootNode")
                             .call(add_node);
-                        thisNode.append("path")
-                            .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + 30 + "," + 30 + ")"; })
-                            .attr("d", d3.svg.symbol()
-                                .size(120)
-                                .type("cross")
-                            )
-                            .call(add_node);
                         thisNode.append("text")
-                            .attr("x", 14)
-                            .attr("y", 0)
+                            .attr("x", 13)
+                            .attr("y", 30)
                             .attr("dy", ".35em")
-                            .attr("class", "WorkflowChart-defaultText")
-                            .text(function () { return "START"; });
+                            .attr("class", "WorkflowChart-startText")
+                            .text(function () { return "START"; })
+                            .call(add_node);
                     }
-                    else {
+                    else {//d.isActiveEdit
                         thisNode.append("rect")
                             .attr("width", rectW)
                             .attr("height", rectH)
                             .attr("rx", 5)
                             .attr("ry", 5)
-                            .attr('stroke', function(d) { return d.isActiveEdit ? "#337ab7" : "#D7D7D7"; })
-                            .attr('stroke-width', function(d){ return d.isActiveEdit ? "2px" : "1px"; })
+                            .attr('stroke', function(d) {
+                                if(d.edgeType) {
+                                    if(d.edgeType === "failure") {
+                                        return "#d9534f";
+                                    }
+                                    else if(d.edgeType === "success") {
+                                        return "#5cb85c";
+                                    }
+                                    else if(d.edgeType === "always"){
+                                        return "#337ab7";
+                                    }
+                                }
+                                else {
+                                    return "#D7D7D7";
+                                }
+                            })
+                            .attr('stroke-width', "2px")
                             .attr("class", function(d) {
                                 return d.placeholder ? "rect placeholder" : "rect";
                             });
+
+                        thisNode.append("path")
+                            .attr("d", rounded_rect(1, 0, 5, rectH, 5, 1, 0, 1, 0))
+                            .attr("class", "WorkflowChart-activeNode")
+                            .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
 
                         thisNode.append("text")
                             .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
@@ -517,8 +549,22 @@ export default [ '$state',
                     .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; });
 
                 t.selectAll(".rect")
-                    .attr('stroke', function(d) { return d.isActiveEdit ? "#337ab7" : "#D7D7D7"; })
-                    .attr('stroke-width', function(d){ return d.isActiveEdit ? "2px" : "1px"; })
+                    .attr('stroke', function(d) {
+                        if(d.edgeType) {
+                            if(d.edgeType === "failure") {
+                                return "#d9534f";
+                            }
+                            else if(d.edgeType === "success") {
+                                return "#5cb85c";
+                            }
+                            else if(d.edgeType === "always"){
+                                return "#337ab7";
+                            }
+                        }
+                        else {
+                            return "#D7D7D7";
+                        }
+                     })
                     .attr("class", function(d) {
                         return d.placeholder ? "rect placeholder" : "rect";
                     });
@@ -600,6 +646,9 @@ export default [ '$state',
 
                 t.selectAll(".WorkflowChart-conflictText")
                     .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
+
+                t.selectAll(".WorkflowChart-activeNode")
+                    .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
 
             }
 
