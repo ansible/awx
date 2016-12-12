@@ -60,7 +60,6 @@ from awx.main.tasks import send_notifications
 from awx.main.access import get_user_queryset
 from awx.main.ha import is_ha_environment
 from awx.api.authentication import TaskAuthentication, TokenGetAuthentication
-from awx.api.utils.decorators import paginated
 from awx.api.generics import get_view_name
 from awx.api.generics import * # noqa
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
@@ -3435,8 +3434,10 @@ class JobJobPlaysList(BaseJobEventsList):
     view_name = _('Job Plays List')
     new_in_200 = True
 
-    @paginated
-    def get(self, request, limit, offset, ordering, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        limit = kwargs.get('limit', 20)
+        ordering = kwargs.get('ordering', None)
+        offset = kwargs.get('offset', 0)
         all_plays = []
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
@@ -3510,14 +3511,15 @@ class JobJobTasksList(BaseJobEventsList):
     view_name = _('Job Play Tasks List')
     new_in_200 = True
 
-    @paginated
-    def get(self, request, limit, offset, ordering, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """Return aggregate data about each of the job tasks that is:
           - an immediate child of the job event
           - corresponding to the spinning up of a new task or playbook
         """
         results = []
-
+        limit = kwargs.get('limit', 20)
+        ordering = kwargs.get('ordering', None)
+        offset = kwargs.get('offset', 0)
         # Get the job and the parent task.
         # If there's no event ID specified, this will return a 404.
         job = Job.objects.filter(pk=self.kwargs['pk'])
