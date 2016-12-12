@@ -251,7 +251,7 @@ class SystemJobDict(PartialModelDict):
 
 class AdHocCommandDict(PartialModelDict):
     FIELDS = (
-        'id', 'created', 'status', 'inventory_id', 'dependent_jobs__id',
+        'id', 'created', 'status', 'inventory_id', 'dependent_jobs__id', 'celery_task_id',
     )
     model = AdHocCommand
 
