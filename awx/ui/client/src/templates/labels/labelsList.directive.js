@@ -8,7 +8,8 @@ export default
         'Prompt',
         '$q',
         '$filter',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter) {
+        '$state',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state) {
             return {
                 restrict: 'E',
                 scope: false,
@@ -63,9 +64,8 @@ export default
                             Rest.setUrl(url);
                             Rest.post({"disassociate": true, "id": labelId})
                                 .success(function () {
-                                    // @issue: OLD SEARCH
-                                    // scope.search("job_template", scope.$parent.job_template_page);
                                     Wait('stop');
+                                    $state.go('.', null, {reload: true});
                                 })
                                 .error(function (data, status) {
                                     Wait('stop');

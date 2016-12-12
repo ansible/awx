@@ -355,6 +355,16 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                     innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
 
+                    let handleEditStateParams = function(stateParams){console.log(stateParams);
+                        let matchingConditions = [];
+
+                        angular.forEach(stateParams, function(stateParam) {
+                            matchingConditions.push(`$stateParams['` + stateParam + `'] == ${list.iterator}.id`);
+                        });
+
+                        return matchingConditions;
+                    };
+
                     for (field_action in list.fieldActions) {
                         if (field_action !== 'columnClass') {
                             if (list.fieldActions[field_action].type && list.fieldActions[field_action].type === 'DropDown') {
@@ -376,8 +386,19 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                                 innerTable += "class=\"List-actionButton ";
                                 innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
                                 innerTable += "\" ";
-                                // rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
-                                innerTable += (field_action === 'edit') ? `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`: '';
+                                if(field_action === 'edit') {
+                                    // editStateParams allows us to handle cases where a list might have different types of resources in it.  As a result the edit
+                                    // icon might now always point to the same state and differing states may have differing stateParams.  Specifically this occurs
+                                    // on the Templates list where editing a workflow job template takes you to a state where the param is workflow_job_template_id.
+                                    // You can also edit a Job Template from this list so the stateParam there would be job_template_id.
+                                    if(list.fieldActions[field_action].editStateParams) {
+                                        let matchingConditions = handleEditStateParams(list.fieldActions[field_action].editStateParams);
+                                        innerTable += `ng-class="{'List-editButton--selected' : ${matchingConditions.join(' || ')}}"`;
+                                    }
+                                    else {
+                                        innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
+                                    }
+                                }
                                 innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                                 innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
                                 innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";

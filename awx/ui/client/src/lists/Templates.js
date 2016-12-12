@@ -47,6 +47,7 @@ export default
                 label: i18n._('Labels'),
                 type: 'labels',
                 nosort: true,
+                showDelete: true,
                 columnClass: 'List-tableCell col-lg-2 col-md-4 hidden-sm hidden-xs'
             }
         },
@@ -58,7 +59,7 @@ export default
                 basePaths: ['templates'],
                 awToolTip: i18n._('Create a new template'),
                 actionClass: 'btn List-dropdownSuccess',
-                buttonContent: i18n._('ADD'),
+                buttonContent: '&#43; ' + i18n._('ADD'),
                 options: [
                     {
                         optionContent: i18n._('Job Template'),
@@ -109,7 +110,8 @@ export default
                 awToolTip: i18n._('Edit template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
-                ngShow: 'template.summary_fields.user_capabilities.edit'
+                ngShow: 'template.summary_fields.user_capabilities.edit',
+                editStateParams: ['job_template_id', 'workflow_job_template_id']
             },
             view: {
                 label: i18n._('View'),
