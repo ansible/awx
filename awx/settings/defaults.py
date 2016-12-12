@@ -223,6 +223,7 @@ INSTALLED_APPS = (
 
 INTERNAL_IPS = ('127.0.0.1',)
 
+MAX_PAGE_SIZE = 200
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
