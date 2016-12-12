@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Django REST Framework
+from django.conf import settings
 from rest_framework import pagination
 from rest_framework.utils.urls import replace_query_param
 
@@ -9,7 +10,7 @@ from rest_framework.utils.urls import replace_query_param
 class Pagination(pagination.PageNumberPagination):
 
     page_size_query_param = 'page_size'
-    max_page_size = 200
+    max_page_size = settings.MAX_PAGE_SIZE
 
     def get_next_link(self):
         if not self.page.has_next():
