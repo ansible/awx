@@ -47,10 +47,10 @@ describe('Controller: WorkflowMaker', () => {
 
     }));
 
-    describe('scope.saveWorkflowMaker()', () => {
+    describe('scope.closeWorkflowMaker()', () => {
 
         it('should close the dialog', ()=>{
-            scope.saveWorkflowMaker();
+            scope.closeWorkflowMaker();
             expect(scope.closeDialog).toHaveBeenCalled();
         });
 

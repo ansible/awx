@@ -1687,6 +1687,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     button.label = i18n._('Save');
                                     button['class'] = 'Form-saveButton';
                                 }
+                                if (btn === 'select') {
+                                    button.label = i18n._('Select');
+                                    button['class'] = 'Form-saveButton';
+                                }
                                 if (btn === 'cancel') {
                                     button.label = i18n._('Cancel');
                                     button['class'] = 'Form-cancelButton';
