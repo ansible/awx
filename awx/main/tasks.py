@@ -85,8 +85,11 @@ def celery_startup(conf=None, **kwargs):
 
 
 def uwsgi_reload():
-    "Does chain reload of uWSGI"
-    os.system("echo c > /tmp/awxfifo")
+    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
+    logger.warn('Initiating uWSGI chain reload of server')
+    TRIGGER_CHAIN_RELOAD = 'c'
+    with open('/tmp/awxfifo', 'w') as awxfifo:
+        awxfifo.write(TRIGGER_CHAIN_RELOAD)
 
 
 @task(queue='broadcast_all')
