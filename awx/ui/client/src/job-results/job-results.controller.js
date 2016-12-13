@@ -31,6 +31,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         $scope.machine_credential_link = getTowerLink('credential');
         $scope.cloud_credential_link = getTowerLink('cloud_credential');
         $scope.network_credential_link = getTowerLink('network_credential');
+        $scope.schedule_link = getTowerLink('schedule');
     };
 
     // uses options to set scope variables to their readable string
@@ -64,7 +65,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
     // turn related api browser routes into tower routes
     getTowerLinks();
-    
+
     // the links below can't be set in getTowerLinks because the
     // links on the UI don't directly match the corresponding URL
     // on the API browser

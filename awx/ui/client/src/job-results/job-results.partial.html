@@ -62,6 +62,20 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
+                    <!-- STATUS DETAIL -->
+                    <div class="JobResults-resultRow">
+                        <label class="JobResults-resultRowLabel">
+                            Status
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            <i
+                                class="JobResults-statusResultIcon
+                                    fa
+                                    icon-job-{{ job.status }}">
+                            </i> {{ status_label }}
+                        </div>
+                    </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.started">
@@ -131,6 +145,22 @@
                                 aw-tool-tip="Edit the User"
                                 data-placement="top">
                                 {{ job.summary_fields.created_by.username }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- SCHEDULED BY DETAIL -->
+                    <div class="JobResults-resultRow toggle-show"
+                        ng-show="job.summary_fields.schedule.name">
+                        <label
+                            class="JobResults-resultRowLabel">
+                            Schedule
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            <a href="{{ scheduled_by_link }}"
+                                aw-tool-tip="Edit the Schedule"
+                                data-placement="top">
+                                {{ job.summary_fields.schedule.name }}
                             </a>
                         </div>
                     </div>
@@ -347,80 +377,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- STATUS DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Status
-                        </label>
-                        <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                            <i
-                                class="JobResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job.status }}">
-                            </i> {{ status_label }}
-                        </div>
-                    </div> -->
-
-                    <!-- SCHEDULED BY DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow toggle-show"
-                        ng-show="job.summary_fields.schedule_by.username">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Launched By
-                        </label>
-                        <div class="JobResults-resultRowText">
-                            <a href="{{ scheduled_by_link }}"
-                                aw-tool-tip="Edit the Schedule"
-                                data-placement="top">
-                                {{ job.summary_fields.scheduled_by.username }}
-                            </a>
-                        </div>
-                    </div> -->
-
-                    <!-- ELAPSED TIME DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow toggle-show"
-                        ng-show="job_status.started">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Elapsed
-                        </label>
-                        <div class="JobResults-resultRowText">
-                            {{ job_status.elapsed }}
-                        </div>
-                    </div> -->
-
-                    <!-- EXPLANATION DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show"
-                        ng-show="job_status.explanation">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Explanation
-                        </label> -->
 
                         <!-- PREVIOUS TASK SUCCEEDED -->
                         <!-- <div class="JobResults-resultRowText
