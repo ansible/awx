@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('id',),
             },
-            bases=('main.unifiedjob', models.Model, awx.main.models.notifications.JobNotificationMixin, awx.main.models.workflow.WorkflowJobInheritNodesMixin),
+            bases=('main.unifiedjob', models.Model, awx.main.models.notifications.JobNotificationMixin),
         ),
         migrations.CreateModel(
             name='WorkflowJobNode',

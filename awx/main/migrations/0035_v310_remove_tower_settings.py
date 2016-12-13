@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
-import awx.main.models.notifications
-import jsonfield.fields
-import django.db.models.deletion
-import awx.main.models.workflow
-import awx.main.fields
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
