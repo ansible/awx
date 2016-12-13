@@ -14,7 +14,6 @@ export default ['templateUrl',
                 resolve: "="
             },
             controller: controller,
-            controllerAs: 'rbac',
             templateUrl: templateUrl('access/add-rbac-user-team/rbac-user-team'),
             link: function(scope, element, attrs) {
                 $('#add-permissions-modal').modal('show');

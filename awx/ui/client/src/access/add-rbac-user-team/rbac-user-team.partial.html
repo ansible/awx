@@ -33,14 +33,19 @@
 
                 <div class="Form-tabHolder">
                     <div class="Form-tab"
-                        ng-click="selectTab('templates')"
-                        ng-class="{'is-selected': tab.templates }">
+                        ng-click="selectTab('job_templates')"
+                        ng-class="{'is-selected': tab.job_templates }">
                         Templates
                     </div>
                     <div class="Form-tab"
-                        ng-click="selectTab('projects')"
-                        ng-class="{'is-selected': tab.projects}"
+                        ng-click="selectTab('workflow_templates')"
+                        ng-class="{'is-selected': tab.workflow_templates}"
                     >
+                        Workflow Templates
+                    </div>
+                    <div class="Form-tab"
+                        ng-click="selectTab('projects')"
+                        ng-class="{'is-selected': tab.projects }">
                         Projects
                     </div>
                     <div class="Form-tab"
@@ -57,8 +62,11 @@
                     </div>
                 </div>
 
-                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="tab.templates">
-                    <rbac-multiselect-list view="Templates" all-selected="allSelected" dataset="resolve.templatesDataset"></rbac-multiselect-list>
+                <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.job_templates">
+                    <rbac-multiselect-list view="JobTemplates" all-selected="allSelected" dataset="resolve.jobTemplatesDataset"></rbac-multiselect-list>
+                </div>
+                <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.workflow_templates">
+                    <rbac-multiselect-list view="WorkflowTemplates" all-selected="allSelected" dataset="resolve.workflowTemplatesDataset"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-projects" class="AddPermissions-list" ng-show="tab.projects">
                     <rbac-multiselect-list view="Projects" all-selected="allSelected" dataset="resolve.projectsDataset"></rbac-multiselect-list>

@@ -31,7 +31,8 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
         _.each(resources, (resource) => scope.keys[resource] = {});
 
         scope.tab = {
-            templates: true,
+            job_templates: true,
+            workflow_templates: false,
             projects: false,
             inventories: false,
             credentials: false

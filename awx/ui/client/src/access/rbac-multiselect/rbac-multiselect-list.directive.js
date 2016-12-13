@@ -24,7 +24,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 Teams: addPermissionsTeamsList, 
                 Users: addPermissionsUsersList,
                 Projects: ProjectList,
-                Templates: TemplateList,
+                JobTemplates: TemplateList,
+                WorkflowTemplates: TemplateList,
                 Inventories: InventoryList,
                 Credentials: CredentialList
             };
@@ -34,23 +35,48 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             list.listTitleBadge = false;
             delete list.actions;
             delete list.fieldActions;
-            
-            if (scope.view !== 'Users' && scope.view !== 'Teams' && scope.view !=='Projects' && scope.view !== 'Inventories'){
-                list.fields = {
-                    name: list.fields.name,
-                    description: list.fields.description
-                };
-            } else if (scope.view === 'Projects'){
-                list.fields = {
-                    name: list.fields.name,
-                    scm_type: list.fields.scm_type
-                };
-            } else if (scope.view === 'Inventories'){
-                list.fieds = {
-                    name: list.fields.name,
-                    organization: list.fields.organization
-                };
-            }
+
+            switch(scope.view){
+
+                case 'Projects':
+                    list.fields = {
+                        name: list.fields.name,
+                        scm_type: list.fields.scm_type
+                    };
+                    break;
+
+                case 'Inventories':
+                    list.fields = {
+                        name: list.fields.name,
+                        organization: list.fields.organization
+                    };
+                    break;
+
+                case 'JobTemplates':
+                    list.name = 'job_templates';
+                    list.iterator = 'job_template';
+                    list.fields = {
+                        name: list.fields.name,
+                        description: list.fields.description
+                    };
+                    break;
+
+                case 'WorkflowTemplates':
+                    list.name = 'workflow_templates';
+                    list.iterator = 'workflow_template',
+                    list.basePath = 'workflow_job_templates';
+                    list.fields = {
+                        name: list.fields.name,
+                        description: list.fields.description
+                    };
+                    break;
+
+                default:
+                    list.fields = {
+                        name: list.fields.name,
+                        description: list.fields.description
+                    };
+            } 
 
             list_html = generateList.build({
                 mode: 'edit',

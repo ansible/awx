@@ -242,8 +242,12 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             value: {order_by: 'name', page_size: '5'},
                             dynamic: true
                         },
-                        template_search: {
-                            value: {order_by: 'name', page_size: '5', type: 'workflow_job_template,job_template'}, // @issue and also system_job_template? 
+                        job_template_search: {
+                            value: {order_by: 'name', page_size: '5'},
+                            dynamic: true
+                        },
+                        workflow_template_search: {
+                            value: {order_by: 'name', page_size: '5'},
                             dynamic: true
                         },
                         inventory_search: {
@@ -261,10 +265,16 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         }
                     },
                     resolve: {
-                        templatesDataset: ['TemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
-                            function(list, qs, $stateParams, GetBasePath) {
-                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        jobTemplatesDataset: ['QuerySet', '$stateParams', 'GetBasePath',
+                            function(qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath('job_templates');
+                                return qs.search(path, $stateParams.job_template_search);
+                            }
+                        ],
+                        workflowTemplatesDataset: ['QuerySet', '$stateParams', 'GetBasePath',
+                            function(qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath('workflow_job_templates');
+                                return qs.search(path, $stateParams.workflow_template_search);
                             }
                         ],
                         projectsDataset: ['ProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
