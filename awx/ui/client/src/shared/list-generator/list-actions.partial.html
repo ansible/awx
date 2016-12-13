@@ -29,9 +29,9 @@
         </span>
     </div>
     <span ng-if="!options.showTipWhenDisabled">
-        <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}">
+        <div class="btn-group" ng-if="options.type === 'buttonDropdown'" ng-disabled="{{options.ngDisabled}}" aw-tool-tip="{{options.awToolTip}}" data-tip-watch="{{options.dataTipWatch}}" data-placement="{{options.dataPlacement}}" data-container="{{options.dataContainer}}" ng-show="{{options.ngShow}}">
             <button type="button" class="{{options.actionClass}} List-dropdownButton dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span>{{options.buttonContent}}&nbsp;</span>
+                <span  ng-bind-html="options.buttonContent"></span>
                 <span class="List-dropdownCarat"></span>
                 <span class="sr-only">Toggle Dropdown</span>
             </button>

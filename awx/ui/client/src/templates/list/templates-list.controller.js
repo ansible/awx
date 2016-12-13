@@ -107,7 +107,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
            if(template) {
                     Prompt({
                         hdr: 'Delete',
-                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the ' + (template.type === "Workflow Job Template" ? 'workflow ' : '') + 'job template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
+                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
                         action: function() {
 
                             function handleSuccessfulDelete() {
