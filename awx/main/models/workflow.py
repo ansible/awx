@@ -435,11 +435,6 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
         return new_wfjt
 
 
-# Stub in place because of old migrations, can remove if migrations are squashed
-class WorkflowJobInheritNodesMixin(object):
-    pass
-
-
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
     class Meta:
         app_label = 'main'

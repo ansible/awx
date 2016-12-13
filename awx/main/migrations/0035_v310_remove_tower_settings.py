@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0036_v310_jobevent_uuid'),
+        ('main', '0034_v310_release'),
     ]
 
-    # These settings are now in the separate awx.conf app.
     operations = [
+        # Remove Tower settings, these settings are now in separate awx.conf app.
         migrations.RemoveField(
             model_name='towersettings',
             name='user',
