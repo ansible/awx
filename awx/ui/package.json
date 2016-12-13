@@ -6,7 +6,7 @@
     "url": ""
   },
   "config": {
-    "django_port": "8013",
+    "django_port": "8043",
     "django_host": "0.0.0.0",
     "sauce_username": "leigh-johnson",
     "sauce_access_key": "f740c3ad-c706-4e10-bb95-46e2cc50c2ac"
