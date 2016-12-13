@@ -24,8 +24,8 @@ export default [ '$state',
                 width = 950,
                 height = 590 - margin.top - margin.bottom,
                 i = 0,
-                rectW = 120,
-                rectH = 60,
+                nodeW = 120,
+                nodeH = 60,
                 rootW = 60,
                 rootH = 40;
 
@@ -51,10 +51,10 @@ export default [ '$state',
 
             function lineData(d){
 
-                let sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + rectW;
-                let sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + rectH / 2;
+                let sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + nodeW;
+                let sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + nodeH / 2;
                 let targetX = d.target.y;
-                let targetY = d.target.x + rectH / 2;
+                let targetY = d.target.x + nodeH / 2;
 
                 let points = [
                     {
@@ -174,8 +174,8 @@ export default [ '$state',
                     let thisNode = d3.select(this);
                     if(d.isStartNode) {
                         thisNode.append("rect")
-                            .attr("width", 60)
-                            .attr("height", 40)
+                            .attr("width", rootW)
+                            .attr("height", rootH)
                             .attr("y", 10)
                             .attr("rx", 5)
                             .attr("ry", 5)
@@ -192,8 +192,8 @@ export default [ '$state',
                     }
                     else {
                         thisNode.append("rect")
-                            .attr("width", rectW)
-                            .attr("height", rectH)
+                            .attr("width", nodeW)
+                            .attr("height", nodeH)
                             .attr("rx", 5)
                             .attr("ry", 5)
                             .attr('stroke', function(d) {
@@ -218,13 +218,13 @@ export default [ '$state',
                             });
 
                         thisNode.append("path")
-                            .attr("d", rounded_rect(1, 0, 5, rectH, 5, 1, 0, 1, 0))
+                            .attr("d", rounded_rect(1, 0, 5, nodeH, 5, 1, 0, 1, 0))
                             .attr("class", "WorkflowChart-activeNode")
                             .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
 
                         thisNode.append("text")
-                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
+                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : nodeW / 2; })
+                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : nodeH / 2; })
                             .attr("dy", ".35em")
                             .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
                             .attr("class", "WorkflowChart-defaultText WorkflowChart-nameText")
@@ -254,13 +254,13 @@ export default [ '$state',
                             .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
                         thisNode.append("circle")
-                            .attr("cy", rectH)
+                            .attr("cy", nodeH)
                             .attr("r", 10)
                             .attr("class", "WorkflowChart-nodeTypeCircle")
                             .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
 
                         thisNode.append("text")
-                            .attr("y", rectH)
+                            .attr("y", nodeH)
                             .attr("dy", ".35em")
                             .attr("text-anchor", "middle")
                             .attr("class", "WorkflowChart-nodeTypeLetter")
@@ -270,8 +270,8 @@ export default [ '$state',
                             .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
 
                         thisNode.append("rect")
-                            .attr("width", rectW)
-                            .attr("height", rectH)
+                            .attr("width", nodeW)
+                            .attr("height", nodeH)
                             .attr("class", "transparentRect")
                             .call(edit_node)
                             .on("mouseover", function(d) {
@@ -287,8 +287,8 @@ export default [ '$state',
                                 }
                             });
                         thisNode.append("text")
-                            .attr("x", rectW - 50)
-                            .attr("y", rectH - 10)
+                            .attr("x", nodeW - 50)
+                            .attr("y", nodeH - 10)
                             .attr("dy", ".35em")
                             .attr("class", "WorkflowChart-detailsLink")
                             .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; })
@@ -298,7 +298,7 @@ export default [ '$state',
                             .call(details);
                         thisNode.append("circle")
                             .attr("id", function(d){return "node-" + d.id + "-add";})
-                            .attr("cx", rectW)
+                            .attr("cx", nodeW)
                             .attr("r", 10)
                             .attr("class", "addCircle nodeCircle")
                             .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
@@ -318,7 +318,7 @@ export default [ '$state',
                         thisNode.append("path")
                             .attr("class", "nodeAddCross WorkflowChart-hoverPath")
                             .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + rectW + "," + 0 + ")"; })
+                            .attr("transform", function() { return "translate(" + nodeW + "," + 0 + ")"; })
                             .attr("d", d3.svg.symbol()
                                 .size(60)
                                 .type("cross")
@@ -339,8 +339,8 @@ export default [ '$state',
                             });
                         thisNode.append("circle")
                             .attr("id", function(d){return "node-" + d.id + "-remove";})
-                            .attr("cx", rectW)
-                            .attr("cy", rectH)
+                            .attr("cx", nodeW)
+                            .attr("cy", nodeH)
                             .attr("r", 10)
                             .attr("class", "removeCircle")
                             .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
@@ -360,7 +360,7 @@ export default [ '$state',
                         thisNode.append("path")
                             .attr("class", "nodeRemoveCross WorkflowChart-hoverPath")
                             .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + rectW + "," + rectH + ") rotate(-45)"; })
+                            .attr("transform", function() { return "translate(" + nodeW + "," + nodeH + ") rotate(-45)"; })
                             .attr("d", d3.svg.symbol()
                                 .size(60)
                                 .type("cross")
@@ -451,10 +451,10 @@ export default [ '$state',
                 linkEnter.append("circle")
                      .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
                      .attr("cx", function(d) {
-                         return (d.target.y + d.source.y + rectW) / 2;
+                         return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                      })
                      .attr("cy", function(d) {
-                         return (d.target.x + d.source.x + rectH) / 2;
+                         return (d.source.isStartNode) ? ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
                      })
                      .attr("r", 10)
                      .attr("class", "addCircle linkCircle")
@@ -476,7 +476,16 @@ export default [ '$state',
                 linkEnter.append("path")
                      .attr("class", "linkCross")
                      .style("fill", "white")
-                     .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; })
+                     .attr("transform", function(d) {
+                         let translate;
+                         if(d.source.isStartNode) {
+                             translate = "translate(" + (d.target.y + d.source.y + rootW) / 2 + "," + ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 + ")";
+                         }
+                         else {
+                             translate = "translate(" + (d.target.y + d.source.y + nodeW) / 2 + "," + (d.target.x + d.source.x + nodeH) / 2 + ")";
+                         }
+                         return translate;
+                     })
                      .attr("d", d3.svg.symbol()
                          .size(60)
                          .type("cross")
@@ -538,15 +547,24 @@ export default [ '$state',
                 t.selectAll(".linkCircle")
                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .attr("cx", function(d) {
-                        return (d.target.y + d.source.y + rectW) / 2;
+                        return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                     })
                     .attr("cy", function(d) {
-                        return (d.target.x + d.source.x + rectH) / 2;
+                        return (d.source.isStartNode) ? ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
                     });
 
                 t.selectAll(".linkCross")
                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
-                    .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; });
+                    .attr("transform", function(d) {
+                        let translate;
+                        if(d.source.isStartNode) {
+                            translate = "translate(" + (d.target.y + d.source.y + rootW) / 2 + "," + ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 + ")";
+                        }
+                        else {
+                            translate = "translate(" + (d.target.y + d.source.y + nodeW) / 2 + "," + (d.target.x + d.source.x + nodeH) / 2 + ")";
+                        }
+                        return translate;
+                    });
 
                 t.selectAll(".rect")
                     .attr('stroke', function(d) {
@@ -631,8 +649,8 @@ export default [ '$state',
                     });
 
                 t.selectAll(".WorkflowChart-nameText")
-                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
+                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : nodeW / 2; })
+                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : nodeH / 2; })
                     .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
                     .text(function (d) {
                         return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? wrap(d.unifiedJobTemplate.name) : "";
