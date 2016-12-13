@@ -62,20 +62,6 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
-                    <!-- STATUS DETAIL -->
-                    <div class="JobResults-resultRow">
-                        <label class="JobResults-resultRowLabel">
-                            Status
-                        </label>
-                        <div class="JobResults-resultRowText">
-                            <i
-                                class="JobResults-statusResultIcon
-                                    fa
-                                    icon-job-{{ job.status }}">
-                            </i> {{ status_label }}
-                        </div>
-                    </div>
-
                     <!-- START TIME DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.started">
@@ -154,7 +140,7 @@
                         ng-show="job.summary_fields.schedule.name">
                         <label
                             class="JobResults-resultRowLabel">
-                            Schedule
+                            Launched By
                         </label>
                         <div class="JobResults-resultRowText">
                             <a href="{{ scheduled_by_link }}"
@@ -446,7 +432,10 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="JobResults-statusResultIcon
-                            fa icon-job-{{ job.status }}">
+                            fa icon-job-{{ job.status }}"
+                            aw-tool-tip="Job {{status_label}}"
+                            aw-tip-placement="top"
+                            data-original-title>
                         </i>
                         {{ job.name }}
                     </div>
