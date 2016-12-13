@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ '$state',
-    function($state) {
+export default [ '$state', 'moment',
+    function($state, moment) {
 
     return {
         scope: {
@@ -188,6 +188,7 @@ export default [ '$state',
                             .attr("dy", ".35em")
                             .attr("class", "WorkflowChart-startText")
                             .text(function () { return "START"; })
+                            .attr("display", function() { return scope.mode === 'details' ? 'none' : null;})
                             .call(add_node);
                     }
                     else {
@@ -223,10 +224,10 @@ export default [ '$state',
                             .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
 
                         thisNode.append("text")
-                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
+                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : rectW / 2; })
+                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : rectH / 2; })
                             .attr("dy", ".35em")
-                            .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
+                            .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
                             .attr("class", "WorkflowChart-defaultText WorkflowChart-nameText")
                             .text(function (d) {
                                 return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
@@ -291,7 +292,7 @@ export default [ '$state',
                             .attr("y", rectH - 10)
                             .attr("dy", ".35em")
                             .attr("class", "WorkflowChart-detailsLink")
-                            .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; })
+                            .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
                             .text(function () {
                                 return "DETAILS";
                             })
@@ -386,7 +387,7 @@ export default [ '$state',
                                 let statusClass = "WorkflowChart-nodeStatus ";
 
                                 if(d.job){
-                                    switch(d.job.jobStatus) {
+                                    switch(d.job.status) {
                                         case "pending":
                                             statusClass = "workflowChart-nodeStatus--running";
                                             break;
@@ -402,15 +403,37 @@ export default [ '$state',
                                         case "failed":
                                             statusClass = "workflowChart-nodeStatus--failed";
                                             break;
+                                        case "error":
+                                            statusClass = "workflowChart-nodeStatus--failed";
+                                            break;
                                     }
                                 }
 
                                 return statusClass;
                             })
-                            .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
+                            .style("display", function(d) { return d.job && d.job.status ? null : "none"; })
                             .attr("cy", 10)
                             .attr("cx", 10)
                             .attr("r", 6);
+
+                        thisNode.append("foreignObject")
+                             .attr("x", 5)
+                             .attr("y", 43)
+                             .style("font-size","0.7em")
+                             .attr("class", "WorkflowChart-elapsed")
+                             .html(function (d) {
+                                 if(d.job && d.job.elapsed) {
+                                     let elapsedMs = d.job.elapsed * 1000;
+                                     let elapsedMoment = moment.duration(elapsedMs);
+                                     let paddedElapsedMoment = Math.floor(elapsedMoment.asHours()) < 10 ? "0" + Math.floor(elapsedMoment.asHours()) : Math.floor(elapsedMoment.asHours());
+                                     let elapsedString = paddedElapsedMoment + moment.utc(elapsedMs).format(":mm:ss");
+                                     return "<div class=\"WorkflowChart-elapsedHolder\"><span>" + elapsedString + "</span></div>";
+                                 }
+                                 else {
+                                     return "";
+                                 }
+                             })
+                             .style("display", function(d) { return (d.job && d.job.elapsed) ? null : "none"; });
                     }
                 });
 
@@ -588,7 +611,7 @@ export default [ '$state',
                         let statusClass = "WorkflowChart-nodeStatus ";
 
                         if(d.job){
-                            switch(d.job.jobStatus) {
+                            switch(d.job.status) {
                                 case "pending":
                                     statusClass += "workflowChart-nodeStatus--running";
                                     break;
@@ -604,17 +627,20 @@ export default [ '$state',
                                 case "failed":
                                     statusClass += "workflowChart-nodeStatus--failed";
                                     break;
+                                case "error":
+                                    statusClass = "workflowChart-nodeStatus--failed";
+                                    break;
                             }
                         }
 
                         return statusClass;
                     })
-                    .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
+                    .style("display", function(d) { return d.job && d.job.status ? null : "none"; })
                     .transition()
                     .duration(0)
                     .attr("r", 6)
                     .each(function(d) {
-                        if(d.job && d.job.jobStatus && (d.job.jobStatus === "pending" || d.job.jobStatus === "waiting" || d.job.jobStatus === "running")) {
+                        if(d.job && d.job.status && (d.job.status === "pending" || d.job.status === "waiting" || d.job.status === "running")) {
                             // Pulse the circle
                             var circle = d3.select(this);
                 			(function repeat() {
@@ -631,15 +657,15 @@ export default [ '$state',
                     });
 
                 t.selectAll(".WorkflowChart-nameText")
-                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
-                    .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
+                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : rectW / 2; })
+                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : rectH / 2; })
+                    .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
                     .text(function (d) {
                         return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? wrap(d.unifiedJobTemplate.name) : "";
                     });
 
                 t.selectAll(".WorkflowChart-detailsLink")
-                    .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; });
+                    .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
 
                 t.selectAll(".WorkflowChart-incompleteText")
                     .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
@@ -649,6 +675,9 @@ export default [ '$state',
 
                 t.selectAll(".WorkflowChart-activeNode")
                     .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
+
+                t.selectAll(".WorkflowChart-elapsed")
+                    .style("display", function(d) { return (d.job && d.job.elapsed) ? null : "none"; });
 
             }
 
@@ -702,15 +731,15 @@ export default [ '$state',
                     d3.select(this).style("text-decoration", null);
                 });
                 this.on("click", function(d) {
-                    if(d.job.unified_job_id && d.unifiedJobTemplate) {
+                    if(d.job.id && d.unifiedJobTemplate) {
                         if(d.unifiedJobTemplate.unified_job_type === 'job') {
-                            $state.go('jobDetail', {id: d.job.unified_job_id});
+                            $state.go('jobDetail', {id: d.job.id});
                         }
                         else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
-                            $state.go('inventorySyncStdout', {id: d.job.unified_job_id});
+                            $state.go('inventorySyncStdout', {id: d.job.id});
                         }
                         else if(d.unifiedJobTemplate.unified_job_type === 'project_update') {
-                            $state.go('scmUpdateStdout', {id: d.job.unified_job_id});
+                            $state.go('scmUpdateStdout', {id: d.job.id});
                         }
                     }
                 });

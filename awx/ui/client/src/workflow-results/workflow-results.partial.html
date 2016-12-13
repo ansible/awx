@@ -62,6 +62,21 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
+                    <!-- TEMPLATE DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.name">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Template
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ workflow_template_link }}"
+                                aw-tool-tip="Edit the job template"
+                                data-placement="top">
+                                {{ workflow.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.started">
@@ -82,32 +97,6 @@
                         <div class="WorkflowResults-resultRowText">
                             {{ (workflow.finished |
                                 longDate) || "Not Finished" }}
-                        </div>
-                    </div>
-
-                    <!-- TEMPLATE DETAIL -->
-                    <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.name">
-                        <label class="WorkflowResults-resultRowLabel">
-                            Template
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            <a href="{{ workflow_template_link }}"
-                                aw-tool-tip="Edit the job template"
-                                data-placement="top">
-                                {{ workflow.name }}
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- JOB TYPE DETAIL -->
-                    <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.type">
-                        <label class="WorkflowResults-resultRowLabel">
-                            Job Type
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            Workflow Job
                         </div>
                     </div>
 
@@ -265,7 +254,7 @@
                         </div>
                     </div>
                 </div>
-                <workflow-chart tree-data="treeData.data" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
+                <workflow-chart tree-data="treeData.data" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
             </div>
 
         </div>
