@@ -38,7 +38,7 @@ export default
                 organization: {
                     label: i18n._('Organization'),
                     type: 'lookup',
-                    list: 'OrganizationsList',
+                    list: 'OrganizationList',
                     sourceModel: 'organization',
                     basePath: 'organizations',
                     sourceField: 'name',
