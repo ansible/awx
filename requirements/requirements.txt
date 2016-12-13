@@ -45,7 +45,7 @@ baron==0.6.2              # via redbaron
 billiard==3.3.0.23        # via celery
 boto==2.43.0
 celery==3.1.17
-certifi==2016.9.26        # via msrest
+#certifi==2016.9.26        # via msrest --- chris meyers removed this because it fails gce inv sync and azure "classic". By removing this, we coerce libcloud into using the cert file '/etc/pki/tls/certs/ca-bundle.crt '
 cffi==1.9.1               # via cryptography
 channels==0.17.3
 chardet==2.3.0            # via msrest
