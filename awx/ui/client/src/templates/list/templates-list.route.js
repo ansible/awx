@@ -46,6 +46,20 @@ export default {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
             }
+        ],
+        DataOptions: ['Rest', 'GetBasePath', '$stateParams', '$q', 'TemplateList',
+            function(Rest, GetBasePath, $stateParams, $q, list) {
+                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                Rest.setUrl(path);
+                var val = $q.defer();
+                Rest.options()
+                    .then(function(data) {
+                        val.resolve(data.data.actions.GET);
+                    }, function(data) {
+                        val.reject(data);
+                    });
+                return val.promise;
+            }
         ]
     }
 };

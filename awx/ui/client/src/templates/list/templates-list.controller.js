@@ -4,15 +4,16 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Alert',
-    'TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'TemplatesService',
-    'QuerySet', 'GetChoices', 'TemplateCopyService',
+export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
+    'Alert','TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
+    'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
+    'GetChoices', 'TemplateCopyService', 'DataOptions',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
         TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs, GetChoices, TemplateCopyService
+        qs, GetChoices, TemplateCopyService, DataOptions
     ) {
         ClearScope();
 
@@ -36,37 +37,30 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            $scope.options = DataOptions;
 
             $rootScope.flashMessage = null;
 
-            if ($scope.removeChoicesReady) {
-                $scope.removeChoicesReady();
-            }
-            $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
-                $scope[list.name].forEach(function(item, item_idx) {
-                    var itm = $scope[list.name][item_idx];
+            $scope.$watchCollection('templates', function() {
+                    $scope[list.name].forEach(function(item, item_idx) {
+                        var itm = $scope[list.name][item_idx];
 
-                    // Set the item type label
-                    if (list.fields.type) {
-                        $scope.type_choices.every(function(choice) {
-                            if (choice.value === item.type) {
-                                itm.type_label = choice.label;
-                                return false;
-                            }
-                            return true;
-                        });
-                    }
-                });
-            });
-
-            GetChoices({
-                scope: $scope,
-                url: GetBasePath('unified_job_templates'),
-                field: 'type',
-                variable: 'type_choices',
-                callback: 'choicesReady'
-            });
+                        // Set the item type label
+                        if (list.fields.type) {
+                            $scope.options.type.choices.every(function(choice) {
+                                if (choice[0] === item.type) {
+                                    itm.type_label = choice[1];
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
+                    });
+                }
+            );
         }
+
+
 
         $scope.$on(`ws-jobs`, function () {
             // @issue - this is no longer quite as ham-fisted but I'd like for someone else to take a peek
