@@ -81,7 +81,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
-    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'started', 'finished'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
