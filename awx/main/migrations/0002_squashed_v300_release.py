@@ -6,7 +6,6 @@
 from __future__ import unicode_literals
 
 import awx.main.fields
-from awx.main.migrations import _cleanup_deleted as cleanup_deleted
 
 from django.db import migrations, models
 import django.db.models.deletion
@@ -248,8 +247,6 @@ class Migration(migrations.Migration):
             name='fact',
             index_together=set([('timestamp', 'module', 'host')]),
         ),
-        # Active flag cleanup
-        migrations.RunPython(cleanup_deleted.cleanup_deleted),
         # Active flag removal
         migrations.RemoveField(
             model_name='credential',

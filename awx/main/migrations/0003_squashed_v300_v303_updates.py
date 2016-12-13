@@ -5,9 +5,6 @@
 
 from __future__ import unicode_literals
 
-from awx.main.migrations import _migration_utils as migration_utils
-from awx.main.migrations import _save_password_keys
-
 from django.db import migrations, models
 from django.conf import settings
 import awx.main.fields
@@ -44,7 +41,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migration_utils.set_current_apps_for_migrations),
         # Labels Changes
         migrations.RemoveField(
             model_name='job',
@@ -146,7 +142,6 @@ class Migration(migrations.Migration):
             name='survey_passwords',
             field=jsonfield.fields.JSONField(default={}, editable=False, blank=True),
         ),
-        migrations.RunPython(_save_password_keys.migrate_survey_passwords),
         # RBAC credential permission updates
         migrations.AlterField(
             model_name='credential',
@@ -158,5 +153,4 @@ class Migration(migrations.Migration):
             name='use_role',
             field=awx.main.fields.ImplicitRoleField(related_name='+', parent_role=[b'admin_role'], to='main.Role', null=b'True'),
         ),
-        migrations.RunPython(update_dashed_host_variables),
     ]
