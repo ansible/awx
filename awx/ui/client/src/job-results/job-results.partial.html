@@ -85,6 +85,19 @@
                         </div>
                     </div>
 
+                    <!-- RESULTS TRACEBACK DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.result_traceback">
+                        <label class="JobResults-resultRowLabel">
+                            Results Traceback
+                        </label>
+                        <div class="JobResults-resultRowText
+                            job_status_traceback"
+                            ng-bind-html="job.result_traceback">
+                        </div>
+                    </div>
+
+
                     <!-- TEMPLATE DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.summary_fields.job_template.name">
@@ -401,23 +414,6 @@
 
                     <!-- </div> -->
 
-                    <!-- RESULTS TRACEBACK DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show" ng-show="job.result_traceback">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-12
-                                col-sm-12 col-xs-12">
-                            Results Traceback
-                        </label>
-                        <div class="JobResults-resultRowText
-                            col-lg-10 col-md-12 col-sm-12 col-xs-12
-                            job_status_traceback"
-                            ng-bind-html="job.result_traceback">
-                        </div>
-                    </div> -->
 
                 </div>
 
