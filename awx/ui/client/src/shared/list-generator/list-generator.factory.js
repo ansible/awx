@@ -355,7 +355,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                     innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
 
-                    let handleEditStateParams = function(stateParams){console.log(stateParams);
+                    let handleEditStateParams = function(stateParams){
                         let matchingConditions = [];
 
                         angular.forEach(stateParams, function(stateParam) {
