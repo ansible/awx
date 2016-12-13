@@ -22,7 +22,7 @@ export default [ '$state',
 
             let margin = {top: 20, right: 20, bottom: 20, left: 20},
                 width = 950,
-                height = 590 - margin.top - margin.bottom,
+                height = 550,
                 i = 0,
                 rectW = 120,
                 rectH = 60,
@@ -39,15 +39,15 @@ export default [ '$state',
             let zoomObj = d3.behavior.zoom().scaleExtent([0.5, 2]);
 
             let baseSvg = d3.select(element[0]).append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", width - margin.right - margin.left)
+                .attr("height", height - margin.top - margin.bottom)
                 .attr("class", "WorkflowChart-svg")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                 .call(zoomObj
                     .on("zoom", naturalZoom)
                 );
 
-            let svgGroup = baseSvg.append("g");
+            let svgGroup = baseSvg.append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
             function lineData(d){
 
@@ -108,6 +108,8 @@ export default [ '$state',
                 let scale = d3.event.scale,
                     translation = d3.event.translate;
 
+                translation = [translation[0] + (margin.left*scale), translation[1] + (margin.top*scale)];
+
                 svgGroup.attr("transform", "translate(" + translation + ")scale(" + scale + ")");
 
                 scope.workflowZoomed({
@@ -125,7 +127,7 @@ export default [ '$state',
                 translateX = unscaledOffsetX*scale - ((scale*width)-width)/2,
                 translateY = unscaledOffsetY*scale - ((scale*height)-height)/2;
 
-                svgGroup.attr("transform", "translate(" + [translateX, translateY] + ")scale(" + scale + ")");
+                svgGroup.attr("transform", "translate(" + [translateX + (margin.left*scale), translateY + (margin.top*scale)] + ")scale(" + scale + ")");
                 zoomObj.scale(scale);
                 zoomObj.translate([translateX, translateY]);
             }
@@ -148,7 +150,7 @@ export default [ '$state',
             }
 
             function resetZoomAndPan() {
-                svgGroup.attr("transform", "translate(" + 0 + "," + 0 + ")scale(" + 1 + ")");
+                svgGroup.attr("transform", "translate(" + margin.left + "," + margin.top + ")scale(" + 1 + ")");
                 // Update the zoomObj
                 zoomObj.scale(1);
                 zoomObj.translate([0,0]);
