@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0001_squashed_v300_release'),
+        ('main', '0002_squashed_v300_release'),
     ]
 
     operations = [
