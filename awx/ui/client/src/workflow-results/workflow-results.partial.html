@@ -62,6 +62,19 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
+                    <!-- STATUS DETAIL -->
+                    <div class="WorkflowResults-resultRow">
+                        <label class="WorkflowResults-resultRowLabel">
+                             Status
+                         </label>
+                         <div class="WorkflowResults-resultRowText">
+                             <i	class="WorkflowResults-statusResultIcon
+                                     fa
+                                     icon-job-{{ workflow.status }}">
+                             </i> {{ status_label }}
+                         </div>
+                     </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.started">
@@ -180,7 +193,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- end of labels--> 
+                    <!-- end of labels-->
 
                 </div>
 
@@ -195,7 +208,10 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="WorkflowResults-statusResultIcon
-                            fa icon-job-{{ workflow.status }}">
+                            fa icon-job-{{ workflow.status }}"
+                            aw-tool-tip="Job {{status_label}}"
+                            aw-tip-placement="top"
+                            data-original-title>
                         </i>
                         {{ workflow.name }}
                     </div>
