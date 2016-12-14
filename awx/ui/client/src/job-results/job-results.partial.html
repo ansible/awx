@@ -62,6 +62,19 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
+                    <!-- STATUS DETAIL -->
+                    <div class="JobResults-resultRow">
+                        <label class="JobResults-resultRowLabel">
+                             Status
+                         </label>
+                         <div class="JobResults-resultRowText">
+                             <i	class="JobResults-statusResultIcon
+                                     fa
+                                     icon-job-{{ job.status }}">
+                             </i> {{ status_label }}
+                         </div>
+                     </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.started">
@@ -386,44 +399,6 @@
                             </div>
                         </div>
                     </div>
-
-                        <!-- PREVIOUS TASK SUCCEEDED -->
-                        <!-- <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="!previousTaskFailed"
-                            ng-bind-html="job_status.explanation">
-                            <i
-                                class="JobResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job_status.status }}">
-                            </i> {{ job_status.status_label }}
-                        </div> -->
-
-                        <!-- PREVIOUS TASK FAILED -->
-                        <!-- <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="previousTaskFailed">
-                            Previous Task Failed
-                            <a
-                                href=""
-                                id="explanation_help"
-                                aw-pop-over="{{ task_detail }}"
-                                aw-pop-over-watch="task_detail"
-                                data-placement="bottom"
-                                data-container="body"
-                                class="help-link"
-                                over-title="Failure Detail"
-                                title=""
-                                tabindex="-1">
-                                <i class="fa fa-question-circle">
-                                </i>
-                            </a>
-                        </div>
-
-                    <!-- </div> -->
-
 
                 </div>
 
