@@ -194,9 +194,8 @@ if __name__ == "__main__":
     except OSError as e:
         if e.errno == os.errno.ENOENT:
             print('''
-            You need zanata-python-client, install it.
-             1. Install zanata-python-client, use
-                   $ dnf install zanata-python-client
+            You need zanata python client, install it.
+             1. Install zanta python client
              2. Create ~/.config/zanata.ini file:
                    $ vim ~/.config/zanata.ini
                     [servers]

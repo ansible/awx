@@ -34,15 +34,15 @@ msgstr ""
 #: client/src/forms/Inventories.js:153
 #: client/src/forms/JobTemplates.js:414
 #: client/src/forms/Organizations.js:75
-#: client/src/forms/Projects.js:238
+#: client/src/forms/Projects.js:237
 #: client/src/forms/Teams.js:86
-#: client/src/forms/Workflows.js:126
+#: client/src/forms/Workflows.js:127
 #: client/src/inventory-scripts/inventory-scripts.list.js:45
 #: client/src/lists/Credentials.js:59
 #: client/src/lists/Inventories.js:68
 #: client/src/lists/Projects.js:67
 #: client/src/lists/Teams.js:50
-#: client/src/lists/Templates.js:61
+#: client/src/lists/Templates.js:62
 #: client/src/lists/Users.js:58
 #: client/src/notifications/notificationTemplates.list.js:52
 msgid "ADD"
@@ -81,7 +81,7 @@ msgid "Account Token"
 msgstr ""
 
 #: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:20
-#: client/src/shared/list-generator/list-generator.factory.js:502
+#: client/src/shared/list-generator/list-generator.factory.js:538
 msgid "Actions"
 msgstr ""
 
@@ -94,7 +94,7 @@ msgstr ""
 #: client/src/forms/Inventories.js:150
 #: client/src/forms/Organizations.js:72
 #: client/src/forms/Teams.js:83
-#: client/src/forms/Workflows.js:123
+#: client/src/forms/Workflows.js:124
 msgid "Add"
 msgstr ""
 
@@ -119,8 +119,8 @@ msgid "Add Project"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:459
-#: client/src/forms/Workflows.js:171
-#: client/src/shared/form-generator.js:1703
+#: client/src/forms/Workflows.js:172
+#: client/src/shared/form-generator.js:1707
 msgid "Add Survey"
 msgstr ""
 
@@ -136,7 +136,7 @@ msgstr ""
 #: client/src/forms/Inventories.js:151
 #: client/src/forms/JobTemplates.js:412
 #: client/src/forms/Organizations.js:73
-#: client/src/forms/Projects.js:236
+#: client/src/forms/Projects.js:235
 msgid "Add a permission"
 msgstr ""
 
@@ -219,6 +219,10 @@ msgstr ""
 msgid "Authorize Password"
 msgstr ""
 
+#: client/src/configuration/auth-form/configuration-auth.controller.js:101
+msgid "Azure AD"
+msgstr ""
+
 #: client/src/forms/Projects.js:80
 msgid "Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. Together the base path and selected playbook directory provide the full path used to locate playbooks."
 msgstr ""
@@ -235,11 +239,11 @@ msgstr ""
 msgid "CREDENTIALS"
 msgstr ""
 
-#: client/src/forms/Projects.js:195
+#: client/src/forms/Projects.js:194
 msgid "Cache Timeout"
 msgstr ""
 
-#: client/src/forms/Projects.js:184
+#: client/src/forms/Projects.js:183
 msgid "Cache Timeout%s (seconds)%s"
 msgstr ""
 
@@ -265,7 +269,8 @@ msgstr ""
 msgid "Call to get project failed. GET status:"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1691
+#: client/src/configuration/configuration.controller.js:414
+#: client/src/shared/form-generator.js:1695
 msgid "Cancel"
 msgstr ""
 
@@ -281,6 +286,10 @@ msgstr ""
 msgid "Canceled. Click for details"
 msgstr ""
 
+#: client/src/forms/Projects.js:82
+msgid "Change %s under \"Configure Tower\" to change this location."
+msgstr ""
+
 #: client/src/shared/form-generator.js:1084
 msgid "Choose a %s"
 msgstr ""
@@ -289,7 +298,7 @@ msgstr ""
 msgid "Choose your license file, agree to the End User License Agreement, and click submit."
 msgstr ""
 
-#: client/src/forms/Projects.js:152
+#: client/src/forms/Projects.js:151
 msgid "Clean"
 msgstr ""
 
@@ -317,7 +326,7 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
-#: client/src/shared/form-generator.js:1695
+#: client/src/shared/form-generator.js:1699
 msgid "Close"
 msgstr ""
 
@@ -346,6 +355,14 @@ msgstr ""
 msgid "Confirm Password"
 msgstr ""
 
+#: client/src/configuration/configuration.controller.js:421
+msgid "Confirm Reset"
+msgstr ""
+
+#: client/src/configuration/configuration.controller.js:430
+msgid "Confirm factory reset"
+msgstr ""
+
 #: client/src/forms/JobTemplates.js:255
 #: client/src/forms/JobTemplates.js:273
 #: client/src/forms/WorkflowMaker.js:141
@@ -357,11 +374,11 @@ msgstr ""
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr ""
 
-#: client/src/lists/Templates.js:99
+#: client/src/lists/Templates.js:100
 msgid "Copy"
 msgstr ""
 
-#: client/src/lists/Templates.js:102
+#: client/src/lists/Templates.js:103
 msgid "Copy template"
 msgstr ""
 
@@ -402,7 +419,7 @@ msgstr ""
 msgid "Create a new team"
 msgstr ""
 
-#: client/src/lists/Templates.js:59
+#: client/src/lists/Templates.js:60
 msgid "Create a new template"
 msgstr ""
 
@@ -435,7 +452,7 @@ msgstr ""
 msgid "Custom Script"
 msgstr ""
 
-#: client/src/app.js:405
+#: client/src/app.js:409
 msgid "DASHBOARD"
 msgstr ""
 
@@ -451,7 +468,7 @@ msgstr ""
 #: client/src/lists/Credentials.js:90
 #: client/src/lists/Inventories.js:92
 #: client/src/lists/Teams.js:77
-#: client/src/lists/Templates.js:123
+#: client/src/lists/Templates.js:125
 #: client/src/lists/Users.js:87
 #: client/src/notifications/notificationTemplates.list.js:89
 msgid "Delete"
@@ -473,7 +490,7 @@ msgstr ""
 msgid "Delete notification"
 msgstr ""
 
-#: client/src/forms/Projects.js:162
+#: client/src/forms/Projects.js:161
 msgid "Delete on Update"
 msgstr ""
 
@@ -481,7 +498,7 @@ msgstr ""
 msgid "Delete team"
 msgstr ""
 
-#: client/src/lists/Templates.js:126
+#: client/src/lists/Templates.js:128
 msgid "Delete template"
 msgstr ""
 
@@ -489,7 +506,7 @@ msgstr ""
 msgid "Delete the job"
 msgstr ""
 
-#: client/src/forms/Projects.js:164
+#: client/src/forms/Projects.js:163
 msgid "Delete the local repository in its entirety prior to performing an update."
 msgstr ""
 
@@ -505,7 +522,7 @@ msgstr ""
 msgid "Delete user"
 msgstr ""
 
-#: client/src/forms/Projects.js:164
+#: client/src/forms/Projects.js:163
 msgid "Depending on the size of the repository this may significantly increase the amount of time required to complete an update."
 msgstr ""
 
@@ -517,7 +534,7 @@ msgstr ""
 #: client/src/forms/Teams.js:34
 #: client/src/forms/Users.js:142
 #: client/src/forms/Users.js:167
-#: client/src/forms/Workflows.js:40
+#: client/src/forms/Workflows.js:41
 #: client/src/inventory-scripts/inventory-scripts.form.js:32
 #: client/src/inventory-scripts/inventory-scripts.list.js:25
 #: client/src/lists/Credentials.js:34
@@ -550,6 +567,12 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
+#: client/src/configuration/auth-form/configuration-auth.controller.js:70
+#: client/src/configuration/configuration.controller.js:159
+#: client/src/configuration/configuration.controller.js:212
+msgid "Discard changes"
+msgstr ""
+
 #: client/src/forms/Teams.js:148
 msgid "Dissasociate permission from team"
 msgstr ""
@@ -567,7 +590,7 @@ msgstr ""
 msgid "Drag and drop your custom inventory script file here or create one in the field to import your custom inventory."
 msgstr ""
 
-#: client/src/forms/Projects.js:175
+#: client/src/forms/Projects.js:174
 msgid "Each time a job runs using this project, perform an update to the local repository prior to starting the job."
 msgstr ""
 
@@ -576,7 +599,7 @@ msgstr ""
 #: client/src/lists/Credentials.js:71
 #: client/src/lists/Inventories.js:78
 #: client/src/lists/Teams.js:60
-#: client/src/lists/Templates.js:107
+#: client/src/lists/Templates.js:108
 #: client/src/lists/Users.js:68
 #: client/src/notifications/notificationTemplates.list.js:63
 #: client/src/notifications/notificationTemplates.list.js:72
@@ -584,8 +607,8 @@ msgid "Edit"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:466
-#: client/src/forms/Workflows.js:178
-#: client/src/shared/form-generator.js:1707
+#: client/src/forms/Workflows.js:179
+#: client/src/shared/form-generator.js:1711
 msgid "Edit Survey"
 msgstr ""
 
@@ -613,7 +636,7 @@ msgstr ""
 msgid "Edit team"
 msgstr ""
 
-#: client/src/lists/Templates.js:109
+#: client/src/lists/Templates.js:110
 msgid "Edit template"
 msgstr ""
 
@@ -646,7 +669,7 @@ msgstr ""
 msgid "Enables creation of a provisioning callback URL. Using the URL a host can contact Tower and request a configuration update using this job template."
 msgstr ""
 
-#: client/src/helpers/Credentials.js:308
+#: client/src/helpers/Credentials.js:306
 msgid "Encrypted credentials are not supported."
 msgstr ""
 
@@ -670,6 +693,10 @@ msgstr ""
 msgid "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr ""
 
+#: client/src/configuration/configuration.controller.js:272
+#: client/src/configuration/configuration.controller.js:350
+#: client/src/configuration/configuration.controller.js:384
+#: client/src/configuration/configuration.controller.js:403
 #: client/src/controllers/Projects.js:133
 #: client/src/controllers/Projects.js:155
 #: client/src/controllers/Projects.js:180
@@ -684,8 +711,8 @@ msgstr ""
 #: client/src/controllers/Users.js:267
 #: client/src/controllers/Users.js:321
 #: client/src/controllers/Users.js:94
-#: client/src/helpers/Credentials.js:312
-#: client/src/helpers/Credentials.js:328
+#: client/src/helpers/Credentials.js:310
+#: client/src/helpers/Credentials.js:326
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:119
 msgid "Error!"
 msgstr ""
@@ -711,8 +738,8 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:352
 #: client/src/forms/JobTemplates.js:364
-#: client/src/forms/Workflows.js:71
-#: client/src/forms/Workflows.js:83
+#: client/src/forms/Workflows.js:72
+#: client/src/forms/Workflows.js:84
 msgid "Extra Variables"
 msgstr ""
 
@@ -732,7 +759,7 @@ msgstr ""
 msgid "Failed to add new user. POST returned status:"
 msgstr ""
 
-#: client/src/helpers/Credentials.js:313
+#: client/src/helpers/Credentials.js:311
 msgid "Failed to create new Credential. POST status:"
 msgstr ""
 
@@ -753,7 +780,15 @@ msgstr ""
 msgid "Failed to retrieve user: %s. GET status:"
 msgstr ""
 
-#: client/src/helpers/Credentials.js:329
+#: client/src/configuration/configuration.controller.js:351
+msgid "Failed to save settings. Returned status:"
+msgstr ""
+
+#: client/src/configuration/configuration.controller.js:385
+msgid "Failed to save toggle settings. Returned status:"
+msgstr ""
+
+#: client/src/helpers/Credentials.js:327
 msgid "Failed to update Credential. PUT status:"
 msgstr ""
 
@@ -800,6 +835,22 @@ msgstr ""
 #: client/src/forms/JobTemplates.js:199
 #: client/src/forms/JobTemplates.js:212
 msgid "Forks"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:102
+msgid "Github"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:103
+msgid "Github Org"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:104
+msgid "Github Team"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:105
+msgid "Google OAuth2"
 msgstr ""
 
 #: client/src/forms/Teams.js:118
@@ -949,7 +1000,7 @@ msgstr ""
 msgid "JOB TEMPLATE"
 msgstr ""
 
-#: client/src/app.js:425
+#: client/src/app.js:429
 #: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:113
 #: client/src/main-menu/main-menu.partial.html:122
 #: client/src/main-menu/main-menu.partial.html:43
@@ -963,7 +1014,7 @@ msgstr ""
 msgid "Job Tags"
 msgstr ""
 
-#: client/src/lists/Templates.js:64
+#: client/src/lists/Templates.js:65
 msgid "Job Template"
 msgstr ""
 
@@ -986,6 +1037,10 @@ msgstr ""
 msgid "Jobs"
 msgstr ""
 
+#: client/src/configuration/auth-form/configuration-auth.controller.js:106
+msgid "LDAP"
+msgstr ""
+
 #: client/src/main-menu/main-menu.partial.html:83
 msgid "LOG OUT"
 msgstr ""
@@ -996,8 +1051,8 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:340
 #: client/src/forms/JobTemplates.js:345
-#: client/src/forms/Workflows.js:59
-#: client/src/forms/Workflows.js:64
+#: client/src/forms/Workflows.js:60
+#: client/src/forms/Workflows.js:65
 #: client/src/lists/Templates.js:47
 msgid "Labels"
 msgstr ""
@@ -1012,8 +1067,8 @@ msgid "Last Updated"
 msgstr ""
 
 #: client/src/lists/PortalJobTemplates.js:39
-#: client/src/lists/Templates.js:83
-#: client/src/shared/form-generator.js:1699
+#: client/src/lists/Templates.js:84
+#: client/src/shared/form-generator.js:1703
 msgid "Launch"
 msgstr ""
 
@@ -1049,19 +1104,19 @@ msgstr ""
 msgid "Limit"
 msgstr ""
 
-#: client/src/shared/socket/socket.service.js:176
+#: client/src/shared/socket/socket.service.js:170
 msgid "Live events: attempting to connect to the Tower server."
 msgstr ""
 
-#: client/src/shared/socket/socket.service.js:180
+#: client/src/shared/socket/socket.service.js:174
 msgid "Live events: connected. Pages containing job status information will automatically update in real-time."
 msgstr ""
 
-#: client/src/shared/socket/socket.service.js:184
+#: client/src/shared/socket/socket.service.js:178
 msgid "Live events: error connecting to the Tower server."
 msgstr ""
 
-#: client/src/shared/form-generator.js:1962
+#: client/src/shared/form-generator.js:1977
 msgid "Loading..."
 msgstr ""
 
@@ -1131,7 +1186,7 @@ msgstr ""
 #: client/src/forms/Users.js:139
 #: client/src/forms/Users.js:164
 #: client/src/forms/Users.js:190
-#: client/src/forms/Workflows.js:33
+#: client/src/forms/Workflows.js:34
 #: client/src/inventory-scripts/inventory-scripts.form.js:25
 #: client/src/inventory-scripts/inventory-scripts.list.js:20
 #: client/src/lists/CompletedJobs.js:43
@@ -1195,7 +1250,7 @@ msgid "New User"
 msgstr ""
 
 #: client/src/forms/Workflows.js:19
-msgid "New Workflow"
+msgid "New Workflow Job Template"
 msgstr ""
 
 #: client/src/controllers/Users.js:174
@@ -1293,7 +1348,7 @@ msgid "OpenStack domains define administrative boundaries. It is only needed for
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:347
-#: client/src/forms/Workflows.js:66
+#: client/src/forms/Workflows.js:67
 msgid "Optional labels that describe this job template, such as 'dev' or 'test'. Labels can be used to group and filter job templates and completed jobs in the Tower display."
 msgstr ""
 
@@ -1309,8 +1364,8 @@ msgstr ""
 #: client/src/forms/Projects.js:49
 #: client/src/forms/Teams.js:39
 #: client/src/forms/Users.js:59
-#: client/src/forms/Workflows.js:46
-#: client/src/forms/Workflows.js:52
+#: client/src/forms/Workflows.js:47
+#: client/src/forms/Workflows.js:53
 #: client/src/inventory-scripts/inventory-scripts.form.js:37
 #: client/src/inventory-scripts/inventory-scripts.list.js:30
 #: client/src/lists/Inventories.js:52
@@ -1337,7 +1392,7 @@ msgid "PASSWORD"
 msgstr ""
 
 #: client/src/organizations/list/organizations-list.partial.html:44
-#: client/src/shared/form-generator.js:1865
+#: client/src/shared/form-generator.js:1880
 #: client/src/shared/list-generator/list-generator.factory.js:245
 msgid "PLEASE ADD ITEMS TO THIS LIST"
 msgstr ""
@@ -1356,7 +1411,7 @@ msgid "Pagerduty subdomain"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:358
-#: client/src/forms/Workflows.js:77
+#: client/src/forms/Workflows.js:78
 msgid "Pass extra command line variables to the playbook. This is the %s or %s command line parameter for %s. Provide key/value pairs using either YAML or JSON."
 msgstr ""
 
@@ -1419,8 +1474,8 @@ msgstr ""
 #: client/src/forms/Inventories.js:142
 #: client/src/forms/JobTemplates.js:403
 #: client/src/forms/Organizations.js:64
-#: client/src/forms/Projects.js:228
-#: client/src/forms/Workflows.js:115
+#: client/src/forms/Projects.js:227
+#: client/src/forms/Workflows.js:116
 msgid "Permissions"
 msgstr ""
 
@@ -1493,9 +1548,9 @@ msgstr ""
 #: client/src/forms/Inventories.js:91
 #: client/src/forms/JobTemplates.js:396
 #: client/src/forms/Organizations.js:57
-#: client/src/forms/Projects.js:220
+#: client/src/forms/Projects.js:219
 #: client/src/forms/Teams.js:110
-#: client/src/forms/Workflows.js:108
+#: client/src/forms/Workflows.js:109
 msgid "Please save before assigning permissions"
 msgstr ""
 
@@ -1508,7 +1563,7 @@ msgstr ""
 msgid "Please save before assigning to teams"
 msgstr ""
 
-#: client/src/forms/Workflows.js:184
+#: client/src/forms/Workflows.js:185
 msgid "Please save before defining the workflow graph"
 msgstr ""
 
@@ -1593,7 +1648,7 @@ msgstr ""
 msgid "Project Name"
 msgstr ""
 
-#: client/src/forms/Projects.js:101
+#: client/src/forms/Projects.js:100
 msgid "Project Path"
 msgstr ""
 
@@ -1636,6 +1691,10 @@ msgstr ""
 #: client/src/forms/JobTemplates.js:313
 #: client/src/forms/JobTemplates.js:321
 msgid "Provisioning Callback URL"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:107
+msgid "RADIUS"
 msgstr ""
 
 #: client/src/dashboard/lists/jobs/jobs-list.partial.html:4
@@ -1684,12 +1743,26 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: client/src/forms/Projects.js:154
+#: client/src/forms/Projects.js:153
 msgid "Remove any local modifications prior to performing an update."
 msgstr ""
 
 #: client/src/license/license.partial.html:89
 msgid "Request License"
+msgstr ""
+
+#: client/src/configuration/auth-form/sub-forms/auth-azure.form.js:41
+#: client/src/configuration/auth-form/sub-forms/auth-github-org.form.js:31
+#: client/src/configuration/auth-form/sub-forms/auth-github-team.form.js:31
+#: client/src/configuration/auth-form/sub-forms/auth-github.form.js:27
+#: client/src/configuration/auth-form/sub-forms/auth-google-oauth2.form.js:39
+#: client/src/configuration/auth-form/sub-forms/auth-ldap.form.js:87
+#: client/src/configuration/auth-form/sub-forms/auth-radius.form.js:32
+#: client/src/configuration/auth-form/sub-forms/auth-saml.form.js:59
+#: client/src/configuration/jobs-form/configuration-jobs.form.js:55
+#: client/src/configuration/system-form/configuration-system.form.js:41
+#: client/src/configuration/ui-form/configuration-ui.form.js:35
+msgid "Reset All"
 msgstr ""
 
 #: client/src/lists/Projects.js:42
@@ -1704,26 +1777,30 @@ msgstr ""
 #: client/src/forms/Inventories.js:120
 #: client/src/forms/Inventories.js:166
 #: client/src/forms/Organizations.js:88
-#: client/src/forms/Projects.js:250
+#: client/src/forms/Projects.js:249
 #: client/src/forms/Teams.js:137
 #: client/src/forms/Teams.js:99
 #: client/src/forms/Users.js:201
 msgid "Role"
 msgstr ""
 
+#: client/src/configuration/auth-form/configuration-auth.controller.js:108
+msgid "SAML"
+msgstr ""
+
 #: client/src/controllers/Projects.js:657
 msgid "SCM Branch"
 msgstr ""
 
-#: client/src/forms/Projects.js:155
+#: client/src/forms/Projects.js:154
 msgid "SCM Clean"
 msgstr ""
 
-#: client/src/forms/Projects.js:131
+#: client/src/forms/Projects.js:130
 msgid "SCM Credential"
 msgstr ""
 
-#: client/src/forms/Projects.js:166
+#: client/src/forms/Projects.js:165
 msgid "SCM Delete"
 msgstr ""
 
@@ -1736,7 +1813,7 @@ msgid "SCM Type"
 msgstr ""
 
 #: client/src/dashboard/graphs/dashboard-graphs.partial.html:49
-#: client/src/forms/Projects.js:176
+#: client/src/forms/Projects.js:175
 msgid "SCM Update"
 msgstr ""
 
@@ -1744,7 +1821,7 @@ msgstr ""
 msgid "SCM Update Cancel"
 msgstr ""
 
-#: client/src/forms/Projects.js:146
+#: client/src/forms/Projects.js:145
 msgid "SCM Update Options"
 msgstr ""
 
@@ -1765,7 +1842,7 @@ msgstr ""
 msgid "SIGN IN WITH"
 msgstr ""
 
-#: client/src/app.js:509
+#: client/src/app.js:513
 msgid "SOCKETS"
 msgstr ""
 
@@ -1798,11 +1875,17 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
+#: client/src/configuration/auth-form/configuration-auth.controller.js:81
+#: client/src/configuration/configuration.controller.js:170
+#: client/src/configuration/configuration.controller.js:220
+msgid "Save changes"
+msgstr ""
+
 #: client/src/license/license.partial.html:122
 msgid "Save successful!"
 msgstr ""
 
-#: client/src/lists/Templates.js:91
+#: client/src/lists/Templates.js:92
 msgid "Schedule"
 msgstr ""
 
@@ -1814,7 +1897,7 @@ msgstr ""
 msgid "Schedule future SCM updates"
 msgstr ""
 
-#: client/src/lists/Templates.js:94
+#: client/src/lists/Templates.js:95
 msgid "Schedule future job template runs"
 msgstr ""
 
@@ -1838,8 +1921,21 @@ msgstr ""
 msgid "Security Token Service (STS) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users."
 msgstr ""
 
+#: client/src/shared/form-generator.js:1691
+msgid "Select"
+msgstr ""
+
+#: client/src/configuration/jobs-form/configuration-jobs.controller.js:87
+#: client/src/configuration/ui-form/configuration-ui.controller.js:82
+msgid "Select commands"
+msgstr ""
+
 #: client/src/forms/Projects.js:98
-msgid "Select from the list of directories found in the base path.Together the base path and the playbook directory provide the full path used to locate playbooks."
+msgid "Select from the list of directories found in the Project Base Path. Together the base path and the playbook directory provide the full path used to locate playbooks."
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:226
+msgid "Select group types"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:152
@@ -1945,7 +2041,7 @@ msgid "Split up your organization to associate content and control permissions f
 msgstr ""
 
 #: client/src/lists/PortalJobTemplates.js:42
-#: client/src/lists/Templates.js:86
+#: client/src/lists/Templates.js:87
 msgid "Start a job using this template"
 msgstr ""
 
@@ -2017,7 +2113,7 @@ msgstr ""
 #: client/src/forms/Inventories.js:126
 #: client/src/forms/Inventories.js:173
 #: client/src/forms/Organizations.js:95
-#: client/src/forms/Projects.js:256
+#: client/src/forms/Projects.js:255
 msgid "Team Roles"
 msgstr ""
 
@@ -2093,6 +2189,14 @@ msgstr ""
 msgid "There is no SCM update information available for this project. An update has not yet been  completed.  If you have not already done so, start an update for this project."
 msgstr ""
 
+#: client/src/configuration/configuration.controller.js:273
+msgid "There was an error resetting value. Returned status:"
+msgstr ""
+
+#: client/src/configuration/configuration.controller.js:404
+msgid "There was an error resetting values. Returned status:"
+msgstr ""
+
 #: client/src/helpers/Credentials.js:138
 msgid "This is the tenant name.  This value is usually the same  as the username."
 msgstr ""
@@ -2114,6 +2218,10 @@ msgstr ""
 msgid "This value does not match the password you entered previously.  Please confirm that password."
 msgstr ""
 
+#: client/src/configuration/configuration.controller.js:429
+msgid "This will reset all configuration values to their factory defaults. Are you sure you want to proceed?"
+msgstr ""
+
 #: client/src/dashboard/lists/jobs/jobs-list.partial.html:14
 msgid "Time"
 msgstr ""
@@ -2122,7 +2230,7 @@ msgstr ""
 msgid "Time Remaining"
 msgstr ""
 
-#: client/src/forms/Projects.js:192
+#: client/src/forms/Projects.js:191
 msgid "Time in seconds to consider a project to be current. During job runs and callbacks the task system will evaluate the timestamp of the latest project update. If it is older than Cache Timeout, it is not considered current, and a new project update will be performed."
 msgstr ""
 
@@ -2192,17 +2300,12 @@ msgstr ""
 msgid "Update in Progress"
 msgstr ""
 
-#: client/src/forms/Projects.js:173
+#: client/src/forms/Projects.js:172
 msgid "Update on Launch"
 msgstr ""
 
 #: client/src/license/license.partial.html:71
 msgid "Upgrade"
-msgstr ""
-
-#: client/src/forms/Projects.js:100
-#: client/src/forms/Projects.js:82
-msgid "Use %s in your environment settings file to determine the base path value."
 msgstr ""
 
 #: client/src/notifications/notificationTemplates.form.js:404
@@ -2221,7 +2324,7 @@ msgstr ""
 #: client/src/forms/Inventories.js:115
 #: client/src/forms/Inventories.js:161
 #: client/src/forms/Organizations.js:83
-#: client/src/forms/Projects.js:245
+#: client/src/forms/Projects.js:244
 #: client/src/forms/Teams.js:94
 msgid "User"
 msgstr ""
@@ -2291,7 +2394,7 @@ msgstr ""
 #: client/src/lists/Credentials.js:80
 #: client/src/lists/Inventories.js:85
 #: client/src/lists/Teams.js:69
-#: client/src/lists/Templates.js:115
+#: client/src/lists/Templates.js:117
 #: client/src/lists/Users.js:78
 #: client/src/notifications/notificationTemplates.list.js:80
 msgid "View"
@@ -2306,8 +2409,8 @@ msgid "View JSON examples at %s"
 msgstr ""
 
 #: client/src/forms/JobTemplates.js:450
-#: client/src/forms/Workflows.js:162
-#: client/src/shared/form-generator.js:1711
+#: client/src/forms/Workflows.js:163
+#: client/src/shared/form-generator.js:1715
 msgid "View Survey"
 msgstr ""
 
@@ -2347,7 +2450,7 @@ msgstr ""
 msgid "View team"
 msgstr ""
 
-#: client/src/lists/Templates.js:117
+#: client/src/lists/Templates.js:119
 msgid "View template"
 msgstr ""
 
@@ -2363,6 +2466,16 @@ msgstr ""
 msgid "View user"
 msgstr ""
 
+#: client/src/forms/Workflows.js:22
+msgid "WORKFLOW"
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:68
+#: client/src/configuration/configuration.controller.js:157
+#: client/src/configuration/configuration.controller.js:210
+msgid "Warning: Unsaved Changes"
+msgstr ""
+
 #: client/src/login/loginModal/loginModal.partial.html:17
 msgid "Welcome to Ansible Tower! &nbsp;Please sign in."
 msgstr ""
@@ -2376,12 +2489,12 @@ msgstr ""
 msgid "When this template is submitted as a job, setting the type to %s will execute the playbook, running tasks  on the selected hosts."
 msgstr ""
 
-#: client/src/forms/Workflows.js:186
-#: client/src/shared/form-generator.js:1715
+#: client/src/forms/Workflows.js:187
+#: client/src/shared/form-generator.js:1719
 msgid "Workflow Editor"
 msgstr ""
 
-#: client/src/lists/Templates.js:69
+#: client/src/lists/Templates.js:70
 msgid "Workflow Job Template"
 msgstr ""
 
@@ -2395,6 +2508,12 @@ msgstr ""
 
 #: client/src/controllers/Users.js:141
 msgid "You do not have permission to add a user."
+msgstr ""
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:67
+#: client/src/configuration/configuration.controller.js:156
+#: client/src/configuration/configuration.controller.js:209
+msgid "You have unsaved changes. Would you like to proceed <strong>without</strong> saving?"
 msgstr ""
 
 #: client/src/shared/form-generator.js:960
