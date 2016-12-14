@@ -99,9 +99,9 @@ export default [
 
         var dropdownOptions = [
             {label: i18n._('Azure AD'), value: 'azure'},
-			{label: i18n._('Github'), value: 'github'},
-            {label: i18n._('Github Org'), value: 'github_org'},
-            {label: i18n._('Github Team'), value: 'github_team'},
+			{label: i18n._('GitHub'), value: 'github'},
+            {label: i18n._('GitHub Org'), value: 'github_org'},
+            {label: i18n._('GithHub Team'), value: 'github_team'},
             {label: i18n._('Google OAuth2'), value: 'google_oauth'},
             {label: i18n._('LDAP'), value: 'ldap'},
             {label: i18n._('RADIUS'), value: 'radius'},
