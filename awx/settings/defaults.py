@@ -150,7 +150,7 @@ ALLOWED_HOSTS = []
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
 # Note: This setting may be overridden by database settings.
-STDOUT_MAX_BYTES_DISPLAY = 10485760
+STDOUT_MAX_BYTES_DISPLAY = 1048576
 
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
