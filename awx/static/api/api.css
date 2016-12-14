@@ -151,6 +151,9 @@ body .prettyprint .lit {
 body .prettyprint .str {
   color: #D9534F;
 }
+body div.ansi_back {
+  display: inline-block;
+}
 
 body .well.tab-content {
   padding: 20px;

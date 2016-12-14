@@ -6,6 +6,7 @@ from channels import Group
 from channels.sessions import channel_session
 
 from django.contrib.auth.models import User
+from django.core.serializers.json import DjangoJSONEncoder
 from awx.main.models.organization import AuthToken
 
 
@@ -86,4 +87,4 @@ def ws_receive(message):
 
 
 def emit_channel_notification(group, payload):
-    Group(group).send({"text": json.dumps(payload)})
+    Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})

@@ -21,6 +21,7 @@ logger = logging.getLogger('awx.main.commands.run_callback_receiver')
 class CallbackBrokerWorker(ConsumerMixin):
     def __init__(self, connection):
         self.connection = connection
+        self.partial_events = {}
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=[Queue(settings.CALLBACK_QUEUE,
@@ -31,18 +32,28 @@ class CallbackBrokerWorker(ConsumerMixin):
 
     def process_task(self, body, message):
         try:
-            if 'event' not in body:
-                raise Exception('Payload does not have an event')
             if 'job_id' not in body and 'ad_hoc_command_id' not in body:
                 raise Exception('Payload does not have a job_id or ad_hoc_command_id')
             if settings.DEBUG:
                 logger.info('Body: {}'.format(body))
                 logger.info('Message: {}'.format(message))
             try:
-                if 'job_id' in body:
-                    JobEvent.create_from_data(**body)
-                elif 'ad_hoc_command_id' in body:
-                    AdHocCommandEvent.create_from_data(**body)
+                # If event came directly from callback without counter/stdout,
+                # save it until the rest of the event arrives.
+                if 'counter' not in body:
+                    if 'uuid' in body:
+                        self.partial_events[body['uuid']] = body
+                # If event has counter, try to combine it with any event data
+                # already received for the same uuid, then create the actual
+                # job event record.
+                else:
+                    if 'uuid' in body:
+                        partial_event = self.partial_events.pop(body['uuid'], {})
+                        body.update(partial_event)
+                    if 'job_id' in body:
+                        JobEvent.create_from_data(**body)
+                    elif 'ad_hoc_command_id' in body:
+                        AdHocCommandEvent.create_from_data(**body)
             except DatabaseError as e:
                 logger.error('Database Error Saving Job Event: {}'.format(e))
         except Exception as exc:

@@ -21,11 +21,26 @@
     margin-left: 0;
 }
 
-.Form-nav--dropdown {
-    width: 175px;
+.Form-nav--dropdownContainer {
+    width: 285px;
     margin-top: -52px;
     margin-bottom: 22px;
     margin-left: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.Form-nav--dropdown {
+    width: 60%;
+}
+
+.Form-nav--dropdownLabel {
+    text-transform: uppercase;
+    color: @default-interface-txt;
+    font-size: 14px;
+    font-weight: bold;
+    padding-right: 5px;
+    padding-top: 5px;
 }
 
 .Form-tabRow {

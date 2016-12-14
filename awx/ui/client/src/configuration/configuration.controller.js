@@ -17,8 +17,10 @@ export default [
     'configurationLdapForm',
     'configurationRadiusForm',
     'configurationSamlForm',
+    'systemActivityStreamForm',
+    'systemLoggingForm',
+    'systemMiscForm',
     'ConfigurationJobsForm',
-    'ConfigurationSystemForm',
     'ConfigurationUiForm',
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
@@ -33,8 +35,10 @@ export default [
         configurationLdapForm,
         configurationRadiusForm,
         configurationSamlForm,
+        systemActivityStreamForm,
+        systemLoggingForm,
+        systemMiscForm,
         ConfigurationJobsForm,
-        ConfigurationSystemForm,
         ConfigurationUiForm
     ) {
         var vm = this;
@@ -48,8 +52,10 @@ export default [
             'ldap': configurationLdapForm,
             'radius': configurationRadiusForm,
             'saml': configurationSamlForm,
+            'activity_stream': systemActivityStreamForm,
+            'logging': systemLoggingForm,
+            'misc': systemMiscForm,
             'jobs': ConfigurationJobsForm,
-            'system': ConfigurationSystemForm,
             'ui': ConfigurationUiForm
         };
 
@@ -84,19 +90,24 @@ export default [
             lastForm: '',
             currentForm: '',
             currentAuth: '',
+            currentSystem: '',
             setCurrent: function(form) {
                 this.lastForm = this.currentForm;
                 this.currentForm = form;
-            },
-            setCurrentAuth: function(form) {
-                this.currentAuth = form;
-                this.setCurrent(this.currentAuth);
             },
             getCurrent: function() {
                 return this.currentForm;
             },
             currentFormName: function() {
                 return 'configuration_' + this.currentForm + '_template_form';
+            },
+            setCurrentAuth: function(form) {
+                this.currentAuth = form;
+                this.setCurrent(this.currentAuth);
+            },
+            setCurrentSystem: function(form) {
+                this.currentSystem = form;
+                this.setCurrent(this.currentSystem);
             }
         };
 
@@ -182,6 +193,7 @@ export default [
         }
 
         function active(setForm) {
+            // Authentication and System's sub-module dropdowns handled first:
             if (setForm === 'auth') {
                 // Default to 'azure' on first load
                 if (formTracker.currentAuth === '') {
@@ -190,7 +202,15 @@ export default [
                     // If returning to auth tab reset current form to previously viewed
                     formTracker.setCurrentAuth(formTracker.currentAuth);
                 }
-            } else {
+            } else if (setForm === 'system') {
+                if (formTracker.currentSystem === '') {
+                    formTracker.setCurrentSystem('misc');
+                } else {
+                    // If returning to system tab reset current form to previously viewed
+                    formTracker.setCurrentSystem(formTracker.currentSystem);
+                }
+            }
+            else {
                 formTracker.setCurrent(setForm);
             }
             vm.activeTab = setForm;
