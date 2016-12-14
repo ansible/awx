@@ -372,6 +372,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TRACK_STARTED = True
 CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
+CELERYD_POOL_RESTARTS = True
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
@@ -874,7 +875,7 @@ LOGGING = {
         },
         'http_receiver': {
             'class': 'awx.main.utils.handlers.HTTPSNullHandler',
-            'level': 'INFO',
+            'level': 'DEBUG',
             'formatter': 'json',
             'host': '',
         },
@@ -973,7 +974,7 @@ LOGGING = {
             'handlers': ['callback_receiver'],
         },
         'awx.main.tasks': {
-            'handlers': ['task_system']
+            'handlers': ['task_system'],
         },
         'awx.main.scheduler': {
             'handlers': ['task_system'],
@@ -1000,18 +1001,6 @@ LOGGING = {
             'handlers': ['http_receiver'],
             'level': 'INFO',
             'propagate': False
-        },
-        'awx.analytics.job_events': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.activity_stream': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.system_tracking': {
-            'handlers': ['null'],
-            'level': 'INFO'
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],

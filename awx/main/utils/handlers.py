@@ -30,6 +30,7 @@ PARAM_NAMES = {
     'password': 'LOG_AGGREGATOR_PASSWORD',
     'enabled_loggers': 'LOG_AGGREGATOR_LOGGERS',
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
+    'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
 }
 
 
@@ -48,6 +49,7 @@ class HTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
         super(HTTPSHandler, self).__init__()
         self.fqdn = fqdn
+        self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
             # settings values take precedence over the input params
             settings_name = PARAM_NAMES[fd]
@@ -100,11 +102,21 @@ class HTTPSHandler(logging.Handler):
             payload_str = json.dumps(payload_input)
         else:
             payload_str = payload_input
-        return dict(data=payload_str, background_callback=unused_callback)
+        if self.async:
+            return dict(data=payload_str, background_callback=unused_callback)
+        else:
+            return dict(data=payload_str)
+
+    def skip_log(self, logger_name):
+        if self.host == '' or (not self.enabled_flag):
+            return True
+        if not logger_name.startswith('awx.analytics'):
+            # Tower log emission is only turned off by enablement setting
+            return False
+        return self.enabled_loggers is None or logger_name.split('.')[-1] not in self.enabled_loggers
 
     def emit(self, record):
-        if (self.host == '' or self.enabled_loggers is None or
-                record.name.split('.')[-1] not in self.enabled_loggers):
+        if self.skip_log(record.name):
             return
         try:
             payload = self.format(record)
@@ -123,7 +135,10 @@ class HTTPSHandler(logging.Handler):
                             self.session.post(host, **self.get_post_kwargs(fact_payload))
                         return
 
-            self.session.post(host, **self.get_post_kwargs(payload))
+            if self.async:
+                self.session.post(host, **self.get_post_kwargs(payload))
+            else:
+                requests.post(host, auth=requests.auth.HTTPBasicAuth(self.username, self.password), **self.get_post_kwargs(payload))
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
