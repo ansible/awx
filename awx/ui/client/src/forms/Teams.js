@@ -150,7 +150,16 @@ export default
                             ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
-                    //hideOnSuperuser: true // defunct with RBAC
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Grant Permission'),
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            ngShow: '(puser_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        }
+                    }                
                 }
             },
         };}]); //InventoryForm
