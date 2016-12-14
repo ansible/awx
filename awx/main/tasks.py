@@ -618,7 +618,7 @@ class BaseTask(Task):
                         for child_proc in child_procs:
                             os.kill(child_proc.pid, signal.SIGKILL)
                         os.kill(main_proc.pid, signal.SIGKILL)
-                    except TypeError:
+                    except (TypeError, psutil.Error):
                         os.kill(job.pid, signal.SIGKILL)
             else:
                 os.kill(job.pid, signal.SIGTERM)
