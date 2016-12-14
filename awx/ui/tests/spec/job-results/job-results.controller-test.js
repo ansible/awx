@@ -391,7 +391,7 @@ describe('Controller: jobResultsController', () => {
                 status: 'finished'
             };
             $rScope.$broadcast('ws-jobs', eventPayload);
-            expect($scope.job.status).toBe(eventPayload.status);
+            expect($scope.job_status).toBe(eventPayload.status);
         });
     });
 
