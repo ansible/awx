@@ -175,7 +175,6 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 .DEFAULT_GOAL := build
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
-	requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -309,19 +308,11 @@ requirements_tower_dev:
 		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
 	fi
 
-# Install third-party requirements needed for running unittests in jenkins
-requirements_jenkins:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate && pip install -Ir requirements/requirements_jenkins.txt; \
-	else \
-		pip install -Ir requirements/requirements_jenkins.txt; \
-	fi
-
 requirements: requirements_ansible requirements_tower
 
 requirements_dev: requirements requirements_tower_dev
 
-requirements_test: requirements requirements_jenkins
+requirements_test: requirements
 
 # "Install" ansible-tower package in development mode.
 develop:
