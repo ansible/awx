@@ -239,23 +239,23 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     url: '/add-permissions',
                     params: {
                         project_search: {
-                            value: {order_by: 'name', page_size: '5'},
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
                         },
                         job_template_search: {
-                            value: {order_by: 'name', page_size: '5'},
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
                         },
                         workflow_template_search: {
-                            value: {order_by: 'name', page_size: '5'},
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
                         },
                         inventory_search: {
-                            value: {order_by: 'name', page_size: '5'},
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
                         },
                         credential_search: {
-                            value: {order_by: 'name', page_size: '5'},
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
                         }
                     },
