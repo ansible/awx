@@ -15,8 +15,9 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             path = GetBasePath($scope.basePath) || $scope.basePath;
             relations = getRelationshipFields($scope.dataset.results);
             $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
-            qs.initFieldset(path, $scope.djangoModel, relations).then((models) => {
-                $scope.models = models;
+            qs.initFieldset(path, $scope.djangoModel, relations).then((data) => {
+                $scope.models = data.models;
+                $scope.$emit(`${$scope.list.iterator}_options`, data.options);
             });
         }
 
@@ -102,12 +103,12 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             params.page = '1';
             queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
                 if (object[key] && object[key] !== sourceValue){
-                    return [object[key], sourceValue]; 
+                    return [object[key], sourceValue];
                 }
                 else {
                     // // https://lodash.com/docs/3.10.1#merge
                     // If customizer fn returns undefined merging is handled by default _.merge algorithm
-                    return undefined; 
+                    return undefined;
                 }
             });
             // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
