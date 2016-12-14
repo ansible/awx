@@ -307,6 +307,17 @@ export default
                         dataContainer: "body",
                         labelClass: 'stack-inline',
                         ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    }, {
+                        name: 'allow_simultaneous',
+                        label: i18n._('Enable Concurrent Jobs'),
+                        type: 'checkbox',
+                        column: 2,
+                        awPopOver: "<p>" + i18n._("If enabled, simultaneous runs of this job template will be allowed.") + "</p>",
+                        dataPlacement: 'right',
+                        dataTitle: i18n._('Enable Concurrent Jobs'),
+                        dataContainer: "body",
+                        labelClass: 'stack-inline',
+                        ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                     }]
                 },
                 callback_url: {
