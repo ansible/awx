@@ -173,7 +173,9 @@ class EventContext(object):
                 if event_data.get(key, False):
                     event = key
                     break
-
+        max_res = int(os.getenv("MAX_EVENT_RES", 700000))
+        if event not in ('playbook_on_stats',) and "res" in event_data and len(str(event_data['res'])) > max_res:
+            event_data['res'] = {}
         event_dict = dict(event=event, event_data=event_data)
         for key in event_data.keys():
             if key in ('job_id', 'ad_hoc_command_id', 'uuid', 'parent_uuid', 'created', 'artifact_data'):

@@ -150,7 +150,11 @@ ALLOWED_HOSTS = []
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
 # Note: This setting may be overridden by database settings.
-STDOUT_MAX_BYTES_DISPLAY = 1048576
+STDOUT_MAX_BYTES_DISPLAY = 10485760
+
+# The maximum size of the ansible callback event's res data structure
+# beyond this limit and the value will be removed
+MAX_EVENT_RES_DATA = 700000
 
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
@@ -521,17 +525,6 @@ ANSIBLE_FORCE_COLOR = True
 # Additional environment variables to be passed to the subprocess started by
 # the celery task.
 AWX_TASK_ENV = {}
-
-# Maximum number of job events processed by the callback receiver worker process
-# before it recycles
-JOB_EVENT_RECYCLE_THRESHOLD = 3000
-
-# Number of workers used to proecess job events in parallel
-JOB_EVENT_WORKERS = 4
-
-# Maximum number of job events that can be waiting on a single worker queue before
-# it can be skipped as too busy
-JOB_EVENT_MAX_QUEUE_SIZE = 100
 
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
