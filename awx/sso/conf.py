@@ -331,6 +331,7 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     feature_required='ldap',
+    default='MemberDNGroupType',
 )
 
 register(

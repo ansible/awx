@@ -289,14 +289,12 @@ angular.module('CredentialsHelper', ['Utilities'])
 
                          Wait('stop');
                          var base = $location.path().replace(/^\//, '').split('/')[0];
-                             if (base === 'credentials') {
-                             ReturnToCaller();
+                         if (base === 'credentials') {
+                             $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
                          }
                          else {
                              ReturnToCaller(1);
                          }
-                         $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
-
                      })
                      .error(function (data, status) {
                          Wait('stop');

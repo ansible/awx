@@ -1073,8 +1073,8 @@ class JobEvent(CreatedModifiedModel):
         from awx.main.models.inventory import Host
         hostnames = set()
         try:
-            for v in self.event_data.values():
-                hostnames.update(v.keys())
+            for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                hostnames.update(self.event_data.get(stat, {}).keys())
         except AttributeError: # In case event_data or v isn't a dict.
             pass
         with ignore_inventory_computed_fields():
