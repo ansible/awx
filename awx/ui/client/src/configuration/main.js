@@ -20,8 +20,12 @@ import configurationLdapForm from './auth-form/sub-forms/auth-ldap.form.js';
 import configurationRadiusForm from './auth-form/sub-forms/auth-radius.form.js';
 import configurationSamlForm from './auth-form/sub-forms/auth-saml.form';
 
+//system sub-forms
+import systemActivityStreamForm from './system-form/sub-forms/system-activity-stream.form.js';
+import systemLoggingForm from './system-form/sub-forms/system-logging.form.js';
+import systemMiscForm from './system-form/sub-forms/system-misc.form.js';
+
 import configurationJobsForm from './jobs-form/configuration-jobs.form';
-import configurationSystemForm from './system-form/configuration-system.form';
 import configurationUiForm from './ui-form/configuration-ui.form';
 
 export default
@@ -36,10 +40,15 @@ angular.module('configuration', [])
     .factory('configurationLdapForm', configurationLdapForm)
     .factory('configurationRadiusForm', configurationRadiusForm)
     .factory('configurationSamlForm', configurationSamlForm)
+    //system forms
+    .factory('systemActivityStreamForm', systemActivityStreamForm)
+    .factory('systemLoggingForm', systemLoggingForm)
+    .factory('systemMiscForm', systemMiscForm)
+
     //other forms
     .factory('ConfigurationJobsForm', configurationJobsForm)
-    .factory('ConfigurationSystemForm', configurationSystemForm)
     .factory('ConfigurationUiForm', configurationUiForm)
+
     //helpers and services
     .factory('ConfigurationUtils', ConfigurationUtils)
     .service('ConfigurationService', configurationService)

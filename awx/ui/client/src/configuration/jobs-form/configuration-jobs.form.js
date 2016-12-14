@@ -46,7 +46,19 @@
              },
              AWX_PROOT_ENABLED: {
                  type: 'toggleSwitch',
-             }
+             },
+             DEFAULT_JOB_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_JOB_TIMEOUT',
+             },
+             DEFAULT_INVENTORY_UPDATE_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
+             },
+             DEFAULT_PROJECT_UPDATE_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_PROJECT_UPDATE_TIMEOUT',
+             },
          },
 
          buttons: {
