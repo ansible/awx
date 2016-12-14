@@ -708,6 +708,11 @@ class BaseTask(Task):
                 stdout_handle.close()
             except Exception:
                 pass
+
+        instance = self.update_model(pk)
+        if instance.cancel_flag:
+            status = 'canceled'
+
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
                                      **extra_update_fields)
@@ -1044,17 +1049,18 @@ class RunJob(BaseTask):
             local_project_sync = job.project.create_project_update(launch_type="sync")
             local_project_sync.job_type = 'run'
             local_project_sync.save()
+            # save the associated project update before calling run() so that a
+            # cancel() call on the job can cancel the project update
+            job = self.update_model(job.pk, project_update=local_project_sync)
+
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
-                job.scm_revision = job.project.scm_revision
-                job.project_update = local_project_sync
-                job.save()
+                job = self.update_model(job.pk, scm_revision=project.scm_revision)
             except Exception:
-                job.status = 'failed'
-                job.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                                      ('project_update', local_project_sync.name, local_project_sync.id)
-                job.save()
+                job = self.update_model(job.pk, status='failed',
+                        job_explanation='Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                                        ('project_update', local_project_sync.name, local_project_sync.id))
                 raise
 
     def post_run_hook(self, job, status, **kwargs):
