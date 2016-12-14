@@ -1,4 +1,9 @@
 export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet) {
+    // if the job_status hasn't been set by the websocket, set it now
+    if (!$scope.job_status) {
+        $scope.job_status = jobData.status;
+    }
+
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
 
@@ -111,7 +116,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
     $scope.relaunchJob = function() {
         jobResultsService.relaunchJob($scope);
-        $state.reload();
     };
 
     $scope.lessLabels = false;
@@ -417,7 +421,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) ===
             parseInt($scope.job.id,10)) {
-            $scope.job.status = data.status;
+            $scope.job_status = data.status;
         }
         if (parseInt(data.project_id, 10) ===
             parseInt($scope.job.project,10)) {
