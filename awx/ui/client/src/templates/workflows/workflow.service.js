@@ -225,7 +225,6 @@ export default [function(){
 
             if(params.nodesObj[params.nodeId].summary_fields.job) {
                 treeNode.job = _.clone(params.nodesObj[params.nodeId].summary_fields.job);
-                //treeNode.job.unified_job_id = params.nodesObj[params.nodeId].summary_fields.job.id;
             }
 
             if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {

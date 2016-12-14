@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ '$state', 'moment',
-    function($state, moment) {
+export default [ '$state',
+    function($state) {
 
     return {
         scope: {
