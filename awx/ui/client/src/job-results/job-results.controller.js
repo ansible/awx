@@ -31,6 +31,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         $scope.machine_credential_link = getTowerLink('credential');
         $scope.cloud_credential_link = getTowerLink('cloud_credential');
         $scope.network_credential_link = getTowerLink('network_credential');
+        $scope.schedule_link = getTowerLink('schedule');
     };
 
     // uses options to set scope variables to their readable string
@@ -64,7 +65,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
     // turn related api browser routes into tower routes
     getTowerLinks();
-    
+
     // the links below can't be set in getTowerLinks because the
     // links on the UI don't directly match the corresponding URL
     // on the API browser
@@ -84,7 +85,9 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         jobData.summary_fields.source_workflow_job.id){
             $scope.workflow_result_link = `/#/workflows/${jobData.summary_fields.source_workflow_job.id}`;
     }
-
+    if(jobData.result_traceback) {
+        $scope.job.result_traceback = jobData.result_traceback.trim().split('\n').join('<br />');
+    }
     // use options labels to manipulate display of details
     getTowerLabels();
 
