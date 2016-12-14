@@ -20,7 +20,7 @@
                 </div>
             </div>
             <!-- end header -->
-            <div class="AddPermissions-body">
+            <div id="AddPermissions-body" class="AddPermissions-body">
                 <!-- begin section 1 -->
                 <div class="AddPermissions-directions">
                     <span class="AddPermissions-directionNumber">
@@ -65,7 +65,7 @@
                 <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.job_templates">
                     <rbac-multiselect-list view="JobTemplates" all-selected="allSelected" dataset="resolve.jobTemplatesDataset"></rbac-multiselect-list>
                 </div>
-                <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.workflow_templates">
+                <div id="AddPermissions-workflowTemplates" class="AddPermissions-list" ng-show="tab.workflow_templates">
                     <rbac-multiselect-list view="WorkflowTemplates" all-selected="allSelected" dataset="resolve.workflowTemplatesDataset"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-projects" class="AddPermissions-list" ng-show="tab.projects">
@@ -141,7 +141,15 @@
                         </div>
                     </div>
 
-                    <!-- role drop-down -->
+                    <!-- role drop-downs -->
+                    <div ng-repeat="(type, roleSet) in keys" ng-show="tab[type]">
+                        <select
+                            id="{{type}}-role-select" class="form-control"
+                            ng-model="roleSelection[type]"
+                            ng-options="key as value.name for (key , value) in roleSet">
+                            <option value="" selected hidden />
+                        </select>
+                    </div>
 
                     <!-- lists of selected resources -->
                     <!-- (type, collection) => ('resource', {id: {}, ... }) -->
@@ -149,7 +157,8 @@
                         <rbac-selected-list
                             resource-type="type"
                             collection="collection"
-                            selected="selected">
+                            selected="selected"
+                            ng-show="tab[type]">
                         </rbac-selected-list>
                     </div>
 
@@ -167,7 +176,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="saveForm()"
-                        ng-disabled="multiselectRoles.$invalid || !showSection2Container()">
+                        ng-disabled="!showSection2Container()">
                         Save
                     </button>
                 </div>

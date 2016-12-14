@@ -11,8 +11,8 @@
  * Controller for handling permissions adding
  */
 
-export default ['$rootScope', '$scope', '$state', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', 
-function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
+export default ['$rootScope', '$scope', '$state', 'i18n', 'CreateSelect2', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', 
+function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
     init();
 
@@ -24,12 +24,20 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
         // selected - keyed by type of resource
         // selected[type] - keyed by each resource object's id
         // selected[type][id] === { roles: [ ... ], ... }
+
+        // collection of resources selected in section 1
         scope.selected = {};
-        _.each(resources, (resource) => scope.selected[resource] = {});
+        _.each(resources, (type) => scope.selected[type] = {});
 
+        // collection of assignable roles per type of resource
         scope.keys = {};
-        _.each(resources, (resource) => scope.keys[resource] = {});
+        _.each(resources, (type) => scope.keys[type] = {});
 
+        // collection of currently-selected role to assign in section 2
+        scope.roleSelection = {};
+        _.each(resources, (type) => scope.roleSelection[type] = null);
+
+        // tracks currently-selected tabs, initialized with the job templates tab open
         scope.tab = {
             job_templates: true,
             workflow_templates: false,
@@ -37,13 +45,39 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
             inventories: false,
             credentials: false
         };
+
+        // initializes select2 per select field
+        // html snippet:
+        /*
+            <div ng-repeat="(type, roleSet) in keys">
+                <select
+                    ng-show="tab[type]" 
+                    id="{{type}}-role-select" class="form-control"
+                    ng-model="roleSelection[type]"
+                    ng-options="value.name for (key , value) in roleSet">
+                </select>
+            </div>
+        */
+        _.each(resources, (type) => buildSelect2(type));
+
+        function buildSelect2(type){
+            CreateSelect2({
+                element: `#${type}-role-select`,
+                multiple: false,
+                placeholder: i18n._('Select a role')
+            });
+        }
+
         scope.showKeyPane = false;
+
+        // the user or team being assigned permissions
         scope.owner = scope.resolve.resourceData.data;
     }
 
     // aggregate name/descriptions for each available role, based on resource type
+    // reasoning: 
     function aggregateKey(item, type){
-        _.merge(scope.keys[type], item.summary_fields.object_roles);
+        _.merge(scope.keys[type], _.omit(item.summary_fields.object_roles, 'read_role'));
     }
 
     scope.closeModal = function() {
@@ -66,11 +100,6 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
         return Object.keys(scope.selected[tab]).length > 0;
     };
 
-    scope.removeSelection = function(resource, type){
-        delete scope.selected[type][resource.id];
-        resource.isSelected = false;
-    };
-
     // handle form tab changes
     scope.selectTab = function(selected){
         _.each(scope.tab, (value, key, collection) => {
@@ -78,7 +107,7 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
         });
     };
 
-    // pop/push into unified collection of selected users & teams
+    // pop/push into unified collection of selected resourcesf
     scope.$on("selectedOrDeselected", function(e, value) {
         let resourceType = scope.currentTab(),
             item = value.value;
@@ -94,15 +123,20 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
     // post roles to api
     scope.saveForm = function() {
-        Wait('start');
-        // scope.selected => { n: {id: n}, ... } => [ {id: n}, ... ]
-        let requests = _(scope.selected).map((type) => {
-            return _.map(type, (resource) => resource.roles);
+        //Wait('start');
+
+        // builds an array of role entities to apply to current user or team
+        let roles = _(scope.selected).map( (resources, type) =>{
+            return _.map(resources, (resource) => {
+                return resource.summary_fields.object_roles[scope.roleSelection[type]]
+            });
         }).flattenDeep().value();
+
+        debugger;
         
         Rest.setUrl(scope.owner.related.roles);
 
-        $q.all( _.map(requests, (entity) => Rest.post({id: entity.id})) )
+        $q.all( _.map(roles, (entity) => Rest.post({id: entity.id})) )
             .then( () =>{
                 Wait('stop');
                 scope.closeModal();

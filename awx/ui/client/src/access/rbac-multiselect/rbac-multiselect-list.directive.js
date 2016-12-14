@@ -70,7 +70,13 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         description: list.fields.description
                     };
                     break;
-
+                case 'Users':
+                    list.fields = {
+                        username: list.fields.username,
+                        first_name: list.fields.first_name,
+                        last_name: list.fields.last_name
+                    }
+                    break;
                 default:
                     list.fields = {
                         name: list.fields.name,

@@ -17,7 +17,6 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                 selected: "="
             },
             link: function(scope, element, attrs) {
-                console.log(scope.resourceType)
                 let listMap, list, list_html;
 
                 listMap = {
@@ -28,12 +27,12 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                     credentials: CredentialList
                 };
 
-                list = _.cloneDeep(listMap[scope.resourceType])
+                list = _.cloneDeep(listMap[scope.resourceType]);
 
                 list.fieldActions = {
                     remove: {
                         ngClick: `removeSelection(${list.iterator}, resourceType)`,
-                        icon: 'fa-remove',
+                        iconClass: 'fa fa-times-circle',
                         awToolTip: i18n._(`Remove ${list.iterator}`),
                         label: i18n._('Remove'),
                         class: 'btn-sm'
@@ -42,6 +41,8 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                 delete list.actions;
 
                 list.listTitleBadge = false;
+
+                // @issue - fix field.columnClass values for this view
 
                 switch(scope.resourceType){
 
@@ -77,8 +78,7 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                             description: list.fields.description
                         };
                         break;
-
-                    default:
+                    case 'credentials':
                         list.fields = {
                             name: list.fields.name,
                             description: list.fields.description
@@ -93,12 +93,31 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                     related: false,
                     title: false,
                     showSearch: false,
+                    showEmptyPanel: false,
                     paginate: false
                 });
 
                 scope.list = list;
-                scope[`${list.iterator}_dataset`] = scope.collection;
-                scope[list.name] = scope.collection;
+
+                scope.$watchCollection('collection', function(selected){
+                    scope[`${list.iterator}_dataset`] = scope.collection;
+                    scope[list.name] = _.values(scope.collection);
+                });
+
+                scope.removeSelection = function(resource, type){
+                    let multiselect_scope, deselectedIdx;
+
+                    delete scope.collection[resource.id];
+                    delete scope.selected[type][resource.id];
+
+                    // a quick & dirty hack
+                    // section 1 and section 2 elements produce sibling scopes
+                    // This means events propogated from section 2 are not received in section 1
+                    // The following code directly accesses the right scope by list table id
+                    multiselect_scope = angular.element('#AddPermissions-body').find(`#${type}_table`).scope()
+                    deselectedIdx = _.findIndex(multiselect_scope[type], {id: resource.id});
+                    multiselect_scope[type][deselectedIdx].isSelected = false;
+                };
 
                 element.append(list_html);
                 $compile(element.contents())(scope);
