@@ -8,12 +8,12 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
     'Alert','TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
-    'GetChoices', 'TemplateCopyService', 'DataOptions',
+    'GetChoices', 'TemplateCopyService',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
         TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs, GetChoices, TemplateCopyService, DataOptions
+        qs, GetChoices, TemplateCopyService
     ) {
         ClearScope();
 
@@ -37,29 +37,39 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-            $scope.options = DataOptions;
+            $scope.options = {};
 
             $rootScope.flashMessage = null;
-
-            $scope.$watchCollection('templates', function() {
-                    $scope[list.name].forEach(function(item, item_idx) {
-                        var itm = $scope[list.name][item_idx];
-
-                        // Set the item type label
-                        if (list.fields.type) {
-                            $scope.options.type.choices.every(function(choice) {
-                                if (choice[0] === item.type) {
-                                    itm.type_label = choice[1];
-                                    return false;
-                                }
-                                return true;
-                            });
-                        }
-                    });
-                }
-            );
         }
 
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            debugger;
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
+
+        $scope.$watchCollection('templates', function() {
+                optionsRequestDataProcessing();
+            }
+        );
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
+
+                // Set the item type label
+                if (list.fields.type && $scope.options.hasOwnProperty('type')) {
+                    $scope.options.type.choices.every(function(choice) {
+                        if (choice[0] === item.type) {
+                            itm.type_label = choice[1];
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+            });
+        }
 
 
         $scope.$on(`ws-jobs`, function () {
