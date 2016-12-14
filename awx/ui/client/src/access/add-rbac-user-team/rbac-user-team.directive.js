@@ -16,6 +16,7 @@ export default ['templateUrl',
             controller: controller,
             templateUrl: templateUrl('access/add-rbac-user-team/rbac-user-team'),
             link: function(scope, element, attrs) {
+                scope.selectTab('job_templates');
                 $('#add-permissions-modal').modal('show');
                 window.scrollTo(0, 0);
             }

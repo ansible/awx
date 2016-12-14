@@ -18,7 +18,7 @@ function(rootScope, scope, $state, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
     function init(){
 
-        let resources = ['templates', 'projects', 'inventories', 'credentials'];
+        let resources = ['job_templates', 'workflow_templates', 'projects', 'inventories', 'credentials'];
 
         // data model:
         // selected - keyed by type of resource

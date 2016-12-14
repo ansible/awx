@@ -5,8 +5,9 @@
  *************************************************/
 
 import addRbacUserTeamDirective from './rbac-user-team.directive';
-import rbacMultiselect from '../rbac-multiselect/main';
+import rbacSelectedList from './rbac-selected-list.directive';
 
 export default
-    angular.module('AddRbacUserTeamModule', [rbacMultiselect.name])
-        .directive('addRbacUserTeam', addRbacUserTeamDirective);
+    angular.module('AddRbacUserTeamModule', [])
+        .directive('addRbacUserTeam', addRbacUserTeamDirective)
+        .directive('rbacSelectedList', rbacSelectedList);

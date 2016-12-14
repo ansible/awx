@@ -35,7 +35,7 @@
                     <div class="Form-tab"
                         ng-click="selectTab('job_templates')"
                         ng-class="{'is-selected': tab.job_templates }">
-                        Templates
+                        Job Templates
                     </div>
                     <div class="Form-tab"
                         ng-click="selectTab('workflow_templates')"
@@ -95,10 +95,16 @@
                     </div>
                     <div class="Form-tabHolder">
                         <div class="Form-tab"
-                            ng-click="selectTab('templates')"
-                            ng-class="{'is-selected': tab.templates }"
-                            ng-show="showSection2Tab('templates')">
-                            Templates
+                            ng-click="selectTab('job_templates')"
+                            ng-class="{'is-selected': tab.job_templates }"
+                            ng-show="showSection2Tab('job_templates')">
+                            Job Templates
+                        </div>
+                        <div class="Form-tab"
+                            ng-click="selectTab('workflow_templates')"
+                            ng-class="{'is-selected': tab.workflow_templates }"
+                            ng-show="showSection2Tab('workflow_templates')">
+                            Workflow Templates
                         </div>
                         <div class="Form-tab"
                             ng-click="selectTab('projects')"
@@ -134,30 +140,19 @@
                             </div>
                         </div>
                     </div>
-                    <form name="multiselectRoles" novalidate>
-                        <!-- type of selected resources -->
-                        <div ng-repeat="(type, list) in selected">
-                            <!-- controllerAs: 'rbac' -->
-                            <div class="AddPermissions-roleRow"
-                                ng-repeat="resource in list"
-                                ng-show="tab[type]">
-                                <div class="AddPermissions-roleName">
-                                    <span class="AddPermissions-roleNameVal">
-                                        {{ resource.name }}
-                                    </span>
-                                    <span class="AddPermissions-roleType">
-                                        {{ resource.type }}
-                                    </span>
-                                </div>
-                                <rbac-multiselect-role class="AddPermissions-roleSelect" roles="resource.summary_fields.object_roles" model="resource.roles">
-                                </rbac-multiselect-role>
-                                <button class="AddPermissions-roleRemove"
-                                    ng-click="removeSelection(resource, type)">
-                                    <i class="fa fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+
+                    <!-- role drop-down -->
+
+                    <!-- lists of selected resources -->
+                    <!-- (type, collection) => ('resource', {id: {}, ... }) -->
+                    <div ng-repeat="(type, collection) in selected">
+                        <rbac-selected-list
+                            resource-type="type"
+                            collection="collection"
+                            selected="selected">
+                        </rbac-selected-list>
+                    </div>
+
                 </div>
                 <!-- end section 2 -->
             </div>
