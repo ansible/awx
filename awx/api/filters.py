@@ -77,7 +77,7 @@ class FieldLookupBackend(BaseFilterBackend):
     SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
                          'startswith', 'istartswith', 'endswith', 'iendswith',
                          'regex', 'iregex', 'gt', 'gte', 'lt', 'lte', 'in',
-                         'isnull')
+                         'isnull', 'search')
 
     def get_field_from_lookup(self, model, lookup):
         field = None
@@ -148,6 +148,15 @@ class FieldLookupBackend(BaseFilterBackend):
                 re.compile(value)
             except re.error as e:
                 raise ValueError(e.args[0])
+        elif new_lookup.endswith('__search'):
+            related_model = getattr(field, 'related_model', None)
+            if not related_model:
+                raise ValueError('%s is not searchable' % new_lookup[:-8])
+            new_lookups = []
+            for rm_field in related_model._meta.fields:
+                if rm_field.name in ('username', 'first_name', 'last_name', 'email', 'name', 'description'):
+                    new_lookups.append('{}__{}__icontains'.format(new_lookup[:-8], rm_field.name))
+            return value, new_lookups
         else:
             value = self.value_to_python_for_field(field, value)
         return value, new_lookup
@@ -160,6 +169,7 @@ class FieldLookupBackend(BaseFilterBackend):
             or_filters = []
             chain_filters = []
             role_filters = []
+            search_filters = []
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
@@ -179,6 +189,16 @@ class FieldLookupBackend(BaseFilterBackend):
                 # RBAC filtering
                 if key == 'role_level':
                     role_filters.append(values[0])
+                    continue
+
+                # Search across related objects.
+                if key.endswith('__search'):
+                    for value in values:
+                        for search_term in force_text(value).replace(',', ' ').split():
+                            search_value, new_keys = self.value_to_python(queryset.model, key, search_term)
+                            assert isinstance(new_keys, list)
+                            for new_key in new_keys:
+                                search_filters.append((new_key, search_value))
                     continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
@@ -211,7 +231,7 @@ class FieldLookupBackend(BaseFilterBackend):
                         and_filters.append((q_not, new_key, value))
 
             # Now build Q objects for database query filter.
-            if and_filters or or_filters or chain_filters or role_filters:
+            if and_filters or or_filters or chain_filters or role_filters or search_filters:
                 args = []
                 for n, k, v in and_filters:
                     if n:
@@ -233,6 +253,11 @@ class FieldLookupBackend(BaseFilterBackend):
                             q |= ~Q(**{k:v})
                         else:
                             q |= Q(**{k:v})
+                    args.append(q)
+                if search_filters:
+                    q = Q()
+                    for k,v in search_filters:
+                        q |= Q(**{k:v})
                     args.append(q)
                 for n,k,v in chain_filters:
                     if n:
