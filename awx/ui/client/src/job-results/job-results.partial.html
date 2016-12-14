@@ -85,14 +85,24 @@
                         </div>
                     </div>
 
+                    <!-- EXPLANATION DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.job_explanation">
+                        <label class="JobResults-resultRowLabel">
+                            Explanation
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            {{job.job_explanation}}
+                        </div>
+                    </div>
+
                     <!-- RESULTS TRACEBACK DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.result_traceback">
                         <label class="JobResults-resultRowLabel">
                             Results Traceback
                         </label>
-                        <div class="JobResults-resultRowText
-                            job_status_traceback"
+                        <div class="JobResults-resultRowText"
                             ng-bind-html="job.result_traceback">
                         </div>
                     </div>
@@ -410,7 +420,7 @@
                                 <i class="fa fa-question-circle">
                                 </i>
                             </a>
-                        </div> -->
+                        </div>
 
                     <!-- </div> -->
 

@@ -85,7 +85,9 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         jobData.summary_fields.source_workflow_job.id){
             $scope.workflow_result_link = `/#/workflows/${jobData.summary_fields.source_workflow_job.id}`;
     }
-
+    if(jobData.result_traceback) {
+        $scope.job.result_traceback = jobData.result_traceback.trim().split('\n').join('<br />');
+    }
     // use options labels to manipulate display of details
     getTowerLabels();
 
