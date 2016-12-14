@@ -224,10 +224,7 @@ export default [function(){
             }
 
             if(params.nodesObj[params.nodeId].summary_fields.job) {
-                treeNode.job = {
-                    jobStatus: params.nodesObj[params.nodeId].summary_fields.job.status,
-                    unified_job_id: params.nodesObj[params.nodeId].summary_fields.job.id
-                };
+                treeNode.job = _.clone(params.nodesObj[params.nodeId].summary_fields.job);
             }
 
             if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
@@ -282,8 +279,8 @@ export default [function(){
 
             if(matchingNode) {
                 matchingNode.job = {
-                    jobStatus: params.status,
-                    unified_job_id: params.unified_job_id
+                    status: params.status,
+                    id: params.unified_job_id
                 };
             }
 
