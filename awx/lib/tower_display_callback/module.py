@@ -29,8 +29,8 @@ from ansible.plugins.callback import CallbackBase
 from ansible.plugins.callback.default import CallbackModule as DefaultCallbackModule
 
 # Tower Display Callback
-from tower_display_callback.events import event_context
-from tower_display_callback.minimal import CallbackModule as MinimalCallbackModule
+from .events import event_context
+from .minimal import CallbackModule as MinimalCallbackModule
 
 
 class BaseCallbackModule(CallbackBase):
