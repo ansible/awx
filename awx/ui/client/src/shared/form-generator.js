@@ -846,28 +846,15 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "\t" + label();
                         if (field.hasShowInputButton) {
                             var tooltip = i18n._("Toggle the display of plaintext.");
-                            field.toggleInput = function(id) {
-                                var buttonId = id + "_show_input_button",
-                                    inputId = id + "_input",
-                                    buttonInnerHTML = $(buttonId).html();
-                                if (buttonInnerHTML.indexOf("Show") > -1) {
-                                    $(buttonId).html("Hide");
-                                    $(inputId).attr("type", "text");
-                                } else {
-                                    $(buttonId).html("Show");
-                                    $(inputId).attr("type", "password");
-                                }
-                            };
                             html += "\<div class='input-group";
                             html += (horizontal) ? " " + getFieldWidth() : "";
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button type='button' class='btn btn-default show_input_button Form-passwordButton' ";
+                            html += "<button aw-password-toggle type='button' class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
                             html += `aw-tool-tip='${tooltip}'} aw-tip-placement='top'`;
                             html += "tabindex='-1' ";
-                            html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
                             html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
                             html += ">\n" + field.showInputInnerHTML;
                             html += "\n</button>\n";

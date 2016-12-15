@@ -1133,4 +1133,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             });
         }
     };
+}])
+
+.directive('awPasswordToggle', [function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element) {
+            $(element).click(function() {
+                var buttonInnerHTML = $(element).html();
+                if (buttonInnerHTML.indexOf("Show") > -1) {
+                    $(element).html("Hide");
+                    $(element).closest('.input-group').find('input').first().attr("type", "text");
+                } else {
+                    $(element).html("Show");
+                    $(element).closest('.input-group').find('input').first().attr("type", "password");
+                }
+            });
+        }
+    };
 }]);
