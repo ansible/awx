@@ -65,7 +65,7 @@ GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices) {
                     msg: 'Call to ' + url + ' failed. GET returned: ' + status });
             });
     });
-    debugger;
+
     $scope.refreshJobs = function() {
         // @issue: OLD SEARCH
         // $scope.search(SchedulesList.iterator);

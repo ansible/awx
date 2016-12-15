@@ -115,7 +115,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(WorkflowMakerJobTemplateList, generateList) {
-                                //debugger;
+
                                 let html = generateList.build({
                                     list: WorkflowMakerJobTemplateList,
                                     input_type: 'radio',
