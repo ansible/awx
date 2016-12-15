@@ -1057,7 +1057,7 @@ class RunJob(BaseTask):
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
-                job = self.update_model(job.pk, scm_revision=project.scm_revision)
+                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
                 job = self.update_model(job.pk, status='failed',
                                         job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % 
