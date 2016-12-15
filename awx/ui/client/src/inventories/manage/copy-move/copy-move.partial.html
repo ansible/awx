@@ -10,7 +10,7 @@
             <input type="radio" ng-model="submitMode" value="move" class="ng-pristine ng-untouched ng-valid"> Move
         </label>
     </div>
-    <div id="copyMove-list"></div>
+    <div id="copyMove-list" ui-view="copyMoveList"></div>
     <div class="copyMove-root form-group pull-left" ng-hide="atRootLevel">
         <span><input type="checkbox" ng-model="targetRootGroup" ng-change="toggleTargetRootGroup()">  Use the inventory root</span>
     </div>

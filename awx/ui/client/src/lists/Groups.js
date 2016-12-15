@@ -12,7 +12,7 @@ export default
     .value('CopyMoveGroupList', {
 
         name: 'groups',
-        iterator: 'group',
+        iterator: 'copy',
         selectTitle: 'Copy Groups',
         index: false,
         well: false,
