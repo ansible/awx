@@ -267,8 +267,23 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
         fields = []
         for field in self.model._meta.fields:
             if field.name in ('username', 'first_name', 'last_name', 'email',
-                              'name', 'description', 'email'):
+                              'name', 'description'):
                 fields.append(field.name)
+        return fields
+
+    @property
+    def related_search_fields(self):
+        fields = []
+        for field in self.model._meta.fields:
+            if field.name.endswith('_role'):
+                continue
+            if getattr(field, 'related_model', None):
+                fields.append('{}__search'.format(field.name))
+        for rel in self.model._meta.related_objects:
+            name = rel.get_accessor_name()
+            if name.endswith('_set'):
+                continue
+            fields.append('{}__search'.format(name))
         return fields
 
 

@@ -182,6 +182,10 @@ class Metadata(metadata.SimpleMetadata):
         if getattr(view, 'search_fields', None):
             metadata['search_fields'] = view.search_fields
 
+        # Add related search fields if available from the view.
+        if getattr(view, 'related_search_fields', None):
+            metadata['related_search_fields'] = view.related_search_fields
+
         return metadata
 
 
