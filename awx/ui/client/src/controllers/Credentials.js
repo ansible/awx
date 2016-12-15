@@ -52,7 +52,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
             var itm = $scope[list.name][item_idx];
 
             // Set the item type label
-            debugger;
             if (list.fields.kind && $scope.options &&
                 $scope.options.hasOwnProperty('kind')) {
                     $scope.options.kind.choices.every(function(choice) {
