@@ -3897,20 +3897,47 @@ class UnifiedJobList(ListAPIView):
     new_in_148 = True
 
 
+class StdoutANSIFilter(object):
+
+    def __init__(self, fileobj):
+        self.fileobj = fileobj
+        self.extra_data = ''
+        if hasattr(fileobj,'close'):
+            self.close = fileobj.close
+
+    def read(self, size=-1):
+        data = self.extra_data
+        while size > 0 and len(data) < size:
+            line = self.fileobj.readline(size)
+            if not line:
+                break
+            # Remove ANSI escape sequences used to embed event data.
+            line = re.sub(r'\x1b\[K(?:[A-Za-z0-9+/=]+\x1b\[\d+D)+\x1b\[K', '', line)
+            # Remove ANSI color escape sequences.
+            line = re.sub(r'\x1b[^m]*m', '', line)
+            data += line
+        if size > 0 and len(data) > size:
+            self.extra_data = data[size:]
+            data = data[:size]
+        else:
+            self.extra_data = ''
+        return data
+
+
 class UnifiedJobStdout(RetrieveAPIView):
 
     authentication_classes = [TokenGetAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
     serializer_class = UnifiedJobStdoutSerializer
     renderer_classes = [BrowsableAPIRenderer, renderers.StaticHTMLRenderer,
                         PlainTextRenderer, AnsiTextRenderer,
-                        renderers.JSONRenderer, DownloadTextRenderer]
+                        renderers.JSONRenderer, DownloadTextRenderer, AnsiDownloadRenderer]
     filter_backends = ()
     new_in_148 = True
 
     def retrieve(self, request, *args, **kwargs):
         unified_job = self.get_object()
         obj_size = unified_job.result_stdout_size
-        if request.accepted_renderer.format != 'txt_download' and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
+        if request.accepted_renderer.format not in {'txt_download', 'ansi_download'} and obj_size > settings.STDOUT_MAX_BYTES_DISPLAY:
             response_message = _("Standard Output too large to display (%(text_size)d bytes), "
                                  "only download supported for sizes over %(supported_size)d bytes") % {
                 'text_size': obj_size, 'supported_size': settings.STDOUT_MAX_BYTES_DISPLAY}
@@ -3951,18 +3978,24 @@ class UnifiedJobStdout(RetrieveAPIView):
                 elif content_format == 'html':
                     return Response({'range': {'start': start, 'end': end, 'absolute_end': absolute_end}, 'content': body})
             return Response(data)
+        elif request.accepted_renderer.format == 'txt':
+            return Response(unified_job.result_stdout)
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
-        elif request.accepted_renderer.format == 'txt_download':
+        elif request.accepted_renderer.format in {'txt_download', 'ansi_download'}:
             try:
                 content_fd = open(unified_job.result_stdout_file, 'r')
+                if request.accepted_renderer.format == 'txt_download':
+                    # For txt downloads, filter out ANSI escape sequences.
+                    content_fd = StdoutANSIFilter(content_fd)
+                    suffix = ''
+                else:
+                    suffix = '_ansi'
                 response = HttpResponse(FileWrapper(content_fd), content_type='text/plain')
-                response["Content-Disposition"] = 'attachment; filename="job_%s.txt"' % str(unified_job.id)
+                response["Content-Disposition"] = 'attachment; filename="job_%s%s.txt"' % (str(unified_job.id), suffix)
                 return response
             except Exception as e:
                 return Response({"error": _("Error generating stdout download file: %s") % str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        elif request.accepted_renderer.format == 'txt':
-            return Response(unified_job.result_stdout)
         else:
             return super(UnifiedJobStdout, self).retrieve(request, *args, **kwargs)
 
