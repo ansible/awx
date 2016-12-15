@@ -185,7 +185,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "scm_update_on_launch && projectSelected && scm_type.value !== 'manual'",
+                ngShow: "scm_update_on_launch && scm_type.value !== 'manual'",
                 spinner: true,
                 "default": '0',
                 awPopOver: '<p>' + i18n._('Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
