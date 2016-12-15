@@ -131,8 +131,6 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
                 return resource.summary_fields.object_roles[scope.roleSelection[type]]
             });
         }).flattenDeep().value();
-
-        debugger;
         
         Rest.setUrl(scope.owner.related.roles);
 
