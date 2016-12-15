@@ -36,6 +36,7 @@ export default ['i18n', function(i18n){
             },
             notification_type: {
                     label: i18n._('Type'),
+                    ngBind: "notification_template.type_label",
                     searchType: 'select',
                     searchOptions: [],
                     excludeModal: true,
