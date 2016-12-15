@@ -47,7 +47,7 @@ export default ['i18n', function(i18n){
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addNotification()',
-                awToolTip: i18n._('Create a new custom inventory'),
+                awToolTip: i18n._('Create a new notification template'),
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: 'canAdd'
