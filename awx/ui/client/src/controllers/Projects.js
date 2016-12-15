@@ -37,7 +37,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
         _.forEach($scope[list.name], buildTooltips);
         $rootScope.flashMessage = null;
     }
-    
+
     $scope.$on(`${list.iterator}_options`, function(event, data){
         $scope.options = data.data.actions.GET;
         optionsRequestDataProcessing();
@@ -66,13 +66,10 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                     });
                 }
 
-            _.forEach($scope[list.name], buildTooltips);
+                buildTooltips(itm);
 
         });
     }
-    // $scope.$watch(`${list.name}`, function() {
-    //     _.forEach($scope[list.name], buildTooltips);
-    // });
 
     function buildTooltips(project) {
         project.statusIcon = GetProjectIcon(project.status);
