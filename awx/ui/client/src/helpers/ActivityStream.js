@@ -25,9 +25,6 @@ export default
                         case 'inventory':
                             rtnTitle = 'INVENTORIES';
                             break;
-                        case 'job_template':
-                            rtnTitle = 'JOB TEMPLATES';
-                            break;
                         case 'credential':
                             rtnTitle = 'CREDENTIALS';
                             break;
@@ -54,9 +51,6 @@ export default
                             break;
                         case 'template':
                             rtnTitle = 'TEMPLATES';
-                            break;
-                        case 'workflow_job_template':
-                            rtnTitle = 'WORKFLOW JOB TEMPLATES';
                             break;
                     }
 
