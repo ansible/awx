@@ -1743,6 +1743,10 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PMRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pmrun password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d
