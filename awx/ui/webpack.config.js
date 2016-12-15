@@ -100,7 +100,7 @@ var dev = {
             'select2': path.resolve() + '/node_modules/select2/dist/js/select2.full.js'
         }
     },
-    devtool: 'sourcemap',
+    devtool: 'inline-source-map',
     watch: true,
 };
 
