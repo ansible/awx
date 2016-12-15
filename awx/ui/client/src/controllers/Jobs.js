@@ -28,33 +28,8 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
         $scope.showJobType = true;
-
-        // _.forEach($scope[list.name], buildTooltips);
-        // if ($scope.removeChoicesReady) {
-        //     $scope.removeChoicesReady();
-        // }
-        // $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
-        //     $scope[list.name].forEach(function(item, item_idx) {
-        //         var itm = $scope[list.name][item_idx];
-        //         if(item.summary_fields && item.summary_fields.source_workflow_job &&
-        //             item.summary_fields.source_workflow_job.id){
-        //                 item.workflow_result_link = `/#/workflows/${item.summary_fields.source_workflow_job.id}`;
-        //         }
-        //         // Set the item type label
-        //         if (list.fields.type) {
-        //             $scope.type_choices.every(function(choice) {
-        //                 if (choice.value === item.type) {
-        //                     itm.type_label = choice.label;
-        //                     return false;
-        //                 }
-        //                 return true;
-        //             });
-        //         }
-        //     });
-        // });
-
-
     }
+    
     $scope.$on(`${list.iterator}_options`, function(event, data){
         $scope.options = data.data.actions.GET;
         optionsRequestDataProcessing();

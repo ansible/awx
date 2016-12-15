@@ -37,6 +37,7 @@ export default
             },
             kind: {
                 label: i18n._('Type'),
+                ngBind: 'credential.kind_label',
                 excludeModal: true,
                 nosort: true,
                 columnClass: 'col-md-2 hidden-sm hidden-xs'
