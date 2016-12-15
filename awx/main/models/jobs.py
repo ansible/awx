@@ -664,6 +664,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
             self.project_update.cancel()
         return res
 
+
 class JobHostSummary(CreatedModifiedModel):
     '''
     Per-host statistics for each job.
