@@ -43,7 +43,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
         }
 
         $scope.$on(`${list.iterator}_options`, function(event, data){
-            debugger;
             $scope.options = data.data.actions.GET;
             optionsRequestDataProcessing();
         });
