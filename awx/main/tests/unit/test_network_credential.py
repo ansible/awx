@@ -77,7 +77,7 @@ def test_net_cred_ssh_agent(mocker, get_ssh_version):
         mocker.patch.object(run_job, 'post_run_hook', return_value=None)
 
         run_job.run(mock_job.id)
-        assert run_job.update_model.call_count == 3
+        assert run_job.update_model.call_count == 4
 
         job_args = run_job.update_model.call_args_list[1][1].get('job_args')
         assert 'ssh-add' in job_args
