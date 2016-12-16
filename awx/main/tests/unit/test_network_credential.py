@@ -46,7 +46,7 @@ def test_net_cred_parse(mocker):
         assert env['ANSIBLE_NET_USERNAME'] == options['username']
         assert env['ANSIBLE_NET_PASSWORD'] == options['password']
         assert env['ANSIBLE_NET_AUTHORIZE'] == '1'
-        assert env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] == options['authorize_password']
+        assert env['ANSIBLE_NET_AUTH_PASS'] == options['authorize_password']
 
 
 def test_net_cred_ssh_agent(mocker, get_ssh_version):
