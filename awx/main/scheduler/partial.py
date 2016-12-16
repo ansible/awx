@@ -68,7 +68,6 @@ class PartialModelDict(object):
 
         merged_values = []
         for k, g in grouped_results:
-            print k
             groups = list(g)
             merged_value = {}
             for group in groups:
