@@ -22,19 +22,19 @@ EXAMPLES = '''
 #            {
 #                "source": "apt",
 #               "version": "1.0.6-5",
-#               "architecture": "amd64",
+#               "arch": "amd64",
 #               "name": "libbz2-1.0"
 #           },
 #           {
 #               "source": "apt",
 #               "version": "2.7.1-4ubuntu1",
-#               "architecture": "amd64",
+#               "arch": "amd64",
 #               "name": "patch"
 #           },
 #           {
 #               "source": "apt",
 #               "version": "4.8.2-19ubuntu1",
-#               "architecture": "amd64",
+#               "arch": "amd64",
 #               "name": "gcc-4.8-base"
 #           }, ... ] } }
 '''
@@ -64,7 +64,7 @@ def deb_package_list():
         ac_pkg = apt_cache[package].installed
         package_details = dict(name=package,
                                version=ac_pkg.version,
-                               architecture=ac_pkg.architecture,
+                               arch=ac_pkg.architecture,
                                source='apt')
         installed_packages.append(package_details)
     return installed_packages
