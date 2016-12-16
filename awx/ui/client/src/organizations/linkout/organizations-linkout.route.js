@@ -156,7 +156,7 @@ export default [{
     url: '/:organization_id/inventories',
     searchPrefix: 'inventory',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsInventories,
             templateProvider: function(OrgInventoryList, generateList) {
                 let html = generateList.build({
@@ -202,7 +202,7 @@ export default [{
     url: '/:organization_id/projects',
     searchPrefix: 'project',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsProjects,
             templateProvider: function(OrgProjectList, generateList) {
                 let html = generateList.build({
@@ -231,8 +231,8 @@ export default [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', function(InventoryList, GetBasePath, $stateParams) {
-            let list = _.cloneDeep(InventoryList);
+        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', function(ProjectList, GetBasePath, $stateParams) {
+            let list = _.cloneDeep(ProjectList);
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
