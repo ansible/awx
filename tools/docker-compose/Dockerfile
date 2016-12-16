@@ -6,7 +6,7 @@ FROM centos:7
 # ENV LC_ALL en_US.UTF-8
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
-ADD requirements/requirements.txt requirements/requirements_ansible.txt requirements/requirements_dev.txt requirements/requirements_jenkins.txt /tmp/requirements/
+ADD requirements/requirements.txt requirements/requirements_ansible.txt requirements/requirements_dev.txt /tmp/requirements/
 RUN yum -y update && yum -y install curl epel-release
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
