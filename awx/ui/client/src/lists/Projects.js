@@ -30,7 +30,8 @@ export default
                 dataPlacement: 'right',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "List-staticColumn--smallStatus",
-                nosort: true
+                nosort: true,
+                excludeModal: true
             },
             name: {
                 key: true,
