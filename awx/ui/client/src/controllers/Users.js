@@ -311,7 +311,7 @@ export function UsersEdit($scope, $rootScope, $location,
     $scope.formSave = function() {
         $rootScope.flashMessage = null;
         if ($scope[form.name + '_form'].$valid) {
-            Rest.setUrl(defaultUrl + id + '/');
+            Rest.setUrl(defaultUrl + '/');
             var data = processNewData(form.fields);
             Rest.put(data).success(function() {
                     $state.go($state.current, null, { reload: true });
