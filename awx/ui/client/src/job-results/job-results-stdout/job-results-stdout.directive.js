@@ -90,23 +90,14 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 var visItem,
                     parentItem;
 
-                var containerHeight = $container.height();
-                var containerTop = $container.position().top;
-                var containerNetHeight = containerHeight + containerTop;
-
                 // iterate through each line of standard out
-                $container.find('.JobResultsStdOut-aLineOfStdOut')
+                $container.find('.JobResultsStdOut-aLineOfStdOut:visible')
                     .each( function () {
                         var $this = $(this);
 
-                        var lineHeight = $this.height();
-                        var lineTop = $this.position().top;
-                        var lineNetHeight = lineHeight + lineTop;
-
                         // check to see if the line is the first visible
                         // line in the viewport...
-                        if (lineNetHeight > containerTop &&
-                            lineTop < containerNetHeight) {
+                        if ($this.position().top >= 0) {
 
                             // ...if it is, return the line number
                             // for this line
