@@ -70,7 +70,7 @@
                          <div class="JobResults-resultRowText">
                              <i	class="JobResults-statusResultIcon
                                      fa
-                                     icon-job-{{ job.status }}">
+                                     icon-job-{{ job_status }}">
                              </i> {{ status_label }}
                          </div>
                      </div>
@@ -415,6 +415,7 @@
                         <i class="JobResults-statusResultIcon
                             fa icon-job-{{ job_status }}"
                             aw-tool-tip="Job {{status_label}}"
+                            data-tip-watch="status_tooltip"
                             aw-tip-placement="top"
                             data-original-title>
                         </i>

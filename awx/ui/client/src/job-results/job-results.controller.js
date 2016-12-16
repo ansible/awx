@@ -1,8 +1,4 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet) {
-    // if the job_status hasn't been set by the websocket, set it now
-    if (!$scope.job_status) {
-        $scope.job_status = jobData.status;
-    }
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope) {
 
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
@@ -52,7 +48,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
             }
         };
 
-        $scope.status_label = getTowerLabel('status');
         $scope.type_label = getTowerLabel('job_type');
         $scope.verbosity_label = getTowerLabel('verbosity');
     };
@@ -67,6 +62,27 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.jobOptions = jobDataOptions.actions.GET;
     $scope.labels = jobLabels;
     $scope.jobFinished = jobFinished;
+
+    // update label in left pane and tooltip in right pane when the job_status
+    // changes
+    $scope.$watch('job_status', function(status) {
+        if (status) {
+            $scope.status_label = $scope.jobOptions.status.choices
+                .filter(val => val[0] === status)
+                .map(val => val[1])[0];
+            $scope.status_tooltip = "Job " + $scope.status_label;
+        }
+    });
+
+    // update the job_status value.  Use the cached rootScope value if there
+    // is one.  This is a workaround when the rest call for the jobData is
+    // made before some socket events come in for the job status
+    if ($rootScope['lastSocketStatus' + jobData.id]) {
+        $scope.job_status = $rootScope['lastSocketStatus' + jobData.id];
+        delete $rootScope['lastSocketStatus' + jobData.id];
+    } else {
+        $scope.job_status = jobData.status;
+    }
 
     // turn related api browser routes into tower routes
     getTowerLinks();
@@ -424,13 +440,19 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) ===
             parseInt($scope.job.id,10)) {
+            // controller is defined, so set the job_status
             $scope.job_status = data.status;
-        }
-        if (parseInt(data.project_id, 10) ===
+        } else if (parseInt(data.project_id, 10) ===
             parseInt($scope.job.project,10)) {
+            // this is a project status update message, so set the
+            // project status in the left pane
             $scope.project_status = data.status;
             $scope.project_update_link = `/#/scm_update/${data
                 .unified_job_id}`;
+        } else {
+            // controller was previously defined, but is not yet defined
+            // for this job.  cache the socket status on root scope
+            $rootScope['lastSocketStatus' + data.unified_job_id] = data.status;
         }
     });
 }];

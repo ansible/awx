@@ -35,8 +35,9 @@ export default {
     resolve: {
         // the GET for the particular job
         jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', function(Rest, GetBasePath, $stateParams, $q, $state, Alert) {
-            Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
             var val = $q.defer();
+
+            Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
             Rest.get()
                 .then(function(data) {
                     val.resolve(data.data);
@@ -51,6 +52,7 @@ export default {
 
                     $state.go('jobs');
                 });
+
             return val.promise;
         }],
         Dataset: ['QuerySet', '$stateParams', 'jobData',
