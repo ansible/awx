@@ -119,7 +119,6 @@ export default
                     iterator: 'role',
                     open: false,
                     index: false,
-                    actions: {},
                     emptyListText: i18n._('No permissions have been granted'),
                     fields: {
                         name: {
@@ -159,7 +158,7 @@ export default
                             buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
                             ngShow: '(puser_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
-                    }                
+                    }
                 }
             },
         };}]); //InventoryForm

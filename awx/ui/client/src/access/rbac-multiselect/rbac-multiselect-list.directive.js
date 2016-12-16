@@ -5,8 +5,8 @@
  *************************************************/
 
 /* jshint unused: vars */
-export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList', 
-    'InventoryList', 'CredentialList', '$compile', 'generateList', 'GetBasePath', 'SelectionInit', 
+export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList',
+    'InventoryList', 'CredentialList', '$compile', 'generateList', 'GetBasePath', 'SelectionInit',
     function(addPermissionsTeamsList, addPermissionsUsersList, TemplateList, ProjectList,
     InventoryList, CredentialList, $compile, generateList, GetBasePath, SelectionInit) {
     return {
@@ -21,7 +21,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             let listMap, list, list_html;
 
             listMap = {
-                Teams: addPermissionsTeamsList, 
+                Teams: addPermissionsTeamsList,
                 Users: addPermissionsUsersList,
                 Projects: ProjectList,
                 JobTemplates: TemplateList,
@@ -63,7 +63,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
                 case 'WorkflowTemplates':
                     list.name = 'workflow_templates';
-                    list.iterator = 'workflow_template',
+                    list.iterator = 'workflow_template';
                     list.basePath = 'workflow_job_templates';
                     list.fields = {
                         name: list.fields.name,
@@ -75,14 +75,14 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         username: list.fields.username,
                         first_name: list.fields.first_name,
                         last_name: list.fields.last_name
-                    }
+                    };
                     break;
                 default:
                     list.fields = {
                         name: list.fields.name,
                         description: list.fields.description
                     };
-            } 
+            }
 
             list_html = generateList.build({
                 mode: 'edit',

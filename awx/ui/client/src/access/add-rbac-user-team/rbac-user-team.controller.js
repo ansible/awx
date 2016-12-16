@@ -11,7 +11,7 @@
  * Controller for handling permissions adding
  */
 
-export default ['$rootScope', '$scope', '$state', 'i18n', 'CreateSelect2', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors', 
+export default ['$rootScope', '$scope', '$state', 'i18n', 'CreateSelect2', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors',
 function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, Wait, ProcessErrors) {
 
     init();
@@ -51,7 +51,7 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
         /*
             <div ng-repeat="(type, roleSet) in keys">
                 <select
-                    ng-show="tab[type]" 
+                    ng-show="tab[type]"
                     id="{{type}}-role-select" class="form-control"
                     ng-model="roleSelection[type]"
                     ng-options="value.name for (key , value) in roleSet">
@@ -75,7 +75,7 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
     }
 
     // aggregate name/descriptions for each available role, based on resource type
-    // reasoning: 
+    // reasoning:
     function aggregateKey(item, type){
         _.merge(scope.keys[type], _.omit(item.summary_fields.object_roles, 'read_role'));
     }
@@ -126,12 +126,12 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
         //Wait('start');
 
         // builds an array of role entities to apply to current user or team
-        let roles = _(scope.selected).map( (resources, type) =>{
+        let roles = _(scope.selected).map( (resources, type) => {
             return _.map(resources, (resource) => {
-                return resource.summary_fields.object_roles[scope.roleSelection[type]]
+                return resource.summary_fields.object_roles[scope.roleSelection[type]];
             });
         }).flattenDeep().value();
-        
+
         Rest.setUrl(scope.owner.related.roles);
 
         $q.all( _.map(roles, (entity) => Rest.post({id: entity.id})) )

@@ -5,7 +5,7 @@
  *************************************************/
 
 /* jshint unused: vars */
-export default ['$compile','templateUrl', 'i18n', 'generateList', 
+export default ['$compile','templateUrl', 'i18n', 'generateList',
     'ProjectList', 'TemplateList', 'InventoryList', 'CredentialList',
     function($compile, templateUrl, i18n, generateList,
     ProjectList, TemplateList, InventoryList, CredentialList) {
@@ -71,7 +71,7 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
 
                     case 'workflow_templates':
                         list.name = 'workflow_templates';
-                        list.iterator = 'workflow_template',
+                        list.iterator = 'workflow_template';
                         list.basePath = 'workflow_job_templates';
                         list.fields = {
                             name: list.fields.name,
@@ -114,7 +114,7 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                     // section 1 and section 2 elements produce sibling scopes
                     // This means events propogated from section 2 are not received in section 1
                     // The following code directly accesses the right scope by list table id
-                    multiselect_scope = angular.element('#AddPermissions-body').find(`#${type}_table`).scope()
+                    multiselect_scope = angular.element('#AddPermissions-body').find(`#${type}_table`).scope();
                     deselectedIdx = _.findIndex(multiselect_scope[type], {id: resource.id});
                     multiselect_scope[type][deselectedIdx].isSelected = false;
                 };
