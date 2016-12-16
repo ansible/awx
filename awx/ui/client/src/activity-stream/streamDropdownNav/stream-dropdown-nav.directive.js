@@ -20,15 +20,13 @@ export default ['templateUrl', function(templateUrl) {
                 {label: 'Hosts', value: 'host'},
                 {label: 'Inventories', value: 'inventory'},
                 {label: 'Inventory Scripts', value: 'inventory_script'},
-                {label: 'Job Templates', value: 'job_template'},
                 {label: 'Jobs', value: 'job'},
                 {label: 'Organizations', value: 'organization'},
                 {label: 'Projects', value: 'project'},
                 {label: 'Schedules', value: 'schedule'},
                 {label: 'Teams', value: 'team'},
                 {label: 'Templates', value: 'template'},
-                {label: 'Users', value: 'user'},
-                {label: 'Workflow Job Templates', value: 'workflow_job_template'}
+                {label: 'Users', value: 'user'}
             ];
 
             CreateSelect2({
