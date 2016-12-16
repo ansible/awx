@@ -56,6 +56,10 @@ within all designated text fields of a model.
 
 _Added in AWX 1.4_
 
+(_Added in Ansible Tower 3.1.0_) Search across related fields:
+
+    ?related__search=findme
+
 ## Filtering
 
 Any additional query string parameters may be used to filter the list of

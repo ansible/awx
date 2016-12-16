@@ -217,6 +217,7 @@ export function TeamsEdit($scope, $rootScope, $stateParams,
         $rootScope.flashMessage = null;
         if ($scope[form.name + '_form'].$valid) {
             var data = processNewData(form.fields);
+            Rest.setUrl(defaultUrl);
             Rest.put(data).success(function() {
                     $state.go($state.current, null, { reload: true });
                 })

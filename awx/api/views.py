@@ -65,6 +65,9 @@ from awx.api.generics import * # noqa
 from awx.conf.license import get_license, feature_enabled, feature_exists, LicenseForbids
 from awx.main.models import * # noqa
 from awx.main.utils import * # noqa
+from awx.main.utils import (
+    callback_filter_out_ansible_extra_vars
+)
 from awx.api.permissions import * # noqa
 from awx.api.renderers import * # noqa
 from awx.api.serializers import * # noqa
@@ -2663,7 +2666,7 @@ class JobTemplateCallback(GenericAPIView):
         # Send a signal to celery that the job should be started.
         kv = {"inventory_sources_already_updated": inventory_sources_already_updated}
         if extra_vars is not None:
-            kv['extra_vars'] = extra_vars
+            kv['extra_vars'] = callback_filter_out_ansible_extra_vars(extra_vars)
         result = job.signal_start(**kv)
         if not result:
             data = dict(msg=_('Error starting job!'))

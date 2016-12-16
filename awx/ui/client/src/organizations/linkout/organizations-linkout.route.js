@@ -99,6 +99,7 @@ export default [{
             list.iterator = 'add_user';
             list.name = 'add_users';
             list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
             delete list.actions;
             delete list.fieldActions;
             return list;
@@ -386,6 +387,7 @@ export default [{
                 }
             };
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+            list.listTitle = 'Admins';
             return list;
         }],
         AddAdminList: ['UserList', function(UserList) {
@@ -394,6 +396,7 @@ export default [{
             list.iterator = 'add_user';
             list.name = 'add_users';
             list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
             delete list.actions;
             delete list.fieldActions;
             return list;

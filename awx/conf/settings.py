@@ -1,6 +1,7 @@
 # Python
 import contextlib
 import logging
+import sys
 import threading
 import time
 
@@ -86,6 +87,7 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['_awx_conf_settings'] = self
         self.__dict__['_awx_conf_preload_expires'] = None
         self.__dict__['_awx_conf_preload_lock'] = threading.RLock()
+        self.__dict__['_awx_conf_init_readonly'] = False
 
     def _get_supported_settings(self):
         return settings_registry.get_registered_settings()
@@ -110,6 +112,20 @@ class SettingsWrapper(UserSettingsHolder):
                 return
             # Otherwise update local preload timeout.
             self.__dict__['_awx_conf_preload_expires'] = time.time() + SETTING_CACHE_TIMEOUT
+            # Check for any settings that have been defined in Python files and
+            # make those read-only to avoid overriding in the database.
+            if not self._awx_conf_init_readonly and 'migrate_to_database_settings' not in sys.argv:
+                defaults_snapshot = self._get_default('DEFAULTS_SNAPSHOT')
+                for key in self._get_writeable_settings():
+                    init_default = defaults_snapshot.get(key, None)
+                    try:
+                        file_default = self._get_default(key)
+                    except AttributeError:
+                        file_default = None
+                    if file_default != init_default and file_default is not None:
+                        logger.warning('Setting %s has been marked read-only!', key)
+                        settings_registry._registry[key]['read_only'] = True
+                    self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.
         if cache.get('_awx_conf_preload_expires', empty) is not empty:

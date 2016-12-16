@@ -31,8 +31,7 @@ export default
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
-                sourceModel: 'unified_job_template',
-                sourceField: 'name',
+                ngBind: 'schedule.summary_fields.unified_job_template.name',
                 ngClick: "editSchedule(schedule)",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataTipWatch: 'schedule.nameTip',

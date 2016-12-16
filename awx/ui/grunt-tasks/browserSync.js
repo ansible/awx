@@ -12,7 +12,6 @@ module.exports = {
             ]
         },
         options: {
-            open: 'external',
             proxy: {
                 target: `https://${django_host}:${django_port}`,
                 ws: true

@@ -47,6 +47,11 @@ class Migration(migrations.Migration):
             name='uuid',
             field=models.CharField(max_length=40),
         ),
+        migrations.AlterField(
+            model_name='credential',
+            name='become_method',
+            field=models.CharField(default=b'', help_text='Privilege escalation method.', max_length=32, blank=True, choices=[(b'', 'None'), (b'sudo', 'Sudo'), (b'su', 'Su'), (b'pbrun', 'Pbrun'), (b'pfexec', 'Pfexec'), (b'dzdo', 'DZDO'), (b'pmrun', 'Pmrun')]),
+        ),
         # Add Workflows
         migrations.AlterField(
             model_name='unifiedjob',

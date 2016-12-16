@@ -30,7 +30,8 @@ export default
                 dataPlacement: 'right',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "List-staticColumn--smallStatus",
-                nosort: true
+                nosort: true,
+                excludeModal: true
             },
             name: {
                 key: true,
@@ -46,6 +47,7 @@ export default
             },
             scm_type: {
                 label: i18n._('Type'),
+                ngBind: 'project.type_label',
                 excludeModal: true,
                 columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs'
             },

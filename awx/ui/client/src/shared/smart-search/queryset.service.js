@@ -18,13 +18,23 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                 // grab a single model from the cache, if present
                 if (cache.get(path)) {
-                    defer.resolve({[name] : new DjangoSearchModel(name, path, cache.get(path), relations)});
+                    defer.resolve({
+                        models: {
+                            [name] : new DjangoSearchModel(name, path, cache.get(path), relations)
+                        },
+                        options: cache.get(path)
+                    });
                 } else {
                     this.url = path;
                     resolve = this.options(path)
                         .then((res) => {
                             base = res.data.actions.GET;
-                            defer.resolve({[name]: new DjangoSearchModel(name, path, base, relations)});
+                            defer.resolve({
+                                models: {
+                                    [name]: new DjangoSearchModel(name, path, base, relations)
+                                },
+                                options: res
+                            });
                         });
                 }
                 return defer.promise;
@@ -76,9 +86,9 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 if (Array.isArray(value)){
                     return _.map(value, (item) => {
                         return `${key.split('__').join(':')}:${item}`;
-                    });                    
+                    });
                 }
-                else { 
+                else {
                     return `${key.split('__').join(':')}:${value}`;
                 }
             },

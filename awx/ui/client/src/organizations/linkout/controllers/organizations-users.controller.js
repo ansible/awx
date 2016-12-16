@@ -37,7 +37,7 @@ export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '
         }
 
         $scope.addUsers = function() {
-            $compile("<add-users add-users-type='user' class='AddUsers'></add-users>")($scope);
+            $compile("<add-users add-users-type='users' class='AddUsers'></add-users>")($scope);
         };
 
         $scope.editUser = function(id) {

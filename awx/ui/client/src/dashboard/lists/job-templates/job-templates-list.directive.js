@@ -47,7 +47,7 @@ export default
                 };
 
                 scope.editJobTemplate = function (jobTemplateId) {
-                    $state.go('templates.editJobTemplate', {id: jobTemplateId});
+                    $state.go('templates.editJobTemplate', {job_template_id: jobTemplateId});
                 };
             }
 }];

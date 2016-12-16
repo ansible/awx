@@ -45,7 +45,19 @@ export default
                         let path = `${GetBasePath('job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -119,7 +131,19 @@ export default
                         let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -190,7 +214,19 @@ export default
                         let path = `${GetBasePath('projects')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -268,6 +304,18 @@ export default
                         }
                     ],
                     ParentObject: [() =>{return {endpoint:'/api/v1/schedules'}; }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     'list@jobs': {

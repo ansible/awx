@@ -654,6 +654,16 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def get_notification_friendly_name(self):
         return "Job"
 
+    '''
+    Canceling a job also cancels the implicit project update with launch_type
+    run.
+    '''
+    def cancel(self):
+        res = super(Job, self).cancel()
+        if self.project_update:
+            self.project_update.cancel()
+        return res
+
 
 class JobHostSummary(CreatedModifiedModel):
     '''

@@ -109,8 +109,12 @@ def send_notifications(notification_list, job_id=None):
         raise TypeError("notification_list should be of type list")
     if job_id is not None:
         job_actual = UnifiedJob.objects.get(id=job_id)
-    for notification_id in notification_list:
-        notification = Notification.objects.get(id=notification_id)
+
+    notifications = Notification.objects.filter(id__in=notification_list)
+    if job_id is not None:
+        job_actual.notifications.add(*notifications)
+
+    for notification in notifications:
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
@@ -121,8 +125,6 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
         finally:
             notification.save()
-        if job_id is not None:
-            job_actual.notifications.add(notification)
 
 
 @task(bind=True, queue='default')
@@ -618,7 +620,7 @@ class BaseTask(Task):
                         for child_proc in child_procs:
                             os.kill(child_proc.pid, signal.SIGKILL)
                         os.kill(main_proc.pid, signal.SIGKILL)
-                    except TypeError:
+                    except (TypeError, psutil.Error):
                         os.kill(job.pid, signal.SIGKILL)
             else:
                 os.kill(job.pid, signal.SIGTERM)
@@ -708,6 +710,11 @@ class BaseTask(Task):
                 stdout_handle.close()
             except Exception:
                 pass
+
+        instance = self.update_model(pk)
+        if instance.cancel_flag:
+            status = 'canceled'
+
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
                                      **extra_update_fields)
@@ -809,7 +816,7 @@ class RunJob(BaseTask):
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['TOWER_HOST'] = settings.TOWER_URL_BASE
-        env['MAX_EVENT_RES'] = settings.MAX_EVENT_RES_DATA
+        env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
@@ -1045,17 +1052,18 @@ class RunJob(BaseTask):
             local_project_sync = job.project.create_project_update(launch_type="sync")
             local_project_sync.job_type = 'run'
             local_project_sync.save()
+            # save the associated project update before calling run() so that a
+            # cancel() call on the job can cancel the project update
+            job = self.update_model(job.pk, project_update=local_project_sync)
+
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
-                job.scm_revision = job.project.scm_revision
-                job.project_update = local_project_sync
-                job.save()
+                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
-                job.status = 'failed'
-                job.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                                      ('project_update', local_project_sync.name, local_project_sync.id)
-                job.save()
+                job = self.update_model(job.pk, status='failed',
+                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % 
+                                                         ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
     def post_run_hook(self, job, status, **kwargs):
@@ -1737,6 +1745,10 @@ class RunAdHocCommand(BaseTask):
         d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^PMRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'^pmrun password.*:\s*?$', re.M)] = 'become_password'
         d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
         d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d

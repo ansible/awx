@@ -14,12 +14,12 @@
 export default [
     '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait', 'rbacUiControlService',
-    'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetChoices', '$q', '$state', 'Dataset', 'ParentObject',
+    'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetChoices', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
     function($scope, $compile, $location, $stateParams,
         SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
         GetBasePath, Wait, rbacUiControlService, Find,
         ToggleSchedule, DeleteSchedule, GetChoices,
-        $q, $state, Dataset, ParentObject) {
+        $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
 
         ClearScope();
 
@@ -43,11 +43,45 @@ export default [
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            $scope.unified_job_options = UnifiedJobsOptions.actions.GET;
 
-            _.forEach($scope[list.name], buildTooltips);
+            // _.forEach($scope[list.name], buildTooltips);
+        }
+
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
+
+        $scope.$watchCollection(`${$scope.list.name}`, function() {
+                optionsRequestDataProcessing();
+            }
+        );
+
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
+
+                // Set the item type label
+                if (list.fields.type && $scope.unified_job_options &&
+                    $scope.unified_job_options.hasOwnProperty('type')) {
+                        $scope.unified_job_options.type.choices.every(function(choice) {
+                            if (choice[0] === itm.summary_fields.unified_job_template.unified_job_type) {
+                            itm.type_label = choice[1];
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+                buildTooltips(itm);
+
+            });
         }
 
         function buildTooltips(schedule) {
+            var job = schedule.summary_fields.unified_job_template;
             if (schedule.enabled) {
                 schedule.play_tip = 'Schedule is active. Click to stop.';
                 schedule.status = 'active';
@@ -57,6 +91,18 @@ export default [
                 schedule.status = 'stopped';
                 schedule.status_tip = 'Schedule is stopped. Click to activate.';
             }
+
+            schedule.nameTip = schedule.name;
+            // include the word schedule if the schedule name does not include the word schedule
+            if (schedule.name.indexOf("schedule") === -1 && schedule.name.indexOf("Schedule") === -1) {
+                schedule.nameTip += " schedule";
+            }
+            schedule.nameTip += " for ";
+            if (job.name.indexOf("job") === -1 && job.name.indexOf("Job") === -1) {
+                schedule.nameTip += "job ";
+            }
+            schedule.nameTip += job.name;
+            schedule.nameTip += ". Click to edit schedule.";
         }
 
         $scope.refreshSchedules = function() {
@@ -99,7 +145,7 @@ export default [
                             name: 'projectSchedules.edit',
                             params: {
                                 id: schedule.unified_job_template,
-                                schedule_id: schedule.id                                
+                                schedule_id: schedule.id
                             }
                         });
                         break;
@@ -109,7 +155,7 @@ export default [
                             name: 'managementJobSchedules.edit',
                             params: {
                                 id: schedule.unified_job_template,
-                                schedule_id: schedule.id                                
+                                schedule_id: schedule.id
                             }
                         });
                         break;
@@ -136,7 +182,7 @@ export default [
                             throw err;
                         }
                     });
-                });                
+                });
             }
         };
 
@@ -160,7 +206,7 @@ export default [
         };
 
         base = $location.path().replace(/^\//, '').split('/')[0];
-        
+
         if (base === 'management_jobs') {
             $scope.base = base = 'system_job_templates';
         }
@@ -175,17 +221,5 @@ export default [
         $scope.formCancel = function() {
             $state.go('^', null, { reload: true });
         };
-
-        // @issue - believe this is no longer necessary now that parent object is resolved prior to controller initilizing
-
-        // Wait('start');
-
-        // GetChoices({
-        //     scope: $scope,
-        //     url: GetBasePath('unified_jobs'),   //'/static/sample/data/types/data.json'
-        //     field: 'type',
-        //     variable: 'type_choices',
-        //     callback: 'choicesReady'
-        // });
     }
 ];

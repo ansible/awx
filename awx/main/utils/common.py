@@ -43,7 +43,8 @@ __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore', 
            'copy_m2m_relationships' ,'cache_list_capabilities', 'to_python_boolean',
            'ignore_inventory_computed_fields', 'ignore_inventory_group_removal',
            '_inventory_updates', 'get_pk_from_dict', 'getattrd', 'NoDefaultProvided',
-           'get_current_apps', 'set_current_apps', 'OutputEventFilter']
+           'get_current_apps', 'set_current_apps', 'OutputEventFilter',
+           'callback_filter_out_ansible_extra_vars',]
 
 
 def get_object_or_400(klass, *args, **kwargs):
@@ -824,3 +825,12 @@ class OutputEventFilter(object):
             self._current_event_data = next_event_data
         else:
             self._current_event_data = None
+
+
+def callback_filter_out_ansible_extra_vars(extra_vars):
+    extra_vars_redacted = {}
+    for key, value in extra_vars.iteritems():
+        if not key.startswith('ansible_'):
+            extra_vars_redacted[key] = value
+    return extra_vars_redacted
+

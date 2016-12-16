@@ -82,14 +82,13 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
-# Store a snapshot of default settings at this point (only for migrating from
-# file to database settings).
-if 'migrate_to_database_settings' in sys.argv:
-    DEFAULTS_SNAPSHOT = {}
-    this_module = sys.modules[__name__]
-    for setting in dir(this_module):
-        if setting == setting.upper():
-            DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
+# Store a snapshot of default settings at this point before loading any
+# customizable config files.
+DEFAULTS_SNAPSHOT = {}
+this_module = sys.modules[__name__]
+for setting in dir(this_module):
+    if setting == setting.upper():
+        DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
 
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.

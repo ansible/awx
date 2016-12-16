@@ -86,7 +86,7 @@ export default
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
             "view": {
                 mode: "all",
-                ngClick: "viewJob(job.id)",
+                ngClick: "viewJobDetails(job)",
                 awToolTip: "View the job",
                 dataPlacement: "top"
             },

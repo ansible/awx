@@ -366,7 +366,9 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
-        return (super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names() +
+        base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
+        base_list.remove('labels')
+        return (base_list +
                 ['survey_spec', 'survey_enabled', 'organization'])
 
     def get_absolute_url(self):

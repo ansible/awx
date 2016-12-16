@@ -263,7 +263,7 @@ export default
                 "ssh_key_unlock": {
                     label: i18n._('Private Key Passphrase'),
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
+                    ngShow: "kind.value === 'ssh' || kind.value === 'scm' || kind.value === 'net'",
                     ngDisabled: "keyEntered === false || ssh_key_unlock_ask || !(credential_obj.summary_fields.user_capabilities.edit || canAdd)",
                     subCheckbox: {
                         variable: 'ssh_key_unlock_ask',
