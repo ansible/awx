@@ -109,8 +109,12 @@ def send_notifications(notification_list, job_id=None):
         raise TypeError("notification_list should be of type list")
     if job_id is not None:
         job_actual = UnifiedJob.objects.get(id=job_id)
-    for notification_id in notification_list:
-        notification = Notification.objects.get(id=notification_id)
+
+    notifications = Notification.objects.filter(id__in=notification_list)
+    if job_id is not None:
+        job_actual.notifications.add(*notifications)
+
+    for notification in notifications:
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
@@ -121,8 +125,6 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
         finally:
             notification.save()
-        if job_id is not None:
-            job_actual.notifications.add(notification)
 
 
 @task(bind=True, queue='default')
