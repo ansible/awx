@@ -1,4 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment) {
 
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
@@ -168,6 +169,17 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     }
 
     $scope.events = {};
+
+    // For elapsed time while a job is running, compute the differnce in seconds,
+    // from the time the job started until now. Moment() returns the current
+    // time as a moment object.
+    var start = ($scope.job.started === null) ? moment() : moment($scope.job.started);
+    if(jobFinished === false){
+        var elapsedInterval = setInterval(function(){
+            let now = moment();
+            $scope.job.elapsed = now.diff(start, 'seconds');
+        }, 1000);
+    }
 
     // EVENT STUFF BELOW
 
@@ -442,6 +454,13 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
+            if (data.status === "successful" ||
+                data.status === "failed" ||
+                data.status === "error" ||
+                data.status === "canceled") {
+                    clearInterval(elapsedInterval);
+                    $state.go('.', null, { reload: true });
+            }
         } else if (parseInt(data.project_id, 10) ===
             parseInt($scope.job.project,10)) {
             // this is a project status update message, so set the
