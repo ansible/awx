@@ -4,7 +4,7 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, moment;
 
     jobData = {
         related: {}
@@ -28,6 +28,8 @@ describe('Controller: jobResultsController', () => {
     Dataset = {
         data: {foo: "bar"}
     };
+
+    moment = function(){};
 
     let provideVals = () => {
         angular.mock.module('jobResults', ($provide) => {
@@ -58,6 +60,10 @@ describe('Controller: jobResultsController', () => {
                 'encodeQueryset'
             ]);
 
+            moment = jasmine.createSpyObj('moment', [
+                'diff'
+            ]);
+
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
             $provide.value('jobLabels', jobLabels);
@@ -71,11 +77,12 @@ describe('Controller: jobResultsController', () => {
             $provide.value('Rest', Rest);
             $provide.value('$state', $state);
             $provide.value('QuerySet', QuerySet);
+            $provide.value('moment', moment);
         });
     };
 
     let injectVals = () => {
-        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_) => {
+        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_, _moment_) => {
             // when you call $scope.$apply() (which you need to do to
             // to get inside of .then blocks to test), something is
             // causing a request for all static files.
@@ -110,6 +117,7 @@ describe('Controller: jobResultsController', () => {
             Rest = _Rest_;
             $state = _$state_;
             QuerySet = _QuerySet_;
+            moment = _moment_;
 
             jobResultsService.getEvents.and
                 .returnValue(eventResolve);
@@ -134,7 +142,8 @@ describe('Controller: jobResultsController', () => {
                 Dataset: Dataset,
                 Rest: Rest,
                 $state: $state,
-                QuerySet: QuerySet
+                QuerySet: QuerySet,
+                moment: moment
             });
         });
     };
