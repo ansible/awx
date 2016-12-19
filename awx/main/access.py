@@ -1396,23 +1396,18 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
         return qs
 
     def can_use_prompted_resources(self, data):
-        if not self.check_related('credential', Credential, data):
-            return False
-        if not self.check_related('inventory', Inventory, data):
-            return False
-        return True
+        return (
+            self.check_related('credential', Credential, data, role_field='use_role') and
+            self.check_related('inventory', Inventory, data, role_field='use_role'))
 
     @check_superuser
     def can_add(self, data):
         if not data:  # So the browseable API will work
             return True
-        if not self.check_related('workflow_job_template', WorkflowJobTemplate, data, mandatory=True):
-            return False
-        if not self.check_related('unified_job_template', UnifiedJobTemplate, data):
-            return False
-        if not self.can_use_prompted_resources(data):
-            return False
-        return True
+        return (
+            self.check_related('workflow_job_template', WorkflowJobTemplate, data, mandatory=True) and
+            self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role') and
+            self.can_use_prompted_resources(data))
 
     def wfjt_admin(self, obj):
         if not obj.workflow_job_template:
