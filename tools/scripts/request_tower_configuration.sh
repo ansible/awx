@@ -20,7 +20,7 @@ OPTIONS:
    -c      Host config key (required)
    -t      Job template ID (required)
    -e      Extra variables
-   -s      Number of seconds between retries (default: ${NUM_SECONDS}
+   -s      Number of seconds between retries (default: ${NUM_SECONDS})
 EOF
 }
 
