@@ -51,17 +51,29 @@ class TestWorkflowJobTemplateAccess:
 @pytest.mark.django_db
 class TestWorkflowJobTemplateNodeAccess:
 
-    def test_jt_access_to_edit(self, wfjt_node, org_admin):
+    def test_no_jt_access_to_edit(self, wfjt_node, org_admin):
+        # without access to the related job template, admin to the WFJT can
+        # not change the prompted parameters
         access = WorkflowJobTemplateNodeAccess(org_admin)
         assert not access.can_change(wfjt_node, {'job_type': 'scan'})
 
     def test_add_JT_no_start_perm(self, wfjt, job_template, rando):
         wfjt.admin_role.members.add(rando)
-        access = WorkflowJobTemplateAccess(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
         job_template.read_role.members.add(rando)
         assert not access.can_add({
-            'workflow_job_template': wfjt.pk,
-            'unified_job_template': job_template.pk})
+            'workflow_job_template': wfjt,
+            'unified_job_template': job_template})
+
+    def test_add_node_with_minimum_permissions(self, wfjt, job_template, inventory, rando):
+        wfjt.admin_role.members.add(rando)
+        access = WorkflowJobTemplateNodeAccess(rando)
+        job_template.execute_role.members.add(rando)
+        inventory.use_role.members.add(rando)
+        assert access.can_add({
+            'workflow_job_template': wfjt,
+            'inventory': inventory,
+            'unified_job_template': job_template})
 
     def test_remove_unwanted_foreign_node(self, wfjt_node, job_template, rando):
         wfjt = wfjt_node.workflow_job_template
