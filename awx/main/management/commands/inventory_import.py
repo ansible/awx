@@ -1256,7 +1256,8 @@ class Command(NoArgsCommand):
         '''
         TODO: Remove this deprecation when we remove support for rax.py
         '''
-        self.logger.info("Rackspace inventory sync is Deprecated in Tower 3.1.0 and support for Rackspace will be removed in a future release.")
+        if self.source == "rax.py":
+            self.logger.info("Rackspace inventory sync is Deprecated in Tower 3.1.0 and support for Rackspace will be removed in a future release.")
 
         begin = time.time()
         self.load_inventory_from_database()
