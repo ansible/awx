@@ -29,8 +29,6 @@ describe('Controller: jobResultsController', () => {
         data: {foo: "bar"}
     };
 
-    moment = function(){};
-
     let provideVals = () => {
         angular.mock.module('jobResults', ($provide) => {
             ParseTypeChange = jasmine.createSpy('ParseTypeChange');
@@ -60,10 +58,15 @@ describe('Controller: jobResultsController', () => {
                 'encodeQueryset'
             ]);
 
-            moment = jasmine.createSpyObj('moment', [
-                'diff'
+            moment = jasmine.createSpyObj('momentStub', [
+                  'diff'
             ]);
-
+            spyOn(window, 'moment').andReturn(momentStub);
+            // spyOn(window, 'moment').and.callFake(function (date) {
+            //   return {
+            //     diff: function (diff) { /* your format implementation */ }
+            //   };
+            // });
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
             $provide.value('jobLabels', jobLabels);

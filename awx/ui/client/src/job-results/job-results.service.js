@@ -5,7 +5,8 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', 'Alert',
+function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath, Alert) {
     var val = {
         // the playbook_on_stats event returns the count data in a weird format.
         // format to what we need!
