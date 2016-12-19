@@ -11,8 +11,12 @@ export default
         function(CreateSelect2) {
             return {
                 restrict: 'E',
-                scope: false,
-                template: '<select ng-cloak class="AddPermissions-selectHide roleSelect2 form-control" ng-model="obj.roles" ng-options="role.label for role in roles | filter:{label: \'!Read\'} track by role.value" multiple required></select>',
+                scope: {
+                    roles: '=',
+                    model: '='
+                },
+                // @issue why is the read-only role ommited from this selection?
+                template: '<select ng-cloak class="AddPermissions-selectHide roleSelect2 form-control" ng-model="model" ng-options="role.name for role in roles track by role.id" multiple required></select>',
                 link: function(scope, element, attrs, ctrl) {
                     CreateSelect2({
                         element: '.roleSelect2',

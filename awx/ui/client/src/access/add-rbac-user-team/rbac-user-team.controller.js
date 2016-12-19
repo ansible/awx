@@ -1,0 +1,165 @@
+/*************************************************
+ * Copyright (c) 2015 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+/**
+ * @ngdoc function
+ * @name controllers.function:Access
+ * @description
+ * Controller for handling permissions adding
+ */
+
+export default ['$rootScope', '$scope', '$state', 'i18n', 'CreateSelect2', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors',
+function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, Wait, ProcessErrors) {
+
+    init();
+
+    function init(){
+
+        let resources = ['job_templates', 'workflow_templates', 'projects', 'inventories', 'credentials'];
+
+        // data model:
+        // selected - keyed by type of resource
+        // selected[type] - keyed by each resource object's id
+        // selected[type][id] === { roles: [ ... ], ... }
+
+        // collection of resources selected in section 1
+        scope.selected = {};
+        _.each(resources, (type) => scope.selected[type] = {});
+
+        // collection of assignable roles per type of resource
+        scope.keys = {};
+        _.each(resources, (type) => scope.keys[type] = {});
+
+        // collection of currently-selected role to assign in section 2
+        scope.roleSelection = {};
+        _.each(resources, (type) => scope.roleSelection[type] = null);
+
+        // tracks currently-selected tabs, initialized with the job templates tab open
+        scope.tab = {
+            job_templates: true,
+            workflow_templates: false,
+            projects: false,
+            inventories: false,
+            credentials: false
+        };
+
+        // initializes select2 per select field
+        // html snippet:
+        /*
+            <div ng-repeat="(type, roleSet) in keys">
+                <select
+                    ng-show="tab[type]"
+                    id="{{type}}-role-select" class="form-control"
+                    ng-model="roleSelection[type]"
+                    ng-options="value.name for (key , value) in roleSet">
+                </select>
+            </div>
+        */
+        _.each(resources, (type) => buildSelect2(type));
+
+        function buildSelect2(type){
+            CreateSelect2({
+                element: `#${type}-role-select`,
+                multiple: false,
+                placeholder: i18n._('Select a role')
+            });
+        }
+
+        scope.showKeyPane = false;
+
+        // the user or team being assigned permissions
+        scope.owner = scope.resolve.resourceData.data;
+    }
+
+    // aggregate name/descriptions for each available role, based on resource type
+    // reasoning:
+    function aggregateKey(item, type){
+        _.merge(scope.keys[type], _.omit(item.summary_fields.object_roles, 'read_role'));
+    }
+
+    scope.closeModal = function() {
+        $state.go('^', null, {reload: true});
+    };
+
+    scope.currentTab = function(){
+        return _.findKey(scope.tab, (tab) => tab);
+    };
+
+    scope.toggleKeyPane = function() {
+        scope.showKeyPane = !scope.showKeyPane;
+    };
+
+    scope.showSection2Container = function(){
+        return _.any(scope.selected, (type) => Object.keys(type).length > 0);
+    };
+
+    scope.showSection2Tab = function(tab){
+        return Object.keys(scope.selected[tab]).length > 0;
+    };
+
+    scope.saveEnabled = function(){
+        let missingRole = false;
+        let resourceSelected = false;
+        _.forOwn(scope.selected, function(value, key) {
+            if(Object.keys(value).length > 0) {
+                // A resource from this tab has been selected
+                resourceSelected = true;
+                if(!scope.roleSelection[key]) {
+                    missingRole = true;
+                }
+            }
+         });
+        return resourceSelected && !missingRole;
+    };
+
+    // handle form tab changes
+    scope.selectTab = function(selected){
+        _.each(scope.tab, (value, key, collection) => {
+           collection[key] = (selected === key);
+        });
+    };
+
+    // pop/push into unified collection of selected resourcesf
+    scope.$on("selectedOrDeselected", function(e, value) {
+        let resourceType = scope.currentTab(),
+            item = value.value;
+
+        if (item.isSelected) {
+            scope.selected[resourceType][item.id] = item;
+            scope.selected[resourceType][item.id].roles = [];
+            aggregateKey(item, resourceType);
+        } else {
+            delete scope.selected[resourceType][item.id];
+        }
+    });
+
+    // post roles to api
+    scope.saveForm = function() {
+        //Wait('start');
+
+        // builds an array of role entities to apply to current user or team
+        let roles = _(scope.selected).map( (resources, type) => {
+            return _.map(resources, (resource) => {
+                return resource.summary_fields.object_roles[scope.roleSelection[type]];
+            });
+        }).flattenDeep().value();
+
+        Rest.setUrl(scope.owner.related.roles);
+
+        $q.all( _.map(roles, (entity) => Rest.post({id: entity.id})) )
+            .then( () =>{
+                Wait('stop');
+                scope.closeModal();
+            }, (error) => {
+                scope.closeModal();
+                ProcessErrors(null, error.data, error.status, null, {
+                    hdr: 'Error!',
+                    msg: 'Failed to post role(s): POST returned status' +
+                        error.status
+                });
+            });
+    };
+}];

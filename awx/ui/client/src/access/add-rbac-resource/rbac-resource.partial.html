@@ -46,10 +46,10 @@
                 </div>
 
                 <div id="AddPermissions-users" class="AddPermissions-list" ng-show="usersSelected">
-                    <add-permissions-list view="Users" all-selected="allSelected" dataset="usersDataset"></add-permissions-list>
+                    <rbac-multiselect-list view="Users" all-selected="allSelected" dataset="usersDataset"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-teams" class="AddPermissions-list" ng-show="teamsSelected">
-                    <add-permissions-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></add-permissions-list>
+                    <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></rbac-multiselect-list>
                 </div>
 
                 <div class="AddPermissions-separator"
@@ -61,7 +61,7 @@
                         2
                     </span>
                     Please assign roles to the selected users/teams
-                    <div class="AddPermissions-keyToggle"
+                    <div class="AddPermissions-keyToggle btn"
                         ng-class="{'is-active': showKeyPane}"
                         ng-click="toggleKeyPane()">
                         Key
@@ -91,8 +91,8 @@
                                 {{ obj.type }}
                             </span>
                         </div>
-                        <role-select class="AddPermissions-roleSelect">
-                        </role-select>
+                        <rbac-multiselect-role class="AddPermissions-roleSelect" roles="roles" model="obj.roles">
+                        </rbac-multiselect-role>
                         <button class="AddPermissions-roleRemove"
                             ng-click="removeObject(obj)">
                             <i class="fa fa-times"></i>

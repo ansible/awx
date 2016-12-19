@@ -241,9 +241,11 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                html += `<div class="List-noItems" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
-                html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
-                html += "</div>";
+                if (options.showEmptyPanel === undefined || options.showEmptyPanel === true){
+                    html += `<div class="List-noItems" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
+                    html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
+                    html += "</div>";
+                }
 
                 // Add a title and optionally a close button (used on Inventory->Groups)
                 if (options.mode !== 'lookup' && list.showTitle) {
@@ -443,12 +445,14 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     html += "</div>\n";
                 }
 
-                html += `<paginate
+                if (options.paginate === undefined || options.paginate === true) {
+                    html += `<paginate
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"
                     dataset="${list.iterator}_dataset"
                     iterator="${list.iterator}">
                     </paginate></div>`;
+                }
 
                 return html;
             },
