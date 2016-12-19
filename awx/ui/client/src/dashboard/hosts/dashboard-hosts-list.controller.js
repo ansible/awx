@@ -39,7 +39,7 @@ export default ['$scope', '$state', '$stateParams', 'GetBasePath', 'DashboardHos
         }
 
         $scope.editHost = function(id) {
-            $state.go('dashboardHosts.edit', { id: id });
+            $state.go('dashboardHosts.edit', { host_id: id });
         };
 
         $scope.toggleHostEnabled = function(host) {

@@ -53,9 +53,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
 
                     formStates = _.map(params.modes, (mode) => this.generateFormNode(mode, form, params));
                     states = states.concat(_.flatten(formStates));
-                    $log.debug('*** Generated State Tree', states);
-                    resolve({ states: states });
                 }
+
+                $log.debug('*** Generated State Tree', states);
+                resolve({ states: states });
             });
         },
 
@@ -68,7 +69,8 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          * @returns {object} a list state definition
          */
         generateListNode: function(list, params) {
-            let state;
+            let state,
+                url = params.urls && params.urls.list ? params.urls.list : (params.url ? params.url : `/${list.name}`);
 
             // allows passed-in params to specify a custom templateUrl
             // otherwise, use html returned by generateList.build() to fulfill templateProvider fn
@@ -90,7 +92,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
             state = $stateExtender.buildDefinition({
                 searchPrefix: list.iterator,
                 name: params.parent,
-                url: (params.url || `/${list.name}`),
+                url: url,
                 data: params.data,
                 ncyBreadcrumb: {
                     label: list.title
@@ -135,14 +137,17 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          * @returns {array} Array of state definitions required by form mode [{...}, {...}, ...]
          */
         generateFormNode: function(mode, form, params) {
-            let formNode, states = [];
+            let formNode,
+                states = [],
+                url;
             switch (mode) {
                 case 'add':
+                    url = params.urls && params.urls.add ? params.urls.add : (params.url ? params.url : '/add');
                     // breadcrumbName necessary for resources that are more than one word like
                     // job templates.  form.name can't have spaces in it or it busts form gen
                     formNode = $stateExtender.buildDefinition({
                         name: params.name || `${params.parent}.add`,
-                        url: params.url || '/add',
+                        url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
                             label: `CREATE ${form.breadcrumbName || form.name}`
@@ -171,9 +176,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     }
                     break;
                 case 'edit':
+                    url = params.urls && params.urls.edit ? params.urls.edit : (params.url ? params.url : `/:${form.name}_id`);
                     formNode = $stateExtender.buildDefinition({
                         name: params.name || `${params.parent}.edit`,
-                        url: (params.url || `/:${form.name}_id`),
+                        url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
                             label: '{{parentObject.name || name}}'
