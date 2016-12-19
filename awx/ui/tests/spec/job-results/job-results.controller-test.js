@@ -212,6 +212,9 @@ describe('Controller: jobResultsController', () => {
         });
 
         it('should set scope variables based on options', () => {
+            $scope.job_status = jobData.status;
+
+            $scope.$apply();
             expect($scope.status_label).toBe("New");
             expect($scope.type_label).toBe("Playbook Run");
             expect($scope.verbosity_label).toBe("0 (Normal)");
