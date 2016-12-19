@@ -1191,7 +1191,7 @@ class Command(NoArgsCommand):
 
     def check_license(self):
         license_info = TaskEnhancer().validate_enhancements()
-        if not license_info or len(license_info) == 0:
+        if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No Tower license found!')
         available_instances = license_info.get('available_instances', 0)
