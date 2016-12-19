@@ -5,5 +5,6 @@ kombu==3.0.35
 boto==2.43.0
 psphere==0.5.2
 psutil==5.0.0
+pyvmomi==6.5
 secretstorage==2.3.1
 shade==1.13.1
