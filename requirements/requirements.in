@@ -38,6 +38,7 @@ python-memcached==1.58
 python-radius==1.0
 python-saml==2.2.0
 python-social-auth==0.2.21
+pyvmomi==6.5
 redbaron==0.6.2
 requests-futures==0.9.7
 service-identity==16.0.0

@@ -482,6 +482,7 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     # good naming conventions
     source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
+    source = source.replace('vmware.py', 'vmware_inventory.py')
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group
     if not os.path.exists(source):
