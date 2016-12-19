@@ -878,7 +878,7 @@ class RunJob(BaseTask):
             authorize = network_cred.authorize
             env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
             if authorize:
-                env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] = decrypt_field(network_cred, 'authorize_password')
+                env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
