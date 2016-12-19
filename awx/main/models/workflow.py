@@ -327,6 +327,9 @@ class WorkflowJobOptions(BaseModel):
         new_workflow_job.copy_nodes_from_original(original=self)
         return new_workflow_job
 
+    def nodes_last_modified(self):
+        return self.workflow_nodes.aggregate(models.Max('modified'))['modified__max']
+
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
     class Meta:
