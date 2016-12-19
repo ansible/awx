@@ -1349,10 +1349,22 @@ class RunInventoryUpdate(BaseTask):
                                                          'password'))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
-            section = 'defaults'
+            credential = inventory_update.credential
+
+            section = 'vmware'
             cp.add_section(section)
+            cp.set('vmware', 'cache_max_age', 0)
+
+            cp.set('vmware', 'username', credential.username)
+            cp.set('vmware', 'password', decrypt_field(credential, 'password'))
+            cp.set('vmware', 'server', credential.host)
+
             vmware_opts = dict(inventory_update.source_vars_dict.items())
-            vmware_opts.setdefault('guests_only', 'True')
+            if inventory_update.instance_filters:
+                inventory_update.setdefault('host_filters', inventory_update.instance_filters)
+            if inventory_update.group_by:
+                inventory_update.setdefault('groupby_patterns', inventory_update.groupby_patterns)
+
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
@@ -1472,10 +1484,7 @@ class RunInventoryUpdate(BaseTask):
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
-            env['VMWARE_INI'] = cloud_credential
-            env['VMWARE_HOST'] = passwords.get('source_host', '')
-            env['VMWARE_USER'] = passwords.get('source_username', '')
-            env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+            env['VMWARE_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
             env['AZURE_CERT_PATH'] = cloud_credential
