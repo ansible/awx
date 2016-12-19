@@ -5,7 +5,7 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', 'GetBasePath', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, GetBasePath) {
     var val = {
         // the playbook_on_stats event returns the count data in a weird format.
         // format to what we need!
@@ -191,6 +191,27 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
         relaunchJob: function(scope) {
             InitiatePlaybookRun({ scope: scope, id: scope.job.id,
                 relaunch: true });
+        },
+        getJobData: function(id){
+            var val = $q.defer();
+
+            Rest.setUrl(GetBasePath('jobs') + id );
+            Rest.get()
+                .then(function(data) {
+                    val.resolve(data.data);
+                }, function(data) {
+                    val.reject(data);
+
+                    if (data.status === 404) {
+                        Alert('Job Not Found', 'Cannot find job.', 'alert-info');
+                    } else if (data.status === 403) {
+                        Alert('Insufficient Permissions', 'You do not have permission to view this job.', 'alert-info');
+                    }
+
+                    $state.go('jobs');
+                });
+
+            return val.promise;
         }
     };
     return val;

@@ -34,26 +34,8 @@ export default {
     },
     resolve: {
         // the GET for the particular job
-        jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', function(Rest, GetBasePath, $stateParams, $q, $state, Alert) {
-            var val = $q.defer();
-
-            Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
-            Rest.get()
-                .then(function(data) {
-                    val.resolve(data.data);
-                }, function(data) {
-                    val.reject(data);
-
-                    if (data.status === 404) {
-                        Alert('Job Not Found', 'Cannot find job.', 'alert-info');
-                    } else if (data.status === 403) {
-                        Alert('Insufficient Permissions', 'You do not have permission to view this job.', 'alert-info');
-                    }
-
-                    $state.go('jobs');
-                });
-
-            return val.promise;
+        jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', 'jobResultsService', function(Rest, GetBasePath, $stateParams, $q, $state, Alert, jobResultsService) {
+            return jobResultsService.getJobData($stateParams.id);
         }],
         Dataset: ['QuerySet', '$stateParams', 'jobData',
             function(qs, $stateParams, jobData) {
