@@ -468,21 +468,6 @@ var tower = angular.module('Tower', [
                 }
             });
 
-
-            $stateExtender.addState({
-                name: 'teamUsers',
-                url: '/teams/:team_id/users',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList,
-                resolve: {
-                    Users: ['UsersList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                    }]
-                }
-            });
-
-
             $stateExtender.addState({
                 name: 'userCredentials',
                 url: '/users/:user_id/credentials',
@@ -513,58 +498,6 @@ var tower = angular.module('Tower', [
                     label: N_('SOCKETS')
                 }
             });
-
-            $rootScope.addPermission = function(scope) {
-                $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
-            };
-            $rootScope.addPermissionWithoutTeamTab = function(scope) {
-                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
-            };
-
-            $rootScope.deletePermission = function(user, accessListEntry) {
-                let entry = accessListEntry;
-
-                let action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-
-                    let url;
-                    if (entry.team_id) {
-                        url = GetBasePath("teams") + entry.team_id + "/roles/";
-                    } else {
-                        url = GetBasePath("users") + user.id + "/roles/";
-                    }
-
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": entry.id })
-                        .success(function() {
-                            Wait('stop');
-                            $state.go('.', null, { reload: true });
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                if (accessListEntry.team_id) {
-                    Prompt({
-                        hdr: `Team access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
-                        action: action,
-                        actionText: 'REMOVE TEAM ACCESS'
-                    });
-                } else {
-                    Prompt({
-                        hdr: `User access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
-                        action: action,
-                        actionText: 'REMOVE'
-                    });
-                }
-            };
 
             $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
                 var action = function() {

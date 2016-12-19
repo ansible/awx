@@ -489,18 +489,18 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                 if (options.mode !== 'lookup'){
                     for (fld in list.fields) {
-                    let customClass = list.fields[fld].columnClass || '';
-                    html += `<th
-                            base-path="${list.basePath || list.name}"
-                            collection="${list.name}"
-                            dataset="${list.iterator}_dataset"
-                            column-sort
-                            column-field="${fld}"
-                            column-iterator="${list.iterator}"
-                            column-no-sort="${list.fields[fld].nosort}"
-                            column-label="${list.fields[fld].label}"
-                            column-custom-class="${customClass}">
-                        </th>`;
+                        let customClass = list.fields[fld].columnClass || '';
+                        html += `<th
+                                base-path="${list.basePath || list.name}"
+                                collection="${list.name}"
+                                dataset="${list.iterator}_dataset"
+                                column-sort
+                                column-field="${fld}"
+                                column-iterator="${list.iterator}"
+                                column-no-sort="${list.fields[fld].nosort}"
+                                column-label="${list.fields[fld].label}"
+                                column-custom-class="${customClass}">
+                            </th>`;
                     }
                 }
                 if (options.mode === 'lookup') {
