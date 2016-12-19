@@ -1373,7 +1373,9 @@ class RunInventoryUpdate(BaseTask):
 
             section = 'ansible'
             cp.add_section(section)
-            cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
+            cp.set(section, 'group_patterns', os.environ.get('SATELLITE6_GROUP_PATTERNS', []))
+            cp.set(section, 'want_facts', True)
+            cp.set(section, 'group_prefix', os.environ.get('SATELLITE6_GROUP_PREFIX', 'foreman_'))
 
             section = 'cache'
             cp.add_section(section)
