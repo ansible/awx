@@ -183,6 +183,9 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                         msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
+                })
+                .finally(function() {
+                    Wait('stop');
                 });
         };
 
