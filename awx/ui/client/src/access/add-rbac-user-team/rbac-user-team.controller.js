@@ -100,6 +100,21 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
         return Object.keys(scope.selected[tab]).length > 0;
     };
 
+    scope.saveEnabled = function(){
+        let missingRole = false;
+        let resourceSelected = false;
+        _.forOwn(scope.selected, function(value, key) {
+            if(Object.keys(value).length > 0) {
+                // A resource from this tab has been selected
+                resourceSelected = true;
+                if(!scope.roleSelection[key]) {
+                    missingRole = true;
+                }
+            }
+         });
+        return resourceSelected && !missingRole;
+    };
+
     // handle form tab changes
     scope.selectTab = function(selected){
         _.each(scope.tab, (value, key, collection) => {

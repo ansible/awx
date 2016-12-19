@@ -76,11 +76,11 @@
                 </div>
                 <div id="AddPermissions-credentials" class="AddPermissions-list" ng-show="tab.credentials">
                     <rbac-multiselect-list view="Credentials" all-selected="allSelected" dataset="resolve.credentialsDataset"></rbac-multiselect-list>
-                </div> 
+                </div>
                 <!-- end section 1 -->
-   
+
                 <!-- begin section 2 -->
-                <div ng-show="showSection2Container()">            
+                <div ng-show="showSection2Container()">
                     <div class="AddPermissions-separator"></div>
                     <div class="AddPermissions-directions">
                         <span class="AddPermissions-directionNumber">
@@ -176,7 +176,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="saveForm()"
-                        ng-disabled="!showSection2Container()">
+                        ng-disabled="!saveEnabled()">
                         Save
                     </button>
                 </div>

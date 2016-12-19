@@ -64,7 +64,7 @@ export default
             },
 
             related: {
-                permissions: {
+                users: {
                     dataPlacement: 'top',
                     awToolTip: i18n._('Please save before adding users'),
                     basePath: 'api/v1/teams/{{$stateParams.team_id}}/access_list/',
@@ -73,15 +73,14 @@ export default
                     },
                     type: 'collection',
                     title: i18n._('Users'),
-                    iterator: 'permission',
+                    iterator: 'user',
                     index: false,
                     open: false,
                     actions: {
                         add: {
-                            // @issue https://github.com/ansible/ansible-tower/issues/3487
-                            //ngClick: "addPermissionWithoutTeamTab",
+                            ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
-                            awToolTip: i18n._('Add user to team'),
+                            awToolTip: i18n._('Add User'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -104,44 +103,44 @@ export default
                         }
                     }
                 },
-                roles: {
-                    hideSearchAndActions: true,
-                    dataPlacement: 'top',
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                permissions: {
                     basePath: 'api/v1/teams/{{$stateParams.team_id}}/roles/',
                     search: {
                         page_size: '10',
                         // @todo ask about name field / serializer on this endpoint
                         order_by: 'id'
                     },
+                    awToolTip: i18n._('Please save before assigning permissions'),
+                    dataPlacement: 'top',
+                    hideSearchAndActions: true,
                     type: 'collection',
                     title: i18n._('Permissions'),
-                    iterator: 'role',
+                    iterator: 'permission',
                     open: false,
                     index: false,
                     emptyListText: i18n._('No permissions have been granted'),
                     fields: {
                         name: {
                             label: i18n._('Name'),
-                            ngBind: 'role.summary_fields.resource_name',
-                            linkTo: '{{convertApiUrl(role.related[role.summary_fields.resource_type])}}',
+                            ngBind: 'permission.summary_fields.resource_name',
+                            linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
                             noSort: true
                         },
                         type: {
                             label: i18n._('Type'),
-                            ngBind: 'role.summary_fields.resource_type_display_name',
+                            ngBind: 'permission.summary_fields.resource_type_display_name',
                             noSort: true
                         },
                         role: {
                             label: i18n._('Role'),
-                            ngBind: 'role.name',
+                            ngBind: 'permission.name',
                             noSort: true
                         }
                     },
                     fieldActions: {
                         "delete": {
                             label: i18n._('Remove'),
-                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, role.name, role.summary_fields.resource_name, role.related.teams)',
+                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, permission.name, permission.summary_fields.resource_name, permission.related.teams)',
                             'class': "List-actionButton--delete",
                             iconClass: 'fa fa-times',
                             awToolTip: i18n._('Dissasociate permission from team'),
@@ -156,7 +155,7 @@ export default
                             awToolTip: i18n._('Grant Permission'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
-                            ngShow: '(puser_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     }
                 }
