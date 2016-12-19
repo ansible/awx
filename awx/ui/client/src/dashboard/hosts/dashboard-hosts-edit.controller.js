@@ -7,9 +7,7 @@
  export default
  	['$scope', '$state', '$stateParams', 'DashboardHostsForm', 'GenerateForm', 'ParseTypeChange', 'DashboardHostService', 'host',
  	function($scope, $state, $stateParams, DashboardHostsForm, GenerateForm, ParseTypeChange, DashboardHostService, host){
- 		var generator = GenerateForm,
- 			form = DashboardHostsForm;
-        $scope.parseType = 'yaml';
+ 		$scope.parseType = 'yaml';
  		$scope.formCancel = function(){
  			$state.go('^', null, {reload: true});
  		};
@@ -33,11 +31,10 @@
 
  		};
  		var init = function(){
- 			$scope.host = host;
- 			generator.inject(form, {mode: 'edit', related: false, scope: $scope});
-    		$scope.name = host.name;
- 			$scope.description = host.description;
- 			$scope.variables = host.variables === '' ? '---' : host.variables;
+ 			$scope.host = host.data;
+ 			$scope.name = host.data.name;
+ 			$scope.description = host.data.description;
+ 			$scope.variables = host.data.variables === '' ? '---' : host.data.variables;
         	ParseTypeChange({
         		scope: $scope,
         		field_id: 'host_variables',

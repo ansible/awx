@@ -12,6 +12,7 @@ export default function(){
         formLabelSize: 'col-lg-3',
         formFieldSize: 'col-lg-9',
         iterator: 'host',
+        basePath: 'hosts',
         headerFields:{
             enabled: {
                 //flag: 'host.enabled',
