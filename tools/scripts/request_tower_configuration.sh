@@ -1,28 +1,90 @@
 #!/bin/bash
 
-usage() {
-  echo -e "Requests server configuration from Ansible Tower\n"
-  echo "Usage: $0 <server address>[:server port] <host config key> <job template id>"
-  echo "Example: $0 example.towerhost.net 44d7507f2ead49af5fca80aa18fd24bc 38"
-  exit 1
+fatal() {
+    if [ -n "${2}" ]; then
+        echo -e "Error: ${2}"
+    fi
+    exit ${1}
 }
 
-[ $# -lt 3 ] && usage
+usage() {
+cat << EOF
+Usage: $0 <options>
 
-retry_attempts=10
-attempt=0
-while [[ $attempt -lt $retry_attempts ]]
+Request server configuration from Ansible Tower.
+
+OPTIONS:
+   -h      Show this message
+   -s      Tower server (e.g. https://tower.example.com) (required)
+   -k      Allow insecure SSL connections and transfers
+   -c      Host config key (required)
+   -t      Job template ID (required)
+   -e      Extra variables
+   -s      Number of seconds between retries (default: ${NUM_SECONDS}
+EOF
+}
+
+# Initialize variables
+INSECURE=""
+NUM_SECONDS=60
+
+# Parse arguments
+while getopts “hks:c:t:s:” OPTION
 do
-  status_code=`curl -s -i --data "host_config_key=$2" http://$1/api/v1/job_templates/$3/callback/ | head -n 1 | awk '{print $2}'`
-  if [[ $status_code -ge 300 ]]
-    then
-    echo "${status_code} received, encountered problem, halting."
-    exit 1
-  else
-    exit 0
-  fi
-  attempt=$(( attempt + 1 ))
-  echo "${status_code} received... retrying in 1 minute. (Attempt ${attempt})"
-  sleep 60
+     case ${OPTION} in
+         h)
+             usage
+             exit 1
+             ;;
+         s)
+             TOWER_SERVER=${OPTARG}
+             ;;
+         k)
+             INSECURE="-k"
+             ;;
+         c)
+             HOST_CFG_KEY=${OPTARG}
+             ;;
+         t)
+             TEMPLATE_ID=${OPTARG}
+             ;;
+         e)
+             EXTRA_VARS=${OPTARG}
+             ;;
+         2)
+             NUM_SECONDS=${OPTARG}
+             ;;
+         ?)
+             usage
+             exit
+             ;;
+     esac
 done
-exit 1
+
+# Validate required arguments
+test -z ${TOWER_SERVER} && fatal 1 "Missing required -s argument"
+# Make sure TOWER_SERVER starts with http:// or https://
+[[ "${TOWER_SERVER}" =~ ^https?:// ]] || fatal 1 "Tower server must begin with http:// or https://"
+test -z ${HOST_CFG_KEY} && fatal 1 "Missing required -c argument"
+test -z ${TEMPLATE_ID} && fatal 1 "Missing required -t argument"
+
+# Generate curl --data parameter
+if [ -n "${EXTRA_VARS}" ]; then
+    CURL_DATA="{\"host_config_key\": \"${HOST_CFG_KEY}\", \"extra_vars\": \"${EXTRA_VARS}\"}"
+else
+    CURL_DATA="{\"host_config_key\": \"${HOST_CFG_KEY}\"}"
+fi
+
+set -o pipefail
+HTTP_STATUS=$(curl ${INSECURE} -s -i -X POST -H 'Content-Type:application/json' --data "$CURL_DATA" ${TOWER_SERVER}/api/v1/job_templates/${TEMPLATE_ID}/callback/ 2>&1 | head -n1 | awk '{print $2}')
+CURL_RC=$?
+if [ ${CURL_RC} -ne 0 ]; then
+    fatal ${CURL_RC} "curl exited with ${CURL_RC}, halting."
+fi
+
+# Extract http status code
+if [[ ${HTTP_STATUS} -ge 300 ]]; then
+    fatal 1 "${HTTP_STATUS} received, encountered problem, halting."
+else
+    echo "Success: ${HTTP_STATUS} received."
+fi
