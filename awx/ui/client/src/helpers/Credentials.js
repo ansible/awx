@@ -147,9 +147,9 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
                             scope.hostLabel = i18n._("Satellite 6 URL");
-                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address name which %s" +
-                                "corresponds to your Red Hat Satellite 6 server. %s" +
-                                "For example, %s"), "<br />", "<br />", "https://satelite.example.org");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL which corresponds to your %s" +
+                                "Red Hat Satellite 6 server. %s" +
+                                "For example, %s"), "<br />", "<br />", "https://satellite.example.org");
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
@@ -157,8 +157,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
                             scope.hostLabel = i18n._("CloudForms URL");
-                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address for the virtual %s" +
-                                " machine which is hosting the CloudForm URL. %s" +
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL for the virtual machine which %s" +
+                                "corresponds to your CloudForm instance. %s" +
                                 "For example, %s"), "<br />", "<br />", "https://cloudforms.example.org");
                          break;
                          case 'net':
