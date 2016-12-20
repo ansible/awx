@@ -361,18 +361,142 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 return states;
             }
 
+            function buildNotificationState(field) {
+                let state,
+                    list = field.include ? $injector.get(field.include) : field;
+                state = $stateExtender.buildDefinition({
+                    searchPrefix: `${list.iterator}`,
+                    name: `${formStateDefinition.name}.${list.iterator}s`,
+                    url: `/${list.iterator}s`,
+                    ncyBreadcrumb: {
+                        parent: `${formStateDefinition.name}`,
+                        label: `${field.iterator}s`
+                    },
+                    params: {
+                        [list.iterator + '_search']: {
+                            value: { order_by: field.order_by ? field.order_by : 'name' }
+                        }
+                    },
+                    views: {
+                        'related': {
+                            templateProvider: function(FormDefinition, GenerateForm) {
+                                let html = GenerateForm.buildCollection({
+                                    mode: 'edit',
+                                    related: `${list.iterator}s`,
+                                    form: typeof(FormDefinition) === 'function' ?
+                                        FormDefinition() : FormDefinition
+                                });
+                                return html;
+                            },
+                            controller: ['$scope', 'ListDefinition', 'Dataset', 'ToggleNotification', 'NotificationsListInit', 'GetBasePath', '$stateParams', 'inventorySourceData',
+                                function($scope, list, Dataset, ToggleNotification, NotificationsListInit, GetBasePath, $stateParams, inventorySourceData) {
+                                    var url , params = $stateParams, id;
+                                    if(params.hasOwnProperty('project_id')){
+                                        id = params.project_id;
+                                        url = GetBasePath('projects');
+                                    }
+                                    if(params.hasOwnProperty('job_template_id')){
+                                        id = params.job_template_id;
+                                        url = GetBasePath('job_templates');
+                                    }
+                                    if(params.hasOwnProperty('workflow_job_template_id')){
+                                        id = params.workflow_job_template_id;
+                                        url = GetBasePath('workflow_job_templates');
+                                    }
+                                    if(params.hasOwnProperty('inventory_id')){
+                                        id = inventorySourceData.id;
+                                        url = GetBasePath('inventory_sources');
+                                    }
+                                    function init() {
+                                        $scope.list = list;
+                                        $scope[`${list.iterator}_dataset`] = Dataset.data;
+                                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+
+                                        NotificationsListInit({
+                                            scope: $scope,
+                                            url: url,
+                                            id: id
+                                        });
+
+                                        $scope.$watch(`${list.iterator}_dataset`, function() {
+                                            // The list data has changed and we need to update which notifications are on/off
+                                            $scope.$emit('relatednotifications');
+                                        });
+                                    }
+
+                                    $scope.toggleNotification = function(event, notifier_id, column) {
+                                        var notifier = this.notification;
+                                        try {
+                                            $(event.target).tooltip('hide');
+                                        }
+                                        catch(e) {
+                                            // ignore
+                                        }
+                                        ToggleNotification({
+                                            scope: $scope,
+                                            url: url + id,
+                                            notifier: notifier,
+                                            column: column,
+                                            callback: 'NotificationRefresh'
+                                        });
+                                    };
+
+                                    init();
+
+                                }
+                            ]
+                        }
+                    },
+                    resolve: {
+                        ListDefinition: () => {
+                            return list;
+                        },
+                        inventorySourceData: ['$stateParams', 'GroupManageService', function($stateParams, GroupManageService) {
+                            if($stateParams.hasOwnProperty('group_id')){
+                                return GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
+                            }
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
+                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
+                                // allow related list definitions to use interpolated $rootScope / $stateParams in basePath field
+                                let path, interpolator;
+                                if (GetBasePath(list.basePath)) {
+                                    path = GetBasePath(list.basePath);
+                                } else {
+                                    interpolator = $interpolate(list.basePath);
+                                    path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
+                                }
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ]
+                    }
+                });
+                // // appy any default search parameters in form definition
+                // if (field.search) {
+                //     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
+                // }
+                return state;
+            }
+
             function buildListNodes(field) {
                 let states = [];
-                states.push(buildListDefinition(field));
-                if (field.iterator === 'permission' && field.actions && field.actions.add) {
-                    if (form.name === 'user' || form.name === 'team'){
-                        states.push(buildRbacUserTeamDirective());
-
-                    }
-                    else {
-                        states.push(buildRbacResourceDirective());
-                    }
+                if(field.iterator === 'notification'){
+                    states.push(buildNotificationState(field));
                     states = _.flatten(states);
+                }
+                else{
+                    states.push(buildListDefinition(field));
+                    if (field.iterator === 'permission' && field.actions && field.actions.add) {
+                        if (form.name === 'user' || form.name === 'team'){
+                            states.push(buildRbacUserTeamDirective());
+
+                        }
+                        else {
+                            states.push(buildRbacResourceDirective());
+                        }
+                        states = _.flatten(states);
+                    }
                 }
                 return states;
             }

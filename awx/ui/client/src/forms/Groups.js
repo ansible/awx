@@ -354,6 +354,7 @@ export default
                         GroupFormObject.related[itm] = angular.copy(NotificationsList);
                         GroupFormObject.related[itm].generateList = true;
                         GroupFormObject.related[itm].disabled = "source === undefined || source.value === ''";
+                        GroupFormObject.related[itm].ngClick = "$state.go('inventoryManage.editGroup.notifications')";
                     }
                 }
                 return GroupFormObject;
