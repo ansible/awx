@@ -467,7 +467,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     Attr(field, 'columnClass') : "";
                 html += `
 <td ${classList}>
-    <role-list class=\"RoleList\">
+    <role-list delete-target=\"${list.iterator}\" class=\"RoleList\">
     </role-list>
 </td>
                 `;
@@ -476,7 +476,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     Attr(field, 'columnClass') : "";
                 html += `
 <td ${classList}>
-    <role-list class=\"RoleList\" team-role-list="true">
+    <role-list delete-target=\"${list.iterator}\" class=\"RoleList\" team-role-list="true">
     </role-list>
 </td>
                 `;

@@ -485,6 +485,44 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 // }
                 return state;
             }
+            
+            function buildRbacUserDirective() {
+                let states = [];
+
+                states.push($stateExtender.buildDefinition({
+                    name: `${formStateDefinition.name}.users.add`,
+                    squashSearchUrl: true,
+                    url: '/add-user',
+                    params: {
+                        user_search: {
+                            value: { order_by: 'username', page_size: '5' },
+                            dynamic: true,
+                        }
+                    },
+                    views: {
+                        [`modal@${formStateDefinition.name}`]: {
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true"></add-rbac-resource>`
+                        }
+                    },
+                    resolve: {
+                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams.user_search);
+
+                            }
+                        ]
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#add-permissions-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                }));
+                return states;
+            }
 
             function buildListNodes(field) {
                 let states = [];
@@ -497,14 +535,18 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     if (field.iterator === 'permission' && field.actions && field.actions.add) {
                         if (form.name === 'user' || form.name === 'team'){
                             states.push(buildRbacUserTeamDirective());
-
                         }
                         else {
                             states.push(buildRbacResourceDirective());
                         }
-                        states = _.flatten(states);
+                    }
+                    else if (field.iterator === 'user' && field.actions && field.actions.add) {
+                        if(form.name === 'team') {
+                            states.push(buildRbacUserDirective());
+                        }
                     }
                 }
+                states = _.flatten(states);
                 return states;
             }
 

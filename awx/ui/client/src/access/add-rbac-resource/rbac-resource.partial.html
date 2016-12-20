@@ -39,16 +39,15 @@
                     </div>
                     <div id="teams_tab" class="Form-tab"
                         ng-click="toggleFormTabs('teams')"
-                        ng-class="{'is-selected': teamsSelected }"
-                    >
+                        ng-class="{'is-selected': teamsSelected }">
                         Teams
                     </div>
                 </div>
 
-                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="usersSelected">
+                <div id="AddPermissions-users" class="AddPermissions-list" ng-if="usersSelected">
                     <rbac-multiselect-list view="Users" all-selected="allSelected" dataset="usersDataset"></rbac-multiselect-list>
                 </div>
-                <div id="AddPermissions-teams" class="AddPermissions-list" ng-show="teamsSelected">
+                <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="teamsSelected">
                     <rbac-multiselect-list view="Teams" all-selected="allSelected" dataset="teamsDataset"></rbac-multiselect-list>
                 </div>
 
