@@ -455,7 +455,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     searchPrefix: field.sourceModel,
                     //squashSearchUrl: true, @issue enable
                     name: `${formStateDefinition.name}.${field.sourceModel}`,
-                    url: `/${field.sourceModel}`,
+                    url: `/${field.sourceModel}?selected`,
                     // a lookup field's basePath takes precedence over generic list definition's basePath, if supplied
                     data: {
                         basePath: field.basePath || null,
@@ -465,6 +465,9 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         [field.sourceModel + '_search']: {
                             value: { page_size: '5' }
                         }
+                    },
+                    ncyBreadcrumb: {
+                        skip: true
                     },
                     views: {
                         'modal': {

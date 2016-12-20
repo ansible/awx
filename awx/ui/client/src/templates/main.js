@@ -133,9 +133,22 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope.list = list;
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+                                        $scope.$watch('job_templates', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.job_templates.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.job_templates[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.job_templates[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_job_template = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.job_templates.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -153,7 +166,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
 
                                     $scope.$on('templateSelected', function(e, options) {
                                         if(options.activeTab !== 'jobs') {
-                                            // Clear out any selected job
+                                            $scope.job_templates.forEach(function(row, i) {
+                                                $scope.job_templates[i].checked = 0;
+                                            });
+                                        }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.job_templates.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.job_templates[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.job_templates[i].checked = 0;
+                                                    }
+                                                });
+                                            }
                                         }
                                     });
                                 }
@@ -181,9 +208,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
+                                        $scope.$watch('workflow_inventory_sources', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.workflow_inventory_sources[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.workflow_inventory_sources[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_inventory_source = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.workflow_inventory_sources.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -200,8 +239,22 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'project_sync') {
-
+                                        if(options.activeTab !== 'inventory_sync') {
+                                            $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                $scope.workflow_inventory_sources[i].checked = 0;
+                                            });
+                                        }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.workflow_inventory_sources[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.workflow_inventory_sources[i].checked = 0;
+                                                    }
+                                                });
+                                            }
                                         }
                                     });
                                 }
@@ -227,9 +280,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
+                                        $scope.$watch('projects', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.projects.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.projects[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.projects[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_project = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.projects.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -246,8 +311,22 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'inventory_sync') {
-
+                                        if(options.activeTab !== 'project_sync') {
+                                            $scope.projects.forEach(function(row, i) {
+                                                $scope.projects[i].checked = 0;
+                                            });
+                                        }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.projects.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.projects[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.projects[i].checked = 0;
+                                                    }
+                                                });
+                                            }
                                         }
                                     });
                                 }
@@ -294,6 +373,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
+
                                         resetPromptFields();
                                         // Loop across the preset values and attach them to scope
                                         _.forOwn(options.presetValues, function(value, key) {
@@ -387,6 +467,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                             dynamic: true
                         }
                     },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
                     views: {
                         'related': {
                             templateProvider: function(ListDefinition, generateList) {
@@ -438,6 +521,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                             squash: true,
                             dynamic: true
                         }
+                    },
+                    ncyBreadcrumb: {
+                        skip: true
                     },
                     views: {
                         'related': {
