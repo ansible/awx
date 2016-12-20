@@ -460,6 +460,9 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             if($stateParams.hasOwnProperty('group_id')){
                                 return GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
                             }
+                            else{
+                                return null;
+                            }
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
                             (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
