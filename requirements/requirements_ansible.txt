@@ -29,7 +29,7 @@ azure-servicemanagement-legacy==0.20.4  # via azure
 azure-storage==0.33.0     # via azure
 azure==2.0.0rc6
 Babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-heatclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
-backports.ssl_match_hostname==3.5.0.1
+backports.ssl-match-hostname==3.5.0.1
 boto==2.43.0
 #certifi==2016.9.26        # via msrest
 cffi==1.9.1               # via cryptography
