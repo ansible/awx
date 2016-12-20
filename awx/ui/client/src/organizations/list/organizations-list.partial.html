@@ -20,26 +20,27 @@
                 </button>
             </div>
         </div>
-        <!-- smart-search directive bindings:
-            djangoModel: '@', // one-way, interpolated
-            searchSize: '@',
-            basePath: '@',
-            iterator: '@',
-            dataset: '=', // two-way
-            list: '=',
-            collection: '=',
-            searchTags: '=',
-        -->
-        <smart-search
-            django-model="organization"
-            base-path="organizations"
-            iterator="organization"
-            list="list"
-            dataset="organization_dataset"
-            collection="organizations"
-            search-tags="searchTags">
-        </smart-search>
+
         <div class="List-well">
+            <!-- smart-search directive bindings:
+                djangoModel: '@', // one-way, interpolated
+                searchSize: '@',
+                basePath: '@',
+                iterator: '@',
+                dataset: '=', // two-way
+                list: '=',
+                collection: '=',
+                searchTags: '=',
+            -->
+            <smart-search
+                django-model="organization"
+                base-path="organizations"
+                iterator="organization"
+                list="list"
+                dataset="organization_dataset"
+                collection="organizations"
+                search-tags="searchTags">
+            </smart-search>
 
             <div class="List-noItems" ng-show="organizations.length < 1" translate>PLEASE ADD ITEMS TO THIS LIST</div>
 
