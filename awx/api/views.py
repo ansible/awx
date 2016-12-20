@@ -2956,7 +2956,7 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
     def check_object_permissions(self, request, obj):
         if request.method == 'POST' and obj:
             relaunch_perm, messages = request.user.can_access_with_errors(self.model, 'start', obj)
-            if not relaunch_perm:
+            if not relaunch_perm and 'workflow_job_template' in messages:
                 self.permission_denied(request, message=messages['workflow_job_template'])
         return super(WorkflowJobRelaunch, self).check_object_permissions(request, obj)
 

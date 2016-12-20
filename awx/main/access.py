@@ -1297,12 +1297,6 @@ class JobAccess(BaseAccess):
     def can_delete(self, obj):
         return self.org_access(obj)
 
-    def get_method_capability(self, method, obj, parent_obj):
-        if method == 'start':
-            # Return simplistic permission, will perform detailed check on POST
-            return (not obj.job_template) or self.user in obj.job_template.execute_role
-        return super(JobAccess, self).get_method_capability(method, obj, parent_obj)
-
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
