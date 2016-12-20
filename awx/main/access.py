@@ -1825,25 +1825,22 @@ class JobEventAccess(BaseAccess):
 class UnifiedJobTemplateAccess(BaseAccess):
     '''
     I can see a unified job template whenever I can see the same project,
-    inventory source or job template.  Unified job templates do not include
-    projects without SCM configured or inventory sources without a cloud
-    source.
+    inventory source, WFJT, or job template.  Unified job templates do not include
+    inventory sources without a cloud source.
     '''
 
     model = UnifiedJobTemplate
 
     def get_queryset(self):
-        qs = self.model.objects.all()
-        project_qs = self.user.get_queryset(Project).filter(scm_type__in=[s[0] for s in Project.SCM_TYPE_CHOICES])
-        inventory_source_qs = self.user.get_queryset(InventorySource).filter(source__in=CLOUD_INVENTORY_SOURCES)
-        job_template_qs = self.user.get_queryset(JobTemplate)
-        system_job_template_qs = self.user.get_queryset(SystemJobTemplate)
-        workflow_job_template_qs = self.user.get_queryset(WorkflowJobTemplate)
-        qs = qs.filter(Q(Project___in=project_qs) |
-                       Q(InventorySource___in=inventory_source_qs) |
-                       Q(JobTemplate___in=job_template_qs) |
-                       Q(systemjobtemplate__in=system_job_template_qs) |
-                       Q(workflowjobtemplate__in=workflow_job_template_qs))
+        if self.user.is_superuser or self.user.is_system_auditor:
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                Q(pk__in=self.model.accessible_pk_qs(self.user, 'read_role')) |
+                Q(inventorysource__inventory__id__in=Inventory._accessible_pk_qs(
+                    Inventory, self.user, 'read_role')))
+        qs = qs.exclude(inventorysource__source="")
+
         qs = qs.select_related(
             'created_by',
             'modified_by',
@@ -1882,25 +1879,25 @@ class UnifiedJobAccess(BaseAccess):
     model = UnifiedJob
 
     def get_queryset(self):
-        qs = self.model.objects.all()
-        project_update_qs = self.user.get_queryset(ProjectUpdate)
-        inventory_update_qs = self.user.get_queryset(InventoryUpdate).filter(source__in=CLOUD_INVENTORY_SOURCES)
-        job_qs = self.user.get_queryset(Job)
-        ad_hoc_command_qs = self.user.get_queryset(AdHocCommand)
-        system_job_qs = self.user.get_queryset(SystemJob)
-        workflow_job_qs = self.user.get_queryset(WorkflowJob)
-        qs = qs.filter(Q(ProjectUpdate___in=project_update_qs) |
-                       Q(InventoryUpdate___in=inventory_update_qs) |
-                       Q(Job___in=job_qs) |
-                       Q(AdHocCommand___in=ad_hoc_command_qs) |
-                       Q(SystemJob___in=system_job_qs) |
-                       Q(WorkflowJob___in=workflow_job_qs))
-        qs = qs.select_related(
+        if self.user.is_superuser or self.user.is_system_auditor:
+            qs = self.model.objects.all()
+        else:
+            inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
+            inv_update_qs = InventoryUpdate.objects.filter(inventory_source__inventory__id__in=inv_pk_qs)
+            ad_hoc_command_qs = AdHocCommand.objects.filter(inventory__id__in=inv_pk_qs)
+            org_auditor_qs = Organization.objects.filter(
+                Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
+            qs = self.model.objects.filter(
+                Q(unified_job_template__id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
+                Q(inventoryupdate__in=inv_update_qs) |
+                Q(adhoccommand__in=ad_hoc_command_qs) |
+                Q(job__inventory__organization__in=org_auditor_qs) |
+                Q(job__project__organization__in=org_auditor_qs)
+            )
+        qs = qs.prefetch_related(
             'created_by',
             'modified_by',
             'unified_job_node__workflow_job',
-        )
-        qs = qs.prefetch_related(
             'unified_job_template',
         )
 
@@ -1922,6 +1919,9 @@ class UnifiedJobAccess(BaseAccess):
         #    'job_template__credential',
         #    'job_template__cloud_credential',
         #)
+        # Maybe we can do these, like:
+        # 'projectupdate__project',
+        # 'inventoryupdate__inventory'
         return qs.all()
 
 

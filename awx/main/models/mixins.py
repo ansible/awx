@@ -3,6 +3,7 @@ import json
 
 # Django
 from django.db import models
+from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 
@@ -37,8 +38,9 @@ class ResourceMixin(models.Model):
         '''
         return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
+
     @staticmethod
-    def _accessible_objects(cls, accessor, role_field):
+    def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
         if type(accessor) == User:
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:
@@ -47,14 +49,24 @@ class ResourceMixin(models.Model):
             accessor_type = ContentType.objects.get_for_model(accessor)
             ancestor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
                                                  object_id=accessor.id)
-        qs = cls.objects.filter(pk__in =
-                                RoleAncestorEntry.objects.filter(
-                                    ancestor__in=ancestor_roles,
-                                    content_type_id = ContentType.objects.get_for_model(cls).id,
-                                    role_field = role_field
-                                ).values_list('object_id').distinct()
-                                )
-        return qs
+
+        if content_types is not None:
+            return RoleAncestorEntry.objects.filter(
+                ancestor__in = ancestor_roles,
+                content_type_id__in = content_types,
+                role_field = role_field
+            ).values_list('object_id').distinct()
+
+        return RoleAncestorEntry.objects.filter(
+            ancestor__in = ancestor_roles,
+            content_type_id = ContentType.objects.get_for_model(cls).id,
+            role_field = role_field
+        ).values_list('object_id').distinct()
+
+
+    @staticmethod
+    def _accessible_objects(cls, accessor, role_field):
+        return cls.objects.filter(pk__in = ResourceMixin._accessible_pk_qs(cls, accessor, role_field))
 
 
     def get_permissions(self, accessor):
