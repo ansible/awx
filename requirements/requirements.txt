@@ -36,9 +36,9 @@ azure-servicebus==0.20.3  # via azure
 azure-servicemanagement-legacy==0.20.4  # via azure
 azure-storage==0.33.0     # via azure
 azure==2.0.0rc6
-babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-heatclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
+Babel==2.3.4              # via osc-lib, oslo.i18n, python-cinderclient, python-glanceclient, python-heatclient, python-magnumclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient
 backports.functools-lru-cache==1.3  # via jaraco.functools
-backports.ssl-match-hostname==3.5.0.1  # via websocket-client
+backports.ssl_match_hostname==3.5.0.1  # via websocket-client
 baron==0.6.2              # via redbaron
 billiard==3.3.0.23        # via celery
 boto==2.43.0
@@ -66,7 +66,7 @@ django-solo==1.1.2
 django-split-settings==0.2.2
 django-taggit==0.21.3
 django-transaction-hooks==0.2
-django==1.8.16
+Django==1.8.16            # via channels, django-auth-ldap, django-crum, django-split-settings, django-transaction-hooks
 djangorestframework-yaml==1.0.3
 djangorestframework==3.3.3
 dogpile.cache==0.6.2      # via python-ironicclient, shade
@@ -128,7 +128,7 @@ oslo.utils==3.20.0        # via osc-lib, oslo.serialization, python-cinderclient
 pbr==1.10.0               # via cliff, debtcollector, keystoneauth1, mock, openstacksdk, osc-lib, oslo.i18n, oslo.serialization, oslo.utils, positional, python-cinderclient, python-designateclient, python-glanceclient, python-heatclient, python-ironicclient, python-keystoneclient, python-magnumclient, python-mistralclient, python-neutronclient, python-novaclient, python-openstackclient, python-troveclient, requestsexceptions, shade, stevedore
 pexpect==3.1
 positional==1.1.1         # via keystoneauth1, python-keystoneclient
-prettytable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-heatclient, python-ironicclient, python-magnumclient, python-novaclient, python-troveclient
+PrettyTable==0.7.2        # via cliff, python-cinderclient, python-glanceclient, python-heatclient, python-ironicclient, python-magnumclient, python-novaclient, python-troveclient
 psphere==0.5.2
 psutil==5.0.0
 psycopg2==2.6.2
@@ -136,8 +136,8 @@ pyasn1-modules==0.0.8     # via service-identity
 pyasn1==0.1.9             # via cryptography, pyasn1-modules, service-identity
 pycparser==2.17           # via cffi
 pygerduty==0.35.1
-pyjwt==1.4.2              # via adal, python-social-auth
-pyopenssl==16.2.0
+PyJWT==1.4.2              # via adal, python-social-auth
+pyOpenSSL==16.2.0         # via service-identity
 pyparsing==2.1.10         # via cliff, cmd2, oslo.utils
 pyrad==2.0                # via django-radius
 python-cinderclient==1.9.0  # via python-openstackclient, shade
@@ -163,7 +163,7 @@ python-swiftclient==3.2.0  # via python-heatclient, python-troveclient, shade
 python-troveclient==2.7.0  # via shade
 pytz==2016.10             # via babel, celery, irc, oslo.serialization, oslo.utils, tempora, twilio
 pyvmomi==6.5
-pyyaml==3.12              # via cliff, djangorestframework-yaml, os-client-config, psphere, python-heatclient, python-ironicclient, python-mistralclient
+PyYAML==3.12              # via cliff, djangorestframework-yaml, os-client-config, psphere, python-heatclient, python-ironicclient, python-mistralclient
 rackspace-auth-openstack==1.3  # via rackspace-novaclient
 rackspace-novaclient==2.1
 rax-default-network-flags-python-novaclient-ext==0.4.0  # via rackspace-novaclient
