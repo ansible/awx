@@ -407,6 +407,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                         id = inventorySourceData.id;
                                         url = GetBasePath('inventory_sources');
                                     }
+                                    if(params.hasOwnProperty('organization_id')){
+                                        id = params.organization_id;
+                                        url = GetBasePath('organizations');
+                                    }
                                     function init() {
                                         $scope.list = list;
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
