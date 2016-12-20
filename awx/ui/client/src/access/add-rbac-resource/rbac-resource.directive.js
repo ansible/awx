@@ -15,6 +15,7 @@ export default ['templateUrl', '$state',
                 usersDataset: '=',
                 teamsDataset: '=',
                 resourceData: '=',
+                withoutTeamPermissions: '@'
             },
             controller: controller,
             templateUrl: templateUrl('access/add-rbac-resource/rbac-resource'),

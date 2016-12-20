@@ -2,7 +2,7 @@
     ng-repeat="entry in access_list">
     <div class="RoleList-deleteContainer"
         ng-if="entry.explicit && entry.user_capabilities.unattach"
-        ng-click="deletePermission(permission, entry)">
+        ng-click="deletePermission(deleteTarget, entry)">
         <i ng-if="entry.explicit && entry.user_capabilities.unattach"
             class="fa fa-times RoleList-tagDelete"></i>
     </div>

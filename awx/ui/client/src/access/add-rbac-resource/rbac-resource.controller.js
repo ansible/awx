@@ -84,7 +84,7 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                         .map(function(role) {
                             return {
                                 url: url,
-                                id: role.value
+                                id: role.value || role.id
                             };
                         });
                 }));
