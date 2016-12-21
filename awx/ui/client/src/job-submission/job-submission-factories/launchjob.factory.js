@@ -1,6 +1,6 @@
 
 export default
-    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location) {
+    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location, $rootScope) {
 
             // This factory gathers up all the job launch data and POST's it.
 
@@ -121,7 +121,7 @@ export default
                     .success(function(data) {
                         Wait('stop');
                         var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command || data.workflow_job;
-                        if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
+                        if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
                             var goToJobDetails = function(state) {
@@ -207,5 +207,6 @@ LaunchJob.$inject =
         'Empty',
         'GetBasePath',
         '$state',
-        '$location'
+        '$location',
+        '$rootScope'
     ];

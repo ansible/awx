@@ -29,7 +29,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
 
         $scope.showJobType = true;
     }
-    
+
     $scope.$on(`${list.iterator}_options`, function(event, data){
         $scope.options = data.data.actions.GET;
         optionsRequestDataProcessing();
@@ -87,7 +87,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
             typeId = job.inventory_source;
         } else if (job.type === 'project_update') {
             typeId = job.project;
-        } else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
+        } else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command' || job.type === 'workflow_job') {
             typeId = job.id;
         }
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
