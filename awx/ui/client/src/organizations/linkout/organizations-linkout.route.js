@@ -298,6 +298,7 @@ export default [{
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.iterator = 'job_template';
             list.name = 'job_templates';
+            list.fields.type.ngBind = "job_template.type_label";
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',

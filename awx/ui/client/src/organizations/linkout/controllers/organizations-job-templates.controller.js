@@ -38,6 +38,34 @@ export default ['$scope', '$rootScope', '$location', '$log',
                 });
         }
 
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
+
+        $scope.$watchCollection(`${$scope.list.name}`, function() {
+                optionsRequestDataProcessing();
+            }
+        );
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
+
+                // Set the item type label
+                if (list.fields.type && $scope.options && $scope.options.hasOwnProperty('type')) {
+                    $scope.options.type.choices.every(function(choice) {
+                        if (choice[0] === item.type) {
+                            itm.type_label = choice[1];
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+            });
+        }
+
         $scope.addJobTemplate = function() {
             $state.go('jobTemplates.add');
         };

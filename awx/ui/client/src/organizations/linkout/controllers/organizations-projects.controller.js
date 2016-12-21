@@ -66,6 +66,39 @@ export default ['$scope', '$rootScope', '$location', '$log',
             });
         }
 
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
+
+        $scope.$watchCollection(`${$scope.list.name}`, function() {
+                optionsRequestDataProcessing();
+            }
+        );
+
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
+
+                // Set the item type label
+                if (list.fields.scm_type && $scope.options &&
+                        $scope.options.hasOwnProperty('scm_type')) {
+                            $scope.options.scm_type.choices.every(function(choice) {
+                                if (choice[0] === item.scm_type) {
+                                itm.type_label = choice[1];
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
+
+                    // buildTooltips(itm);
+
+            });
+        }
+
         // Go out and get the organization
         Rest.setUrl(orgBase + $stateParams.organization_id);
         Rest.get()

@@ -15,6 +15,9 @@ export default ['$scope', '$filter',
             var singleJobStatus = true;
             var firstJobStatus;
             var recentJobs = $scope.jobs;
+            if(!recentJobs){
+                return;
+            }
             var sparkData =
             _.sortBy(recentJobs.map(function(job) {
 
