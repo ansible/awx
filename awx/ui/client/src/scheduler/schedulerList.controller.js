@@ -126,6 +126,26 @@ export default [
                 let deferred = $q.defer();
 
                 switch(schedule.summary_fields.unified_job_template.unified_job_type){
+                case 'job':
+                    deferred.resolve({
+                        name: 'jobTemplateSchedules.edit',
+                        params: {
+                            id: schedule.unified_job_template,
+                            schedule_id: schedule.id
+                        }
+                    });
+                    break;
+
+                    case 'workflow_job':
+                        deferred.resolve({
+                            name: 'workflowJobTemplateSchedules.edit',
+                            params: {
+                                id: schedule.unified_job_template,
+                                schedule_id: schedule.id
+                            }
+                        });
+                        break;
+
                     case 'inventory_update':
                         Rest.setUrl(schedule.related.unified_job_template);
                         Rest.get().then( (res) => {
