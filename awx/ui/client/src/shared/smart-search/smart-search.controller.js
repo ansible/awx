@@ -76,7 +76,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // add a search tag, merge new queryset, $state.go()
         $scope.add = function(terms) {
-            let params = {};
+            let params = {},
+                origQueryset = _.clone(queryset);
 
             _.forEach(terms.split(' '), (term) => {
                 // if only a value is provided, search using default keys
@@ -111,6 +112,25 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     return undefined;
                 }
             });
+            // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
+            // This transition will not reload controllers/resolves/views
+            // but will register new $stateParams[$scope.iterator + '_search'] terms
+            $state.go('.', {
+                [$scope.iterator + '_search']: queryset });
+            qs.search(path, queryset).then((res) => {
+                $scope.dataset = res.data;
+                $scope.collection = res.data.results;
+            })
+            .catch(function() {
+                $scope.revertSearch(origQueryset);
+            });
+
+            $scope.searchTerm = null;
+            $scope.searchTags = stripDefaultParams(queryset);
+        };
+
+        $scope.revertSearch = function(queryToBeRestored) {
+            queryset = queryToBeRestored;
             // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
             // This transition will not reload controllers/resolves/views
             // but will register new $stateParams[$scope.iterator + '_search'] terms

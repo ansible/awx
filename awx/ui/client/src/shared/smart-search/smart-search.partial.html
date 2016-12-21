@@ -3,7 +3,7 @@
     <div class="SmartSearch-bar">
         <div class="SmartSearch-searchTermContainer">
             <!-- string search input -->
-            <form class="SmartSearch-form" ng-submit="add(searchTerm)" novalidate>
+            <form name="smartSearch" class="SmartSearch-form" aw-enter-key="add(searchTerm)" novalidate>
                 <input class="SmartSearch-input" ng-model="searchTerm" placeholder="Search">
             </form>
             <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="add(searchTerm)">
