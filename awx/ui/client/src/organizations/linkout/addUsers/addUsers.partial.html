@@ -27,7 +27,7 @@
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updateUsers()"
-                        ng-disabled="!selectedItems || !selectedItems.length">
+                        ng-disabled="!selectedItems || selectedItems.length === 0">
                         Save
                     </button>
                 </div>
