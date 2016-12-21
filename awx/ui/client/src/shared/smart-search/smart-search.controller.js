@@ -76,16 +76,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // add a search tag, merge new queryset, $state.go()
         $scope.add = function(terms) {
-            let params = {};
-
-            _.forEach(terms.split(' '), (term) => {
-                // if only a value is provided, search using default keys
-                if (term.split(':').length === 1) {
-                    params = _.merge(params, setDefaults(term));
-                } else {
-                    params = _.merge(params, qs.encodeParam(term));
-                }
-            });
+            let params = {},
+                origQueryset = _.clone(queryset);
 
             function setDefaults(term) {
                 // "name" and "description" are sane defaults for MOST models, but not ALL!
@@ -100,17 +92,47 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 }
             }
 
-            params.page = '1';
-            queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
-                if (object[key] && object[key] !== sourceValue){
-                    return [object[key], sourceValue];
-                }
-                else {
-                    // // https://lodash.com/docs/3.10.1#merge
-                    // If customizer fn returns undefined merging is handled by default _.merge algorithm
-                    return undefined;
-                }
-            });
+            if(terms && terms !== '') {
+                _.forEach(terms.split(' '), (term) => {
+                    // if only a value is provided, search using default keys
+                    if (term.split(':').length === 1) {
+                        params = _.merge(params, setDefaults(term));
+                    } else {
+                        params = _.merge(params, qs.encodeParam(term));
+                    }
+                });
+
+                params.page = '1';
+                queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
+                    if (object[key] && object[key] !== sourceValue){
+                        return [object[key], sourceValue];
+                    }
+                    else {
+                        // // https://lodash.com/docs/3.10.1#merge
+                        // If customizer fn returns undefined merging is handled by default _.merge algorithm
+                        return undefined;
+                    }
+                });
+                // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
+                // This transition will not reload controllers/resolves/views
+                // but will register new $stateParams[$scope.iterator + '_search'] terms
+                $state.go('.', {
+                    [$scope.iterator + '_search']: queryset });
+                qs.search(path, queryset).then((res) => {
+                    $scope.dataset = res.data;
+                    $scope.collection = res.data.results;
+                })
+                .catch(function() {
+                    $scope.revertSearch(origQueryset);
+                });
+
+                $scope.searchTerm = null;
+                $scope.searchTags = stripDefaultParams(queryset);
+            }
+        };
+
+        $scope.revertSearch = function(queryToBeRestored) {
+            queryset = queryToBeRestored;
             // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
             // This transition will not reload controllers/resolves/views
             // but will register new $stateParams[$scope.iterator + '_search'] terms
