@@ -560,17 +560,33 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
 
                         $scope.selectedTemplate = $scope.nodeBeingEdited.unifiedJobTemplate;
 
-                        switch ($scope.nodeBeingEdited.unifiedJobTemplate.type) {
-                            case "job_template":
-                                $scope.workflowMakerFormConfig.activeTab = "jobs";
-                                break;
-                            case "project":
-                                $scope.workflowMakerFormConfig.activeTab = "project_sync";
-                                break;
-                            case "inventory_source":
-                                $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
-                                break;
+                        if($scope.selectedTemplate.unified_job_type) {
+                            switch ($scope.selectedTemplate.unified_job_type) {
+                                case "job":
+                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                    break;
+                                case "project_update":
+                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                    break;
+                                case "inventory_update":
+                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                    break;
+                            }
                         }
+                        else if($scope.selectedTemplate.type) {
+                            switch ($scope.selectedTemplate.type) {
+                                case "job_template":
+                                    $scope.workflowMakerFormConfig.activeTab = "jobs";
+                                    break;
+                                case "project":
+                                    $scope.workflowMakerFormConfig.activeTab = "project_sync";
+                                    break;
+                                case "inventory_source":
+                                    $scope.workflowMakerFormConfig.activeTab = "inventory_sync";
+                                    break;
+                            }
+                        }
+
                     }
 
                     let siblingConnectionTypes = WorkflowService.getSiblingConnectionTypes({

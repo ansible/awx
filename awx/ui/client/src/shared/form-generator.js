@@ -1328,7 +1328,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //lookup type fields
                     if (field.type === 'lookup') {
-                        let defaultLookupNgClick = `$state.go($state.current.name + '.${field.sourceModel}')`;
+                        let defaultLookupNgClick = `$state.go($state.current.name + '.${field.sourceModel}', {selected: ${field.sourceModel}})`;
                         html += label();
 
                         html += "<div ";
