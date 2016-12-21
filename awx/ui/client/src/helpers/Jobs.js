@@ -29,8 +29,8 @@ export default
                 else if (type === 'ad_hoc_command') {
                     RelaunchAdhoc({ scope: scope, id: id, name: name });
                 }
-                else if (type === 'job' || type === 'system_job') {
-                    RelaunchPlaybook({ scope: scope, id: id, name: name });
+                else if (type === 'job' || type === 'system_job' || type === 'workflow_job') {
+                    RelaunchPlaybook({ scope: scope, id: id, name: name, job_type: type });
                 }
                 else if (type === 'project_update') {
                     RelaunchSCM({ scope: scope, id: id });
@@ -289,8 +289,9 @@ export default
     .factory('RelaunchPlaybook', ['InitiatePlaybookRun', function(InitiatePlaybookRun) {
         return function(params) {
             var scope = params.scope,
-                id = params.id;
-            InitiatePlaybookRun({ scope: scope, id: id, relaunch: true });
+                id = params.id,
+                job_type = params.job_type;
+            InitiatePlaybookRun({ scope: scope, id: id, relaunch: true, job_type: job_type });
         };
     }])
 

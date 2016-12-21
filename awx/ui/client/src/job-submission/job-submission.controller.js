@@ -145,7 +145,7 @@ export default
                     }
                 }
                 else {
-                    if($scope.submitJobType && $scope.submitJobType === 'workflow_job_template') {
+                    if($scope.submitJobType && $scope.submitJobType === 'workflow_job') {
                         launch_url = GetBasePath('workflow_jobs') + $scope.submitJobId + '/relaunch/';
                     }
                     else {
