@@ -97,7 +97,8 @@ export default
                 actionClass: 'btn List-buttonDefault system-tracking',
                 ngDisabled: 'systemTrackingDisabled || !hostsSelected',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: true
             },
             refresh: {
                 mode: 'all',
