@@ -59,6 +59,10 @@ option_list = [
                 help='Number of credentials to create'),
     make_option('--inventory-hosts', action='store', type='int', default=40,
                 help='number of credentials to create'),
+    make_option('--wfjts', action='store', type='int', default=15,
+                help='number of workflow job templates to create'),
+    make_option('--nodes', action='store', type='int', default=200,
+                help='number of workflow job template nodes to create'),
     make_option('--jobs', action='store', type='int', default=200,
                 help='number of job entries to create'),
     make_option('--job-events', action='store', type='int', default=500,
@@ -84,6 +88,8 @@ n_credentials      = int(options['credentials'])
 n_inventories      = int(options['inventories'])
 n_inventory_groups = int(options['inventory_groups'])
 n_inventory_hosts  = int(options['inventory_hosts'])
+n_wfjts            = int(options['wfjts'])
+n_nodes            = int(options['nodes'])
 n_jobs             = int(options['jobs'])
 n_job_events       = int(options['job_events'])
 prefix             = options['prefix']
@@ -97,6 +103,8 @@ credentials      = []
 inventories      = []
 inventory_groups = []
 inventory_hosts  = []
+wfjts            = []
+nodes            = []
 jobs             = []
 #job_events       = []
 
@@ -122,6 +130,17 @@ def spread(n, m):
 
 
 ids = defaultdict(lambda: 0)
+bulk_data_description = 'Made by the Tower bulk-data creator script'
+
+
+# function to cycle through a list
+def yield_choice(alist):
+    ix = 0
+    while True:
+        ix += 1
+        if ix >= len(alist):
+            ix = 0
+        yield alist[ix]
 
 
 class Rollback(Exception):
@@ -195,6 +214,11 @@ try:
                 org_idx += 1
                 print('')
 
+            creator_gen = yield_choice(users)
+            for i in range(6):
+                next(creator_gen)
+            modifier_gen = yield_choice(users)
+
             print('# Creating %d teams' % n_teams)
             org_idx = 0
             for n in spread(n_teams, n_organizations):
@@ -204,7 +228,11 @@ try:
                     team_id = ids['team']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    team, _ = Team.objects.get_or_create(name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org)
+                    team, _ = Team.objects.get_or_create(
+                        name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen))
+                    )
                     teams.append(team)
                 org_idx += 1
                 print('')
@@ -373,6 +401,54 @@ try:
                     if project_idx == 0 and i == 0:
                         job_template.admin_role.members.add(jt_admin)
                 project_idx += 1
+                print('')
+
+            print('# Creating %d Workflow Job Templates' % n_wfjts)
+            org_idx = 0
+            for n in spread(n_wfjts, n_organizations):
+                org = organizations[org_idx]
+                for i in range(n):
+                    ids['wfjts'] += 1
+                    wfjt_id = ids['wfjts']
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
+                    sys.stdout.flush()
+                    wfjt, _ = WorkflowJobTemplate.objects.get_or_create(
+                        name='%s WFJT %d Org %d' % (prefix, wfjt_id, org_idx),
+                        description=bulk_data_description,
+                        organization=org
+                    )
+                    wfjts.append(wfjt)
+                org_idx += 1
+                print('')
+
+            print('# Creating %d Workflow Job Template nodes' % n_nodes)
+            wfjt_idx = 0
+            for n in spread(n_nodes, n_wfjts):
+                wfjt = wfjts[wfjt_idx]
+                jt_gen = yield_choice(job_templates)
+                inv_gen = yield_choice(inventories)
+                cred_gen = yield_choice(credentials)
+                for i in range(n):
+                    ids['nodes'] += 1
+                    node_id = ids['nodes']
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, wfjt.name, i+ 1))
+                    sys.stdout.flush()
+                    kwargs = dict(
+                        workflow_job_template=wfjt,
+                        unified_job_template=next(jt_gen),
+                        modified=now()
+                    )
+                    if i % 2 == 0:
+                        # only apply inventories for every other node
+                        kwargs['inventory'] = next(inv_gen)
+                    if i % 3 == 0:
+                        # only apply prompted credential every 3rd node
+                        kwargs['credential'] = next(cred_gen)
+                    node, _ = WorkflowJobTemplateNode.objects.get_or_create(
+                        **kwargs
+                    )
+                    wfjts.append(wfjt)
+                wfjt_idx += 1
                 print('')
 
             print('# Creating %d jobs' % n_jobs)
