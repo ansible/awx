@@ -12,14 +12,32 @@ from optparse import make_option, OptionParser
 # Django
 import django
 from django.utils.timezone import now
-from django.contrib.auth.models import User
-from django.db import transaction
 
-# awx
-from awx.main.models import * # noqa
+
+base_dir = os.path.abspath(  # Convert into absolute path string
+    os.path.join(  # Current file's grandparent directory
+        os.path.join(  # Current file's parent directory
+            os.path.dirname(  # Current file's directory
+                os.path.abspath(__file__)  # Current file path
+            ),
+            os.pardir
+        ),
+        os.pardir
+    )
+)
+
+if base_dir not in sys.path:
+    sys.path.insert(1, base_dir)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # noqa
 django.setup() # noqa
+
+
+from django.contrib.auth.models import User # noqa
+from django.db import transaction # noqa
+
+# awx
+from awx.main.models import * # noqa
 
 
 option_list = [
@@ -114,28 +132,37 @@ try:
 
     with transaction.atomic():
         with batch_role_ancestor_rebuilding():
-            admin, _      = User.objects.get_or_create(username = 'admin', is_superuser=True)
-            org_admin, _  = User.objects.get_or_create(username = 'org_admin')
-            org_member, _ = User.objects.get_or_create(username = 'org_member')
-            prj_admin, _  = User.objects.get_or_create(username = 'prj_admin')
-            jt_admin, _   = User.objects.get_or_create(username = 'jt_admin')
-            inv_admin, _  = User.objects.get_or_create(username = 'inv_admin')
+            admin, created      = User.objects.get_or_create(username = 'admin', is_superuser=True)
+            if created:
+                admin.is_superuser = True
+                admin.save()
+                admin.set_password('test')
+                admin.save()
 
-            admin.is_superuser = True
-            admin.save()
-            admin.set_password('test')
-            admin.save()
-            org_admin.set_password('test')
-            org_admin.save()
-            org_member.set_password('test')
-            org_member.save()
-            prj_admin.set_password('test')
-            prj_admin.save()
-            jt_admin.set_password('test')
-            jt_admin.save()
-            inv_admin.set_password('test')
-            inv_admin.save()
+            org_admin, created  = User.objects.get_or_create(username = 'org_admin')
+            if created:
+                org_admin.set_password('test')
+                org_admin.save()
 
+            org_member, created = User.objects.get_or_create(username = 'org_member')
+            if created:
+                org_member.set_password('test')
+                org_member.save()
+
+            prj_admin, created  = User.objects.get_or_create(username = 'prj_admin')
+            if created:
+                prj_admin.set_password('test')
+                prj_admin.save()
+
+            jt_admin, created   = User.objects.get_or_create(username = 'jt_admin')
+            if created:
+                jt_admin.set_password('test')
+                jt_admin.save()
+
+            inv_admin, created  = User.objects.get_or_create(username = 'inv_admin')
+            if created:
+                inv_admin.set_password('test')
+                inv_admin.save()
 
 
             print('# Creating %d organizations' % n_organizations)
