@@ -510,7 +510,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                             collection="${list.name}"
                             dataset="${list.iterator}_dataset"
                             column-sort
-                            column-field="${name}"
+                            column-field="name"
                             column-iterator="${list.iterator}"
                             column-no-sort="${list.fields.name.nosort}"
                             column-label="${list.fields.name.label}"
