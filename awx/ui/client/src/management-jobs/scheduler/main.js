@@ -50,7 +50,19 @@ angular.module('managementJobScheduler', [])
                     let path = `${GetBasePath('system_job_templates')}${$stateParams.id}`;
                     Rest.setUrl(path);
                     return Rest.get(path).then((res) => res.data);
-                }]
+                }],
+                UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                    function(Rest, GetBasePath, $stateParams, $q) {
+                        Rest.setUrl(GetBasePath('unified_jobs'));
+                        var val = $q.defer();
+                        Rest.options()
+                            .then(function(data) {
+                                val.resolve(data.data);
+                            }, function(data) {
+                                val.reject(data);
+                            });
+                        return val.promise;
+                    }]
             }
         });
         $stateExtender.addState({
