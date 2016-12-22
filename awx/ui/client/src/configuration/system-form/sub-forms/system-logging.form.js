@@ -34,7 +34,7 @@
              },
              LOG_AGGREGATOR_LOGGERS: {
                  type: 'textarea',
-                 reset: 'LOG_AGGREGATOR_PASSWORD'
+                 reset: 'LOG_AGGREGATOR_LOGGERS'
              },
             LOG_AGGREGATOR_INDIVIDUAL_FACTS: {
                 type: 'toggleSwitch',
