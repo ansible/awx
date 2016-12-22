@@ -169,7 +169,7 @@ try:
             for i in xrange(n_organizations):
                 sys.stdout.write('\r%d     ' % (i + 1))
                 sys.stdout.flush()
-                org = Organization.objects.create(name='%s Organization %d' % (prefix, i))
+                org, _ = Organization.objects.get_or_create(name='%s Organization %d' % (prefix, i))
                 organizations.append(org)
                 if i == 0:
                     org.admin_role.members.add(org_admin)
@@ -189,7 +189,7 @@ try:
                     user_id = ids['user']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, organizations[org_idx].name, i+ 1))
                     sys.stdout.flush()
-                    user = User.objects.create(username='%suser-%d' % (prefix, user_id))
+                    user, _ = User.objects.get_or_create(username='%suser-%d' % (prefix, user_id))
                     organizations[org_idx].member_role.members.add(user)
                     users.append(user)
                 org_idx += 1
@@ -204,7 +204,7 @@ try:
                     team_id = ids['team']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    team = Team.objects.create(name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org)
+                    team, _ = Team.objects.get_or_create(name='%s Team %d Org %d' % (prefix, team_id, org_idx), organization=org)
                     teams.append(team)
                 org_idx += 1
                 print('')
@@ -240,7 +240,7 @@ try:
                     sys.stdout.write('\r   %d     ' % (ids['credential']))
                     sys.stdout.flush()
                     credential_id = ids['credential']
-                    credential = Credential.objects.create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx))
+                    credential, _ = Credential.objects.get_or_create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx))
                     credential.admin_role.members.add(user)
                     credentials.append(credential)
                 user_idx += 1
@@ -256,7 +256,7 @@ try:
                     sys.stdout.write('\r   %d     ' % (ids['credential'] - starting_credential_id))
                     sys.stdout.flush()
                     credential_id = ids['credential']
-                    credential = Credential.objects.create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx))
+                    credential, _ = Credential.objects.get_or_create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx))
                     credential.admin_role.parents.add(team.member_role)
                     credentials.append(credential)
                 team_idx += 1
@@ -271,7 +271,7 @@ try:
                     project_id = ids['project']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    project = Project.objects.create(name='%s Project %d Org %d' % (prefix, project_id, org_idx), organization=org)
+                    project, _ = Project.objects.get_or_create(name='%s Project %d Org %d' % (prefix, project_id, org_idx), organization=org)
                     projects.append(project)
                     if org_idx == 0 and i == 0:
                         project.admin_role.members.add(prj_admin)
@@ -289,7 +289,7 @@ try:
                     inventory_id = ids['inventory']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    inventory = Inventory.objects.create(name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx), organization=org)
+                    inventory, _ = Inventory.objects.get_or_create(name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx), organization=org)
                     inventories.append(inventory)
                     if org_idx == 0 and i == 0:
                         inventory.admin_role.members.add(inv_admin)
@@ -308,7 +308,7 @@ try:
                     group_id = ids['group']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, inventory.name, i+ 1))
                     sys.stdout.flush()
-                    group = Group.objects.create(
+                    group, _ = Group.objects.get_or_create(
                         name='%s Group %d Inventory %d' % (prefix, group_id, inv_idx),
                         inventory=inventory,
                     )
@@ -335,7 +335,7 @@ try:
                     host_id = ids['host']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i+ 1))
                     sys.stdout.flush()
-                    host = Host.objects.create(name='%s.host-%06d.group-%05d.dummy' % (prefix, host_id, group_idx), inventory=group.inventory)
+                    host, _ = Host.objects.get_or_create(name='%s.host-%06d.group-%05d.dummy' % (prefix, host_id, group_idx), inventory=group.inventory)
                     # Add the host to up to 3 groups
                     host.groups.add(group)
                     for m in range(2):
@@ -363,7 +363,7 @@ try:
                     if org_inv_count > 0:
                         inventory = project.organization.inventories.all()[inv_idx % org_inv_count]
 
-                    job_template = JobTemplate.objects.create(
+                    job_template, _ = JobTemplate.objects.get_or_create(
                         name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
                         inventory=inventory,
                         project=project,
@@ -383,19 +383,21 @@ try:
                 for i in range(n):
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
-                    job = Job.objects.create(job_template=job_template)
+                    job, _ = Job.objects.get_or_create(job_template=job_template)
+                    job._is_new = _
                     jobs.append(job)
 
-                    if job_template.inventory:
-                        inv_groups = [g for g in job_template.inventory.groups.all()]
-                        if len(inv_groups):
-                            JobHostSummary.objects.bulk_create([
-                                JobHostSummary(
-                                    job=job, host=h, host_name=h.name, processed=1,
-                                    created=now(), modified=now()
-                                )
-                                for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
-                            ])
+                    with transaction.atomic():
+                        if job_template.inventory:
+                            inv_groups = [g for g in job_template.inventory.groups.all()]
+                            if len(inv_groups) and job._is_new:
+                                JobHostSummary.objects.bulk_create([
+                                    JobHostSummary(
+                                        job=job, host=h, host_name=h.name, processed=1,
+                                        created=now(), modified=now()
+                                    )
+                                    for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
+                                ])
                     group_idx += 1
                 job_template_idx += 1
                 if n:
@@ -407,15 +409,17 @@ try:
                 job = jobs[job_idx]
                 sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
                 sys.stdout.flush()
-                JobEvent.objects.bulk_create([
-                    JobEvent(
-                        created=now(),
-                        modified=now(),
-                        job=job,
-                        event='runner_on_ok'
-                    )
-                    for i in range(n)
-                ])
+                # Check if job already has events, for idempotence
+                if job._is_new:
+                    JobEvent.objects.bulk_create([
+                        JobEvent(
+                            created=now(),
+                            modified=now(),
+                            job=job,
+                            event='runner_on_ok'
+                        )
+                        for i in range(n)
+                    ])
                 job_idx += 1
                 if n:
                     print('')

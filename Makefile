@@ -508,6 +508,9 @@ test_jenkins : test_coverage
 
 # Make fake data
 bulk_data:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
 	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py
 
 # l10n TASKS
