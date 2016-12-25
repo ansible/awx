@@ -130,17 +130,17 @@ def spread(n, m):
 
 
 ids = defaultdict(lambda: 0)
-bulk_data_description = 'Made by the Tower bulk-data creator script'
+bulk_data_description = 'From Tower bulk-data script'
 
 
 # function to cycle through a list
 def yield_choice(alist):
     ix = 0
     while True:
+        yield alist[ix]
         ix += 1
         if ix >= len(alist):
             ix = 0
-        yield alist[ix]
 
 
 class Rollback(Exception):
@@ -274,6 +274,8 @@ try:
                 user_idx += 1
             print('')
 
+            credential_gen = yield_choice(credentials)
+
             print('# Creating %d credentials for teams' % (n_credentials // 2))
             team_idx = 0
             starting_credential_id = ids['credential']
@@ -395,6 +397,7 @@ try:
                         name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
                         inventory=inventory,
                         project=project,
+                        credential=next(credential_gen)
                     )
                     job_templates.append(job_template)
                     inv_idx += 1
@@ -428,6 +431,8 @@ try:
                 jt_gen = yield_choice(job_templates)
                 inv_gen = yield_choice(inventories)
                 cred_gen = yield_choice(credentials)
+                parent_idx = 0
+                wfjt_nodes = []
                 for i in range(n):
                     ids['nodes'] += 1
                     node_id = ids['nodes']
@@ -447,7 +452,23 @@ try:
                     node, _ = WorkflowJobTemplateNode.objects.get_or_create(
                         **kwargs
                     )
-                    wfjts.append(wfjt)
+                    # nodes.append(node)
+                    wfjt_nodes.append(node)
+                    if i <= 3:
+                        continue
+                    parent_node = wfjt_nodes[parent_idx]
+                    if parent_node.workflow_job_template != node.workflow_job_template:
+                        raise Exception("Programming error, associating nodes in different workflows")
+                    elif parent_node == node:
+                        raise Exception("error, self association")
+                    if parent_idx % 2 == 0:
+                        parent_node.always_nodes.add(node)
+                    else:
+                        if (i + 1) % 3 == 0:
+                            parent_node.failure_nodes.add(node)
+                        else:
+                            parent_node.success_nodes.add(node)
+                    parent_idx = (parent_idx + 7) % len(wfjt_nodes)
                 wfjt_idx += 1
                 print('')
 
@@ -459,7 +480,13 @@ try:
                 for i in range(n):
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
-                    job, _ = Job.objects.get_or_create(job_template=job_template)
+                    job_stat = 'successful'
+                    if i % 4 == 0:
+                        job_stat = 'failed'
+                    elif i % 3 == 0:
+                        job_stat = 'canceled'
+                    job, _ = Job.objects.get_or_create(
+                        job_template=job_template, status=job_stat)
                     job._is_new = _
                     jobs.append(job)
 
