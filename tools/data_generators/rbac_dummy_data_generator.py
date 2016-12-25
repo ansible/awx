@@ -147,6 +147,15 @@ class Rollback(Exception):
     pass
 
 
+# Normally the modified_by field is populated by the crum library automatically,
+# but since this is ran outside the request-response cycle that won't work.
+# It is disaled here.
+def mock_save(self, *args, **kwargs):
+    return super(PrimordialModel, self).save(*args, **kwargs)
+
+PrimordialModel.save = mock_save
+
+
 try:
 
     with transaction.atomic():
@@ -268,7 +277,12 @@ try:
                     sys.stdout.write('\r   %d     ' % (ids['credential']))
                     sys.stdout.flush()
                     credential_id = ids['credential']
-                    credential, _ = Credential.objects.get_or_create(name='%s Credential %d User %d' % (prefix, credential_id, user_idx))
+                    credential, _ = Credential.objects.get_or_create(
+                        name='%s Credential %d User %d' % (prefix, credential_id, user_idx),
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen)),
+                        kind='ssh'
+                    )
                     credential.admin_role.members.add(user)
                     credentials.append(credential)
                 user_idx += 1
@@ -286,7 +300,12 @@ try:
                     sys.stdout.write('\r   %d     ' % (ids['credential'] - starting_credential_id))
                     sys.stdout.flush()
                     credential_id = ids['credential']
-                    credential, _ = Credential.objects.get_or_create(name='%s Credential %d team %d' % (prefix, credential_id, team_idx))
+                    credential, _ = Credential.objects.get_or_create(
+                        name='%s Credential %d team %d' % (prefix, credential_id, team_idx),
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen)),
+                        kind='ssh'
+                    )
                     credential.admin_role.parents.add(team.member_role)
                     credentials.append(credential)
                 team_idx += 1
@@ -301,7 +320,21 @@ try:
                     project_id = ids['project']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    project, _ = Project.objects.get_or_create(name='%s Project %d Org %d' % (prefix, project_id, org_idx), organization=org)
+                    project, _ = Project.objects.get_or_create(
+                        name='%s Project %d Org %d' % (prefix, project_id, org_idx),
+                        organization=org,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen)),
+                        scm_url='https://github.com/jlaska/ansible-playbooks.git',
+                        scm_type='git',
+                        playbook_files=[
+                            "check.yml", "debug-50.yml", "debug.yml", "debug2.yml",
+                            "debug_extra_vars.yml", "dynamic_inventory.yml",
+                            "environ_test.yml", "fail_unless.yml", "pass_unless.yml",
+                            "pause.yml", "ping-20.yml", "ping.yml",
+                            "setfact_50.yml", "vault.yml"
+                        ]
+                    )
                     projects.append(project)
                     if org_idx == 0 and i == 0:
                         project.admin_role.members.add(prj_admin)
@@ -319,7 +352,13 @@ try:
                     inventory_id = ids['inventory']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i+ 1))
                     sys.stdout.flush()
-                    inventory, _ = Inventory.objects.get_or_create(name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx), organization=org)
+                    inventory, _ = Inventory.objects.get_or_create(
+                        name='%s Inventory %d Org %d' % (prefix, inventory_id, org_idx),
+                        organization=org,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen)),
+                        variables='{"ansible_connection": "local"}'
+                    )
                     inventories.append(inventory)
                     if org_idx == 0 and i == 0:
                         inventory.admin_role.members.add(inv_admin)
@@ -341,6 +380,8 @@ try:
                     group, _ = Group.objects.get_or_create(
                         name='%s Group %d Inventory %d' % (prefix, group_id, inv_idx),
                         inventory=inventory,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen))
                     )
                     # Have each group have up to 3 parent groups
                     for parent_n in range(3):
@@ -365,7 +406,12 @@ try:
                     host_id = ids['host']
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, group.name, i+ 1))
                     sys.stdout.flush()
-                    host, _ = Host.objects.get_or_create(name='%s.host-%06d.group-%05d.dummy' % (prefix, host_id, group_idx), inventory=group.inventory)
+                    host, _ = Host.objects.get_or_create(
+                        name='%s.host-%06d.group-%05d.dummy' % (prefix, host_id, group_idx),
+                        inventory=group.inventory,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen))
+                    )
                     # Add the host to up to 3 groups
                     host.groups.add(group)
                     for m in range(2):
@@ -392,12 +438,20 @@ try:
                     org_inv_count = project.organization.inventories.count()
                     if org_inv_count > 0:
                         inventory = project.organization.inventories.all()[inv_idx % org_inv_count]
+                    extra_kwargs = {}
+                    if ids['job_template'] % 5 == 0:
+                        extra_kwargs['cloud_credential'] = next(credential_gen)
+                    if ids['job_template'] % 7 == 0:
+                        extra_kwargs['network_credential'] = next(credential_gen)
 
                     job_template, _ = JobTemplate.objects.get_or_create(
                         name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
                         inventory=inventory,
                         project=project,
-                        credential=next(credential_gen)
+                        credential=next(credential_gen),
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen)),
+                        **extra_kwargs
                     )
                     job_templates.append(job_template)
                     inv_idx += 1
@@ -418,7 +472,9 @@ try:
                     wfjt, _ = WorkflowJobTemplate.objects.get_or_create(
                         name='%s WFJT %d Org %d' % (prefix, wfjt_id, org_idx),
                         description=bulk_data_description,
-                        organization=org
+                        organization=org,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen))
                     )
                     wfjts.append(wfjt)
                 org_idx += 1
@@ -440,8 +496,7 @@ try:
                     sys.stdout.flush()
                     kwargs = dict(
                         workflow_job_template=wfjt,
-                        unified_job_template=next(jt_gen),
-                        modified=now()
+                        unified_job_template=next(jt_gen)
                     )
                     if i % 2 == 0:
                         # only apply inventories for every other node
@@ -450,7 +505,8 @@ try:
                         # only apply prompted credential every 3rd node
                         kwargs['credential'] = next(cred_gen)
                     node, _ = WorkflowJobTemplateNode.objects.get_or_create(
-                        **kwargs
+                        **kwargs,
+                        defaults=dict(modified=now())
                     )
                     # nodes.append(node)
                     wfjt_nodes.append(node)
