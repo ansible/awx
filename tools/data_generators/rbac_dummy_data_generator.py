@@ -63,6 +63,8 @@ option_list = [
                 help='number of workflow job templates to create'),
     make_option('--nodes', action='store', type='int', default=200,
                 help='number of workflow job template nodes to create'),
+    make_option('--labels', action='store', type='int', default=200,
+                help='labels to create, will associate 10x as many'),
     make_option('--jobs', action='store', type='int', default=200,
                 help='number of job entries to create'),
     make_option('--job-events', action='store', type='int', default=500,
@@ -90,6 +92,7 @@ n_inventory_groups = int(options['inventory_groups'])
 n_inventory_hosts  = int(options['inventory_hosts'])
 n_wfjts            = int(options['wfjts'])
 n_nodes            = int(options['nodes'])
+n_labels           = int(options['labels'])
 n_jobs             = int(options['jobs'])
 n_job_events       = int(options['job_events'])
 prefix             = options['prefix']
@@ -105,6 +108,7 @@ inventory_groups = []
 inventory_hosts  = []
 wfjts            = []
 nodes            = []
+labels           = []
 jobs             = []
 #job_events       = []
 
@@ -207,6 +211,7 @@ try:
                     org.member_role.members.add(jt_admin)
                     org.member_role.members.add(inv_admin)
 
+            organization_gen = yield_choice(organizations)
             print('')
 
             print('# Creating %d users' % n_users)
@@ -324,7 +329,7 @@ try:
                         name='%s Project %d Org %d' % (prefix, project_id, org_idx),
                         organization=org,
                         defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen)),
+                                      modified_by=next(modifier_gen),
                         scm_url='https://github.com/jlaska/ansible-playbooks.git',
                         scm_type='git',
                         playbook_files=[
@@ -333,7 +338,7 @@ try:
                             "environ_test.yml", "fail_unless.yml", "pass_unless.yml",
                             "pause.yml", "ping-20.yml", "ping.yml",
                             "setfact_50.yml", "vault.yml"
-                        ]
+                        ])
                     )
                     projects.append(project)
                     if org_idx == 0 and i == 0:
@@ -476,6 +481,7 @@ try:
                         defaults=dict(created_by=next(creator_gen),
                                       modified_by=next(modifier_gen))
                     )
+                    wfjt._is_new = _
                     wfjts.append(wfjt)
                 org_idx += 1
                 print('')
@@ -484,6 +490,8 @@ try:
             wfjt_idx = 0
             for n in spread(n_nodes, n_wfjts):
                 wfjt = wfjts[wfjt_idx]
+                if not wfjt._is_new:
+                    continue
                 jt_gen = yield_choice(job_templates)
                 inv_gen = yield_choice(inventories)
                 cred_gen = yield_choice(credentials)
@@ -496,7 +504,8 @@ try:
                     sys.stdout.flush()
                     kwargs = dict(
                         workflow_job_template=wfjt,
-                        unified_job_template=next(jt_gen)
+                        unified_job_template=next(jt_gen),
+                        modified=now()
                     )
                     if i % 2 == 0:
                         # only apply inventories for every other node
@@ -505,8 +514,7 @@ try:
                         # only apply prompted credential every 3rd node
                         kwargs['credential'] = next(cred_gen)
                     node, _ = WorkflowJobTemplateNode.objects.get_or_create(
-                        **kwargs,
-                        defaults=dict(modified=now())
+                        **kwargs
                     )
                     # nodes.append(node)
                     wfjt_nodes.append(node)
@@ -528,6 +536,35 @@ try:
                 wfjt_idx += 1
                 print('')
 
+            print('# Creating %d Labels' % n_labels)
+            org_idx = 0
+            for n in spread(n_labels, n_organizations):
+                org = organizations[org_idx]
+                for i in range(n):
+                    ids['labels'] += 1
+                    label_id = ids['labels']
+                    sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
+                    sys.stdout.flush()
+                    label, _ = Label.objects.get_or_create(
+                        name='%s Label %d Org %d' % (prefix, label_id, org_idx),
+                        organization=org,
+                        defaults=dict(created_by=next(creator_gen),
+                                      modified_by=next(modifier_gen))
+                    )
+                    labels.append(label)
+                org_idx += 1
+                print('')
+            label_gen = yield_choice(labels)
+
+            print('# Adding labels to job templates')
+            jt_idx = 0
+            for n in spread(n_labels*7, n_job_templates):
+                jt = job_templates[jt_idx]
+                print('  Giving %d labels to %s JT' % (n, jt.name))
+                for i in range(n):
+                    jt.labels.add(next(label_gen))
+                jt_idx += 1
+
             print('# Creating %d jobs' % n_jobs)
             group_idx = 0
             job_template_idx = 0
@@ -537,9 +574,9 @@ try:
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
                     job_stat = 'successful'
-                    if i % 4 == 0:
+                    if len(jobs) % 4 == 0:
                         job_stat = 'failed'
-                    elif i % 3 == 0:
+                    elif len(jobs) % 11 == 0:
                         job_stat = 'canceled'
                     job, _ = Job.objects.get_or_create(
                         job_template=job_template, status=job_stat)
