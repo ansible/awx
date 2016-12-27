@@ -63,7 +63,7 @@ option_list = [
                 help='number of workflow job templates to create'),
     make_option('--nodes', action='store', type='int', default=200,
                 help='number of workflow job template nodes to create'),
-    make_option('--labels', action='store', type='int', default=200,
+    make_option('--labels', action='store', type='int', default=100,
                 help='labels to create, will associate 10x as many'),
     make_option('--jobs', action='store', type='int', default=200,
                 help='number of job entries to create'),
@@ -71,6 +71,8 @@ option_list = [
                 help='number of job event entries to create'),
     make_option('--pretend', action='store_true',
                 help="Don't commit the data to the database"),
+    make_option('--preset', action='store', type='string', default='',
+                help="Preset data set to use"),
     make_option('--prefix', action='store', type='string', default='',
                 help="Prefix generated names with this string"),
     #make_option('--spread-bias', action='store', type='string', default='exponential',
@@ -79,6 +81,10 @@ option_list = [
 parser = OptionParser(option_list=option_list)
 options, remainder = parser.parse_args()
 options = vars(options)
+
+
+if options['preset']:
+    pass
 
 
 n_organizations    = int(options['organizations'])
@@ -454,10 +460,13 @@ try:
                         inventory=inventory,
                         project=project,
                         credential=next(credential_gen),
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen)),
+                        defaults=dict(
+                            created_by=next(creator_gen),
+                            modified_by=next(modifier_gen),
+                            playbook="debug.yml"),
                         **extra_kwargs
                     )
+                    job_template._is_new = _
                     job_templates.append(job_template)
                     inv_idx += 1
                     if project_idx == 0 and i == 0:
@@ -546,7 +555,7 @@ try:
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, org.name, i + 1))
                     sys.stdout.flush()
                     label, _ = Label.objects.get_or_create(
-                        name='%s Label %d Org %d' % (prefix, label_id, org_idx),
+                        name='%sL_%do%d' % (prefix, label_id, org_idx),
                         organization=org,
                         defaults=dict(created_by=next(creator_gen),
                                       modified_by=next(modifier_gen))
@@ -560,16 +569,31 @@ try:
             jt_idx = 0
             for n in spread(n_labels*7, n_job_templates):
                 jt = job_templates[jt_idx]
+                if not jt._is_new:
+                    continue
                 print('  Giving %d labels to %s JT' % (n, jt.name))
                 for i in range(n):
                     jt.labels.add(next(label_gen))
                 jt_idx += 1
+
+            print('# Adding labels to workflow job templates')
+            wfjt_idx = 0
+            for n in spread(n_labels*3, n_wfjts):
+                wfjt = wfjts[wfjt_idx]
+                if not jt._is_new:
+                    continue
+                print('  Giving %d labels to %s WFJT' % (n, wfjt.name))
+                for i in range(n):
+                    wfjt.labels.add(next(label_gen))
+                wfjt_idx += 1
 
             print('# Creating %d jobs' % n_jobs)
             group_idx = 0
             job_template_idx = 0
             for n in spread(n_jobs, n_job_templates):
                 job_template = job_templates[job_template_idx]
+                if not jt._is_new:
+                    continue
                 for i in range(n):
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
@@ -578,15 +602,25 @@ try:
                         job_stat = 'failed'
                     elif len(jobs) % 11 == 0:
                         job_stat = 'canceled'
-                    job, _ = Job.objects.get_or_create(
-                        job_template=job_template, status=job_stat)
-                    job._is_new = _
+                    job, _ = Job.objects.create(
+                        job_template=job_template,
+                        status=job_stat, name=job_template.name,
+                        project=job_template.project, inventory=job_template.inventory,
+                        credential=job_template.credential,
+                        cloud_credential=job_template.cloud_credential,
+                        network_credential=job_template.network_credential
+                    )
                     jobs.append(job)
+                    if i == n:
+                        job_template.last_job = job
+                        if job_template.pk % 5 == 0:
+                            job_template.current_job = job
+                        job_template.save()
 
                     with transaction.atomic():
                         if job_template.inventory:
                             inv_groups = [g for g in job_template.inventory.groups.all()]
-                            if len(inv_groups) and job._is_new:
+                            if len(inv_groups):
                                 JobHostSummary.objects.bulk_create([
                                     JobHostSummary(
                                         job=job, host=h, host_name=h.name, processed=1,
@@ -603,19 +637,20 @@ try:
             job_idx = 0
             for n in spread(n_job_events, n_jobs):
                 job = jobs[job_idx]
+                if not job._is_new:
+                    continue
                 sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
                 sys.stdout.flush()
                 # Check if job already has events, for idempotence
-                if job._is_new:
-                    JobEvent.objects.bulk_create([
-                        JobEvent(
-                            created=now(),
-                            modified=now(),
-                            job=job,
-                            event='runner_on_ok'
-                        )
-                        for i in range(n)
-                    ])
+                JobEvent.objects.bulk_create([
+                    JobEvent(
+                        created=now(),
+                        modified=now(),
+                        job=job,
+                        event='runner_on_ok'
+                    )
+                    for i in range(n)
+                ])
                 job_idx += 1
                 if n:
                     print('')
