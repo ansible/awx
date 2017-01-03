@@ -19,10 +19,9 @@ export default {
     resolve: {
             moduleOptions:
                 [   'getModuleOptions',
-                    'lodashAsPromised',
                     'ProcessErrors',
                     '$stateParams',
-                    function(getModuleOptions, _, ProcessErrors, $stateParams) {
+                    function(getModuleOptions, ProcessErrors, $stateParams) {
 
                     var hostIds = $stateParams.hostIds.split(',');
 
