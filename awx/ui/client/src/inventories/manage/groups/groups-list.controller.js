@@ -46,7 +46,7 @@
         }
 
         function buildStatusIndicators(group){
-            if (group === undefined) {
+            if (group === undefined || group === null) {
                 group = {};
             }
 
@@ -147,7 +147,7 @@
         $scope.$on(`ws-jobs`, function(e, data){
             var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
 
-            if (group === undefined) {
+            if (group === undefined || group === null) {
                 group = {};
             }
 
