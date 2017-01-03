@@ -3446,7 +3446,7 @@ class JobJobPlaysList(BaseJobEventsList):
         all_plays = []
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': 'Job not found.'}, -1, status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Job not found.'}, status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         # Put together a queryset for relevant job events.
@@ -3503,9 +3503,7 @@ class JobJobPlaysList(BaseJobEventsList):
             play_details['skipped_count'] = skipped_count
             play_details['unreachable_count'] = unreachable_count
             all_plays.append(play_details)
-
-        # Done; return the plays and the total count.
-        return all_plays, count, None
+        return Response(dict(count=count, plays=all_plays))
 
 
 class JobJobTasksList(BaseJobEventsList):
@@ -3529,15 +3527,15 @@ class JobJobTasksList(BaseJobEventsList):
         # If there's no event ID specified, this will return a 404.
         job = Job.objects.filter(pk=self.kwargs['pk'])
         if not job.exists():
-            return ({'detail': _('Job not found.')}, -1, status.HTTP_404_NOT_FOUND)
+            return Response({'detail': _('Job not found.')}, status=status.HTTP_404_NOT_FOUND)
         job = job[0]
 
         if 'event_id' not in request.query_params:
-            return ({"detail": _("'event_id' not provided.")}, -1, status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": _("'event_id' not provided.")}, status.HTTP_400_BAD_REQUEST)
 
         parent_task = job.job_events.filter(pk=int(request.query_params.get('event_id', -1)))
         if not parent_task.exists():
-            return ({'detail': _('Parent event not found.')}, -1, status.HTTP_404_NOT_FOUND)
+            return Response({'detail': _('Parent event not found.')}, status.HTTP_404_NOT_FOUND)
         parent_task = parent_task[0]
 
         STARTING_EVENTS = ('playbook_on_task_start', 'playbook_on_setup')
@@ -3628,9 +3626,7 @@ class JobJobTasksList(BaseJobEventsList):
                     task_data['host_count'] += child_data['num']
             count += 1
             results.append(task_data)
-
-        # Done; return the results and count.
-        return (results, count, None)
+        return Response(dict(count=count, tasks=results))
 
 
 class AdHocCommandList(ListCreateAPIView):
