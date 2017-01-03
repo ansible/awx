@@ -46,6 +46,10 @@
         }
 
         function buildStatusIndicators(group){
+            if (group === undefined || group === null) {
+                group = {};
+            }
+
             let group_status, hosts_status;
 
             group_status = GetSyncStatusMsg({
@@ -142,10 +146,14 @@
 
         $scope.$on(`ws-jobs`, function(e, data){
             var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
+
+            if (group === undefined || group === null) {
+                group = {};
+            }
+
             if(data.status === 'failed' || data.status === 'successful'){
                 $state.reload();
-            }
-            else{
+            } else {
                 var status = GetSyncStatusMsg({
                     status: data.status,
                     has_inventory_sources: group.has_inventory_sources,
