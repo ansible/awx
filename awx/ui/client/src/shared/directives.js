@@ -1168,4 +1168,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             });
         }
     };
+}])
+
+.directive('awTruncateBreadcrumb', ['BreadCrumbService', function(BreadCrumbService) {
+    return {
+        restrict: 'A',
+        scope: {
+            breadcrumbStep: '='
+        },
+        link: function(scope) {
+            scope.$watch('breadcrumbStep.ncyBreadcrumbLabel', function(){
+                BreadCrumbService.truncateCrumbs();
+            });
+        }
+    };
 }]);
