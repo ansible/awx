@@ -603,7 +603,7 @@ class AuthTokenView(APIView):
             return Response({'token': token.key, 'expires': token.expires}, headers=headers)
         if 'username' in request.data:
             logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])),
-                           user=dict(actor=request.data['username']))
+                           extra=dict(actor=request.data['username']))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
