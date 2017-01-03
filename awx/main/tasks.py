@@ -374,9 +374,12 @@ class BaseTask(Task):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
                     self.open_fifo_write(path, data)
+                # Ansible network modules do not yet support ssh-agent.
+                # Instead, ssh private key file is explicitly passed via an
+                # env variable.
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -875,6 +878,10 @@ class RunJob(BaseTask):
             env['ANSIBLE_NET_USERNAME'] = network_cred.username
             env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
 
+            ssh_keyfile = kwargs.get('private_data_files', {}).get('network_credential', '')
+            if ssh_keyfile:
+                env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
+
             authorize = network_cred.authorize
             env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
             if authorize:
@@ -1037,8 +1044,15 @@ class RunJob(BaseTask):
         private_data_files = kwargs.get('private_data_files', {})
         if 'credential' in private_data_files:
             return private_data_files.get('credential')
-        elif 'network_credential' in private_data_files:
-            return private_data_files.get('network_credential')
+        '''
+        Note: Don't inject network ssh key data into ssh-agent for network
+        credentials because the ansible modules no not yet support it.
+        We will want to add back in support when/if Ansible network modules
+        support this.
+        '''
+        #elif 'network_credential' in private_data_files:
+        #    return private_data_files.get('network_credential')
+
         return ''
 
     def should_use_proot(self, instance, **kwargs):
