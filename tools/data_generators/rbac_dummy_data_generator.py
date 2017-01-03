@@ -84,7 +84,22 @@ options = vars(options)
 
 
 if options['preset']:
-    pass
+    # Read the numbers of resources from presets file, if provided
+    presets_filename = os.path.abspath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'presets.tsv'))
+
+    with open(presets_filename) as f:
+        text = f.read()
+
+    split_lines = [line.split('\t') for line in text.split('\n')]
+    keys = split_lines[0][1:]
+
+    try:
+        col = keys.index(options['preset'])
+    except ValueError:
+        raise Exception('Preset "%s" dataset not found, options are %s' % (options['preset'], keys))
+
+    options.update({cols[0]: cols[col + 1] for cols in split_lines})
 
 
 n_organizations    = int(options['organizations'])
@@ -162,6 +177,7 @@ class Rollback(Exception):
 # It is disaled here.
 def mock_save(self, *args, **kwargs):
     return super(PrimordialModel, self).save(*args, **kwargs)
+
 
 PrimordialModel.save = mock_save
 
@@ -334,17 +350,17 @@ try:
                     project, _ = Project.objects.get_or_create(
                         name='%s Project %d Org %d' % (prefix, project_id, org_idx),
                         organization=org,
-                        defaults=dict(created_by=next(creator_gen),
-                                      modified_by=next(modifier_gen),
-                        scm_url='https://github.com/jlaska/ansible-playbooks.git',
-                        scm_type='git',
-                        playbook_files=[
-                            "check.yml", "debug-50.yml", "debug.yml", "debug2.yml",
-                            "debug_extra_vars.yml", "dynamic_inventory.yml",
-                            "environ_test.yml", "fail_unless.yml", "pass_unless.yml",
-                            "pause.yml", "ping-20.yml", "ping.yml",
-                            "setfact_50.yml", "vault.yml"
-                        ])
+                        defaults=dict(
+                            created_by=next(creator_gen), modified_by=next(modifier_gen),
+                            scm_url='https://github.com/jlaska/ansible-playbooks.git',
+                            scm_type='git',
+                            playbook_files=[
+                                "check.yml", "debug-50.yml", "debug.yml", "debug2.yml",
+                                "debug_extra_vars.yml", "dynamic_inventory.yml",
+                                "environ_test.yml", "fail_unless.yml", "pass_unless.yml",
+                                "pause.yml", "ping-20.yml", "ping.yml",
+                                "setfact_50.yml", "vault.yml"
+                            ])
                     )
                     projects.append(project)
                     if org_idx == 0 and i == 0:
@@ -567,7 +583,7 @@ try:
 
             print('# Adding labels to job templates')
             jt_idx = 0
-            for n in spread(n_labels*7, n_job_templates):
+            for n in spread(n_labels * 7, n_job_templates):
                 jt = job_templates[jt_idx]
                 if not jt._is_new:
                     continue
@@ -578,7 +594,7 @@ try:
 
             print('# Adding labels to workflow job templates')
             wfjt_idx = 0
-            for n in spread(n_labels*3, n_wfjts):
+            for n in spread(n_labels * 3, n_wfjts):
                 wfjt = wfjts[wfjt_idx]
                 if not jt._is_new:
                     continue
