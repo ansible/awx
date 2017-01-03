@@ -76,7 +76,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'total_groups',
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
-    'project': DEFAULT_SUMMARY_FIELDS + ('status',),
+    'project': DEFAULT_SUMMARY_FIELDS + ('status', 'scm_type'),
     'project_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'cloud_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
