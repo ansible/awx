@@ -1,34 +1,26 @@
 import os
 
+preset = 'medium'
+
 presets_filename = os.path.abspath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     'presets.tsv'))
 
 with open(presets_filename) as f:
-    r = f.read()
+    text = f.read()
 
-print r
+split_lines = [line.split('\t') for line in text.split('\n')]
+keys = split_lines[0][1:]
 
-lines = r.split('\n')
-keys = lines[0].split('\t')[1:]
-
-preset = 'medium'
-
-col = None
-for i, key in enumerate(keys):
-    if key == preset:
-        col = i
-        break
-
-if col is None:
+try:
+    col = keys.index(preset)
+except ValueError:
     raise Exception('Preset %s data set not found, options are %s' % (preset, keys))
 
+options = {cols[0]: cols[col+1] for cols in split_lines}
 
-options = {}
-
-for line in lines[1:]:
-    cols = line.split('\t')
-    options[cols[0]] = cols[i+1]
+print ' text '
+print text
 
 print ' options '
 print options
