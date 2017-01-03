@@ -3,7 +3,7 @@ apache-libcloud==1.3.0
 azure==2.0.0rc6
 backports.ssl-match-hostname==3.5.0.1
 kombu==3.0.35
-boto==2.43.0
+boto==2.45.0
 psphere==0.5.2
 psutil==5.0.0
 pyvmomi==6.5
