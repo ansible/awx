@@ -5,7 +5,7 @@
  *************************************************/
 
 export default [
-    '$rootScope', '$scope', '$state', '$stateParams',
+    '$rootScope', '$scope', '$state', '$stateParams', '$timeout',
     'AngularCodeMirror',
     'systemActivityStreamForm',
     'systemLoggingForm',
@@ -16,7 +16,7 @@ export default [
     'GenerateForm',
     'i18n',
     function(
-        $rootScope, $scope, $state, $stateParams,
+        $rootScope, $scope, $state, $stateParams, $timeout,
         AngularCodeMirror,
         systemActivityStreamForm,
         systemLoggingForm,
@@ -170,6 +170,12 @@ export default [
             }
 
         });
+
+        // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
+        // TODO Find better solution for this bug
+        $timeout(function(){
+            $scope.$parent.configuration_logging_template_form.$setPristine();
+        }, 1000);
 
         angular.extend(systemVm, {
             activeForm: activeForm,
