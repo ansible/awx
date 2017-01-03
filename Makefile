@@ -506,6 +506,14 @@ test_tox:
 # Alias existing make target so old versions run against Jekins the same way
 test_jenkins : test_coverage
 
+# Make fake data
+DATA_GEN_PRESET = ""
+bulk_data:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
+
 # l10n TASKS
 # --------------------------------------
 
