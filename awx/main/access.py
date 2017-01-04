@@ -353,7 +353,7 @@ class BaseAccess(object):
 
             # Shortcuts in certain cases by deferring to earlier property
             if display_method == 'schedule':
-                user_capabilities['schedule'] = user_capabilities['edit']
+                user_capabilities['schedule'] = user_capabilities['start']
                 continue
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
@@ -1912,11 +1912,17 @@ class ScheduleAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        return self.check_related('unified_job_template', UnifiedJobTemplate, data, mandatory=True)
+        return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True)
+        if self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True):
+            return True
+        if ('unified_job_template' in data and data['unified_job_template'] != obj.pk) or obj.created_by_id != self.user.id:
+            return False
+        # Users with execute role can modify the schedules they created
+        return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role')
+
 
     def can_delete(self, obj):
         return self.can_change(obj, {})
