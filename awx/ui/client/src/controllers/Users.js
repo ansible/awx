@@ -247,6 +247,7 @@ export function UsersEdit($scope, $rootScope, $location,
                 }
 
                 $scope.user_obj = data;
+                $scope.name = data.username;
 
                 CreateSelect2({
                     element: '#user_user_type',
