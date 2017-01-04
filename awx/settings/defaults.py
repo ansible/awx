@@ -364,7 +364,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 # Initialize Django-Celery.
 djcelery.setup_loader()
 
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_DEFAULT_QUEUE = 'default'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

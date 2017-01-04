@@ -48,7 +48,7 @@ if is_testing(sys.argv):
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'amqp://guest:guest@localhost:5672'
 
 # Set True to enable additional logging from the job_event_callback plugin
 JOB_CALLBACK_DEBUG = False
