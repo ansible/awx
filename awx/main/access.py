@@ -1671,8 +1671,8 @@ class WorkflowJobAccess(BaseAccess):
             if not node_access.can_add({'reference_obj': node}):
                 wj_add_perm = False
         if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = ('Template has been modified since job was launched, '
-                                                      'and you do not have permission to its resources.')
+            self.messages['workflow_job_template'] = _('Template has been modified since job was launched, '
+                                                       'and you do not have permission to its resources.')
         return wj_add_perm
 
     def can_cancel(self, obj):
