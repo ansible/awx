@@ -8,7 +8,8 @@ export default
                 let $breadcrumbClone = $('.BreadCrumb-list').clone().appendTo('#bread_crumb_width_checker');
                 let $breadcrumbCloneItems = $breadcrumbClone.find('.BreadCrumb-item');
                 // 40px for the padding on the breadcrumb bar and a few extra pixels for rounding
-                let expandedBreadcrumbWidth = 45;
+				let breadcrumbBarPadding = 45;
+                let expandedBreadcrumbWidth = breadcrumbBarPadding;
                 let crumbs = [];
                 $breadcrumbCloneItems.css('max-width', 'none');
                 $breadcrumbCloneItems.each(function(index, item){
@@ -20,7 +21,7 @@ export default
                     });
                 });
                 // Remove the clone from the dom
-                $breadcrumbClone.remove();
+                $breadcrumbClone.remove();console.log(availableWidth);
                 if(expandedBreadcrumbWidth > availableWidth) {
                     let widthToTrim = expandedBreadcrumbWidth - availableWidth;
                     // Sort the crumbs from biggest to smallest
@@ -61,7 +62,7 @@ export default
                             if(sortedCrumbs[i-1]) {
                                 // We've gotten all the way down to the smallest crumb without being able to reasonably trim
                                 // the previous crumbs.  Go ahead and trim all of them equally.
-                                maxWidth = availableWidth/(i+1);
+                                maxWidth = (availableWidth-breadcrumbBarPadding)/(i+1);
                             }
                             else {
                                 // There's only one breadcrumb so trim this one down
