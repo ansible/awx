@@ -80,3 +80,8 @@ class AnsiTextRenderer(PlainTextRenderer):
 
     media_type = 'text/plain'
     format = 'ansi'
+
+
+class AnsiDownloadRenderer(PlainTextRenderer):
+
+    format = "ansi_download"
