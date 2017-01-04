@@ -228,8 +228,8 @@ register(
     'LOG_AGGREGATOR_HOST',
     field_class=fields.CharField,
     allow_null=True,
-    label=_('Logging Aggregator Receiving Host'),
-    help_text=_('External host maintain a log collector to send logs to'),
+    label=_('Logging Aggregator'),
+    help_text=_('Hostname/IP where external logs will be sent to.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -237,8 +237,8 @@ register(
     'LOG_AGGREGATOR_PORT',
     field_class=fields.IntegerField,
     allow_null=True,
-    label=_('Logging Aggregator Receiving Port'),
-    help_text=_('Port that the log collector is listening on'),
+    label=_('Logging Aggregator Port'),
+    help_text=_('Port on Logging Aggregator to send logs to (if required).'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -247,8 +247,8 @@ register(
     field_class=fields.ChoiceField,
     choices=['logstash', 'splunk', 'loggly', 'sumologic', 'other'],
     allow_null=True,
-    label=_('Logging Aggregator Type: Logstash, Loggly, Datadog, etc'),
-    help_text=_('The type of log aggregator service to format messages for'),
+    label=_('Logging Aggregator Type'),
+    help_text=_('Format messages for the chosen log aggregator.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -256,8 +256,8 @@ register(
     'LOG_AGGREGATOR_USERNAME',
     field_class=fields.CharField,
     allow_null=True,
-    label=_('Logging Aggregator Username to Authenticate With'),
-    help_text=_('Username for Logstash or others (basic auth)'),
+    label=_('Logging Aggregator Username'),
+    help_text=_('Username for external log aggregator (if required).'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -266,8 +266,8 @@ register(
     field_class=fields.CharField,
     allow_null=True,
     encrypted=True,
-    label=_('Logging Aggregator Password to Authenticate With'),
-    help_text=_('Password for Logstash or others (basic auth)'),
+    label=_('Logging Aggregator Password/Token'),
+    help_text=_('Password or authentication token for external log aggregator (if required).'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -278,11 +278,10 @@ register(
     label=_('Loggers to send data to the log aggregator from'),
     help_text=_('List of loggers that will send HTTP logs to the collector, these can '
                 'include any or all of: \n'
-                'activity_stream - logs duplicate to records entered in activity stream\n'
+                'awx - Tower service logs\n'
+                'activity_stream - activity stream records\n'
                 'job_events - callback data from Ansible job events\n'
-                'system_tracking - data generated from scan jobs\n'
-                'Sending generic Tower logs must be configured through local_settings.py'
-                'instead of this mechanism.'),
+                'system_tracking - facts gathered from scan jobs.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -290,10 +289,11 @@ register(
     'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Flag denoting to send individual messages for each fact in system tracking'),
-    help_text=_('If not set, the data from system tracking will be sent inside '
-                'of a single dictionary, but if set, separate requests will be sent '
-                'for each package, service, etc. that is found in the scan.'),
+    label=_('Log System Tracking Facts Individually'),
+    help_text=_('If set, system tracking facts will be sent for each package, service, or'
+                'other item found in a scan, allowing for greater search query granularity. '
+                'If unset, facts will be sent as a single dictionary, allowing for greater '
+                'efficiency in fact processing.'),
     category=_('Logging'),
     category_slug='logging',
 )
@@ -301,8 +301,8 @@ register(
     'LOG_AGGREGATOR_ENABLED',
     field_class=fields.BooleanField,
     default=False,
-    label=_('Flag denoting whether to use the external logger system'),
-    help_text=_('If not set, only normal settings data will be used to configure loggers.'),
+    label=_('Enable External Logging'),
+    help_text=_('Enable sending logs to external log aggregator.'),
     category=_('Logging'),
     category_slug='logging',
 )
