@@ -1586,8 +1586,7 @@ class ResourceAccessListElementSerializer(UserSerializer):
         the resource.
         '''
         ret = super(ResourceAccessListElementSerializer, self).to_representation(user)
-        object_id = self.context['view'].object_id
-        obj = self.context['view'].resource_model.objects.get(pk=object_id)
+        obj = self.context['view'].get_parent_object()
         if self.context['view'].request is not None:
             requesting_user = self.context['view'].request.user
         else:
