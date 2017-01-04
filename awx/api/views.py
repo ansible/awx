@@ -3438,6 +3438,7 @@ class JobJobPlaysList(BaseJobEventsList):
     parent_model = Job
     view_name = _('Job Plays List')
     new_in_200 = True
+    deprecated = True
 
     def get(self, request, *args, **kwargs):
         limit = kwargs.get('limit', 20)
@@ -3513,6 +3514,7 @@ class JobJobTasksList(BaseJobEventsList):
     parent_model = Job
     view_name = _('Job Play Tasks List')
     new_in_200 = True
+    deprecated = True
 
     def get(self, request, *args, **kwargs):
         """Return aggregate data about each of the job tasks that is:
