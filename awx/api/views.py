@@ -2316,7 +2316,10 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
     always_allow_superuser = False
 
     def update_raw_data(self, data):
-        obj = self.get_object()
+        try:
+            obj = self.get_object()
+        except PermissionDenied:
+            return data
         extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for p in obj.passwords_needed_to_start:
