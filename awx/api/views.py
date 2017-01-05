@@ -1259,7 +1259,8 @@ class UserTeamsList(ListAPIView):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
         if not self.request.user.can_access(User, 'read', u):
             raise PermissionDenied()
-        return Team.accessible_objects(self.request.user, 'read_role').filter(member_role__members=u)
+        return Team.accessible_objects(self.request.user, 'read_role').filter(
+            Q(member_role__members=u) | Q(admin_role__members=u)).distinct()
 
 
 class UserRolesList(SubListCreateAttachDetachAPIView):
