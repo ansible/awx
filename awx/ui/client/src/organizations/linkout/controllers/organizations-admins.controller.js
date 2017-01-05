@@ -29,6 +29,7 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
             Rest.get()
                 .success(function(data) {
                     $scope.organization_name = data.name;
+                    $scope.name = data.name;
                     $scope.org_id = data.id;
 
                     $scope.orgRelatedUrls = data.related;

@@ -1,6 +1,6 @@
 export default
-    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty',
-    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty) {
+    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService',
+    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -8,9 +8,25 @@ export default
 
                 var streamConfig = {}, originalRoute;
 
-                scope.showActivityStreamButton = false;
-                scope.showRefreshButton = false;
-                scope.loadingLicense = true;
+                function init() {
+
+                    scope.showActivityStreamButton = false;
+                    scope.showRefreshButton = false;
+                    scope.loadingLicense = true;
+
+                    function onResize(){
+                        BreadCrumbService.truncateCrumbs();
+                    }
+
+                    function cleanUp() {
+                        angular.element($window).off('resize', onResize);
+                    }
+
+                    angular.element($window).on('resize', onResize);
+                    scope.$on('$destroy', cleanUp);
+                }
+
+                init();
 
                 scope.refresh = function() {
                     $state.go($state.current, {}, {reload: true});
