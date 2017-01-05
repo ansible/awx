@@ -872,7 +872,7 @@ class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIV
 class OrganizationAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = Organization
+    parent_model = Organization
     new_in_300 = True
 
 
@@ -1007,7 +1007,7 @@ class TeamActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
 class TeamAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = Team
+    parent_model = Team
     new_in_300 = True
 
 
@@ -1201,7 +1201,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
 class ProjectAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = Project
+    parent_model = Project
     new_in_300 = True
 
 
@@ -1415,7 +1415,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
 class UserAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = User
+    parent_model = User
     new_in_300 = True
 
 
@@ -1522,7 +1522,7 @@ class CredentialActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIVie
 class CredentialAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = Credential
+    parent_model = Credential
     new_in_300 = True
 
 
@@ -1616,7 +1616,7 @@ class InventoryActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView
 class InventoryAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = Inventory
+    parent_model = Inventory
     new_in_300 = True
 
 
@@ -2690,7 +2690,7 @@ class JobTemplateJobsList(SubListCreateAPIView):
 class JobTemplateAccessList(ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = JobTemplate
+    parent_model = JobTemplate
     new_in_300 = True
 
 
@@ -3036,7 +3036,7 @@ class WorkflowJobTemplateNotificationTemplatesSuccessList(WorkflowsEnforcementMi
 class WorkflowJobTemplateAccessList(WorkflowsEnforcementMixin, ResourceAccessList):
 
     model = User # needs to be User for AccessLists's
-    resource_model = WorkflowJobTemplate
+    parent_model = WorkflowJobTemplate
     new_in_310 = True
 
 

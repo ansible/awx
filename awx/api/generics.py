@@ -559,14 +559,12 @@ class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass
 
 
-class ResourceAccessList(ListAPIView):
+class ResourceAccessList(ParentMixin, ListAPIView):
 
     serializer_class = ResourceAccessListElementSerializer
 
     def get_queryset(self):
-        self.object_id = self.kwargs['pk']
-        resource_model = getattr(self, 'resource_model')
-        obj = get_object_or_404(resource_model, pk=self.object_id)
+        obj = self.get_parent_object()
 
         content_type = ContentType.objects.get_for_model(obj)
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))
