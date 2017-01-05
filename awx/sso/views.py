@@ -25,6 +25,8 @@ logger = logging.getLogger('awx.sso.views')
 
 class BaseRedirectView(RedirectView):
 
+    permanent = True
+
     def get_redirect_url(self, *args, **kwargs):
         last_path = self.request.COOKIES.get('lastPath', '')
         last_path = urllib.quote(urllib.unquote(last_path).strip('"'))
