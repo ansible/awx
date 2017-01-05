@@ -122,8 +122,7 @@ def _reset_celery_logging():
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
 
-def _clear_cache_keys(cache_keys):
-    set_of_keys = set([key for key in cache_keys])
+def _clear_cache_keys(set_of_keys):
     logger.debug('cache delete_many(%r)', set_of_keys)
     cache.delete_many(set_of_keys)
 
@@ -132,8 +131,8 @@ def _clear_cache_keys(cache_keys):
 def process_cache_changes(cache_keys):
     logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
         process_cache_changes.request))
-    _clear_cache_keys(cache_keys)
     set_of_keys = set([key for key in cache_keys])
+    _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
             _uwsgi_reload()
