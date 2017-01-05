@@ -1918,10 +1918,10 @@ class ScheduleAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True):
             return True
-        if ('unified_job_template' in data and data['unified_job_template'] != obj.pk) or obj.created_by_id != self.user.id:
-            return False
         # Users with execute role can modify the schedules they created
-        return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role')
+        return (
+            obj.created_by == self.user and
+            self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True))
 
 
     def can_delete(self, obj):
