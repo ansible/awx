@@ -459,7 +459,7 @@ class BaseTask(Task):
         for k,v in env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
-            elif k.startswith('ANSIBLE_'):
+            elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
             elif hidden_re.search(k):
                 env[k] = HIDDEN_PASSWORD
