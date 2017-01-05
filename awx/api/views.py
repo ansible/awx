@@ -3407,6 +3407,10 @@ class BaseJobEventsList(SubListAPIView):
     relationship = 'job_events'
     view_name = _('Job Events List')
 
+    def finalize_response(self, request, response, *args, **kwargs):
+        response['X-UI-Max-Events'] = settings.RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER
+        return super(BaseJobEventsList, self).finalize_response(request, response, *args, **kwargs)
+
 
 class HostJobEventsList(BaseJobEventsList):
 
