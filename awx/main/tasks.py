@@ -93,6 +93,9 @@ def _setup_tower_logger():
     if settings.LOG_AGGREGATOR_ENABLED:
         LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
         LOGGING_DICT['handlers']['http_receiver']['async'] = False
+        if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
+            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
+                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
     configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
     logger = logging.getLogger('awx.main.tasks')
 
@@ -128,8 +131,8 @@ def _clear_cache_keys(cache_keys):
 @task(queue='broadcast_all')
 def process_cache_changes(cache_keys):
     logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
-        _clear_cache_keys.request))
-    clear_cache_keys(cache_keys)
+        process_cache_changes.request))
+    _clear_cache_keys(cache_keys)
     set_of_keys = set([key for key in cache_keys])
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):

@@ -274,7 +274,7 @@ register(
 register(
     'LOG_AGGREGATOR_LOGGERS',
     field_class=fields.StringListField,
-    default=['activity_stream', 'job_events', 'system_tracking'],
+    default=['awx', 'activity_stream', 'job_events', 'system_tracking'],
     label=_('Loggers to send data to the log aggregator from'),
     help_text=_('List of loggers that will send HTTP logs to the collector, these can '
                 'include any or all of: \n'

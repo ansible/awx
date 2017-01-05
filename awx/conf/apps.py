@@ -18,5 +18,8 @@ class ConfConfig(AppConfig):
         if settings.LOG_AGGREGATOR_ENABLED:
             LOGGING_DICT = settings.LOGGING
             LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
+            if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
+                if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
+                    LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
             configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
         # checks.register(SettingsWrapper._check_settings)
