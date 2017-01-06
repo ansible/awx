@@ -376,6 +376,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
             },
 
             applyDefaults: function (form, scope) {
+                // Note: This is a hack. Ideally, mode should be set in each <resource>-<mode>.controller.js
+                // The mode is needed by the awlookup directive to auto-populate form fields when there is a 
+                // single related resource.
+                scope.mode = this.mode;
+
                 for (var fld in form.fields) {
                     if (form.fields[fld]['default'] || form.fields[fld]['default'] === 0) {
                         if (form.fields[fld].type === 'select' && scope[fld + '_options']) {
