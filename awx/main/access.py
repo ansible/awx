@@ -363,26 +363,29 @@ class BaseAccess(object):
                 continue
 
             # Compute permission
-            data = {}
-            access_method = getattr(self, "can_%s" % method)
-            if method in ['change']: # 3 args
-                user_capabilities[display_method] = access_method(obj, data)
-            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
-                user_capabilities[display_method] = access_method(obj)
-            elif method in ['start']:
-                user_capabilities[display_method] = access_method(obj, validate_license=False)
-            elif method in ['add']: # 2 args with data
-                user_capabilities[display_method] = access_method(data)
-            elif method in ['attach', 'unattach']: # parent/sub-object call
-                if type(parent_obj) == Team:
-                    relationship = 'parents'
-                    parent_obj = parent_obj.member_role
-                else:
-                    relationship = 'members'
-                user_capabilities[display_method] = access_method(
-                    obj, parent_obj, relationship, skip_sub_obj_read_check=True, data=data)
+            user_capabilities[display_method] = self.get_method_capability(method, obj, parent_obj)
 
         return user_capabilities
+
+    def get_method_capability(self, method, obj, parent_obj):
+        if method in ['change']: # 3 args
+            return self.can_change(obj, {})
+        elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
+            access_method = getattr(self, "can_%s" % method)
+            return access_method(obj)
+        elif method in ['start']:
+            return self.can_start(obj, validate_license=False)
+        elif method in ['add']: # 2 args with data
+            return self.can_add({})
+        elif method in ['attach', 'unattach']: # parent/sub-object call
+            access_method = getattr(self, "can_%s" % method)
+            if type(parent_obj) == Team:
+                relationship = 'parents'
+                parent_obj = parent_obj.member_role
+            else:
+                relationship = 'members'
+            return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        return False
 
 
 class UserAccess(BaseAccess):
@@ -1478,8 +1481,14 @@ class WorkflowJobNodeAccess(BaseAccess):
         qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
         return qs
 
+    @check_superuser
     def can_add(self, data):
-        return False
+        if data is None:  # Hide direct creation in API browser
+            return False
+        return (
+            self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role') and
+            self.check_related('credential', Credential, data, role_field='use_role') and
+            self.check_related('inventory', Inventory, data, role_field='use_role'))
 
     def can_change(self, obj, data):
         return False
@@ -1617,6 +1626,14 @@ class WorkflowJobAccess(BaseAccess):
             return self.user.is_superuser
         return self.user in obj.workflow_job_template.admin_role
 
+    def get_method_capability(self, method, obj, parent_obj):
+        if method == 'start':
+            # Return simplistic permission, will perform detailed check on POST
+            if not obj.workflow_job_template:
+                return self.user.is_superuser
+            return self.user in obj.workflow_job_template.execute_role
+        return super(WorkflowJobAccess, self).get_method_capability(method, obj, parent_obj)
+
     def can_start(self, obj, validate_license=True):
         if validate_license:
             self.check_license()
@@ -1624,7 +1641,34 @@ class WorkflowJobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return (obj.workflow_job_template and self.user in obj.workflow_job_template.execute_role)
+        wfjt = obj.workflow_job_template
+        # only superusers can relaunch orphans
+        if not wfjt:
+            return False
+
+        # execute permission to WFJT is mandatory for any relaunch
+        if self.user not in wfjt.execute_role:
+            return False
+
+        # WFJT is valid base for WJ, launch permitted
+        last_modified = wfjt.nodes_last_modified()
+        if last_modified and obj.created > last_modified:
+            return True
+
+        # user's WFJT access doesn't guarentee permission to launch, introspect nodes
+        return self.can_recreate(obj)
+
+    def can_recreate(self, obj):
+        node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credential', 'unified_job_template')
+        node_access = WorkflowJobNodeAccess(user=self.user)
+        wj_add_perm = True
+        for node in node_qs:
+            if not node_access.can_add({'reference_obj': node}):
+                wj_add_perm = False
+        if not wj_add_perm and self.save_messages:
+            self.messages['workflow_job_template'] = _('Template has been modified since job was launched, '
+                                                       'and you do not have permission to its resources.')
+        return wj_add_perm
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
