@@ -178,7 +178,7 @@ class EventContext(object):
             event_data['res'] = {}
         event_dict = dict(event=event, event_data=event_data)
         for key in event_data.keys():
-            if key in ('job_id', 'ad_hoc_command_id', 'uuid', 'parent_uuid', 'created', 'artifact_data'):
+            if key in ('job_id', 'ad_hoc_command_id', 'uuid', 'parent_uuid', 'created',):
                 event_dict[key] = event_data.pop(key)
             elif key in ('verbosity', 'pid'):
                 event_dict[key] = event_data[key]

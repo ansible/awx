@@ -111,10 +111,6 @@ class BaseCallbackModule(CallbackBase):
 
         if 'res' in event_data:
             event_data['res'] = self.censor_result(copy.copy(event_data['res']))
-            res = event_data.get('res', None)
-            if res and isinstance(res, dict):
-                if 'artifact_data' in res:
-                    event_data['artifact_data'] = res['artifact_data']
 
         if event not in self.EVENTS_WITHOUT_TASK:
             task = event_data.pop('task', None)
@@ -319,6 +315,9 @@ class BaseCallbackModule(CallbackBase):
         with self.capture_event_data('playbook_on_notify', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_notify(result, handler)
 
+    '''
+    ansible_stats is, retoractively, added in 2.2
+    '''
     def v2_playbook_on_stats(self, stats):
         self.clear_play()
         # FIXME: Add count of plays/tasks.
@@ -329,7 +328,9 @@ class BaseCallbackModule(CallbackBase):
             ok=stats.ok,
             processed=stats.processed,
             skipped=stats.skipped,
+            artifact_data=stats.custom.get('_run', {})
         )
+
         with self.capture_event_data('playbook_on_stats', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_stats(stats)
 

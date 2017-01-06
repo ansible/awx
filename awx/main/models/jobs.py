@@ -1175,7 +1175,6 @@ class JobEvent(CreatedModifiedModel):
         # Save UUID and parent UUID for determining parent-child relationship.
         job_event_uuid = kwargs.get('uuid', None)
         parent_event_uuid = kwargs.get('parent_uuid', None)
-        artifact_dict = kwargs.get('artifact_data', None)
 
         # Sanity check: Don't honor keys that we don't recognize.
         valid_keys = {'job_id', 'event', 'event_data', 'playbook', 'play',
@@ -1184,6 +1183,11 @@ class JobEvent(CreatedModifiedModel):
         for key in kwargs.keys():
             if key not in valid_keys:
                 kwargs.pop(key)
+
+        event_data = kwargs.get('event_data', None)
+        artifact_dict = None
+        if event_data:
+            artifact_dict = event_data.pop('artifact_data', None)
 
         # Try to find a parent event based on UUID.
         if parent_event_uuid:
@@ -1208,12 +1212,21 @@ class JobEvent(CreatedModifiedModel):
 
         # Save artifact data to parent job (if provided).
         if artifact_dict:
-            event_data = kwargs.get('event_data', None)
             if event_data and isinstance(event_data, dict):
-                res = event_data.get('res', None)
-                if res and isinstance(res, dict):
-                    if res.get('_ansible_no_log', False):
-                        artifact_dict['_ansible_no_log'] = True
+                # Note: Core has not added support for marking artifacts as 
+                # sensitive yet. Going forward, core will not use
+                # _ansible_no_log to denote sensitive set_stats calls.
+                # Instead, they plan to add a flag outside of the traditional
+                # no_log mechanism. no_log will not work for this feature,
+                # in core, because sensitive data is scrubbed before sending
+                # data to the callback. The playbook_on_stats is the callback
+                # in which the set_stats data is used.
+
+                # Again, the sensitive artifact feature has not yet landed in
+                # core. The below is how we mark artifacts payload as
+                # senstive
+                # artifact_dict['_ansible_no_log'] = True
+                #
                 parent_job = Job.objects.filter(pk=kwargs['job_id']).first()
                 if parent_job and parent_job.artifacts != artifact_dict:
                     parent_job.artifacts = artifact_dict
