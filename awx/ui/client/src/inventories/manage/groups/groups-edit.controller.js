@@ -58,9 +58,10 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
         };
 
         $scope.lookupCredential = function(){
+            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
             $state.go('.credential', {
                 credential_search: {
-                    kind: $scope.source.value,
+                    kind: kind,
                     page_size: '5',
                     page: '1'
                 }
