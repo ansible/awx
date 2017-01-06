@@ -34,11 +34,13 @@ def run_job_complete(job_id):
 
 @task
 def run_task_manager():
+    logger.debug("Running Tower task manager.")
     TaskManager().schedule()
 
 
 @task
 def run_fail_inconsistent_running_jobs():
+    logger.debug("Running task to fail inconsistent running jobs.")
     with transaction.atomic():
         # Lock
         try:
