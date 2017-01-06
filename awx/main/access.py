@@ -1661,9 +1661,9 @@ class WorkflowJobAccess(BaseAccess):
             return True
 
         # user's WFJT access doesn't guarentee permission to launch, introspect nodes
-        return self.can_readd(obj)
+        return self.can_recreate(obj)
 
-    def can_readd(self, obj):
+    def can_recreate(self, obj):
         node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credential', 'unified_job_template')
         node_access = WorkflowJobNodeAccess(user=self.user)
         wj_add_perm = True
