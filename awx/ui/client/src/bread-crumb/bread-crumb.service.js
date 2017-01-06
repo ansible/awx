@@ -21,7 +21,7 @@ export default
                     });
                 });
                 // Remove the clone from the dom
-                $breadcrumbClone.remove();console.log(availableWidth);
+                $breadcrumbClone.remove();
                 if(expandedBreadcrumbWidth > availableWidth) {
                     let widthToTrim = expandedBreadcrumbWidth - availableWidth;
                     // Sort the crumbs from biggest to smallest
