@@ -43,6 +43,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         scm_type: list.fields.scm_type
                     };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
                 case 'Inventories':
@@ -50,6 +52,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         organization: list.fields.organization
                     };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
                 case 'JobTemplates':
@@ -59,6 +63,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         description: list.fields.description
                     };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
                 case 'WorkflowTemplates':
@@ -69,6 +75,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         name: list.fields.name,
                         description: list.fields.description
                     };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 case 'Users':
                     list.fields = {
@@ -76,12 +84,17 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         first_name: list.fields.first_name,
                         last_name: list.fields.last_name
                     };
+                    list.fields.username.columnClass = 'col-md-5 col-sm-5 col-xs-11';
+                    list.fields.first_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
+                    list.fields.last_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
                     break;
                 default:
                     list.fields = {
                         name: list.fields.name,
                         description: list.fields.description
                     };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
             }
 
             list_html = generateList.build({

@@ -34,7 +34,7 @@
             username: {
                 key: true,
                 label: 'Username',
-                columnClass: 'col-md-3 col-sm-3 col-xs-9'
+                columnClass: 'col-md-5 col-sm-5 col-xs-11'
             },
         },
 
