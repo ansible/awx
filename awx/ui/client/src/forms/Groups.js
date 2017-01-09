@@ -69,6 +69,11 @@ export default
                     ngModel: 'source'
                 },
                 credential: {
+                    // initializes a default value for this search param
+                    // search params with default values set will not generate user-interactable search tags
+                    search: {
+                        kind: null
+                    },
                     label: 'Cloud Credential',
                     type: 'lookup',
                     list: 'CredentialList',
