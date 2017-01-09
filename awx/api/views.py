@@ -3164,8 +3164,8 @@ class SystemJobTemplateLaunch(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
 
-        new_job = obj.create_unified_job(**request.data)
-        new_job.signal_start(**request.data)
+        new_job = obj.create_unified_job(extra_vars=request.data.get('extra_vars', {}))
+        new_job.signal_start()
         data = dict(system_job=new_job.id)
         return Response(data, status=status.HTTP_201_CREATED)
 
