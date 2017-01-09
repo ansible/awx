@@ -61,6 +61,14 @@ export default
         },
 
         actions: {
+            refresh: {
+                mode: 'all',
+                awToolTip: i18n._("Refresh the page"),
+                ngClick: "refresh()",
+                ngShow: "socketStatus === 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: i18n._('REFRESH')
+            },
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
@@ -68,14 +76,6 @@ export default
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: "canAdd"
-            },
-            refresh: {
-                mode: 'all',
-                awToolTip: i18n._("Refresh the page"),
-                ngClick: "refresh()",
-                ngShow: "socketStatus == 'error'",
-                actionClass: 'btn List-buttonDefault',
-                buttonContent: i18n._('REFRESH')
             }
         },
 
