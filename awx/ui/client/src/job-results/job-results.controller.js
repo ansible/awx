@@ -1,5 +1,7 @@
 export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment',
 function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment) {
+    var toDestroy = [];
+    var cancelRequests = false;
 
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
@@ -66,14 +68,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // update label in left pane and tooltip in right pane when the job_status
     // changes
-    $scope.$watch('job_status', function(status) {
+    toDestroy.push($scope.$watch('job_status', function(status) {
         if (status) {
             $scope.status_label = $scope.jobOptions.status.choices
                 .filter(val => val[0] === status)
                 .map(val => val[1])[0];
             $scope.status_tooltip = "Job " + $scope.status_label;
         }
-    });
+    }));
 
     // update the job_status value.  Use the cached rootScope value if there
     // is one.  This is a workaround when the rest call for the jobData is
@@ -278,6 +280,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
                         }
+
+                        classList = null;
+                        putIn = null;
                     } else {
                         // this is a header or recap line, so just
                         // append to the bottom
@@ -368,7 +373,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     delete event.event;
                     processEvent(event);
                 });
-                if (events.next) {
+                if (events.next && !cancelRequests) {
                     getEvents(events.next);
                 } else {
                     // put those paused events into the pane
@@ -378,7 +383,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     };
 
     // grab non-header recap lines
-    $scope.$watch('job_event_dataset', function(val) {
+    toDestroy.push($scope.$watch('job_event_dataset', function(val) {
         // pause websocket events from coming in to the pane
         $scope.gotPreviouslyRanEvents = $q.defer();
 
@@ -391,19 +396,19 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 delete event.event;
                 processEvent(event);
             });
-            if (val.next) {
+            if (val.next  && !cancelRequests) {
                 getEvents(val.next);
             } else {
                 // put those paused events into the pane
                 $scope.gotPreviouslyRanEvents.resolve("");
             }
         });
-    });
+    }));
 
 
 
     // Processing of job_events messages from the websocket
-    $scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+    toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
         $q.all([$scope.gotPreviouslyRanEvents.promise,
             $scope.hasSkeleton.promise]).then(() => {
             var url = Dataset
@@ -446,10 +451,10 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             }
 
         });
-    });
+    }));
 
     // Processing of job-status messages from the websocket
-    $scope.$on(`ws-jobs`, function(e, data) {
+    toDestroy.push($scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) ===
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
@@ -477,5 +482,18 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             // for this job.  cache the socket status on root scope
             $rootScope['lastSocketStatus' + data.unified_job_id] = data.status;
         }
+    }));
+
+    $scope.$on('$destroy', function(){
+        cancelRequests = true;
+        eventQueue.initialize();
+        Object.keys($scope.events)
+            .forEach(v => {
+                $scope.events[v].$destroy();
+                $scope.events[v] = null;
+            });
+        $scope.events = {};
+        clearInterval(elapsedInterval);
+        toDestroy.forEach(v => v());
     });
 }];

@@ -185,7 +185,6 @@ export default ['$log', 'moment', function($log, moment){
         data-uuid="${clickClass}">
     </i>
 </span>`;
-                // console.log(expandDom);
                 return expandDom;
             } else {
                 // non-header lines don't get an expander

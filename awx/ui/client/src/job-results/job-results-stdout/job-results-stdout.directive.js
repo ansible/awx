@@ -12,6 +12,18 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
         templateUrl: templateUrl('job-results/job-results-stdout/job-results-stdout'),
         restrict: 'E',
         link: function(scope, element) {
+            var toDestroy = [],
+                resizer,
+                scrollWatcher;
+
+            scope.$on('$destroy', function(){
+                $(window).off("resize", resizer);
+                $(window).off("scroll", scrollWatcher);
+                $(".JobResultsStdOut-stdoutContainer").off('scroll',
+                    scrollWatcher);
+                toDestroy.forEach(v => v());
+            });
+
             scope.stdoutContainerAvailable.resolve("container available");
             // utility function used to find the top visible line and
             // parent header in the pane
@@ -115,9 +127,15 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                             // stop iterating over the standard out
                             // lines once the first one has been
                             // found
+
+                            $this = null;
                             return false;
-                    }
-                });
+                        }
+
+                        $this = null;
+                    });
+
+                $container = null;
 
                 return {
                     visLine: visItem,
@@ -131,22 +149,24 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
             } else {
                 scope.isMobile = false;
             }
-            // watch changes to the window size
-            $(window).resize(function() {
+
+            resizer = function() {
                 // and update the isMobile var accordingly
                 if (window.innerWidth <= 1200 && !scope.isMobile) {
                     scope.isMobile = true;
                 } else if (window.innerWidth > 1200 & scope.isMobile) {
                     scope.isMobile = false;
                 }
-            });
+            };
+            // watch changes to the window size
+            $(window).resize(resizer);
 
             var lastScrollTop;
 
             var initScrollTop = function() {
                 lastScrollTop = 0;
             };
-            var scrollWatcher = function() {
+            scrollWatcher = function() {
                 var st = $(this).scrollTop();
                 var netScroll = st + $(this).innerHeight();
                 var fullHeight;
@@ -178,11 +198,15 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 }
 
                 lastScrollTop = st;
+
+                st = null;
+                netScroll = null;
+                fullHeight = null;
             };
 
             // update scroll watchers when isMobile changes based on
             // window resize
-            scope.$watch('isMobile', function(val) {
+            toDestroy.push(scope.$watch('isMobile', function(val) {
                 if (val === true) {
                     // make sure ^ TOP always shown for mobile
                     scope.stdoutOverflowed = true;
@@ -204,7 +228,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                     $(".JobResultsStdOut-stdoutContainer").on('scroll',
                         scrollWatcher);
                 }
-            });
+            }));
 
             // called to scroll to follow anchor
             scope.followScroll = function() {
@@ -237,7 +261,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
 
             // if following becomes active, go ahead and get to the bottom
             // of the standard out pane
-            scope.$watch('followEngaged', function(val) {
+            toDestroy.push(scope.$watch('followEngaged', function(val) {
                 // scroll to follow point if followEngaged is true
                 if (val) {
                     scope.followScroll();
@@ -251,7 +275,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                         scope.followTooltip = "Click to follow standard out as it comes in.";
                     }
                 }
-            });
+            }));
 
             // follow button ng-click function
             scope.followToggleClicked = function() {
