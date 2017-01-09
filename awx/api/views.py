@@ -4109,7 +4109,7 @@ class NotificationTemplateDetail(RetrieveUpdateDestroyAPIView):
 
 class NotificationTemplateTest(GenericAPIView):
 
-    view_name = _('NotificationTemplate Test')
+    view_name = _('Notification Template Test')
     model = NotificationTemplate
     serializer_class = EmptySerializer
     new_in_300 = True
