@@ -195,7 +195,7 @@ export default ['$log', 'moment', function($log, moment){
             return _
                 .zip(_.range(event.start_line + 1,
                     event.end_line + 1),
-                    event.stdout.replace("\t", "        ").split("\r\n").slice(0, -1));
+                    event.stdout.replace("\t", "        ").split("\r\n")).slice(0, -1);
         },
         // public function that provides the parsed stdout line, given a
         // job_event
