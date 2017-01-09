@@ -985,8 +985,6 @@ class ProjectUpdateAccess(BaseAccess):
 
     @check_superuser
     def can_cancel(self, obj):
-        if not obj.can_cancel:
-            return False
         if self.user == obj.created_by:
             return True
         # Project updates cascade delete with project, admin role descends from org admin
