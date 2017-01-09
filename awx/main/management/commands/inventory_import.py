@@ -64,7 +64,7 @@ class MemObject(object):
         all_vars = {}
         files_found = 0
         for suffix in ('', '.yml', '.yaml', '.json'):
-            path = ''.join([base_path, suffix])
+            path = ''.join([base_path, suffix]).encode("utf-8")
             if not os.path.exists(path):
                 continue
             if not os.path.isfile(path):
@@ -462,7 +462,7 @@ class ExecutableJsonLoader(BaseLoader):
         # to set their variables
         for k,v in self.all_group.all_hosts.iteritems():
             if 'hostvars' not in _meta:
-                data = self.command_to_json([self.source, '--host', k])
+                data = self.command_to_json([self.source, '--host', k.encode("utf-8")])
             else:
                 data = _meta['hostvars'].get(k, {})
             if isinstance(data, dict):
