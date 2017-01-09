@@ -851,6 +851,7 @@ class OrganizationNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView)
     serializer_class = NotificationTemplateSerializer
     parent_model = Organization
     relationship = 'notification_templates_any'
+    new_in_300 = True
 
 
 class OrganizationNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
@@ -859,6 +860,7 @@ class OrganizationNotificationTemplatesErrorList(SubListCreateAttachDetachAPIVie
     serializer_class = NotificationTemplateSerializer
     parent_model = Organization
     relationship = 'notification_templates_error'
+    new_in_300 = True
 
 
 class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
@@ -867,6 +869,7 @@ class OrganizationNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIV
     serializer_class = NotificationTemplateSerializer
     parent_model = Organization
     relationship = 'notification_templates_success'
+    new_in_300 = True
 
 
 class OrganizationAccessList(ResourceAccessList):
@@ -921,6 +924,7 @@ class TeamRolesList(SubListCreateAttachDetachAPIView):
     metadata_class = RoleMetadata
     parent_model = Team
     relationship='member_role.children'
+    new_in_300 = True
 
     def get_queryset(self):
         team = get_object_or_404(Team, pk=self.kwargs['pk'])
@@ -1103,6 +1107,7 @@ class ProjectNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     serializer_class = NotificationTemplateSerializer
     parent_model = Project
     relationship = 'notification_templates_any'
+    new_in_300 = True
 
 
 class ProjectNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
@@ -1111,6 +1116,7 @@ class ProjectNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
     serializer_class = NotificationTemplateSerializer
     parent_model = Project
     relationship = 'notification_templates_error'
+    new_in_300 = True
 
 
 class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
@@ -1119,6 +1125,7 @@ class ProjectNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
     serializer_class = NotificationTemplateSerializer
     parent_model = Project
     relationship = 'notification_templates_success'
+    new_in_300 = True
 
 
 class ProjectUpdatesList(SubListAPIView):
@@ -1156,6 +1163,7 @@ class ProjectUpdateList(ListAPIView):
 
     model = ProjectUpdate
     serializer_class = ProjectUpdateListSerializer
+    new_in_13 = True
 
 
 class ProjectUpdateDetail(RetrieveDestroyAPIView):
@@ -1196,6 +1204,7 @@ class ProjectUpdateNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = ProjectUpdate
     relationship = 'notifications'
+    new_in_300 = True
 
 
 class ProjectAccessList(ResourceAccessList):
@@ -1271,6 +1280,7 @@ class UserRolesList(SubListCreateAttachDetachAPIView):
     parent_model = User
     relationship='roles'
     permission_classes = (IsAuthenticated,)
+    new_in_300 = True
 
     def get_queryset(self):
         u = get_object_or_404(User, pk=self.kwargs['pk'])
@@ -2170,6 +2180,7 @@ class InventorySourceNotificationTemplatesAnyList(SubListCreateAttachDetachAPIVi
     serializer_class = NotificationTemplateSerializer
     parent_model = InventorySource
     relationship = 'notification_templates_any'
+    new_in_300 = True
 
     def post(self, request, *args, **kwargs):
         parent = self.get_parent_object()
@@ -2281,6 +2292,7 @@ class InventoryUpdateNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = InventoryUpdate
     relationship = 'notifications'
+    new_in_300 = True
 
 
 class JobTemplateList(ListCreateAPIView):
@@ -2399,6 +2411,7 @@ class JobTemplateSurveySpec(GenericAPIView):
     model = JobTemplate
     parent_model = JobTemplate
     serializer_class = EmptySerializer
+    new_in_210 = True
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2465,6 +2478,7 @@ class WorkflowJobTemplateSurveySpec(WorkflowsEnforcementMixin, JobTemplateSurvey
 
     model = WorkflowJobTemplate
     parent_model = WorkflowJobTemplate
+    new_in_310 = True
 
 
 class JobTemplateActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -2482,6 +2496,7 @@ class JobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
     serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
     relationship = 'notification_templates_any'
+    new_in_300 = True
 
 
 class JobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
@@ -2490,6 +2505,7 @@ class JobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView
     serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
     relationship = 'notification_templates_error'
+    new_in_300 = True
 
 
 class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
@@ -2498,6 +2514,7 @@ class JobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIVi
     serializer_class = NotificationTemplateSerializer
     parent_model = JobTemplate
     relationship = 'notification_templates_success'
+    new_in_300 = True
 
 
 class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDetachAPIView):
@@ -2956,6 +2973,7 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
     model = WorkflowJob
     serializer_class = EmptySerializer
     is_job_start = True
+    new_in_310 = True
 
     def check_object_permissions(self, request, obj):
         if request.method == 'POST' and obj:
@@ -3139,6 +3157,7 @@ class SystemJobTemplateList(ListAPIView):
 
     model = SystemJobTemplate
     serializer_class = SystemJobTemplateSerializer
+    new_in_210 = True
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
@@ -3150,6 +3169,7 @@ class SystemJobTemplateDetail(RetrieveAPIView):
 
     model = SystemJobTemplate
     serializer_class = SystemJobTemplateSerializer
+    new_in_210 = True
 
 
 class SystemJobTemplateLaunch(GenericAPIView):
@@ -3157,6 +3177,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
     model = SystemJobTemplate
     serializer_class = EmptySerializer
     is_job_start = True
+    new_in_210 = True
 
     def get(self, request, *args, **kwargs):
         return Response({})
@@ -3179,6 +3200,7 @@ class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
     parent_model = SystemJobTemplate
     relationship = 'schedules'
     parent_key = 'unified_job_template'
+    new_in_210 = True
 
 
 class SystemJobTemplateJobsList(SubListAPIView):
@@ -3188,6 +3210,7 @@ class SystemJobTemplateJobsList(SubListAPIView):
     parent_model = SystemJobTemplate
     relationship = 'jobs'
     parent_key = 'system_job_template'
+    new_in_210 = True
 
 
 class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPIView):
@@ -3196,6 +3219,7 @@ class SystemJobTemplateNotificationTemplatesAnyList(SubListCreateAttachDetachAPI
     serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
     relationship = 'notification_templates_any'
+    new_in_300 = True
 
 
 class SystemJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachAPIView):
@@ -3204,6 +3228,7 @@ class SystemJobTemplateNotificationTemplatesErrorList(SubListCreateAttachDetachA
     serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
     relationship = 'notification_templates_error'
+    new_in_300 = True
 
 
 class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetachAPIView):
@@ -3212,6 +3237,7 @@ class SystemJobTemplateNotificationTemplatesSuccessList(SubListCreateAttachDetac
     serializer_class = NotificationTemplateSerializer
     parent_model = SystemJobTemplate
     relationship = 'notification_templates_success'
+    new_in_300 = True
 
 
 class JobList(ListCreateAPIView):
@@ -3249,10 +3275,12 @@ class JobLabelList(SubListAPIView):
     parent_model = Job
     relationship = 'labels'
     parent_key = 'job'
+    new_in_300 = True
 
 
 class WorkflowJobLabelList(WorkflowsEnforcementMixin, JobLabelList):
     parent_model = WorkflowJob
+    new_in_310 = True
 
 
 class JobActivityStreamList(ActivityStreamEnforcementMixin, SubListAPIView):
@@ -3347,6 +3375,7 @@ class JobNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = Job
     relationship = 'notifications'
+    new_in_300 = True
 
 
 class BaseJobHostSummariesList(SubListAPIView):
@@ -3857,12 +3886,14 @@ class AdHocCommandNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = AdHocCommand
     relationship = 'notifications'
+    new_in_300 = True
 
 
 class SystemJobList(ListCreateAPIView):
 
     model = SystemJob
     serializer_class = SystemJobListSerializer
+    new_in_210 = True
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_superuser and not request.user.is_system_auditor:
@@ -3874,6 +3905,7 @@ class SystemJobDetail(RetrieveDestroyAPIView):
 
     model = SystemJob
     serializer_class = SystemJobSerializer
+    new_in_210 = True
 
 
 class SystemJobCancel(RetrieveAPIView):
@@ -3881,6 +3913,7 @@ class SystemJobCancel(RetrieveAPIView):
     model = SystemJob
     serializer_class = SystemJobCancelSerializer
     is_job_cancel = True
+    new_in_210 = True
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -3897,6 +3930,7 @@ class SystemJobNotificationsList(SubListAPIView):
     serializer_class = NotificationSerializer
     parent_model = SystemJob
     relationship = 'notifications'
+    new_in_300 = True
 
 
 class UnifiedJobTemplateList(ListAPIView):
@@ -4019,6 +4053,7 @@ class UnifiedJobStdout(RetrieveAPIView):
 class ProjectUpdateStdout(UnifiedJobStdout):
 
     model = ProjectUpdate
+    new_in_13 = True
 
 
 class InventoryUpdateStdout(UnifiedJobStdout):
@@ -4089,6 +4124,7 @@ class NotificationTemplateNotificationList(SubListAPIView):
     parent_model = NotificationTemplate
     relationship = 'notifications'
     parent_key = 'notification_template'
+    new_in_300 = True
 
 
 class NotificationList(ListAPIView):
