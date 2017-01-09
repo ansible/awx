@@ -32,7 +32,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         form.formFieldSize = null;
         $scope.inventory_id = inventory_id;
 
-        $scope.$watch('invnentory_obj.summary_fields.user_capabilities.edit', function(val) {
+        $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
                 $scope.canAdd = false;
             }

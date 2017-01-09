@@ -16,6 +16,8 @@ export default
         index: false,
         hover: true,
         well: false,
+        title: false,
+
         fields: {
             status: {
                 label: '',

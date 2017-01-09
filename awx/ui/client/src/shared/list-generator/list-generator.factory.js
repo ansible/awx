@@ -134,7 +134,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     base, action, fld, cnt, field_action, fAction, itm;
 
                 if (options.mode !== 'lookup') {
-                    if (options.title !== false) {
+                    if (options.title !== false && list.title !== false) {
                         html += "<div class=\"List-header\">";
                         html += "<div class=\"List-title\">";
 
