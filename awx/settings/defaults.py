@@ -163,6 +163,10 @@ MAX_EVENT_RES_DATA = 700000
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
 
+JOB_EVENT_WORKERS = 4
+
+JOB_EVENT_MAX_QUEUE_SIZE = 5000
+
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
