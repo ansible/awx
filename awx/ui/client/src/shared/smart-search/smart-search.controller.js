@@ -1,5 +1,5 @@
-export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet',
-    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs) {
+export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService',
+    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService) {
 
         let path, relations,
             // steps through the current tree of $state configurations, grabs default search params
@@ -17,6 +17,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
             qs.initFieldset(path, $scope.djangoModel, relations).then((data) => {
                 $scope.models = data.models;
+                $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
             });
         }
@@ -38,6 +39,16 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             return flat;
         }
 
+        function setDefaults(term) {
+            if ($scope.list.defaultSearchParams) {
+                return $scope.list.defaultSearchParams(term);
+            } else {
+               return {
+                    search: encodeURIComponent(term)
+                };
+            }
+        }
+
         $scope.toggleKeyPane = function() {
             $scope.showKeyPane = !$scope.showKeyPane;
         };
@@ -56,7 +67,27 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // remove tag, merge new queryset, $state.go
         $scope.remove = function(index) {
-            let removed = qs.encodeParam($scope.searchTags.splice(index, 1)[0]);
+            let tagToRemove = $scope.searchTags.splice(index, 1)[0];
+            let termParts = SmartSearchService.splitTermIntoParts(tagToRemove);
+            let removed;
+            if (termParts.length === 1) {
+                removed = setDefaults(tagToRemove);
+            }
+            else {
+                let root = termParts[0].split(".")[0].replace(/^-/, '');
+                let encodeParams = {
+                    term: tagToRemove
+                };
+                if(_.has($scope.options.actions.GET, root)) {
+                    if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                        encodeParams.relatedSearchTerm = true;
+                    }
+                    else {
+                        encodeParams.searchTerm = true;
+                    }
+                }
+                removed = qs.encodeParam(encodeParams);
+            }
             _.each(removed, (value, key) => {
                 if (Array.isArray(queryset[key])){
                     _.remove(queryset[key], (item) => item === value);
@@ -79,26 +110,35 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             let params = {},
                 origQueryset = _.clone(queryset);
 
-            function setDefaults(term) {
-                // "name" and "description" are sane defaults for MOST models, but not ALL!
-                // defaults may be configured in ListDefinition.defaultSearchParams
-                if ($scope.list.defaultSearchParams) {
-                    return $scope.list.defaultSearchParams(term);
-                } else {
-                   return {
-                        or__name__icontains: term,
-                        or__description__icontains: term
-                    };
-                }
-            }
+            // Remove leading/trailing whitespace if there is any
+            terms = terms.trim();
 
             if(terms && terms !== '') {
-                _.forEach(terms.split(' '), (term) => {
+                // Split the terms up
+                let splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
+                _.forEach(splitTerms, (term) => {
+
+                    let termParts = SmartSearchService.splitTermIntoParts(term);
+
                     // if only a value is provided, search using default keys
-                    if (term.split(':').length === 1) {
+                    if (termParts.length === 1) {
                         params = _.merge(params, setDefaults(term));
                     } else {
-                        params = _.merge(params, qs.encodeParam(term));
+                        // Figure out if this is a search term
+                        let root = termParts[0].split(".")[0].replace(/^-/, '');
+                        if(_.has($scope.options.actions.GET, root)) {
+                            if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                                params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}));
+                            }
+                            else {
+                                params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}));
+                            }
+                        }
+                        // Its not a search term or a related search term
+                        else {
+                            params = _.merge(params, qs.encodeParam({term: term}));
+                        }
+
                     }
                 });
 
