@@ -251,6 +251,7 @@ class BaseSerializer(serializers.ModelSerializer):
             'inventory_update': _('Inventory Sync'),
             'system_job': _('Management Job'),
             'workflow_job': _('Workflow Job'),
+            'workflow_job_template': _('Workflow Template'),
         }
         choices = []
         for t in self.get_types():
