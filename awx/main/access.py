@@ -1043,7 +1043,7 @@ class JobTemplateAccess(BaseAccess):
                 Project.accessible_objects(self.user, 'use_role').exists() or
                 Inventory.accessible_objects(self.user, 'use_role').exists())
 
-        # if reference_obj is provided, determine if it can be coppied
+        # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
 
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
@@ -1543,13 +1543,13 @@ class WorkflowJobTemplateAccess(BaseAccess):
             for node in qs.all():
                 node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
-                    node_errors['inventory'] = 'Prompted inventory %s can not be coppied.' % node.inventory.name
+                    node_errors['inventory'] = 'Prompted inventory %s can not be copied.' % node.inventory.name
                 if node.credential and self.user not in node.credential.use_role:
-                    node_errors['credential'] = 'Prompted credential %s can not be coppied.' % node.credential.name
+                    node_errors['credential'] = 'Prompted credential %s can not be copied.' % node.credential.name
                 ujt = node.unified_job_template
                 if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
                     node_errors['unified_job_template'] = (
-                        'Prompted %s %s can not be coppied.' % (ujt._meta.verbose_name_raw, ujt.name))
+                        'Prompted %s %s can not be copied.' % (ujt._meta.verbose_name_raw, ujt.name))
                 if node_errors:
                     wfjt_errors[node.id] = node_errors
             self.messages.update(wfjt_errors)

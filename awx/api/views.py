@@ -2910,6 +2910,8 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
         copy_TF, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
         data['can_copy'] = copy_TF
         data['warnings'] = messages
+        if not copy_TF:
+            data['warnings'] = _('You do not have permission to make a copy.')
         return Response(data)
 
     def post(self, request, *args, **kwargs):
