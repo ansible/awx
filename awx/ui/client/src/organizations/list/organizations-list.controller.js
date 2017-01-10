@@ -131,7 +131,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             if (editing_organization_id === undefined) {
                 return false;
             }
-            if (deleted_organization_id == editing_organization_id) {
+            if (deleted_organization_id === editing_organization_id) {
                 return true;
             }
             return false;
@@ -147,7 +147,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 Rest.destroy()
                     .success(function() {
                         Wait('stop');
-                        if (isDeletedOrganizationBeingEdited(id, $stateParams.organization_id) === true) {
+                        if (isDeletedOrganizationBeingEdited(id, parseInt($stateParams.organization_id)) === true) {
                             $state.go('^', null, { reload: true });
                         } else {
                             $state.reload('organizations');
