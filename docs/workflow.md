@@ -32,7 +32,7 @@ As stated, workflow job templates can be created with populated `extra_vars`. Th
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
-Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest keep their own paces. Canceling a workflow spawned job resource follows the same rules.
+Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest keep their own paces. Canceling a workflow spawned job resource follows the same rules. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a its workflow when the user lacks necessary permissions to use it), then the branch should stop executing in this case as well.
 
 A workflow job itself can also be canceled. In this case all its spawned job resources will be canceled if cancelable and following paths stop executing.
 
