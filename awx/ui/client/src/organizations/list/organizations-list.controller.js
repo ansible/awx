@@ -127,6 +127,16 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             });
         };
 
+        function isDeletedOrganizationBeingEdited(deleted_organization_id, editing_organization_id) {
+            if (editing_organization_id === undefined) {
+                return false;
+            }
+            if (deleted_organization_id == editing_organization_id) {
+                return true;
+            }
+            return false;
+        }
+
         $scope.deleteOrganization = function(id, name) {
 
             var action = function() {
@@ -137,7 +147,11 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 Rest.destroy()
                     .success(function() {
                         Wait('stop');
-                        $state.reload('organizations');
+                        if (isDeletedOrganizationBeingEdited(id, $stateParams.organization_id) === true) {
+                            $state.go('^', null, { reload: true });
+                        } else {
+                            $state.reload('organizations');
+                        }
                     })
                     .error(function(data, status) {
                         ProcessErrors($scope, data, status, null, {
