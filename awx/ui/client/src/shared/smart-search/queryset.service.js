@@ -69,10 +69,12 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 function encodeTerm(value, key){
 
                     if (Array.isArray(value)){
-                        return _.map(value, function(item){
+                        let concated = '';
+                        angular.forEach(value, function(item){
                             item = item.replace(/"|'/g, "");
-                            return `${key}=${item}`.join('&') + '&';
+                            concated += `${key}=${item}&`;
                         });
+                        return concated;
                     }
                     else {
                         value = value.replace(/"|'/g, "");

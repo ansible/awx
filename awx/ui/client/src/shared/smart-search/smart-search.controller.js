@@ -120,23 +120,34 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
                     let termParts = SmartSearchService.splitTermIntoParts(term);
 
+                    function combineSameSearches(a,b){
+                        if (_.isArray(a)) {
+                          return a.concat(b);
+                        }
+                        else {
+                            if(a) {
+                                return [a,b];
+                            }
+                        }
+                    }
+
                     // if only a value is provided, search using default keys
                     if (termParts.length === 1) {
-                        params = _.merge(params, setDefaults(term));
+                        params = _.merge(params, setDefaults(term), combineSameSearches);
                     } else {
                         // Figure out if this is a search term
                         let root = termParts[0].split(".")[0].replace(/^-/, '');
                         if(_.has($scope.options.actions.GET, root)) {
                             if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
-                                params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}));
+                                params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
                             }
                             else {
-                                params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}));
+                                params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                             }
                         }
                         // Its not a search term or a related search term
                         else {
-                            params = _.merge(params, qs.encodeParam({term: term}));
+                            params = _.merge(params, qs.encodeParam({term: term}), combineSameSearches);
                         }
 
                     }
