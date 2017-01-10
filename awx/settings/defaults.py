@@ -154,7 +154,7 @@ STDOUT_MAX_BYTES_DISPLAY = 1048576
 
 # Returned in the header on event api lists as a recommendation to the UI
 # on how many events to display before truncating/hiding
-RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 10000
+RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 4000
 
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
