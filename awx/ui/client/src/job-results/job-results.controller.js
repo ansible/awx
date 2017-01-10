@@ -383,7 +383,11 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         // making rest calls for next pages/etc. (you can see context is
         // also passed into getEvents and processEvent and similar checks
         // exist in these functions)
-        if (context !== currentContext) {
+        //
+        // also, if the page doesn't contain results (i.e.: the response
+        // returns an error), don't process the page
+        if (context !== currentContext || events === undefined ||
+            events.results === undefined) {
             return;
         }
 
@@ -441,7 +445,16 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
         $( ".JobResultsStdOut-aLineOfStdOut.not_skeleton" ).remove();
         $scope.hasSkeleton.promise.then(() => {
-            processPage(val, context);
+            if (val.count > parseInt(val.maxEvents)) {
+                $(".header_task").hide();
+                $(".header_play").hide();
+                $scope.tooManyEvents = true;
+            } else {
+                $(".header_task").show();
+                $(".header_play").show();
+                $scope.tooManyEvents = false;
+                processPage(val, context);
+            }
         });
     }));
 
