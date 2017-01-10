@@ -45,12 +45,14 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
         $scope.$on(`${list.iterator}_options`, function(event, data){
             $scope.options = data.data.actions.GET;
             optionsRequestDataProcessing();
+            renameTypeLabelFromWorkflowJobTemplateToWorkflowTemplate();
         });
 
         $scope.$watchCollection('templates', function() {
-                optionsRequestDataProcessing();
-            }
-        );
+            optionsRequestDataProcessing();
+            renameTypeLabelFromWorkflowJobTemplateToWorkflowTemplate();
+        });
+
         // iterate over the list and add fields like type label, after the
         // OPTIONS request returns, or the list is sorted/paginated/searched
         function optionsRequestDataProcessing(){
@@ -70,6 +72,13 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
             });
         }
 
+        function renameTypeLabelFromWorkflowJobTemplateToWorkflowTemplate() {
+            $scope[list.name].forEach(function(item) {
+                if (item.type_label === "Workflow Job Template") {
+                    item.type_label = "Workflow Template";
+                }
+            });
+        }
 
         $scope.$on(`ws-jobs`, function () {
             // @issue - this is no longer quite as ham-fisted but I'd like for someone else to take a peek
