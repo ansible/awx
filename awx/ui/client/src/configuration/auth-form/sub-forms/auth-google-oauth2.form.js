@@ -16,7 +16,8 @@ export default ['i18n', function(i18n) {
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: {

@@ -30,7 +30,8 @@
                  reset: 'LOG_AGGREGATOR_USERNAME'
              },
              LOG_AGGREGATOR_PASSWORD: {
-                 type: 'text',
+                 type: 'sensitive',
+                 hasShowInputButton: true,
                  reset: 'LOG_AGGREGATOR_PASSWORD'
              },
              LOG_AGGREGATOR_LOGGERS: {

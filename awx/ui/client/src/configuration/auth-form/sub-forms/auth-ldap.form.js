@@ -21,7 +21,8 @@ export default ['i18n', function(i18n) {
                 reset: 'AUTH_LDAP_BIND_DN'
             },
             AUTH_LDAP_BIND_PASSWORD: {
-                type: 'password'
+                type: 'sensitive',
+                hasShowInputButton: true,
             },
             AUTH_LDAP_USER_SEARCH: {
                 type: 'textarea',

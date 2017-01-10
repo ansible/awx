@@ -21,7 +21,8 @@ export default ['i18n', function(i18n) {
                 reset: 'RADIUS_PORT'
             },
             RADIUS_SECRET: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'RADIUS_SECRET'
             }
         },
