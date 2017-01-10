@@ -131,7 +131,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
                                         msg: 'Call to delete workflow job template failed. DELETE returned status: ' + status });
                                 });
                             }
@@ -141,8 +141,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete job template failed. DELETE returned status: ' + status });
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
+                                        msg: 'Call to delete job template failed. DELETE returned status: ' + data.status });
                                 });
                             }
                             else {
