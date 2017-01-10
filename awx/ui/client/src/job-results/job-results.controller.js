@@ -418,12 +418,20 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     // grab non-header recap lines
     toDestroy.push($scope.$watch('job_event_dataset', function(val) {
         eventQueue.initialize();
+
         Object.keys($scope.events)
             .forEach(v => {
-                $scope.events[v].$destroy();
-                $scope.events[v] = null;
+                // dont destroy scope events for skeleton lines
+                let name = $scope.events[v].event.name;
+
+                if (!(name === "playbook_on_play_start" ||
+                    name === "playbook_on_task_start" ||
+                    name === "playbook_on_stats")) {
+                    $scope.events[v].$destroy();
+                    $scope.events[v] = null;
+                    delete $scope.events[v];
+                }
             });
-        $scope.events = {};
 
         // pause websocket events from coming in to the pane
         $scope.gotPreviouslyRanEvents = $q.defer();
@@ -443,10 +451,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
         $q.all([$scope.gotPreviouslyRanEvents.promise,
             $scope.hasSkeleton.promise]).then(() => {
-            // for header and recap lines, as well as if no filters
-            // were added by the user, just put the line in the
+            // put the line in the
             // standard out pane (and increment play and task
-            // count)
+            // count if applicable)
             if (data.event_name === "playbook_on_play_start") {
                 $scope.playCount++;
             } else if (data.event_name === "playbook_on_task_start") {
