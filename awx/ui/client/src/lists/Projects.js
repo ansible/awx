@@ -42,14 +42,14 @@ export default
             scm_revision: {
                 label: i18n._('Revision'),
                 excludeModal: true,
-                columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs',
+                columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
                 class: 'List-staticColumnAdjacent--monospace'
             },
             scm_type: {
                 label: i18n._('Type'),
                 ngBind: 'project.type_label',
                 excludeModal: true,
-                columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs'
+                columnClass: 'col-lg-2 col-md-2 col-sm-3 hidden-xs'
             },
             last_updated: {
                 label: i18n._('Last Updated'),

@@ -78,7 +78,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             },
             close: {
                 ngClick: 'formCancel()',
-                ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngShow: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()',
