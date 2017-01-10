@@ -432,14 +432,14 @@ export default
             ${data.related.callback}
         </string>
     </p>
-    <p>The host configuration key is:
+    <p class="break">The host configuration key is:
         <strong>
             ${$filter('sanitize')(data.host_config_key)}
         </string>
     </p>
 </div>
 `,
-                        'alert-info', saveCompleted, null, null,
+                        'alert-danger', saveCompleted, null, null,
                         null, true);
                 }
                 var orgDefer = $q.defer();
