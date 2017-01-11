@@ -21,7 +21,7 @@ export default [ 'templateUrl', '$timeout', '$location', '$anchorScroll',
                 $(window).off("scroll", scrollWatcher);
                 $(".JobResultsStdOut-stdoutContainer").off('scroll',
                     scrollWatcher);
-                toDestroy.forEach(v => v());
+                toDestroy.forEach(closureFunc => closureFunc());
             });
 
             scope.stdoutContainerAvailable.resolve("container available");

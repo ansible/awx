@@ -508,6 +508,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     }));
 
     $scope.$on('$destroy', function(){
+        $( ".JobResultsStdOut-aLineOfStdOut" ).remove();
         cancelRequests = true;
         eventQueue.initialize();
         Object.keys($scope.events)
@@ -517,6 +518,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             });
         $scope.events = {};
         clearInterval(elapsedInterval);
-        toDestroy.forEach(v => v());
+        toDestroy.forEach(closureFunc => closureFunc());
     });
 }];
