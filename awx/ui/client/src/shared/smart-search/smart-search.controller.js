@@ -145,9 +145,9 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                                 params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                             }
                         }
-                        // Its not a search term or a related search term
+                        // Its not a search term or a related search term - treat it as a string
                         else {
-                            params = _.merge(params, qs.encodeParam({term: term}), combineSameSearches);
+                            params = _.merge(params, setDefaults(term), combineSameSearches);
                         }
 
                     }
