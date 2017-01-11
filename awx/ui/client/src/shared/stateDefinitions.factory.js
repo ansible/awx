@@ -267,7 +267,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-user-team resolve="$resolve"></add-rbac-user-team>`
+                            template: `<add-rbac-user-team resolve="$resolve" title="Add Permissions"></add-rbac-user-team>`
                         }
                     },
                     resolve: {
@@ -332,7 +332,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="Add Users / Teams"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -501,7 +501,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="Add Users"></add-rbac-resource>`
                         }
                     },
                     resolve: {
