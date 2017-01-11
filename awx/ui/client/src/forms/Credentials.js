@@ -425,6 +425,7 @@ export default
                     ngClick: `(organization === undefined ? true : false)||$state.go('credentials.edit.permissions')`,
                     awToolTip: '{{permissionsTooltip}}',
                     dataTipWatch: 'permissionsTooltip',
+                    awToolTipTabEnabledInEditMode: true,
                     dataPlacement: 'top',
                     basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {
