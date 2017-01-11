@@ -24,6 +24,7 @@ describe('Service: SmartSearch', () => {
             expect(SmartSearchService.splitSearchIntoTerms('name:\'foo bar\' description:\'bar foo\'')).toEqual(["name:\'foo bar\'", "description:\'bar foo\'"]);
             expect(SmartSearchService.splitSearchIntoTerms('name:\'foo bar\'       description:\'bar foo\'')).toEqual(["name:\'foo bar\'", "description:\'bar foo\'"]);
             expect(SmartSearchService.splitSearchIntoTerms('name:\"foo bar\" description:\'bar foo\'')).toEqual(["name:\"foo bar\"", "description:\'bar foo\'"]);
+            expect(SmartSearchService.splitSearchIntoTerms('name:\"foo bar\" foo')).toEqual(["name:\"foo bar\"", "foo"]);
         });
     });
 
