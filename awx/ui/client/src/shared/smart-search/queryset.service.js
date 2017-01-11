@@ -94,7 +94,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 let keySplit = paramParts[0].split('.');
                 let exclude = false;
                 let lessThanGreaterThan = paramParts[1].match(/^(>|<).*$/) ? true : false;
-                if(keySplit[0].startsWith("-")) {
+                if(keySplit[0].match(/^-/g)) {
                     exclude = true;
                     keySplit[0] = keySplit[0].replace(/^-/, '');
                 }
