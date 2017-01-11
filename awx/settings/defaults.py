@@ -163,6 +163,12 @@ MAX_EVENT_RES_DATA = 700000
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
 
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = True
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = True
+
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
