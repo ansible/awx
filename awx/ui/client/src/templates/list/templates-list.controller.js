@@ -239,14 +239,36 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                                     </div>
                                     <div class="Prompt-bodyTarget">`;
 
-                                        // Go and grab all of the warning strings
-                                        _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
-                                            if(ujt) {
-                                                // _.forOwn(ujts, function(warningString) {
-                                                bodyHtml += '<div>' + ujt + '</div>';
-                                                // });
-                                            }
-                                         } );
+                                        // List the unified job templates user can not access
+                                        if (result.data.templates_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Unified Job Templates that can not be copied<ul>';
+                                            _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
+                                                if(ujt) {
+                                                    bodyHtml += '<li>' + ujt + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted inventories user can not access
+                                        if (result.data.inventories_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted inventories that can not be copied<ul>';
+                                            _.forOwn(result.data.inventories_unable_to_copy, function(inv) {
+                                                if(inv) {
+                                                    bodyHtml += '<li>' + inv + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted credentials user can not access
+                                        if (result.data.credentials_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted credentials that can not be copied<ul>';
+                                            _.forOwn(result.data.credentials_unable_to_copy, function(cred) {
+                                                if(cred) {
+                                                    bodyHtml += '<li>' + cred + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
 
                                     bodyHtml += '</div>';
 

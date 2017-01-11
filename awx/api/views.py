@@ -2907,12 +2907,12 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
-        data = {
-            'can_copy': can_copy, 'can_copy_without_user_input': can_copy,
-            'templates_unable_to_copy': [] if can_copy else ['all'],
-            'credentials_unable_to_copy': [] if can_copy else ['all'],
-            'inventories_unable_to_copy': [] if can_copy else ['all']
-        }
+        data = OrderedDict([
+            ('can_copy', can_copy), ('can_copy_without_user_input', can_copy),
+            ('templates_unable_to_copy', [] if can_copy else ['all']),
+            ('credentials_unable_to_copy', [] if can_copy else ['all']),
+            ('inventories_unable_to_copy', [] if can_copy else ['all'])
+        ])
         if messages and can_copy:
             data['can_copy_without_user_input'] = False
             data.update(messages)
