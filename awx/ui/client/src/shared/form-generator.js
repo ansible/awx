@@ -1479,7 +1479,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += `<div id="${itm}_tab" `+
                                 `class="Form-tab" `;
                             html += (this.form.related[itm].ngClick) ? `ng-click="` + this.form.related[itm].ngClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
-                            if (collection.awToolTip){
+                            if (collection.awToolTip && collection.awToolTipTabEnabledInEditMode === true) {
                                 html += `aw-tool-tip="${collection.awToolTip}" ` +
                                 `aw-tip-placement="${collection.dataPlacement}" ` +
                                 `data-tip-watch="${collection.dataTipWatch}" `;
