@@ -67,6 +67,8 @@ class WorkflowDAG(SimpleDAG):
             obj = n['node_object']
             job = obj.job
 
+            if obj.unified_job_template is None:
+                continue
             if not job:
                 return False
             # Job is about to run or is running. Hold our horses and wait for

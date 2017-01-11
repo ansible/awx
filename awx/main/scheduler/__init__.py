@@ -114,6 +114,8 @@ class TaskManager():
             dag = WorkflowDAG(workflow_job)
             spawn_nodes = dag.bfs_nodes_to_run()
             for spawn_node in spawn_nodes:
+                if spawn_node.unified_job_template is None:
+                    continue
                 kv = spawn_node.get_job_kwargs()
                 job = spawn_node.unified_job_template.create_unified_job(**kv)
                 spawn_node.job = job
