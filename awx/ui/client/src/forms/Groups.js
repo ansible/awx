@@ -43,7 +43,7 @@ export default
                     label: 'Variables',
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    rows: 12,
+                    rows: 6,
                     'default': '---',
                     dataTitle: 'Group Variables',
                     dataPlacement: 'right',

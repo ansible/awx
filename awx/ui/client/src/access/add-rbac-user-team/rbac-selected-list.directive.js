@@ -42,8 +42,6 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
 
                 list.listTitleBadge = false;
 
-                // @issue - fix field.columnClass values for this view
-
                 switch(scope.resourceType){
 
                     case 'projects':
@@ -51,6 +49,8 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                             name: list.fields.name,
                             scm_type: list.fields.scm_type
                         };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.scm_type.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
 
                     case 'inventories':
@@ -58,6 +58,8 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                             name: list.fields.name,
                             organization: list.fields.organization
                         };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
 
                     case 'job_templates':
@@ -67,6 +69,8 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                             name: list.fields.name,
                             description: list.fields.description
                         };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
 
                     case 'workflow_templates':
@@ -77,12 +81,16 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                             name: list.fields.name,
                             description: list.fields.description
                         };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
                     case 'credentials':
                         list.fields = {
                             name: list.fields.name,
                             description: list.fields.description
                         };
+                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
+                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                 }
 
                 list.fields = _.each(list.fields, (field) => field.nosort = true);

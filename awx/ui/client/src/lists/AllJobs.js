@@ -18,6 +18,7 @@ export default
         hover: true,
         well: false,
         emptyListText: i18n._('No jobs have yet run.'),
+        title: false,
 
         fields: {
             status: {

@@ -1553,12 +1553,14 @@ class InventoryScriptList(ListCreateAPIView):
 
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
+    new_in_210 = True
 
 
 class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
 
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
+    new_in_210 = True
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -134,7 +134,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     base, action, fld, cnt, field_action, fAction, itm;
 
                 if (options.mode !== 'lookup') {
-                    if (options.title !== false) {
+                    if (options.title !== false && list.title !== false) {
                         html += "<div class=\"List-header\">";
                         html += "<div class=\"List-title\">";
 
@@ -311,7 +311,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
 
                 if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List- List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
                 }
 
                 // Change layout if a lookup list, place radio buttons before labels
