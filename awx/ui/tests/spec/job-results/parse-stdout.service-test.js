@@ -31,10 +31,14 @@ describe('parseStdoutService', () => {
             unstyledLine = 'ok: [host-00]';
             expect(parseStdoutService.prettify(line, unstyled)).toBe(unstyledLine);
         });
+
+        it('can return empty strings', () => {
+            expect(parseStdoutService.prettify("")).toBe("");
+        });
     });
 
     describe('getLineClasses()', () => {
-        xit('creates a string that is used as a class', () => {
+        it('creates a string that is used as a class', () => {
             let headerEvent = {
                 event_name: 'playbook_on_task_start',
                 event_data: {
@@ -44,12 +48,15 @@ describe('parseStdoutService', () => {
             };
             let lineNum = 3;
             let line = "TASK [setup] *******************************************************************";
-            let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
+            let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 actual_header play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
             expect(parseStdoutService.getLineClasses(headerEvent, line, lineNum)).toBe(styledLine);
         });
     });
 
     describe('getStartTime()', () => {
+        // TODO: the problem is that the date here calls moment, and thus
+        // the date will be timezone'd in the string (this could be
+        // different based on where you are)
         xit('creates returns a badge with the start time of the event', () => {
             let headerEvent = {
                 event_name: 'playbook_on_play_start',
