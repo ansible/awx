@@ -68,7 +68,7 @@ export default
                     searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addPermission",
+                            ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
                             awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
