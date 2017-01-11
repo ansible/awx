@@ -328,7 +328,7 @@ class BaseCallbackModule(CallbackBase):
             ok=stats.ok,
             processed=stats.processed,
             skipped=stats.skipped,
-            artifact_data=stats.custom.get('_run', {})
+            artifact_data=stats.custom.get('_run', {}) if hasattr(stats, 'custom') else {}
         )
 
         with self.capture_event_data('playbook_on_stats', **event_data):
