@@ -66,7 +66,19 @@ angular.module('inventory', [
                         ],
                         ParentObject: ['groupData', function(groupData) {
                             return groupData;
-                        }]
+                        }],
+                        UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                            function(Rest, GetBasePath, $stateParams, $q) {
+                                Rest.setUrl(GetBasePath('unified_jobs'));
+                                var val = $q.defer();
+                                Rest.options()
+                                    .then(function(data) {
+                                        val.resolve(data.data);
+                                    }, function(data) {
+                                        val.reject(data);
+                                    });
+                                return val.promise;
+                            }]
                     },
                     views: {
                         // clear form template when views render in this substate
