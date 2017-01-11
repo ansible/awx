@@ -115,6 +115,19 @@ describe('parseStdoutService', () => {
 
             expect(returnedEvent).toEqual(expectedReturn);
         });
+
+        it('deals correctly with capped lines', () => {
+            let mockEvent = {
+                start_line: 7,
+                end_line: 11,
+                stdout: "a\r\nb\r\nc..."
+            };
+            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."], [11, "[1;imline capped.[0im"]];
+
+            let returnedEvent = parseStdoutService.getLineArr(mockEvent);
+
+            expect(returnedEvent).toEqual(expectedReturn);
+        });
     });
 
     describe('parseStdout()', () => {

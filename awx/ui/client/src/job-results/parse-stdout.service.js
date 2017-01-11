@@ -27,6 +27,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
+                line = line.replace(/\[1;im/g, '<i>');
                 line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;32m/g, '<span class="ansi32">');
@@ -39,6 +40,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
                 //end span
+                line = line.replace(/\[0im/g, '</i>');
                 line = line.replace(/\[0m/g, '</span>');
             } else {
                 // For the host event modal in the standard out tab,
@@ -192,10 +194,22 @@ export default ['$log', 'moment', function($log, moment){
             }
         },
         getLineArr: function(event) {
-            return _
-                .zip(_.range(event.start_line + 1,
-                    event.end_line + 1),
-                    event.stdout.replace("\t", "        ").split("\r\n")).slice(0, -1);
+            let lineNums = _.range(event.start_line + 1,
+                event.end_line + 1);
+
+            let lines = event.stdout
+                .replace("\t", "        ")
+                .split("\r\n");
+
+            if (lineNums.length > lines.length) {
+                let padBy = lineNums.length - lines.length;
+
+                for (let i = 0; i <= padBy; i++) {
+                    lines.push("[1;imline capped.[0im");
+                }
+            }
+
+            return _.zip(lineNums, lines).slice(0, -1);
         },
         // public function that provides the parsed stdout line, given a
         // job_event
