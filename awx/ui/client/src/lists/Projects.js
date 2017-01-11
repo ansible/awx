@@ -39,17 +39,17 @@ export default
                 columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
                 modalColumnClass: 'col-md-8'
             },
-            scm_revision: {
-                label: i18n._('Revision'),
-                excludeModal: true,
-                columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
-                class: 'List-staticColumnAdjacent--monospace'
-            },
             scm_type: {
                 label: i18n._('Type'),
                 ngBind: 'project.type_label',
                 excludeModal: true,
                 columnClass: 'col-lg-2 col-md-2 col-sm-3 hidden-xs'
+            },
+            scm_revision: {
+                label: i18n._('Revision'),
+                excludeModal: true,
+                columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
+                class: 'List-staticColumnAdjacent--monospace'
             },
             last_updated: {
                 label: i18n._('Last Updated'),
