@@ -7,7 +7,8 @@
 
 export default
     angular.module('AllJobsDefinition', ['sanitizeFilter', 'capitalizeFilter'])
-    .value( 'AllJobsList', {
+    .factory('AllJobsList', ['i18n', function(i18n) {
+    return {
 
         name: 'jobs',
         basePath: 'unified_jobs',
@@ -16,6 +17,7 @@ export default
         index: false,
         hover: true,
         well: false,
+        emptyListText: i18n._('No jobs have yet run.'),
         title: false,
 
         fields: {
@@ -115,4 +117,5 @@ export default
                 ngShow: "(job.status !== 'running' && job.status !== 'waiting' && job.status !== 'pending') && job.summary_fields.user_capabilities.delete"
             }
         }
-    });
+    };
+}]);
