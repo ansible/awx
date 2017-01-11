@@ -220,7 +220,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                     .then(function(result) {
 
                         if(result.data.can_copy) {
-                            if(!result.data.warnings || _.isEmpty(result.data.warnings)) {
+                            if(result.data.can_copy_without_user_input) {
                                 // Go ahead and copy the workflow - the user has full priveleges on all the resources
                                 TemplateCopyService.copyWorkflow(template.id)
                                 .then(function(result) {
@@ -235,16 +235,16 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
 
                                 let bodyHtml = `
                                     <div class="Prompt-bodyQuery">
-                                        You may not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and may result in an incomplete workflow.
+                                        You do not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and will result in an incomplete workflow.
                                     </div>
                                     <div class="Prompt-bodyTarget">`;
 
                                         // Go and grab all of the warning strings
-                                        _.forOwn(result.data.warnings, function(warning) {
-                                            if(warning) {
-                                                _.forOwn(warning, function(warningString) {
-                                                    bodyHtml += '<div>' + warningString + '</div>';
-                                                });
+                                        _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
+                                            if(ujt) {
+                                                // _.forOwn(ujts, function(warningString) {
+                                                bodyHtml += '<div>' + ujt + '</div>';
+                                                // });
                                             }
                                          } );
 
