@@ -68,6 +68,9 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                 function encodeTerm(value, key){
 
+                    key = key.replace(/__icontains_DEFAULT/g, "__icontains");
+                    key = key.replace(/__search_DEFAULT/g, "__search");
+
                     if (Array.isArray(value)){
                         let concated = '';
                         angular.forEach(value, function(item){
@@ -99,10 +102,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 let valueString = paramParts[1];
                 if(keySplit.length === 1) {
                     if(params.searchTerm && !lessThanGreaterThan) {
-                        paramString += keySplit[0] + '__icontains';
+                        paramString += keySplit[0] + '__icontains_DEFAULT';
                     }
                     else if(params.relatedSearchTerm) {
-                        paramString += keySplit[0] + '__search';
+                        paramString += keySplit[0] + '__search_DEFAULT';
                     }
                     else {
                         paramString += keySplit[0];
@@ -142,7 +145,8 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         return decodeURIComponent(`${searchString}`);
                     }
                     else {
-                        key = key.replace(/__icontains/g, "");
+                        key = key.replace(/__icontains_DEFAULT/g, "");
+                        key = key.replace(/__search_DEFAULT/g, "");
                         let split = key.split('__');
                         let decodedParam = searchString;
                         let exclude = false;
