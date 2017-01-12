@@ -1553,12 +1553,14 @@ class InventoryScriptList(ListCreateAPIView):
 
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
+    new_in_210 = True
 
 
 class InventoryScriptDetail(RetrieveUpdateDestroyAPIView):
 
     model = CustomInventoryScript
     serializer_class = CustomInventoryScriptSerializer
+    new_in_210 = True
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -2904,10 +2906,16 @@ class WorkflowJobTemplateCopy(WorkflowsEnforcementMixin, GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
-        data = {}
-        copy_TF, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
-        data['can_copy'] = copy_TF
-        data['warnings'] = messages
+        can_copy, messages = request.user.can_access_with_errors(self.model, 'copy', obj)
+        data = OrderedDict([
+            ('can_copy', can_copy), ('can_copy_without_user_input', can_copy),
+            ('templates_unable_to_copy', [] if can_copy else ['all']),
+            ('credentials_unable_to_copy', [] if can_copy else ['all']),
+            ('inventories_unable_to_copy', [] if can_copy else ['all'])
+        ])
+        if messages and can_copy:
+            data['can_copy_without_user_input'] = False
+            data.update(messages)
         return Response(data)
 
     def post(self, request, *args, **kwargs):
@@ -2938,7 +2946,10 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
     always_allow_superuser = False
 
     def update_raw_data(self, data):
-        obj = self.get_object()
+        try:
+            obj = self.get_object()
+        except PermissionDenied:
+            return data
         extra_vars = data.pop('extra_vars', None) or {}
         if obj:
             for v in obj.variables_needed_to_start:

@@ -323,6 +323,7 @@ export default ['i18n', function(i18n) {
             headers: {
                 label: i18n._('HTTP Headers'),
                 type: 'textarea',
+                name: 'headers',
                 rows: 5,
                 'class': 'Form-formGroup--fullWidth',
                 awRequiredWhen: {

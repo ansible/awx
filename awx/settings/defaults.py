@@ -73,7 +73,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -162,6 +162,12 @@ MAX_EVENT_RES_DATA = 700000
 
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
+
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = True
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = True
 
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',

@@ -120,13 +120,11 @@ class TestWorkflowJobAccess:
         access = WorkflowJobTemplateAccess(rando, save_messages=True)
         assert not access.can_copy(wfjt)
         warnings = access.messages
-        assert 1 in warnings
-        assert 'inventory' in warnings[1]
+        assert 'inventories_unable_to_copy' in warnings
 
     def test_workflow_copy_warnings_jt(self, wfjt, rando, job_template):
         wfjt.workflow_job_template_nodes.create(unified_job_template=job_template)
         access = WorkflowJobTemplateAccess(rando, save_messages=True)
         assert not access.can_copy(wfjt)
         warnings = access.messages
-        assert 1 in warnings
-        assert 'unified_job_template' in warnings[1]
+        assert 'templates_unable_to_copy' in warnings

@@ -122,7 +122,7 @@ export default
                         add: {
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
-                            awToolTip: 'Add a permission',
+                            awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; '+ i18n._('ADD'),
                             ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'

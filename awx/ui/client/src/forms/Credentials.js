@@ -420,9 +420,12 @@ export default
 
             related: {
                 permissions: {
-                    disabled: 'disablePermissionAssignment',
+                    disabled: '(organization === undefined ? true : false)',
+                    // Do not transition the state if organization is undefined
+                    ngClick: `(organization === undefined ? true : false)||$state.go('credentials.edit.permissions')`,
                     awToolTip: '{{permissionsTooltip}}',
                     dataTipWatch: 'permissionsTooltip',
+                    awToolTipTabEnabledInEditMode: true,
                     dataPlacement: 'top',
                     basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {

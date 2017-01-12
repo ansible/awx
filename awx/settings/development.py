@@ -24,11 +24,11 @@ ALLOWED_HOSTS = ['*']
 mimetypes.add_type("image/svg+xml", ".svg", True)
 mimetypes.add_type("image/svg+xml", ".svgz", True)
 
-MONGO_HOST = '127.0.0.1'
-MONGO_PORT = 27017
-MONGO_USERNAME = None
-MONGO_PASSWORD = None
-MONGO_DB = 'system_tracking_dev'
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = False
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = False
 
 # Override django.template.loaders.cached.Loader in defaults.py
 TEMPLATE_LOADERS = (

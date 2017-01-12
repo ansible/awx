@@ -121,6 +121,7 @@ export default
                 organizations: {
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
+                    emptyListText: i18n._('Please add user to an Organization.'),
                     search: {
                         page_size: '10'
                     },

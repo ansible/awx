@@ -20,7 +20,8 @@ export default ['i18n', function(i18n) {
                 reset: 'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT'
             },
             SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_SAML_SP_PRIVATE_KEY'
             },
             SOCIAL_AUTH_SAML_ORG_INFO: {
@@ -56,8 +57,8 @@ export default ['i18n', function(i18n) {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: i18n._('Reset All'),
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',

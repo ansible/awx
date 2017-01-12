@@ -11,7 +11,8 @@ export default ['templateUrl',
         return {
             restrict: 'E',
             scope: {
-                resolve: "="
+                resolve: "=",
+                title: "@",
             },
             controller: controller,
             templateUrl: templateUrl('access/add-rbac-user-team/rbac-user-team'),

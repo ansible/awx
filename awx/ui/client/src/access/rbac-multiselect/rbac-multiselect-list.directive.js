@@ -88,6 +88,14 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     list.fields.first_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
                     list.fields.last_name.columnClass = 'col-md-3 col-sm-3 hidden-xs';
                     break;
+                case 'Teams':
+                    list.fields = {
+                        name: list.fields.name,
+                        organization: list.fields.organization,
+                    };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    break;
                 default:
                     list.fields = {
                         name: list.fields.name,

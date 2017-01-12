@@ -283,7 +283,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, Rest, Alert, ProcessErrors, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, Empty, OwnerChange, FormSave, Wait,
-    $state, CreateSelect2, Authorization) {
+    $state, CreateSelect2, Authorization, i18n) {
 
     ClearScope();
 
@@ -336,13 +336,14 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                 });
         }
 
-        // if the credential is assigned to an organization, allow permission delegation
-        // do NOT use $scope.organization in a view directive to determine if a credential is associated with an org
-        // @todo why not? ^ and what is this type check for a number doing - should this be a type check for undefined?
-        $scope.disablePermissionAssignment = typeof($scope.organization) === 'number' ? false : true;
-        if ($scope.disablePermissionAssignment) {
-            $scope.permissionsTooltip = 'Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.';
-        }
+        $scope.$watch('organization', function(val) {
+            if (val === undefined) {
+                $scope.permissionsTooltip = i18n._('Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.');
+            } else {
+                $scope.permissionsTooltip = '';
+            }
+        });
+
         setAskCheckboxes();
         KindChange({
             scope: $scope,
@@ -613,5 +614,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'Empty', 'OwnerChange',
-    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization'
+    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n',
 ];
