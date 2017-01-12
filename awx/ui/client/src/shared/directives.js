@@ -484,7 +484,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 function applyValidation(viewValue) {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
-                    query = query.replace(/\:value/, encodeURI(viewValue));
+                    query = query.replace(/\:value/, encodeURIComponent(viewValue));
                     Rest.setUrl(`${basePath}${query}`);
                     // https://github.com/ansible/ansible-tower/issues/3549
                     // capturing both success/failure conditions in .then() promise
