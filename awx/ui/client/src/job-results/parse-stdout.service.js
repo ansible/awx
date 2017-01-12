@@ -27,7 +27,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
-                line = line.replace(/\[1;im/g, '<i>');
+                line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
                 line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;32m/g, '<span class="ansi32">');
@@ -40,7 +40,6 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
                 //end span
-                line = line.replace(/\[0im/g, '</i>');
                 line = line.replace(/\[0m/g, '</span>');
             } else {
                 // For the host event modal in the standard out tab,
@@ -205,7 +204,7 @@ export default ['$log', 'moment', function($log, moment){
                 let padBy = lineNums.length - lines.length;
 
                 for (let i = 0; i <= padBy; i++) {
-                    lines.push("[1;imline capped.[0im");
+                    lines.push("[1;imLine capped.[0m");
                 }
             }
 
