@@ -1,0 +1,2803 @@
+# asasaki <asasaki@redhat.com>, 2017. #zanata
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"MIME-Version: 1.0\n"
+"PO-Revision-Date: 2017-01-10 10:27+0000\n"
+"Last-Translator: asasaki <asasaki@redhat.com>\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"X-Generator: Zanata 3.9.6\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#: client/src/notifications/notificationTemplates.form.js:371
+msgid "%s or %s"
+msgstr "%s または %s"
+
+#: client/src/controllers/Projects.js:397
+#: client/src/controllers/Projects.js:679
+msgid ""
+"%sNote:%s Mercurial does not support password authentication for SSH. Do not "
+"put the username and key in the URL. If using Bitbucket and SSH, do not "
+"supply your Bitbucket username."
+msgstr ""
+"%s注:%s Mercurial は SSH のパスワード認証をサポートしません。ユーザー名およびキーを URL "
+"に入れないでください。Bitbucket および SSH を使用している場合は、Bitbucket ユーザー名を入力しないでください。"
+
+#: client/src/controllers/Projects.js:384
+#: client/src/controllers/Projects.js:666
+msgid ""
+"%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key "
+"only, do not enter a username (other than git). Additionally, GitHub and "
+"Bitbucket do not support password authentication when using SSH. GIT read "
+"only protocol (git://) does not use username or password information."
+msgstr ""
+"%s注:%s GitHub または Bitbucket の SSH プロトコルを使用している場合、SSH キーのみを入力し、ユーザー名 (git 以外) "
+"を入力しないでください。また、GitHub および Bitbucket は、SSH の使用時のパスワード認証をサポートしません。GIT "
+"の読み取り専用プロトコル (git://) はユーザー名またはパスワード情報を使用しません。"
+
+#: client/src/forms/Credentials.js:287
+msgid "(defaults to %s)"
+msgstr "(%s にデフォルト設定)"
+
+#: client/src/organizations/list/organizations-list.partial.html:15
+msgid "+ ADD"
+msgstr "+ 追加"
+
+#: client/src/controllers/Users.js:185
+msgid "A value is required"
+msgstr "値が必要"
+
+#: client/src/forms/Credentials.js:442
+#: client/src/forms/Inventories.js:153
+#: client/src/forms/JobTemplates.js:414
+#: client/src/forms/Organizations.js:75
+#: client/src/forms/Projects.js:237
+#: client/src/forms/Teams.js:86
+#: client/src/forms/Workflows.js:127
+#: client/src/inventory-scripts/inventory-scripts.list.js:45
+#: client/src/lists/Credentials.js:59
+#: client/src/lists/Inventories.js:68
+#: client/src/lists/Projects.js:67
+#: client/src/lists/Teams.js:50
+#: client/src/lists/Templates.js:62
+#: client/src/lists/Users.js:58
+#: client/src/notifications/notificationTemplates.list.js:52
+msgid "ADD"
+msgstr "追加"
+
+#: client/src/notifications/notifications.list.js:68
+msgid "ADD NOTIFICATION TEMPLATE"
+msgstr "通知テンプレートの追加"
+
+#: client/src/forms/Credentials.js:199
+msgid "API Key"
+msgstr "API キー"
+
+#: client/src/notifications/notificationTemplates.form.js:248
+msgid "API Service/Integration Key"
+msgstr "API サービス/統合キー"
+
+#: client/src/notifications/shared/type-change.service.js:52
+msgid "API Token"
+msgstr "API トークン"
+
+#: client/src/setup-menu/setup-menu.partial.html:59
+msgid "About Tower"
+msgstr "Tower について"
+
+#: client/src/forms/Credentials.js:92
+msgid "Access Key"
+msgstr "アクセスキー"
+
+#: client/src/notifications/notificationTemplates.form.js:226
+msgid "Account SID"
+msgstr "アカウント SID"
+
+#: client/src/notifications/notificationTemplates.form.js:184
+msgid "Account Token"
+msgstr "アカウントトークン"
+
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:20
+#: client/src/shared/list-generator/list-generator.factory.js:538
+msgid "Actions"
+msgstr "アクション"
+
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:17
+#: client/src/lists/Templates.js:40
+msgid "Activity"
+msgstr "アクティビティー"
+
+#: client/src/configuration/system-form/configuration-system.controller.js:81
+msgid "Activity Stream"
+msgstr "アクティビティーストリーム"
+
+#: client/src/forms/Inventories.js:104
+#: client/src/forms/Inventories.js:150
+#: client/src/forms/Organizations.js:72
+#: client/src/forms/Teams.js:83
+#: client/src/forms/Workflows.js:124
+msgid "Add"
+msgstr "追加"
+
+#: client/src/lists/Credentials.js:17
+msgid "Add Credentials"
+msgstr "認証情報の追加"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:12
+msgid "Add Existing Hosts"
+msgstr "既存ホストの追加"
+
+#: client/src/lists/Inventories.js:15
+msgid "Add Inventories"
+msgstr "インベントリーの追加"
+
+#: client/src/notifications/notifications.list.js:63
+msgid "Add Notification"
+msgstr "通知の追加"
+
+#: client/src/lists/Projects.js:15
+msgid "Add Project"
+msgstr "プロジェクトの追加"
+
+#: client/src/forms/JobTemplates.js:459
+#: client/src/forms/Workflows.js:172
+#: client/src/shared/form-generator.js:1707
+msgid "Add Survey"
+msgstr "Survey の追加"
+
+#: client/src/lists/Teams.js:15
+msgid "Add Team"
+msgstr "チームの追加"
+
+#: client/src/lists/Users.js:25
+msgid "Add Users"
+msgstr "ユーザーの追加"
+
+#: client/src/forms/Credentials.js:440
+#: client/src/forms/Inventories.js:151
+#: client/src/forms/JobTemplates.js:412
+#: client/src/forms/Organizations.js:73
+#: client/src/forms/Projects.js:235
+msgid "Add a permission"
+msgstr "パーミッションの追加"
+
+#: client/src/setup-menu/setup-menu.partial.html:23
+msgid ""
+"Add passwords, SSH keys, etc. for Tower to use when launching jobs against "
+"machines, or when syncing inventories or projects."
+msgstr ""
+"マシンに対してジョブを起動する際やインベントリーまたはプロジェクトの同期時に使用する Tower のパスワード、SSH キーなどを追加します。"
+
+#: client/src/forms/Teams.js:84
+msgid "Add user to team"
+msgstr "ユーザーのチームへの追加"
+
+#: client/src/shared/form-generator.js:1450
+msgid "Admin"
+msgstr "管理者"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:37
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:43
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:65
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:74
+msgid "All"
+msgstr "すべて"
+
+#: client/src/portal-mode/portal-mode-jobs.partial.html:7
+msgid "All Jobs"
+msgstr "すべてのジョブ"
+
+#: client/src/forms/JobTemplates.js:299
+#: client/src/forms/JobTemplates.js:306
+msgid "Allow Provisioning Callbacks"
+msgstr "プロビジョニングコールバックの許可"
+
+#: client/src/setup-menu/setup-menu.partial.html:11
+msgid "Allow others to sign into Tower and own the content they create."
+msgstr "他のユーザーが Tower にサインインし、独自に作成するコンテンツを所有できるようにします。"
+
+#: client/src/forms/WorkflowMaker.js:50
+msgid "Always"
+msgstr "常時"
+
+#: client/src/controllers/Projects.js:220
+msgid ""
+"An SCM update does not appear to be running for project: %s. Click the "
+"%sRefresh%s button to view the latest status."
+msgstr "SCM 更新がプロジェクトに対して実行されていないようです: %s。%s更新%s ボタンをクリックして最新のステータスを表示してください。"
+
+#: client/src/controllers/Projects.js:162
+msgid "Are you sure you want to delete the project below?"
+msgstr "以下のプロジェクトを削除してもよろしいですか?"
+
+#: client/src/controllers/Users.js:102
+msgid "Are you sure you want to delete the user below?"
+msgstr "以下のユーザーを削除してもよろしいですか?"
+
+#: client/src/controllers/Projects.js:647
+msgid "Are you sure you want to remove the %s below from %s?"
+msgstr "%s から以下の %s を削除してもよろしいですか?"
+
+#: client/src/forms/Credentials.js:233
+#: client/src/forms/Credentials.js:271
+#: client/src/forms/Credentials.js:310
+#: client/src/forms/Credentials.js:395
+msgid "Ask at runtime?"
+msgstr "実行時に確認しますか?"
+
+#: client/src/shared/form-generator.js:1452
+msgid "Auditor"
+msgstr "監査者"
+
+#: client/src/forms/Credentials.js:73
+msgid ""
+"Authentication for network device access. This can include SSH keys, "
+"usernames, passwords, and authorize information. Network credentials are "
+"used when submitting jobs to run playbooks against network devices."
+msgstr ""
+"ネットワークデバイスアクセスの認証です。これには、SSH "
+"キー、ユーザー名、パスワード、および承認情報が含まれることがあります。ネットワーク認証情報は、ネットワークデバイスに対して Playbook "
+"を実行するためのジョブの送信時に使用されます。"
+
+#: client/src/forms/Credentials.js:69
+msgid ""
+"Authentication for remote machine access. This can include SSH keys, "
+"usernames, passwords, and sudo information. Machine credentials are used "
+"when submitting jobs to run playbooks against remote hosts."
+msgstr ""
+"リモートマシンアクセスの認証です。これには、SSH キー、ユーザー名、パスワード、および sudo "
+"情報が含まれることがあります。マシン認証情報は、リモートホストに対して Playbook を実行するためのジョブの送信時に使用されます。"
+
+#: client/src/forms/Credentials.js:341
+msgid "Authorize"
+msgstr "承認"
+
+#: client/src/forms/Credentials.js:349
+msgid "Authorize Password"
+msgstr "パスワードの承認"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:101
+msgid "Azure AD"
+msgstr "Azure AD"
+
+#: client/src/forms/Projects.js:80
+msgid ""
+"Base path used for locating playbooks. Directories found inside this path "
+"will be listed in the playbook directory drop-down. Together the base path "
+"and selected playbook directory provide the full path used to locate "
+"playbooks."
+msgstr ""
+"Playbook を見つけるために使用されるベースパスです。このパス内にあるディレクトリーは Playbook "
+"ディレクトリーのドロップダウンに一覧表示されます。ベースパスと選択された Playbook ディレクトリーは、Playbook "
+"を見つけるために使用される完全なパスを提供します。"
+
+#: client/src/forms/JobTemplates.js:293
+msgid "Become Privilege Escalation"
+msgstr "Become (権限昇格)"
+
+#: client/src/license/license.partial.html:104
+msgid "Browse"
+msgstr "参照"
+
+#: client/src/app.js:317
+msgid "CREDENTIALS"
+msgstr "認証情報"
+
+#: client/src/forms/Projects.js:194
+msgid "Cache Timeout"
+msgstr "キャッシュタイムアウト"
+
+#: client/src/forms/Projects.js:183
+msgid "Cache Timeout%s (seconds)%s"
+msgstr "キャッシュタイムアウト%s (seconds)%s"
+
+#: client/src/controllers/Projects.js:156
+#: client/src/controllers/Users.js:95
+msgid "Call to %s failed. DELETE returned status:"
+msgstr "%s の呼び出しに失敗しました。DELETE で返されたステータス:"
+
+#: client/src/controllers/Projects.js:201
+#: client/src/controllers/Projects.js:217
+msgid "Call to %s failed. GET status:"
+msgstr "%s の呼び出しに失敗しました。GET ステータス:"
+
+#: client/src/controllers/Projects.js:641
+msgid "Call to %s failed. POST returned status:"
+msgstr "%s の呼び出しに失敗しました。POST で返されたステータス:"
+
+#: client/src/controllers/Projects.js:180
+msgid "Call to %s failed. POST status:"
+msgstr "%s の呼び出しに失敗しました。POST ステータス:"
+
+#: client/src/controllers/Projects.js:226
+msgid "Call to get project failed. GET status:"
+msgstr "プロジェクトを取得するための呼び出しに失敗しました。GET ステータス:"
+
+#: client/src/configuration/configuration.controller.js:434
+#: client/src/shared/form-generator.js:1695
+msgid "Cancel"
+msgstr "取り消し"
+
+#: client/src/controllers/Projects.js:196
+msgid "Cancel Not Allowed"
+msgstr "取り消しは許可されていません"
+
+#: client/src/lists/Projects.js:121
+msgid "Cancel the SCM update"
+msgstr "SCM 更新の取り消し"
+
+#: client/src/controllers/Projects.js:53
+msgid "Canceled. Click for details"
+msgstr "取り消されました。クリックして詳細を確認してください。"
+
+#: client/src/forms/Projects.js:82
+msgid "Change %s under \"Configure Tower\" to change this location."
+msgstr "この場所を変更するために「Tower の設定」下の %s を変更します。"
+
+#: client/src/shared/form-generator.js:1084
+msgid "Choose a %s"
+msgstr "%s の選択"
+
+#: client/src/license/license.partial.html:97
+msgid ""
+"Choose your license file, agree to the End User License Agreement, and click "
+"submit."
+msgstr "ライセンスファイルを選択し、使用許諾契約書に同意した後に「送信」をクリックします。"
+
+#: client/src/forms/Projects.js:151
+msgid "Clean"
+msgstr "クリーニング"
+
+#: client/src/lists/Inventories.js:18
+msgid ""
+"Click on a row to select it, and click Finished when done. Click the %s "
+"button to create a new inventory."
+msgstr "行をクリックしてこれを選択し、終了したら「終了」をクリックします。%s ボタンをクリックして新規インベントリーを作成します。"
+
+#: client/src/lists/Teams.js:18
+msgid ""
+"Click on a row to select it, and click Finished when done. Click the %s "
+"button to create a new team."
+msgstr "行をクリックしてこれを選択し、終了したら「終了」をクリックします。%s ボタンをクリックして新規チームを作成します。"
+
+#: client/src/lists/Templates.js:19
+msgid ""
+"Click on a row to select it, and click Finished when done. Use the %s button "
+"to create a new job template."
+msgstr "行をクリックしてこれを選択し、終了したら「終了」をクリックします。%s ボタンをクリックして新規ジョブテンプレートを作成します。"
+
+#: client/src/forms/Credentials.js:319
+msgid "Client ID"
+msgstr "クライアント ID"
+
+#: client/src/notifications/notificationTemplates.form.js:259
+msgid "Client Identifier"
+msgstr "クライアント識別子"
+
+#: client/src/forms/Credentials.js:328
+msgid "Client Secret"
+msgstr "クライアントシークレット"
+
+#: client/src/shared/form-generator.js:1699
+msgid "Close"
+msgstr "閉じる"
+
+#: client/src/forms/JobTemplates.js:164
+#: client/src/forms/JobTemplates.js:176
+msgid "Cloud Credential"
+msgstr "クラウド認証情報"
+
+#: client/src/helpers/Credentials.js:158
+msgid "CloudForms Host"
+msgstr "CloudForms ホスト"
+
+#: client/src/notifications/notificationTemplates.form.js:295
+msgid "Color can be one of %s."
+msgstr "色を %s のいずれかにすることができます。"
+
+#: client/src/lists/CompletedJobs.js:18
+msgid "Completed Jobs"
+msgstr "完了したジョブ"
+
+#: client/src/management-jobs/card/card.partial.html:32
+msgid "Configure Notifications"
+msgstr "通知の設定"
+
+#: client/src/forms/Users.js:82
+msgid "Confirm Password"
+msgstr "パスワードの確認"
+
+#: client/src/configuration/configuration.controller.js:441
+msgid "Confirm Reset"
+msgstr "リセットの確認"
+
+#: client/src/configuration/configuration.controller.js:450
+msgid "Confirm factory reset"
+msgstr "出荷時の設定へのリセットの確認"
+
+#: client/src/forms/JobTemplates.js:255
+#: client/src/forms/JobTemplates.js:273
+#: client/src/forms/WorkflowMaker.js:141
+#: client/src/forms/WorkflowMaker.js:156
+msgid ""
+"Consult the Ansible documentation for further details on the usage of tags."
+msgstr "タグの使用法についての詳細は、Ansible ドキュメントを参照してください。"
+
+#: client/src/forms/JobTemplates.js:241
+msgid ""
+"Control the level of output ansible will produce as the playbook executes."
+msgstr "Playbook の実行時に Ansible が生成する出力のレベルを制御します。"
+
+#: client/src/lists/Templates.js:100
+msgid "Copy"
+msgstr "コピー"
+
+#: client/src/lists/Templates.js:103
+msgid "Copy template"
+msgstr "テンプレートのコピー"
+
+#: client/src/forms/Credentials.js:18
+msgid "Create Credential"
+msgstr "認証情報の作成"
+
+#: client/src/lists/Users.js:52
+msgid "Create New"
+msgstr "新規作成"
+
+#: client/src/lists/Credentials.js:57
+msgid "Create a new credential"
+msgstr "新規認証情報の作成"
+
+#: client/src/inventory-scripts/inventory-scripts.list.js:43
+msgid "Create a new custom inventory"
+msgstr "新規カスタムインベントリーの作成"
+
+#: client/src/lists/Inventories.js:66
+msgid "Create a new inventory"
+msgstr "新規インベントリーの作成"
+
+#: client/src/notifications/notificationTemplates.list.js:50
+#: client/src/notifications/notifications.list.js:66
+msgid "Create a new notification template"
+msgstr "新規通知テンプレートの作成"
+
+#: client/src/organizations/list/organizations-list.partial.html:16
+msgid "Create a new organization"
+msgstr "新規組織の作成"
+
+#: client/src/lists/Projects.js:65
+msgid "Create a new project"
+msgstr "新規プロジェクトの作成"
+
+#: client/src/lists/Teams.js:48
+msgid "Create a new team"
+msgstr "新規チームの作成"
+
+#: client/src/lists/Templates.js:60
+msgid "Create a new template"
+msgstr "新規テンプレートの作成"
+
+#: client/src/lists/Users.js:56
+msgid "Create a new user"
+msgstr "新規ユーザーの作成"
+
+#: client/src/setup-menu/setup-menu.partial.html:35
+msgid "Create and edit scripts to dynamically load hosts from any source."
+msgstr "任意のソースからホストを動的にロードするためのスクリプトを作成し、編集します。"
+
+#: client/src/setup-menu/setup-menu.partial.html:42
+msgid ""
+"Create templates for sending notifications with Email, HipChat, Slack, and "
+"SMS."
+msgstr "メール、HipChat、Slack、および SMS での通知を送信するためのテンプレートを作成します。"
+
+#: client/src/forms/JobTemplates.js:154
+#: client/src/forms/WorkflowMaker.js:60
+#: client/src/forms/WorkflowMaker.js:69
+msgid "Credential"
+msgstr "認証情報"
+
+#: client/src/lists/Credentials.js:18
+#: client/src/lists/Credentials.js:19
+#: client/src/setup-menu/setup-menu.partial.html:22
+msgid "Credentials"
+msgstr "認証情報"
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:50
+#: client/src/inventory-scripts/inventory-scripts.form.js:60
+msgid "Custom Script"
+msgstr "カスタムスクリプト"
+
+#: client/src/app.js:409
+msgid "DASHBOARD"
+msgstr "ダッシュボード"
+
+#: client/src/controllers/Projects.js:649
+#: client/src/controllers/Users.js:104
+msgid "DELETE"
+msgstr "削除"
+
+#: client/src/controllers/Projects.js:161
+#: client/src/controllers/Projects.js:646
+#: client/src/controllers/Users.js:101
+#: client/src/inventory-scripts/inventory-scripts.list.js:74
+#: client/src/lists/Credentials.js:90
+#: client/src/lists/Inventories.js:92
+#: client/src/lists/Teams.js:77
+#: client/src/lists/Templates.js:125
+#: client/src/lists/Users.js:87
+#: client/src/notifications/notificationTemplates.list.js:89
+msgid "Delete"
+msgstr "削除"
+
+#: client/src/lists/Credentials.js:92
+msgid "Delete credential"
+msgstr "認証情報の削除"
+
+#: client/src/lists/Inventories.js:94
+msgid "Delete inventory"
+msgstr "インベントリーの削除"
+
+#: client/src/inventory-scripts/inventory-scripts.list.js:76
+msgid "Delete inventory script"
+msgstr "インベントリースクリプトの削除"
+
+#: client/src/notifications/notificationTemplates.list.js:91
+msgid "Delete notification"
+msgstr "通知の削除"
+
+#: client/src/forms/Projects.js:161
+msgid "Delete on Update"
+msgstr "更新時のデプロイ"
+
+#: client/src/lists/Teams.js:81
+msgid "Delete team"
+msgstr "チームの削除"
+
+#: client/src/lists/Templates.js:128
+msgid "Delete template"
+msgstr "テンプレートの削除"
+
+#: client/src/lists/CompletedJobs.js:82
+msgid "Delete the job"
+msgstr "ジョブの削除"
+
+#: client/src/forms/Projects.js:163
+msgid ""
+"Delete the local repository in its entirety prior to performing an update."
+msgstr "更新の実行前にローカルリポジトリーを完全に削除します。"
+
+#: client/src/lists/Projects.js:115
+msgid "Delete the project"
+msgstr "プロジェクトの削除"
+
+#: client/src/lists/ScheduledJobs.js:80
+msgid "Delete the schedule"
+msgstr "スケジュールの削除"
+
+#: client/src/lists/Users.js:91
+msgid "Delete user"
+msgstr "ユーザーの削除"
+
+#: client/src/forms/Projects.js:163
+msgid ""
+"Depending on the size of the repository this may significantly increase the "
+"amount of time required to complete an update."
+msgstr "リポジトリーのサイズにより、更新の完了までに必要な時間が大幅に長くなる可能性があります。"
+
+#: client/src/forms/Credentials.js:41
+#: client/src/forms/Inventories.js:37
+#: client/src/forms/JobTemplates.js:42
+#: client/src/forms/Organizations.js:33
+#: client/src/forms/Projects.js:38
+#: client/src/forms/Teams.js:34
+#: client/src/forms/Users.js:142
+#: client/src/forms/Users.js:167
+#: client/src/forms/Workflows.js:41
+#: client/src/inventory-scripts/inventory-scripts.form.js:32
+#: client/src/inventory-scripts/inventory-scripts.list.js:25
+#: client/src/lists/Credentials.js:34
+#: client/src/lists/PortalJobTemplates.js:29
+#: client/src/lists/Teams.js:30
+#: client/src/lists/Templates.js:36
+#: client/src/notifications/notificationTemplates.form.js:36
+msgid "Description"
+msgstr "説明"
+
+#: client/src/notifications/notificationTemplates.form.js:138
+#: client/src/notifications/notificationTemplates.form.js:143
+#: client/src/notifications/notificationTemplates.form.js:155
+#: client/src/notifications/notificationTemplates.form.js:160
+#: client/src/notifications/notificationTemplates.form.js:372
+msgid "Destination Channels"
+msgstr "送信先チャネル"
+
+#: client/src/notifications/notificationTemplates.form.js:367
+msgid "Destination Channels or Users"
+msgstr "送信先チャネルまたはユーザー"
+
+#: client/src/notifications/notificationTemplates.form.js:209
+#: client/src/notifications/notificationTemplates.form.js:214
+msgid "Destination SMS Number"
+msgstr "送信先 SMS 番号"
+
+#: client/src/license/license.partial.html:5
+#: client/src/shared/form-generator.js:1481
+msgid "Details"
+msgstr "詳細"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:70
+#: client/src/configuration/configuration.controller.js:170
+#: client/src/configuration/configuration.controller.js:232
+#: client/src/configuration/system-form/configuration-system.controller.js:49
+msgid "Discard changes"
+msgstr "変更の破棄"
+
+#: client/src/forms/Teams.js:148
+msgid "Dissasociate permission from team"
+msgstr "チームからパーミッションの関連付けを解除"
+
+#: client/src/forms/Users.js:217
+msgid "Dissasociate permission from user"
+msgstr "ユーザーからパーミッションの関連付けを解除"
+
+#: client/src/forms/Credentials.js:382
+#: client/src/helpers/Credentials.js:133
+msgid "Domain Name"
+msgstr "ドメイン名"
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:58
+msgid ""
+"Drag and drop your custom inventory script file here or create one in the "
+"field to import your custom inventory."
+msgstr ""
+"カスタムインベントリーのスクリプトファイルをここにドラッグアンドドロップするか、またはこのフィールドにカスタムインベントリーをインポートするためのファイルを作成します。"
+
+#: client/src/forms/Projects.js:174
+msgid ""
+"Each time a job runs using this project, perform an update to the local "
+"repository prior to starting the job."
+msgstr "このプロジェクトでジョブを実行する際は常に、ジョブの開始前にローカルリポジトリーに対して更新を実行します。"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:63
+#: client/src/inventory-scripts/inventory-scripts.list.js:57
+#: client/src/lists/Credentials.js:71
+#: client/src/lists/Inventories.js:78
+#: client/src/lists/Teams.js:60
+#: client/src/lists/Templates.js:108
+#: client/src/lists/Users.js:68
+#: client/src/notifications/notificationTemplates.list.js:63
+#: client/src/notifications/notificationTemplates.list.js:72
+msgid "Edit"
+msgstr "編集"
+
+#: client/src/forms/JobTemplates.js:466
+#: client/src/forms/Workflows.js:179
+#: client/src/shared/form-generator.js:1711
+msgid "Edit Survey"
+msgstr "Survey の編集"
+
+#: client/src/lists/Credentials.js:73
+msgid "Edit credential"
+msgstr "認証情報の編集"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:66
+msgid "Edit host"
+msgstr "ホストの編集"
+
+#: client/src/lists/Inventories.js:80
+msgid "Edit inventory"
+msgstr "インベントリーの編集"
+
+#: client/src/inventory-scripts/inventory-scripts.list.js:59
+msgid "Edit inventory script"
+msgstr "インベントリースクリプトの編集"
+
+#: client/src/notifications/notificationTemplates.list.js:74
+msgid "Edit notification"
+msgstr "通知の編集"
+
+#: client/src/lists/Teams.js:64
+msgid "Edit team"
+msgstr "チームの編集"
+
+#: client/src/lists/Templates.js:110
+msgid "Edit template"
+msgstr "テンプレートの編集"
+
+#: client/src/lists/Projects.js:102
+msgid "Edit the project"
+msgstr "プロジェクトの編集"
+
+#: client/src/lists/ScheduledJobs.js:66
+msgid "Edit the schedule"
+msgstr "スケジュールの編集"
+
+#: client/src/lists/Users.js:72
+msgid "Edit user"
+msgstr "ユーザーの編集"
+
+#: client/src/controllers/Projects.js:196
+msgid ""
+"Either you do not have access or the SCM update process completed. Click the "
+"%sRefresh%s button to view the latest status."
+msgstr "アクセスがないか、または SCM 更新プロセスが完了しました。%s更新%s ボタンをクリックして最新のステータスを表示します。"
+
+#: client/src/forms/Credentials.js:192
+#: client/src/forms/Users.js:42
+msgid "Email"
+msgstr "メール"
+
+#: client/src/forms/JobTemplates.js:288
+msgid "Enable Privilege Escalation"
+msgstr "権限昇格の有効化"
+
+#: client/src/forms/JobTemplates.js:303
+msgid ""
+"Enables creation of a provisioning callback URL. Using the URL a host can "
+"contact Tower and request a configuration update using this job template."
+msgstr ""
+"プロビジョニングコールバック URL の作成を有効にします。この URL を使用してホストは Tower "
+"に接続でき、このジョブテンプレートを使用して接続の更新を要求できます。"
+
+#: client/src/helpers/Credentials.js:306
+msgid "Encrypted credentials are not supported."
+msgstr "暗号化された認証情報はサポートされていません。"
+
+#: client/src/license/license.partial.html:108
+msgid "End User License Agreement"
+msgstr "使用許諾契約書"
+
+#: client/src/forms/Inventories.js:60
+msgid ""
+"Enter inventory variables using either JSON or YAML syntax. Use the radio "
+"button to toggle between the two."
+msgstr ""
+"JSON または YAML 構文のいずれかを使用してインベントリー変数を入力します。ラジオボタンを使用して 2 つの間の切り替えを行います。"
+
+#: client/src/helpers/Credentials.js:159
+msgid ""
+"Enter the hostname or IP address for the virtual %s machine which is hosting "
+"the CloudForm appliance."
+msgstr "CloudForm アプライアンスをホストしている仮想%sマシンのホスト名または IP アドレスを入力します。"
+
+#: client/src/helpers/Credentials.js:150
+msgid ""
+"Enter the hostname or IP address name which %scorresponds to your Red Hat "
+"Satellite 6 server."
+msgstr "Red Hat Satellite 6 サーバーに対応するホスト名%sまたは IP アドレスを入力します。"
+
+#: client/src/helpers/Credentials.js:128
+msgid ""
+"Enter the hostname or IP address which corresponds to your VMware vCenter."
+msgstr "VMware vCenter に対応するホスト名または IP アドレスを入力します。"
+
+#: client/src/configuration/configuration.controller.js:292
+#: client/src/configuration/configuration.controller.js:370
+#: client/src/configuration/configuration.controller.js:404
+#: client/src/configuration/configuration.controller.js:423
+#: client/src/controllers/Projects.js:133
+#: client/src/controllers/Projects.js:155
+#: client/src/controllers/Projects.js:180
+#: client/src/controllers/Projects.js:201
+#: client/src/controllers/Projects.js:216
+#: client/src/controllers/Projects.js:225
+#: client/src/controllers/Projects.js:363
+#: client/src/controllers/Projects.js:557
+#: client/src/controllers/Projects.js:623
+#: client/src/controllers/Projects.js:641
+#: client/src/controllers/Users.js:182
+#: client/src/controllers/Users.js:267
+#: client/src/controllers/Users.js:321
+#: client/src/controllers/Users.js:94
+#: client/src/helpers/Credentials.js:310
+#: client/src/helpers/Credentials.js:326
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:119
+msgid "Error!"
+msgstr "エラー!"
+
+#: client/src/controllers/Projects.js:381
+#: client/src/controllers/Projects.js:664
+msgid "Example URLs for GIT SCM include:"
+msgstr "GIT SCM のサンプル URL には以下が含まれます:"
+
+#: client/src/controllers/Projects.js:394
+#: client/src/controllers/Projects.js:676
+msgid "Example URLs for Mercurial SCM include:"
+msgstr "Mercurial SCM のサンプル URL には以下が含まれます:"
+
+#: client/src/controllers/Projects.js:389
+#: client/src/controllers/Projects.js:671
+msgid "Example URLs for Subversion SCM include:"
+msgstr "Subversion SCM のサンプル URL には以下が含まれます:"
+
+#: client/src/license/license.partial.html:39
+msgid "Expires On"
+msgstr "有効期限"
+
+#: client/src/forms/JobTemplates.js:352
+#: client/src/forms/JobTemplates.js:364
+#: client/src/forms/Workflows.js:72
+#: client/src/forms/Workflows.js:84
+msgid "Extra Variables"
+msgstr "追加変数"
+
+#: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:67
+msgid "FAILED"
+msgstr "失敗"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:80
+msgid "Failed"
+msgstr "失敗"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:44
+msgid "Failed Hosts"
+msgstr "失敗したホスト"
+
+#: client/src/controllers/Users.js:182
+msgid "Failed to add new user. POST returned status:"
+msgstr "新規ユーザーを追加できませんでした。POST で返されたステータス:"
+
+#: client/src/helpers/Credentials.js:311
+msgid "Failed to create new Credential. POST status:"
+msgstr "新規の認証情報を作成できませんでした。POST ステータス:"
+
+#: client/src/controllers/Projects.js:364
+msgid "Failed to create new project. POST returned status:"
+msgstr "新規プロジェクトを作成できませんでした。POST で返されたステータス:"
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:120
+msgid "Failed to get third-party login types.  Returned status:"
+msgstr "サードパーティーのログインタイプを取得できませんでした。返されたステータス:"
+
+#: client/src/controllers/Projects.js:558
+msgid "Failed to retrieve project: %s. GET status:"
+msgstr "プロジェクトを取得できませんでした: %s. GET ステータス:"
+
+#: client/src/controllers/Users.js:268
+#: client/src/controllers/Users.js:322
+msgid "Failed to retrieve user: %s. GET status:"
+msgstr "ユーザーを取得できませんでした: %s. GET ステータス:"
+
+#: client/src/configuration/configuration.controller.js:371
+msgid "Failed to save settings. Returned status:"
+msgstr "設定を保存できませんでした。返されたステータス:"
+
+#: client/src/configuration/configuration.controller.js:405
+msgid "Failed to save toggle settings. Returned status:"
+msgstr "トグルの設定を保存できませんでした。返されたステータス:"
+
+#: client/src/helpers/Credentials.js:327
+msgid "Failed to update Credential. PUT status:"
+msgstr "認証情報を更新できませんでした。PUT ステータス:"
+
+#: client/src/controllers/Projects.js:623
+msgid "Failed to update project: %s. PUT status:"
+msgstr "プロジェクトを更新できませんでした: %s. PUT ステータス:"
+
+#: client/src/notifications/notifications.list.js:49
+msgid "Failure"
+msgstr "失敗"
+
+#: client/src/lists/CompletedJobs.js:56
+#: client/src/lists/PortalJobs.js:37
+msgid "Finished"
+msgstr "終了日時"
+
+#: client/src/forms/Users.js:28
+#: client/src/lists/Users.js:41
+msgid "First Name"
+msgstr "名"
+
+#: client/src/helpers/Credentials.js:142
+msgid "For example, %s"
+msgstr "例: %s"
+
+#: client/src/notifications/notificationTemplates.form.js:142
+#: client/src/notifications/notificationTemplates.form.js:159
+#: client/src/notifications/notificationTemplates.form.js:213
+#: client/src/notifications/notificationTemplates.form.js:333
+#: client/src/notifications/notificationTemplates.form.js:371
+#: client/src/notifications/notificationTemplates.form.js:98
+msgid "For example:"
+msgstr "例:"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:54
+msgid ""
+"For hosts that are part of an external inventory, this flag cannot be "
+"changed. It will be set by the inventory sync process."
+msgstr "外部インベントリーの一部であるホストの場合、このフラグを変更できません。これはインベントリー同期プロセスで設定されます。"
+
+#: client/src/forms/JobTemplates.js:223
+#: client/src/forms/WorkflowMaker.js:125
+msgid ""
+"For more information and examples see %sthe Patterns topic at docs.ansible."
+"com%s."
+msgstr "詳細情報およびサンプルについては、docs.ansible.com の %sパターンのトピックを参照してください%s。"
+
+#: client/src/forms/JobTemplates.js:199
+#: client/src/forms/JobTemplates.js:212
+msgid "Forks"
+msgstr "フォーク"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:102
+msgid "GitHub"
+msgstr "GitHub"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:103
+msgid "GitHub Org"
+msgstr "GitHub 組織"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:104
+msgid "GithHub Team"
+msgstr "GithHub チーム"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:105
+msgid "Google OAuth2"
+msgstr "Google OAuth2"
+
+#: client/src/forms/Teams.js:118
+msgid "Granted Permissions"
+msgstr "付与されたパーミッション"
+
+#: client/src/forms/Users.js:183
+msgid "Granted permissions"
+msgstr "付与されたパーミッション"
+
+#: client/src/setup-menu/setup-menu.partial.html:5
+msgid ""
+"Group all of your content to manage permissions across departments in your "
+"company."
+msgstr "会社内の複数の部署のパーミッションを管理するためにすべてのコンテンツを分類します。"
+
+#: client/src/notifications/notificationTemplates.form.js:324
+msgid "HTTP Headers"
+msgstr "HTTP ヘッダー"
+
+#: client/src/forms/Credentials.js:140
+#: client/src/notifications/notificationTemplates.form.js:72
+msgid "Host"
+msgstr "ホスト"
+
+#: client/src/helpers/Credentials.js:131
+msgid "Host (Authentication URL)"
+msgstr "ホスト (認証 URL)"
+
+#: client/src/forms/JobTemplates.js:326
+#: client/src/forms/JobTemplates.js:335
+msgid "Host Config Key"
+msgstr "ホスト設定キー"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:55
+msgid "Host Enabled"
+msgstr "有効なホスト"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:39
+msgid "Hosts"
+msgstr "ホスト"
+
+#: client/src/license/license.partial.html:52
+msgid "Hosts Available"
+msgstr "利用可能なホスト"
+
+#: client/src/license/license.partial.html:64
+msgid "Hosts Remaining"
+msgstr "残りのホスト"
+
+#: client/src/license/license.partial.html:58
+msgid "Hosts Used"
+msgstr "使用されたホスト"
+
+#: client/src/license/license.partial.html:116
+msgid "I agree to the End User License Agreement"
+msgstr "使用許諾契約書に同意します。"
+
+#: client/src/main-menu/main-menu.partial.html:104
+#: client/src/main-menu/main-menu.partial.html:27
+msgid "INVENTORIES"
+msgstr "インベントリー"
+
+#: client/src/notifications/notificationTemplates.form.js:356
+msgid "IRC Nick"
+msgstr "IRC ニック"
+
+#: client/src/notifications/notificationTemplates.form.js:345
+msgid "IRC Server Address"
+msgstr "IRC サーバーアドレス"
+
+#: client/src/notifications/shared/type-change.service.js:58
+msgid "IRC Server Password"
+msgstr "IRC サーバーパスワード"
+
+#: client/src/notifications/shared/type-change.service.js:57
+msgid "IRC Server Port"
+msgstr "IRC サーバーポート"
+
+#: client/src/forms/JobTemplates.js:291
+msgid ""
+"If enabled, run this playbook as an administrator. This is the equivalent of "
+"passing the %s option to the %s command."
+msgstr "有効な場合、この Playbook を管理者として実行します。これは %s オプションを %s コマンドに渡すことに相当します。"
+
+#: client/src/forms/Credentials.js:54
+msgid ""
+"If no organization is given, the credential can only be used by the user "
+"that creates the credential.  Organization admins and system administrators "
+"can assign an organization so that roles for the credential can be assigned "
+"to users and teams in that organization."
+msgstr ""
+"組織が指定されない場合、認証情報はそれを作成するユーザーのみに使用されます。組織管理者およびシステム管理者は組織を割り当て、認証情報のロールを組織内のユーザーおよびチームに割り当てられるようにします。"
+
+#: client/src/license/license.partial.html:70
+msgid ""
+"If you are ready to upgrade, please contact us by clicking the button below"
+msgstr "アップグレードの準備ができましたら、以下のボタンをクリックしてお問い合わせください。"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:54
+msgid ""
+"Indicates if a host is available and should be included in running jobs."
+msgstr "ホストが利用可能かどうか、また実行中のジョブに組み込む必要があるかどうかを示します。"
+
+#: client/src/forms/JobTemplates.js:58
+msgid ""
+"Instead, %s will check playbook  syntax, test environment setup and report "
+"problems."
+msgstr "代わりに、%s は Playbook  構文、テスト環境セットアップおよびレポートの問題を検査します。"
+
+#: client/src/license/license.partial.html:11
+msgid "Invalid License"
+msgstr "無効なライセンス"
+
+#: client/src/license/license.controller.js:69
+#: client/src/license/license.controller.js:76
+msgid "Invalid file format. Please upload valid JSON."
+msgstr "無効なファイル形式です。有効な JSON をアップロードしてください。"
+
+#: client/src/login/loginModal/loginModal.partial.html:34
+msgid "Invalid username and/or password.  Please try again."
+msgstr "無効なユーザー名および/またはパスワードです。やり直してください。"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:50
+#: client/src/lists/Inventories.js:16
+#: client/src/lists/Inventories.js:17
+msgid "Inventories"
+msgstr "インベントリー"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:41
+#: client/src/forms/JobTemplates.js:73
+#: client/src/forms/JobTemplates.js:86
+#: client/src/forms/WorkflowMaker.js:79
+#: client/src/forms/WorkflowMaker.js:89
+msgid "Inventory"
+msgstr "インベントリー"
+
+#: client/src/inventory-scripts/inventory-scripts.list.js:12
+#: client/src/setup-menu/setup-menu.partial.html:34
+msgid "Inventory Scripts"
+msgstr "インベントリースクリプト"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:46
+msgid "Inventory Sync"
+msgstr "インベントリー同期"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:55
+msgid "Inventory Sync Failures"
+msgstr "インベントリーの同期の失敗"
+
+#: client/src/forms/Inventories.js:67
+msgid "Inventory Variables"
+msgstr "インベントリー変数"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:4
+msgid "JOB STATUS"
+msgstr "ジョブステータス"
+
+#: client/src/forms/JobTemplates.js:23
+msgid "JOB TEMPLATE"
+msgstr "ジョブテンプレート"
+
+#: client/src/app.js:429
+#: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:113
+#: client/src/main-menu/main-menu.partial.html:122
+#: client/src/main-menu/main-menu.partial.html:43
+msgid "JOBS"
+msgstr "ジョブ"
+
+#: client/src/forms/JobTemplates.js:248
+#: client/src/forms/JobTemplates.js:256
+#: client/src/forms/WorkflowMaker.js:134
+#: client/src/forms/WorkflowMaker.js:142
+msgid "Job Tags"
+msgstr "ジョブタグ"
+
+#: client/src/lists/Templates.js:65
+msgid "Job Template"
+msgstr "ジョブテンプレート"
+
+#: client/src/lists/PortalJobTemplates.js:15
+#: client/src/lists/PortalJobTemplates.js:16
+msgid "Job Templates"
+msgstr "ジョブテンプレート"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:32
+#: client/src/forms/JobTemplates.js:48
+#: client/src/forms/JobTemplates.js:62
+#: client/src/forms/WorkflowMaker.js:110
+#: client/src/forms/WorkflowMaker.js:99
+msgid "Job Type"
+msgstr "ジョブタイプ"
+
+#: client/src/lists/PortalJobs.js:15
+#: client/src/lists/PortalJobs.js:19
+#: client/src/partials/jobs.html:7
+msgid "Jobs"
+msgstr "ジョブ"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:106
+msgid "LDAP"
+msgstr "LDAP"
+
+#: client/src/main-menu/main-menu.partial.html:83
+msgid "LOG OUT"
+msgstr "ログアウト"
+
+#: client/src/notifications/notificationTemplates.form.js:270
+msgid "Label to be shown with notification"
+msgstr "通知と共に表示されるラベル"
+
+#: client/src/forms/JobTemplates.js:340
+#: client/src/forms/JobTemplates.js:345
+#: client/src/forms/Workflows.js:60
+#: client/src/forms/Workflows.js:65
+#: client/src/lists/Templates.js:47
+msgid "Labels"
+msgstr "ラベル"
+
+#: client/src/forms/Users.js:35
+#: client/src/lists/Users.js:45
+msgid "Last Name"
+msgstr "姓"
+
+#: client/src/lists/Projects.js:53
+msgid "Last Updated"
+msgstr "最終更新日時"
+
+#: client/src/lists/PortalJobTemplates.js:39
+#: client/src/lists/Templates.js:84
+#: client/src/shared/form-generator.js:1703
+msgid "Launch"
+msgstr "起動"
+
+#: client/src/management-jobs/card/card.partial.html:21
+msgid "Launch Management Job"
+msgstr "管理ジョブの起動"
+
+#: client/src/license/license.controller.js:42
+#: client/src/license/license.partial.html:8
+msgid "License"
+msgstr "ライセンス"
+
+#: client/src/license/license.partial.html:102
+msgid "License File"
+msgstr "ライセンスファイル"
+
+#: client/src/license/license.partial.html:33
+msgid "License Key"
+msgstr "ライセンスキー"
+
+#: client/src/license/license.controller.js:42
+msgid "License Management"
+msgstr "ライセンス管理"
+
+#: client/src/license/license.partial.html:21
+msgid "License Type"
+msgstr "ライセンスタイプ"
+
+#: client/src/forms/JobTemplates.js:218
+#: client/src/forms/JobTemplates.js:225
+#: client/src/forms/WorkflowMaker.js:120
+#: client/src/forms/WorkflowMaker.js:127
+msgid "Limit"
+msgstr "制限"
+
+#: client/src/shared/socket/socket.service.js:170
+msgid "Live events: attempting to connect to the Tower server."
+msgstr "ライブイベント: Tower サーバーへの接続を試行しています。"
+
+#: client/src/shared/socket/socket.service.js:174
+msgid ""
+"Live events: connected. Pages containing job status information will "
+"automatically update in real-time."
+msgstr "ライブイベント: 接続されています。ジョブステータス情報を含むページは自動的にリアルタイムで更新されます。"
+
+#: client/src/shared/socket/socket.service.js:178
+msgid "Live events: error connecting to the Tower server."
+msgstr "ライブイベント: Tower サーバーへの接続時にエラーが発生しました。"
+
+#: client/src/shared/form-generator.js:1977
+msgid "Loading..."
+msgstr "ロード中..."
+
+#: client/src/main-menu/main-menu.partial.html:188
+msgid "Log Out"
+msgstr "ログアウト"
+
+#: client/src/configuration/system-form/configuration-system.controller.js:82
+msgid "Logging"
+msgstr "ロギング"
+
+#: client/src/management-jobs/card/card.route.js:21
+msgid "MANAGEMENT JOBS"
+msgstr "管理ジョブ"
+
+#: client/src/forms/Credentials.js:68
+msgid "Machine"
+msgstr "マシン"
+
+#: client/src/forms/JobTemplates.js:137
+msgid "Machine Credential"
+msgstr "マシンの認証情報"
+
+#: client/src/setup-menu/setup-menu.partial.html:29
+msgid ""
+"Manage the cleanup of old job history, activity streams, data marked for "
+"deletion, and system tracking info."
+msgstr "古いジョブ履歴、アクティビティーストリーム、削除用にマークされたデータ、およびシステムトラッキング情報のクリーンアップを管理します。"
+
+#: client/src/helpers/Credentials.js:111
+msgid "Management Certificate"
+msgstr "管理証明書"
+
+#: client/src/management-jobs/card/card.partial.html:4
+#: client/src/setup-menu/setup-menu.partial.html:28
+msgid "Management Jobs"
+msgstr "管理ジョブ"
+
+#: client/src/controllers/Projects.js:62
+msgid "Manual projects do not require a schedule"
+msgstr "手動プロジェクトにスケジュールは不要です"
+
+#: client/src/controllers/Projects.js:547
+#: client/src/controllers/Projects.js:61
+msgid "Manual projects do not require an SCM update"
+msgstr "手動プロジェクトに SCM 更新は不要です"
+
+#: client/src/login/loginModal/loginModal.partial.html:28
+msgid "Maximum per-user sessions reached. Please sign in."
+msgstr "ユーザーあたりの最大セッション数に達しました。サインインしてください。"
+
+#: client/src/configuration/system-form/configuration-system.controller.js:80
+msgid "Misc. System"
+msgstr "その他のシステム"
+
+#: client/src/portal-mode/portal-mode-jobs.partial.html:4
+msgid "My Jobs"
+msgstr "マイジョブ"
+
+#: client/src/main-menu/main-menu.partial.html:160
+msgid "My View"
+msgstr "マイビュー"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:18
+msgid "NO HOSTS FOUND"
+msgstr "ホストが見つかりませんでした"
+
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:14
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:13
+#: client/src/forms/Credentials.js:34
+#: client/src/forms/Inventories.js:29
+#: client/src/forms/JobTemplates.js:35
+#: client/src/forms/Organizations.js:26
+#: client/src/forms/Projects.js:31
+#: client/src/forms/Teams.js:126
+#: client/src/forms/Teams.js:27
+#: client/src/forms/Users.js:139
+#: client/src/forms/Users.js:164
+#: client/src/forms/Users.js:190
+#: client/src/forms/Workflows.js:34
+#: client/src/inventory-scripts/inventory-scripts.form.js:25
+#: client/src/inventory-scripts/inventory-scripts.list.js:20
+#: client/src/lists/CompletedJobs.js:43
+#: client/src/lists/Credentials.js:29
+#: client/src/lists/Inventories.js:46
+#: client/src/lists/PortalJobTemplates.js:24
+#: client/src/lists/PortalJobs.js:32
+#: client/src/lists/Projects.js:37
+#: client/src/lists/ScheduledJobs.js:32
+#: client/src/lists/Teams.js:25
+#: client/src/lists/Templates.js:26
+#: client/src/notifications/notificationTemplates.form.js:29
+#: client/src/notifications/notificationTemplates.list.js:33
+#: client/src/notifications/notifications.list.js:26
+msgid "Name"
+msgstr "名前"
+
+#: client/src/forms/Credentials.js:72
+msgid "Network"
+msgstr "ネットワーク"
+
+#: client/src/forms/JobTemplates.js:182
+#: client/src/forms/JobTemplates.js:193
+msgid "Network Credential"
+msgstr "ネットワークの認証情報"
+
+#: client/src/forms/JobTemplates.js:192
+msgid ""
+"Network credentials are used by Ansible networking modules to connect to and "
+"manage networking devices."
+msgstr ""
+"ネットワーク認証情報は、ネットワークデバイスへの接続およびその管理を実行するために Ansible ネットワークモジュールによって使用されます。"
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:16
+msgid "New Custom Inventory"
+msgstr "新規カスタムインベントリー"
+
+#: client/src/forms/Inventories.js:18
+msgid "New Inventory"
+msgstr "新規インベントリー"
+
+#: client/src/forms/JobTemplates.js:20
+msgid "New Job Template"
+msgstr "新規ジョブテンプレート"
+
+#: client/src/notifications/notificationTemplates.form.js:16
+msgid "New Notification Template"
+msgstr "新規通知テンプレート"
+
+#: client/src/forms/Organizations.js:18
+msgid "New Organization"
+msgstr "新規組織"
+
+#: client/src/forms/Projects.js:18
+msgid "New Project"
+msgstr "新規プロジェクト"
+
+#: client/src/forms/Teams.js:18
+msgid "New Team"
+msgstr "新規チーム"
+
+#: client/src/forms/Users.js:18
+msgid "New User"
+msgstr "新規ユーザー"
+
+#: client/src/forms/Workflows.js:19
+msgid "New Workflow Job Template"
+msgstr "新規ワークフロージョブテンプレート"
+
+#: client/src/controllers/Users.js:174
+msgid "New user successfully created!"
+msgstr "新規ユーザーが正常に作成されました!"
+
+#: client/src/lists/ScheduledJobs.js:50
+msgid "Next Run"
+msgstr "次回の実行日時"
+
+#: client/src/lists/Credentials.js:24
+msgid "No Credentials Have Been Created"
+msgstr "認証情報が作成されていません"
+
+#: client/src/controllers/Projects.js:123
+msgid "No SCM Configuration"
+msgstr "SCM 設定がありません"
+
+#: client/src/controllers/Projects.js:114
+msgid "No Updates Available"
+msgstr "利用可能な更新がありません"
+
+#: client/src/lists/CompletedJobs.js:22
+msgid "No completed jobs"
+msgstr "完了したジョブがありません"
+
+#: client/src/license/license.controller.js:41
+msgid "No file selected."
+msgstr "ファイルが選択されていません。"
+
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:46
+msgid "No jobs were recently run."
+msgstr "最近実行されたジョブがありません。"
+
+#: client/src/forms/Teams.js:123
+#: client/src/forms/Users.js:187
+msgid "No permissions have been granted"
+msgstr "パーミッションが付与されていません"
+
+#: client/src/lists/ScheduledJobs.js:18
+msgid "No schedules exist"
+msgstr "スケジュールがありません"
+
+#: client/src/controllers/Users.js:16
+msgid "Normal User"
+msgstr "標準ユーザー"
+
+#: client/src/controllers/Projects.js:64
+msgid "Not configured for SCM"
+msgstr "SCM 用に設定されていません"
+
+#: client/src/notifications/notificationTemplates.form.js:293
+msgid "Notification Color"
+msgstr "通知の色"
+
+#: client/src/notifications/notificationTemplates.list.js:14
+msgid "Notification Templates"
+msgstr "通知テンプレート"
+
+#: client/src/notifications/notifications.list.js:17
+#: client/src/setup-menu/setup-menu.partial.html:41
+msgid "Notifications"
+msgstr "通知"
+
+#: client/src/notifications/notificationTemplates.form.js:306
+msgid "Notify Channel"
+msgstr "通知チャネル"
+
+#: client/src/notifications/notificationTemplates.form.js:198
+msgid "Number associated with the \"Messaging Service\" in Twilio."
+msgstr "Twilio の \"メッセージングサービス\" に関連付けられた数字。 "
+
+#: client/src/shared/form-generator.js:547
+msgid "OFF"
+msgstr "オフ"
+
+#: client/src/shared/form-generator.js:545
+msgid "ON"
+msgstr "オン"
+
+#: client/src/organizations/list/organizations-list.partial.html:6
+msgid "ORGANIZATIONS"
+msgstr "組織"
+
+#: client/src/forms/WorkflowMaker.js:45
+msgid "On&nbsp;Failure"
+msgstr "失敗した場合&nbsp;"
+
+#: client/src/forms/WorkflowMaker.js:40
+msgid "On&nbsp;Success"
+msgstr "成功した場合&nbsp;"
+
+#: client/src/forms/Credentials.js:377
+msgid ""
+"OpenStack domains define administrative boundaries. It is only needed for "
+"Keystone v3 authentication URLs. Common scenarios include:"
+msgstr ""
+"OpenStack ドメインは管理上の境界を定義します。これは Keystone v3 認証 URL "
+"にのみ必要です。共通するシナリオには以下が含まれます:"
+
+#: client/src/forms/JobTemplates.js:347
+#: client/src/forms/Workflows.js:67
+msgid ""
+"Optional labels that describe this job template, such as 'dev' or 'test'. "
+"Labels can be used to group and filter job templates and completed jobs in "
+"the Tower display."
+msgstr ""
+"「dev」または「test」などのこのジョブテンプレートを説明するオプションラベルです。ラベルを使用し、Tower "
+"のディスプレイでジョブテンプレートおよび完了したジョブの分類およびフィルターを実行できます。"
+
+#: client/src/forms/JobTemplates.js:284
+#: client/src/notifications/notificationTemplates.form.js:391
+msgid "Options"
+msgstr "オプション"
+
+#: client/src/forms/Credentials.js:49
+#: client/src/forms/Credentials.js:55
+#: client/src/forms/Inventories.js:42
+#: client/src/forms/Projects.js:43
+#: client/src/forms/Projects.js:49
+#: client/src/forms/Teams.js:39
+#: client/src/forms/Users.js:59
+#: client/src/forms/Workflows.js:47
+#: client/src/forms/Workflows.js:53
+#: client/src/inventory-scripts/inventory-scripts.form.js:37
+#: client/src/inventory-scripts/inventory-scripts.list.js:30
+#: client/src/lists/Inventories.js:52
+#: client/src/lists/Teams.js:35
+#: client/src/notifications/notificationTemplates.form.js:41
+msgid "Organization"
+msgstr "組織"
+
+#: client/src/forms/Users.js:129
+#: client/src/setup-menu/setup-menu.partial.html:4
+msgid "Organizations"
+msgstr "組織"
+
+#: client/src/forms/Credentials.js:80
+msgid "Others (Cloud Providers)"
+msgstr "その他 (クラウドプロバイダー)"
+
+#: client/src/lists/Credentials.js:45
+msgid "Owners"
+msgstr "所有者"
+
+#: client/src/login/loginModal/loginModal.partial.html:68
+msgid "PASSWORD"
+msgstr "パスワード"
+
+#: client/src/organizations/list/organizations-list.partial.html:44
+#: client/src/shared/form-generator.js:1880
+#: client/src/shared/list-generator/list-generator.factory.js:245
+msgid "PLEASE ADD ITEMS TO THIS LIST"
+msgstr "項目をこの一覧に追加してください"
+
+#: client/src/main-menu/main-menu.partial.html:67
+msgid "PORTAL MODE"
+msgstr "ポータルモード"
+
+#: client/src/main-menu/main-menu.partial.html:19
+#: client/src/main-menu/main-menu.partial.html:95
+msgid "PROJECTS"
+msgstr "プロジェクト"
+
+#: client/src/notifications/notificationTemplates.form.js:237
+msgid "Pagerduty subdomain"
+msgstr "Pagerduty サブドメイン"
+
+#: client/src/forms/JobTemplates.js:358
+#: client/src/forms/Workflows.js:78
+msgid ""
+"Pass extra command line variables to the playbook. This is the %s or %s "
+"command line parameter for %s. Provide key/value pairs using either YAML or "
+"JSON."
+msgstr ""
+"追加のコマンドライン変数を Playbook に渡します。これは、%s の %s または %s コマンドラインパラメーターです。YAML または "
+"JSON のいずれかを使用してキーと値のペアを指定します。"
+
+#: client/src/forms/Credentials.js:227
+#: client/src/forms/Users.js:70
+#: client/src/helpers/Credentials.js:119
+#: client/src/helpers/Credentials.js:127
+#: client/src/helpers/Credentials.js:147
+#: client/src/helpers/Credentials.js:156
+#: client/src/helpers/Credentials.js:165
+#: client/src/helpers/Credentials.js:45
+#: client/src/helpers/Credentials.js:94
+#: client/src/notifications/shared/type-change.service.js:28
+msgid "Password"
+msgstr "パスワード"
+
+#: client/src/helpers/Credentials.js:73
+msgid "Password (API Key)"
+msgstr "パスワード (API キー)"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:20
+msgid "Past 24 Hours"
+msgstr "過去 24 時間"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:15
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:26
+msgid "Past Month"
+msgstr "過去 1 ヵ月"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:23
+msgid "Past Week"
+msgstr "過去 1 週間"
+
+#: client/src/helpers/Credentials.js:102
+msgid ""
+"Paste the contents of the PEM file associated with the service account email."
+""
+msgstr "サービスアカウントメールに関連付けられた PEM ファイルの内容を貼り付けます。"
+
+#: client/src/helpers/Credentials.js:114
+msgid ""
+"Paste the contents of the PEM file that corresponds to the certificate you "
+"uploaded in the Microsoft Azure console."
+msgstr "Microsoft Azure コンソールにアップロードした証明書に対応する PEM ファイルの内容を貼り付けます。"
+
+#: client/src/helpers/Credentials.js:66
+msgid "Paste the contents of the SSH private key file."
+msgstr "SSH 秘密鍵ファイルの内容を貼り付けます。"
+
+#: client/src/helpers/Credentials.js:41
+msgid "Paste the contents of the SSH private key file.%s or click to close%s"
+msgstr "SSH 秘密鍵ファイルの内容を貼り付けます。%s またはクリックして %s を閉じます。"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:8
+msgid "Period"
+msgstr "期間"
+
+#: client/src/controllers/Projects.js:284
+#: client/src/controllers/Users.js:141
+msgid "Permission Error"
+msgstr "パーミッションのエラー"
+
+#: client/src/forms/Credentials.js:432
+#: client/src/forms/Inventories.js:142
+#: client/src/forms/JobTemplates.js:403
+#: client/src/forms/Organizations.js:64
+#: client/src/forms/Projects.js:227
+#: client/src/forms/Workflows.js:116
+msgid "Permissions"
+msgstr "パーミッション"
+
+#: client/src/forms/JobTemplates.js:120
+#: client/src/forms/JobTemplates.js:131
+msgid "Playbook"
+msgstr "Playbook"
+
+#: client/src/forms/Projects.js:89
+msgid "Playbook Directory"
+msgstr "Playbook ディレクトリー"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:52
+msgid "Playbook Run"
+msgstr "Playbook 実行"
+
+#: client/src/license/license.partial.html:84
+msgid ""
+"Please click the button below to visit Ansible's website to get a Tower "
+"license key."
+msgstr "以下のボタンをクリックし、Ansible の web サイトに移動して Tower ライセンスキーを取得します。"
+
+#: client/src/shared/form-generator.js:828
+#: client/src/shared/form-generator.js:953
+msgid ""
+"Please enter a URL that begins with ssh, http or https.  The URL may not "
+"contain the '@' character."
+msgstr "ssh、http または https で始まる URL を入力します。URL には「@」文字を含めることはできません。"
+
+#: client/src/shared/form-generator.js:1189
+msgid "Please enter a number greater than %d and less than %d."
+msgstr "%d より大きく、%d より小さい数値を入力してください。"
+
+#: client/src/shared/form-generator.js:1191
+msgid "Please enter a number greater than %d."
+msgstr "%d より大きい数値を入力してください。"
+
+#: client/src/shared/form-generator.js:1183
+msgid "Please enter a number."
+msgstr "数値を入力してください。"
+
+#: client/src/login/loginModal/loginModal.partial.html:78
+msgid "Please enter a password."
+msgstr "パスワードを入力してください。"
+
+#: client/src/login/loginModal/loginModal.partial.html:58
+msgid "Please enter a username."
+msgstr "ユーザー名を入力してください。"
+
+#: client/src/shared/form-generator.js:818
+#: client/src/shared/form-generator.js:943
+msgid "Please enter a valid email address."
+msgstr "有効なメールアドレスを入力してください。"
+
+#: client/src/shared/form-generator.js:1044
+#: client/src/shared/form-generator.js:813
+#: client/src/shared/form-generator.js:938
+msgid "Please enter a value."
+msgstr "値を入力してください。"
+
+#: client/src/lists/CompletedJobs.js:13
+msgid "Please save and run a job to view"
+msgstr "表示するジョブを保存し、実行してください。"
+
+#: client/src/notifications/notifications.list.js:15
+msgid "Please save before adding notifications"
+msgstr "保存してから通知を追加します。"
+
+#: client/src/forms/Teams.js:69
+msgid "Please save before adding users"
+msgstr "保存してからユーザーを追加します。"
+
+#: client/src/forms/Inventories.js:138
+#: client/src/forms/Inventories.js:91
+#: client/src/forms/JobTemplates.js:396
+#: client/src/forms/Organizations.js:57
+#: client/src/forms/Projects.js:219
+#: client/src/forms/Teams.js:110
+#: client/src/forms/Workflows.js:109
+msgid "Please save before assigning permissions"
+msgstr "保存してからパーミッションを割り当てます。"
+
+#: client/src/forms/Users.js:122
+#: client/src/forms/Users.js:179
+msgid "Please save before assigning to organizations"
+msgstr "保存してから組織に割り当てます。"
+
+#: client/src/forms/Users.js:148
+msgid "Please save before assigning to teams"
+msgstr "保存してからチームに割り当てます。"
+
+#: client/src/forms/Workflows.js:185
+msgid "Please save before defining the workflow graph"
+msgstr "保存してからワークフローグラフを定義します。"
+
+#: client/src/forms/WorkflowMaker.js:65
+msgid "Please select a Credential."
+msgstr "認証情報を選択してください。"
+
+#: client/src/forms/JobTemplates.js:150
+msgid ""
+"Please select a Machine Credential or check the Prompt on launch option."
+msgstr "マシン認証情報を選択するか、または「起動プロンプト」オプションにチェックを付けます。"
+
+#: client/src/shared/form-generator.js:1224
+msgid "Please select a number between"
+msgstr "Please select a number between"
+
+#: client/src/shared/form-generator.js:1220
+msgid "Please select a number."
+msgstr "数値を選択してください。"
+
+#: client/src/shared/form-generator.js:1111
+#: client/src/shared/form-generator.js:1180
+#: client/src/shared/form-generator.js:1298
+#: client/src/shared/form-generator.js:1403
+msgid "Please select a value."
+msgstr "値を選択してください。"
+
+#: client/src/forms/JobTemplates.js:83
+msgid "Please select an Inventory or check the Prompt on launch option."
+msgstr "インベントリーを選択するか、または「起動プロンプト」オプションにチェックを付けてください。"
+
+#: client/src/forms/WorkflowMaker.js:86
+msgid "Please select an Inventory."
+msgstr "インベントリーを選択してください。"
+
+#: client/src/shared/form-generator.js:1217
+msgid "Please select at least one value."
+msgstr "1 つ以上の値を選択してください。"
+
+#: client/src/notifications/shared/type-change.service.js:27
+msgid "Port"
+msgstr "ポート"
+
+#: client/src/forms/Credentials.js:257
+#: client/src/helpers/Credentials.js:36
+#: client/src/helpers/Credentials.js:60
+msgid "Private Key"
+msgstr "秘密鍵"
+
+#: client/src/forms/Credentials.js:264
+msgid "Private Key Passphrase"
+msgstr "秘密鍵のパスフレーズ"
+
+#: client/src/forms/Credentials.js:279
+#: client/src/forms/Credentials.js:283
+msgid "Privilege Escalation"
+msgstr "権限昇格"
+
+#: client/src/helpers/Credentials.js:90
+msgid "Privilege Escalation Password"
+msgstr "権限昇格のパスワード"
+
+#: client/src/helpers/Credentials.js:89
+msgid "Privilege Escalation Username"
+msgstr "権限昇格のユーザー名"
+
+#: client/src/forms/JobTemplates.js:114
+#: client/src/forms/JobTemplates.js:97
+#: client/src/helpers/Credentials.js:103
+msgid "Project"
+msgstr "プロジェクト"
+
+#: client/src/helpers/Credentials.js:132
+msgid "Project (Tenant Name)"
+msgstr "プロジェクト (テナント名)"
+
+#: client/src/forms/Projects.js:75
+#: client/src/forms/Projects.js:83
+msgid "Project Base Path"
+msgstr "プロジェクトのベースパス"
+
+#: client/src/forms/Credentials.js:363
+msgid "Project Name"
+msgstr "プロジェクト名"
+
+#: client/src/forms/Projects.js:100
+msgid "Project Path"
+msgstr "プロジェクトパス"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:66
+msgid "Project Sync Failures"
+msgstr "プロジェクトの同期の失敗"
+
+#: client/src/controllers/Projects.js:134
+msgid "Project lookup failed. GET returned:"
+msgstr "プロジェクトの検索に失敗しました。GET で以下が返されました:"
+
+#: client/src/dashboard/counts/dashboard-counts.directive.js:61
+#: client/src/lists/Projects.js:16
+#: client/src/lists/Projects.js:17
+msgid "Projects"
+msgstr "プロジェクト"
+
+#: client/src/forms/JobTemplates.js:159
+#: client/src/forms/JobTemplates.js:230
+#: client/src/forms/JobTemplates.js:261
+#: client/src/forms/JobTemplates.js:279
+#: client/src/forms/JobTemplates.js:369
+#: client/src/forms/JobTemplates.js:68
+#: client/src/forms/JobTemplates.js:92
+msgid "Prompt on launch"
+msgstr "起動プロンプト"
+
+#: client/src/forms/JobTemplates.js:253
+#: client/src/forms/JobTemplates.js:271
+#: client/src/forms/WorkflowMaker.js:139
+#: client/src/forms/WorkflowMaker.js:154
+msgid "Provide a comma separated list of tags."
+msgstr "カンマ区切りのタグの一覧を指定してください。"
+
+#: client/src/forms/JobTemplates.js:221
+#: client/src/forms/WorkflowMaker.js:123
+msgid ""
+"Provide a host pattern to further constrain the list of hosts that will be "
+"managed or affected by the playbook. Multiple patterns can be separated by "
+"%s %s or %s"
+msgstr ""
+"Playbook によって管理されるか、または影響されるホストの一覧をさらに制限するためのホストのパターンを指定してください。複数のパターンは %s "
+"%s または %s で区切ることができます。"
+
+#: client/src/forms/JobTemplates.js:313
+#: client/src/forms/JobTemplates.js:321
+msgid "Provisioning Callback URL"
+msgstr "プロビジョニングコールバック URL"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:107
+msgid "RADIUS"
+msgstr "RADIUS"
+
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:4
+msgid "RECENT JOB RUNS"
+msgstr "最近のジョブ実行"
+
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:42
+msgid "RECENTLY RUN JOBS"
+msgstr "最近実行されたジョブ"
+
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:4
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:52
+msgid "RECENTLY USED JOB TEMPLATES"
+msgstr "最近使用されたジョブテンプレート"
+
+#: client/src/lists/Projects.js:76
+#: client/src/partials/jobs.html:15
+#: client/src/portal-mode/portal-mode-jobs.partial.html:12
+msgid "REFRESH"
+msgstr "更新"
+
+#: client/src/forms/JobTemplates.js:99
+msgid "RESET"
+msgstr "リセット"
+
+#: client/src/helpers/Credentials.js:98
+msgid "RSA Private Key"
+msgstr "RSA 秘密鍵"
+
+#: client/src/notifications/notificationTemplates.form.js:94
+#: client/src/notifications/notificationTemplates.form.js:99
+msgid "Recipient List"
+msgstr "受信者リスト"
+
+#: client/src/bread-crumb/bread-crumb.partial.html:6
+#: client/src/lists/Projects.js:72
+msgid "Refresh the page"
+msgstr "ページの更新"
+
+#: client/src/lists/CompletedJobs.js:75
+msgid "Relaunch using the same parameters"
+msgstr "同一パラメーターによる起動"
+
+#: client/src/forms/Teams.js:144
+#: client/src/forms/Users.js:214
+msgid "Remove"
+msgstr "削除"
+
+#: client/src/forms/Projects.js:153
+msgid "Remove any local modifications prior to performing an update."
+msgstr "更新の実行前にローカルの変更を削除します。"
+
+#: client/src/license/license.partial.html:89
+msgid "Request License"
+msgstr "ライセンスの要求"
+
+#: client/src/configuration/auth-form/sub-forms/auth-azure.form.js:41
+#: client/src/configuration/auth-form/sub-forms/auth-github-org.form.js:31
+#: client/src/configuration/auth-form/sub-forms/auth-github-team.form.js:31
+#: client/src/configuration/auth-form/sub-forms/auth-github.form.js:27
+#: client/src/configuration/auth-form/sub-forms/auth-google-oauth2.form.js:39
+#: client/src/configuration/auth-form/sub-forms/auth-ldap.form.js:87
+#: client/src/configuration/auth-form/sub-forms/auth-radius.form.js:32
+#: client/src/configuration/auth-form/sub-forms/auth-saml.form.js:59
+#: client/src/configuration/jobs-form/configuration-jobs.form.js:67
+#: client/src/configuration/system-form/configuration-system.form.js:41
+#: client/src/configuration/system-form/sub-forms/system-activity-stream.form.js:25
+#: client/src/configuration/system-form/sub-forms/system-logging.form.js:50
+#: client/src/configuration/system-form/sub-forms/system-misc.form.js:29
+#: client/src/configuration/ui-form/configuration-ui.form.js:35
+msgid "Reset All"
+msgstr "すべてのリセット"
+
+#: client/src/lists/Projects.js:42
+msgid "Revision"
+msgstr "リビジョン"
+
+#: client/src/controllers/Projects.js:657
+msgid "Revision #"
+msgstr "リビジョン #"
+
+#: client/src/forms/Credentials.js:454
+#: client/src/forms/Inventories.js:120
+#: client/src/forms/Inventories.js:166
+#: client/src/forms/Organizations.js:88
+#: client/src/forms/Projects.js:249
+#: client/src/forms/Teams.js:137
+#: client/src/forms/Teams.js:99
+#: client/src/forms/Users.js:201
+msgid "Role"
+msgstr "ロール"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:108
+msgid "SAML"
+msgstr "SAML"
+
+#: client/src/controllers/Projects.js:657
+msgid "SCM Branch"
+msgstr "SCM ブランチ"
+
+#: client/src/forms/Projects.js:154
+msgid "SCM Clean"
+msgstr "SCM クリーニング"
+
+#: client/src/forms/Projects.js:130
+msgid "SCM Credential"
+msgstr "SCM 認証情報"
+
+#: client/src/forms/Projects.js:165
+msgid "SCM Delete"
+msgstr "SCM 削除"
+
+#: client/src/helpers/Credentials.js:93
+msgid "SCM Private Key"
+msgstr "SCM 秘密鍵"
+
+#: client/src/forms/Projects.js:56
+msgid "SCM Type"
+msgstr "SCM タイプ"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:49
+#: client/src/forms/Projects.js:175
+msgid "SCM Update"
+msgstr "SCM 更新"
+
+#: client/src/controllers/Projects.js:176
+msgid "SCM Update Cancel"
+msgstr "SCM 更新の取り消し"
+
+#: client/src/forms/Projects.js:145
+msgid "SCM Update Options"
+msgstr "SCM 更新オプション"
+
+#: client/src/controllers/Projects.js:543
+#: client/src/controllers/Projects.js:57
+msgid "SCM update currently running"
+msgstr "現在実行中の SCM 更新"
+
+#: client/src/main-menu/main-menu.partial.html:59
+msgid "SETTINGS"
+msgstr "設定"
+
+#: client/src/login/loginModal/loginModal.partial.html:97
+msgid "SIGN IN"
+msgstr "サインイン"
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.partial.html:2
+msgid "SIGN IN WITH"
+msgstr "サインイン:"
+
+#: client/src/app.js:513
+msgid "SOCKETS"
+msgstr "ソケット"
+
+#: client/src/helpers/Credentials.js:166
+msgid "SSH Key"
+msgstr "SSH キー"
+
+#: client/src/forms/Credentials.js:255
+msgid "SSH key description"
+msgstr "SSH キーの説明"
+
+#: client/src/notifications/notificationTemplates.form.js:384
+msgid "SSL Connection"
+msgstr "SSL 接続"
+
+#: client/src/forms/Credentials.js:120
+#: client/src/forms/Credentials.js:128
+msgid "STS Token"
+msgstr "STS トークン"
+
+#: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:64
+msgid "SUCCESSFUL"
+msgstr "成功"
+
+#: client/src/helpers/Credentials.js:149
+msgid "Satellite 6 Host"
+msgstr "Satellite 6 ホスト"
+
+#: client/src/shared/form-generator.js:1687
+msgid "Save"
+msgstr "保存"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:81
+#: client/src/configuration/configuration.controller.js:181
+#: client/src/configuration/configuration.controller.js:240
+#: client/src/configuration/system-form/configuration-system.controller.js:60
+msgid "Save changes"
+msgstr "変更の保存"
+
+#: client/src/license/license.partial.html:122
+msgid "Save successful!"
+msgstr "正常に保存が実行されました!"
+
+#: client/src/lists/Templates.js:92
+msgid "Schedule"
+msgstr "スケジュール"
+
+#: client/src/management-jobs/card/card.partial.html:26
+msgid "Schedule Management Job"
+msgstr "管理ジョブのスケジュール"
+
+#: client/src/controllers/Projects.js:49
+msgid "Schedule future SCM updates"
+msgstr "将来の SCM 更新のスケジュール"
+
+#: client/src/lists/Templates.js:95
+msgid "Schedule future job template runs"
+msgstr "将来のジョブテンプレート実行のスケジュール"
+
+#: client/src/lists/ScheduledJobs.js:15
+msgid "Scheduled Jobs"
+msgstr "スケジュール済みのジョブ"
+
+#: client/src/partials/jobs.html:10
+msgid "Schedules"
+msgstr "スケジュール"
+
+#: client/src/inventory-scripts/inventory-scripts.form.js:59
+msgid "Script must begin with a hashbang sequence: i.e.... %s"
+msgstr "スクリプトは hashbang シーケンスで開始する必要があります (例: .... %s)。"
+
+#: client/src/forms/Credentials.js:105
+msgid "Secret Key"
+msgstr "シークレットキー"
+
+#: client/src/forms/Credentials.js:125
+msgid ""
+"Security Token Service (STS) is a web service that enables you to request "
+"temporary, limited-privilege credentials for AWS Identity and Access "
+"Management (IAM) users."
+msgstr ""
+"セキュリティートークンサービス (STS) は、AWS Identity and Access Management (IAM) "
+"ユーザーの一時的な、権限の制限された認証情報を要求できる web サービスです。"
+
+#: client/src/shared/form-generator.js:1691
+msgid "Select"
+msgstr "選択"
+
+#: client/src/configuration/jobs-form/configuration-jobs.controller.js:87
+#: client/src/configuration/ui-form/configuration-ui.controller.js:82
+msgid "Select commands"
+msgstr "コマンドの選択"
+
+#: client/src/forms/Projects.js:98
+msgid ""
+"Select from the list of directories found in the Project Base Path. Together "
+"the base path and the playbook directory provide the full path used to "
+"locate playbooks."
+msgstr ""
+"プロジェクトのベースパスにあるデイレクトリーの一覧から選択します。ベースパスと Playbook ディレクトリーは、Playbook "
+"を見つけるために使用される完全なパスを提供します。"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:226
+msgid "Select group types"
+msgstr "グループタイプの選択"
+
+#: client/src/forms/JobTemplates.js:152
+#: client/src/forms/WorkflowMaker.js:67
+msgid ""
+"Select the credential you want the job to use when accessing the remote "
+"hosts. Choose the credential containing  the username and SSH key or "
+"password that Ansible will need to log into the remote hosts."
+msgstr ""
+"リモートホストへのアクセス時にジョブで使用する認証情報を選択します。Ansible がリモートホストにログインするために必要なユーザー名および SSH "
+"キーまたはパスワードが含まれる認証情報を選択してください。 "
+
+#: client/src/forms/JobTemplates.js:85
+#: client/src/forms/WorkflowMaker.js:88
+msgid "Select the inventory containing the hosts you want this job to manage."
+msgstr "このジョブで管理するホストが含まれるインベントリーを選択してください。"
+
+#: client/src/forms/JobTemplates.js:130
+msgid "Select the playbook to be executed by this job."
+msgstr "このジョブで実行される Playbook を選択してください。"
+
+#: client/src/forms/JobTemplates.js:113
+msgid ""
+"Select the project containing the playbook you want this job to execute."
+msgstr "このジョブで実行する Playbook が含まれるプロジェクトを選択してください。"
+
+#: client/src/configuration/system-form/configuration-system.controller.js:167
+msgid "Select types"
+msgstr "タイプの選択"
+
+#: client/src/forms/JobTemplates.js:174
+msgid ""
+"Selecting an optional cloud credential in the job template will pass along "
+"the access credentials to the running playbook, allowing provisioning into "
+"the cloud without manually passing parameters to the included modules."
+msgstr ""
+"ジョブテンプレートでオプションのクラウド認証情報を選択すると、アクセス認証情報が実行中の Playbook "
+"に渡され、パラメーターを組み込みモジュールに手動で渡さなくてもクラウドへのプロビジョニングが許可されます。"
+
+#: client/src/notifications/notificationTemplates.form.js:83
+msgid "Sender Email"
+msgstr "送信者のメール"
+
+#: client/src/helpers/Credentials.js:97
+msgid "Service Account Email Address"
+msgstr "サービスアカウントのメールアドレス"
+
+#: client/src/forms/JobTemplates.js:60
+#: client/src/forms/WorkflowMaker.js:108
+msgid ""
+"Setting the type to %s will execute the playbook and store any  scanned "
+"facts for use with Tower's System Tracking feature."
+msgstr ""
+"タイプを %s に設定すると Playbook が実行され、Tower のシステムトラッキング機能で使用するスキャンされたファクトが保存されます。"
+
+#: client/src/forms/JobTemplates.js:57
+msgid "Setting the type to %s will not execute the playbook."
+msgstr "タイプを %s に設定すると Playbook は実行されません。"
+
+#: client/src/forms/WorkflowMaker.js:106
+msgid ""
+"Setting the type to %s will not execute the playbook. Instead, %s will check "
+"playbook  syntax, test environment setup and report problems."
+msgstr ""
+"タイプを %s に設定すると Playbook は実行されません。その代わりに、%s は Playbook  "
+"構文、テスト環境セットアップおよびレポートの問題を検査します。"
+
+#: client/src/main-menu/main-menu.partial.html:147
+msgid "Settings"
+msgstr "設定"
+
+#: client/src/shared/form-generator.js:843
+msgid "Show"
+msgstr "表示"
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:34
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:45
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:56
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:77
+msgid "Sign in with %s"
+msgstr "%s でサインイン"
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:64
+msgid "Sign in with %s Organizations"
+msgstr "%s 組織でサインイン"
+
+#: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:62
+msgid "Sign in with %s Teams"
+msgstr "%s チームでサインイン"
+
+#: client/src/forms/JobTemplates.js:266
+#: client/src/forms/JobTemplates.js:274
+#: client/src/forms/WorkflowMaker.js:149
+#: client/src/forms/WorkflowMaker.js:157
+msgid "Skip Tags"
+msgstr "スキップタグ"
+
+#: client/src/forms/JobTemplates.js:272
+#: client/src/forms/WorkflowMaker.js:155
+msgid ""
+"Skip tags are useful when you have a large playbook, and you want to skip "
+"specific parts of a play or task."
+msgstr "スキップタグは、Playbook のサイズが大きく、プレイまたはタスクの特定の部分をスキップする必要がある場合に役立ちます。"
+
+#: client/src/forms/Credentials.js:76
+msgid "Source Control"
+msgstr "ソースコントロール"
+
+#: client/src/forms/Projects.js:27
+msgid "Source Details"
+msgstr "ソース詳細"
+
+#: client/src/notifications/notificationTemplates.form.js:196
+msgid "Source Phone Number"
+msgstr "発信元の電話番号"
+
+#: client/src/notifications/notificationTemplates.form.js:332
+msgid "Specify HTTP Headers in JSON format"
+msgstr "JSON 形式での HTTP ヘッダーの指定"
+
+#: client/src/forms/Credentials.js:285
+msgid ""
+"Specify a method for %s operations. This is equivalent to specifying the %s "
+"parameter, where %s could be %s"
+msgstr "%s 操作のメソッドを指定します。これは %s を指定することに相当します。%s は %s にすることができます。"
+
+#: client/src/setup-menu/setup-menu.partial.html:17
+msgid ""
+"Split up your organization to associate content and control permissions for "
+"groups."
+msgstr "コンテンツを関連付け、グループのパーミッションを制御するために組織を分割します。"
+
+#: client/src/lists/PortalJobTemplates.js:42
+#: client/src/lists/Templates.js:87
+msgid "Start a job using this template"
+msgstr "このテンプレートによるジョブの開始"
+
+#: client/src/controllers/Projects.js:48
+#: client/src/controllers/Projects.js:540
+msgid "Start an SCM update"
+msgstr "SCM 更新の開始"
+
+#: client/src/dashboard/hosts/dashboard-hosts.list.js:49
+msgid "Status"
+msgstr "ステータス"
+
+#: client/src/license/license.partial.html:121
+msgid "Submit"
+msgstr "送信"
+
+#: client/src/license/license.partial.html:27
+msgid "Subscription"
+msgstr "サブスクリプション"
+
+#: client/src/forms/Credentials.js:152
+#: client/src/forms/Credentials.js:163
+msgid "Subscription ID"
+msgstr "サブスクリプション ID"
+
+#: client/src/forms/Credentials.js:162
+msgid "Subscription ID is an Azure construct, which is mapped to a username."
+msgstr "サブスクリプション ID は、ユーザー名にマップされる Azure コンストラクトです。"
+
+#: client/src/notifications/notifications.list.js:38
+msgid "Success"
+msgstr "成功"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:77
+msgid "Successful"
+msgstr "成功"
+
+#: client/src/controllers/Users.js:18
+msgid "System Administrator"
+msgstr "システム管理者"
+
+#: client/src/controllers/Users.js:17
+msgid "System Auditor"
+msgstr "システム監査者"
+
+#: client/src/app.js:341
+msgid "TEAMS"
+msgstr "チーム"
+
+#: client/src/main-menu/main-menu.partial.html:113
+#: client/src/main-menu/main-menu.partial.html:35
+msgid "TEMPLATES"
+msgstr "テンプレート"
+
+#: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:106
+msgid "TIME"
+msgstr "時間"
+
+#: client/src/forms/JobTemplates.js:254
+#: client/src/forms/WorkflowMaker.js:140
+msgid ""
+"Tags are useful when you have a large playbook, and you want to run a "
+"specific part of a play or task."
+msgstr "タグは、Playbook のサイズが大きく、プレイまたはタスクの特定の部分を実行する必要がある場合に役立ちます。"
+
+#: client/src/notifications/notificationTemplates.form.js:313
+msgid "Target URL"
+msgstr "ターゲット URL"
+
+#: client/src/forms/Credentials.js:461
+#: client/src/forms/Inventories.js:126
+#: client/src/forms/Inventories.js:173
+#: client/src/forms/Organizations.js:95
+#: client/src/forms/Projects.js:255
+msgid "Team Roles"
+msgstr "チームロール"
+
+#: client/src/forms/Users.js:155
+#: client/src/lists/Teams.js:16
+#: client/src/lists/Teams.js:17
+#: client/src/setup-menu/setup-menu.partial.html:16
+msgid "Teams"
+msgstr "チーム"
+
+#: client/src/lists/Templates.js:16
+msgid "Template"
+msgstr "テンプレート"
+
+#: client/src/lists/Templates.js:17
+#: client/src/lists/Templates.js:18
+msgid "Templates"
+msgstr "テンプレート"
+
+#: client/src/forms/Credentials.js:335
+msgid "Tenant ID"
+msgstr "テナント ID"
+
+#: client/src/notifications/notificationTemplates.list.js:65
+msgid "Test notification"
+msgstr "テスト通知"
+
+#: client/src/shared/form-generator.js:1409
+msgid "That value was not found.  Please enter or select a valid value."
+msgstr "値が見つかりませんでした。有効な値を入力または選択してください。"
+
+#: client/src/helpers/Credentials.js:105
+msgid ""
+"The Project ID is the GCE assigned identification. It is constructed as two "
+"words followed by a three digit number.  Such as:"
+msgstr "プロジェクト ID は GCE によって割り当てられる識別情報です。これは、以下のように 2 語とそれに続く 3 桁の数字で構成されます。"
+
+#: client/src/controllers/Projects.js:693
+msgid "The SCM update process is running."
+msgstr "SCM 更新プロセスが実行中です。"
+
+#: client/src/forms/Credentials.js:191
+msgid ""
+"The email address assigned to the Google Compute Engine %sservice account."
+msgstr "Google Compute Engine %sサービスアカウントに割り当てられたメールアドレス。"
+
+#: client/src/helpers/Credentials.js:141
+msgid "The host to authenticate with."
+msgstr "認証するホスト。"
+
+#: client/src/helpers/Credentials.js:75
+msgid "The host value"
+msgstr "ホスト値"
+
+#: client/src/forms/JobTemplates.js:208
+msgid ""
+"The number of parallel or simultaneous processes to use while executing the "
+"playbook. 0 signifies the default value from the %sansible configuration "
+"file%s."
+msgstr ""
+"Playbook の実行中に使用する並列または同時プロセスの数です。0 は %sansible 設定ファイル%s のデフォルト値を表します。"
+
+#: client/src/helpers/Credentials.js:74
+msgid "The project value"
+msgstr "プロジェクト値"
+
+#: client/src/controllers/Projects.js:123
+msgid ""
+"The selected project is not configured for SCM. To configure for SCM, edit "
+"the project and provide SCM settings, and then run an update."
+msgstr ""
+"選択されたプロジェクトは SCM に対して設定されていません。SCM の設定を行うには、プロジェクトを編集して SCM "
+"設定を指定してから更新を実行します。"
+
+#: client/src/lists/PortalJobTemplates.js:20
+msgid "There are no job templates to display at this time"
+msgstr "現時点で表示できるジョブテンプレートはありません"
+
+#: client/src/lists/PortalJobs.js:20
+msgid "There are no jobs to display at this time"
+msgstr "現時点で表示できるジョブはありません"
+
+#: client/src/controllers/Projects.js:114
+msgid ""
+"There is no SCM update information available for this project. An update has "
+"not yet been  completed.  If you have not already done so, start an update "
+"for this project."
+msgstr ""
+"このプロジェクトに利用できる SCM "
+"更新情報はありません。更新はまだ完了していません。まだ更新を実行していない場合は、このプロジェクトの更新を開始してください。"
+
+#: client/src/configuration/configuration.controller.js:293
+msgid "There was an error resetting value. Returned status:"
+msgstr "値のリセット中にエラーが発生しました。返されたステータス:"
+
+#: client/src/configuration/configuration.controller.js:424
+msgid "There was an error resetting values. Returned status:"
+msgstr "値のリセット中にエラーが発生しました。返されたステータス:"
+
+#: client/src/helpers/Credentials.js:138
+msgid ""
+"This is the tenant name.  This value is usually the same  as the username."
+msgstr "これはテナント名です。通常、この値はユーザー名と同じです。"
+
+#: client/src/notifications/notifications.list.js:21
+msgid ""
+"This list is populated by notification templates added from the "
+"%sNotifications%s section"
+msgstr "この一覧は、%s通知%s セクションで追加される通知テンプレートで事前に設定されます。"
+
+#: client/src/notifications/notificationTemplates.form.js:199
+msgid "This must be of the form %s."
+msgstr "これは %s 形式でなければなりません。"
+
+#: client/src/forms/Users.js:160
+msgid "This user is not a member of any teams"
+msgstr "このユーザーはいずれのチームのメンバーでもありません。"
+
+#: client/src/shared/form-generator.js:823
+#: client/src/shared/form-generator.js:948
+msgid ""
+"This value does not match the password you entered previously.  Please "
+"confirm that password."
+msgstr "この値は、以前に入力されたパスワードと一致しません。パスワードを確認してください。"
+
+#: client/src/configuration/configuration.controller.js:449
+msgid ""
+"This will reset all configuration values to their factory defaults. Are you "
+"sure you want to proceed?"
+msgstr "これにより、すべての設定値が出荷時の設定にリセットされます。本当に続行してもよいですか?"
+
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:14
+msgid "Time"
+msgstr "時間"
+
+#: client/src/license/license.partial.html:45
+msgid "Time Remaining"
+msgstr "残りの時間"
+
+#: client/src/forms/Projects.js:191
+msgid ""
+"Time in seconds to consider a project to be current. During job runs and "
+"callbacks the task system will evaluate the timestamp of the latest project "
+"update. If it is older than Cache Timeout, it is not considered current, and "
+"a new project update will be performed."
+msgstr ""
+"プロジェクトが最新であることを判別するための時間 (秒単位) "
+"です。ジョブ実行およびコールバック時に、タスクシステムは最新のプロジェクト更新のタイムスタンプを評価します。これがキャッシュタイムアウトよりも古い場合には、最新とは見なされず、新規のプロジェクト更新が実行されます。"
+
+#: client/src/forms/Credentials.js:126
+msgid ""
+"To learn more about the IAM STS Token, refer to the %sAmazon documentation%s."
+""
+msgstr "IAM STS トークンについての詳細は、%sAmazon ドキュメント%s を参照してください。"
+
+#: client/src/shared/form-generator.js:848
+msgid "Toggle the display of plaintext."
+msgstr "プレーンテキストの表示を切り替えます。"
+
+#: client/src/notifications/shared/type-change.service.js:34
+#: client/src/notifications/shared/type-change.service.js:40
+msgid "Token"
+msgstr "トークン"
+
+#: client/src/forms/Credentials.js:61
+#: client/src/forms/Credentials.js:85
+#: client/src/forms/Teams.js:132
+#: client/src/forms/Users.js:196
+#: client/src/forms/WorkflowMaker.js:34
+#: client/src/lists/CompletedJobs.js:50
+#: client/src/lists/Credentials.js:39
+#: client/src/lists/Projects.js:48
+#: client/src/lists/ScheduledJobs.js:42
+#: client/src/lists/Templates.js:31
+#: client/src/notifications/notificationTemplates.form.js:54
+#: client/src/notifications/notificationTemplates.list.js:38
+#: client/src/notifications/notifications.list.js:31
+msgid "Type"
+msgstr "タイプ"
+
+#: client/src/forms/Credentials.js:25
+#: client/src/notifications/notificationTemplates.form.js:23
+msgid "Type Details"
+msgstr "タイプの詳細"
+
+#: client/src/notifications/notificationTemplates.form.js:212
+#: client/src/notifications/notificationTemplates.form.js:97
+msgid "Type an option on each line."
+msgstr "各行にオプションを入力します。"
+
+#: client/src/notifications/notificationTemplates.form.js:141
+#: client/src/notifications/notificationTemplates.form.js:158
+#: client/src/notifications/notificationTemplates.form.js:370
+msgid "Type an option on each line. The pound symbol (#) is not required."
+msgstr "各行にオプションを入力します。シャープ記号 (#) は不要です。"
+
+#: client/src/controllers/Projects.js:402
+#: client/src/controllers/Projects.js:684
+msgid "URL popover text"
+msgstr "URL ポップオーバーテキスト"
+
+#: client/src/login/loginModal/loginModal.partial.html:49
+msgid "USERNAME"
+msgstr "ユーザー名"
+
+#: client/src/app.js:365
+msgid "USERS"
+msgstr "ユーザー"
+
+#: client/src/controllers/Projects.js:220
+msgid "Update Not Found"
+msgstr "更新が見つかりません"
+
+#: client/src/controllers/Projects.js:693
+msgid "Update in Progress"
+msgstr "更新が進行中です"
+
+#: client/src/forms/Projects.js:172
+msgid "Update on Launch"
+msgstr "起動時の更新"
+
+#: client/src/license/license.partial.html:71
+msgid "Upgrade"
+msgstr "アップグレード"
+
+#: client/src/notifications/notificationTemplates.form.js:404
+msgid "Use SSL"
+msgstr "SSL の使用"
+
+#: client/src/notifications/notificationTemplates.form.js:397
+msgid "Use TLS"
+msgstr "TLS の使用"
+
+#: client/src/forms/Credentials.js:77
+msgid ""
+"Used to check out and synchronize playbook repositories with a remote source "
+"control management system such as Git, Subversion (svn), or Mercurial (hg). "
+"These credentials are used by Projects."
+msgstr ""
+"Git、Subversion (svn)、または Mercurial (hg) などのリモートソースコントロール管理システムで Playbook "
+"リポジトリーをチェックアウトし、同期するために使用されます。これらの認証情報はプロジェクトで使用されます。"
+
+#: client/src/forms/Credentials.js:449
+#: client/src/forms/Inventories.js:115
+#: client/src/forms/Inventories.js:161
+#: client/src/forms/Organizations.js:83
+#: client/src/forms/Projects.js:244
+#: client/src/forms/Teams.js:94
+msgid "User"
+msgstr "ユーザー"
+
+#: client/src/forms/Users.js:94
+msgid "User Type"
+msgstr "ユーザータイプ"
+
+#: client/src/forms/Users.js:49
+#: client/src/helpers/Credentials.js:117
+#: client/src/helpers/Credentials.js:32
+#: client/src/helpers/Credentials.js:56
+#: client/src/helpers/Credentials.js:88
+#: client/src/lists/Users.js:37
+#: client/src/notifications/notificationTemplates.form.js:64
+msgid "Username"
+msgstr "ユーザー名"
+
+#: client/src/forms/Credentials.js:81
+msgid ""
+"Usernames, passwords, and access keys for authenticating to the specified "
+"cloud or infrastructure provider. These are used for dynamic inventory "
+"sources and for cloud provisioning and deployment in playbook runs."
+msgstr ""
+"指定されたクラウドまたはインフラストラクチャープロバイダーに対する認証を行うためのユーザー名、パスワード、およびアクセスキーです。これらは動的なインベントリーソースおよび "
+"Playbook 実行のクラウドプロビジョニングおよびデプロイメントに使用されます。"
+
+#: client/src/forms/Teams.js:75
+#: client/src/lists/Users.js:26
+#: client/src/lists/Users.js:27
+#: client/src/setup-menu/setup-menu.partial.html:10
+msgid "Users"
+msgstr "ユーザー"
+
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:7
+#: client/src/dashboard/lists/jobs/jobs-list.partial.html:7
+msgid "VIEW ALL"
+msgstr "すべてを表示"
+
+#: client/src/main-menu/main-menu.partial.html:75
+msgid "VIEW DOCUMENTATION"
+msgstr "ドキュメントの表示"
+
+#: client/src/main-menu/main-menu.partial.html:51
+msgid "VIEW USER PAGE FOR {{ $root.current_user.username | uppercase }}"
+msgstr "{{ $root.current_user.username | uppercase }} のユーザーページの表示"
+
+#: client/src/license/license.partial.html:10
+msgid "Valid License"
+msgstr "有効なライセンス"
+
+#: client/src/forms/Inventories.js:55
+msgid "Variables"
+msgstr "変数"
+
+#: client/src/forms/Credentials.js:389
+msgid "Vault Password"
+msgstr "Vault パスワード"
+
+#: client/src/forms/JobTemplates.js:235
+#: client/src/forms/JobTemplates.js:242
+msgid "Verbosity"
+msgstr "詳細"
+
+#: client/src/about/about.controller.js:24
+#: client/src/license/license.partial.html:15
+msgid "Version"
+msgstr "バージョン"
+
+#: client/src/dashboard/graphs/dashboard-graphs.partial.html:58
+#: client/src/inventory-scripts/inventory-scripts.list.js:65
+#: client/src/lists/Credentials.js:80
+#: client/src/lists/Inventories.js:85
+#: client/src/lists/Teams.js:69
+#: client/src/lists/Templates.js:117
+#: client/src/lists/Users.js:78
+#: client/src/notifications/notificationTemplates.list.js:80
+msgid "View"
+msgstr "表示"
+
+#: client/src/main-menu/main-menu.partial.html:173
+msgid "View Documentation"
+msgstr "ドキュメントの表示"
+
+#: client/src/forms/Inventories.js:65
+msgid "View JSON examples at %s"
+msgstr "JSON サンプルを %s に表示"
+
+#: client/src/forms/JobTemplates.js:450
+#: client/src/forms/Workflows.js:163
+#: client/src/shared/form-generator.js:1715
+msgid "View Survey"
+msgstr "Survey の表示"
+
+#: client/src/forms/Inventories.js:66
+msgid "View YAML examples at %s"
+msgstr "YAML サンプルを %s に表示"
+
+#: client/src/setup-menu/setup-menu.partial.html:47
+msgid "View Your License"
+msgstr "ライセンスの表示"
+
+#: client/src/setup-menu/setup-menu.partial.html:48
+msgid "View and edit your license information."
+msgstr "ライセンス情報を表示し、編集します。"
+
+#: client/src/lists/Credentials.js:82
+msgid "View credential"
+msgstr "認証情報の表示"
+
+#: client/src/setup-menu/setup-menu.partial.html:60
+msgid "View information about this version of Ansible Tower."
+msgstr "本バージョンの Ansible Tower 情報を表示します。"
+
+#: client/src/lists/Inventories.js:87
+msgid "View inventory"
+msgstr "インベントリーの表示"
+
+#: client/src/inventory-scripts/inventory-scripts.list.js:67
+msgid "View inventory script"
+msgstr "インベントリースクリプトの表示"
+
+#: client/src/notifications/notificationTemplates.list.js:82
+msgid "View notification"
+msgstr "通知の表示"
+
+#: client/src/lists/Teams.js:72
+msgid "View team"
+msgstr "チームの表示"
+
+#: client/src/lists/Templates.js:119
+msgid "View template"
+msgstr "テンプレートの表示"
+
+#: client/src/lists/Projects.js:108
+msgid "View the project"
+msgstr "プロジェクトの表示"
+
+#: client/src/lists/ScheduledJobs.js:73
+msgid "View the schedule"
+msgstr "スケジュールの表示"
+
+#: client/src/lists/Users.js:81
+msgid "View user"
+msgstr "ユーザーの表示"
+
+#: client/src/forms/Workflows.js:22
+msgid "WORKFLOW"
+msgstr "ワークフロー"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:68
+#: client/src/configuration/configuration.controller.js:168
+#: client/src/configuration/configuration.controller.js:230
+#: client/src/configuration/system-form/configuration-system.controller.js:47
+msgid "Warning: Unsaved Changes"
+msgstr "警告: 変更が保存されていません"
+
+#: client/src/login/loginModal/loginModal.partial.html:17
+msgid "Welcome to Ansible Tower! &nbsp;Please sign in."
+msgstr "Ansible Tower へようこそ! &nbsp;サインインしてください。"
+
+#: client/src/license/license.partial.html:78
+msgid ""
+"Welcome to Ansible Tower! Please complete the steps below to acquire a "
+"license."
+msgstr "Ansible Tower へようこそ! ライセンスを取得するために以下のステップを完了してください。"
+
+#: client/src/forms/JobTemplates.js:55
+#: client/src/forms/WorkflowMaker.js:104
+msgid ""
+"When this template is submitted as a job, setting the type to %s will "
+"execute the playbook, running tasks  on the selected hosts."
+msgstr ""
+"このテンプレートがジョブとして送信される場合、タイプを %s に設定すると Playbook が実行され、選択されたホストでタスクが実行されます。"
+
+#: client/src/forms/Workflows.js:187
+#: client/src/shared/form-generator.js:1719
+msgid "Workflow Editor"
+msgstr "ワークフローエディター"
+
+#: client/src/lists/Templates.js:70
+msgid "Workflow Job Template"
+msgstr "ワークフロージョブテンプレート"
+
+#: client/src/controllers/Projects.js:468
+msgid "You do not have access to view this property"
+msgstr "これを適切に表示するためのアクセス権がありません。"
+
+#: client/src/controllers/Projects.js:284
+msgid "You do not have permission to add a project."
+msgstr "プロジェクトを追加するパーミッションがありません。"
+
+#: client/src/controllers/Users.js:141
+msgid "You do not have permission to add a user."
+msgstr "ユーザーを追加するパーミッションがありません。"
+
+#: client/src/configuration/auth-form/configuration-auth.controller.js:67
+#: client/src/configuration/configuration.controller.js:167
+#: client/src/configuration/configuration.controller.js:229
+#: client/src/configuration/system-form/configuration-system.controller.js:46
+msgid ""
+"You have unsaved changes. Would you like to proceed <strong>without</strong> "
+"saving?"
+msgstr "保存されていない変更があります。変更<strong>せずに</strong>次に進みますか?"
+
+#: client/src/shared/form-generator.js:960
+msgid "Your password must be %d characters long."
+msgstr "パスワードの長さは %d 文字にしてください。"
+
+#: client/src/shared/form-generator.js:965
+msgid "Your password must contain a lowercase letter."
+msgstr "パスワードには小文字を含める必要があります。"
+
+#: client/src/shared/form-generator.js:975
+msgid "Your password must contain a number."
+msgstr "パスワードには数字を含める必要があります。"
+
+#: client/src/shared/form-generator.js:970
+msgid "Your password must contain an uppercase letter."
+msgstr "パスワードには大文字を含める必要があります。"
+
+#: client/src/shared/form-generator.js:980
+msgid "Your password must contain one of the following characters: %s"
+msgstr "パスワードには以下の文字のいずれかを使用する必要があります: %s"
+
+#: client/src/controllers/Projects.js:176
+msgid "Your request to cancel the update was submitted to the task manager."
+msgstr "更新を取り消す要求がタスクマネージャーに送信されました。"
+
+#: client/src/login/loginModal/loginModal.partial.html:22
+msgid "Your session timed out due to inactivity. Please sign in."
+msgstr "アイドル時間によりセッションがタイムアウトしました。サインインしてください。"
+
+#: client/src/shared/form-generator.js:1224
+msgid "and"
+msgstr "and"
+
+#: client/src/forms/Credentials.js:139
+#: client/src/forms/Credentials.js:362
+msgid "set in helpers/credentials"
+msgstr "ヘルパー/認証情報で設定"
+
+#: client/src/forms/Credentials.js:379
+msgid "v2 URLs%s - leave blank"
+msgstr "v2 URL%s - 空白にする"
+
+#: client/src/forms/Credentials.js:380
+msgid "v3 default%s - set to 'default'"
+msgstr "v3 デフォルト%s  - 「デフォルト」に設定"
+
+#: client/src/forms/Credentials.js:381
+msgid "v3 multi-domain%s - your domain name"
+msgstr "v3 マルチドメイン%s - ドメイン名"
+
