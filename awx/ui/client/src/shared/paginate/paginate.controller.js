@@ -18,7 +18,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 return;
             }
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
+            queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page.toString() });
             $state.go('.', {
                 [$scope.iterator + '_search']: queryset
             });

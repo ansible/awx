@@ -1,5 +1,5 @@
-export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory',
-    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory) {
+export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory', 'SmartSearchService',
+    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory, SmartSearchService) {
         return {
             // kick off building a model for a specific endpoint
             // this is usually a list's basePath
@@ -67,29 +67,120 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 return angular.isObject(params) ? `?${queryset}` : '';
 
                 function encodeTerm(value, key){
+
+                    key = key.replace(/__icontains_DEFAULT/g, "__icontains");
+                    key = key.replace(/__search_DEFAULT/g, "__search");
+
                     if (Array.isArray(value)){
-                        return _.map(value, (item) => `${key}=${item}`).join('&') + '&';
+                        let concated = '';
+                        angular.forEach(value, function(item){
+                            item = item.replace(/"|'/g, "");
+                            concated += `${key}=${item}&`;
+                        });
+                        return concated;
                     }
                     else {
+                        value = value.replace(/"|'/g, "");
                         return `${key}=${value}&`;
                     }
                 }
             },
             // encodes a ui smart-search param to a django-friendly param
             // operand:key:comparator:value => {operand__key__comparator: value}
-            encodeParam(param){
-                let split = param.split(':');
-                return {[split.slice(0,split.length -1).join('__')] : split[split.length-1]};
+            encodeParam(params){
+                // Assumption here is that we have a key and a value so the length
+                // of the paramParts array will be 2.  [0] is the key and [1] the value
+                let paramParts = SmartSearchService.splitTermIntoParts(params.term);
+                let keySplit = paramParts[0].split('.');
+                let exclude = false;
+                let lessThanGreaterThan = paramParts[1].match(/^(>|<).*$/) ? true : false;
+                if(keySplit[0].match(/^-/g)) {
+                    exclude = true;
+                    keySplit[0] = keySplit[0].replace(/^-/, '');
+                }
+                let paramString = exclude ? "not__" : "";
+                let valueString = paramParts[1];
+                if(keySplit.length === 1) {
+                    if(params.searchTerm && !lessThanGreaterThan) {
+                        paramString += keySplit[0] + '__icontains_DEFAULT';
+                    }
+                    else if(params.relatedSearchTerm) {
+                        paramString += keySplit[0] + '__search_DEFAULT';
+                    }
+                    else {
+                        paramString += keySplit[0];
+                    }
+                }
+                else {
+                    paramString += keySplit.join('__');
+                }
+
+                if(lessThanGreaterThan) {
+                    if(paramParts[1].match(/^>=.*$/)) {
+                        paramString += '__gte';
+                        valueString = valueString.replace(/^(>=)/,"");
+                    }
+                    else if(paramParts[1].match(/^<=.*$/)) {
+                        paramString += '__lte';
+                        valueString = valueString.replace(/^(<=)/,"");
+                    }
+                    else if(paramParts[1].match(/^<.*$/)) {
+                        paramString += '__lt';
+                        valueString = valueString.replace(/^(<)/,"");
+                    }
+                    else if(paramParts[1].match(/^>.*$/)) {
+                        paramString += '__gt';
+                        valueString = valueString.replace(/^(>)/,"");
+                    }
+                }
+
+                return {[paramString] : valueString};
             },
             // decodes a django queryset param into a ui smart-search tag or set of tags
             decodeParam(value, key){
+
+                let decodeParamString = function(searchString) {
+                    if(key === 'search') {
+                        // Don't include 'search:' in the search tag
+                        return decodeURIComponent(`${searchString}`);
+                    }
+                    else {
+                        key = key.replace(/__icontains_DEFAULT/g, "");
+                        key = key.replace(/__search_DEFAULT/g, "");
+                        let split = key.split('__');
+                        let decodedParam = searchString;
+                        let exclude = false;
+                        if(key.startsWith('not__')) {
+                            exclude = true;
+                            split = split.splice(1, split.length);
+                        }
+                        if(key.endsWith('__gt')) {
+                            decodedParam = '>' + decodedParam;
+                            split = split.splice(0, split.length-1);
+                        }
+                        else if(key.endsWith('__lt')) {
+                            decodedParam = '<' + decodedParam;
+                            split = split.splice(0, split.length-1);
+                        }
+                        else if(key.endsWith('__gte')) {
+                            decodedParam = '>=' + decodedParam;
+                            split = split.splice(0, split.length-1);
+                        }
+                        else if(key.endsWith('__lte')) {
+                            decodedParam = '<=' + decodedParam;
+                            split = split.splice(0, split.length-1);
+                        }
+                        return exclude ? `-${split.join('.')}:${decodedParam}` : `${split.join('.')}:${decodedParam}`;
+                    }
+                };
+
                 if (Array.isArray(value)){
                     return _.map(value, (item) => {
-                        return `${key.split('__').join(':')}:${item}`;
+                        return decodeParamString(item);
                     });
                 }
                 else {
-                    return `${key.split('__').join(':')}:${value}`;
+                    return decodeParamString(value);
                 }
             },
 
@@ -161,6 +252,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
             success(data) {
                 return data;
             },
+
         };
     }
 ];
