@@ -238,21 +238,33 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 Wait('start');
                 this.url = `${endpoint}${this.encodeQueryset(params)}`;
                 Rest.setUrl(this.url);
+
                 return Rest.get()
-                    .success(this.success.bind(this))
-                    .error(this.error.bind(this))
-                    .finally(Wait('stop'));
+                    .then(function(response) {
+                        Wait('stop');
+
+                        if (response
+                            .headers('X-UI-Max-Events') !== null) {
+                            response.data.maxEvents = response.
+                                headers('X-UI-Max-Events');
+                        }
+
+                        return response;
+                    })
+                    .catch(function(response) {
+                        Wait('stop');
+
+                        this.error(response.data, response.status);
+
+                        return response;
+                    }.bind(this));
             },
             error(data, status) {
                 ProcessErrors($rootScope, data, status, null, {
                     hdr: 'Error!',
                     msg: 'Call to ' + this.url + '. GET returned: ' + status
                 });
-            },
-            success(data) {
-                return data;
-            },
-
+            }
         };
     }
 ];

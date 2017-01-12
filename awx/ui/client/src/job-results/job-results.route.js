@@ -25,6 +25,7 @@ export default {
     params: {
         job_event_search: {
             value: {
+                page_size: 100,
                 order_by: 'id',
                 not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
             },

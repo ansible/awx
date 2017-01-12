@@ -162,6 +162,7 @@
 
 .JobResultsStdOut-stdoutColumn {
     padding-left: 20px;
+    padding-right: 20px;
     padding-top: 2px;
     padding-bottom: 2px;
     color: @default-interface-txt;
@@ -169,6 +170,12 @@
     white-space: pre-wrap;
     word-break: break-word;
     width:100%;
+}
+
+.JobResultsStdOut-stdoutColumn--tooMany {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: @default-err;
 }
 
 .JobResultsStdOut-stdoutColumn {
@@ -214,6 +221,11 @@
 
 .JobResultsStdOut-toTop:hover {
     color: @default-interface-txt;
+}
+
+.JobResultsStdOut-cappedLine {
+    color: @b7grey;
+    font-style: italic;
 }
 
 @media (max-width: @breakpoint-md) {
