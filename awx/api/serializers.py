@@ -2370,7 +2370,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if view and view.request:
             request_method = view.request.method
         if request_method in ['PATCH']:
-            obj = view.get_object()
+            obj = self.instance
             char_prompts = copy.copy(obj.char_prompts)
             char_prompts.update(self.extract_char_prompts(data))
         else:
