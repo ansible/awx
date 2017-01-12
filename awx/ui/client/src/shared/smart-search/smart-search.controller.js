@@ -85,12 +85,19 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     else {
                         encodeParams.searchTerm = true;
                     }
+                    removed = qs.encodeParam(encodeParams);
                 }
-                removed = qs.encodeParam(encodeParams);
+                else {
+                    removed = setDefaults(tagToRemove);
+                }
             }
             _.each(removed, (value, key) => {
                 if (Array.isArray(queryset[key])){
                     _.remove(queryset[key], (item) => item === value);
+                    // If the array is now empty, remove that key
+                    if(queryset[key].length === 0) {
+                        delete queryset[key];
+                    }
                 }
                 else {
                     delete queryset[key];
