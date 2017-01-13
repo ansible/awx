@@ -101,7 +101,11 @@ export default {
             templateProvider: function(InventoryGroups, generateList, $templateRequest, $stateParams, GetBasePath) {
                 let list = _.cloneDeep(InventoryGroups);
                 if($stateParams && $stateParams.group) {
-                    list.basePath = GetBasePath('groups') + $stateParams.group[$stateParams.group.length-1] + '/children';
+                    list.basePath = GetBasePath('groups') + _.last($stateParams.group) + '/children';
+                }
+                else {
+                    //reaches here if the user is on the root level group
+                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
                 }
                 let html = generateList.build({
                     list: list,
@@ -119,7 +123,11 @@ export default {
             templateProvider: function(InventoryHosts, generateList, $stateParams, GetBasePath) {
                 let list = _.cloneDeep(InventoryHosts);
                 if($stateParams && $stateParams.group) {
-                    list.basePath = GetBasePath('groups') + $stateParams.group[$stateParams.group.length-1] + '/all_hosts';
+                    list.basePath = GetBasePath('groups') + _.last($stateParams.group) + '/all_hosts';
+                }
+                else {
+                    //reaches here if the user is on the root level group
+                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts';
                 }
                 let html = generateList.build({
                     list: list,
