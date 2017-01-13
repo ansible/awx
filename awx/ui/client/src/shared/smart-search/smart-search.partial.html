@@ -33,25 +33,27 @@
     </div>
     <!-- hint key -->
     <div class="SmartSearch-keyPane row" ng-repeat="model in models" ng-show="showKeyPane">
-        <div class="SmartSearch-keyPane--exit">
-            <button class="Form-exit" ng-click="toggleKeyPane()">
+        <div class="SmartSearch-keyPane--exitHolder">
+            <button class="Form-exit SmartSearch-keyPane--exit" ng-click="toggleKeyPane()">
                 <i class="fa fa-times-circle"></i>
             </button>
         </div>
-        <div class="SmartSearch-keyRow" ng-repeat="(key,value) in model.base">
-            <div class="SmartSearch-keyName">
-                {{ key }}
+        <div class="SmartSearch-keyRow SmartSearch-examples">
+            <div class="SmartSearch-examples--title">
+                <b>EXAMPLES:</b>
             </div>
-            <div class="SmartSearch-keyInfo">
-                <div>Type: {{ value.type }}</div>
-                <div>Description: {{value.help_text}}</div>
-                <div ng-if="value.choices">
-                    Enumerated: <span ng-repeat="choice in value.choices"> {{ choice[0] }} </span>
-                </div>
-            </div>
+            <div class="SmartSearch-examples--search">name:foo</div>
+            <div class="SmartSearch-examples--search">organization.name:Default</div>
+            <div class="SmartSearch-examples--search">id:>10</div>
         </div>
-        <div class="SmartSearch-keyRow SmartSearch-relations">
-            <b>Searchable relationships:</b> <span ng-repeat="relation in model.related track by $index">{{ relation }}<span ng-if="$index !== Object.keys(model.related).length -1">, </span></span>
+        <div class="SmartSearch-keyRow">
+            <b>FIELDS:</b> <span ng-repeat="(key,value) in model.base">{{ key }}<span ng-if="!$last">, </span></span>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>RELATED FIELDS:</b> <span ng-repeat="relation in model.related">{{ relation }}<span ng-if="!$last">, </span></span>
+        </div>
+        <div class="SmartSearch-keyRow">
+            <b>ADDITIONAL INFORMATION:</b> <span>For additional information on advanced search search syntax please see the Ansible Tower documentation.</span>
         </div>
     </div>
 </div>
