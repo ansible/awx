@@ -13,6 +13,7 @@ export default
 
             var scope = params.scope,
                 id = params.id,
+                templateType = params.templateType,
                 url;
 
 
@@ -35,7 +36,8 @@ export default
                 scope.$emit("SurveyDeleted");
 
             } else {
-                url = GetBasePath('job_templates')+ id + '/survey_spec/';
+                let basePath = templateType === 'workflow_job_template' ? GetBasePath('workflow_job_templates') : GetBasePath('job_templates');
+                url = basePath + id + '/survey_spec/';
 
                 Rest.setUrl(url);
                 Rest.destroy()
