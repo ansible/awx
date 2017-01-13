@@ -169,6 +169,10 @@ SESSION_COOKIE_SECURE = True
 # Disallow sending csrf cookies over insecure connections
 CSRF_COOKIE_SECURE = True
 
+# Limit CSRF cookies to browser sessions
+CSRF_COOKIE_AGE = None
+
+
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
