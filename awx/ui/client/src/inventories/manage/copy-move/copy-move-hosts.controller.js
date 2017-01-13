@@ -8,10 +8,10 @@
     ['$scope', '$state', '$stateParams', 'generateList', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host', 'Dataset',
     function($scope, $state, $stateParams, GenerateList, HostManageService, GetBasePath, CopyMoveGroupList, host, Dataset){
         var list = CopyMoveGroupList;
-        
+
         $scope.item = host;
         $scope.submitMode = 'copy';
-        $scope['toggle_'+ list.iterator] = function(id){
+        $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
