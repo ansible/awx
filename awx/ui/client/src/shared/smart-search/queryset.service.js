@@ -80,7 +80,9 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         return concated;
                     }
                     else {
-                        value = value.replace(/"|'/g, "");
+                        if(value && typeof value === 'string') {
+                            value = value.replace(/"|'/g, "");
+                        }
                         return `${key}=${value}&`;
                     }
                 }
