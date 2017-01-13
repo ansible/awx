@@ -18,7 +18,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 return;
             }
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page.toString() });
+            queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
             $state.go('.', {
                 [$scope.iterator + '_search']: queryset
             });
@@ -59,7 +59,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 return `1 - ${pageSize}`;
             } else {
                 let floor = (($scope.current() - 1) * parseInt(pageSize)) + 1;
-                let ceil = floor + parseInt(pageSize);
+                let ceil = floor + parseInt(pageSize) < $scope.dataset.count ? floor + parseInt(pageSize) : $scope.dataset.count;
                 return `${floor} - ${ceil}`;
             }
         }
