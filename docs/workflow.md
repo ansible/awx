@@ -58,9 +58,12 @@ Workflow jobs cannot be copied directly, instead a workflow job is implicitly co
 * Verify that CRUD operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
 * Verify the RBAC property of workflow resources. In specific: 
   * Workflow job templates can only be accessible by superusers ---- system admin, admin of the same organization and system auditor and auditor of the same organization with read permission only.
-  * Workflow jobs follows the permission rules of its associated workflow job template.
-  * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template.
-  * Workflow job nodes follows the permission rules of both its associated workflow job and unified job.
+  * Workflow job read and delete permissions follow from its associated workflow job template.
+  * Workflow job relaunch permission consists of the union of execute permission to its associated workflow job template, and the permission to re-create all the nodes inside of the workflow job.
+  * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template for creation and editing.
+  * Workflow job nodes can be deleted with only permission to their workflow job template.
+  * Workflow job nodes are viewable if its workflow job is viewable.
+  * No CRUD actions are possible on workflow job nodes by any user, and they may only be deleted by deleting their workflow job.
 * Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
 * Verify that only the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources and projects*.
 * Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of decision trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.
