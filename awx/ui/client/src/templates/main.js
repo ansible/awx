@@ -103,7 +103,8 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         },
                         inventory_source_search: {
                             value: {
-                                page_size: '5'
+                                page_size: '5',
+                                not__source: ''
                             },
                             squash: true,
                             dynamic: true
