@@ -1656,11 +1656,6 @@ class WorkflowJobAccess(BaseAccess):
         if self.user not in wfjt.execute_role:
             return False
 
-        # WFJT is valid base for WJ, launch permitted
-        last_modified = wfjt.nodes_last_modified()
-        if last_modified and obj.created > last_modified:
-            return True
-
         # user's WFJT access doesn't guarentee permission to launch, introspect nodes
         return self.can_recreate(obj)
 
@@ -1672,8 +1667,8 @@ class WorkflowJobAccess(BaseAccess):
             if not node_access.can_add({'reference_obj': node}):
                 wj_add_perm = False
         if not wj_add_perm and self.save_messages:
-            self.messages['workflow_job_template'] = _('Template has been modified since job was launched, '
-                                                       'and you do not have permission to its resources.')
+            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job '
+                                                       'resources required for relaunch.')
         return wj_add_perm
 
     def can_cancel(self, obj):
