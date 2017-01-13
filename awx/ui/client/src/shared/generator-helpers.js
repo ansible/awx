@@ -591,6 +591,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     }
                 }
                 else {
+                    if(field.simpleTip) {
+                        html += `<span aw-tool-tip="${field.simpleTip.awToolTip}" data-placement=${field.simpleTip.dataPlacement}>`;
+                    }
                     // Add icon:
                     if (field.ngShowIcon) {
                         html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
@@ -614,6 +617,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     // Add additional text:
                     if (field.text) {
                         html += field.text;
+                    }
+                    if(field.simpleTip) {
+                        html += `</span>`;
                     }
                 }
 
