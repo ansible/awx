@@ -38,13 +38,15 @@
                 <i class="fa fa-times-circle"></i>
             </button>
         </div>
-        <div class="SmartSearch-keyRow SmartSearch-examples">
-            <div class="SmartSearch-examples--title">
-                <b>EXAMPLES:</b>
+        <div class="SmartSearch-keyRow">
+            <div class="SmartSearch-examples">
+                <div class="SmartSearch-examples--title">
+                    <b>EXAMPLES:</b>
+                </div>
+                <div class="SmartSearch-examples--search">name:foo</div>
+                <div class="SmartSearch-examples--search">organization.name:Default</div>
+                <div class="SmartSearch-examples--search">id:>10</div>
             </div>
-            <div class="SmartSearch-examples--search">name:foo</div>
-            <div class="SmartSearch-examples--search">organization.name:Default</div>
-            <div class="SmartSearch-examples--search">id:>10</div>
         </div>
         <div class="SmartSearch-keyRow">
             <b>FIELDS:</b> <span ng-repeat="(key,value) in model.base">{{ key }}<span ng-if="!$last">, </span></span>
