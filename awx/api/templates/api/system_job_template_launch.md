@@ -13,7 +13,7 @@ Which will act on data older than 30 days.
 
 For `cleanup_facts`:
 
-`{"older_than": "4w", `granularity`: "3d"}`
+`{"older_than": "4w", "granularity": "3d"}`
 
 Which will reduce the granularity of scan data to one scan per 3 days when the data is older than 4w.
 
