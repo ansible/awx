@@ -60,9 +60,6 @@
         };
 
         function init(){
-            var url = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
-            url += $stateParams.group ? '?not__id__in=' + group.id + ',' + _.last($stateParams.group) : '?not__id=' + group.id;
-            list.basePath = url;
             $scope.atRootLevel = $stateParams.group ? false : true;
 
             // search init

@@ -30,8 +30,8 @@ var copyMoveGroupRoute = {
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath', 'group',
             function(list, qs, $stateParams, GetBasePath, group) {
-                $stateParams.copy_search.not__id__in = ($stateParams.group.length > 0 ? group.id + ',' + _.last($stateParams.group) : group.id);
-                let path = GetBasePath(list.name);
+                $stateParams.copy_search.not__id__in = ($stateParams.group && $stateParams.group.length > 0 ? group.id + ',' + _.last($stateParams.group) : group.id.toString());
+                let path = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
                 return qs.search(path, $stateParams.copy_search);
             }
         ],

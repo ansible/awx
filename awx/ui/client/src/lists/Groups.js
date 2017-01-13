@@ -22,5 +22,6 @@ export default
                 key: true,
                 label: 'Target Group Name'
             }
-        }
+        },
+        basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/groups'
     });
