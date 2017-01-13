@@ -10,6 +10,7 @@ from sets import Set
 from django.conf import settings
 from django.db import transaction, connection
 from django.db.utils import DatabaseError
+from django.utils.translation import ugettext_lazy as _
 
 # AWX
 from awx.main.models import * # noqa
@@ -123,7 +124,8 @@ class TaskManager():
                 can_start = job.signal_start(**kv)
                 if not can_start:
                     job.status = 'failed'
-                    job.job_explanation = "Workflow job could not start because it was not in the right state or required manual credentials"
+                    job.job_explanation = _("Job spawned from workflow could not start because it "
+                                            "was not in the right state or required manual credentials")
                     job.save(update_fields=['status', 'job_explanation'])
                     connection.on_commit(lambda: job.websocket_emit_status('failed'))
 

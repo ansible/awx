@@ -606,6 +606,12 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         evars.update(extra_vars)
         self.update_fields(extra_vars=json.dumps(evars))
 
+    def signal_start(self, **kwargs):
+        # Block cases that would cause the task manager to error
+        if self.inventory_id is None or self.project_id is None:
+            return False
+        return super(Job, self).signal_start(**kwargs)
+
     def display_artifacts(self):
         '''
         Hides artifacts if they are marked as no_log type artifacts.
