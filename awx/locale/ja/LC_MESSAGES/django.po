@@ -1961,17 +1961,17 @@ msgstr "認証情報がクラウドソースに必要です。"
 
 #: main/models/inventory.py:1005
 #, python-format
-msgid "Invalid %(source)s region%(plural)s: %(region)s"
+msgid "Invalid %(source)s region: %(region)s"
 msgstr "無効な %(source)s リージョン: %(region)s"
 
 #: main/models/inventory.py:1031
 #, python-format
-msgid "Invalid filter expression%(plural)s: %(filter)s"
+msgid "Invalid filter expression: %(filter)s"
 msgstr "無効なフィルター式: %(filter)s"
 
 #: main/models/inventory.py:1050
 #, python-format
-msgid "Invalid group by choice%(plural)s: %(choice)s"
+msgid "Invalid group by choice: %(choice)s"
 msgstr "無効なグループ (選択による): %(choice)s"
 
 #: main/models/inventory.py:1198
