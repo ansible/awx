@@ -66,7 +66,7 @@ var copyMoveHostRoute = {
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
-                let path = GetBasePath(list.name);
+                let path = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts/';
                 return qs.search(path, $stateParams.copy_search);
             }
         ],
@@ -80,7 +80,9 @@ var copyMoveHostRoute = {
             controller: CopyMoveHostsController,
         },
         'copyMoveList@inventoryManage.copyMoveHost': {
-            templateProvider: function(CopyMoveGroupList, generateList) {
+            templateProvider: function(CopyMoveGroupList, generateList, $stateParams, GetBasePath) {
+                let list = CopyMoveGroupList;
+                list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts/';
                 let html = generateList.build({
                     list: CopyMoveGroupList,
                     mode: 'lookup',
