@@ -388,25 +388,23 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            checkbox_group: {
-                label: i18n._('Options'),
-                type: 'checkbox_group',
+            email_options: {
+                label: 'Options',
+                type: 'radio_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
-                fields: [{
-                    name: 'use_tls',
-                    label: i18n._('Use TLS'),
-                    type: 'checkbox',
+                class: 'squeeze',
+                ngChange: "emailOptionsChange()",
+                options: [{
+                    value: 'use_tls',
+                    label: 'Use TLS',
                     ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'checkbox-options stack-inline',
-                    ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+                    labelClass: 'checkbox-options stack-inline'
                 }, {
-                    name: 'use_ssl',
-                    label: i18n._('Use SSL'),
-                    type: 'checkbox',
+                    value: 'use_ssl',
+                    label: 'Use SSL',
                     ngShow: "notification_type.value == 'email'",
-                    labelClass: 'checkbox-options stack-inline',
-                    ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+                    labelClass: 'checkbox-options stack-inline'
                 }]
             }
         },
