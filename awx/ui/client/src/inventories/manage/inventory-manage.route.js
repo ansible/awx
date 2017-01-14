@@ -98,9 +98,17 @@ export default {
         },
         // target ui-views with name@inventoryManage state
         'groupsList@inventoryManage': {
-            templateProvider: function(InventoryGroups, generateList, $templateRequest) {
+            templateProvider: function(InventoryGroups, generateList, $templateRequest, $stateParams, GetBasePath) {
+                let list = _.cloneDeep(InventoryGroups);
+                if($stateParams && $stateParams.group) {
+                    list.basePath = GetBasePath('groups') + _.last($stateParams.group) + '/children';
+                }
+                else {
+                    //reaches here if the user is on the root level group
+                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
+                }
                 let html = generateList.build({
-                    list: InventoryGroups,
+                    list: list,
                     mode: 'edit'
                 });
                 html = generateList.wrapPanel(html);
@@ -112,9 +120,17 @@ export default {
             controller: GroupsListController
         },
         'hostsList@inventoryManage': {
-            templateProvider: function(InventoryHosts, generateList) {
+            templateProvider: function(InventoryHosts, generateList, $stateParams, GetBasePath) {
+                let list = _.cloneDeep(InventoryHosts);
+                if($stateParams && $stateParams.group) {
+                    list.basePath = GetBasePath('groups') + _.last($stateParams.group) + '/all_hosts';
+                }
+                else {
+                    //reaches here if the user is on the root level group
+                    list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts';
+                }
                 let html = generateList.build({
-                    list: InventoryHosts,
+                    list: list,
                     mode: 'edit'
                 });
                 return generateList.wrapPanel(html);
