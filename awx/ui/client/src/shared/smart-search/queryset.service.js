@@ -74,7 +74,9 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     if (Array.isArray(value)){
                         let concated = '';
                         angular.forEach(value, function(item){
-                            item = item.replace(/"|'/g, "");
+                            if(item && typeof item === 'string') {
+                                item = item.replace(/"|'/g, "");
+                            }
                             concated += `${key}=${item}&`;
                         });
                         return concated;
