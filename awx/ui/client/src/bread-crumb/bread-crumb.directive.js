@@ -47,6 +47,9 @@ export default
                                         order_by: '-timestamp',
                                         page_size: '20',
                                     };
+                                    if (streamConfig.activityStreamTarget && streamConfig.activityStreamId) {
+                                        stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params[streamConfig.activityStreamId];
+                                    }
                                 }
                                 else {
                                     stateGoParams.activity_search = {
