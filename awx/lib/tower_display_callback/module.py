@@ -19,8 +19,6 @@ from __future__ import (absolute_import, division, print_function)
 
 # Python
 import contextlib
-import copy
-import re
 import sys
 import uuid
 
