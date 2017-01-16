@@ -11,6 +11,14 @@ export default ['i18n', function(i18n) {
         showHeader: false,
 
         fields: {
+            SOCIAL_AUTH_SAML_CALLBACK_URL: {
+                type: 'text',
+                reset: 'SOCIAL_AUTH_SAML_CALLBACK_URL'
+            },
+            SOCIAL_AUTH_SAML_METADATA_URL: {
+                type: 'text',
+                reset: 'SOCIAL_AUTH_SAML_METADATA_URL'
+            },
             SOCIAL_AUTH_SAML_SP_ENTITY_ID: {
                 type: 'text',
                 reset: 'SOCIAL_AUTH_SAML_SP_ENTITY_ID'
@@ -48,6 +56,20 @@ export default ['i18n', function(i18n) {
             SOCIAL_AUTH_SAML_ENABLED_IDPS: {
                 type: 'textarea',
                 reset: 'SOCIAL_AUTH_SAML_ENABLED_IDPS',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            SOCIAL_AUTH_SAML_ORGANIZATION_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_ORGANIZATION_MAP',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            SOCIAL_AUTH_SAML_TEAM_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_SAML_TEAM_MAP',
                 rows: 6,
                 codeMirror: true,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth'

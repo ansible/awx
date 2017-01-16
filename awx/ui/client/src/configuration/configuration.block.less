@@ -99,3 +99,45 @@ input#filePickerText {
 .Section-messageBar--close:hover {
     color: @white;
 }
+
+//Codemirror and more disabling - you can still tab into the field with this method though
+textarea[disabled="disabled"] + div[id*="-container"]{
+    pointer-events: none;
+    cursor: not-allowed;
+
+        .CodeMirror {
+            cursor: not-allowed;
+        }
+
+        .CodeMirror.cm-s-default,
+        .CodeMirror-line {
+            background-color: #f6f6f6;
+        }
+
+        .CodeMirror-gutter.CodeMirror-lint-markers,
+        .CodeMirror-gutter.CodeMirror-linenumbers {
+            background-color: #ebebeb;
+            color: @b7grey;
+        }
+
+        .CodeMirror-lines {
+            cursor: default;
+        }
+
+        .CodeMirror-cursors {
+            display: none;
+        }
+}
+
+//Needed to show the not-allowed cursor over a Codemirror instance
+.Form-formGroup--disabled {
+    cursor: not-allowed;
+
+    // Filepicker and toggle disabling
+    .Form-filePicker--pickerButton, .Form-filePicker--textBox,
+    .ScheduleToggle {
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+}

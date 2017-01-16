@@ -671,7 +671,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
 
-                        if(field.reset) {
+                        if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
                             html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">Reset</a>`;
                         }
@@ -725,6 +725,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
 
                     html += "<div class='form-group Form-formGroup ";
+                    html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
                     html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
@@ -764,6 +765,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "\" ";
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                             html += (field.required) ? "required " : "";
+                            html += (field.disabled) ? `disabled="disabled" `: ``;
                             html += (field.readonly || field.showonly) ? "readonly " : "";
                             html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                             html += (field.capitalize) ? "capitalize " : "";
@@ -867,6 +869,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if (field.control === null || field.control === undefined || field.control) {
                             html += "<input ";
+                            html += (field.disabled) ? `disabled="disabled" `: ``;
                             html += buildId(field, fld + "_input", this.form);
                             html += "type='password' ";
                             html += "ng-model=\"" + fld + '" ';
@@ -986,6 +989,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += ">\n";
 
                         html += "<textarea ";
+                        html += (field.disabled) ? `disabled="disabled" `: ``;
                         html += (field.rows) ? this.attr(field, 'rows') : "";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
@@ -1045,6 +1049,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"Form-dropDownContainer\">\n";
                         html += "<select ";
+                        html += (field.disabled) ? `disabled="disabled" `: ``;
                         html += "ng-model=\"" + (field.ngModel ? field.ngModel : fld) + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-dropDown";

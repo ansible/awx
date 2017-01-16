@@ -11,6 +11,10 @@
          showHeader: false,
 
          fields: {
+             SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL: {
+                 type: 'text',
+                 reset: 'SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL'
+             },
              SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: {
                  type: 'text',
                  reset: 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY'

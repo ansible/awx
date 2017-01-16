@@ -11,20 +11,28 @@ export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Re
         return {
             getConfigurationOptions: function() {
                 var deferred = $q.defer();
-                var returnData;
+                var returnData = {};
 
                 Rest.setUrl(url + '/all');
                 Rest.options()
                     .success(function(data) {
-                        if($rootScope.user_is_superuser) {
-                            returnData = data.actions.PUT;
-                        } else {
-                            returnData = data.actions.GET;
-                        }
+                        // Compare GET actions with PUT actions and flag discrepancies
+                        // for disabling in the UI
+                        var getActions = data.actions.GET;
+                        var getKeys = _.keys(getActions);
+                        var putActions = data.actions.PUT;
 
-                        //LICENSE is read only, returning here explicitly for display
-                        // Removing LICENSE display until 3.2 or later
-                        //returnData.LICENSE = data.actions.GET.LICENSE;
+                        _.each(getKeys, function(key) {
+                            if(putActions[key]) {
+                                returnData[key] = putActions[key];
+                            } else {
+                                returnData[key] = _.extend(getActions[key], {
+                                                        required: false,
+                                                        disabled: true
+                                                    });
+                            }
+                        });
+
                         deferred.resolve(returnData);
                     })
                     .error(function(error) {
