@@ -4,6 +4,7 @@ azure==2.0.0rc6
 backports.ssl-match-hostname==3.5.0.1
 kombu==3.0.35
 boto==2.45.0
+python-memcached==1.58
 psphere==0.5.2
 psutil==5.0.0
 pyvmomi==6.5

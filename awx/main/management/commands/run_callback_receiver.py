@@ -87,24 +87,10 @@ class CallbackBrokerWorker(ConsumerMixin):
                 if settings.DEBUG:
                     logger.info('Body: {}'.format(body))
                 try:
-                    # If event came directly from callback without counter/stdout,
-                    # save it until the rest of the event arrives.
-                    if 'counter' not in body:
-                        if 'uuid' in body:
-                            self.partial_events[body['uuid']] = body
-                    # If event has counter, try to combine it with any event data
-                    # already received for the same uuid, then create the actual
-                    # job event record.
-                    else:
-                        if 'uuid' in body:
-                            partial_event = self.partial_events.pop(body['uuid'], {})
-                            body.update(partial_event)
-                        else:
-                            continue
-                        if 'job_id' in body:
-                            JobEvent.create_from_data(**body)
-                        elif 'ad_hoc_command_id' in body:
-                            AdHocCommandEvent.create_from_data(**body)
+                    if 'job_id' in body:
+                        JobEvent.create_from_data(**body)
+                    elif 'ad_hoc_command_id' in body:
+                        AdHocCommandEvent.create_from_data(**body)
                 except DatabaseError as e:
                     logger.error('Database Error Saving Job Event: {}'.format(e))
             except Exception as exc:

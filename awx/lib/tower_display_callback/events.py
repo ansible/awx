@@ -27,6 +27,7 @@ import multiprocessing
 import os
 import threading
 import uuid
+import memcache
 
 # Kombu
 from kombu import Connection, Exchange, Producer
@@ -100,6 +101,8 @@ class EventContext(object):
     def __init__(self):
         self.display_lock = multiprocessing.RLock()
         self.dispatcher = CallbackQueueEventDispatcher()
+        cache_actual = os.getenv('CACHE', '127.0.0.1:11211')
+        self.cache = memcache.Client([cache_actual], debug=0)
 
     def add_local(self, **kwargs):
         if not hasattr(self, '_local'):
@@ -201,7 +204,7 @@ class EventContext(object):
 
     def dump_begin(self, fileobj):
         begin_dict = self.get_begin_dict()
-        self.dispatcher.dispatch(begin_dict)
+        self.cache.set(":1:ev-{}".format(begin_dict['uuid']), begin_dict)
         self.dump(fileobj, {'uuid': begin_dict['uuid']})
 
     def dump_end(self, fileobj):
