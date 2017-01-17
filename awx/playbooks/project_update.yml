@@ -115,6 +115,12 @@
         chdir: "{{project_path|quote}}/roles"
       when: doesRequirementsExist.stat.exists and scm_full_checkout|bool
 
+      # format provided by ansible is ["Revision: 12345", "URL: ..."]
+    - name: parse subversion version string properly
+      set_fact:
+        scm_version: "{{scm_version|regex_replace('^.*Revision: ([0-9]+).*$', '\\1')}}"
+      when: scm_type == 'svn'
+
     - name: Repository Version
       debug: msg="Repository Version {{ scm_version }}"
       when: scm_version is defined
