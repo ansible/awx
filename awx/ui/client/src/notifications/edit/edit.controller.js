@@ -241,10 +241,10 @@ export default ['Rest', 'Wait',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (field.name === "username" && $scope.notification_type.value === "email" && value === null) {
+                if (i === "username" && $scope.notification_type.value === "email" && (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
-                if (field.type === 'sensitive' && value === null) {
+                if (field.type === 'sensitive' && (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
                 return $scope[i];
@@ -256,8 +256,8 @@ export default ['Rest', 'Wait',
 
                 delete params.notification_configuration.email_options;
 
-                params.notification_configuration.use_ssl = $scope.use_ssl;
-                params.notification_configuration.use_tls = $scope.use_tls;
+                params.notification_configuration.use_ssl = Boolean($scope.use_ssl);
+                params.notification_configuration.use_tls = Boolean($scope.use_tls);
 
             Wait('start');
             Rest.setUrl(url + id + '/');

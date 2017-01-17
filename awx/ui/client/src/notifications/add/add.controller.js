@@ -154,7 +154,7 @@ export default ['$rootScope', 'Rest', 'Wait', 'NotificationsFormObject',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (field.name === "username" && $scope.notification_type.value === "email" && value === null) {
+                if (i === "username" && $scope.notification_type.value === "email" && value === null) {
                     $scope[i] = "";
                 }
                 if (field.type === 'sensitive' && value === null) {
