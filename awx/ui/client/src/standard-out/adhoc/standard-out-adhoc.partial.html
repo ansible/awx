@@ -110,7 +110,7 @@
                         <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
-                        <a href="/api/v1/ad_hoc_commands/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                        <a href="/api/v1/ad_hoc_commands/{{ job.id }}/stdout?format=txt_download">
                             <button class="StandardOut-actionButton" aw-tool-tip="Download Output" data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>
