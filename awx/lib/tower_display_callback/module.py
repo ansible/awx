@@ -19,8 +19,6 @@ from __future__ import (absolute_import, division, print_function)
 
 # Python
 import contextlib
-import copy
-import re
 import sys
 import uuid
 
@@ -77,40 +75,10 @@ class BaseCallbackModule(CallbackBase):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
 
-    def censor_result(self, res, no_log=False):
-        if not isinstance(res, dict):
-            if no_log:
-                return "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-            return res
-        if res.get('_ansible_no_log', no_log):
-            new_res = {}
-            for k in self.CENSOR_FIELD_WHITELIST:
-                if k in res:
-                    new_res[k] = res[k]
-                if k == 'cmd' and k in res:
-                    if isinstance(res['cmd'], list):
-                        res['cmd'] = ' '.join(res['cmd'])
-                    if re.search(r'\s', res['cmd']):
-                        new_res['cmd'] = re.sub(r'^(([^\s\\]|\\\s)+).*$',
-                                                r'\1 <censored>',
-                                                res['cmd'])
-            new_res['censored'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-            res = new_res
-        if 'results' in res:
-            if isinstance(res['results'], list):
-                for i in xrange(len(res['results'])):
-                    res['results'][i] = self.censor_result(res['results'][i], res.get('_ansible_no_log', no_log))
-            elif res.get('_ansible_no_log', False):
-                res['results'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
-        return res
-
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
 
         event_data.setdefault('uuid', str(uuid.uuid4()))
-
-        if 'res' in event_data:
-            event_data['res'] = self.censor_result(copy.copy(event_data['res']))
 
         if event not in self.EVENTS_WITHOUT_TASK:
             task = event_data.pop('task', None)
@@ -258,7 +226,7 @@ class BaseCallbackModule(CallbackBase):
         if task_uuid in self.task_uuids:
             # FIXME: When this task UUID repeats, it means the play is using the
             # free strategy, so different hosts may be running different tasks
-            # within a play. 
+            # within a play.
             return
         self.task_uuids.add(task_uuid)
         self.set_task(task)
