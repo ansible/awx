@@ -1,10 +1,10 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', 'i18n',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, i18n) {
     var toDestroy = [];
     var cancelRequests = false;
 
     // download stdout tooltip text
-    $scope.standardOutTooltip = "Download Output";
+    $scope.standardOutTooltip = i18n._('Download Output');
 
     // this allows you to manage the timing of rest-call based events as
     // filters are updated.  see processPage for more info
@@ -452,7 +452,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $(".header_task").hide();
                 $(".header_play").hide();
                 $scope.tooManyEvents = true;
-                $scope.standardOutTooltip = 'The output is too large to display. Please download. <i class="fa icon-job-error"></i>';
+                $scope.standardOutTooltip = i18n._('The output is too large to display. Please download. <i class="fa icon-job-stdout-download-tooltip"></i>');
             } else {
                 $(".header_task").show();
                 $(".header_play").show();
