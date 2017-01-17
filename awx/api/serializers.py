@@ -1620,7 +1620,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     'name': role.name,
                     'description': role.description,
                     'team_id': team_role.object_id,
-                    'team_name': team_role.content_object.name
+                    'team_name': team_role.content_object.name,
+                    'team_organization_name': team_role.content_object.organization.name,
                 }
                 if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
