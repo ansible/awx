@@ -452,7 +452,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $(".header_task").hide();
                 $(".header_play").hide();
                 $scope.tooManyEvents = true;
-                $scope.standardOutTooltip = i18n._('The output is too large to display. Please download. <i class="fa icon-job-stdout-download-tooltip"></i>');
+                $scope.standardOutTooltip = i18n._('The output is too large to display. Please download.<span class="fa-stack fa-lg"><i class="fa fa-circle fa-stack-1x"></i><i class="fa fa-stack-1x icon-job-stdout-download-tooltip"></i></span>');
             } else {
                 $(".header_task").show();
                 $(".header_play").show();
