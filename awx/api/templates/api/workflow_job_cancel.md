@@ -1,7 +1,7 @@
 # Cancel Workflow Job
 
 Make a GET request to this resource to determine if the workflow job can be
-cancelled. The response will include the following field:
+canceled. The response will include the following field:
 
 * `can_cancel`: Indicates whether this workflow job is in a state that can
   be canceled (boolean, read-only)
