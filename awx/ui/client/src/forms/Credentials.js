@@ -288,7 +288,8 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: 'credentialSubForm',
-                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngChange: 'becomeMethodChange()',
                 },
                 "become_username": {
                     labelBind: 'becomeUsernameLabel',

@@ -113,7 +113,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ClearScope, GetBasePath, GetChoices, Empty, KindChange,
+    ClearScope, GetBasePath, GetChoices, Empty, KindChange, BecomeMethodChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
     ClearScope();
 
@@ -221,6 +221,10 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         KindChange({ scope: $scope, form: form, reset: true });
     };
 
+    $scope.becomeMethodChange = function() {
+        BecomeMethodChange({ scope: $scope });
+    };
+
     // Save
     $scope.formSave = function() {
         if ($scope[form.name + '_form'].$valid) {
@@ -276,13 +280,13 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'BecomeMethodChange',
     'OwnerChange', 'FormSave', '$state', 'CreateSelect2'
 ];
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, Rest, Alert, ProcessErrors, ClearScope, Prompt,
-    GetBasePath, GetChoices, KindChange, Empty, OwnerChange, FormSave, Wait,
+    GetBasePath, GetChoices, KindChange, BecomeMethodChange, Empty, OwnerChange, FormSave, Wait,
     $state, CreateSelect2, Authorization, i18n) {
 
     ClearScope();
@@ -345,11 +349,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         });
 
         setAskCheckboxes();
-        KindChange({
-            scope: $scope,
-            form: form,
-            reset: false
-        });
         OwnerChange({ scope: $scope });
         $scope.$watch("ssh_key_data", function(val) {
             if (val === "" || val === null || val === undefined) {
@@ -454,6 +453,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                         break;
                     }
                 }
+
+                KindChange({
+                    scope: $scope,
+                    form: form,
+                    reset: false
+                });
+                
                 master.kind = $scope.kind;
 
                 CreateSelect2({
@@ -517,6 +523,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     // Handle Kind change
     $scope.kindChange = function() {
         KindChange({ scope: $scope, form: form, reset: true });
+    };
+
+    $scope.becomeMethodChange = function() {
+        BecomeMethodChange({ scope: $scope });
     };
 
     $scope.formCancel = function() {
@@ -613,6 +623,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-    'KindChange', 'Empty', 'OwnerChange',
+    'KindChange', 'BecomeMethodChange', 'Empty', 'OwnerChange',
     'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n',
 ];
