@@ -177,7 +177,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     break;
                 case 'edit':
                     url = params.urls && params.urls.edit ? params.urls.edit : (params.url ? params.url : `/:${form.name}_id`);
-                    formNode = $stateExtender.buildDefinition({
+                    let formNodeState = {
                         name: params.name || `${params.parent}.edit`,
                         url: url,
                         ncyBreadcrumb: {
@@ -215,8 +215,15 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                     return Rest.get();
                                 }
                             ]
-                        }
-                    });
+                        },
+                    };
+                    if (params.data && params.data.activityStreamTarget) {
+                        formNodeState.data = {};
+                        formNodeState.data.activityStreamId = params.data.activityStreamTarget + '_id';
+
+                    }
+                    formNode = $stateExtender.buildDefinition(formNodeState);
+
                     if (params.resolve && params.resolve.edit) {
                         formNode.resolve = _.merge(formNode.resolve, params.resolve.edit);
                     }
