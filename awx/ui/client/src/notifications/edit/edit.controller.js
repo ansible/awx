@@ -94,7 +94,7 @@ export default ['Rest', 'Wait',
                                     if (form.fields[fld].name === 'headers') {
                                         $scope[fld] = JSON.stringify($scope[fld], null, 2);
                                     } else {
-                                        $scope[fld] = $scope[fld].toString().replace(',', '\n');
+                                        $scope[fld] = $scope[fld].toString().replace(/,/g, '\n');
                                     }
                                 }
                             }
