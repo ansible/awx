@@ -3,6 +3,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var toDestroy = [];
     var cancelRequests = false;
 
+    // download stdout tooltip text
+    $scope.standardOutTooltip = "Download Output";
+
     // this allows you to manage the timing of rest-call based events as
     // filters are updated.  see processPage for more info
     var currentContext = 1;
@@ -449,6 +452,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $(".header_task").hide();
                 $(".header_play").hide();
                 $scope.tooManyEvents = true;
+                $scope.standardOutTooltip = 'The output is too large to display. Please download. <i class="fa icon-job-error"></i>';
             } else {
                 $(".header_task").show();
                 $(".header_play").show();
