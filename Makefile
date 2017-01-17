@@ -559,9 +559,12 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
-# generate l10n .json .mo
-languages: $(UI_DEPS_FLAG_FILE) check-po
+# generate l10n .json
+ui-languages: $(UI_DEPS_FLAG_FILE) check-po
 	$(NPM_BIN) --prefix awx/ui run languages
+
+# generate l10n .mo
+api-languages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
@@ -592,8 +595,7 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-# todo: include languages target when .po deliverables are added to source control
-$(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): ui-languages $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 

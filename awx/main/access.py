@@ -985,8 +985,6 @@ class ProjectUpdateAccess(BaseAccess):
 
     @check_superuser
     def can_cancel(self, obj):
-        if not obj.can_cancel:
-            return False
         if self.user == obj.created_by:
             return True
         # Project updates cascade delete with project, admin role descends from org admin
@@ -1395,7 +1393,8 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
             qs = self.model.objects.filter(
                 workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
                     self.user, 'read_role'))
-        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
+        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes',
+                                 'unified_job_template')
         return qs
 
     def can_use_prompted_resources(self, data):

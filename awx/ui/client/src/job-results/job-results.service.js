@@ -171,22 +171,8 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                                 });
                             }
                         });
-                    Rest.destroy()
-                        .success(function() {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                        })
-                        .error(function(obj, status) {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                            ProcessErrors(null, obj, status, null, {
-                                hdr: 'Error!',
-                                msg: `Could not cancel job.
-                                    Returned status: ${status}`
-                            });
-                        });
                 },
-                actionText: 'CANCEL'
+                actionText: 'PROCEED'
             });
         },
         relaunchJob: function(scope) {

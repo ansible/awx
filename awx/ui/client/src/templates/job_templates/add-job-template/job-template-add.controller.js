@@ -294,7 +294,7 @@
         ${data.related.callback}
     </strong>
 </p>
-<p class="break">The host configuration key is:
+<p>The host configuration key is:
     <strong>
         ${$filter('sanitize')(data.host_config_key)}
     </strong>

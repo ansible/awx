@@ -15,9 +15,21 @@ export default ['$scope', '$filter',
             var singleJobStatus = true;
             var firstJobStatus;
             var recentJobs = $scope.jobs;
+            var detailsBaseUrl;
+  
             if(!recentJobs){
                 return;
             }
+
+            // unless we explicitly define a value for the template-type attribute when invoking the
+            // directive, assume the status icons are for a regular (non-workflow) job when building
+            // the details url path
+            if (typeof $scope.templateType !== 'undefined' && $scope.templateType === 'workflow_job_template') {
+                detailsBaseUrl = '/#/workflows/';
+            } else {
+                detailsBaseUrl = '/#/jobs/';
+            }
+
             var sparkData =
             _.sortBy(recentJobs.map(function(job) {
 
@@ -38,6 +50,7 @@ export default ['$scope', '$filter',
                 data.sortDate = job.finished || "running" + data.jobId;
                 data.finished = $filter('longDate')(job.finished) || job.status+"";
                 data.status_tip = "JOB ID: " + data.jobId + "<br>STATUS: " + data.smartStatus + "<br>FINISHED: " + data.finished;
+                data.detailsUrl = detailsBaseUrl + data.jobId;
 
                 // If we've already determined that there are both failed and successful jobs OR if the current job in the loop is
                 // pending/waiting/running then we don't worry about checking for a single job status

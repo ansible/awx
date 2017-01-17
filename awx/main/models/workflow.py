@@ -134,7 +134,7 @@ class WorkflowNodeBase(CreatedModifiedModel):
         scan_errors = ujt_obj._extra_job_type_errors(accepted_fields)
         ignored_dict.update(scan_errors)
         for fd in ['inventory', 'credential']:
-            if getattr(ujt_obj, fd) is None and not (ask_for_vars_dict.get(fd, False) and fd in prompts_dict):
+            if getattr(ujt_obj, "{}_id".format(fd)) is None and not (ask_for_vars_dict.get(fd, False) and fd in prompts_dict):
                 missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
 
         data = {}
@@ -421,18 +421,22 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     def can_start_without_user_input(self):
         '''Return whether WFJT can be launched without survey passwords.'''
-        return not bool(self.variables_needed_to_start)
+        return not bool(
+            self.variables_needed_to_start or
+            self.node_templates_missing() or
+            self.node_prompts_rejected())
 
-    def get_warnings(self):
-        warning_data = {}
-        for node in self.workflow_job_template_nodes.all():
-            if node.unified_job_template is None:
-                warning_data[node.pk] = 'Node is missing a linked unified_job_template'
-                continue
+    def node_templates_missing(self):
+        return [node.pk for node in self.workflow_job_template_nodes.filter(
+                unified_job_template__isnull=True).all()]
+
+    def node_prompts_rejected(self):
+        node_list = []
+        for node in self.workflow_job_template_nodes.select_related('unified_job_template').all():
             node_prompts_warnings = node.get_prompts_warnings()
             if node_prompts_warnings:
-                warning_data[node.pk] = node_prompts_warnings
-        return warning_data
+                node_list.append(node.pk)
+        return node_list
 
     def user_copy(self, user):
         new_wfjt = self.copy_unified_jt()

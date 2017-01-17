@@ -2370,7 +2370,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if view and view.request:
             request_method = view.request.method
         if request_method in ['PATCH']:
-            obj = view.get_object()
+            obj = self.instance
             char_prompts = copy.copy(obj.char_prompts)
             char_prompts.update(self.extract_char_prompts(data))
         else:
@@ -2709,17 +2709,14 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
-    warnings = serializers.SerializerMethodField()
     workflow_job_template_data = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('can_start_without_user_input', 'extra_vars', 'warnings',
+        fields = ('can_start_without_user_input', 'extra_vars',
                   'survey_enabled', 'variables_needed_to_start',
+                  'node_templates_missing', 'node_prompts_rejected',
                   'workflow_job_template_data')
-
-    def get_warnings(self, obj):
-        return obj.get_warnings()
 
     def get_survey_enabled(self, obj):
         if obj:

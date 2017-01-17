@@ -1,5 +1,11 @@
 export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment',
 function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment) {
+    var toDestroy = [];
+    var cancelRequests = false;
+
+    // this allows you to manage the timing of rest-call based events as
+    // filters are updated.  see processPage for more info
+    var currentContext = 1;
 
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
@@ -66,14 +72,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // update label in left pane and tooltip in right pane when the job_status
     // changes
-    $scope.$watch('job_status', function(status) {
+    toDestroy.push($scope.$watch('job_status', function(status) {
         if (status) {
             $scope.status_label = $scope.jobOptions.status.choices
                 .filter(val => val[0] === status)
                 .map(val => val[1])[0];
             $scope.status_tooltip = "Job " + $scope.status_label;
         }
-    });
+    }));
 
     // update the job_status value.  Use the cached rootScope value if there
     // is one.  This is a workaround when the rest call for the jobData is
@@ -185,7 +191,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
-    var processEvent = function(event) {
+    var processEvent = function(event, context) {
+        // only care about filter context checking when the event comes
+        // as a rest call
+        if (context && context !== currentContext) {
+            return;
+        }
         // put the event in the queue
         var mungedEvent = eventQueue.populate(event);
 
@@ -278,6 +289,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
                         }
+
+                        classList = null;
+                        putIn = null;
                     } else {
                         // this is a header or recap line, so just
                         // append to the bottom
@@ -357,99 +371,113 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         getSkeleton(jobData.related.job_events + "?order_by=id&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
     });
 
+    var getEvents;
+
+    var processPage = function(events, context) {
+        // currentContext is the context of the filter when this request
+        // to processPage was made
+        //
+        // currentContext is the context of the filter currently
+        //
+        // if they are not the same, make sure to stop process events/
+        // making rest calls for next pages/etc. (you can see context is
+        // also passed into getEvents and processEvent and similar checks
+        // exist in these functions)
+        //
+        // also, if the page doesn't contain results (i.e.: the response
+        // returns an error), don't process the page
+        if (context !== currentContext || events === undefined ||
+            events.results === undefined) {
+            return;
+        }
+
+        events.results.forEach(event => {
+            // get the name in the same format as the data
+            // coming over the websocket
+            event.event_name = event.event;
+            delete event.event;
+
+            processEvent(event, context);
+        });
+        if (events.next && !cancelRequests) {
+            getEvents(events.next, context);
+        } else {
+            // put those paused events into the pane
+            $scope.gotPreviouslyRanEvents.resolve("");
+        }
+    };
+
     // grab non-header recap lines
-    var getEvents = function(url) {
+    getEvents = function(url, context) {
+        if (context !== currentContext) {
+            return;
+        }
+
         jobResultsService.getEvents(url)
             .then(events => {
-                events.results.forEach(event => {
-                    // get the name in the same format as the data
-                    // coming over the websocket
-                    event.event_name = event.event;
-                    delete event.event;
-                    processEvent(event);
-                });
-                if (events.next) {
-                    getEvents(events.next);
-                } else {
-                    // put those paused events into the pane
-                    $scope.gotPreviouslyRanEvents.resolve("");
-                }
+                processPage(events, context);
             });
     };
 
     // grab non-header recap lines
-    $scope.$watch('job_event_dataset', function(val) {
+    toDestroy.push($scope.$watch('job_event_dataset', function(val) {
+        eventQueue.initialize();
+
+        Object.keys($scope.events)
+            .forEach(v => {
+                // dont destroy scope events for skeleton lines
+                let name = $scope.events[v].event.name;
+
+                if (!(name === "playbook_on_play_start" ||
+                    name === "playbook_on_task_start" ||
+                    name === "playbook_on_stats")) {
+                    $scope.events[v].$destroy();
+                    $scope.events[v] = null;
+                    delete $scope.events[v];
+                }
+            });
+
         // pause websocket events from coming in to the pane
         $scope.gotPreviouslyRanEvents = $q.defer();
+        currentContext += 1;
+
+        let context = currentContext;
 
         $( ".JobResultsStdOut-aLineOfStdOut.not_skeleton" ).remove();
         $scope.hasSkeleton.promise.then(() => {
-            val.results.forEach(event => {
-                // get the name in the same format as the data
-                // coming over the websocket
-                event.event_name = event.event;
-                delete event.event;
-                processEvent(event);
-            });
-            if (val.next) {
-                getEvents(val.next);
+            if (val.count > parseInt(val.maxEvents)) {
+                $(".header_task").hide();
+                $(".header_play").hide();
+                $scope.tooManyEvents = true;
             } else {
-                // put those paused events into the pane
-                $scope.gotPreviouslyRanEvents.resolve("");
+                $(".header_task").show();
+                $(".header_play").show();
+                $scope.tooManyEvents = false;
+                processPage(val, context);
             }
         });
-    });
+    }));
 
 
 
     // Processing of job_events messages from the websocket
-    $scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+    toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
         $q.all([$scope.gotPreviouslyRanEvents.promise,
             $scope.hasSkeleton.promise]).then(() => {
-            var url = Dataset
-                .config.url.split("?")[0] +
-                QuerySet.encodeQueryset($state.params.job_event_search);
-            var noFilter = (url.split("&")
-                .filter(v => v.indexOf("page=") !== 0 &&
-                    v.indexOf("/api/v1") !== 0 &&
-                    v.indexOf("order_by=id") !== 0 &&
-                    v.indexOf("not__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats") !== 0).length === 0);
-
-            if(data.event_name === "playbook_on_start" ||
-                data.event_name === "playbook_on_play_start" ||
-                data.event_name === "playbook_on_task_start" ||
-                data.event_name === "playbook_on_stats" ||
-                noFilter) {
-                // for header and recap lines, as well as if no filters
-                // were added by the user, just put the line in the
-                // standard out pane (and increment play and task
-                // count)
-                if (data.event_name === "playbook_on_play_start") {
-                    $scope.playCount++;
-                } else if (data.event_name === "playbook_on_task_start") {
-                    $scope.taskCount++;
-                }
-                processEvent(data);
-            } else {
-                // to make sure host event/verbose lines go through a
-                // user defined filter, appent the id to the url, and
-                // make a request to the job_events endpoint with the
-                // id of the incoming event appended.  If the event,
-                // is returned, put the line in the standard out pane
-                Rest.setUrl(`${url}&id=${data.id}`);
-                Rest.get()
-                    .success(function(isHere) {
-                        if (isHere.count) {
-                            processEvent(data);
-                        }
-                    });
+            // put the line in the
+            // standard out pane (and increment play and task
+            // count if applicable)
+            if (data.event_name === "playbook_on_play_start") {
+                $scope.playCount++;
+            } else if (data.event_name === "playbook_on_task_start") {
+                $scope.taskCount++;
             }
-
+            processEvent(data);
         });
-    });
+    }));
 
     // Processing of job-status messages from the websocket
-    $scope.$on(`ws-jobs`, function(e, data) {
+    toDestroy.push($scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) ===
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
@@ -477,5 +505,19 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             // for this job.  cache the socket status on root scope
             $rootScope['lastSocketStatus' + data.unified_job_id] = data.status;
         }
+    }));
+
+    $scope.$on('$destroy', function(){
+        $( ".JobResultsStdOut-aLineOfStdOut" ).remove();
+        cancelRequests = true;
+        eventQueue.initialize();
+        Object.keys($scope.events)
+            .forEach(v => {
+                $scope.events[v].$destroy();
+                $scope.events[v] = null;
+            });
+        $scope.events = {};
+        clearInterval(elapsedInterval);
+        toDestroy.forEach(closureFunc => closureFunc());
     });
 }];
