@@ -61,7 +61,7 @@ Workflow jobs cannot be copied directly, instead a workflow job is implicitly co
   * Workflow job read and delete permissions follow from its associated workflow job template.
   * Workflow job relaunch permission consists of the union of execute permission to its associated workflow job template, and the permission to re-create all the nodes inside of the workflow job.
   * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template for creation and editing.
-  * Workflow job template nodes can be deleted with permission to their workflow job template (even lacking permission to its job template).
+  * Workflow job template nodes can be deleted with admin permission to their workflow job template (even lacking permission to the node's job template).
   * Workflow job nodes are viewable if its workflow job is viewable.
   * No CRUD actions are possible on workflow job nodes by any user, and they may only be deleted by deleting their workflow job.
   * Workflow jobs can be deleted by superusers and org admins of the organization of its associated workflow job template, and no one else.
