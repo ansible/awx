@@ -115,6 +115,17 @@ export default ['$rootScope', 'Rest', 'Wait', 'NotificationsFormObject',
             });
         };
 
+        $scope.emailOptionsChange = function () {
+            if ($scope.email_options === 'use_ssl') {
+                $scope.use_ssl = true;
+                $scope.use_tls = false;
+            }
+            else if ($scope.email_options === 'use_tls') {
+                $scope.use_ssl = false;
+                $scope.use_tls = true;
+            }
+        };
+
         // Save
         $scope.formSave = function() {
             var params,
@@ -143,7 +154,7 @@ export default ['$rootScope', 'Rest', 'Wait', 'NotificationsFormObject',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (field.name === "username" && $scope.notification_type.value === "email" && value === null) {
+                if (i === "username" && $scope.notification_type.value === "email" && value === null) {
                     $scope[i] = "";
                 }
                 if (field.type === 'sensitive' && value === null) {
@@ -156,13 +167,13 @@ export default ['$rootScope', 'Rest', 'Wait', 'NotificationsFormObject',
                 .filter(i => (form.fields[i].ngShow && form.fields[i].ngShow.indexOf(v) > -1))
                 .map(i => [i, processValue($scope[i], i, form.fields[i])]));
 
-            delete params.notification_configuration.checkbox_group;
+                delete params.notification_configuration.email_options;
 
-            for (var j = 0; j < form.fields.checkbox_group.fields.length; j++) {
-                if (form.fields.checkbox_group.fields[j].ngShow && form.fields.checkbox_group.fields[j].ngShow.indexOf(v) > -1) {
-                    params.notification_configuration[form.fields.checkbox_group.fields[j].name] = Boolean($scope[form.fields.checkbox_group.fields[j].name]);
+                for(var j = 0; j < form.fields.email_options.options.length; j++) {
+                    if(form.fields.email_options.options[j].ngShow && form.fields.email_options.options[j].ngShow.indexOf(v) > -1) {
+                        params.notification_configuration[form.fields.email_options.options[j].value] = Boolean($scope[form.fields.email_options.options[j].value]);
+                    }
                 }
-            }
 
             Wait('start');
             Rest.setUrl(url);
