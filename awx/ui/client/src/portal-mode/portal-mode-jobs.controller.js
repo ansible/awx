@@ -9,26 +9,24 @@ export function PortalModeJobsController($scope, $rootScope, $state, $stateParam
     var list = PortalJobsList;
 
     $scope.$on('ws-jobs', function() {
-        // @issue: OLD SEARCH
-        //$scope.search('job');
-    });
-    if ($rootScope.removeJobStatusChange) {
-        $rootScope.removeJobStatusChange();
-    }
-    $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-portal', function() {
         $state.go('.', null, { reload: true });
     });
 
     init();
 
-    function init() {
+    function init(data) {
+        let d = (!data) ? Dataset : data;
         // search init
         $scope.list = list;
-        $scope[`${list.iterator}_dataset`] = Dataset.data;
+        $scope[`${list.iterator}_dataset`] = d.data;
         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
         $scope.iterator = list.iterator;
     }
+
+    $scope.$on('filterPortalJobs', function(e, data){
+        init(data);
+    });
 
     $scope.refresh = function() {
         $state.go('.', null, {reload: true});
