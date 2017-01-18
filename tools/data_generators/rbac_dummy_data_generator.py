@@ -608,8 +608,6 @@ try:
             job_template_idx = 0
             for n in spread(n_jobs, n_job_templates):
                 job_template = job_templates[job_template_idx]
-                if not jt._is_new:
-                    continue
                 for i in range(n):
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
@@ -618,7 +616,7 @@ try:
                         job_stat = 'failed'
                     elif len(jobs) % 11 == 0:
                         job_stat = 'canceled'
-                    job, _ = Job.objects.create(
+                    job, _ = Job.objects.get_or_create(
                         job_template=job_template,
                         status=job_stat, name=job_template.name,
                         project=job_template.project, inventory=job_template.inventory,
@@ -626,7 +624,10 @@ try:
                         cloud_credential=job_template.cloud_credential,
                         network_credential=job_template.network_credential
                     )
+                    job._is_new = _
                     jobs.append(job)
+                    if not job._is_new:
+                        continue
                     if i == n:
                         job_template.last_job = job
                         if job_template.pk % 5 == 0:
