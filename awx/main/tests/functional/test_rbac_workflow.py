@@ -86,10 +86,14 @@ class TestWorkflowJobTemplateNodeAccess:
 @pytest.mark.django_db
 class TestWorkflowJobAccess:
 
-    def test_wfjt_admin_delete(self, wfjt, workflow_job, rando):
-        wfjt.admin_role.members.add(rando)
-        access = WorkflowJobAccess(rando)
+    def test_org_admin_can_delete_workflow_job(self, workflow_job, org_admin):
+        access = WorkflowJobAccess(org_admin)
         assert access.can_delete(workflow_job)
+
+    def test_wfjt_admin_can_delete_workflow_job(self, workflow_job, rando):
+        workflow_job.workflow_job_template.admin_role.members.add(rando)
+        access = WorkflowJobAccess(rando)
+        assert not access.can_delete(workflow_job)
 
     def test_cancel_your_own_job(self, wfjt, workflow_job, rando):
         wfjt.execute_role.members.add(rando)

@@ -1625,11 +1625,11 @@ class WorkflowJobAccess(BaseAccess):
     def can_change(self, obj, data):
         return False
 
+    @check_superuser
     def can_delete(self, obj):
-        if obj.workflow_job_template is None:
-            # only superusers can delete orphaned workflow jobs
-            return self.user.is_superuser
-        return self.user in obj.workflow_job_template.admin_role
+        return (obj.workflow_job_template and
+                obj.workflow_job_template.organization and
+                self.user in obj.workflow_job_template.organization.admin_role)
 
     def get_method_capability(self, method, obj, parent_obj):
         if method == 'start':
