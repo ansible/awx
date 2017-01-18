@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import mock # noqa
 import pytest
 
@@ -20,6 +22,84 @@ def team_project_list(organization_factory):
                                           'team1.member_role:pshared.admin_role',
                                           'team2.member_role:pshared.admin_role'])
     return objects
+
+
+@pytest.mark.django_db
+def test_user_project_paged_list(get, organization_factory):
+    'Test project listing that spans multiple pages'
+
+    # 3 total projects, 1 per page, 3 pages
+    objects = organization_factory(
+        'org1',
+        projects=['project-%s' % i for i in range(3)],
+        users=['alice'],
+        roles=['project-%s.admin_role:alice' % i for i in range(3)],
+    )
+
+    # first page has first project and no previous page
+    pk = objects.users.alice.pk
+    url = reverse('api:user_projects_list', args=(pk,))
+    results = get(url, objects.users.alice, QUERY_STRING='page_size=1').data
+    assert results['count'] == 3
+    assert len(results['results']) == 1
+    assert results['previous'] is None
+    assert results['next'] == (
+        '/api/v1/users/%s/projects/?page=2&page_size=1' % pk
+    )
+
+    # second page has one more, a previous and next page
+    results = get(url, objects.users.alice,
+                  QUERY_STRING='page=2&page_size=1').data
+    assert len(results['results']) == 1
+    assert results['previous'] == (
+        '/api/v1/users/%s/projects/?page=1&page_size=1' % pk
+    )
+    assert results['next'] == (
+        '/api/v1/users/%s/projects/?page=3&page_size=1' % pk
+    )
+
+    # third page has last project and a previous page
+    results = get(url, objects.users.alice,
+                  QUERY_STRING='page=3&page_size=1').data
+    assert len(results['results']) == 1
+    assert results['previous'] == (
+        '/api/v1/users/%s/projects/?page=2&page_size=1' % pk
+    )
+    assert results['next'] is None
+
+
+@pytest.mark.django_db
+def test_user_project_paged_list_with_unicode(get, organization_factory):
+    'Test project listing that contains unicode chars in the next/prev links'
+
+    # Create 2 projects that contain a "cloud" unicode character, make sure we
+    # can search it and properly generate next/previous page links
+    objects = organization_factory(
+        'org1',
+        projects=['project-☁-1','project-☁-2'],
+        users=['alice'],
+        roles=['project-☁-1.admin_role:alice','project-☁-2.admin_role:alice'],
+    )
+    pk = objects.users.alice.pk
+    url = reverse('api:user_projects_list', args=(pk,))
+
+    # first on first page, next page link contains unicode char
+    results = get(url, objects.users.alice,
+                  QUERY_STRING='page_size=1&search=%E2%98%81').data
+    assert results['count'] == 2
+    assert len(results['results']) == 1
+    assert results['next'] == (
+        '/api/v1/users/%s/projects/?page=2&page_size=1&search=%%E2%%98%%81' % pk  # noqa
+    )
+
+    # second project on second page, previous page link contains unicode char
+    results = get(url, objects.users.alice,
+                  QUERY_STRING='page=2&page_size=1&search=%E2%98%81').data
+    assert results['count'] == 2
+    assert len(results['results']) == 1
+    assert results['previous'] == (
+        '/api/v1/users/%s/projects/?page=1&page_size=1&search=%%E2%%98%%81' % pk  # noqa
+    )
 
 
 @pytest.mark.django_db
