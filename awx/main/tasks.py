@@ -1868,7 +1868,7 @@ class RunSystemJob(BaseTask):
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
                 args.extend(['--days', str(json_vars.get('days', 60))])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands'])
+                args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands', '--workflow-jobs'])
             if system_job.job_type == 'cleanup_facts':
                 if 'older_than' in json_vars:
                     args.extend(['--older_than', str(json_vars['older_than'])])
