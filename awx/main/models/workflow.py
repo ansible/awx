@@ -429,7 +429,7 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     def node_prompts_rejected(self):
         node_list = []
-        for node in self.workflow_job_template_nodes.select_related('unified_job_template').all():
+        for node in self.workflow_job_template_nodes.prefetch_related('unified_job_template').all():
             node_prompts_warnings = node.get_prompts_warnings()
             if node_prompts_warnings:
                 node_list.append(node.pk)
