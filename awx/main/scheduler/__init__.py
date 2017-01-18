@@ -121,7 +121,10 @@ class TaskManager():
                 job = spawn_node.unified_job_template.create_unified_job(**kv)
                 spawn_node.job = job
                 spawn_node.save()
-                can_start = job.signal_start(**kv)
+                if job._resources_sufficient_for_launch():
+                    can_start = job.signal_start(**kv)
+                else:
+                    can_start = False
                 if not can_start:
                     job.status = 'failed'
                     job.job_explanation = _("Job spawned from workflow could not start because it "
