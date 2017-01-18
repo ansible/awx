@@ -184,6 +184,12 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                             }
                                         }
                                     });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.job_templates.forEach(function(row, i) {
+                                            $scope.job_templates[i].checked = 0;
+                                        });
+                                    });
                                 }
                             ]
                         },
@@ -258,6 +264,12 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                             }
                                         }
                                     });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                            $scope.workflow_inventory_sources[i].checked = 0;
+                                        });
+                                    });
                                 }
                             ]
                         },
@@ -329,6 +341,12 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                                 });
                                             }
                                         }
+                                    });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.projects.forEach(function(row, i) {
+                                            $scope.projects[i].checked = 0;
+                                        });
                                     });
                                 }
                             ]

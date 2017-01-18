@@ -49,14 +49,13 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
             $scope.workflowMakerFormConfig.nodeMode = "idle";
             $scope.edgeFlags.showTypeOptions = false;
             delete $scope.selectedTemplate;
-            delete $scope.workflow_job_templates;
-            delete $scope.workflow_projects;
-            delete $scope.workflow_inventory_sources;
             delete $scope.placeholderNode;
             delete $scope.betweenTwoNodes;
             $scope.nodeBeingEdited = null;
             $scope.edgeFlags.typeRestriction = null;
             $scope.workflowMakerFormConfig.activeTab = "jobs";
+
+            $scope.$broadcast('clearWorkflowLists');
         }
 
         function recursiveNodeUpdates(params, completionCallback) {

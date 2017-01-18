@@ -160,13 +160,13 @@ export default [function(){
                 allNodeIds.push(node.id);
 
                 _.forEach(node.success_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
                 _.forEach(node.failure_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
                 _.forEach(node.always_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
             });
 
@@ -223,12 +223,14 @@ export default [function(){
                 treeNode.originalParentId = params.parentId;
             }
 
-            if(params.nodesObj[params.nodeId].summary_fields.job) {
-                treeNode.job = _.clone(params.nodesObj[params.nodeId].summary_fields.job);
-            }
+            if(params.nodesObj[params.nodeId].summary_fields) {
+                if(params.nodesObj[params.nodeId].summary_fields.job) {
+                    treeNode.job = _.clone(params.nodesObj[params.nodeId].summary_fields.job);
+                }
 
-            if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
-                treeNode.unifiedJobTemplate = _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template);
+                if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
+                    treeNode.unifiedJobTemplate = _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template);
+                }
             }
 
             // Loop across the success nodes and add them recursively
