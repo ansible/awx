@@ -561,6 +561,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         "Override in child classes, None value indicates this is not configurable"
         return None
 
+    def _resources_sufficient_for_launch(self):
+        return True
+
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
