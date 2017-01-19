@@ -3308,6 +3308,7 @@ class JobStart(GenericAPIView):
     model = Job
     serializer_class = EmptySerializer
     is_job_start = True
+    deprecated = True
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
