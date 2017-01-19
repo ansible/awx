@@ -86,7 +86,8 @@ export default
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
                     },
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    watchBasePath: "credentialBasePath"
                 },
                 source_regions: {
                     label: 'Regions',

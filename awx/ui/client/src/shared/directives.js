@@ -469,34 +469,59 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 autopopulateLookup,
                 modelKey = attrs.ngModel,
                 modelName = attrs.source,
-                watcher = attrs.awRequiredWhen || undefined;
+                watcher = attrs.awRequiredWhen || undefined,
+                watchBasePath;
 
-            if (attrs.autopopulateLookup !== undefined) {
-               autopopulateLookup = attrs.autopopulateLookup;
+            if (attrs.autopopulatelookup !== undefined) {
+               autopopulateLookup = JSON.parse(attrs.autopopulatelookup);
             } else {
                autopopulateLookup = true;
+            }
+
+
+            // The following block of code is for instances where the
+            // lookup field is reused by varying sub-forms. Example: The groups
+            // form will change it's credential lookup based on the
+            // source type. The basepath the lookup should utilize is dynamic
+            // in this case. You'd configure the "watchBasePath" key on the
+            // field's configuration in the form configuration field.
+            if (attrs.watchbasepath !== undefined) {
+                watchBasePath = attrs.watchbasepath;
+                scope.$watch(watchBasePath, (newValue) => {
+                    if(newValue !== undefined && fieldIsAutopopulatable()){
+                        _doAutoPopulate();
+                    }
+                });
             }
 
             function _doAutoPopulate() {
                 let query = '';
 
-                basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
+                if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
+                    basePath = scope[attrs.watchbasepath];
+                }
+                else {
+                    basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
+                    switch(modelName) {
+                        case 'credential':
+                            query = '?kind=ssh';
+                            break;
+                        case 'network_credential':
+                            query = '?kind=net';
+                            break;
+                    }
 
-                switch(modelName) {
-                    case 'credential':
-                        query = '?kind=ssh';
-                        break;
-                    case 'network_credential':
-                        query = '?kind=net';
-                        break;
                 }
 
                 Rest.setUrl(`${basePath}` + query);
                 Rest.get()
                 .success(function (data) {
                     if (data.count === 1) {
-                        scope[modelKey] = data.results[0].name;
-                        scope[modelName] = data.results[0].id;
+                        if(data.results[0].summary_fields.user_capabilities.edit === true){
+                            scope[modelKey] = data.results[0].name;
+                            scope[modelName] = data.results[0].id;
+                        }
+
                     }
                 });
             }
@@ -518,9 +543,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 }
                 if (scope.mode === "add") {
                     if(watcher){
-                        scope.$watch(watcher, (newValue, oldValue, scope2) => {
-                            console.log('success', watcher, newValue , oldValue, scope2);
-
+                        scope.$watch(watcher, () => {
                             if(Boolean(scope.$eval(watcher)) === true){
 
                                 // if we get here then the field is required

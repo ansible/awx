@@ -76,6 +76,7 @@ export default
                     list: 'InventoryList',
                     sourceModel: 'inventory',
                     sourceField: 'name',
+                    autopopulateLookup: false,
                     awRequiredWhen: {
                         reqExpression: '!ask_inventory_on_launch',
                         alwaysShowAsterisk: true
@@ -138,6 +139,7 @@ export default
                     type: 'lookup',
                     list: 'CredentialList',
                     basePath: 'credentials',
+                    autopopulateLookup: false,
                     search: {
                         kind: 'ssh'
                     },
