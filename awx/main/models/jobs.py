@@ -4,7 +4,6 @@
 # Python
 import datetime
 import hmac
-import json
 import logging
 import time
 from urlparse import urljoin
@@ -588,23 +587,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
                          extra_vars=self.extra_vars,
                          hosts=all_hosts))
         return data
-
-    def handle_extra_data(self, extra_data):
-        extra_vars = {}
-        if isinstance(extra_data, dict):
-            extra_vars = extra_data
-        elif extra_data is None:
-            return
-        else:
-            if extra_data == "":
-                return
-            try:
-                extra_vars = json.loads(extra_data)
-            except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
-        evars = self.extra_vars_dict
-        evars.update(extra_vars)
-        self.update_fields(extra_vars=json.dumps(evars))
 
     def _resources_sufficient_for_launch(self):
         if self.job_type == PERM_INVENTORY_SCAN:
@@ -1355,23 +1337,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
-
-    def handle_extra_data(self, extra_data):
-        extra_vars = {}
-        if isinstance(extra_data, dict):
-            extra_vars = extra_data
-        elif extra_data is None:
-            return
-        else:
-            if extra_data == "":
-                return
-            try:
-                extra_vars = json.loads(extra_data)
-            except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
-        evars = self.extra_vars_dict
-        evars.update(extra_vars)
-        self.update_fields(extra_vars=json.dumps(evars))
 
     @property
     def task_impact(self):
