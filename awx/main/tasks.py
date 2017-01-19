@@ -1070,9 +1070,10 @@ class RunJob(BaseTask):
 
             def job_event_callback(event_data):
                 event_data.setdefault('job_id', instance.id)
-                cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
-                if cache_event is not None:
-                    event_data.update(cache_event)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
                 dispatcher.dispatch(event_data)
         else:
             def job_event_callback(event_data):
