@@ -3,8 +3,6 @@
 import mock # noqa
 import pytest
 
-from django.conf import settings
-from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from awx.main.models import Project
 
@@ -102,37 +100,6 @@ def test_user_project_paged_list_with_unicode(get, organization_factory):
     assert results['previous'] == (
         '/api/v1/users/%s/projects/?page=1&page_size=1&search=%%E2%%98%%81' % pk  # noqa
     )
-
-
-@pytest.mark.django_db
-def test_user_project_max_page_size(get, organization_factory):
-    'Ensure that maximum page size is respected'
-
-    rest_settings = settings.REST_FRAMEWORK.copy()
-    rest_settings['PAGE_SIZE'] = 1
-    with override_settings(MAX_PAGE_SIZE=2, REST_FRAMEWORK=rest_settings):
-        # 3 total projects, 1 per page, 3 pages
-        objects = organization_factory(
-            'org1',
-            projects=['project-%s' % i for i in range(3)],
-            users=['alice'],
-            roles=['project-%s.admin_role:alice' % i for i in range(3)],
-        )
-
-        # first page only shows one project
-        pk = objects.users.alice.pk
-        url = reverse('api:user_projects_list', args=(pk,))
-        results = get(url, objects.users.alice).data
-        assert len(results['results']) == 1
-        assert results['next'] is not None
-
-        # page size of 2 is allowed
-        results = get(url, objects.users.alice, QUERY_STRING='page_size=2').data
-        assert len(results['results']) == 2
-
-        # page size of 3 is *not* allowed (max allowed is 2 per page)
-        results = get(url, objects.users.alice, QUERY_STRING='page_size=3').data
-        assert len(results['results']) == 2
 
 
 @pytest.mark.django_db
