@@ -377,7 +377,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
             applyDefaults: function (form, scope) {
                 // Note: This is a hack. Ideally, mode should be set in each <resource>-<mode>.controller.js
-                // The mode is needed by the awlookup directive to auto-populate form fields when there is a 
+                // The mode is needed by the awlookup directive to auto-populate form fields when there is a
                 // single related resource.
                 scope.mode = this.mode;
 
@@ -1368,6 +1368,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `data-basePath="${field.basePath}"`;
                         html += `data-source="${field.sourceModel}"`;
                         html += `data-query="?${field.sourceField}__iexact=:value"`;
+                        html += (field.autopopulateLookup) ? `autopopulateLookup=${field.autopopulateLookup}` : ""; 
                         html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
                         html += " awlookup >\n";
                         html += "</div>\n";

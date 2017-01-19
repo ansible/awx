@@ -48,6 +48,7 @@ export default
                     ngShow: 'canShareCredential',
                     label: i18n._('Organization'),
                     type: 'lookup',
+                    autopopulateLookup: false,
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',

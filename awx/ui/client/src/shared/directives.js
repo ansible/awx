@@ -465,19 +465,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
         link: function(scope, elm, attrs, fieldCtrl) {
             let query,
                 basePath,
-                defer = $q.defer();
+                defer = $q.defer(),
+                autopopulateLookup,
+                modelKey = attrs.ngModel,
+                modelName = attrs.source,
+                watcher = attrs.awRequiredWhen || undefined;
 
-            // Auto-populating related fields when there is only 1 relatable entry isn't mission critical.
-            // Therefore, don't display an error message if the get request fails. 
+            if (attrs.autopopulateLookup !== undefined) {
+               autopopulateLookup = attrs.autopopulateLookup;
+            } else {
+               autopopulateLookup = true;
+            }
+
             function _doAutoPopulate() {
-                let modelKey = attrs.ngModel;
-                let modelName = attrs.source;
                 let query = '';
 
-                // TODO: We can't fully rely on basePath. For example, the "Add Credentials" form sets the basePath
-                // to something like admin_of_organizations. Instead, we should probably just use the model name.
-                // At the time, we need to account for admin_of_organizations to determine if we auto-populate org
-                // on the cred add page.
                 basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
 
                 switch(modelName) {
@@ -492,20 +494,53 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 Rest.setUrl(`${basePath}` + query);
                 Rest.get()
                 .success(function (data) {
-                    // TODO: Obviously, add back in the data count
-                    /*
-                    if (data.count == 1) {
+                    if (data.count === 1) {
+                        scope[modelKey] = data.results[0].name;
+                        scope[modelName] = data.results[0].id;
                     }
-                    */
-                    scope[modelKey] = data.results[0].name;
-                    scope[modelName] = data.results[0].id;
                 });
             }
 
-            // TODO: Add more logic checks to see if this field needs to be auto-populated. Checks similar to the below linked code.
-            // https://github.com/ansible/ansible-tower/blob/release_3.0.3/awx/ui/client/src/lookup/lookup.factory.js#L94
-            if (scope.mode === 'add') {
+            if (fieldIsAutopopulatable()) {
                 _doAutoPopulate();
+            }
+
+            // This checks to see if the field meets the criteria to
+            // autopopulate:
+            // Population rules:
+            // - add form only
+            // - lookup is required
+            // - lookup is not promptable
+            // - user must only have access to 1 item the lookup is for
+            function fieldIsAutopopulatable() {
+                if (autopopulateLookup === false) {
+                    return false;
+                }
+                if (scope.mode === "add") {
+                    if(watcher){
+                        scope.$watch(watcher, (newValue, oldValue, scope2) => {
+                            console.log('success', watcher, newValue , oldValue, scope2);
+
+                            if(Boolean(scope.$eval(watcher)) === true){
+
+                                // if we get here then the field is required
+                                // by way of awRequiredWhen
+                                // and is a candidate for autopopulation
+
+                                _doAutoPopulate();
+                            }
+                        });
+                    }
+                    else if (attrs.required === true) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
             }
 
             // query the API to see if field value corresponds to a valid resource
