@@ -87,6 +87,7 @@ pycparser==2.17           # via cffi
 PyJWT==1.4.2              # via adal
 pykerberos==1.1.13        # via requests-kerberos
 pyparsing==2.1.10         # via cliff, cmd2, oslo.utils
+python-memcached==1.58
 python-cinderclient==1.9.0  # via python-openstackclient, shade
 python-dateutil==2.6.0    # via adal, azure-storage
 python-designateclient==2.4.0  # via shade

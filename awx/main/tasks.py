@@ -862,6 +862,7 @@ class RunJob(BaseTask):
         env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -1069,6 +1070,9 @@ class RunJob(BaseTask):
 
             def job_event_callback(event_data):
                 event_data.setdefault('job_id', instance.id)
+                cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                if cache_event is not None:
+                    event_data.update(cache_event)
                 dispatcher.dispatch(event_data)
         else:
             def job_event_callback(event_data):
