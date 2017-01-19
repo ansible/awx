@@ -973,7 +973,7 @@ msgid ""
 "com%s."
 msgstr ""
 "Pour obtenir plus d'informations et voir des exemples, reportez-vous à la "
-"rubrique %Patterns sur docs.ansible.com%s."
+"rubrique %sPatterns sur docs.ansible.com%s."
 
 #: client/src/forms/JobTemplates.js:199
 #: client/src/forms/JobTemplates.js:212
