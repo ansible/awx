@@ -1479,7 +1479,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += `<div id="${itm}_tab" `+
                                 `class="Form-tab" `;
                             html += (this.form.related[itm].ngClick) ? `ng-click="` + this.form.related[itm].ngClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
-                            if (collection.awToolTip){
+                            if (collection.awToolTip && collection.awToolTipTabEnabledInEditMode === true) {
                                 html += `aw-tool-tip="${collection.awToolTip}" ` +
                                 `aw-tip-placement="${collection.dataPlacement}" ` +
                                 `data-tip-watch="${collection.dataTipWatch}" `;
@@ -1830,7 +1830,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // smart-search directive
                 html += `
                 <div
-                    ng-hide="${itm}.length === 0 && (${collection.iterator}_searchTags | isEmpty)">
+                    ng-hide="${itm}.length === 0 && (searchTags | isEmpty)">
                         <smart-search
                             django-model="${itm}"
                             search-size="${width}"
@@ -1855,7 +1855,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += `
                     <div
                         class="row"
-                        ng-show="${itm}.length === 0 && !(${collection.iterator}_searchTags | isEmpty)">
+                        ng-show="${itm}.length === 0 && !(searchTags | isEmpty)">
                         <div class="col-lg-12 List-searchNoResults">
                             No records matched your search.
                         </div>
@@ -1865,7 +1865,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
                 var emptyListText = (collection.emptyListText) ? collection.emptyListText : i18n._("PLEASE ADD ITEMS TO THIS LIST");
                 html += `<div ng-hide="is_superuser">`;
-                html += `<div class="List-noItems" ng-show="${itm}.length === 0 && (${collection.iterator}_searchTags | isEmpty)"> ${emptyListText} </div>`;
+                html += `<div class="List-noItems" ng-show="${itm}.length === 0 && (searchTags | isEmpty)"> ${emptyListText} </div>`;
                 html += '</div>';
 
                 html += `

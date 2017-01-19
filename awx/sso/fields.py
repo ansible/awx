@@ -299,7 +299,10 @@ class LDAPGroupTypeField(fields.ChoiceField):
         data = super(LDAPGroupTypeField, self).to_internal_value(data)
         if not data:
             return None
-        return getattr(django_auth_ldap.config, data)()
+        if data.endswith('MemberDNGroupType'):
+            return getattr(django_auth_ldap.config, data)(member_attr='member')
+        else:
+            return getattr(django_auth_ldap.config, data)()
 
 
 class LDAPUserFlagsField(fields.DictField):

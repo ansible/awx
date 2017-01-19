@@ -233,7 +233,7 @@ export default
                     hdr: hdr,
                     body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,
                     action: action,
-                    actionText: (action_label === 'cancel' || job.status === 'new') ? "YES" : "DELETE"
+                    actionText: (action_label === 'cancel' || job.status === 'new') ? "OK" : "DELETE"
                 });
             });
 

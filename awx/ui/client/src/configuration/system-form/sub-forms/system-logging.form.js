@@ -30,7 +30,8 @@
                  reset: 'LOG_AGGREGATOR_USERNAME'
              },
              LOG_AGGREGATOR_PASSWORD: {
-                 type: 'text',
+                 type: 'sensitive',
+                 hasShowInputButton: true,
                  reset: 'LOG_AGGREGATOR_PASSWORD'
              },
              LOG_AGGREGATOR_LOGGERS: {
@@ -48,8 +49,8 @@
          buttons: {
              reset: {
                  ngClick: 'vm.resetAllConfirm()',
-                 label: i18n._('Reset All'),
-                 class: 'Form-button--left Form-cancelButton'
+                 label: i18n._('Revert all to default'),
+                 class: 'Form-resetAll'
              },
              cancel: {
                  ngClick: 'vm.formCancel()',

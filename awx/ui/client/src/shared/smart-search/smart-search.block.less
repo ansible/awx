@@ -186,8 +186,6 @@
 .SmartSearch-keyPane {
     max-height: 200px;
     overflow: auto;
-    display: flex;
-    flex-wrap: wrap;
     margin: 0px 0px 20px 0px;
     font-size: 12px;
     width: 100%;
@@ -197,29 +195,11 @@
     border: 1px solid @login-notice-border;
     background-color: @login-notice-bg;
     color: @login-notice-text;
-}
-
-.SmartSearch-relations{
-    margin-top: 15px;
+    position: relative;
 }
 
 .SmartSearch-keyRow {
-    width: 33%;
-    flex: 1 1 auto;
-    flex-direction: column;
     margin-bottom: 15px;
-    padding-right: 50px;
-}
-// 100% rows in a modal
-.modal-body .SmartSearch-keyRow{
-    width: 100%;
-}
-// `.${list.name}List` class can be used to set add custom class overrides
-.groupsList .SmartSearch-keyRow, .hostsList .SmartSearch-keyRow, .PortalMode .SmartSearch-keyRow{
-    width: 100%;
-}
-.SmartSearch-keyRow:nth-child(3){
-    padding-right: 0px;
 }
 
 .SmartSearch-keyName {
@@ -231,4 +211,31 @@
 
 .SmartSearch-keyComparators {
     flex: 1 0 auto;
+}
+
+.SmartSearch-keyPane--exitHolder {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.SmartSearch-keyPane--exit {
+    background-color: @login-notice-bg;
+}
+
+.SmartSearch-examples {
+    display: flex;
+}
+
+.SmartSearch-examples--title {
+    margin-right: 5px;
+}
+
+.SmartSearch-examples--search {
+    color: @default-err;
+    background-color: @default-bg;
+    border: 1px solid @default-border;
+    border-radius: 5px;
+    padding: 0px 5px;
+    margin-right: 5px;
 }

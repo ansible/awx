@@ -3,7 +3,8 @@
 describe('Service: QuerySet', () => {
     let $httpBackend,
         QuerySet,
-        Authorization;
+        Authorization,
+        SmartSearchService;
 
     beforeEach(angular.mock.module('Tower', ($provide) =>{
         // @todo: improve app source / write testing utilities for interim
@@ -17,9 +18,10 @@ describe('Service: QuerySet', () => {
     }));
     beforeEach(angular.mock.module('RestServices'));
 
-    beforeEach(angular.mock.inject((_$httpBackend_, _QuerySet_) => {
+    beforeEach(angular.mock.inject((_$httpBackend_, _QuerySet_, _SmartSearchService_) => {
         $httpBackend = _$httpBackend_;
         QuerySet = _QuerySet_;
+        SmartSearchService = _SmartSearchService_;
 
         // @todo: improve app source
         // config.js / local_settings emit $http requests in the app's run block
@@ -33,24 +35,27 @@ describe('Service: QuerySet', () => {
             .respond(200, '');
     }));
 
-    describe('fn encodeQuery', () => {
-        xit('null/undefined params should return an empty string', () => {
-            expect(QuerySet.encodeQuery(null)).toEqual('');
-            expect(QuerySet.encodeQuery(undefined)).toEqual('');
+    describe('fn encodeParam', () => {
+        it('should encode parameters properly', () =>{
+            expect(QuerySet.encodeParam({term: "name:foo", searchTerm: true})).toEqual({"name__icontains_DEFAULT" : "foo"});
+            expect(QuerySet.encodeParam({term: "-name:foo", searchTerm: true})).toEqual({"not__name__icontains_DEFAULT" : "foo"});
+            expect(QuerySet.encodeParam({term: "name:'foo bar'", searchTerm: true})).toEqual({"name__icontains_DEFAULT" : "'foo bar'"});
+            expect(QuerySet.encodeParam({term: "-name:'foo bar'", searchTerm: true})).toEqual({"not__name__icontains_DEFAULT" : "'foo bar'"});
+            expect(QuerySet.encodeParam({term: "organization:foo", relatedSearchTerm: true})).toEqual({"organization__search_DEFAULT" : "foo"});
+            expect(QuerySet.encodeParam({term: "-organization:foo", relatedSearchTerm: true})).toEqual({"not__organization__search_DEFAULT" : "foo"});
+            expect(QuerySet.encodeParam({term: "organization.name:foo", relatedSearchTerm: true})).toEqual({"organization__name" : "foo"});
+            expect(QuerySet.encodeParam({term: "-organization.name:foo", relatedSearchTerm: true})).toEqual({"not__organization__name" : "foo"});
+            expect(QuerySet.encodeParam({term: "id:11", searchTerm: true})).toEqual({"id__icontains_DEFAULT" : "11"});
+            expect(QuerySet.encodeParam({term: "-id:11", searchTerm: true})).toEqual({"not__id__icontains_DEFAULT" : "11"});
+            expect(QuerySet.encodeParam({term: "id:>11", searchTerm: true})).toEqual({"id__gt" : "11"});
+            expect(QuerySet.encodeParam({term: "-id:>11", searchTerm: true})).toEqual({"not__id__gt" : "11"});
+            expect(QuerySet.encodeParam({term: "id:>=11", searchTerm: true})).toEqual({"id__gte" : "11"});
+            expect(QuerySet.encodeParam({term: "-id:>=11", searchTerm: true})).toEqual({"not__id__gte" : "11"});
+            expect(QuerySet.encodeParam({term: "id:<11", searchTerm: true})).toEqual({"id__lt" : "11"});
+            expect(QuerySet.encodeParam({term: "-id:<11", searchTerm: true})).toEqual({"not__id__lt" : "11"});
+            expect(QuerySet.encodeParam({term: "id:<=11", searchTerm: true})).toEqual({"id__lte" : "11"});
+            expect(QuerySet.encodeParam({term: "-id:<=11", searchTerm: true})).toEqual({"not__id__lte" : "11"});
         });
-        xit('should encode params to a string', () => {
-            let params = {
-                    or__created_by: 'Jenkins',
-                    or__modified_by: 'Jenkins',
-                    and__not__status: 'success',
-                },
-                result = '?or__created_by=Jenkins&or__modified_by=Jenkins&and__not__status=success';
-            expect(QuerySet.encodeQuery(params)).toEqual(result);
-        });
-    });
-
-    xdescribe('fn decodeQuery', () => {
-
     });
 
 

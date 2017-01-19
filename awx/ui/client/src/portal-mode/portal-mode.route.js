@@ -47,14 +47,18 @@ export default {
                         $scope.activeFilter = 'user';
                         path = GetBasePath('jobs');
                         $stateParams.job_search.created_by = $rootScope.current_user.id;
-                        qs.search(path, $stateParams.job_search);
+                        qs.search(path, $stateParams.job_search).then((response) => {
+                            $scope.$broadcast('filterPortalJobs', response);
+                        });
                     };
 
                     $scope.filterAll = function() {
                         $scope.activeFilter = 'all';
                         delete $stateParams.job_search.created_by;
                         path = GetBasePath('jobs');
-                        qs.search(path, $stateParams.job_search);
+                        qs.search(path, $stateParams.job_search).then((response) => {
+                            $scope.$broadcast('filterPortalJobs', response);
+                        });
                     };
                 }
             ]

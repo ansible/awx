@@ -120,7 +120,7 @@ export default
                     Rest.post(job_launch_data)
                     .success(function(data) {
                         Wait('stop');
-                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command || data.workflow_job;
+                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
                         if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
@@ -131,7 +131,8 @@ export default
                             if(_.has(data, 'job')) {
                                 goToJobDetails('jobDetail');
                             }
-                            else if(_.has(data, 'workflow_job')) {
+                            else if(data.type && data.type === 'workflow_job') {
+                                job = data.id;
                                 goToJobDetails('workflowResults');
                             }
                             else if(_.has(data, 'ad_hoc_command')) {

@@ -288,7 +288,8 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: 'credentialSubForm',
-                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngChange: 'becomeMethodChange()',
                 },
                 "become_username": {
                     labelBind: 'becomeUsernameLabel',
@@ -420,9 +421,12 @@ export default
 
             related: {
                 permissions: {
-                    disabled: 'disablePermissionAssignment',
+                    disabled: '(organization === undefined ? true : false)',
+                    // Do not transition the state if organization is undefined
+                    ngClick: `(organization === undefined ? true : false)||$state.go('credentials.edit.permissions')`,
                     awToolTip: '{{permissionsTooltip}}',
                     dataTipWatch: 'permissionsTooltip',
+                    awToolTipTabEnabledInEditMode: true,
                     dataPlacement: 'top',
                     basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {

@@ -11,9 +11,15 @@
  */
 
 function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
-    $stateParams, GenerateForm, InventoryForm, Rest, Alert, ProcessErrors,
+    $stateParams, GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state) {
+
+    $scope.canAdd = false;
+    rbacUiControlService.canAdd(GetBasePath('inventory'))
+        .then(function(canAdd) {
+            $scope.canAdd = canAdd;
+        });
 
     Rest.setUrl(GetBasePath('inventory'));
     Rest.options()
@@ -91,7 +97,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
 }
 
 export default ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'GenerateForm', 'InventoryForm', 'Rest', 'Alert',
+    '$log', '$stateParams', 'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
     'Wait', 'ToJSON', '$state', InventoriesAdd
 ];

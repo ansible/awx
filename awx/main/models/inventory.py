@@ -1002,9 +1002,8 @@ class InventorySourceOptions(BaseModel):
             if r not in valid_regions and r not in invalid_regions:
                 invalid_regions.append(r)
         if invalid_regions:
-            raise ValidationError(_('Invalid %(source)s region%(plural)s: %(region)s') % {
-                'source': self.source, 'plural': '' if len(invalid_regions) == 1 else 's',
-                'region': ', '.join(invalid_regions)})
+            raise ValidationError(_('Invalid %(source)s region: %(region)s') % {
+                'source': self.source, 'region': ', '.join(invalid_regions)})
         return ','.join(regions)
 
     source_vars_dict = VarsDictProperty('source_vars')
@@ -1028,9 +1027,8 @@ class InventorySourceOptions(BaseModel):
             if instance_filter_name not in self.INSTANCE_FILTER_NAMES:
                 invalid_filters.append(instance_filter)
         if invalid_filters:
-            raise ValidationError(_('Invalid filter expression%(plural)s: %(filter)s') %
-                                  {'plural': '' if len(invalid_filters) == 1 else 's',
-                                   'filter': ', '.join(invalid_filters)})
+            raise ValidationError(_('Invalid filter expression: %(filter)s') %
+                                  {'filter': ', '.join(invalid_filters)})
         return instance_filters
 
     def clean_group_by(self):
@@ -1047,9 +1045,8 @@ class InventorySourceOptions(BaseModel):
             if c not in valid_choices and c not in invalid_choices:
                 invalid_choices.append(c)
         if invalid_choices:
-            raise ValidationError(_('Invalid group by choice%(plural)s: %(choice)s') %
-                                  {'plural': '' if len(invalid_choices) == 1 else 's',
-                                   'choice': ', '.join(invalid_choices)})
+            raise ValidationError(_('Invalid group by choice: %(choice)s') %
+                                  {'choice': ', '.join(invalid_choices)})
         return ','.join(choices)
 
 

@@ -78,7 +78,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             },
             close: {
                 ngClick: 'formCancel()',
-                ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngShow: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()',
@@ -103,7 +103,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                     add: {
                         label: i18n._('Add'),
                         ngClick: "$state.go('.add')",
-                        awToolTip: 'Add a permission',
+                        awToolTip: i18n._('Add a permission'),
                         actionClass: 'btn List-buttonSubmit',
                         buttonContent: '&#43; ADD',
                         ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'

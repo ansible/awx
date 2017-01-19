@@ -177,7 +177,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     break;
                 case 'edit':
                     url = params.urls && params.urls.edit ? params.urls.edit : (params.url ? params.url : `/:${form.name}_id`);
-                    formNode = $stateExtender.buildDefinition({
+                    let formNodeState = {
                         name: params.name || `${params.parent}.edit`,
                         url: url,
                         ncyBreadcrumb: {
@@ -215,8 +215,15 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                     return Rest.get();
                                 }
                             ]
-                        }
-                    });
+                        },
+                    };
+                    if (params.data && params.data.activityStreamTarget) {
+                        formNodeState.data = {};
+                        formNodeState.data.activityStreamId = params.data.activityStreamTarget + '_id';
+
+                    }
+                    formNode = $stateExtender.buildDefinition(formNodeState);
+
                     if (params.resolve && params.resolve.edit) {
                         formNode.resolve = _.merge(formNode.resolve, params.resolve.edit);
                     }
@@ -267,7 +274,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-user-team resolve="$resolve"></add-rbac-user-team>`
+                            template: `<add-rbac-user-team resolve="$resolve" title="Add Permissions"></add-rbac-user-team>`
                         }
                     },
                     resolve: {
@@ -332,7 +339,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="Add Users / Teams"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -501,7 +508,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="Add Users"></add-rbac-resource>`
                         }
                     },
                     resolve: {

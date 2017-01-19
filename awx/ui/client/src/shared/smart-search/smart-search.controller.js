@@ -1,5 +1,5 @@
-export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet',
-    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs) {
+export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService',
+    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService) {
 
         let path, relations,
             // steps through the current tree of $state configurations, grabs default search params
@@ -17,6 +17,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
             qs.initFieldset(path, $scope.djangoModel, relations).then((data) => {
                 $scope.models = data.models;
+                $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
             });
         }
@@ -27,7 +28,20 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 // setting the default value of a term to null in a state definition is a very explicit way to ensure it will NEVER generate a search tag, even with a non-default value
                 return defaults[key] !== value && key !== 'order_by' && key !== 'page' && key !== 'page_size' && defaults[key] !== null;
             });
-            return _(stripped).map(qs.decodeParam).flatten().value();
+            let strippedCopy = _.cloneDeep(stripped);
+            if(_.keys(_.pick(defaults, _.keys(strippedCopy))).length > 0){
+                for (var key in strippedCopy) {
+                    if (strippedCopy.hasOwnProperty(key)) {
+                        let value = strippedCopy[key];
+                        if(_.isArray(value)){
+                            let index = _.indexOf(value, defaults[key]);
+                            value = value.splice(index, 1)[0];
+                        }
+                    }
+                }
+                stripped = strippedCopy;
+            }
+            return _(strippedCopy).map(qs.decodeParam).flatten().value();
         }
 
         // searchable relationships
@@ -36,6 +50,16 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 return _.keys(value.related);
             }).flatten().uniq().value();
             return flat;
+        }
+
+        function setDefaults(term) {
+            if ($scope.list.defaultSearchParams) {
+                return $scope.list.defaultSearchParams(term);
+            } else {
+               return {
+                    search: encodeURIComponent(term)
+                };
+            }
         }
 
         $scope.toggleKeyPane = function() {
@@ -56,10 +80,37 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // remove tag, merge new queryset, $state.go
         $scope.remove = function(index) {
-            let removed = qs.encodeParam($scope.searchTags.splice(index, 1)[0]);
+            let tagToRemove = $scope.searchTags.splice(index, 1)[0];
+            let termParts = SmartSearchService.splitTermIntoParts(tagToRemove);
+            let removed;
+            if (termParts.length === 1) {
+                removed = setDefaults(tagToRemove);
+            }
+            else {
+                let root = termParts[0].split(".")[0].replace(/^-/, '');
+                let encodeParams = {
+                    term: tagToRemove
+                };
+                if(_.has($scope.options.actions.GET, root)) {
+                    if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                        encodeParams.relatedSearchTerm = true;
+                    }
+                    else {
+                        encodeParams.searchTerm = true;
+                    }
+                    removed = qs.encodeParam(encodeParams);
+                }
+                else {
+                    removed = setDefaults(tagToRemove);
+                }
+            }
             _.each(removed, (value, key) => {
                 if (Array.isArray(queryset[key])){
                     _.remove(queryset[key], (item) => item === value);
+                    // If the array is now empty, remove that key
+                    if(queryset[key].length === 0) {
+                        delete queryset[key];
+                    }
                 }
                 else {
                     delete queryset[key];
@@ -79,26 +130,46 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             let params = {},
                 origQueryset = _.clone(queryset);
 
-            function setDefaults(term) {
-                // "name" and "description" are sane defaults for MOST models, but not ALL!
-                // defaults may be configured in ListDefinition.defaultSearchParams
-                if ($scope.list.defaultSearchParams) {
-                    return $scope.list.defaultSearchParams(term);
-                } else {
-                   return {
-                        or__name__icontains: term,
-                        or__description__icontains: term
-                    };
-                }
-            }
+            // Remove leading/trailing whitespace if there is any
+            terms = terms.trim();
 
             if(terms && terms !== '') {
-                _.forEach(terms.split(' '), (term) => {
+                // Split the terms up
+                let splitTerms = SmartSearchService.splitSearchIntoTerms(terms);
+                _.forEach(splitTerms, (term) => {
+
+                    let termParts = SmartSearchService.splitTermIntoParts(term);
+
+                    function combineSameSearches(a,b){
+                        if (_.isArray(a)) {
+                          return a.concat(b);
+                        }
+                        else {
+                            if(a) {
+                                return [a,b];
+                            }
+                        }
+                    }
+
                     // if only a value is provided, search using default keys
-                    if (term.split(':').length === 1) {
-                        params = _.merge(params, setDefaults(term));
+                    if (termParts.length === 1) {
+                        params = _.merge(params, setDefaults(term), combineSameSearches);
                     } else {
-                        params = _.merge(params, qs.encodeParam(term));
+                        // Figure out if this is a search term
+                        let root = termParts[0].split(".")[0].replace(/^-/, '');
+                        if(_.has($scope.options.actions.GET, root)) {
+                            if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                                params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
+                            }
+                            else {
+                                params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
+                            }
+                        }
+                        // Its not a search term or a related search term - treat it as a string
+                        else {
+                            params = _.merge(params, setDefaults(term), combineSameSearches);
+                        }
+
                     }
                 });
 

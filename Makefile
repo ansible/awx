@@ -428,7 +428,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -559,9 +559,12 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
-# generate l10n .json .mo
-languages: $(UI_DEPS_FLAG_FILE) check-po
+# generate l10n .json
+ui-languages: $(UI_DEPS_FLAG_FILE) check-po
 	$(NPM_BIN) --prefix awx/ui run languages
+
+# generate l10n .mo
+api-languages:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
@@ -592,8 +595,7 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-# todo: include languages target when .po deliverables are added to source control
-$(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): ui-languages $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 

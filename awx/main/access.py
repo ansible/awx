@@ -353,7 +353,7 @@ class BaseAccess(object):
 
             # Shortcuts in certain cases by deferring to earlier property
             if display_method == 'schedule':
-                user_capabilities['schedule'] = user_capabilities['edit']
+                user_capabilities['schedule'] = user_capabilities['start']
                 continue
             elif display_method == 'delete' and not isinstance(obj, (User, UnifiedJob)):
                 user_capabilities['delete'] = user_capabilities['edit']
@@ -363,26 +363,29 @@ class BaseAccess(object):
                 continue
 
             # Compute permission
-            data = {}
-            access_method = getattr(self, "can_%s" % method)
-            if method in ['change']: # 3 args
-                user_capabilities[display_method] = access_method(obj, data)
-            elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
-                user_capabilities[display_method] = access_method(obj)
-            elif method in ['start']:
-                user_capabilities[display_method] = access_method(obj, validate_license=False)
-            elif method in ['add']: # 2 args with data
-                user_capabilities[display_method] = access_method(data)
-            elif method in ['attach', 'unattach']: # parent/sub-object call
-                if type(parent_obj) == Team:
-                    relationship = 'parents'
-                    parent_obj = parent_obj.member_role
-                else:
-                    relationship = 'members'
-                user_capabilities[display_method] = access_method(
-                    obj, parent_obj, relationship, skip_sub_obj_read_check=True, data=data)
+            user_capabilities[display_method] = self.get_method_capability(method, obj, parent_obj)
 
         return user_capabilities
+
+    def get_method_capability(self, method, obj, parent_obj):
+        if method in ['change']: # 3 args
+            return self.can_change(obj, {})
+        elif method in ['delete', 'run_ad_hoc_commands', 'copy']:
+            access_method = getattr(self, "can_%s" % method)
+            return access_method(obj)
+        elif method in ['start']:
+            return self.can_start(obj, validate_license=False)
+        elif method in ['add']: # 2 args with data
+            return self.can_add({})
+        elif method in ['attach', 'unattach']: # parent/sub-object call
+            access_method = getattr(self, "can_%s" % method)
+            if type(parent_obj) == Team:
+                relationship = 'parents'
+                parent_obj = parent_obj.member_role
+            else:
+                relationship = 'members'
+            return access_method(obj, parent_obj, relationship, skip_sub_obj_read_check=True, data={})
+        return False
 
 
 class UserAccess(BaseAccess):
@@ -982,8 +985,6 @@ class ProjectUpdateAccess(BaseAccess):
 
     @check_superuser
     def can_cancel(self, obj):
-        if not obj.can_cancel:
-            return False
         if self.user == obj.created_by:
             return True
         # Project updates cascade delete with project, admin role descends from org admin
@@ -1040,7 +1041,7 @@ class JobTemplateAccess(BaseAccess):
                 Project.accessible_objects(self.user, 'use_role').exists() or
                 Inventory.accessible_objects(self.user, 'use_role').exists())
 
-        # if reference_obj is provided, determine if it can be coppied
+        # if reference_obj is provided, determine if it can be copied
         reference_obj = data.get('reference_obj', None)
 
         if 'job_type' in data and data['job_type'] == PERM_INVENTORY_SCAN:
@@ -1392,7 +1393,8 @@ class WorkflowJobTemplateNodeAccess(BaseAccess):
             qs = self.model.objects.filter(
                 workflow_job_template__in=WorkflowJobTemplate.accessible_objects(
                     self.user, 'read_role'))
-        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
+        qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes',
+                                 'unified_job_template')
         return qs
 
     def can_use_prompted_resources(self, data):
@@ -1478,8 +1480,14 @@ class WorkflowJobNodeAccess(BaseAccess):
         qs = qs.prefetch_related('success_nodes', 'failure_nodes', 'always_nodes')
         return qs
 
+    @check_superuser
     def can_add(self, data):
-        return False
+        if data is None:  # Hide direct creation in API browser
+            return False
+        return (
+            self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role') and
+            self.check_related('credential', Credential, data, role_field='use_role') and
+            self.check_related('inventory', Inventory, data, role_field='use_role'))
 
     def can_change(self, obj, data):
         return False
@@ -1528,22 +1536,28 @@ class WorkflowJobTemplateAccess(BaseAccess):
 
     def can_copy(self, obj):
         if self.save_messages:
-            wfjt_errors = {}
+            missing_ujt = []
+            missing_credentials = []
+            missing_inventories = []
             qs = obj.workflow_job_template_nodes
             qs.select_related('unified_job_template', 'inventory', 'credential')
             for node in qs.all():
                 node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
-                    node_errors['inventory'] = 'Prompted inventory %s can not be coppied.' % node.inventory.name
+                    missing_inventories.append(node.inventory.name)
                 if node.credential and self.user not in node.credential.use_role:
-                    node_errors['credential'] = 'Prompted credential %s can not be coppied.' % node.credential.name
+                    missing_credentials.append(node.credential.name)
                 ujt = node.unified_job_template
                 if ujt and not self.user.can_access(UnifiedJobTemplate, 'start', ujt, validate_license=False):
-                    node_errors['unified_job_template'] = (
-                        'Prompted %s %s can not be coppied.' % (ujt._meta.verbose_name_raw, ujt.name))
+                    missing_ujt.append(ujt.name)
                 if node_errors:
                     wfjt_errors[node.id] = node_errors
-            self.messages.update(wfjt_errors)
+            if missing_ujt:
+                self.messages['templates_unable_to_copy'] = missing_ujt
+            if missing_credentials:
+                self.messages['credentials_unable_to_copy'] = missing_credentials
+            if missing_inventories:
+                self.messages['inventories_unable_to_copy'] = missing_inventories
 
         return self.check_related('organization', Organization, {'reference_obj': obj}, mandatory=True)
 
@@ -1611,11 +1625,19 @@ class WorkflowJobAccess(BaseAccess):
     def can_change(self, obj, data):
         return False
 
+    @check_superuser
     def can_delete(self, obj):
-        if obj.workflow_job_template is None:
-            # only superusers can delete orphaned workflow jobs
-            return self.user.is_superuser
-        return self.user in obj.workflow_job_template.admin_role
+        return (obj.workflow_job_template and
+                obj.workflow_job_template.organization and
+                self.user in obj.workflow_job_template.organization.admin_role)
+
+    def get_method_capability(self, method, obj, parent_obj):
+        if method == 'start':
+            # Return simplistic permission, will perform detailed check on POST
+            if not obj.workflow_job_template:
+                return self.user.is_superuser
+            return self.user in obj.workflow_job_template.execute_role
+        return super(WorkflowJobAccess, self).get_method_capability(method, obj, parent_obj)
 
     def can_start(self, obj, validate_license=True):
         if validate_license:
@@ -1624,7 +1646,29 @@ class WorkflowJobAccess(BaseAccess):
         if self.user.is_superuser:
             return True
 
-        return (obj.workflow_job_template and self.user in obj.workflow_job_template.execute_role)
+        wfjt = obj.workflow_job_template
+        # only superusers can relaunch orphans
+        if not wfjt:
+            return False
+
+        # execute permission to WFJT is mandatory for any relaunch
+        if self.user not in wfjt.execute_role:
+            return False
+
+        # user's WFJT access doesn't guarentee permission to launch, introspect nodes
+        return self.can_recreate(obj)
+
+    def can_recreate(self, obj):
+        node_qs = obj.workflow_job_nodes.all().prefetch_related('inventory', 'credential', 'unified_job_template')
+        node_access = WorkflowJobNodeAccess(user=self.user)
+        wj_add_perm = True
+        for node in node_qs:
+            if not node_access.can_add({'reference_obj': node}):
+                wj_add_perm = False
+        if not wj_add_perm and self.save_messages:
+            self.messages['workflow_job_template'] = _('You do not have permission to the workflow job '
+                                                       'resources required for relaunch.')
+        return wj_add_perm
 
     def can_cancel(self, obj):
         if not obj.can_cancel:
@@ -1912,11 +1956,17 @@ class ScheduleAccess(BaseAccess):
 
     @check_superuser
     def can_add(self, data):
-        return self.check_related('unified_job_template', UnifiedJobTemplate, data, mandatory=True)
+        return self.check_related('unified_job_template', UnifiedJobTemplate, data, role_field='execute_role', mandatory=True)
 
     @check_superuser
     def can_change(self, obj, data):
-        return self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True)
+        if self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, mandatory=True):
+            return True
+        # Users with execute role can modify the schedules they created
+        return (
+            obj.created_by == self.user and
+            self.check_related('unified_job_template', UnifiedJobTemplate, data, obj=obj, role_field='execute_role', mandatory=True))
+
 
     def can_delete(self, obj):
         return self.can_change(obj, {})

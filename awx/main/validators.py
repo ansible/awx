@@ -185,8 +185,9 @@ def vars_validate_or_raise(vars_str):
     except ValueError:
         pass
     try:
-        yaml.safe_load(vars_str)
-        return vars_str
+        r = yaml.safe_load(vars_str)
+        if not (isinstance(r, basestring) and r.startswith('OrderedDict(')):
+            return vars_str
     except yaml.YAMLError:
         pass
     raise RestValidationError(_('Must be valid JSON or YAML.'))

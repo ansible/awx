@@ -21,7 +21,8 @@ export default ['i18n', function(i18n) {
                 reset: 'AUTH_LDAP_BIND_DN'
             },
             AUTH_LDAP_BIND_PASSWORD: {
-                type: 'password'
+                type: 'sensitive',
+                hasShowInputButton: true,
             },
             AUTH_LDAP_USER_SEARCH: {
                 type: 'textarea',
@@ -84,8 +85,8 @@ export default ['i18n', function(i18n) {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: i18n._('Reset All'),
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',

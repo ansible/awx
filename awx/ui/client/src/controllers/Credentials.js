@@ -113,7 +113,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
-    ClearScope, GetBasePath, GetChoices, Empty, KindChange,
+    ClearScope, GetBasePath, GetChoices, Empty, KindChange, BecomeMethodChange,
     OwnerChange, FormSave, $state, CreateSelect2) {
     ClearScope();
 
@@ -221,6 +221,10 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         KindChange({ scope: $scope, form: form, reset: true });
     };
 
+    $scope.becomeMethodChange = function() {
+        BecomeMethodChange({ scope: $scope });
+    };
+
     // Save
     $scope.formSave = function() {
         if ($scope[form.name + '_form'].$valid) {
@@ -276,14 +280,14 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange',
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'BecomeMethodChange',
     'OwnerChange', 'FormSave', '$state', 'CreateSelect2'
 ];
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, Rest, Alert, ProcessErrors, ClearScope, Prompt,
-    GetBasePath, GetChoices, KindChange, Empty, OwnerChange, FormSave, Wait,
-    $state, CreateSelect2, Authorization) {
+    GetBasePath, GetChoices, KindChange, BecomeMethodChange, Empty, OwnerChange, FormSave, Wait,
+    $state, CreateSelect2, Authorization, i18n) {
 
     ClearScope();
 
@@ -336,19 +340,15 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                 });
         }
 
-        // if the credential is assigned to an organization, allow permission delegation
-        // do NOT use $scope.organization in a view directive to determine if a credential is associated with an org
-        // @todo why not? ^ and what is this type check for a number doing - should this be a type check for undefined?
-        $scope.disablePermissionAssignment = typeof($scope.organization) === 'number' ? false : true;
-        if ($scope.disablePermissionAssignment) {
-            $scope.permissionsTooltip = 'Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.';
-        }
-        setAskCheckboxes();
-        KindChange({
-            scope: $scope,
-            form: form,
-            reset: false
+        $scope.$watch('organization', function(val) {
+            if (val === undefined) {
+                $scope.permissionsTooltip = i18n._('Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.');
+            } else {
+                $scope.permissionsTooltip = '';
+            }
         });
+
+        setAskCheckboxes();
         OwnerChange({ scope: $scope });
         $scope.$watch("ssh_key_data", function(val) {
             if (val === "" || val === null || val === undefined) {
@@ -453,6 +453,13 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                         break;
                     }
                 }
+
+                KindChange({
+                    scope: $scope,
+                    form: form,
+                    reset: false
+                });
+                
                 master.kind = $scope.kind;
 
                 CreateSelect2({
@@ -516,6 +523,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     // Handle Kind change
     $scope.kindChange = function() {
         KindChange({ scope: $scope, form: form, reset: true });
+    };
+
+    $scope.becomeMethodChange = function() {
+        BecomeMethodChange({ scope: $scope });
     };
 
     $scope.formCancel = function() {
@@ -612,6 +623,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-    'KindChange', 'Empty', 'OwnerChange',
-    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization'
+    'KindChange', 'BecomeMethodChange', 'Empty', 'OwnerChange',
+    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n',
 ];

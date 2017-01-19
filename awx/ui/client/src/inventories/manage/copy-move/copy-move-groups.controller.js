@@ -11,7 +11,7 @@
 
         $scope.item = group;
         $scope.submitMode = $stateParams.groups === undefined ? 'move' : 'copy';
-        $scope['toggle_'+ list.iterator] = function(id){
+        $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
@@ -60,9 +60,6 @@
         };
 
         function init(){
-            var url = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
-            url += $stateParams.group ? '?not__id__in=' + group.id + ',' + _.last($stateParams.group) : '?not__id=' + group.id;
-            list.basePath = url;
             $scope.atRootLevel = $stateParams.group ? false : true;
 
             // search init

@@ -15,7 +15,7 @@ export default [ 'templateUrl',
         link: function(scope) {
             // as count is changed by event data coming in,
             // update the host status bar
-            scope.$watch('count', function(val) {
+            var toDestroy = scope.$watch('count', function(val) {
                 if (val) {
                     Object.keys(val).forEach(key => {
                         // reposition the hosts status bar by setting
@@ -37,6 +37,10 @@ export default [ 'templateUrl',
                         .keys(val)
                         .filter(key => (val[key] > 0)).length > 0);
                 }
+            });
+
+            scope.$on('$destroy', function(){
+                toDestroy();
             });
         }
     };

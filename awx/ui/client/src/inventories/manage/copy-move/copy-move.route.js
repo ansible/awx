@@ -30,8 +30,8 @@ var copyMoveGroupRoute = {
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath', 'group',
             function(list, qs, $stateParams, GetBasePath, group) {
-                $stateParams.copy_search.not__id__in = ($stateParams.group.length > 0 ? group.id + ',' + _.last($stateParams.group) : group.id);
-                let path = GetBasePath(list.name);
+                $stateParams.copy_search.not__id__in = ($stateParams.group && $stateParams.group.length > 0 ? group.id + ',' + _.last($stateParams.group) : group.id.toString());
+                let path = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
                 return qs.search(path, $stateParams.copy_search);
             }
         ],
@@ -66,7 +66,7 @@ var copyMoveHostRoute = {
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
-                let path = GetBasePath(list.name);
+                let path = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts/';
                 return qs.search(path, $stateParams.copy_search);
             }
         ],
@@ -80,7 +80,9 @@ var copyMoveHostRoute = {
             controller: CopyMoveHostsController,
         },
         'copyMoveList@inventoryManage.copyMoveHost': {
-            templateProvider: function(CopyMoveGroupList, generateList) {
+            templateProvider: function(CopyMoveGroupList, generateList, $stateParams, GetBasePath) {
+                let list = CopyMoveGroupList;
+                list.basePath = GetBasePath('inventory') + $stateParams.inventory_id + '/hosts/';
                 let html = generateList.build({
                     list: CopyMoveGroupList,
                     mode: 'lookup',

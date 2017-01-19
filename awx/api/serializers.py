@@ -251,6 +251,7 @@ class BaseSerializer(serializers.ModelSerializer):
             'inventory_update': _('Inventory Sync'),
             'system_job': _('Management Job'),
             'workflow_job': _('Workflow Job'),
+            'workflow_job_template': _('Workflow Template'),
         }
         choices = []
         for t in self.get_types():
@@ -1619,7 +1620,8 @@ class ResourceAccessListElementSerializer(UserSerializer):
                     'name': role.name,
                     'description': role.description,
                     'team_id': team_role.object_id,
-                    'team_name': team_role.content_object.name
+                    'team_name': team_role.content_object.name,
+                    'team_organization_name': team_role.content_object.organization.name,
                 }
                 if role.content_type is not None:
                     role_dict['resource_name'] = role.content_object.name
@@ -2369,7 +2371,7 @@ class WorkflowJobTemplateNodeSerializer(WorkflowNodeBaseSerializer):
         if view and view.request:
             request_method = view.request.method
         if request_method in ['PATCH']:
-            obj = view.get_object()
+            obj = self.instance
             char_prompts = copy.copy(obj.char_prompts)
             char_prompts.update(self.extract_char_prompts(data))
         else:
@@ -2708,17 +2710,14 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
     variables_needed_to_start = serializers.ReadOnlyField()
     survey_enabled = serializers.SerializerMethodField()
     extra_vars = VerbatimField(required=False, write_only=True)
-    warnings = serializers.SerializerMethodField()
     workflow_job_template_data = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkflowJobTemplate
-        fields = ('can_start_without_user_input', 'extra_vars', 'warnings',
+        fields = ('can_start_without_user_input', 'extra_vars',
                   'survey_enabled', 'variables_needed_to_start',
+                  'node_templates_missing', 'node_prompts_rejected',
                   'workflow_job_template_data')
-
-    def get_warnings(self, obj):
-        return obj.get_warnings()
 
     def get_survey_enabled(self, obj):
         if obj:

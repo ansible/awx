@@ -484,7 +484,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 function applyValidation(viewValue) {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
-                    query = query.replace(/\:value/, encodeURI(viewValue));
+                    query = query.replace(/\:value/, encodeURIComponent(viewValue));
                     Rest.setUrl(`${basePath}${query}`);
                     // https://github.com/ansible/ansible-tower/issues/3549
                     // capturing both success/failure conditions in .then() promise
@@ -620,12 +620,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 
             if (attrs.tipWatch) {
                 // Add dataTipWatch: 'variable_name'
-                scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
-                    if (newVal !== oldVal) {
-                        // Where did fixTitle come from?:
-                        //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                        $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
-                    }
+                scope.$watch(attrs.tipWatch, function(newVal) {
+                    // Where did fixTitle come from?:
+                    //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
+                    $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
                 });
             }
         }

@@ -32,7 +32,7 @@ As stated, workflow job templates can be created with populated `extra_vars`. Th
 
 Job resources spawned by workflow jobs are needed by workflow to run correctly. Therefore deletion of spawned job resources is blocked while the underlying workflow job is executing.
 
-Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest keep their own paces. Canceling a workflow spawned job resource follows the same rules.
+Other than success and failure, a workflow spawned job resource can also end with status 'error' and 'canceled'. When a workflow spawned job resource errors, all branches starting from that job will stop executing while the rest continue executing. Canceling a workflow spawned job resource follows the same rules. If the unified job template of the node is null (which could be a result of deleting the unified job template or copying a workflow when the user lacks necessary permissions to use the resource), then the branch should stop executing in this case as well.
 
 A workflow job itself can also be canceled. In this case all its spawned job resources will be canceled if cancelable and following paths stop executing.
 
@@ -47,20 +47,24 @@ Workflow job summary:
 ```
 
 ### Workflow Copy and Relaunch
-Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be identical to which it copies from, except for `name` field which will be appended a text to indicate it's a copy.
+Other than the normal way of creating workflow job templates, it is also possible to copy existing workflow job templates. The resulting new workflow job template will be mostly identical to the original, except for `name` field which will be appended a text to indicate it's a copy.
 
-Workflow job templates can be copied by POSTing to endpoint `/workflow_job_templates/\d+/copy/`. After copy finished, the resulting new workflow job template will have identical fields including description, extra_vars, labels, 'launch_type' and survey-related fields (survey_passwords, survey_spec and survey_enabled). More importantly, workflow job template node of the original workflow job template, as well as the topology they bear, will be copied. Note there are RBAC restrictions on determining which workflow job template node is copied. In specific, a workflow job template is allowed to be copied if the user has at least read permission on all related resources like credential and job template. On the other hand, schedules and notification templates of the original workflow job template will not be copied nor shared, and the name of the created workflow job template is the original name plus a special-formatted suffix to indicate its copy origin as well as the copy time, such as 'copy_from_name@10:30:00 am'.
+Workflow job templates can be copied by POSTing to endpoint `/workflow_job_templates/\d+/copy/`. After copy finished, the resulting new workflow job template will have identical fields including description, extra_vars, and survey-related fields (survey_spec and survey_enabled). More importantly, workflow job template node of the original workflow job template, as well as the topology they bear, will be copied. Note there are RBAC restrictions on copying workflow job template nodes. A workflow job template is allowed to be copied if the user has permission to add an equivalent workflow job template. If the user performing the copy does not have access to a node's related resources (job template, inventory, or credential), those related fields will be null in the copy's version of the node. Schedules and notification templates of the original workflow job template will not be copied nor shared, and the name of the created workflow job template is the original name plus a special-formatted suffix to indicate its copy origin as well as the copy time, such as 'copy_from_name@10:30:00 am'.
 
-Worflow jobs cannot be copied directly, instead a workflow job is implicitly copied when it needs to relaunch. Relaunching an existing workflow job is done by POSTing to endpoint `/workflow_jobs/\d+/relaunch/`. What happens next is the original workflow job is copied to create a new workflow job. The new workflow job then gets a copy of all nodes of the original as well as the topology they bear. Finally the full-fledged new workflow job is triggered to run, thus fulfilling the purpose of relaunch.
+Workflow jobs cannot be copied directly, instead a workflow job is implicitly copied when it needs to relaunch. Relaunching an existing workflow job is done by POSTing to endpoint `/workflow_jobs/\d+/relaunch/`. What happens next is the original workflow job is copied to create a new workflow job. The new workflow job then gets a copy of all nodes of the original as well as the topology they bear. Finally the full-fledged new workflow job is triggered to run, thus fulfilling the purpose of relaunch. Survey password-type answers should also be redacted in the relaunched version of the workflow job.
 
 ## Test Coverage
 ### CRUD-related
 * Verify that CRUD operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
 * Verify the RBAC property of workflow resources. In specific: 
   * Workflow job templates can only be accessible by superusers ---- system admin, admin of the same organization and system auditor and auditor of the same organization with read permission only.
-  * Workflow jobs follows the permission rules of its associated workflow job template.
-  * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template.
-  * Workflow job nodes follows the permission rules of both its associated workflow job and unified job.
+  * Workflow job read and delete permissions follow from its associated workflow job template.
+  * Workflow job relaunch permission consists of the union of execute permission to its associated workflow job template, and the permission to re-create all the nodes inside of the workflow job.
+  * Workflow job template nodes rely their permission rules on the permission rules of both their associated workflow job template and unified job template for creation and editing.
+  * Workflow job template nodes can be deleted with admin permission to their workflow job template (even lacking permission to the node's job template).
+  * Workflow job nodes are viewable if its workflow job is viewable.
+  * No CRUD actions are possible on workflow job nodes by any user, and they may only be deleted by deleting their workflow job.
+  * Workflow jobs can be deleted by superusers and org admins of the organization of its associated workflow job template, and no one else.
 * Verify that workflow job template nodes can be created under, or (dis)associated with workflow job templates.
 * Verify that only the permitted types of job template types can be associated with a workflow job template node. Currently the permitted types are *job templates, inventory sources and projects*.
 * Verify that workflow job template nodes under the same workflow job template can be associated to form parent-child relationship of decision trees. In specific, one node takes another as its child node by POSTing another node's id to one of the three endpoints: `/success_nodes/`, `/failure_nodes/` and `/always_nodes/`.

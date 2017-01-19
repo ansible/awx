@@ -131,7 +131,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
                                         msg: 'Call to delete workflow job template failed. DELETE returned status: ' + status });
                                 });
                             }
@@ -141,8 +141,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete job template failed. DELETE returned status: ' + status });
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
+                                        msg: 'Call to delete job template failed. DELETE returned status: ' + data.status });
                                 });
                             }
                             else {
@@ -220,7 +220,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                     .then(function(result) {
 
                         if(result.data.can_copy) {
-                            if(!result.data.warnings || _.isEmpty(result.data.warnings)) {
+                            if(result.data.can_copy_without_user_input) {
                                 // Go ahead and copy the workflow - the user has full priveleges on all the resources
                                 TemplateCopyService.copyWorkflow(template.id)
                                 .then(function(result) {
@@ -235,18 +235,40 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
 
                                 let bodyHtml = `
                                     <div class="Prompt-bodyQuery">
-                                        You may not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and may result in an incomplete workflow.
+                                        You do not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and will result in an incomplete workflow.
                                     </div>
                                     <div class="Prompt-bodyTarget">`;
 
-                                        // Go and grab all of the warning strings
-                                        _.forOwn(result.data.warnings, function(warning) {
-                                            if(warning) {
-                                                _.forOwn(warning, function(warningString) {
-                                                    bodyHtml += '<div>' + warningString + '</div>';
-                                                });
-                                            }
-                                         } );
+                                        // List the unified job templates user can not access
+                                        if (result.data.templates_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Unified Job Templates that can not be copied<ul>';
+                                            _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
+                                                if(ujt) {
+                                                    bodyHtml += '<li>' + ujt + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted inventories user can not access
+                                        if (result.data.inventories_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted inventories that can not be copied<ul>';
+                                            _.forOwn(result.data.inventories_unable_to_copy, function(inv) {
+                                                if(inv) {
+                                                    bodyHtml += '<li>' + inv + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted credentials user can not access
+                                        if (result.data.credentials_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted credentials that can not be copied<ul>';
+                                            _.forOwn(result.data.credentials_unable_to_copy, function(cred) {
+                                                if(cred) {
+                                                    bodyHtml += '<li>' + cred + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
 
                                     bodyHtml += '</div>';
 

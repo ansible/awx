@@ -8,5 +8,6 @@ python-memcached==1.58
 psphere==0.5.2
 psutil==5.0.0
 pyvmomi==6.5
+pywinrm[kerberos]==0.2.2
 secretstorage==2.3.1
 shade==1.13.1

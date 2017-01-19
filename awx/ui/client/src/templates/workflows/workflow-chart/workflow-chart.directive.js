@@ -174,7 +174,20 @@ export default [ '$state','moment',
 
                 nodeEnter.each(function(d) {
                     let thisNode = d3.select(this);
-                    if(d.isStartNode) {
+                    if(d.isStartNode && scope.mode === 'details') {
+                        // Overwrite the default root height and width and replace it with a small blue square
+                        rootW = 25;
+                        rootH = 25;
+                        thisNode.append("rect")
+                            .attr("width", rootW)
+                            .attr("height", rootH)
+                            .attr("y", 10)
+                            .attr("rx", 5)
+                            .attr("ry", 5)
+                            .attr("fill", "#337ab7")
+                            .attr("class", "WorkflowChart-rootNode");
+                    }
+                    else if(d.isStartNode && scope.mode !== 'details') {
                         thisNode.append("rect")
                             .attr("width", rootW)
                             .attr("height", rootH)
@@ -190,7 +203,6 @@ export default [ '$state','moment',
                             .attr("dy", ".35em")
                             .attr("class", "WorkflowChart-startText")
                             .text(function () { return "START"; })
-                            .attr("display", function() { return scope.mode === 'details' ? 'none' : null;})
                             .call(add_node);
                     }
                     else {
@@ -200,15 +212,15 @@ export default [ '$state','moment',
                             .attr("rx", 5)
                             .attr("ry", 5)
                             .attr('stroke', function(d) {
-                                if(d.edgeType) {
-                                    if(d.edgeType === "failure") {
-                                        return "#d9534f";
-                                    }
-                                    else if(d.edgeType === "success") {
+                                if(d.job && d.job.status) {
+                                    if(d.job.status === "successful"){
                                         return "#5cb85c";
                                     }
-                                    else if(d.edgeType === "always"){
-                                        return "#337ab7";
+                                    else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                        return "#d9534f";
+                                    }
+                                    else {
+                                        return "#D7D7D7";
                                     }
                                 }
                                 else {
@@ -593,15 +605,15 @@ export default [ '$state','moment',
 
                 t.selectAll(".rect")
                     .attr('stroke', function(d) {
-                        if(d.edgeType) {
-                            if(d.edgeType === "failure") {
-                                return "#d9534f";
-                            }
-                            else if(d.edgeType === "success") {
+                        if(d.job && d.job.status) {
+                            if(d.job.status === "successful"){
                                 return "#5cb85c";
                             }
-                            else if(d.edgeType === "always"){
-                                return "#337ab7";
+                            else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                return "#d9534f";
+                            }
+                            else {
+                                return "#D7D7D7";
                             }
                         }
                         else {

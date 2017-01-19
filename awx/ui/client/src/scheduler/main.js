@@ -285,9 +285,7 @@ export default
                     }
                 },
                 data: {
-                    activityStream: true,
-                    activityStreamTarget: 'job',
-                    activityStreamId: 'id'
+                    activityStream: false,
                 },
                 ncyBreadcrumb: {
                     parent: 'jobs',

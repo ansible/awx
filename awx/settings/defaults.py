@@ -73,7 +73,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -154,7 +154,7 @@ STDOUT_MAX_BYTES_DISPLAY = 1048576
 
 # Returned in the header on event api lists as a recommendation to the UI
 # on how many events to display before truncating/hiding
-RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 10000
+RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 4000
 
 # The maximum size of the ansible callback event's res data structure
 # beyond this limit and the value will be removed
@@ -166,6 +166,15 @@ EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
 JOB_EVENT_WORKERS = 4
 
 JOB_EVENT_MAX_QUEUE_SIZE = 5000
+
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = True
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = True
+
+# Limit CSRF cookies to browser sessions
+CSRF_COOKIE_AGE = None
 
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
@@ -380,6 +389,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TRACK_STARTED = True
 CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
+CELERYD_POOL_RESTARTS = True
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
@@ -882,7 +892,7 @@ LOGGING = {
         },
         'http_receiver': {
             'class': 'awx.main.utils.handlers.HTTPSNullHandler',
-            'level': 'INFO',
+            'level': 'DEBUG',
             'formatter': 'json',
             'host': '',
         },
@@ -981,7 +991,7 @@ LOGGING = {
             'handlers': ['callback_receiver'],
         },
         'awx.main.tasks': {
-            'handlers': ['task_system']
+            'handlers': ['task_system'],
         },
         'awx.main.scheduler': {
             'handlers': ['task_system'],
@@ -1008,18 +1018,6 @@ LOGGING = {
             'handlers': ['http_receiver'],
             'level': 'INFO',
             'propagate': False
-        },
-        'awx.analytics.job_events': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.activity_stream': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.system_tracking': {
-            'handlers': ['null'],
-            'level': 'INFO'
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],

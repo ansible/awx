@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob
+from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob
 
 
 class Command(NoArgsCommand):
@@ -30,19 +30,22 @@ class Command(NoArgsCommand):
                     'be removed)'),
         make_option('--jobs', dest='only_jobs', action='store_true',
                     default=False,
-                    help='Only remove jobs'),
+                    help='Remove jobs'),
         make_option('--ad-hoc-commands', dest='only_ad_hoc_commands',
                     action='store_true', default=False,
-                    help='Only remove ad hoc commands'),
+                    help='Remove ad hoc commands'),
         make_option('--project-updates', dest='only_project_updates',
                     action='store_true', default=False,
-                    help='Only remove project updates'),
+                    help='Remove project updates'),
         make_option('--inventory-updates', dest='only_inventory_updates',
                     action='store_true', default=False,
-                    help='Only remove inventory updates'),
+                    help='Remove inventory updates'),
         make_option('--management-jobs', default=False,
                     action='store_true', dest='only_management_jobs',
-                    help='Only remove management jobs')
+                    help='Remove management jobs'),
+        make_option('--workflow-jobs', default=False,
+                    action='store_true', dest='only_workflow_jobs',
+                    help='Remove workflow jobs')
     )
 
     def cleanup_jobs(self):
@@ -169,6 +172,28 @@ class Command(NoArgsCommand):
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
+    def cleanup_workflow_jobs(self):
+        skipped, deleted = 0, 0
+        for workflow_job in WorkflowJob.objects.all():
+            workflow_job_display = '"{}" (started {}, {} nodes)'.format(
+                unicode(workflow_job), unicode(workflow_job.created),
+                workflow_job.workflow_nodes.count())
+            if workflow_job.status in ('pending', 'waiting', 'running'):
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s job %s', action_text, workflow_job.status, workflow_job_display)
+                skipped += 1
+            elif workflow_job.created >= self.cutoff:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, workflow_job_display)
+                skipped += 1
+            else:
+                action_text = 'would delete' if self.dry_run else 'deleting'
+                self.logger.info('%s %s', action_text, workflow_job_display)
+                if not self.dry_run:
+                    workflow_job.delete()
+                deleted += 1
+        return skipped, deleted
+
     @transaction.atomic
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
@@ -179,7 +204,7 @@ class Command(NoArgsCommand):
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
-        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs')
+        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs', 'workflow_jobs')
         models_to_cleanup = set()
         for m in model_names:
             if options.get('only_%s' % m, False):

@@ -16,7 +16,8 @@ export default ['i18n', function(i18n) {
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: {
@@ -36,8 +37,8 @@ export default ['i18n', function(i18n) {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: i18n._('Reset All'),
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',
