@@ -146,6 +146,11 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        try {
+                            schedule.extra_data = JSON.parse(schedule.extra_data);
+                        } catch(e) {
+                            // do nothing
+                        }
                         scope.extraVars = data.extra_data === '' ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
 
                         if(schedule.extra_data.hasOwnProperty('granularity')){
@@ -176,7 +181,10 @@ export default
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
                     url = params.url || null,
-                    scheduler;
+                    scheduler,
+                    job_type;
+
+                job_type = scope.parentObject.job_type;
                 if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories' && !url) {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
@@ -201,7 +209,7 @@ export default
                 }
                 else if (base === 'system_job_templates') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
-                    if($stateParams.id  === 4){
+                    if(job_type === "cleanup_facts"){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
