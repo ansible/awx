@@ -149,7 +149,6 @@ var tower = angular.module('Tower', [
     'InventoryHostsDefinition',
     'HostsHelper',
     'AWFilters',
-    'ScanJobsListDefinition',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
