@@ -11,6 +11,10 @@ export default ['i18n', function(i18n) {
         showHeader: false,
 
         fields: {
+            SOCIAL_AUTH_GITHUB_CALLBACK_URL: {
+                type: 'text',
+                reset: 'SOCIAL_AUTH_GITHUB_CALLBACK_URL'
+            },
             SOCIAL_AUTH_GITHUB_KEY: {
                 type: 'text',
                 reset: 'SOCIAL_AUTH_GITHUB_KEY'
@@ -19,6 +23,20 @@ export default ['i18n', function(i18n) {
                 type: 'sensitive',
                 hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_GITHUB_SECRET'
+            },
+            SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_GITHUB_ORGANIZATION_MAP',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            SOCIAL_AUTH_GITHUB_TEAM_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_GITHUB_TEAM_MAP',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
             }
         },
 

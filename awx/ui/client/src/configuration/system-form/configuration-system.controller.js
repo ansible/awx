@@ -130,7 +130,9 @@ export default [
                 placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
                 dataTitle: $scope.$parent.configDataResolve[key].label,
                 required: $scope.$parent.configDataResolve[key].required,
-                ngDisabled: $rootScope.user_is_system_auditor
+                ngDisabled: $rootScope.user_is_system_auditor,
+                disabled: $scope.$parent.configDataResolve[key].disabled || null,
+                readonly: $scope.$parent.configDataResolve[key].readonly || null,
             });
         }
 
