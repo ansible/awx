@@ -973,7 +973,7 @@ msgid ""
 "com%s."
 msgstr ""
 "Pour obtenir plus d'informations et voir des exemples, reportez-vous à la "
-"rubrique %Patterns sur docs.ansible.com%s."
+"rubrique %sPatterns sur docs.ansible.com%s."
 
 #: client/src/forms/JobTemplates.js:199
 #: client/src/forms/JobTemplates.js:212
@@ -1924,7 +1924,7 @@ msgid ""
 msgstr ""
 "Entrez un modèle d'hôte pour limiter davantage la liste des hôtes qui seront "
 "gérés ou attribués par le playbook. Plusieurs modèles peuvent être séparés "
-"par des % s% s ou des % s"
+"par des %s %s ou des %s"
 
 #: client/src/forms/JobTemplates.js:313
 #: client/src/forms/JobTemplates.js:321
@@ -2597,7 +2597,7 @@ msgid ""
 ""
 msgstr ""
 "Pour en savoir plus sur le token STS d'IAM, reportez-vous à la documentation "
-"d'%Amazon%s."
+"d'%sAmazon%s."
 
 #: client/src/shared/form-generator.js:848
 msgid "Toggle the display of plaintext."
