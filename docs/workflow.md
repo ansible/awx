@@ -74,7 +74,7 @@ Artifact support starts in Ansible and is carried through in Tower. The `set_sta
 * Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response. The three types of invalid associations are cycle, convergence(multiple parent) and mutex('always' XOR the rest).
 * Verify that a workflow job template can be successfully copied and the created workflow job template does not miss any field that should be copied or intentionally modified.
 * Verify that if a user has no access to any of the related resources of a workflow job template node, that node will not be copied and will have `null` as placeholder.
-* Verify that `artifact_data` is populated when `set_stats` is used in Ansible >= v2.2.1.0-0.3.rc3.
+* Verify that `artifacts` is populated when `set_stats` is used in Ansible >= v2.2.1.0-0.3.rc3.
 
 ### Task-related
 * Verify that workflow jobs can be launched by POSTing to endpoint `/workflow_job_templates/\d/launch/`.
