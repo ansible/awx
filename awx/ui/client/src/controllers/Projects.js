@@ -176,8 +176,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                     if (parseInt($state.params.project_id) === id) {
                         $state.go("^", null, { reload: true });
                     } else {
-                        // @issue: OLD SEARCH
-                        // $scope.search(list.iterator);
+                        $state.go('.', null, {reload: true});
                     }
                 })
                 .error(function (data, status) {
