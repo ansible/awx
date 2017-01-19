@@ -53,6 +53,9 @@ Workflow job templates can be copied by POSTing to endpoint `/workflow_job_templ
 
 Workflow jobs cannot be copied directly, instead a workflow job is implicitly copied when it needs to relaunch. Relaunching an existing workflow job is done by POSTing to endpoint `/workflow_jobs/\d+/relaunch/`. What happens next is the original workflow job is copied to create a new workflow job. The new workflow job then gets a copy of all nodes of the original as well as the topology they bear. Finally the full-fledged new workflow job is triggered to run, thus fulfilling the purpose of relaunch. Survey password-type answers should also be redacted in the relaunched version of the workflow job.
 
+### Artifacts
+Artifact support starts in Ansible and is carried through in Tower. Tower artifact support starts in Ansible with the `set_stats` module. The `set_stats` module is invoked by users to register or facts, passed in under the `data:` argument. Note that the default `set_stats` parameters are the correct ones to work with Tower (i.e. `per_host: no`). Now that facts are registered, we will describe how facts are used. In Ansible, registered facts are "returned" to the callback plugin(s) via the `playbook_on_stats` event. Ansible users can configure whether or not they wan't the facts displayed through the global `show_custom_stats` configuration. Tower uses a custom callback plugin that gathers the fact data set via `set_stats` in the `playbook_on_stats` handler and "ships" it back to Tower, saves it in the database, and makes it available on the job endpoint via the variable `artifact_data`. The semantics and usage of `artifact_data` throughout a workflow is described elsewhere in this document.
+
 ## Test Coverage
 ### CRUD-related
 * Verify that CRUD operations on all workflow resources are working properly. Note workflow job nodes cannot be created or deleted independently, but verifications are needed to make sure when a workflow job is deleted, all its related workflow job nodes are deleted.
@@ -71,6 +74,7 @@ Workflow jobs cannot be copied directly, instead a workflow job is implicitly co
 * Verify that workflow job template nodes are not allowed to have invalid association. Any attempt that causes invalidity will trigger 400-level response. The three types of invalid associations are cycle, convergence(multiple parent) and mutex('always' XOR the rest).
 * Verify that a workflow job template can be successfully copied and the created workflow job template does not miss any field that should be copied or intentionally modified.
 * Verify that if a user has no access to any of the related resources of a workflow job template node, that node will not be copied and will have `null` as placeholder.
+* Verify that `artifact_data` is populated when `set_stats` is used.
 
 ### Task-related
 * Verify that workflow jobs can be launched by POSTing to endpoint `/workflow_job_templates/\d/launch/`.
