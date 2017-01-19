@@ -819,7 +819,22 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         return []
 
     def handle_extra_data(self, extra_data):
-        return
+        if hasattr(self, 'extra_vars'):
+            extra_vars = {}
+            if isinstance(extra_data, dict):
+                extra_vars = extra_data
+            elif extra_data is None:
+                return
+            else:
+                if extra_data == "":
+                    return
+                try:
+                    extra_vars = json.loads(extra_data)
+                except Exception as e:
+                    logger.warn("Exception deserializing extra vars: " + str(e))
+            evars = self.extra_vars_dict
+            evars.update(extra_vars)
+            self.update_fields(extra_vars=json.dumps(evars))
 
     @property
     def can_start(self):

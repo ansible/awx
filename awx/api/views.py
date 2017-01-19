@@ -2969,7 +2969,7 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
 
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
-        new_job = obj.create_workflow_job(**prompted_fields)
+        new_job = obj.create_unified_job(**prompted_fields)
         new_job.signal_start(**prompted_fields)
 
         data = OrderedDict()

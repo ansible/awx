@@ -392,8 +392,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
-    def create_workflow_job(self, **kwargs):
-        workflow_job = self.create_unified_job(**kwargs)
+    def create_unified_job(self, **kwargs):
+        workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
