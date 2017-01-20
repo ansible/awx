@@ -559,16 +559,10 @@ messages:
 	fi; \
 	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
 
-# generate l10n .json
-ui-languages: $(UI_DEPS_FLAG_FILE) check-po
+# generate l10n .json .mo
+languages: $(UI_DEPS_FLAG_FILE) check-po
 	$(NPM_BIN) --prefix awx/ui run languages
-
-# generate l10n .mo
-api-languages:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py compilemessages
+	$(PYTHON) tools/scripts/compilemessages.py
 
 # End l10n TASKS
 # --------------------------------------
@@ -595,7 +589,7 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-$(UI_RELEASE_FLAG_FILE): ui-languages $(UI_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): languages $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 
