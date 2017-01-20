@@ -106,6 +106,7 @@ reports
 *.log.[0-9]
 *.results
 local/
+*.mo
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built

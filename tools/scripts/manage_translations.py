@@ -101,7 +101,8 @@ def pull(lang=None, both=None):
     Pull translations .po from Zanata
     """
 
-    command = "zanata pull --project-config %(config)s --disable-ssl-cert"
+    command = "zanata pull --project-config %(config)s --lang %(lang)s --disable-ssl-cert"
+    lang = lang[0] if lang and len(lang) > 0 else 'en-us'
 
     if MIN_TRANS_PERCENT_SETTING:
         command += " --min-doc-percent " + MIN_TRANS_PERCENT
@@ -109,12 +110,12 @@ def pull(lang=None, both=None):
         command += " --lang %s" % lang[0]
 
     if both:
-        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS},
+        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS, 'lang': lang},
                   stdout=PIPE, stderr=PIPE, shell=True)
         output, errors = p.communicate()
         _handle_response(output, errors)
 
-    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS},
+    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS, 'lang': lang},
               stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
     _handle_response(output, errors)
@@ -129,7 +130,7 @@ def push(lang=None, both=None):
         (3) only required languages should be kept enabled
     """
 
-    command = "zanata push --project-config %(config)s --force --disable-ssl-cert"
+    command = "zanata push --project-config %(config)s --push-type both --force --disable-ssl-cert"
 
     if both:
         p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS}, stdout=PIPE, stderr=PIPE, shell=True)
