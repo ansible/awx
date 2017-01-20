@@ -210,6 +210,7 @@
                         </label>
                         <div class="JobResults-resultRowText">
                             <a href="{{ project_update_link }}"
+                                ng-hide="job.summary_fields.project.scm_type===''"
                                 aw-tool-tip="View project sync results"
                                 data-placement="top">
                                 <i class="JobResults-statusResultIcon
