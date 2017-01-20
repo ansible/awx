@@ -1264,7 +1264,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += ">\n";
 
                         for (i = 0; i < field.options.length; i++) {
-                            html += "<label class=\"radio-inline\" ";
+                            html += "<label class=\"radio-inline ";
+                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\""; 
                             html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
                             html += ">";
                             html += "<input type=\"radio\" ";

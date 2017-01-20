@@ -393,18 +393,17 @@ export default ['i18n', function(i18n) {
                 type: 'radio_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
-                class: 'squeeze',
                 ngChange: "emailOptionsChange()",
                 options: [{
                     value: 'use_tls',
                     label: 'Use TLS',
                     ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'NotificationsForm-radioButtons'
                 }, {
                     value: 'use_ssl',
                     label: 'Use SSL',
                     ngShow: "notification_type.value == 'email'",
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'NotificationsForm-radioButtons'
                 }]
             }
         },
