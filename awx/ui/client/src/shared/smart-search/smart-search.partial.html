@@ -4,7 +4,8 @@
         <div class="SmartSearch-searchTermContainer">
             <!-- string search input -->
             <form name="smartSearch" class="SmartSearch-form" aw-enter-key="add(searchTerm)" novalidate>
-                <input class="SmartSearch-input" ng-model="searchTerm" placeholder="Search">
+                <input class="SmartSearch-input" ng-model="searchTerm" placeholder="{{disableSearch ? 'Cannot search running job' : 'Search'}}"
+                ng-disabled="disableSearch">
             </form>
             <div type="submit" class="SmartSearch-searchButton" ng-disabled="!searchTerm" ng-click="add(searchTerm)">
                 <i class="fa fa-search"></i>

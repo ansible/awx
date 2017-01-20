@@ -506,7 +506,9 @@
                     list="list"
                     collection="job_events"
                     dataset="job_event_dataset"
-                    search-tags="searchTags">
+                    search-tags="searchTags"
+                    disable-search="job_status == 'running' ||
+                        job_status=='pending'">
                 </smart-search>
                 <job-results-standard-out></job-results-standard-out>
             </div>

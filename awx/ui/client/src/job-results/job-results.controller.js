@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', 'i18n',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, i18n) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n) {
     var toDestroy = [];
     var cancelRequests = false;
 
@@ -9,6 +9,25 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     // this allows you to manage the timing of rest-call based events as
     // filters are updated.  see processPage for more info
     var currentContext = 1;
+    $scope.firstCounterFromSocket = -1;
+
+    // if the user enters the page mid-run, reset the search to include a param
+    // to only grab events less than the first counter from the websocket events
+    toDestroy.push($scope.$watch('firstCounterFromSocket', function(counter) {
+        if (counter > -1) {
+            // make it so that the search include a counter less than the
+            // first counter from the socket
+            let params = _.cloneDeep($stateParams.job_event_search);
+            params.counter__lte = "" + counter;
+
+            Dataset = QuerySet.search(jobData.related.job_events,
+                params);
+
+            Dataset.then(function(actualDataset) {
+                $scope.job_event_dataset = actualDataset.data;
+            });
+        }
+    }));
 
     // used for tag search
     $scope.job_event_dataset = Dataset.data;
@@ -424,57 +443,87 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // grab non-header recap lines
     toDestroy.push($scope.$watch('job_event_dataset', function(val) {
-        eventQueue.initialize();
+        if (val) {
+            eventQueue.initialize();
 
-        Object.keys($scope.events)
-            .forEach(v => {
-                // dont destroy scope events for skeleton lines
-                let name = $scope.events[v].event.name;
+            Object.keys($scope.events)
+                .forEach(v => {
+                    // dont destroy scope events for skeleton lines
+                    let name = $scope.events[v].event.name;
 
-                if (!(name === "playbook_on_play_start" ||
-                    name === "playbook_on_task_start" ||
-                    name === "playbook_on_stats")) {
-                    $scope.events[v].$destroy();
-                    $scope.events[v] = null;
-                    delete $scope.events[v];
+                    if (!(name === "playbook_on_play_start" ||
+                        name === "playbook_on_task_start" ||
+                        name === "playbook_on_stats")) {
+                        $scope.events[v].$destroy();
+                        $scope.events[v] = null;
+                        delete $scope.events[v];
+                    }
+                });
+
+            // pause websocket events from coming in to the pane
+            $scope.gotPreviouslyRanEvents = $q.defer();
+            currentContext += 1;
+
+            let context = currentContext;
+
+            $( ".JobResultsStdOut-aLineOfStdOut.not_skeleton" ).remove();
+            $scope.hasSkeleton.promise.then(() => {
+                if (val.count > parseInt(val.maxEvents)) {
+                    $(".header_task").hide();
+                    $(".header_play").hide();
+                    $scope.standardOutTooltip = '<div class="JobResults-downloadTooLarge"><div>' +
+                        i18n._('The output is too large to display. Please download.') +
+                        '</div>' +
+                        '<div class="JobResults-downloadTooLarge--icon">' +
+                        '<span class="fa-stack fa-lg">' +
+                        '<i class="fa fa-circle fa-stack-1x"></i>' +
+                        '<i class="fa fa-stack-1x icon-job-stdout-download-tooltip"></i>' +
+                        '</span>' +
+                        '</div>' +
+                        '</div>';
+
+                    if ($scope.job_status === "successful" ||
+                        $scope.job_status === "failed" ||
+                        $scope.job_status === "error" ||
+                        $scope.job_status === "canceled") {
+                        $scope.tooManyEvents = true;
+                        $scope.tooManyPastEvents = false;
+                    } else {
+                        $scope.tooManyPastEvents = true;
+                        $scope.tooManyEvents = false;
+                        $scope.gotPreviouslyRanEvents.resolve("");
+                    }
+                } else {
+                    $(".header_task").show();
+                    $(".header_play").show();
+                    $scope.tooManyEvents = false;
+                    $scope.tooManyPastEvents = false;
+                    processPage(val, context);
                 }
             });
-
-        // pause websocket events from coming in to the pane
-        $scope.gotPreviouslyRanEvents = $q.defer();
-        currentContext += 1;
-
-        let context = currentContext;
-
-        $( ".JobResultsStdOut-aLineOfStdOut.not_skeleton" ).remove();
-        $scope.hasSkeleton.promise.then(() => {
-            if (val.count > parseInt(val.maxEvents)) {
-                $(".header_task").hide();
-                $(".header_play").hide();
-                $scope.tooManyEvents = true;
-                $scope.standardOutTooltip = '<div class="JobResults-downloadTooLarge"><div>' +
-                    i18n._('The output is too large to display. Please download.') +
-                    '</div>' +
-                    '<div class="JobResults-downloadTooLarge--icon">' +
-                    '<span class="fa-stack fa-lg">' +
-                    '<i class="fa fa-circle fa-stack-1x"></i>' +
-                    '<i class="fa fa-stack-1x icon-job-stdout-download-tooltip"></i>' +
-                    '</span>' +
-                    '</div>' +
-                    '</div>';
-            } else {
-                $(".header_task").show();
-                $(".header_play").show();
-                $scope.tooManyEvents = false;
-                processPage(val, context);
-            }
-        });
+        }
     }));
 
 
 
     // Processing of job_events messages from the websocket
     toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+
+        // use the lowest counter coming over the socket to retrigger pull data
+        // to only be for stuff lower than that id
+        //
+        // only do this for entering the jobs page mid-run (thus the
+        // data.counter is 1 conditional
+        if (data.counter === 1) {
+          $scope.firstCounterFromSocket = -2;
+        }
+
+        if ($scope.firstCounterFromSocket !== -2 &&
+            $scope.firstCounterFromSocket === -1 ||
+            data.counter < $scope.firstCounterFromSocket) {
+                $scope.firstCounterFromSocket = data.counter;
+        }
+
         $q.all([$scope.gotPreviouslyRanEvents.promise,
             $scope.hasSkeleton.promise]).then(() => {
             // put the line in the
