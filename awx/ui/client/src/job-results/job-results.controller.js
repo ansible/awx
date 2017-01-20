@@ -1,7 +1,10 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', 'i18n',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, i18n) {
     var toDestroy = [];
     var cancelRequests = false;
+
+    // download stdout tooltip text
+    $scope.standardOutTooltip = i18n._('Download Output');
 
     // this allows you to manage the timing of rest-call based events as
     // filters are updated.  see processPage for more info
@@ -449,6 +452,16 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $(".header_task").hide();
                 $(".header_play").hide();
                 $scope.tooManyEvents = true;
+                $scope.standardOutTooltip = '<div class="JobResults-downloadTooLarge"><div>' +
+                    i18n._('The output is too large to display. Please download.') +
+                    '</div>' +
+                    '<div class="JobResults-downloadTooLarge--icon">' +
+                    '<span class="fa-stack fa-lg">' +
+                    '<i class="fa fa-circle fa-stack-1x"></i>' +
+                    '<i class="fa fa-stack-1x icon-job-stdout-download-tooltip"></i>' +
+                    '</span>' +
+                    '</div>' +
+                    '</div>';
             } else {
                 $(".header_task").show();
                 $(".header_play").show();

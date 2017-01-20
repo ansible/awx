@@ -488,7 +488,8 @@
                             job.status === 'canceled'"
                             href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download">
                             <button class="StandardOut-actionButton"
-                                aw-tool-tip="Download Output"
+                                aw-tool-tip="{{ standardOutTooltip }}"
+                                data-tip-watch="standardOutTooltip"
                                 data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>
