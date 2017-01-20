@@ -495,19 +495,26 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             }
 
             function _doAutoPopulate() {
-                let query = '';
+                let query = '?role_level=use_role';
 
                 if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
                     basePath = scope[attrs.watchbasepath];
+                    query = '&role_level=use_role';
                 }
                 else {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     switch(modelName) {
                         case 'credential':
-                            query = '?kind=ssh';
+                            query = '?kind=ssh&role_level=use_role';
                             break;
                         case 'network_credential':
-                            query = '?kind=net';
+                            query = '?kind=net&role_level=use_role';
+                            break;
+                        case 'organization':
+                            query = '?role_level=admin_role';
+                            break;
+                        case 'inventory_script':
+                            query = '?role_level=admin_role';
                             break;
                     }
 
@@ -517,11 +524,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 Rest.get()
                 .success(function (data) {
                     if (data.count === 1) {
-                        if(data.results[0].summary_fields.user_capabilities.edit === true){
-                            scope[modelKey] = data.results[0].name;
-                            scope[modelName] = data.results[0].id;
-                        }
-
+                        scope[modelKey] = data.results[0].name;
+                        scope[modelName] = data.results[0].id;
                     }
                 });
             }
