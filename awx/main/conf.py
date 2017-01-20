@@ -134,6 +134,7 @@ register(
 register(
     'AWX_PROOT_HIDE_PATHS',
     field_class=fields.StringListField,
+    required=False,
     label=_('Paths to hide from isolated jobs'),
     help_text=_('Additional paths to hide from isolated processes.'),
     category=_('Jobs'),
@@ -143,6 +144,7 @@ register(
 register(
     'AWX_PROOT_SHOW_PATHS',
     field_class=fields.StringListField,
+    required=False,
     label=_('Paths to expose to isolated jobs'),
     help_text=_('Whitelist of paths that would otherwise be hidden to expose to isolated jobs.'),
     category=_('Jobs'),
@@ -182,6 +184,7 @@ register(
 register(
     'AWX_ANSIBLE_CALLBACK_PLUGINS',
     field_class=fields.StringListField,
+    required=False,
     label=_('Ansible Callback Plugins'),
     help_text=_('List of paths to search for extra callback plugins to be used when running jobs.'),
     category=_('Jobs'),

@@ -45,6 +45,27 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
 
 
 @pytest.mark.django_db
+def test_jobs_settings(get, put, patch, delete, admin):
+    url = reverse('api:setting_singleton_detail', args=('jobs',))
+    get(url, user=admin, expect=200)
+    delete(url, user=admin, expect=204)
+    response = get(url, user=admin, expect=200)
+    data = dict(response.data.items())
+    put(url, user=admin, data=data, expect=200)
+    patch(url, user=admin, data={'AWX_PROOT_HIDE_PATHS': ['/home']}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == ['/home']
+    data.pop('AWX_PROOT_HIDE_PATHS')
+    data.pop('AWX_PROOT_SHOW_PATHS')
+    data.pop('AWX_ANSIBLE_CALLBACK_PLUGINS')
+    put(url, user=admin, data=data, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == []
+    assert response.data['AWX_PROOT_SHOW_PATHS'] == []
+    assert response.data['AWX_ANSIBLE_CALLBACK_PLUGINS'] == []
+
+
+@pytest.mark.django_db
 def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     url = reverse('api:setting_singleton_detail', args=('ldap',))
     get(url, user=admin, expect=404)
