@@ -210,7 +210,7 @@ export default
                             awToolTip: i18n._('Grant Permission'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
-                            ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                            ngShow: '(!is_superuser && (user_obj.summary_fields.user_capabilities.edit || canAdd))'
                         }
                     },
                     fieldActions: {
