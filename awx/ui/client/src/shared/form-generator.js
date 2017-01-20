@@ -914,10 +914,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.subCheckbox.variable + "\" ";
                             html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.subCheckbox.ngDisabled) {
+                            if (field.subCheckbox.ngDisabled !== undefined) {
                                 html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
+                            } else {
+                                html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             }
-                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
                             html += "</label>";

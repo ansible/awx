@@ -231,7 +231,8 @@ export default
                     subCheckbox: {
                         variable: 'ssh_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'ssh_password\', \'undefined\')'
+                        ngChange: 'ask(\'ssh_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
@@ -309,7 +310,8 @@ export default
                     subCheckbox: {
                         variable: 'become_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'become_password\', \'undefined\')'
+                        ngChange: 'ask(\'become_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
@@ -394,7 +396,8 @@ export default
                     subCheckbox: {
                         variable: 'vault_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'vault_password\', \'undefined\')'
+                        ngChange: 'ask(\'vault_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
