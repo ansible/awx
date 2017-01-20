@@ -25,6 +25,8 @@ describe('Service: SmartSearch', () => {
             expect(SmartSearchService.splitSearchIntoTerms('name:\'foo bar\'       description:\'bar foo\'')).toEqual(["name:\'foo bar\'", "description:\'bar foo\'"]);
             expect(SmartSearchService.splitSearchIntoTerms('name:\"foo bar\" description:\'bar foo\'')).toEqual(["name:\"foo bar\"", "description:\'bar foo\'"]);
             expect(SmartSearchService.splitSearchIntoTerms('name:\"foo bar\" foo')).toEqual(["name:\"foo bar\"", "foo"]);
+            expect(SmartSearchService.splitSearchIntoTerms('inventory:¯\_(ツ)_/¯')).toEqual(["inventory:¯\_(ツ)_/¯"]);
+            expect(SmartSearchService.splitSearchIntoTerms('inventory:¯\_(ツ)_/¯ inventory.name:¯\_(ツ)_/¯')).toEqual(["inventory:¯\_(ツ)_/¯", "inventory.name:¯\_(ツ)_/¯"]);
         });
     });
 
