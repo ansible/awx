@@ -44,7 +44,7 @@ export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
 
             queryset = _.merge($state.params[`${$scope.columnIterator}_search`], { order_by: order_by });
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            $state.go('.', { [$scope.columnIterator + '_search']: queryset });
+            $state.go('.', { [$scope.columnIterator + '_search']: queryset }, {notify: false});
             qs.search(path, queryset).then((res) =>{
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
