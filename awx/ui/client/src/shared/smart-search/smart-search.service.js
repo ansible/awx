@@ -1,7 +1,7 @@
 export default [function() {
     return {
         splitSearchIntoTerms(searchString) {
-            return searchString.match(/(?:[^\s("')]+|"[^"]*"|'[^']*')+/g);
+            return searchString.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
         },
         splitTermIntoParts(searchTerm) {
             let breakOnColon = searchTerm.match(/(?:[^:"]+|"[^"]*")+/g);
