@@ -686,10 +686,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                     interpolator = $interpolate(list.basePath);
                                     path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
                                 }
-                                // Need to delete the role_level here b/c organizations and inventory scripts
+                                // Need to change the role_level here b/c organizations and inventory scripts
                                 // don't have a "use_role", only "admin_role" and "read_role"
                                 if(list.iterator === "organization" || list.iterator === "inventory_script"){
-                                    delete $stateParams[`${list.iterator}_search`].role_level;
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                 }
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
