@@ -587,6 +587,35 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
                     query = query.replace(/\:value/, encodeURIComponent(viewValue));
+
+                    let base = ctrl.$name.split('_name')[0];
+                    if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
+                        basePath = scope[attrs.watchbasepath];
+                        query += '&role_level=use_role';
+                        query = query.replace('?', '&');
+                    }
+                    else {
+                        switch(base) {
+                            case 'credential':
+                                query += '&kind=ssh&role_level=use_role';
+                                break;
+                            case 'network_credential':
+                                query += '&kind=net&role_level=use_role';
+                                break;
+                            case 'cloud_credential':
+                                query += '&cloud=true&role_level=use_role';
+                                break;
+                            case 'organization':
+                                query += '&role_level=admin_role';
+                                break;
+                            case 'inventory_script':
+                                query += '&role_level=admin_role';
+                                break;
+                            default:
+                                query += '&role_level=use_role';
+                        }
+                    }
+
                     Rest.setUrl(`${basePath}${query}`);
                     // https://github.com/ansible/ansible-tower/issues/3549
                     // capturing both success/failure conditions in .then() promise
