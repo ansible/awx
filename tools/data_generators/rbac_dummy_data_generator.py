@@ -490,7 +490,8 @@ try:
                     if project_idx == 0 and i == 0:
                         job_template.admin_role.members.add(jt_admin)
                 project_idx += 1
-                print('')
+                if n > 0:
+                    print('')
 
             print('# Creating %d Workflow Job Templates' % n_wfjts)
             org_idx = 0
@@ -511,7 +512,8 @@ try:
                     wfjt._is_new = _
                     wfjts.append(wfjt)
                 org_idx += 1
-                print('')
+                if n:
+                    print('')
 
             print('# Creating %d Workflow Job Template nodes' % n_nodes)
             wfjt_idx = 0
@@ -561,7 +563,8 @@ try:
                             parent_node.success_nodes.add(node)
                     parent_idx = (parent_idx + 7) % len(wfjt_nodes)
                 wfjt_idx += 1
-                print('')
+                if n:
+                    print('')
 
             print('# Creating %d Labels' % n_labels)
             org_idx = 0
@@ -580,7 +583,8 @@ try:
                     )
                     labels.append(label)
                 org_idx += 1
-                print('')
+                if n:
+                    print('')
             label_gen = yield_choice(labels)
 
             print('# Adding labels to job templates')
@@ -636,10 +640,9 @@ try:
                     jobs.append(job)
                     job_i += 1
                     if not job._is_new:
-                        job_template_idx += 1
                         group_idx += 1
                         continue
-                    if i+1 == n:
+                    if i + 1 == n:
                         job_template.last_job = job
                         if job_template.pk % 5 == 0:
                             job_template.current_job = job
@@ -689,3 +692,5 @@ try:
 except Rollback:
     print('Rolled back changes')
     pass
+
+print('')

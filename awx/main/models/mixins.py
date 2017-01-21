@@ -3,7 +3,6 @@ import json
 
 # Django
 from django.db import models
-from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 
@@ -38,7 +37,6 @@ class ResourceMixin(models.Model):
         '''
         return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
-
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
         if type(accessor) == User:
@@ -50,17 +48,15 @@ class ResourceMixin(models.Model):
             ancestor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
                                                  object_id=accessor.id)
 
-        if content_types is not None:
-            return RoleAncestorEntry.objects.filter(
-                ancestor__in = ancestor_roles,
-                content_type_id__in = content_types,
-                role_field = role_field
-            ).values_list('object_id').distinct()
+        if content_types is None:
+            ct_kwarg = dict(content_type_id = ContentType.objects.get_for_model(cls).id)
+        else:
+            ct_kwarg = dict(content_type_id__in = content_types)
 
         return RoleAncestorEntry.objects.filter(
             ancestor__in = ancestor_roles,
-            content_type_id = ContentType.objects.get_for_model(cls).id,
-            role_field = role_field
+            role_field = role_field,
+            **ct_kwarg
         ).values_list('object_id').distinct()
 
 
