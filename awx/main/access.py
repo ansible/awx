@@ -1883,14 +1883,12 @@ class UnifiedJobAccess(BaseAccess):
             qs = self.model.objects.all()
         else:
             inv_pk_qs = Inventory._accessible_pk_qs(Inventory, self.user, 'read_role')
-            inv_update_qs = InventoryUpdate.objects.filter(inventory_source__inventory__id__in=inv_pk_qs)
-            ad_hoc_command_qs = AdHocCommand.objects.filter(inventory__id__in=inv_pk_qs)
             org_auditor_qs = Organization.objects.filter(
                 Q(admin_role__members=self.user) | Q(auditor_role__members=self.user))
             qs = self.model.objects.filter(
-                Q(unified_job_template__id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
-                Q(inventoryupdate__in=inv_update_qs) |
-                Q(adhoccommand__in=ad_hoc_command_qs) |
+                Q(unified_job_template_id__in=UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')) |
+                Q(inventoryupdate__inventory_source__inventory__id__in=inv_pk_qs) |
+                Q(adhoccommand__inventory__id__in=inv_pk_qs) |
                 Q(job__inventory__organization__in=org_auditor_qs) |
                 Q(job__project__organization__in=org_auditor_qs)
             )
@@ -1919,9 +1917,6 @@ class UnifiedJobAccess(BaseAccess):
         #    'job_template__credential',
         #    'job_template__cloud_credential',
         #)
-        # Maybe we can do these, like:
-        # 'projectupdate__project',
-        # 'inventoryupdate__inventory'
         return qs.all()
 
 

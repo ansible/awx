@@ -669,11 +669,11 @@ try:
             job_idx = 0
             for n in spread(n_job_events, n_jobs):
                 job = jobs[job_idx]
+                # Check if job already has events, for idempotence
                 if not job._is_new:
                     continue
                 sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
                 sys.stdout.flush()
-                # Check if job already has events, for idempotence
                 JobEvent.objects.bulk_create([
                     JobEvent(
                         created=now(),
