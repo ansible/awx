@@ -40,9 +40,56 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
          $scope.disassociateRequests = [];
 
         function init() {
-            $scope.treeDataMaster = angular.copy($scope.treeData.data);
-            $scope.showManualControls = false;
-            $scope.$broadcast("refreshWorkflowChart");
+
+            let allNodes = [];
+            let page = 1;
+
+            let buildTreeFromNodes = function(){
+                WorkflowService.buildTree({
+                    workflowNodes: allNodes
+                }).then(function(data){
+                    $scope.treeData = data;
+
+                    // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
+                    // this treeData object and removing the children object for some reason (?)
+                    // This happens on occasion and I think is a race condition (?)
+                    if(!$scope.treeData.data.children) {
+                        $scope.treeData.data.children = [];
+                    }
+
+                    $scope.treeData.workflow_job_template_obj = $scope.workflowJobTemplateObj;
+
+                    $scope.treeDataMaster = angular.copy($scope.treeData.data);
+                    $scope.showManualControls = false;
+                });
+            };
+
+            let getNodes = function(){
+                // Get the workflow nodes
+                TemplatesService.getWorkflowJobTemplateNodes($scope.workflowJobTemplateObj.id, page)
+                .then(function(data){
+                    for(var i=0; i<data.data.results.length; i++) {
+                        allNodes.push(data.data.results[i]);
+                    }
+                    if(data.data.next) {
+                        // Get the next page
+                        page++;
+                        getNodes();
+                    }
+                    else {
+                        // This is the last page
+                        buildTreeFromNodes();
+                    }
+                }, function(error){
+                    ProcessErrors($scope, error.data, error.status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to get workflow job template nodes. GET returned ' +
+                        'status: ' + error.status
+                    });
+                });
+            };
+
+            getNodes();
         }
 
         function resetNodeForm() {
@@ -155,6 +202,7 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                     data: buildSendableNodeData()
                 })
                 .then(function(data) {
+                    params.node.isNew = false;
                     continueRecursing(data.data.id);
                 }, function(error) {
                     ProcessErrors($scope, error.data, error.status, form, {

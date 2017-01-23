@@ -779,11 +779,15 @@ export default [ '$state','moment',
 
             scope.$watch('canAddWorkflowJobTemplate', function() {
                 // Redraw the graph if permissions change
-                update();
+                if(scope.treeData) {
+                    update();
+                }
             });
 
-            scope.$on('refreshWorkflowChart', function(){
-                update();
+            scope.$on('refreshWorkflowChart', function(){console.log(scope.treeData);
+                if(scope.treeData) {
+                    update();
+                }
             });
 
             scope.$on('panWorkflowChart', function(evt, params) {
@@ -796,6 +800,13 @@ export default [ '$state','moment',
 
             scope.$on('zoomWorkflowChart', function(evt, params) {
                 manualZoom(params.zoom);
+            });
+
+            let clearWatchTreeData = scope.$watch('treeData', function(newVal) {
+                if(newVal) {
+                    update();
+                    clearWatchTreeData();
+                }
             });
 
         }
