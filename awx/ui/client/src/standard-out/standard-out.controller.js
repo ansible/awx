@@ -12,7 +12,7 @@
 
 export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
-    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n) {
 
     ClearScope();
 
@@ -22,6 +22,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // This scope variable controls whether or not the left panel is shown and the right panel
     // is expanded to take up the full screen
     $scope.stdoutFullScreen = false;
+    $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
     // Listen for job status updates that may come across via sockets.  We need to check the payload
     // to see whethere the updated job is the one that we're currently looking at.
@@ -227,6 +228,13 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // Click binding for the expand/collapse button on the standard out log
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+        if ($scope.stdoutFullScreen === true) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+        } else if ($scope.stdoutFullScreen === false) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
+        }
     };
 
     $scope.deleteJob = function() {
@@ -259,4 +267,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
     '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
     'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
-    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n'];

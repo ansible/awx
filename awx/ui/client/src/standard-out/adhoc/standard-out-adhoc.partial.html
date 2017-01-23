@@ -107,7 +107,7 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">STANDARD OUT</div>
                     <div class="StandardOut-panelHeaderActions">
-                        <button class="StandardOut-actionButton" aw-tool-tip="Toggle Output" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"ng-click="toggleStdoutFullscreen()">
+                        <button class="StandardOut-actionButton" aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}" data-tip-watch="toggleStdoutFullscreenTooltip" data-placement="top" ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}" ng-click="toggleStdoutFullscreen()">
                             <i class="fa fa-arrows-alt"></i>
                         </button>
                         <a href="/api/v1/ad_hoc_commands/{{ job.id }}/stdout?format=txt_download">
