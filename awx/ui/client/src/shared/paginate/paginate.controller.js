@@ -21,7 +21,7 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
             $state.go('.', {
                 [$scope.iterator + '_search']: queryset
-            });
+            }, {notify: false});
             qs.search(path, queryset).then((res) => {
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;

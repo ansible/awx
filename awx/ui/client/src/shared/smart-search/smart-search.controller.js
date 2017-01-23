@@ -6,7 +6,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             defaults = _.find($state.$current.path, (step) => {
                 return step.params.hasOwnProperty(`${$scope.iterator}_search`);
             }).params[`${$scope.iterator}_search`].config.value,
-            queryset = $stateParams[`${$scope.iterator}_search`];
+            queryset = $stateParams[`${$scope.iterator}_search`],
+            stateChangeSuccessListener;
 
         // build $scope.tags from $stateParams.QuerySet, build fieldset key
         init();
@@ -20,6 +21,44 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
             });
+
+            function compareParams(a, b) {
+                for (let key in a) {
+                    if (!(key in b) || a[key].toString() !== b[key].toString()) {
+                        return false;
+                    }
+                }
+                for (let key in b) {
+                    if (!(key in a)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if(stateChangeSuccessListener) {
+                stateChangeSuccessListener();
+            }
+
+            stateChangeSuccessListener = $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+                // State has changed - check to see if this is a param change
+                if(fromState.name === toState.name) {
+                    if(!compareParams(fromParams[`${$scope.iterator}_search`], toParams[`${$scope.iterator}_search`])) {
+                        // Params are not the same - we need to update the search.  This should only happen when the user
+                        // hits the forward/back navigation buttons in their browser.
+                        queryset = toParams[`${$scope.iterator}_search`];
+                        qs.search(path, queryset).then((res) => {
+                            $scope.dataset = res.data;
+                            $scope.collection = res.data.results;
+                        });
+
+                        $scope.searchTerm = null;
+                        $scope.searchTags = stripDefaultParams(queryset);
+                    }
+                }
+            });
+
+            $scope.$on('$destroy', stateChangeSuccessListener);
         }
 
         // Removes state definition defaults and pagination terms
@@ -70,7 +109,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             let cleared = _.cloneDeep(defaults);
             delete cleared.page;
             queryset = cleared;
-            $state.go('.', {[$scope.iterator + '_search']: queryset});
+            $state.go('.', {[$scope.iterator + '_search']: queryset}, {notify: false});
             qs.search(path, queryset).then((res) => {
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
@@ -117,7 +156,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 }
             });
             $state.go('.', {
-                [$scope.iterator + '_search']: queryset });
+                [$scope.iterator + '_search']: queryset }, {notify: false});
             qs.search(path, queryset).then((res) => {
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
@@ -188,7 +227,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset });
+                    [$scope.iterator + '_search']: queryset }, {notify: false});
                 qs.search(path, queryset).then((res) => {
                     $scope.dataset = res.data;
                     $scope.collection = res.data.results;
@@ -208,7 +247,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             // This transition will not reload controllers/resolves/views
             // but will register new $stateParams[$scope.iterator + '_search'] terms
             $state.go('.', {
-                [$scope.iterator + '_search']: queryset });
+                [$scope.iterator + '_search']: queryset }, {notify: false});
             qs.search(path, queryset).then((res) => {
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
