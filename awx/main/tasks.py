@@ -1728,6 +1728,7 @@ class RunAdHocCommand(BaseTask):
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -1834,6 +1835,10 @@ class RunAdHocCommand(BaseTask):
 
             def ad_hoc_command_event_callback(event_data):
                 event_data.setdefault('ad_hoc_command_id', instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
                 dispatcher.dispatch(event_data)
         else:
             def ad_hoc_command_event_callback(event_data):
