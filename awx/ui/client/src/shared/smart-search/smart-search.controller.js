@@ -137,11 +137,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     else {
                         encodeParams.searchTerm = true;
                     }
-                    removed = qs.encodeParam(encodeParams);
                 }
-                else {
-                    removed = setDefaults(tagToRemove);
-                }
+                removed = qs.encodeParam(encodeParams);
             }
             _.each(removed, (value, key) => {
                 if (Array.isArray(queryset[key])){
