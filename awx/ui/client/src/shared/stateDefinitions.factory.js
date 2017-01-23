@@ -643,7 +643,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     params: {
                         [field.sourceModel + '_search']: {
-                            value: { page_size: '5' }
+                            value: {
+                                page_size: '5',
+                                role_level: 'use_role'
+                            }
                         }
                     },
                     ncyBreadcrumb: {
@@ -682,6 +685,11 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                 } else {
                                     interpolator = $interpolate(list.basePath);
                                     path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
+                                }
+                                // Need to change the role_level here b/c organizations and inventory scripts
+                                // don't have a "use_role", only "admin_role" and "read_role"
+                                if(list.iterator === "organization" || list.iterator === "inventory_script"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                 }
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }

@@ -43,11 +43,11 @@ export default
                     ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
-                    // interpolated with $rootScope
-                    basePath: "{{$rootScope.current_user.is_superuser ? 'api/v1/organizations' : $rootScope.current_user.url + 'admin_of_organizations'}}",
+                    basePath: 'organizations',
                     ngShow: 'canShareCredential',
                     label: i18n._('Organization'),
                     type: 'lookup',
+                    autopopulateLookup: false,
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',
