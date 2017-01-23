@@ -1,18 +1,18 @@
-# asasaki <asasaki@redhat.com>, 2017. #zanata
+# suanand <suanand@redhat.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-15 12:05+0530\n"
-"PO-Revision-Date: 2017-01-10 04:55+0000\n"
-"Last-Translator: asasaki <asasaki@redhat.com>\n"
+"PO-Revision-Date: 2017-01-20 12:04+0000\n"
+"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ja\n"
-"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=1; plural=0\n"
+"X-Generator: Zanata 3.9.6\n"
 
 #: api/authentication.py:67
 msgid "Invalid token header. No credentials provided."
@@ -40,13 +40,8 @@ msgid ""
 "again."
 msgstr "ユーザーが再ログインするまでに非アクティブな状態になる秒数です。"
 
-#: api/conf.py:14
-#: api/conf.py:24
-#: api/conf.py:33
-#: sso/conf.py:124
-#: sso/conf.py:135
-#: sso/conf.py:147
-#: sso/conf.py:162
+#: api/conf.py:14 api/conf.py:24 api/conf.py:33 sso/conf.py:124
+#: sso/conf.py:135 sso/conf.py:147 sso/conf.py:162
 msgid "Authentication"
 msgstr "認証"
 
@@ -136,9 +131,7 @@ msgstr "管理ジョブ"
 msgid "Workflow Job"
 msgstr "ワークフロージョブ"
 
-#: api/serializers.py:655
-#: api/serializers.py:713
-#: api/views.py:3914
+#: api/serializers.py:655 api/serializers.py:713 api/views.py:3914
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -177,8 +170,7 @@ msgstr "このプロジェクト内で利用可能な一連の Playbook。"
 msgid "Invalid port specification: %s"
 msgstr "無効なポート指定: %s"
 
-#: api/serializers.py:1206
-#: main/validators.py:192
+#: api/serializers.py:1206 main/validators.py:192
 msgid "Must be valid JSON or YAML."
 msgstr "有効な JSON または YAML である必要があります。"
 
@@ -221,8 +213,8 @@ msgstr ""
 
 #: api/serializers.py:1766
 msgid ""
-"Inherit permissions from organization roles. If provided on creation, do not "
-"give either user or team."
+"Inherit permissions from organization roles. If provided on creation, do not"
+" give either user or team."
 msgstr "組織ロールからパーミッションを継承します。作成時に提供される場合は、ユーザーまたはチームのいずれも指定しないでください。"
 
 #: api/serializers.py:1782
@@ -238,8 +230,7 @@ msgstr "認証情報の組織が設定され、一致している状態でチー
 msgid "This field is required."
 msgstr "このフィールドは必須です。"
 
-#: api/serializers.py:1889
-#: api/serializers.py:1891
+#: api/serializers.py:1889 api/serializers.py:1891
 msgid "Playbook not found for project."
 msgstr "プロジェクトの Playbook が見つかりません。"
 
@@ -247,13 +238,11 @@ msgstr "プロジェクトの Playbook が見つかりません。"
 msgid "Must select playbook for project."
 msgstr "プロジェクトの Playbook を選択してください。"
 
-#: api/serializers.py:1957
-#: main/models/jobs.py:280
+#: api/serializers.py:1957 main/models/jobs.py:280
 msgid "Scan jobs must be assigned a fixed inventory."
 msgstr "スキャンジョブに固定インベントリーが割り当てられている必要があります。"
 
-#: api/serializers.py:1959
-#: main/models/jobs.py:283
+#: api/serializers.py:1959 main/models/jobs.py:283
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr "ジョブタイプ「run」および「check」によりプロジェクトが割り当てられている必要があります。"
 
@@ -400,8 +389,8 @@ msgstr ""
 #: api/serializers.py:2978
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
-"disassociate events this is the object type that object1 is being associated "
-"with."
+"disassociate events this is the object type that object1 is being associated"
+" with."
 msgstr ""
 "作成、更新、および削除イベントの場合は設定されません。関連付けおよび関連付け解除イベントの場合、これは object1 "
 "が関連付けられるオブジェクトタイプになります。"
@@ -430,13 +419,11 @@ msgstr "お使いのライセンスではシステムトラッキングを使用
 msgid "Your license does not allow use of workflows."
 msgstr "お使いのライセンスではワークフローを使用できません。"
 
-#: api/views.py:124
-#: templates/rest_framework/api.html:28
+#: api/views.py:124 templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: api/views.py:131
-#: templates/rest_framework/api.html:4
+#: api/views.py:131 templates/rest_framework/api.html:4
 msgid "Ansible Tower REST API"
 msgstr "Ansible Tower REST API"
 
@@ -448,8 +435,7 @@ msgstr "バージョン 1"
 msgid "Ping"
 msgstr "Ping"
 
-#: api/views.py:227
-#: conf/apps.py:12
+#: api/views.py:227 conf/apps.py:12
 msgid "Configuration"
 msgstr "設定"
 
@@ -511,23 +497,19 @@ msgstr "スケジュールジョブの一覧"
 msgid "Your Tower license only permits a single organization to exist."
 msgstr "お使いの Tower ライセンスでは、単一組織のみの存在が許可されます。"
 
-#: api/views.py:932
-#: api/views.py:1284
+#: api/views.py:932 api/views.py:1284
 msgid "Role 'id' field is missing."
 msgstr "ロール「id」フィールドがありません。"
 
-#: api/views.py:938
-#: api/views.py:4182
+#: api/views.py:938 api/views.py:4182
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr "組織ロールをチームの子ロールとして割り当てることができません。"
 
-#: api/views.py:942
-#: api/views.py:4196
+#: api/views.py:942 api/views.py:4196
 msgid "You cannot grant system-level permissions to a team."
 msgstr "システムレベルのパーミッションをチームに付与できません。"
 
-#: api/views.py:949
-#: api/views.py:4188
+#: api/views.py:949 api/views.py:4188
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
@@ -541,9 +523,7 @@ msgstr "プロジェクトを削除できません。"
 msgid "Project Schedules"
 msgstr "プロジェクトのスケジュール"
 
-#: api/views.py:1168
-#: api/views.py:2252
-#: api/views.py:3225
+#: api/views.py:1168 api/views.py:2252 api/views.py:3225
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr "関連付けられたワークフロージョブが実行中の場合、ジョブリソースを削除できません。"
 
@@ -551,25 +531,21 @@ msgstr "関連付けられたワークフロージョブが実行中の場合、
 msgid "Me"
 msgstr "自分"
 
-#: api/views.py:1288
-#: api/views.py:4137
+#: api/views.py:1288 api/views.py:4137
 msgid "You may not perform any action with your own admin_role."
 msgstr "独自の admin_role でアクションを実行することはできません。"
 
-#: api/views.py:1294
-#: api/views.py:4141
+#: api/views.py:1294 api/views.py:4141
 msgid "You may not change the membership of a users admin_role"
 msgstr "ユーザーの admin_role のメンバーシップを変更することはできません"
 
-#: api/views.py:1299
-#: api/views.py:4146
+#: api/views.py:1299 api/views.py:4146
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr "認証情報の組織に属さないユーザーに認証情報のアクセス権を付与することはできません"
 
-#: api/views.py:1303
-#: api/views.py:4150
+#: api/views.py:1303 api/views.py:4150
 msgid "You cannot grant private credential access to another user"
 msgstr "非公開の認証情報のアクセス権を別のユーザーに付与することはできません"
 
@@ -610,8 +586,7 @@ msgstr "ソースが {} のいずれかである場合、通知テンプレー�
 msgid "Job Template Schedules"
 msgstr "ジョブテンプレートスケジュール"
 
-#: api/views.py:2399
-#: api/views.py:2409
+#: api/views.py:2399 api/views.py:2409
 msgid "Your license does not allow adding surveys."
 msgstr "お使いのライセンスでは Survey を追加できません。"
 
@@ -689,8 +664,7 @@ msgstr "ジョブの開始時にエラーが発生しました!"
 msgid "Workflow Job Template Schedules"
 msgstr "ワークフロージョブテンプレートのスケジュール"
 
-#: api/views.py:3131
-#: api/views.py:3853
+#: api/views.py:3131 api/views.py:3853
 msgid "Superuser privileges needed."
 msgstr "スーパーユーザー権限が必要です。"
 
@@ -887,8 +861,7 @@ msgstr "Cow Selection"
 msgid "Select which cow to use with cowsay when running jobs."
 msgstr "ジョブの実行時に cowsay で使用する cow を選択します。"
 
-#: conf/conf.py:54
-#: conf/conf.py:75
+#: conf/conf.py:54 conf/conf.py:75
 msgid "Cows"
 msgstr "Cows"
 
@@ -908,9 +881,7 @@ msgstr "設定例"
 msgid "Example setting which can be different for each user."
 msgstr "ユーザーごとに異なる設定例"
 
-#: conf/conf.py:95
-#: conf/registry.py:67
-#: conf/views.py:46
+#: conf/conf.py:95 conf/registry.py:67 conf/views.py:46
 msgid "User"
 msgstr "ユーザー"
 
@@ -995,12 +966,8 @@ msgstr "機能 %s はアクティブなライセンスで有効にされてい�
 msgid "Features not found in active license."
 msgstr "各種機能はアクティブなライセンスにありません。"
 
-#: main/access.py:507
-#: main/access.py:574
-#: main/access.py:694
-#: main/access.py:957
-#: main/access.py:1198
-#: main/access.py:1587
+#: main/access.py:507 main/access.py:574 main/access.py:694 main/access.py:957
+#: main/access.py:1198 main/access.py:1587
 msgid "Resource is being used by running jobs"
 msgstr "リソースが実行中のジョブで使用されています"
 
@@ -1008,8 +975,7 @@ msgstr "リソースが実行中のジョブで使用されています"
 msgid "Unable to change inventory on a host."
 msgstr "ホストのインベントリーを変更できません。"
 
-#: main/access.py:630
-#: main/access.py:675
+#: main/access.py:630 main/access.py:675
 msgid "Cannot associate two items from different inventories."
 msgstr "異なるインベントリーの 2 つの項目を関連付けることはできません。"
 
@@ -1041,13 +1007,8 @@ msgstr "アクティビティーストリームの有効化"
 msgid "Enable capturing activity for the Tower activity stream."
 msgstr "Tower アクティビティーストリームのアクティビティーのキャプチャーを有効にします。"
 
-#: main/conf.py:19
-#: main/conf.py:29
-#: main/conf.py:39
-#: main/conf.py:48
-#: main/conf.py:60
-#: main/conf.py:78
-#: main/conf.py:103
+#: main/conf.py:19 main/conf.py:29 main/conf.py:39 main/conf.py:48
+#: main/conf.py:60 main/conf.py:78 main/conf.py:103
 msgid "System"
 msgstr "システム"
 
@@ -1087,8 +1048,8 @@ msgstr "Tower ホストのベース URL"
 
 #: main/conf.py:58
 msgid ""
-"This setting is used by services like notifications to render a valid url to "
-"the Tower host."
+"This setting is used by services like notifications to render a valid url to"
+" the Tower host."
 msgstr "この設定は、有効な URL を Tower ホストにレンダリングする通知などのサービスで使用されます。"
 
 #: main/conf.py:67
@@ -1097,20 +1058,16 @@ msgstr "リモートホストヘッダー"
 
 #: main/conf.py:68
 msgid ""
-"HTTP headers and meta keys to search to determine remote host name or IP. "
-"Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
-"behind a reverse proxy.\n"
+"HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy.\n"
 "\n"
-"Note: The headers will be searched in order and the first found remote host "
-"name or IP will be used.\n"
+"Note: The headers will be searched in order and the first found remote host name or IP will be used.\n"
 "\n"
 "In the below example 8.8.8.7 would be the chosen IP address.\n"
 "X-Forwarded-For: 8.8.8.7, 192.168.2.1, 127.0.0.1\n"
 "Host: 127.0.0.1\n"
 "REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR', 'REMOTE_HOST']"
 msgstr ""
-"リモートホスト名または IP を判別するために検索する HTTP "
-"ヘッダーおよびメタキーです。リバースプロキシーの後ろの場合は、\"HTTP_X_FORWARDED_FOR\" のように項目をこの一覧に追加します。\n"
+"リモートホスト名または IP を判別するために検索する HTTP ヘッダーおよびメタキーです。リバースプロキシーの後ろの場合は、\"HTTP_X_FORWARDED_FOR\" のように項目をこの一覧に追加します。\n"
 "\n"
 "注: ヘッダーが順番に検索され、最初に検出されるリモートホスト名または IP が使用されます。\n"
 "\n"
@@ -1139,18 +1096,9 @@ msgstr "アドホックジョブで許可される Ansible モジュール"
 msgid "List of modules allowed to be used by ad-hoc jobs."
 msgstr "アドホックジョブで使用できるモジュール一覧。"
 
-#: main/conf.py:112
-#: main/conf.py:121
-#: main/conf.py:130
-#: main/conf.py:139
-#: main/conf.py:148
-#: main/conf.py:158
-#: main/conf.py:168
-#: main/conf.py:178
-#: main/conf.py:187
-#: main/conf.py:199
-#: main/conf.py:211
-#: main/conf.py:223
+#: main/conf.py:112 main/conf.py:121 main/conf.py:130 main/conf.py:139
+#: main/conf.py:148 main/conf.py:158 main/conf.py:168 main/conf.py:178
+#: main/conf.py:187 main/conf.py:199 main/conf.py:211 main/conf.py:223
 msgid "Jobs"
 msgstr "ジョブ"
 
@@ -1187,8 +1135,8 @@ msgstr "分離されたジョブに公開するパス"
 
 #: main/conf.py:147
 msgid ""
-"Whitelist of paths that would otherwise be hidden to expose to isolated jobs."
-""
+"Whitelist of paths that would otherwise be hidden to expose to isolated "
+"jobs."
 msgstr "分離されたジョブに公開されないように非表示にされることがあるパスのホワイトリスト。"
 
 #: main/conf.py:156
@@ -1280,14 +1228,8 @@ msgstr "ログアグリゲーター受信ホスト"
 msgid "External host maintain a log collector to send logs to"
 msgstr "外部ホストがログの送信先のログコレクターを維持します"
 
-#: main/conf.py:233
-#: main/conf.py:242
-#: main/conf.py:252
-#: main/conf.py:261
-#: main/conf.py:271
-#: main/conf.py:286
-#: main/conf.py:297
-#: main/conf.py:306
+#: main/conf.py:233 main/conf.py:242 main/conf.py:252 main/conf.py:261
+#: main/conf.py:271 main/conf.py:286 main/conf.py:297 main/conf.py:306
 msgid "Logging"
 msgstr "ロギング"
 
@@ -1329,13 +1271,11 @@ msgstr "ログアグリゲーターにデータを送信するロガー"
 
 #: main/conf.py:279
 msgid ""
-"List of loggers that will send HTTP logs to the collector, these can include "
-"any or all of: \n"
+"List of loggers that will send HTTP logs to the collector, these can include any or all of: \n"
 "activity_stream - logs duplicate to records entered in activity stream\n"
 "job_events - callback data from Ansible job events\n"
 "system_tracking - data generated from scan jobs\n"
-"Sending generic Tower logs must be configured through local_settings."
-"pyinstead of this mechanism."
+"Sending generic Tower logs must be configured through local_settings.pyinstead of this mechanism."
 msgstr ""
 "HTTP ログをコレクターに送信するロガーの一覧です。これらには以下のいずれか、またはすべてが含まれます。\n"
 "activity_stream - アクティビティーストリームに入力されるレコードへのログの複製\n"
@@ -1389,13 +1329,11 @@ msgstr "エンティティーの別のエンティティーとの関連付けの
 msgid "No valid inventory."
 msgstr "有効なインベントリーはありません。"
 
-#: main/models/ad_hoc_commands.py:103
-#: main/models/jobs.py:163
+#: main/models/ad_hoc_commands.py:103 main/models/jobs.py:163
 msgid "You must provide a machine / SSH credential."
 msgstr "マシン/SSH 認証情報を入力してください。"
 
-#: main/models/ad_hoc_commands.py:114
-#: main/models/ad_hoc_commands.py:122
+#: main/models/ad_hoc_commands.py:114 main/models/ad_hoc_commands.py:122
 msgid "Invalid type for ad hoc command"
 msgstr "アドホックコマンドの無効なタイプ"
 
@@ -1408,66 +1346,52 @@ msgstr "アドホックコマンドのサポートされていないモジュー
 msgid "No argument passed to %s module."
 msgstr "%s モジュールに渡される引数はありません。"
 
-#: main/models/ad_hoc_commands.py:220
-#: main/models/jobs.py:767
+#: main/models/ad_hoc_commands.py:220 main/models/jobs.py:767
 msgid "Host Failed"
 msgstr "ホストの失敗"
 
-#: main/models/ad_hoc_commands.py:221
-#: main/models/jobs.py:768
+#: main/models/ad_hoc_commands.py:221 main/models/jobs.py:768
 msgid "Host OK"
 msgstr "ホスト OK"
 
-#: main/models/ad_hoc_commands.py:222
-#: main/models/jobs.py:771
+#: main/models/ad_hoc_commands.py:222 main/models/jobs.py:771
 msgid "Host Unreachable"
 msgstr "ホストに到達できません"
 
-#: main/models/ad_hoc_commands.py:227
-#: main/models/jobs.py:770
+#: main/models/ad_hoc_commands.py:227 main/models/jobs.py:770
 msgid "Host Skipped"
 msgstr "ホストがスキップされました"
 
-#: main/models/ad_hoc_commands.py:237
-#: main/models/jobs.py:798
+#: main/models/ad_hoc_commands.py:237 main/models/jobs.py:798
 msgid "Debug"
 msgstr "デバッグ"
 
-#: main/models/ad_hoc_commands.py:238
-#: main/models/jobs.py:799
+#: main/models/ad_hoc_commands.py:238 main/models/jobs.py:799
 msgid "Verbose"
 msgstr "詳細"
 
-#: main/models/ad_hoc_commands.py:239
-#: main/models/jobs.py:800
+#: main/models/ad_hoc_commands.py:239 main/models/jobs.py:800
 msgid "Deprecated"
 msgstr "非推奨"
 
-#: main/models/ad_hoc_commands.py:240
-#: main/models/jobs.py:801
+#: main/models/ad_hoc_commands.py:240 main/models/jobs.py:801
 msgid "Warning"
 msgstr "警告"
 
-#: main/models/ad_hoc_commands.py:241
-#: main/models/jobs.py:802
+#: main/models/ad_hoc_commands.py:241 main/models/jobs.py:802
 msgid "System Warning"
 msgstr "システム警告"
 
-#: main/models/ad_hoc_commands.py:242
-#: main/models/jobs.py:803
+#: main/models/ad_hoc_commands.py:242 main/models/jobs.py:803
 #: main/models/unified_jobs.py:62
 msgid "Error"
 msgstr "エラー"
 
-#: main/models/base.py:45
-#: main/models/base.py:51
-#: main/models/base.py:56
+#: main/models/base.py:45 main/models/base.py:51 main/models/base.py:56
 msgid "Run"
 msgstr "実行"
 
-#: main/models/base.py:46
-#: main/models/base.py:52
-#: main/models/base.py:57
+#: main/models/base.py:46 main/models/base.py:52 main/models/base.py:57
 msgid "Check"
 msgstr "チェック"
 
@@ -1523,38 +1447,31 @@ msgstr "Amazon Web サービス"
 msgid "Rackspace"
 msgstr "Rackspace"
 
-#: main/models/credential.py:38
-#: main/models/inventory.py:713
+#: main/models/credential.py:38 main/models/inventory.py:713
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: main/models/credential.py:39
-#: main/models/inventory.py:714
+#: main/models/credential.py:39 main/models/inventory.py:714
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: main/models/credential.py:40
-#: main/models/inventory.py:715
+#: main/models/credential.py:40 main/models/inventory.py:715
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: main/models/credential.py:41
-#: main/models/inventory.py:710
+#: main/models/credential.py:41 main/models/inventory.py:710
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: main/models/credential.py:42
-#: main/models/inventory.py:711
+#: main/models/credential.py:42 main/models/inventory.py:711
 msgid "Microsoft Azure Classic (deprecated)"
 msgstr "Microsoft Azure Classic (非推奨)"
 
-#: main/models/credential.py:43
-#: main/models/inventory.py:712
+#: main/models/credential.py:43 main/models/inventory.py:712
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: main/models/credential.py:44
-#: main/models/inventory.py:716
+#: main/models/credential.py:44 main/models/inventory.py:716
 msgid "OpenStack"
 msgstr "OpenStack"
 
@@ -1864,8 +1781,7 @@ msgstr "このグループが外部インベントリーソースから作成/�
 msgid "Inventory source(s) that created or modified this group."
 msgstr "このグループを作成または変更したインベントリーソース。"
 
-#: main/models/inventory.py:706
-#: main/models/projects.py:42
+#: main/models/inventory.py:706 main/models/projects.py:42
 #: main/models/unified_jobs.py:386
 msgid "Manual"
 msgstr "手動"
@@ -1961,18 +1877,18 @@ msgstr "認証情報がクラウドソースに必要です。"
 
 #: main/models/inventory.py:1005
 #, python-format
-msgid "Invalid %(source)s region: %(region)s"
-msgstr "無効な %(source)s リージョン: %(region)s"
+msgid "Invalid %(source)s region%(plural)s: %(region)s"
+msgstr ""
 
 #: main/models/inventory.py:1031
 #, python-format
-msgid "Invalid filter expression: %(filter)s"
-msgstr "無効なフィルター式: %(filter)s"
+msgid "Invalid filter expression%(plural)s: %(filter)s"
+msgstr ""
 
 #: main/models/inventory.py:1050
 #, python-format
-msgid "Invalid group by choice: %(choice)s"
-msgstr "無効なグループ (選択による): %(choice)s"
+msgid "Invalid group by choice%(plural)s: %(choice)s"
+msgstr ""
 
 #: main/models/inventory.py:1198
 #, python-format
@@ -2014,8 +1930,7 @@ msgstr "スキャンジョブから/への job_type を上書きを実行でき�
 msgid "Inventory cannot be changed at runtime for scan jobs."
 msgstr "インベントリーはスキャンジョブの実行時に変更できません。"
 
-#: main/models/jobs.py:433
-#: main/models/projects.py:243
+#: main/models/jobs.py:433 main/models/projects.py:243
 msgid "SCM Revision"
 msgstr "SCM リビジョン"
 
@@ -2037,8 +1952,7 @@ msgstr "ジョブホストの概要"
 msgid "Host Failure"
 msgstr "ホストの失敗"
 
-#: main/models/jobs.py:772
-#: main/models/jobs.py:786
+#: main/models/jobs.py:772 main/models/jobs.py:786
 msgid "No Hosts Remaining"
 msgstr "残りのホストがありません"
 
@@ -2162,18 +2076,15 @@ msgstr "Webhook"
 msgid "IRC"
 msgstr "IRC"
 
-#: main/models/notifications.py:127
-#: main/models/unified_jobs.py:57
+#: main/models/notifications.py:127 main/models/unified_jobs.py:57
 msgid "Pending"
 msgstr "保留中"
 
-#: main/models/notifications.py:128
-#: main/models/unified_jobs.py:60
+#: main/models/notifications.py:128 main/models/unified_jobs.py:60
 msgid "Successful"
 msgstr "成功"
 
-#: main/models/notifications.py:129
-#: main/models/unified_jobs.py:61
+#: main/models/notifications.py:129 main/models/unified_jobs.py:61
 msgid "Failed"
 msgstr "失敗"
 
@@ -2347,8 +2258,7 @@ msgstr "取り消されました"
 msgid "Never Updated"
 msgstr "更新されていません"
 
-#: main/models/unified_jobs.py:71
-#: ui/templates/ui/index.html:85
+#: main/models/unified_jobs.py:71 ui/templates/ui/index.html:85
 #: ui/templates/ui/index.html.py:104
 msgid "OK"
 msgstr "OK"
@@ -2403,15 +2313,16 @@ msgstr "ジョブ実行の経過時間 (秒単位)"
 
 #: main/models/unified_jobs.py:497
 msgid ""
-"A status field to indicate the state of the job if it wasn't able to run and "
-"capture stdout"
+"A status field to indicate the state of the job if it wasn't able to run and"
+" capture stdout"
 msgstr "stdout の実行およびキャプチャーを実行できない場合のジョブの状態を示すための状態フィールド"
 
-#: main/notifications/base.py:17
-#: main/notifications/email_backend.py:28
-msgid "{} #{} had status {} on Ansible Tower, view details at {}\n"
+#: main/notifications/base.py:17 main/notifications/email_backend.py:28
+msgid ""
+"{} #{} had status {} on Ansible Tower, view details at {}\n"
 "\n"
-msgstr "{} #{} には Ansible Tower のステータス {} があります。詳細については {} で確認してください\n"
+msgstr ""
+"{} #{} には Ansible Tower のステータス {} があります。詳細については {} で確認してください\n"
 "\n"
 
 #: main/notifications/hipchat_backend.py:46
@@ -2467,15 +2378,12 @@ msgstr "\"%s\" をブール値に変換できません"
 msgid "Unsupported SCM type \"%s\""
 msgstr "サポートされない SCM タイプ \"%s\""
 
-#: main/utils/common.py:249
-#: main/utils/common.py:261
-#: main/utils/common.py:280
+#: main/utils/common.py:249 main/utils/common.py:261 main/utils/common.py:280
 #, python-format
 msgid "Invalid %s URL"
 msgstr "無効な %s URL"
 
-#: main/utils/common.py:251
-#: main/utils/common.py:289
+#: main/utils/common.py:251 main/utils/common.py:289
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "サポートされていない %s URL"
@@ -2530,8 +2438,8 @@ msgstr "1 つ以上の秘密鍵が必要です。"
 #: main/validators.py:126
 #, python-format
 msgid ""
-"At least %(min_keys)d private keys are required, only %(key_count)d provided."
-""
+"At least %(min_keys)d private keys are required, only %(key_count)d "
+"provided."
 msgstr "%(min_keys)d 以上の秘密鍵が必要です。提供数: %(key_count)d のみ。"
 
 #: main/validators.py:129
@@ -2568,8 +2476,8 @@ msgstr "証明書が 1 つのみ許可されます。提供数: %(cert_count)d"
 #: main/validators.py:145
 #, python-format
 msgid ""
-"No more than %(max_certs)d certificates are allowed, %(cert_count)d provided."
-""
+"No more than %(max_certs)d certificates are allowed, %(cert_count)d "
+"provided."
 msgstr "%(max_certs)d を超える証明書は許可されません。提供数: %(cert_count)d"
 
 #: main/views.py:20
@@ -2608,187 +2516,187 @@ msgstr "サーバーエラー"
 msgid "A server error has occurred."
 msgstr "サーバーエラーが発生しました。"
 
-#: settings/defaults.py:593
+#: settings/defaults.py:600
 msgid "Chicago"
 msgstr "シカゴ"
 
-#: settings/defaults.py:594
+#: settings/defaults.py:601
 msgid "Dallas/Ft. Worth"
 msgstr "ダラス/フォートワース"
 
-#: settings/defaults.py:595
+#: settings/defaults.py:602
 msgid "Northern Virginia"
 msgstr "北バージニア"
 
-#: settings/defaults.py:596
+#: settings/defaults.py:603
 msgid "London"
 msgstr "ロンドン"
 
-#: settings/defaults.py:597
+#: settings/defaults.py:604
 msgid "Sydney"
 msgstr "シドニー"
 
-#: settings/defaults.py:598
+#: settings/defaults.py:605
 msgid "Hong Kong"
 msgstr "香港"
 
-#: settings/defaults.py:625
+#: settings/defaults.py:632
 msgid "US East (Northern Virginia)"
 msgstr "米国東部 (バージニア北部)"
 
-#: settings/defaults.py:626
+#: settings/defaults.py:633
 msgid "US East (Ohio)"
 msgstr "米国東部 (オハイオ)"
 
-#: settings/defaults.py:627
+#: settings/defaults.py:634
 msgid "US West (Oregon)"
 msgstr "米国西部 (オレゴン)"
 
-#: settings/defaults.py:628
+#: settings/defaults.py:635
 msgid "US West (Northern California)"
 msgstr "米国西部 (北カリフォルニア)"
 
-#: settings/defaults.py:629
+#: settings/defaults.py:636
 msgid "EU (Frankfurt)"
 msgstr "EU (フランクフルト)"
 
-#: settings/defaults.py:630
+#: settings/defaults.py:637
 msgid "EU (Ireland)"
 msgstr "EU (アイルランド)"
 
-#: settings/defaults.py:631
+#: settings/defaults.py:638
 msgid "Asia Pacific (Singapore)"
 msgstr "アジア太平洋 (シンガポール)"
 
-#: settings/defaults.py:632
+#: settings/defaults.py:639
 msgid "Asia Pacific (Sydney)"
 msgstr "アジア太平洋 (シドニー)"
 
-#: settings/defaults.py:633
+#: settings/defaults.py:640
 msgid "Asia Pacific (Tokyo)"
 msgstr "アジア太平洋 (東京)"
 
-#: settings/defaults.py:634
+#: settings/defaults.py:641
 msgid "Asia Pacific (Seoul)"
 msgstr "アジア太平洋 (ソウル)"
 
-#: settings/defaults.py:635
+#: settings/defaults.py:642
 msgid "Asia Pacific (Mumbai)"
 msgstr "アジア太平洋 (ムンバイ)"
 
-#: settings/defaults.py:636
+#: settings/defaults.py:643
 msgid "South America (Sao Paulo)"
 msgstr "南アメリカ (サンパウロ)"
 
-#: settings/defaults.py:637
+#: settings/defaults.py:644
 msgid "US West (GovCloud)"
 msgstr "米国西部 (GovCloud)"
 
-#: settings/defaults.py:638
+#: settings/defaults.py:645
 msgid "China (Beijing)"
 msgstr "中国 (北京)"
 
-#: settings/defaults.py:687
+#: settings/defaults.py:694
 msgid "US East (B)"
 msgstr "米国東部 (B)"
 
-#: settings/defaults.py:688
+#: settings/defaults.py:695
 msgid "US East (C)"
 msgstr "米国東部 (C)"
 
-#: settings/defaults.py:689
+#: settings/defaults.py:696
 msgid "US East (D)"
 msgstr "米国東部 (D)"
 
-#: settings/defaults.py:690
+#: settings/defaults.py:697
 msgid "US Central (A)"
 msgstr "米国中部 (A)"
 
-#: settings/defaults.py:691
+#: settings/defaults.py:698
 msgid "US Central (B)"
 msgstr "米国中部 (B)"
 
-#: settings/defaults.py:692
+#: settings/defaults.py:699
 msgid "US Central (C)"
 msgstr "米国中部 (C)"
 
-#: settings/defaults.py:693
+#: settings/defaults.py:700
 msgid "US Central (F)"
 msgstr "米国中部 (F)"
 
-#: settings/defaults.py:694
+#: settings/defaults.py:701
 msgid "Europe West (B)"
 msgstr "欧州西部 (B)"
 
-#: settings/defaults.py:695
+#: settings/defaults.py:702
 msgid "Europe West (C)"
 msgstr "欧州西部 (C)"
 
-#: settings/defaults.py:696
+#: settings/defaults.py:703
 msgid "Europe West (D)"
 msgstr "欧州西部 (D)"
 
-#: settings/defaults.py:697
+#: settings/defaults.py:704
 msgid "Asia East (A)"
 msgstr "アジア東部 (A)"
 
-#: settings/defaults.py:698
+#: settings/defaults.py:705
 msgid "Asia East (B)"
 msgstr "アジア東部 (B)"
 
-#: settings/defaults.py:699
+#: settings/defaults.py:706
 msgid "Asia East (C)"
 msgstr "アジア東部 (C)"
 
-#: settings/defaults.py:723
+#: settings/defaults.py:730
 msgid "US Central"
 msgstr "米国中部"
 
-#: settings/defaults.py:724
+#: settings/defaults.py:731
 msgid "US East"
 msgstr "米国東部"
 
-#: settings/defaults.py:725
+#: settings/defaults.py:732
 msgid "US East 2"
 msgstr "米国東部 2"
 
-#: settings/defaults.py:726
+#: settings/defaults.py:733
 msgid "US North Central"
 msgstr "米国中北部"
 
-#: settings/defaults.py:727
+#: settings/defaults.py:734
 msgid "US South Central"
 msgstr "米国中南部"
 
-#: settings/defaults.py:728
+#: settings/defaults.py:735
 msgid "US West"
 msgstr "米国西部"
 
-#: settings/defaults.py:729
+#: settings/defaults.py:736
 msgid "Europe North"
 msgstr "欧州北部"
 
-#: settings/defaults.py:730
+#: settings/defaults.py:737
 msgid "Europe West"
 msgstr "欧州西部"
 
-#: settings/defaults.py:731
+#: settings/defaults.py:738
 msgid "Asia Pacific East"
 msgstr "アジア太平洋東部"
 
-#: settings/defaults.py:732
+#: settings/defaults.py:739
 msgid "Asia Pacific Southeast"
 msgstr "アジア太平洋南東部"
 
-#: settings/defaults.py:733
+#: settings/defaults.py:740
 msgid "Japan East"
 msgstr "日本東部"
 
-#: settings/defaults.py:734
+#: settings/defaults.py:741
 msgid "Japan West"
 msgstr "日本西部"
 
-#: settings/defaults.py:735
+#: settings/defaults.py:742
 msgid "Brazil South"
 msgstr "ブラジル南部"
 
@@ -2816,16 +2724,13 @@ msgid ""
 "  the organization.\n"
 "  If a string or list of strings, specifies the usernames and emails for\n"
 "  users who will be added to the organization. Strings in the format\n"
-"  \"/<pattern>/<flags>\" will be interpreted as JavaScript regular "
-"expressions and\n"
-"  may also be used instead of string literals; only \"i\" and \"m\" are "
-"supported\n"
+"  \"/<pattern>/<flags>\" will be interpreted as JavaScript regular expressions and\n"
+"  may also be used instead of string literals; only \"i\" and \"m\" are supported\n"
 "  for flags.\n"
 "- remove_admins: True/False. Defaults to True.\n"
 "  If True, a user who does not match will be removed from the organization's\n"
 "  administrative list.\n"
-"- users: None, True/False, string or list of strings. Same rules apply as "
-"for\n"
+"- users: None, True/False, string or list of strings. Same rules apply as for\n"
 "  admins.\n"
 "- remove_users: True/False. Defaults to True. Same rules as apply for \n"
 "  remove_admins."
@@ -2872,10 +2777,8 @@ msgid ""
 "  members.\n"
 "  If a string or list of strings, specifies expressions used to match users.\n"
 "  User will be added as a team member if the username or email matches.\n"
-"  Strings in the format \"/<pattern>/<flags>\" will be interpreted as "
-"JavaScript\n"
-"  regular expressions and may also be used instead of string literals; only "
-"\"i\"\n"
+"  Strings in the format \"/<pattern>/<flags>\" will be interpreted as JavaScript\n"
+"  regular expressions and may also be used instead of string literals; only \"i\"\n"
 "  and \"m\" are supported for flags.\n"
 "- remove: True/False. Defaults to True. If True, a user who does not match\n"
 "  the rules above will be removed from the team."
@@ -2925,9 +2828,9 @@ msgstr "ソーシャル認証ユーザーフィールド"
 
 #: sso/conf.py:158
 msgid ""
-"When set to an empty list `[]`, this setting prevents new user accounts from "
-"being created. Only users who have previously logged in using social auth or "
-"have a user account with a matching email address will be able to login."
+"When set to an empty list `[]`, this setting prevents new user accounts from"
+" being created. Only users who have previously logged in using social auth "
+"or have a user account with a matching email address will be able to login."
 msgstr ""
 "空リスト "
 "`[]`に設定される場合、この設定により新規ユーザーアカウントは作成できなくなります。ソーシャル認証を使ってログインしたことのあるユーザーまたは一致するメールアドレスのユーザーアカウントを持つユーザーのみがログインできます。"
@@ -2939,29 +2842,18 @@ msgstr "LDAP サーバー URI"
 #: sso/conf.py:177
 msgid ""
 "URI to connect to LDAP server, such as \"ldap://ldap.example.com:389\" (non-"
-"SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be "
-"specified by separating with spaces or commas. LDAP authentication is "
+"SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be"
+" specified by separating with spaces or commas. LDAP authentication is "
 "disabled if this parameter is empty."
 msgstr ""
-"\"ldap://ldap.example.com:389\" (非 SSL) または \"ldaps://ldap.example.com:636\" "
-"(SSL) などの LDAP サーバーに接続する URI です。複数の LDAP サーバーをスペースまたはカンマで区切って指定できます。LDAP "
+"\"ldap://ldap.example.com:389\" (非 SSL) または \"ldaps://ldap.example.com:636\""
+" (SSL) などの LDAP サーバーに接続する URI です。複数の LDAP サーバーをスペースまたはカンマで区切って指定できます。LDAP "
 "認証は、このパラメーターが空の場合は無効になります。"
 
-#: sso/conf.py:181
-#: sso/conf.py:199
-#: sso/conf.py:211
-#: sso/conf.py:223
-#: sso/conf.py:239
-#: sso/conf.py:258
-#: sso/conf.py:279
-#: sso/conf.py:295
-#: sso/conf.py:314
-#: sso/conf.py:331
-#: sso/conf.py:347
-#: sso/conf.py:362
-#: sso/conf.py:379
-#: sso/conf.py:417
-#: sso/conf.py:458
+#: sso/conf.py:181 sso/conf.py:199 sso/conf.py:211 sso/conf.py:223
+#: sso/conf.py:239 sso/conf.py:258 sso/conf.py:279 sso/conf.py:295
+#: sso/conf.py:314 sso/conf.py:331 sso/conf.py:347 sso/conf.py:362
+#: sso/conf.py:379 sso/conf.py:417 sso/conf.py:458
 msgid "LDAP"
 msgstr "LDAP"
 
@@ -2976,9 +2868,10 @@ msgid ""
 "specified as \"DOMAIN\\username\" for Active Directory. This is the system "
 "user account we will use to login to query LDAP for other user information."
 msgstr ""
-"すべての検索クエリーについてバインドするユーザーの DN (識別名) です。通常、形式は \"CN=Some User,OU=Users,DC="
-"example,DC=com\" になりますが、Active Directory の場合 \"DOMAIN\\username\" "
-"として指定することもできます。これは、他のユーザー情報についての LDAP クエリー実行時のログインに使用するシステムユーザーアカウントです。"
+"すべての検索クエリーについてバインドするユーザーの DN (識別名) です。通常、形式は \"CN=Some "
+"User,OU=Users,DC=example,DC=com\" になりますが、Active Directory の場合 "
+"\"DOMAIN\\username\" として指定することもできます。これは、他のユーザー情報についての LDAP "
+"クエリー実行時のログインに使用するシステムユーザーアカウントです。"
 
 #: sso/conf.py:209
 msgid "LDAP Bind Password"
@@ -3004,14 +2897,14 @@ msgstr "LDAP 接続オプション"
 msgid ""
 "Additional options to set for the LDAP connection.  LDAP referrals are "
 "disabled by default (to prevent certain LDAP queries from hanging with AD). "
-"Option names should be strings (e.g. \"OPT_REFERRALS\"). Refer to https://"
-"www.python-ldap.org/doc/html/ldap.html#options for possible options and "
-"values that can be set."
+"Option names should be strings (e.g. \"OPT_REFERRALS\"). Refer to "
+"https://www.python-ldap.org/doc/html/ldap.html#options for possible options "
+"and values that can be set."
 msgstr ""
 "LDAP 設定に設定する追加オプションです。LDAP 照会はデフォルトで無効にされます (特定の LDAP クエリーが AD "
 "でハングすることを避けるため)。オプション名は文字列でなければなりません (例: "
-"\"OPT_REFERRALS\")。可能なオプションおよび設定できる値については、https://www.python-ldap.org/doc/"
-"html/ldap.html#options を参照してください。"
+"\"OPT_REFERRALS\")。可能なオプションおよび設定できる値については、https://www.python-"
+"ldap.org/doc/html/ldap.html#options を参照してください。"
 
 #: sso/conf.py:251
 msgid "LDAP User Search"
@@ -3023,8 +2916,8 @@ msgid ""
 "will be able to login to Tower.  The user should also be mapped into an "
 "Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  "
 "If multiple search queries need to be supported use of \"LDAPUnion\" is "
-"possible. See python-ldap documentation as linked at the top of this section."
-""
+"possible. See python-ldap documentation as linked at the top of this "
+"section."
 msgstr ""
 "ユーザーを検索するための LDAP 検索クエリーです。指定パターンに一致するユーザーは Tower にログインできます。ユーザーは Tower "
 "組織にマップされている必要もあります (AUTH_LDAP_ORGANIZATION_MAP "
@@ -3043,8 +2936,8 @@ msgid ""
 "will be used instead of AUTH_LDAP_USER_SEARCH."
 msgstr ""
 "ユーザー DN "
-"の形式がすべて同じである場合のユーザー検索の代替法になります。この方法は、組織の環境で使用可能であるかどうかを検索する場合よりも効率的なユーザー検索方法になります。この設定に値がある場合、それが "
-"AUTH_LDAP_USER_SEARCH の代わりに使用されます。"
+"の形式がすべて同じである場合のユーザー検索の代替法になります。この方法は、組織の環境で使用可能であるかどうかを検索する場合よりも効率的なユーザー検索方法になります。この設定に値がある場合、それが"
+" AUTH_LDAP_USER_SEARCH の代わりに使用されます。"
 
 #: sso/conf.py:289
 msgid "LDAP User Attribute Map"
@@ -3053,8 +2946,8 @@ msgstr "LDAP ユーザー属性マップ"
 #: sso/conf.py:290
 msgid ""
 "Mapping of LDAP user schema to Tower API user attributes (key is user "
-"attribute name, value is LDAP attribute name).  The default setting is valid "
-"for ActiveDirectory but users with other LDAP configurations may need to "
+"attribute name, value is LDAP attribute name).  The default setting is valid"
+" for ActiveDirectory but users with other LDAP configurations may need to "
 "change the values (not the keys) of the dictionary/hash-table."
 msgstr ""
 "LDAP ユーザースキーマの Tower API ユーザー属性へのマッピングです (キーはユーザー属性名で、値は LDAP "
@@ -3067,9 +2960,9 @@ msgstr "LDAP グループ検索"
 
 #: sso/conf.py:310
 msgid ""
-"Users in Tower are mapped to organizations based on their membership in LDAP "
-"groups. This setting defines the LDAP search query to find groups. Note that "
-"this, unlike the user search above, does not support LDAPSearchUnion."
+"Users in Tower are mapped to organizations based on their membership in LDAP"
+" groups. This setting defines the LDAP search query to find groups. Note "
+"that this, unlike the user search above, does not support LDAPSearchUnion."
 msgstr ""
 "Tower のユーザーは LDAP グループのメンバーシップに基づいて組織にマップされます。この設定は、グループを検索できるように LDAP "
 "検索クエリーを定義します。上記のユーザー検索とは異なり、これは LDAPSearchUnion をサポートしないことに注意してください。"
@@ -3080,12 +2973,12 @@ msgstr "LDAP グループタイプ"
 
 #: sso/conf.py:328
 msgid ""
-"The group type may need to be changed based on the type of the LDAP server.  "
-"Values are listed at: http://pythonhosted.org/django-auth-ldap/groups."
-"html#types-of-groups"
+"The group type may need to be changed based on the type of the LDAP server."
+"  Values are listed at: http://pythonhosted.org/django-auth-ldap/groups.html"
+"#types-of-groups"
 msgstr ""
-"グループタイプは LDAP サーバーのタイプに基づいて変更する必要がある場合があります。値は以下に記載されています: http://"
-"pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
+"グループタイプは LDAP サーバーのタイプに基づいて変更する必要がある場合があります。値は以下に記載されています: "
+"http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
 
 #: sso/conf.py:342
 msgid "LDAP Require Group"
@@ -3135,32 +3028,19 @@ msgstr "LDAP 組織マップ"
 
 #: sso/conf.py:392
 msgid ""
-"Mapping between organization admins/users and LDAP groups. This controls "
-"what users are placed into what Tower organizations relative to their LDAP "
-"group memberships. Keys are organization names. Organizations will be "
-"created if not present. Values are dictionaries defining the options for "
-"each organization's membership.  For each organization it is possible to "
-"specify what groups are automatically users of the organization and also "
-"what groups can administer the organization.\n"
+"Mapping between organization admins/users and LDAP groups. This controls what users are placed into what Tower organizations relative to their LDAP group memberships. Keys are organization names. Organizations will be created if not present. Values are dictionaries defining the options for each organization's membership.  For each organization it is possible to specify what groups are automatically users of the organization and also what groups can administer the organization.\n"
 "\n"
 " - admins: None, True/False, string or list of strings.\n"
 "   If None, organization admins will not be updated based on LDAP values.\n"
-"   If True, all users in LDAP will automatically be added as admins of the "
-"organization.\n"
-"   If False, no LDAP users will be automatically added as admins of the "
-"organization.\n"
-"   If a string or list of strings, specifies the group DN(s) that will be "
-"added of the organization if they match any of the specified groups.\n"
+"   If True, all users in LDAP will automatically be added as admins of the organization.\n"
+"   If False, no LDAP users will be automatically added as admins of the organization.\n"
+"   If a string or list of strings, specifies the group DN(s) that will be added of the organization if they match any of the specified groups.\n"
 " - remove_admins: True/False. Defaults to True.\n"
-"   If True, a user who is not an member of the given groups will be removed "
-"from the organization's administrative list.\n"
-" - users: None, True/False, string or list of strings. Same rules apply as "
-"for admins.\n"
-" - remove_users: True/False. Defaults to True. Same rules apply as for "
-"remove_admins."
+"   If True, a user who is not an member of the given groups will be removed from the organization's administrative list.\n"
+" - users: None, True/False, string or list of strings. Same rules apply as for admins.\n"
+" - remove_users: True/False. Defaults to True. Same rules apply as for remove_admins."
 msgstr ""
-"組織管理者/ユーザーと LDAP グループ間のマッピングです。これは、LDAP グループメンバーシップと相対してどのユーザーをどの Tower "
-"組織に配置するかを制御します。キーは組織名です。組織は存在しない場合に作成されます。値は、各組織のメンバーシップのオプションを定義する辞書です。各組織については、自動的に組織のユーザーにするユーザーと組織を管理できるグループを指定できます。\n"
+"組織管理者/ユーザーと LDAP グループ間のマッピングです。これは、LDAP グループメンバーシップと相対してどのユーザーをどの Tower 組織に配置するかを制御します。キーは組織名です。組織は存在しない場合に作成されます。値は、各組織のメンバーシップのオプションを定義する辞書です。各組織については、自動的に組織のユーザーにするユーザーと組織を管理できるグループを指定できます。\n"
 "\n"
 " - admins: None、True/False、文字列または文字列の一覧。\n"
 "   None の場合、組織管理者は LDAP 値に基づいて更新されません。\n"
@@ -3170,8 +3050,7 @@ msgstr ""
 " - remove_admins: True/False。デフォルトで True に設定されます。\n"
 "   True の場合、指定グループのメンバーでないユーザーは組織の管理者リストから削除されます。\n"
 " - users: None、True/False、文字列または文字列の一覧。管理者の場合と同じルールが適用されます。\n"
-" - remove_users: True/False。デフォルトで True に設定されます。remove_admins "
-"の場合と同じルールが適用されます。"
+" - remove_users: True/False。デフォルトで True に設定されます。remove_admins の場合と同じルールが適用されます。"
 
 #: sso/conf.py:440
 msgid "LDAP Team Map"
@@ -3179,24 +3058,16 @@ msgstr "LDAP チームマップ"
 
 #: sso/conf.py:441
 msgid ""
-"Mapping between team members (users) and LDAP groups. Keys are team names "
-"(will be created if not present). Values are dictionaries of options for "
-"each team's membership, where each can contain the following parameters:\n"
+"Mapping between team members (users) and LDAP groups. Keys are team names (will be created if not present). Values are dictionaries of options for each team's membership, where each can contain the following parameters:\n"
 "\n"
-" - organization: string. The name of the organization to which the team "
-"belongs. The team will be created if the combination of organization and "
-"team name does not exist. The organization will first be created if it does "
-"not exist.\n"
+" - organization: string. The name of the organization to which the team belongs. The team will be created if the combination of organization and team name does not exist. The organization will first be created if it does not exist.\n"
 " - users: None, True/False, string or list of strings.\n"
 "   If None, team members will not be updated.\n"
 "   If True/False, all LDAP users will be added/removed as team members.\n"
-"   If a string or list of strings, specifies the group DN(s). User will be "
-"added as a team member if the user is a member of ANY of these groups.\n"
-"- remove: True/False. Defaults to True. If True, a user who is not a member "
-"of the given groups will be removed from the team."
+"   If a string or list of strings, specifies the group DN(s). User will be added as a team member if the user is a member of ANY of these groups.\n"
+"- remove: True/False. Defaults to True. If True, a user who is not a member of the given groups will be removed from the team."
 msgstr ""
-"チームメンバー (ユーザー) と LDAP グループ間のマッピングです。キーはチーム名です "
-"(存在しない場合に作成されます)。値は各チームのメンバーシップのオプションの辞書です。各値には以下のパラメーターが含まれます。\n"
+"チームメンバー (ユーザー) と LDAP グループ間のマッピングです。キーはチーム名です (存在しない場合に作成されます)。値は各チームのメンバーシップのオプションの辞書です。各値には以下のパラメーターが含まれます。\n"
 "\n"
 " - organization: 文字列。チームが属する組織の名前です。組織とチーム名の組み合わせ\n"
 "  が存在しない場合にチームが作成されます。組織がまず作成されます (存在しない場合)。\n"
@@ -3205,8 +3076,7 @@ msgstr ""
 " True/False の場合、すべての LDAP ユーザーがチームメンバーとして追加/削除されます。\n"
 "   文字列または文字列の一覧の場合、グループ DN を指定します。\n"
 " ユーザーがこれらのグループのいずれかのメンバーである場合、チームメンバーとして追加されます。\n"
-"- remove: True/False。デフォルトで True に設定されます。True "
-"の場合、指定グループのメンバーでないユーザーはチームから削除されます。"
+"- remove: True/False。デフォルトで True に設定されます。True の場合、指定グループのメンバーでないユーザーはチームから削除されます。"
 
 #: sso/conf.py:484
 msgid "RADIUS Server"
@@ -3214,13 +3084,11 @@ msgstr "RADIUS サーバー"
 
 #: sso/conf.py:485
 msgid ""
-"Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this "
-"setting is empty."
+"Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this"
+" setting is empty."
 msgstr "RADIUS サーバーのホスト名/IP です。この設定が空の場合は RADIUS 認証は無効にされます。"
 
-#: sso/conf.py:487
-#: sso/conf.py:501
-#: sso/conf.py:513
+#: sso/conf.py:487 sso/conf.py:501 sso/conf.py:513
 msgid "RADIUS"
 msgstr "RADIUS"
 
@@ -3250,17 +3118,12 @@ msgid ""
 "OAuth2 key and secret for a web application. Ensure that the Google+ API is "
 "enabled. Provide this URL as the callback URL for your application."
 msgstr ""
-"web アプリケーションの OAuth2 キーおよびシークレットを取得するために https://console.developers.google."
-"com/ にプロジェクトを作成します。Google+ API が有効であることを確認します。この URL をアプリケーションのコールバック URL "
-"として指定します。"
+"web アプリケーションの OAuth2 キーおよびシークレットを取得するために "
+"https://console.developers.google.com/ にプロジェクトを作成します。Google+ API "
+"が有効であることを確認します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:533
-#: sso/conf.py:544
-#: sso/conf.py:555
-#: sso/conf.py:568
-#: sso/conf.py:582
-#: sso/conf.py:594
-#: sso/conf.py:606
+#: sso/conf.py:533 sso/conf.py:544 sso/conf.py:555 sso/conf.py:568
+#: sso/conf.py:582 sso/conf.py:594 sso/conf.py:606
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
@@ -3270,8 +3133,8 @@ msgstr "Google OAuth2 キー"
 
 #: sso/conf.py:543
 msgid ""
-"The OAuth2 key from your web application at https://console.developers."
-"google.com/."
+"The OAuth2 key from your web application at "
+"https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 キー (https://console.developers.google.com/)。"
 
 #: sso/conf.py:553
@@ -3280,8 +3143,8 @@ msgstr "Google OAuth2 シークレット"
 
 #: sso/conf.py:554
 msgid ""
-"The OAuth2 secret from your web application at https://console.developers."
-"google.com/."
+"The OAuth2 secret from your web application at "
+"https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 シークレット (https://console.developers.google.com/)。"
 
 #: sso/conf.py:565
@@ -3326,13 +3189,11 @@ msgid ""
 "obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this "
 "URL as the callback URL for your application."
 msgstr ""
-"OAuth2 キー (クライアント ID) およびシークレット (クライアントシークレット) を取得するために https://github.com/"
-"settings/developers に開発者アプリケーションを作成します。この URL をアプリケーションのコールバック URL として指定します。"
+"OAuth2 キー (クライアント ID) およびシークレット (クライアントシークレット) を取得するために "
+"https://github.com/settings/developers に開発者アプリケーションを作成します。この URL "
+"をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:625
-#: sso/conf.py:636
-#: sso/conf.py:646
-#: sso/conf.py:658
+#: sso/conf.py:625 sso/conf.py:636 sso/conf.py:646 sso/conf.py:658
 #: sso/conf.py:670
 msgid "GitHub OAuth2"
 msgstr "GitHub OAuth2"
@@ -3366,24 +3227,20 @@ msgstr "GitHub OAuth2 チームマップ"
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr "GitHub 組織 OAuth2 コールバック URL"
 
-#: sso/conf.py:685
-#: sso/conf.py:760
+#: sso/conf.py:685 sso/conf.py:760
 msgid ""
-"Create an organization-owned application at https://github.com/organizations/"
-"<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and "
-"secret (Client Secret). Provide this URL as the callback URL for your "
-"application."
+"Create an organization-owned application at "
+"https://github.com/organizations/<yourorg>/settings/applications and obtain "
+"an OAuth2 key (Client ID) and secret (Client Secret). Provide this URL as "
+"the callback URL for your application."
 msgstr ""
-"組織が所有するアプリケーションを https://github.com/organizations/<yourorg>/settings/"
-"applications に作成し、OAuth2 キー (クライアント ID) およびシークレット (クライアントシークレット) を取得します。この "
-"URL をアプリケーションのコールバック URL として指定します。"
+"組織が所有するアプリケーションを "
+"https://github.com/organizations/<yourorg>/settings/applications に作成し、OAuth2"
+" キー (クライアント ID) およびシークレット (クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL "
+"として指定します。"
 
-#: sso/conf.py:689
-#: sso/conf.py:700
-#: sso/conf.py:710
-#: sso/conf.py:722
-#: sso/conf.py:733
-#: sso/conf.py:745
+#: sso/conf.py:689 sso/conf.py:700 sso/conf.py:710 sso/conf.py:722
+#: sso/conf.py:733 sso/conf.py:745
 msgid "GitHub Organization OAuth2"
 msgstr "GitHub 組織 OAuth2"
 
@@ -3391,8 +3248,7 @@ msgstr "GitHub 組織 OAuth2"
 msgid "GitHub Organization OAuth2 Key"
 msgstr "GitHub 組織 OAuth2 キー"
 
-#: sso/conf.py:699
-#: sso/conf.py:774
+#: sso/conf.py:699 sso/conf.py:774
 msgid "The OAuth2 key (Client ID) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 キー (クライアント ID)。"
 
@@ -3400,8 +3256,7 @@ msgstr "GitHub 組織アプリケーションからの OAuth2 キー (クライ�
 msgid "GitHub Organization OAuth2 Secret"
 msgstr "GitHub 組織 OAuth2 シークレット"
 
-#: sso/conf.py:709
-#: sso/conf.py:784
+#: sso/conf.py:709 sso/conf.py:784
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
@@ -3428,12 +3283,8 @@ msgstr "GitHub 組織 OAuth2 チームマップ"
 msgid "GitHub Team OAuth2 Callback URL"
 msgstr "GitHub チーム OAuth2 コールバック URL"
 
-#: sso/conf.py:764
-#: sso/conf.py:775
-#: sso/conf.py:785
-#: sso/conf.py:797
-#: sso/conf.py:808
-#: sso/conf.py:820
+#: sso/conf.py:764 sso/conf.py:775 sso/conf.py:785 sso/conf.py:797
+#: sso/conf.py:808 sso/conf.py:820
 msgid "GitHub Team OAuth2"
 msgstr "GitHub チーム OAuth2"
 
@@ -3451,11 +3302,11 @@ msgstr "GitHub チーム ID"
 
 #: sso/conf.py:795
 msgid ""
-"Find the numeric team ID using the Github API: http://fabian-kostadinov."
-"github.io/2015/01/16/how-to-find-a-github-team-id/."
+"Find the numeric team ID using the Github API: http://fabian-"
+"kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
 msgstr ""
-"Github API を使用して数値のチーム ID を検索します: http://fabian-kostadinov.github.io/2015/01/"
-"16/how-to-find-a-github-team-id/"
+"Github API を使用して数値のチーム ID を検索します: http://fabian-"
+"kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/"
 
 #: sso/conf.py:806
 msgid "GitHub Team OAuth2 Organization Map"
@@ -3471,19 +3322,16 @@ msgstr "Azure AD OAuth2 コールバック URL"
 
 #: sso/conf.py:835
 msgid ""
-"Register an Azure AD application as described by https://msdn.microsoft.com/"
-"en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
+"Register an Azure AD application as described by https://msdn.microsoft.com"
+"/en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
 "secret (Client Secret). Provide this URL as the callback URL for your "
 "application."
 msgstr ""
-"Azure AD アプリケーションを https://msdn.microsoft.com/en-us/library/azure/dn132599."
-"aspx の説明に従って登録し、OAuth2 キー (クライアント ID) およびシークレット (クライアントシークレット) を取得します。この URL "
-"をアプリケーションのコールバック URL として指定します。"
+"Azure AD アプリケーションを https://msdn.microsoft.com/en-"
+"us/library/azure/dn132599.aspx の説明に従って登録し、OAuth2 キー (クライアント ID) およびシークレット "
+"(クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:839
-#: sso/conf.py:850
-#: sso/conf.py:860
-#: sso/conf.py:872
+#: sso/conf.py:839 sso/conf.py:850 sso/conf.py:860 sso/conf.py:872
 #: sso/conf.py:884
 msgid "Azure AD OAuth2"
 msgstr "Azure AD OAuth2"
@@ -3525,17 +3373,9 @@ msgstr ""
 "設定済みの各アイデンティティープロバイダー (IdP) で Tower をサービスプロバイダー (SP) として登録します。SP エンティティー ID "
 "およびアプリケーションのこのコールバック URL を指定します。"
 
-#: sso/conf.py:907
-#: sso/conf.py:921
-#: sso/conf.py:934
-#: sso/conf.py:948
-#: sso/conf.py:962
-#: sso/conf.py:980
-#: sso/conf.py:1002
-#: sso/conf.py:1021
-#: sso/conf.py:1041
-#: sso/conf.py:1075
-#: sso/conf.py:1088
+#: sso/conf.py:907 sso/conf.py:921 sso/conf.py:934 sso/conf.py:948
+#: sso/conf.py:962 sso/conf.py:980 sso/conf.py:1002 sso/conf.py:1021
+#: sso/conf.py:1041 sso/conf.py:1075 sso/conf.py:1088
 msgid "SAML"
 msgstr "SAML"
 
@@ -3566,8 +3406,8 @@ msgstr "SAML サービスプロバイダーの公開証明書"
 
 #: sso/conf.py:946
 msgid ""
-"Create a keypair for Tower to use as a service provider (SP) and include the "
-"certificate content here."
+"Create a keypair for Tower to use as a service provider (SP) and include the"
+" certificate content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに証明書の内容を組み込みます。"
 
 #: sso/conf.py:959
@@ -3576,8 +3416,8 @@ msgstr "SAML サービスプロバイダーの秘密鍵｜"
 
 #: sso/conf.py:960
 msgid ""
-"Create a keypair for Tower to use as a service provider (SP) and include the "
-"private key content here."
+"Create a keypair for Tower to use as a service provider (SP) and include the"
+" private key content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに秘密鍵の内容を組み込みます。"
 
 #: sso/conf.py:978
@@ -3592,8 +3432,7 @@ msgstr "アプリの情報でこの設定を行います。"
 msgid "SAML Service Provider Technical Contact"
 msgstr "SAML サービスプロバイダーテクニカルサポートの問い合わせ先"
 
-#: sso/conf.py:1001
-#: sso/conf.py:1020
+#: sso/conf.py:1001 sso/conf.py:1020
 msgid "Configure this setting with your contact information."
 msgstr "問い合わせ先情報で設定を行います。"
 
@@ -3609,14 +3448,15 @@ msgstr "SAML で有効にされたアイデンティティープロバイダー"
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
-"data using attribute names that differ from the default OIDs (https://github."
-"com/omab/python-social-auth/blob/master/social/backends/saml.py#L16). "
-"Attribute names may be overridden for each IdP."
+"data using attribute names that differ from the default OIDs "
+"(https://github.com/omab/python-social-"
+"auth/blob/master/social/backends/saml.py#L16). Attribute names may be "
+"overridden for each IdP."
 msgstr ""
-"使用中のそれぞれのアイデンティティープロバイダー (IdP) についてのエンティティー ID、SSO URL および証明書を設定します。複数の SAML "
-"IdP がサポートされます。一部の IdP はデフォルト OID とは異なる属性名を使用してユーザーデータを提供することがあります (https://"
-"github.com/omab/python-social-auth/blob/master/social/backends/saml."
-"py#L16)。それぞれの IdP の属性名を上書きできます。"
+"使用中のそれぞれのアイデンティティープロバイダー (IdP) についてのエンティティー ID、SSO URL および証明書を設定します。複数の SAML"
+" IdP がサポートされます。一部の IdP はデフォルト OID とは異なる属性名を使用してユーザーデータを提供することがあります "
+"(https://github.com/omab/python-social-"
+"auth/blob/master/social/backends/saml.py#L16)。それぞれの IdP の属性名を上書きできます。"
 
 #: sso/conf.py:1073
 msgid "SAML Organization Map"
@@ -3627,7 +3467,6 @@ msgid "SAML Team Map"
 msgstr "SAML チームマップ"
 
 #: sso/fields.py:123
-#, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "無効な接続オプション: {invalid_options}"
 
@@ -3644,17 +3483,14 @@ msgid "Subtree"
 msgstr "サブツリー"
 
 #: sso/fields.py:202
-#, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr "3 つの項目の一覧が予期されましが、{length} が取得されました。"
 
 #: sso/fields.py:203
-#, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr "LDAPSearch のインスタンスが予期されましたが、{input_type} が取得されました。"
 
 #: sso/fields.py:239
-#, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
@@ -3662,82 +3498,64 @@ msgstr ""
 "LDAPSearch または LDAPSearchUnion のインスタンスが予期されましたが、{input_type} が取得されました。"
 
 #: sso/fields.py:266
-#, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "無効なユーザー属性: {invalid_attrs}"
 
 #: sso/fields.py:283
-#, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr "LDAPGroupType のインスタンスが予期されましたが、{input_type} が取得されました。"
 
 #: sso/fields.py:308
-#, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "無効なユーザーフラグ: \"{invalid_flag}\""
 
-#: sso/fields.py:324
-#: sso/fields.py:491
-#, python-brace-format
+#: sso/fields.py:324 sso/fields.py:491
 msgid ""
-"Expected None, True, False, a string or list of strings but got {input_type} "
-"instead."
+"Expected None, True, False, a string or list of strings but got {input_type}"
+" instead."
 msgstr "None、True、False、文字列または文字列の一覧が予期されましたが、{input_type} が取得されました。"
 
 #: sso/fields.py:360
-#, python-brace-format
 msgid "Missing key(s): {missing_keys}."
 msgstr "キーがありません: {missing_keys}"
 
 #: sso/fields.py:361
-#, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "無効なキー: {invalid_keys}"
 
-#: sso/fields.py:410
-#: sso/fields.py:527
-#, python-brace-format
+#: sso/fields.py:410 sso/fields.py:527
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr "組織マップの無効なキー: {invalid_keys}"
 
 #: sso/fields.py:428
-#, python-brace-format
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr "チームマップの必要なキーがありません: {invalid_keys}"
 
-#: sso/fields.py:429
-#: sso/fields.py:546
-#, python-brace-format
+#: sso/fields.py:429 sso/fields.py:546
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr "チームマップの無効なキー: {invalid_keys}"
 
 #: sso/fields.py:545
-#, python-brace-format
 msgid "Missing required key for team map: {missing_keys}."
 msgstr "チームマップで必要なキーがありません: {missing_keys}"
 
 #: sso/fields.py:563
-#, python-brace-format
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr "組織情報レコードで必要なキーがありません: {missing_keys}"
 
 #: sso/fields.py:576
-#, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr "組織情報の無効な言語コード: {invalid_lang_codes}"
 
 #: sso/fields.py:595
-#, python-brace-format
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr "問い合わせ先の必要なキーがありません: {missing_keys}"
 
 #: sso/fields.py:607
-#, python-brace-format
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr "IdP で必要なキーがありません: {missing_keys}"
 
 #: sso/pipeline.py:24
-#, python-brace-format
 msgid "An account cannot be found for {0}"
 msgstr "{0} のアカウントが見つかりません"
 
@@ -3745,8 +3563,7 @@ msgstr "{0} のアカウントが見つかりません"
 msgid "Your account is inactive"
 msgstr "アカウントが非アクティブです"
 
-#: sso/validators.py:19
-#: sso/validators.py:44
+#: sso/validators.py:19 sso/validators.py:44
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
 msgstr "DN にはユーザー名の \"%%(user)s\" プレースホルダーを含める必要があります: %s"
@@ -3761,8 +3578,7 @@ msgstr "無効な DN: %s"
 msgid "Invalid filter: %s"
 msgstr "無効なフィルター: %s"
 
-#: templates/error.html:4
-#: ui/templates/ui/index.html:8
+#: templates/error.html:4 ui/templates/ui/index.html:8
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
@@ -3778,8 +3594,7 @@ msgstr "Ansible Tower に戻る"
 msgid "Resize"
 msgstr "サイズの変更"
 
-#: templates/rest_framework/base.html:78
-#: templates/rest_framework/base.html:92
+#: templates/rest_framework/base.html:78 templates/rest_framework/base.html:92
 #, python-format
 msgid "Make a GET request on the %(name)s resource"
 msgstr "%(name)s リソースでの GET 要求"
@@ -3826,10 +3641,7 @@ msgstr "%(name)s リソースでの PUT 要求"
 msgid "Make a PATCH request on the %(name)s resource"
 msgstr "%(name)s リソースでの PATCH 要求"
 
-#: ui/apps.py:9
-#: ui/conf.py:22
-#: ui/conf.py:38
-#: ui/conf.py:53
+#: ui/apps.py:9 ui/conf.py:22 ui/conf.py:38 ui/conf.py:53
 msgid "UI"
 msgstr "UI"
 
@@ -3860,8 +3672,8 @@ msgstr "カスタムログイン情報"
 #: ui/conf.py:32
 msgid ""
 "If needed, you can add specific information (such as a legal notice or a "
-"disclaimer) to a text box in the login modal using this setting. Any content "
-"added must be in plain text, as custom HTML or other markup languages are "
+"disclaimer) to a text box in the login modal using this setting. Any content"
+" added must be in plain text, as custom HTML or other markup languages are "
 "not supported. If multiple paragraphs of text are needed, new lines "
 "(paragraphs) must be escaped as `\\n` within the block of text."
 msgstr ""
@@ -3876,12 +3688,12 @@ msgstr "カスタムロゴ"
 
 #: ui/conf.py:49
 msgid ""
-"To set up a custom logo, provide a file that you create. For the custom logo "
-"to look its best, use a `.png` file with a transparent background. GIF, PNG "
-"and JPEG formats are supported."
+"To set up a custom logo, provide a file that you create. For the custom logo"
+" to look its best, use a `.png` file with a transparent background. GIF, PNG"
+" and JPEG formats are supported."
 msgstr ""
-"カスタムロゴをセットアップするには、作成するファイルを指定します。カスタムロゴを最適化するには、背景が透明の「."
-"png」ファイルを使用します。GIF、PNG および JPEG 形式がサポートされます。"
+"カスタムロゴをセットアップするには、作成するファイルを指定します。カスタムロゴを最適化するには、背景が透明の「.png」ファイルを使用します。GIF、PNG"
+" および JPEG 形式がサポートされます。"
 
 #: ui/fields.py:29
 msgid ""
@@ -3896,8 +3708,9 @@ msgstr "データ URL の無効な base64 エンコードされたデータ。"
 
 #: ui/templates/ui/index.html:49
 msgid ""
-"Your session will expire in <span id=\"remaining_seconds\" class=\"IdleModal-"
-"remainingSeconds\">60</span> seconds, would you like to continue?"
+"Your session will expire in <span id=\"remaining_seconds\" class"
+"=\"IdleModal-remainingSeconds\">60</span> seconds, would you like to "
+"continue?"
 msgstr ""
 "セッションは <span id=\"remaining_seconds\" class=\"IdleModal-"
 "remainingSeconds\">60</span> 秒後に期限切れになります。続行しますか?"
@@ -3912,30 +3725,28 @@ msgstr "データの保持日数を設定します。"
 
 #: ui/templates/ui/index.html:122
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_form.days_to_keep."
-"$dirty && prompt_for_days_form.days_to_keep.$error.min\"> that is not "
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_form.days_to_keep.$dirty && "
+"prompt_for_days_form.days_to_keep.$error.min\"> that is not "
 "negative</span><span ng-show=\"prompt_for_days_form.days_to_keep.$dirty && "
-"prompt_for_days_form.days_to_keep.$error.max\"> that is lower than 9999</"
-"span>."
+"prompt_for_days_form.days_to_keep.$error.max\"> that is lower than "
+"9999</span>."
 msgstr ""
 "<span ng-show=\"prompt_for_days_form.days_to_keep.$dirty && "
-"prompt_for_days_form.days_to_keep.$error.min\">負でない</span><span ng-show="
-"\"prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form."
-"days_to_keep.$error.max\"> 9999 より値の小さい</span>整数を入力してください。"
+"prompt_for_days_form.days_to_keep.$error.min\">負でない</span><span ng-"
+"show=\"prompt_for_days_form.days_to_keep.$dirty && "
+"prompt_for_days_form.days_to_keep.$error.max\"> 9999 "
+"より値の小さい</span>整数を入力してください。"
 
 #: ui/templates/ui/index.html:127
 msgid ""
-"For facts collected older than the time period specified, save one fact scan "
-"(snapshot) per time window (frequency). For example, facts older than 30 "
-"days are purged, while one weekly fact scan is kept.\n"
+"For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.\n"
 "                    <br>\n"
-"                    <br> CAUTION: Setting both numerical variables to \"0\" "
-"will delete all facts.\n"
+"                    <br> CAUTION: Setting both numerical variables to \"0\" will delete all facts.\n"
 "                    <br>\n"
 "                    <br>"
 msgstr ""
-"指定された期間の前に収集されたファクトについては、時間枠 (頻度) ごとに 1 つのファクトスキャン (スナップショット) を保存します。たとえば、30 "
-"日間の前のファクトは削除され、1 つの週次ファクトは保持されます。\n"
+"指定された期間の前に収集されたファクトについては、時間枠 (頻度) ごとに 1 つのファクトスキャン (スナップショット) を保存します。たとえば、30 日間の前のファクトは削除され、1 つの週次ファクトは保持されます。\n"
 "                    <br>\n"
 "                    <br> 注意: どちらの数値変数も「0」に設定すると、すべてのファクトが削除されます。\n"
 "                    <br>\n"
@@ -3947,17 +3758,18 @@ msgstr "古いファクトを削除するまでの期間を選択"
 
 #: ui/templates/ui/index.html:150
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.min\"> "
-"that is not negative</span><span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.max\"> "
-"that is lower than 9999</span>."
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
+"prompt_for_days_facts_form.keep_amount.$error.min\"> that is not "
+"negative</span><span ng-show=\"prompt_for_days_facts_form.keep_amount.$dirty"
+" && prompt_for_days_facts_form.keep_amount.$error.max\"> that is lower than "
+"9999</span>."
 msgstr ""
 "<span ng-show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
-"prompt_for_days_facts_form.keep_amount.$error.min\">負でない</span><span ng-show="
-"\"prompt_for_days_facts_form.keep_amount.$dirty && "
-"prompt_for_days_facts_form.keep_amount.$error.max\"> 9999 より値の小さい</"
-"span>整数を入力してください。"
+"prompt_for_days_facts_form.keep_amount.$error.min\">負でない</span><span ng-"
+"show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
+"prompt_for_days_facts_form.keep_amount.$error.max\"> 9999 "
+"より値の小さい</span>整数を入力してください。"
 
 #: ui/templates/ui/index.html:155
 msgid "Select a frequency for snapshot retention"
@@ -3965,20 +3777,21 @@ msgstr "スナップショットの保持頻度を選択"
 
 #: ui/templates/ui/index.html:169
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"granularity_keep_amount.$dirty && prompt_for_days_facts_form."
-"granularity_keep_amount.$error.min\"> that is not negative</span><span ng-"
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
+"prompt_for_days_facts_form.granularity_keep_amount.$error.min\"> that is not"
+" negative</span><span ng-"
 "show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
 "prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> that is "
 "lower than 9999</span>."
 msgstr ""
-"<span ng-show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
-"prompt_for_days_facts_form.granularity_keep_amount.$error.min\">負でない</"
-"span><span ng-show=\"prompt_for_days_facts_form.granularity_keep_amount."
-"$dirty && prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> "
-"9999 よりも値の小さい</span>整数を入力してください。"
+"<span ng-show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty &&"
+" "
+"prompt_for_days_facts_form.granularity_keep_amount.$error.min\">負でない</span><span"
+" ng-show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
+"prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> 9999 "
+"よりも値の小さい</span>整数を入力してください。"
 
 #: ui/templates/ui/index.html:175
 msgid "working..."
 msgstr "実行中..."
-

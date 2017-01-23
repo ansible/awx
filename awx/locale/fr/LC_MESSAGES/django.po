@@ -1,19 +1,18 @@
-# Corina Roe <croe@redhat.com>, 2017. #zanata
-# Sam Friedmann <sfriedma@redhat.com>, 2017. #zanata
+# suanand <suanand@redhat.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-15 12:05+0530\n"
-"PO-Revision-Date: 2017-01-11 01:57+0000\n"
-"Last-Translator: Corina Roe <croe@redhat.com>\n"
+"PO-Revision-Date: 2017-01-20 10:45+0000\n"
+"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr\n"
-"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Generator: Zanata 3.9.6\n"
 
 #: api/authentication.py:67
 msgid "Invalid token header. No credentials provided."
@@ -42,16 +41,11 @@ msgid ""
 "Number of seconds that a user is inactive before they will need to login "
 "again."
 msgstr ""
-"Délai en secondes pendant lequel un utilisateur peut rester inactif avant de "
-"devoir se reconnecter."
+"Délai en secondes pendant lequel un utilisateur peut rester inactif avant de"
+" devoir se reconnecter."
 
-#: api/conf.py:14
-#: api/conf.py:24
-#: api/conf.py:33
-#: sso/conf.py:124
-#: sso/conf.py:135
-#: sso/conf.py:147
-#: sso/conf.py:162
+#: api/conf.py:14 api/conf.py:24 api/conf.py:33 sso/conf.py:124
+#: sso/conf.py:135 sso/conf.py:147 sso/conf.py:162
 msgid "Authentication"
 msgstr "Authentification"
 
@@ -143,9 +137,7 @@ msgstr "Tâche de gestion"
 msgid "Workflow Job"
 msgstr "Tâche de workflow"
 
-#: api/serializers.py:655
-#: api/serializers.py:713
-#: api/views.py:3914
+#: api/serializers.py:655 api/serializers.py:713 api/views.py:3914
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -185,8 +177,7 @@ msgstr "Tableau des playbooks disponibles dans ce projet."
 msgid "Invalid port specification: %s"
 msgstr "Spécification de port non valide : %s"
 
-#: api/serializers.py:1206
-#: main/validators.py:192
+#: api/serializers.py:1206 main/validators.py:192
 msgid "Must be valid JSON or YAML."
 msgstr "Syntaxe JSON ou YAML valide exigée."
 
@@ -198,8 +189,8 @@ msgstr "Nom de groupe incorrect."
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr ""
-"Le script doit commencer par une séquence hashbang : c.-à-d. ... #!/usr/bin/"
-"env python"
+"Le script doit commencer par une séquence hashbang : c.-à-d. ... "
+"#!/usr/bin/env python"
 
 #: api/serializers.py:1391
 msgid "If 'source' is 'custom', 'source_script' must be provided."
@@ -231,13 +222,13 @@ msgid ""
 "either user or organization. Only valid for creation."
 msgstr ""
 "Champ en écriture seule qui sert à ajouter une équipe au rôle de "
-"propriétaire. Si vous le définissez, n'entrez ni utilisateur ni organisation."
-" Seulement valable pour la création."
+"propriétaire. Si vous le définissez, n'entrez ni utilisateur ni "
+"organisation. Seulement valable pour la création."
 
 #: api/serializers.py:1766
 msgid ""
-"Inherit permissions from organization roles. If provided on creation, do not "
-"give either user or team."
+"Inherit permissions from organization roles. If provided on creation, do not"
+" give either user or team."
 msgstr ""
 "Hériter des permissions à partir des rôles d'organisation. Si vous le "
 "définissez lors de la création, n'entrez ni utilisateur ni équipe."
@@ -257,8 +248,7 @@ msgstr ""
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
 
-#: api/serializers.py:1889
-#: api/serializers.py:1891
+#: api/serializers.py:1889 api/serializers.py:1891
 msgid "Playbook not found for project."
 msgstr "Playbook introuvable pour le projet."
 
@@ -266,13 +256,11 @@ msgstr "Playbook introuvable pour le projet."
 msgid "Must select playbook for project."
 msgstr "Un playbook doit être sélectionné pour le project."
 
-#: api/serializers.py:1957
-#: main/models/jobs.py:280
+#: api/serializers.py:1957 main/models/jobs.py:280
 msgid "Scan jobs must be assigned a fixed inventory."
 msgstr "Un inventaire fixe doit être assigné aux tâches de scan."
 
-#: api/serializers.py:1959
-#: main/models/jobs.py:283
+#: api/serializers.py:1959 main/models/jobs.py:283
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr "Un projet doit être assigné aux types de tâche 'run' et 'check'."
 
@@ -354,8 +342,8 @@ msgstr "Le projet manuel ne peut pas avoir de calendrier défini."
 msgid ""
 "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr ""
-"DTSTART obligatoire dans rrule. La valeur doit correspondre à : DTSTART:"
-"YYYYMMDDTHHMMSSZ"
+"DTSTART obligatoire dans rrule. La valeur doit correspondre à : "
+"DTSTART:YYYYMMDDTHHMMSSZ"
 
 #: api/serializers.py:2927
 msgid "Multiple DTSTART is not supported."
@@ -430,8 +418,8 @@ msgstr ""
 #: api/serializers.py:2978
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
-"disassociate events this is the object type that object1 is being associated "
-"with."
+"disassociate events this is the object type that object1 is being associated"
+" with."
 msgstr ""
 "Laisser vide pour créer, mettre à jour et supprimer des événements. Pour "
 "associer et dissocier des événements, il s'agit du type d'objet auquel "
@@ -461,13 +449,11 @@ msgstr "Votre licence ne permet pas l'utilisation du suivi du système."
 msgid "Your license does not allow use of workflows."
 msgstr "Votre licence ne permet pas l'utilisation de workflows."
 
-#: api/views.py:124
-#: templates/rest_framework/api.html:28
+#: api/views.py:124 templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "API REST"
 
-#: api/views.py:131
-#: templates/rest_framework/api.html:4
+#: api/views.py:131 templates/rest_framework/api.html:4
 msgid "Ansible Tower REST API"
 msgstr "API REST Ansible Tower"
 
@@ -479,8 +465,7 @@ msgstr "Version 1"
 msgid "Ping"
 msgstr "Ping"
 
-#: api/views.py:227
-#: conf/apps.py:12
+#: api/views.py:227 conf/apps.py:12
 msgid "Configuration"
 msgstr "Configuration"
 
@@ -542,26 +527,22 @@ msgstr "Listes des tâches de planification"
 msgid "Your Tower license only permits a single organization to exist."
 msgstr "Votre licence Tower permet l'existence d'une seule organisation."
 
-#: api/views.py:932
-#: api/views.py:1284
+#: api/views.py:932 api/views.py:1284
 msgid "Role 'id' field is missing."
 msgstr "Le champ \"id\" du rôle est manquant."
 
-#: api/views.py:938
-#: api/views.py:4182
+#: api/views.py:938 api/views.py:4182
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr ""
 "Vous ne pouvez pas attribuer un rôle Organisation en tant que rôle enfant "
 "pour une équipe."
 
-#: api/views.py:942
-#: api/views.py:4196
+#: api/views.py:942 api/views.py:4196
 msgid "You cannot grant system-level permissions to a team."
 msgstr ""
 "Vous ne pouvez pas accorder de permissions au niveau système à une équipe."
 
-#: api/views.py:949
-#: api/views.py:4188
+#: api/views.py:949 api/views.py:4188
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
@@ -578,31 +559,26 @@ msgstr "Suppression du projet impossible."
 msgid "Project Schedules"
 msgstr "Calendriers des projets"
 
-#: api/views.py:1168
-#: api/views.py:2252
-#: api/views.py:3225
+#: api/views.py:1168 api/views.py:2252 api/views.py:3225
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr ""
-"Impossible de supprimer les ressources de tâche lorsqu'une tâche de workflow "
-"associée est en cours d'exécution."
+"Impossible de supprimer les ressources de tâche lorsqu'une tâche de workflow"
+" associée est en cours d'exécution."
 
 #: api/views.py:1244
 msgid "Me"
 msgstr "Moi-même"
 
-#: api/views.py:1288
-#: api/views.py:4137
+#: api/views.py:1288 api/views.py:4137
 msgid "You may not perform any action with your own admin_role."
 msgstr "Vous ne pouvez pas effectuer d'action avec votre propre admin_role."
 
-#: api/views.py:1294
-#: api/views.py:4141
+#: api/views.py:1294 api/views.py:4141
 msgid "You may not change the membership of a users admin_role"
 msgstr ""
 "Vous ne pouvez pas modifier l'appartenance de l'admin_role d'un utilisateur"
 
-#: api/views.py:1299
-#: api/views.py:4146
+#: api/views.py:1299 api/views.py:4146
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
@@ -611,8 +587,7 @@ msgstr ""
 "utilisateur ne figurant pas dans l'organisation d'informations "
 "d'identification."
 
-#: api/views.py:1303
-#: api/views.py:4150
+#: api/views.py:1303 api/views.py:4150
 msgid "You cannot grant private credential access to another user"
 msgstr ""
 "Vous ne pouvez pas accorder d'accès privé par informations d'identification "
@@ -657,8 +632,7 @@ msgstr ""
 msgid "Job Template Schedules"
 msgstr "Calendriers des modèles de tâche"
 
-#: api/views.py:2399
-#: api/views.py:2409
+#: api/views.py:2399 api/views.py:2409
 msgid "Your license does not allow adding surveys."
 msgstr "Votre licence ne permet pas l'ajout de questionnaires."
 
@@ -737,8 +711,7 @@ msgstr "Erreur lors du démarrage de la tâche."
 msgid "Workflow Job Template Schedules"
 msgstr "Calendriers des modèles de tâche Workflow"
 
-#: api/views.py:3131
-#: api/views.py:3853
+#: api/views.py:3131 api/views.py:3853
 msgid "Superuser privileges needed."
 msgstr "Privilèges de superutilisateur requis."
 
@@ -936,8 +909,7 @@ msgid "Select which cow to use with cowsay when running jobs."
 msgstr ""
 "Sélectionnez quel cow utiliser avec cowsay lors de l'exécution de tâches."
 
-#: conf/conf.py:54
-#: conf/conf.py:75
+#: conf/conf.py:54 conf/conf.py:75
 msgid "Cows"
 msgstr "Cows"
 
@@ -957,9 +929,7 @@ msgstr "Exemple de paramètre"
 msgid "Example setting which can be different for each user."
 msgstr "Exemple de paramètre qui peut être différent pour chaque utilisateur."
 
-#: conf/conf.py:95
-#: conf/registry.py:67
-#: conf/views.py:46
+#: conf/conf.py:95 conf/registry.py:67 conf/views.py:46
 msgid "User"
 msgstr "Utilisateur"
 
@@ -980,8 +950,8 @@ msgstr ""
 msgid ""
 "Skip over settings that would raise an error when commenting/migrating."
 msgstr ""
-"Ignorer les paramètres qui pourraient provoquer une erreur lors de la saisie "
-"de commentaires/de la migration."
+"Ignorer les paramètres qui pourraient provoquer une erreur lors de la saisie"
+" de commentaires/de la migration."
 
 #: conf/management/commands/migrate_to_database_settings.py:55
 msgid "Skip commenting out settings in files."
@@ -1047,12 +1017,8 @@ msgstr "La fonctionnalité %s n'est pas activée dans la licence active."
 msgid "Features not found in active license."
 msgstr "Fonctionnalités introuvables dans la licence active."
 
-#: main/access.py:507
-#: main/access.py:574
-#: main/access.py:694
-#: main/access.py:957
-#: main/access.py:1198
-#: main/access.py:1587
+#: main/access.py:507 main/access.py:574 main/access.py:694 main/access.py:957
+#: main/access.py:1198 main/access.py:1587
 msgid "Resource is being used by running jobs"
 msgstr "La ressource est utilisée par des tâches en cours d'exécution"
 
@@ -1060,8 +1026,7 @@ msgstr "La ressource est utilisée par des tâches en cours d'exécution"
 msgid "Unable to change inventory on a host."
 msgstr "Impossible de modifier l'inventaire sur un hôte."
 
-#: main/access.py:630
-#: main/access.py:675
+#: main/access.py:630 main/access.py:675
 msgid "Cannot associate two items from different inventories."
 msgstr "Impossible d'associer deux éléments d'inventaires différents."
 
@@ -1093,13 +1058,8 @@ msgstr "Activer le flux d'activité"
 msgid "Enable capturing activity for the Tower activity stream."
 msgstr "Activer la capture d'activités pour le flux d'activité Tower."
 
-#: main/conf.py:19
-#: main/conf.py:29
-#: main/conf.py:39
-#: main/conf.py:48
-#: main/conf.py:60
-#: main/conf.py:78
-#: main/conf.py:103
+#: main/conf.py:19 main/conf.py:29 main/conf.py:39 main/conf.py:48
+#: main/conf.py:60 main/conf.py:78 main/conf.py:103
 msgid "System"
 msgstr "Système"
 
@@ -1146,8 +1106,8 @@ msgstr "URL de base pour l'hôte Tower"
 
 #: main/conf.py:58
 msgid ""
-"This setting is used by services like notifications to render a valid url to "
-"the Tower host."
+"This setting is used by services like notifications to render a valid url to"
+" the Tower host."
 msgstr ""
 "Ce paramètre est utilisé par des services sous la forme de notifications "
 "permettant de rendre valide une URL pour l'hôte Tower."
@@ -1158,24 +1118,18 @@ msgstr "En-têtes d'hôte distant"
 
 #: main/conf.py:68
 msgid ""
-"HTTP headers and meta keys to search to determine remote host name or IP. "
-"Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if "
-"behind a reverse proxy.\n"
+"HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy.\n"
 "\n"
-"Note: The headers will be searched in order and the first found remote host "
-"name or IP will be used.\n"
+"Note: The headers will be searched in order and the first found remote host name or IP will be used.\n"
 "\n"
 "In the below example 8.8.8.7 would be the chosen IP address.\n"
 "X-Forwarded-For: 8.8.8.7, 192.168.2.1, 127.0.0.1\n"
 "Host: 127.0.0.1\n"
 "REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR', 'REMOTE_HOST']"
 msgstr ""
-"En-têtes HTTP et méta-clés à rechercher afin de déterminer le nom ou "
-"l'adresse IP d'un hôte distant. Ajoutez des éléments supplémentaires à cette "
-"liste, tels que \"HTTP_X_FORWARDED_FOR\", en présence d'un proxy inverse.\n"
+"En-têtes HTTP et méta-clés à rechercher afin de déterminer le nom ou l'adresse IP d'un hôte distant. Ajoutez des éléments supplémentaires à cette liste, tels que \"HTTP_X_FORWARDED_FOR\", en présence d'un proxy inverse.\n"
 "\n"
-"Remarque : les en-têtes seront recherchés dans l'ordre, et le premier nom ou "
-"la première adresse IP d'hôte distant trouvé(e) sera utilisé(e).\n"
+"Remarque : les en-têtes seront recherchés dans l'ordre, et le premier nom ou la première adresse IP d'hôte distant trouvé(e) sera utilisé(e).\n"
 "\n"
 "Dans l'exemple ci-dessous 8.8.8.7 est l'adresse IP choisie. \n"
 "X-Forwarded-For : 8.8.8.7, 192.168.2.1, 127.0.0.1\n"
@@ -1203,18 +1157,9 @@ msgstr "Modules Ansible autorisés pour des tâches ad hoc"
 msgid "List of modules allowed to be used by ad-hoc jobs."
 msgstr "Liste des modules que des tâches ad hoc sont autorisées à utiliser."
 
-#: main/conf.py:112
-#: main/conf.py:121
-#: main/conf.py:130
-#: main/conf.py:139
-#: main/conf.py:148
-#: main/conf.py:158
-#: main/conf.py:168
-#: main/conf.py:178
-#: main/conf.py:187
-#: main/conf.py:199
-#: main/conf.py:211
-#: main/conf.py:223
+#: main/conf.py:112 main/conf.py:121 main/conf.py:130 main/conf.py:139
+#: main/conf.py:148 main/conf.py:158 main/conf.py:168 main/conf.py:178
+#: main/conf.py:187 main/conf.py:199 main/conf.py:211 main/conf.py:223
 msgid "Jobs"
 msgstr "Tâches"
 
@@ -1255,8 +1200,8 @@ msgstr "Chemins à exposer aux tâches isolées"
 
 #: main/conf.py:147
 msgid ""
-"Whitelist of paths that would otherwise be hidden to expose to isolated jobs."
-""
+"Whitelist of paths that would otherwise be hidden to expose to isolated "
+"jobs."
 msgstr ""
 "Liste blanche des chemins qui seraient autrement dissimulés de façon à ne "
 "pas être exposés aux tâches isolées."
@@ -1270,8 +1215,8 @@ msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
 msgstr ""
-"Taille maximale d'une sortie standard en octets à afficher avant de demander "
-"le téléchargement de la sortie."
+"Taille maximale d'une sortie standard en octets à afficher avant de demander"
+" le téléchargement de la sortie."
 
 #: main/conf.py:166
 msgid "Job Event Standard Output Maximum Display Size"
@@ -1323,8 +1268,8 @@ msgid ""
 "override this."
 msgstr ""
 "Délai maximal d'exécution des tâches. Utilisez la valeur 0 pour indiquer "
-"qu'aucun délai ne doit être imposé. Un délai d'attente défini sur celui d'un "
-"modèle de tâche précis écrasera cette valeur."
+"qu'aucun délai ne doit être imposé. Un délai d'attente défini sur celui d'un"
+" modèle de tâche précis écrasera cette valeur."
 
 #: main/conf.py:208
 msgid "Default Inventory Update Timeout"
@@ -1363,14 +1308,8 @@ msgid "External host maintain a log collector to send logs to"
 msgstr ""
 "L'hôte externe conserve un collecteur de journaux à qui envoyer des journaux"
 
-#: main/conf.py:233
-#: main/conf.py:242
-#: main/conf.py:252
-#: main/conf.py:261
-#: main/conf.py:271
-#: main/conf.py:286
-#: main/conf.py:297
-#: main/conf.py:306
+#: main/conf.py:233 main/conf.py:242 main/conf.py:252 main/conf.py:261
+#: main/conf.py:271 main/conf.py:286 main/conf.py:297 main/conf.py:306
 msgid "Logging"
 msgstr "Journalisation"
 
@@ -1418,22 +1357,17 @@ msgstr ""
 
 #: main/conf.py:279
 msgid ""
-"List of loggers that will send HTTP logs to the collector, these can include "
-"any or all of: \n"
+"List of loggers that will send HTTP logs to the collector, these can include any or all of: \n"
 "activity_stream - logs duplicate to records entered in activity stream\n"
 "job_events - callback data from Ansible job events\n"
 "system_tracking - data generated from scan jobs\n"
-"Sending generic Tower logs must be configured through local_settings."
-"pyinstead of this mechanism."
+"Sending generic Tower logs must be configured through local_settings.pyinstead of this mechanism."
 msgstr ""
-"Liste des journaliseurs qui enverront des journaux HTTP au collecteur "
-"notamment (tous les types ou certains seulement) : \n"
-"activity_stream - journaux en double pour les enregistrements entrés dans le "
-"flux d'activité\n"
+"Liste des journaliseurs qui enverront des journaux HTTP au collecteur notamment (tous les types ou certains seulement) : \n"
+"activity_stream - journaux en double pour les enregistrements entrés dans le flux d'activité\n"
 "job_events - données de rappel issues d'événements de tâche Ansible\n"
 "system_tracking - données générées par des tâches de scan\n"
-"L'envoi de journaux Tower génériques doit être configuré via local_settings."
-"py sans l'utilisation de ce mécanisme."
+"L'envoi de journaux Tower génériques doit être configuré via local_settings.py sans l'utilisation de ce mécanisme."
 
 #: main/conf.py:293
 msgid ""
@@ -1490,13 +1424,11 @@ msgstr "Entité dissociée d'une autre entité"
 msgid "No valid inventory."
 msgstr "Aucun inventaire valide."
 
-#: main/models/ad_hoc_commands.py:103
-#: main/models/jobs.py:163
+#: main/models/ad_hoc_commands.py:103 main/models/jobs.py:163
 msgid "You must provide a machine / SSH credential."
 msgstr "Vous devez fournir des informations d'identification machine / SSH."
 
-#: main/models/ad_hoc_commands.py:114
-#: main/models/ad_hoc_commands.py:122
+#: main/models/ad_hoc_commands.py:114 main/models/ad_hoc_commands.py:122
 msgid "Invalid type for ad hoc command"
 msgstr "Type non valide pour la commande ad hoc"
 
@@ -1509,66 +1441,52 @@ msgstr "Module non pris en charge pour les commandes ad hoc."
 msgid "No argument passed to %s module."
 msgstr "Aucun argument transmis au module %s."
 
-#: main/models/ad_hoc_commands.py:220
-#: main/models/jobs.py:767
+#: main/models/ad_hoc_commands.py:220 main/models/jobs.py:767
 msgid "Host Failed"
 msgstr "Échec de l'hôte"
 
-#: main/models/ad_hoc_commands.py:221
-#: main/models/jobs.py:768
+#: main/models/ad_hoc_commands.py:221 main/models/jobs.py:768
 msgid "Host OK"
 msgstr "Hôte OK"
 
-#: main/models/ad_hoc_commands.py:222
-#: main/models/jobs.py:771
+#: main/models/ad_hoc_commands.py:222 main/models/jobs.py:771
 msgid "Host Unreachable"
 msgstr "Hôte inaccessible"
 
-#: main/models/ad_hoc_commands.py:227
-#: main/models/jobs.py:770
+#: main/models/ad_hoc_commands.py:227 main/models/jobs.py:770
 msgid "Host Skipped"
 msgstr "Hôte ignoré"
 
-#: main/models/ad_hoc_commands.py:237
-#: main/models/jobs.py:798
+#: main/models/ad_hoc_commands.py:237 main/models/jobs.py:798
 msgid "Debug"
 msgstr "Déboguer"
 
-#: main/models/ad_hoc_commands.py:238
-#: main/models/jobs.py:799
+#: main/models/ad_hoc_commands.py:238 main/models/jobs.py:799
 msgid "Verbose"
 msgstr "Verbeux"
 
-#: main/models/ad_hoc_commands.py:239
-#: main/models/jobs.py:800
+#: main/models/ad_hoc_commands.py:239 main/models/jobs.py:800
 msgid "Deprecated"
 msgstr "Obsolète"
 
-#: main/models/ad_hoc_commands.py:240
-#: main/models/jobs.py:801
+#: main/models/ad_hoc_commands.py:240 main/models/jobs.py:801
 msgid "Warning"
 msgstr "Avertissement"
 
-#: main/models/ad_hoc_commands.py:241
-#: main/models/jobs.py:802
+#: main/models/ad_hoc_commands.py:241 main/models/jobs.py:802
 msgid "System Warning"
 msgstr "Avertissement système"
 
-#: main/models/ad_hoc_commands.py:242
-#: main/models/jobs.py:803
+#: main/models/ad_hoc_commands.py:242 main/models/jobs.py:803
 #: main/models/unified_jobs.py:62
 msgid "Error"
 msgstr "Erreur"
 
-#: main/models/base.py:45
-#: main/models/base.py:51
-#: main/models/base.py:56
+#: main/models/base.py:45 main/models/base.py:51 main/models/base.py:56
 msgid "Run"
 msgstr "Exécuter"
 
-#: main/models/base.py:46
-#: main/models/base.py:52
-#: main/models/base.py:57
+#: main/models/base.py:46 main/models/base.py:52 main/models/base.py:57
 msgid "Check"
 msgstr "Vérifier"
 
@@ -1624,38 +1542,31 @@ msgstr "Amazon Web Services"
 msgid "Rackspace"
 msgstr "Rackspace"
 
-#: main/models/credential.py:38
-#: main/models/inventory.py:713
+#: main/models/credential.py:38 main/models/inventory.py:713
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: main/models/credential.py:39
-#: main/models/inventory.py:714
+#: main/models/credential.py:39 main/models/inventory.py:714
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: main/models/credential.py:40
-#: main/models/inventory.py:715
+#: main/models/credential.py:40 main/models/inventory.py:715
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: main/models/credential.py:41
-#: main/models/inventory.py:710
+#: main/models/credential.py:41 main/models/inventory.py:710
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: main/models/credential.py:42
-#: main/models/inventory.py:711
+#: main/models/credential.py:42 main/models/inventory.py:711
 msgid "Microsoft Azure Classic (deprecated)"
 msgstr "Microsoft Azure Classic (obsolète)"
 
-#: main/models/credential.py:43
-#: main/models/inventory.py:712
+#: main/models/credential.py:43 main/models/inventory.py:712
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: main/models/credential.py:44
-#: main/models/inventory.py:716
+#: main/models/credential.py:44 main/models/inventory.py:716
 msgid "OpenStack"
 msgstr "OpenStack"
 
@@ -1852,8 +1763,8 @@ msgstr ""
 #: main/models/credential.py:350
 msgid "Credential cannot be assigned to both a user and team."
 msgstr ""
-"Les informations d'identification ne peuvent pas être attribuées à la fois à "
-"un utilisateur et une équipe."
+"Les informations d'identification ne peuvent pas être attribuées à la fois à"
+" un utilisateur et une équipe."
 
 #: main/models/fact.py:21
 msgid "Host for the facts that the fact scan captured."
@@ -1971,8 +1882,8 @@ msgstr ""
 #: main/models/inventory.py:490
 msgid "Flag indicating whether this group has any hosts with active failures."
 msgstr ""
-"Marqueur indiquant si ce groupe possède ou non des hôtes avec des échecs non "
-"résolus."
+"Marqueur indiquant si ce groupe possède ou non des hôtes avec des échecs non"
+" résolus."
 
 #: main/models/inventory.py:495
 msgid "Number of hosts in this group with active failures."
@@ -1998,8 +1909,7 @@ msgstr ""
 msgid "Inventory source(s) that created or modified this group."
 msgstr "Sources d'inventaire qui ont créé ou modifié ce groupe."
 
-#: main/models/inventory.py:706
-#: main/models/projects.py:42
+#: main/models/inventory.py:706 main/models/projects.py:42
 #: main/models/unified_jobs.py:386
 msgid "Manual"
 msgstr "Manuel"
@@ -2035,8 +1945,8 @@ msgstr ""
 #: main/models/inventory.py:853
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr ""
-"Limiter automatiquement les groupes créés à partir de la source d'inventaire "
-"(EC2 uniquement)."
+"Limiter automatiquement les groupes créés à partir de la source d'inventaire"
+" (EC2 uniquement)."
 
 #: main/models/inventory.py:857
 msgid "Overwrite local groups and hosts from remote inventory source."
@@ -2164,8 +2074,7 @@ msgid "Inventory cannot be changed at runtime for scan jobs."
 msgstr ""
 "L'inventaire ne peut pas être modifié à l'exécution pour les tâches de scan."
 
-#: main/models/jobs.py:433
-#: main/models/projects.py:243
+#: main/models/jobs.py:433 main/models/projects.py:243
 msgid "SCM Revision"
 msgstr "Révision SCM"
 
@@ -2189,8 +2098,7 @@ msgstr "récapitulatifs des hôtes pour la tâche"
 msgid "Host Failure"
 msgstr "Échec de l'hôte"
 
-#: main/models/jobs.py:772
-#: main/models/jobs.py:786
+#: main/models/jobs.py:772 main/models/jobs.py:786
 msgid "No Hosts Remaining"
 msgstr "Aucun hôte restant"
 
@@ -2277,8 +2185,8 @@ msgstr "Supprimer les tâches plus anciennes qu'un certain nombre de jours"
 #: main/models/jobs.py:1241
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr ""
-"Supprimer les entrées du flux d'activité plus anciennes qu'un certain nombre "
-"de jours"
+"Supprimer les entrées du flux d'activité plus anciennes qu'un certain nombre"
+" de jours"
 
 #: main/models/jobs.py:1242
 msgid "Purge and/or reduce the granularity of system tracking data"
@@ -2316,18 +2224,15 @@ msgstr "Webhook"
 msgid "IRC"
 msgstr "IRC"
 
-#: main/models/notifications.py:127
-#: main/models/unified_jobs.py:57
+#: main/models/notifications.py:127 main/models/unified_jobs.py:57
 msgid "Pending"
 msgstr "En attente"
 
-#: main/models/notifications.py:128
-#: main/models/unified_jobs.py:60
+#: main/models/notifications.py:128 main/models/unified_jobs.py:60
 msgid "Successful"
 msgstr "Réussi"
 
-#: main/models/notifications.py:129
-#: main/models/unified_jobs.py:61
+#: main/models/notifications.py:129 main/models/unified_jobs.py:61
 msgid "Failed"
 msgstr "Échec"
 
@@ -2511,8 +2416,7 @@ msgstr "Annulé"
 msgid "Never Updated"
 msgstr "Jamais mis à jour"
 
-#: main/models/unified_jobs.py:71
-#: ui/templates/ui/index.html:85
+#: main/models/unified_jobs.py:71 ui/templates/ui/index.html:85
 #: ui/templates/ui/index.html.py:104
 msgid "OK"
 msgstr "OK"
@@ -2569,17 +2473,18 @@ msgstr "Délai écoulé (en secondes) pendant lequel la tâche s'est exécutée.
 
 #: main/models/unified_jobs.py:497
 msgid ""
-"A status field to indicate the state of the job if it wasn't able to run and "
-"capture stdout"
+"A status field to indicate the state of the job if it wasn't able to run and"
+" capture stdout"
 msgstr ""
 "Champ d'état indiquant l'état de la tâche si elle n'a pas pu s'exécuter et "
 "capturer stdout"
 
-#: main/notifications/base.py:17
-#: main/notifications/email_backend.py:28
-msgid "{} #{} had status {} on Ansible Tower, view details at {}\n"
+#: main/notifications/base.py:17 main/notifications/email_backend.py:28
+msgid ""
+"{} #{} had status {} on Ansible Tower, view details at {}\n"
 "\n"
-msgstr "{} #{} était à l'état {} sur Ansible Tower, voir les détails sur {}\n"
+msgstr ""
+"{} #{} était à l'état {} sur Ansible Tower, voir les détails sur {}\n"
 "\n"
 
 #: main/notifications/hipchat_backend.py:46
@@ -2635,15 +2540,12 @@ msgstr "Impossible de convertir \"% s\" en booléen"
 msgid "Unsupported SCM type \"%s\""
 msgstr "Type de SCM \"%s\" non pris en charge"
 
-#: main/utils/common.py:249
-#: main/utils/common.py:261
-#: main/utils/common.py:280
+#: main/utils/common.py:249 main/utils/common.py:261 main/utils/common.py:280
 #, python-format
 msgid "Invalid %s URL"
 msgstr "URL %s non valide."
 
-#: main/utils/common.py:251
-#: main/utils/common.py:289
+#: main/utils/common.py:251 main/utils/common.py:289
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "URL %s non prise en charge"
@@ -2698,8 +2600,8 @@ msgstr "Une clé privée au moins est nécessaire."
 #: main/validators.py:126
 #, python-format
 msgid ""
-"At least %(min_keys)d private keys are required, only %(key_count)d provided."
-""
+"At least %(min_keys)d private keys are required, only %(key_count)d "
+"provided."
 msgstr ""
 "%(min_keys)d clés privées au moins sont requises, mais %(key_count)d "
 "uniquement ont été fournies."
@@ -2714,8 +2616,8 @@ msgstr "Une seule clé privée est autorisée, %(key_count)d ont été fournies.
 msgid ""
 "No more than %(max_keys)d private keys are allowed, %(key_count)d provided."
 msgstr ""
-"Pas plus de %(max_keys)d clés privées sont autorisées, %(key_count)d ont été "
-"fournies."
+"Pas plus de %(max_keys)d clés privées sont autorisées, %(key_count)d ont été"
+" fournies."
 
 #: main/validators.py:136
 msgid "Exactly one certificate is required."
@@ -2742,11 +2644,11 @@ msgstr "Un seul certificat est autorisé, %(cert_count)d ont été fournis."
 #: main/validators.py:145
 #, python-format
 msgid ""
-"No more than %(max_certs)d certificates are allowed, %(cert_count)d provided."
-""
+"No more than %(max_certs)d certificates are allowed, %(cert_count)d "
+"provided."
 msgstr ""
-"Pas plus de %(max_certs)d certificats sont autorisés, %(cert_count)d ont été "
-"fournis."
+"Pas plus de %(max_certs)d certificats sont autorisés, %(cert_count)d ont été"
+" fournis."
 
 #: main/views.py:20
 msgid "API Error"
@@ -2784,187 +2686,187 @@ msgstr "Erreur serveur"
 msgid "A server error has occurred."
 msgstr "Une erreur serveur s'est produite."
 
-#: settings/defaults.py:593
+#: settings/defaults.py:600
 msgid "Chicago"
 msgstr "Chicago"
 
-#: settings/defaults.py:594
+#: settings/defaults.py:601
 msgid "Dallas/Ft. Worth"
 msgstr "Dallas/Ft. Worth"
 
-#: settings/defaults.py:595
+#: settings/defaults.py:602
 msgid "Northern Virginia"
 msgstr "Virginie du Nord"
 
-#: settings/defaults.py:596
+#: settings/defaults.py:603
 msgid "London"
 msgstr "Londres"
 
-#: settings/defaults.py:597
+#: settings/defaults.py:604
 msgid "Sydney"
 msgstr "Sydney"
 
-#: settings/defaults.py:598
+#: settings/defaults.py:605
 msgid "Hong Kong"
 msgstr "Hong Kong"
 
-#: settings/defaults.py:625
+#: settings/defaults.py:632
 msgid "US East (Northern Virginia)"
 msgstr "Est des États-Unis (Virginie du Nord)"
 
-#: settings/defaults.py:626
+#: settings/defaults.py:633
 msgid "US East (Ohio)"
 msgstr "Est des États-Unis (Ohio)"
 
-#: settings/defaults.py:627
+#: settings/defaults.py:634
 msgid "US West (Oregon)"
 msgstr "Ouest des États-Unis (Oregon)"
 
-#: settings/defaults.py:628
+#: settings/defaults.py:635
 msgid "US West (Northern California)"
 msgstr "Ouest des États-Unis (Nord de la Californie)"
 
-#: settings/defaults.py:629
+#: settings/defaults.py:636
 msgid "EU (Frankfurt)"
 msgstr "UE (Francfort)"
 
-#: settings/defaults.py:630
+#: settings/defaults.py:637
 msgid "EU (Ireland)"
 msgstr "UE (Irlande)"
 
-#: settings/defaults.py:631
+#: settings/defaults.py:638
 msgid "Asia Pacific (Singapore)"
 msgstr "Asie-Pacifique (Singapour)"
 
-#: settings/defaults.py:632
+#: settings/defaults.py:639
 msgid "Asia Pacific (Sydney)"
 msgstr "Asie-Pacifique (Sydney)"
 
-#: settings/defaults.py:633
+#: settings/defaults.py:640
 msgid "Asia Pacific (Tokyo)"
 msgstr "Asie-Pacifique (Tokyo)"
 
-#: settings/defaults.py:634
+#: settings/defaults.py:641
 msgid "Asia Pacific (Seoul)"
 msgstr "Asie-Pacifique (Séoul)"
 
-#: settings/defaults.py:635
+#: settings/defaults.py:642
 msgid "Asia Pacific (Mumbai)"
 msgstr "Asie-Pacifique (Mumbai)"
 
-#: settings/defaults.py:636
+#: settings/defaults.py:643
 msgid "South America (Sao Paulo)"
 msgstr "Amérique du Sud (Sao Paulo)"
 
-#: settings/defaults.py:637
+#: settings/defaults.py:644
 msgid "US West (GovCloud)"
 msgstr "Ouest des États-Unis (GovCloud)"
 
-#: settings/defaults.py:638
+#: settings/defaults.py:645
 msgid "China (Beijing)"
 msgstr "Chine (Pékin)"
 
-#: settings/defaults.py:687
+#: settings/defaults.py:694
 msgid "US East (B)"
 msgstr "Est des États-Unis (B)"
 
-#: settings/defaults.py:688
+#: settings/defaults.py:695
 msgid "US East (C)"
 msgstr "Est des États-Unis (C)"
 
-#: settings/defaults.py:689
+#: settings/defaults.py:696
 msgid "US East (D)"
 msgstr "Est des États-Unis (D)"
 
-#: settings/defaults.py:690
+#: settings/defaults.py:697
 msgid "US Central (A)"
 msgstr "Centre des États-Unis (A)"
 
-#: settings/defaults.py:691
+#: settings/defaults.py:698
 msgid "US Central (B)"
 msgstr "Centre des États-Unis (B)"
 
-#: settings/defaults.py:692
+#: settings/defaults.py:699
 msgid "US Central (C)"
 msgstr "Centre des États-Unis (C)"
 
-#: settings/defaults.py:693
+#: settings/defaults.py:700
 msgid "US Central (F)"
 msgstr "Centre des États-Unis (F)"
 
-#: settings/defaults.py:694
+#: settings/defaults.py:701
 msgid "Europe West (B)"
 msgstr "Europe de l'Ouest (B)"
 
-#: settings/defaults.py:695
+#: settings/defaults.py:702
 msgid "Europe West (C)"
 msgstr "Europe de l'Ouest (C)"
 
-#: settings/defaults.py:696
+#: settings/defaults.py:703
 msgid "Europe West (D)"
 msgstr "Europe de l'Ouest (D)"
 
-#: settings/defaults.py:697
+#: settings/defaults.py:704
 msgid "Asia East (A)"
 msgstr "Asie de l'Est (A)"
 
-#: settings/defaults.py:698
+#: settings/defaults.py:705
 msgid "Asia East (B)"
 msgstr "Asie de l'Est (B)"
 
-#: settings/defaults.py:699
+#: settings/defaults.py:706
 msgid "Asia East (C)"
 msgstr "Asie de l'Est (C)"
 
-#: settings/defaults.py:723
+#: settings/defaults.py:730
 msgid "US Central"
 msgstr "Centre des États-Unis"
 
-#: settings/defaults.py:724
+#: settings/defaults.py:731
 msgid "US East"
 msgstr "Est des États-Unis"
 
-#: settings/defaults.py:725
+#: settings/defaults.py:732
 msgid "US East 2"
 msgstr "Est des États-Unis 2"
 
-#: settings/defaults.py:726
+#: settings/defaults.py:733
 msgid "US North Central"
 msgstr "Centre-Nord des États-Unis"
 
-#: settings/defaults.py:727
+#: settings/defaults.py:734
 msgid "US South Central"
 msgstr "Centre-Sud des États-Unis"
 
-#: settings/defaults.py:728
+#: settings/defaults.py:735
 msgid "US West"
 msgstr "Ouest des États-Unis"
 
-#: settings/defaults.py:729
+#: settings/defaults.py:736
 msgid "Europe North"
 msgstr "Europe du Nord"
 
-#: settings/defaults.py:730
+#: settings/defaults.py:737
 msgid "Europe West"
 msgstr "Europe de l'Ouest"
 
-#: settings/defaults.py:731
+#: settings/defaults.py:738
 msgid "Asia Pacific East"
 msgstr "Asie-Pacifique Est"
 
-#: settings/defaults.py:732
+#: settings/defaults.py:739
 msgid "Asia Pacific Southeast"
 msgstr "Asie-Pacifique Sud-Est"
 
-#: settings/defaults.py:733
+#: settings/defaults.py:740
 msgid "Japan East"
 msgstr "Est du Japon"
 
-#: settings/defaults.py:734
+#: settings/defaults.py:741
 msgid "Japan West"
 msgstr "Ouest du Japon"
 
-#: settings/defaults.py:735
+#: settings/defaults.py:742
 msgid "Brazil South"
 msgstr "Sud du Brésil"
 
@@ -2992,63 +2894,44 @@ msgid ""
 "  the organization.\n"
 "  If a string or list of strings, specifies the usernames and emails for\n"
 "  users who will be added to the organization. Strings in the format\n"
-"  \"/<pattern>/<flags>\" will be interpreted as JavaScript regular "
-"expressions and\n"
-"  may also be used instead of string literals; only \"i\" and \"m\" are "
-"supported\n"
+"  \"/<pattern>/<flags>\" will be interpreted as JavaScript regular expressions and\n"
+"  may also be used instead of string literals; only \"i\" and \"m\" are supported\n"
 "  for flags.\n"
 "- remove_admins: True/False. Defaults to True.\n"
 "  If True, a user who does not match will be removed from the organization's\n"
 "  administrative list.\n"
-"- users: None, True/False, string or list of strings. Same rules apply as "
-"for\n"
+"- users: None, True/False, string or list of strings. Same rules apply as for\n"
 "  admins.\n"
 "- remove_users: True/False. Defaults to True. Same rules as apply for \n"
 "  remove_admins."
 msgstr ""
-"Mappage avec des administrateurs/utilisateurs d'organisation appartenant à "
-"des comptes d'authentification sociale. Ce paramètre\n"
-"contrôle les utilisateurs qui sont placés dans les organisations Tower en "
-"fonction de\n"
-"leur nom d'utilisateur et adresse électronique. Les clés de dictionnaire "
-"sont des noms d'organisation.\n"
-"Des organisations seront créées si elles ne sont pas présentes dans le cas "
-"où la licence autoriserait\n"
+"Mappage avec des administrateurs/utilisateurs d'organisation appartenant à des comptes d'authentification sociale. Ce paramètre\n"
+"contrôle les utilisateurs qui sont placés dans les organisations Tower en fonction de\n"
+"leur nom d'utilisateur et adresse électronique. Les clés de dictionnaire sont des noms d'organisation.\n"
+"Des organisations seront créées si elles ne sont pas présentes dans le cas où la licence autoriserait\n"
 "plusieurs organisations, sinon l'organisation par défaut est utilisée\n"
-"indépendamment de la clé. Les valeurs sont des dictionnaires définissant les "
-"options\n"
-"d'appartenance de chaque organisation. Pour chaque organisation, il est "
-"possible de\n"
-"préciser les utilisateurs qui sont automatiquement utilisateurs de "
-"l'organisation et\n"
+"indépendamment de la clé. Les valeurs sont des dictionnaires définissant les options\n"
+"d'appartenance de chaque organisation. Pour chaque organisation, il est possible de\n"
+"préciser les utilisateurs qui sont automatiquement utilisateurs de l'organisation et\n"
 "ceux qui peuvent administrer l'organisation. \n"
 "\n"
 "- admins : None, True/False, chaîne ou liste de chaînes.\n"
-" Si défini sur None, les administrateurs de l'organisation ne sont pas mis à "
-"jour.\n"
-" Si défini sur True, tous les utilisateurs se servant de l'authentification "
-"sociale sont automatiquement ajoutés en tant qu'administrateurs\n"
+" Si défini sur None, les administrateurs de l'organisation ne sont pas mis à jour.\n"
+" Si défini sur True, tous les utilisateurs se servant de l'authentification sociale sont automatiquement ajoutés en tant qu'administrateurs\n"
 " de l'organisation.\n"
-" Si défini sur False, aucun utilisateur d'authentification sociale n'est "
-"automatiquement ajouté en tant qu'administrateur de\n"
+" Si défini sur False, aucun utilisateur d'authentification sociale n'est automatiquement ajouté en tant qu'administrateur de\n"
 " l'organisation.\n"
-" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les noms "
-"d'utilisateur et les adresses électroniques des\n"
+" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les noms d'utilisateur et les adresses électroniques des\n"
 " utilisateurs qui seront ajoutés à l'organisation. Les chaînes au format\n"
-" \"/<pattern>/<flags>\" sont interprétées comme des expressions JavaScript "
-"normales et\n"
-" peuvent également être utilisées à la place de littéraux de chaîne ; seuls "
-"\"i\" et \"m\" sont pris en charge\n"
+" \"/<pattern>/<flags>\" sont interprétées comme des expressions JavaScript normales et\n"
+" peuvent également être utilisées à la place de littéraux de chaîne ; seuls \"i\" et \"m\" sont pris en charge\n"
 " pour les marqueurs.\n"
 "- remove_admins : True/False. Par défaut défini sur True.\n"
-" Si défini sur True, l'utilisateur qui ne correspond pas est supprimé de la "
-"liste administrative\n"
+" Si défini sur True, l'utilisateur qui ne correspond pas est supprimé de la liste administrative\n"
 " de l'organisation.\n"
-"- users : None, True/False, chaîne ou liste de chaînes. Les mêmes règles "
-"s'appliquent que pour\n"
+"- users : None, True/False, chaîne ou liste de chaînes. Les mêmes règles s'appliquent que pour\n"
 " admins.\n"
-"- remove_users : True/False. Par défaut défini sur True. Les mêmes règles "
-"s'appliquent que pour \n"
+"- remove_users : True/False. Par défaut défini sur True. Les mêmes règles s'appliquent que pour \n"
 " remove_admins."
 
 #: sso/conf.py:76
@@ -3068,43 +2951,31 @@ msgid ""
 "  members.\n"
 "  If a string or list of strings, specifies expressions used to match users.\n"
 "  User will be added as a team member if the username or email matches.\n"
-"  Strings in the format \"/<pattern>/<flags>\" will be interpreted as "
-"JavaScript\n"
-"  regular expressions and may also be used instead of string literals; only "
-"\"i\"\n"
+"  Strings in the format \"/<pattern>/<flags>\" will be interpreted as JavaScript\n"
+"  regular expressions and may also be used instead of string literals; only \"i\"\n"
 "  and \"m\" are supported for flags.\n"
 "- remove: True/False. Defaults to True. If True, a user who does not match\n"
 "  the rules above will be removed from the team."
 msgstr ""
-"Mappage des membres d'équipe (utilisateurs) de compte d'authentification "
-"sociale. Les clés sont des \n"
-"noms d'équipe (seront créés s'ils ne sont pas présents). Les valeurs sont "
-"des dictionnaires d'options\n"
-"d'appartenance à chaque équipe, où chacune peut contenir les paramètres "
-"suivants :\n"
+"Mappage des membres d'équipe (utilisateurs) de compte d'authentification sociale. Les clés sont des \n"
+"noms d'équipe (seront créés s'ils ne sont pas présents). Les valeurs sont des dictionnaires d'options\n"
+"d'appartenance à chaque équipe, où chacune peut contenir les paramètres suivants :\n"
 "\n"
 "-organization : chaîne. Nom de l'organisation à laquelle l'équipe\n"
-" appartient. Une équipe est créée si la combinaison nom de l'organisation/"
-"nom de \n"
+" appartient. Une équipe est créée si la combinaison nom de l'organisation/nom de \n"
 "l'équipe n'existe pas. L'organisation sera d'abord créée \n"
 "si elle n'existe pas. Si la licence n'autorise pas plusieurs organisations, \n"
 "l'équipe est toujours attribuée à l'organisation par défaut. \n"
 "- users : None, True/False, chaîne ou liste de chaînes.\n"
 " Si défini sur None, les membres de l'équipe ne sont pas mis à jour.\n"
-" Si défini sur True/False, tous les utilisateurs d'authentification sociale "
-"sont ajoutés/supprimés en tant que membres\n"
+" Si défini sur True/False, tous les utilisateurs d'authentification sociale sont ajoutés/supprimés en tant que membres\n"
 " d'équipe.\n"
-" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les "
-"expressions utilisées pour comparer les utilisateurs. \n"
-"L'utilisateur est ajouté en tant que membre d'équipe si son nom "
-"d'utilisateur ou son adresse électronique correspond.\n"
-" Les chaînes au format \"/<pattern>/<flags>\" sont interprétées comme des "
-"expressions JavaScript\n"
-" normales et peuvent également être utilisées à la place de littéraux de "
-"chaîne ; Seuls \"i\"\n"
+" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les expressions utilisées pour comparer les utilisateurs. \n"
+"L'utilisateur est ajouté en tant que membre d'équipe si son nom d'utilisateur ou son adresse électronique correspond.\n"
+" Les chaînes au format \"/<pattern>/<flags>\" sont interprétées comme des expressions JavaScript\n"
+" normales et peuvent également être utilisées à la place de littéraux de chaîne ; Seuls \"i\"\n"
 " et \"m\" sont pris en charge pour les marqueurs.\n"
-"- remove : True/False. Par défaut défini sur True. Si défini sur True, tout "
-"utilisateur qui ne correspond\n"
+"- remove : True/False. Par défaut défini sur True. Si défini sur True, tout utilisateur qui ne correspond\n"
 " pas aux règles ci-dessus est supprimé de l'équipe."
 
 #: sso/conf.py:119
@@ -3133,9 +3004,9 @@ msgstr "Authentification sociale - Champs d'utilisateurs"
 
 #: sso/conf.py:158
 msgid ""
-"When set to an empty list `[]`, this setting prevents new user accounts from "
-"being created. Only users who have previously logged in using social auth or "
-"have a user account with a matching email address will be able to login."
+"When set to an empty list `[]`, this setting prevents new user accounts from"
+" being created. Only users who have previously logged in using social auth "
+"or have a user account with a matching email address will be able to login."
 msgstr ""
 "Lorsqu'il est défini sur une liste vide `[]`, ce paramètre empêche la "
 "création de nouveaux comptes d'utilisateur. Seuls les utilisateurs ayant "
@@ -3150,30 +3021,19 @@ msgstr "URI du serveur LDAP"
 #: sso/conf.py:177
 msgid ""
 "URI to connect to LDAP server, such as \"ldap://ldap.example.com:389\" (non-"
-"SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be "
-"specified by separating with spaces or commas. LDAP authentication is "
+"SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be"
+" specified by separating with spaces or commas. LDAP authentication is "
 "disabled if this parameter is empty."
 msgstr ""
 "URI de connexion au serveur LDAP, tel que \"ldap://ldap.exemple.com:389\" "
-"(non SSL) ou \"ldaps://ldap.exemple.com:636\" (SSL). Plusieurs serveurs LDAP "
-"peuvent être définis en les séparant par des espaces ou des virgules. "
+"(non SSL) ou \"ldaps://ldap.exemple.com:636\" (SSL). Plusieurs serveurs LDAP"
+" peuvent être définis en les séparant par des espaces ou des virgules. "
 "L'authentification LDAP est désactivée si ce paramètre est vide."
 
-#: sso/conf.py:181
-#: sso/conf.py:199
-#: sso/conf.py:211
-#: sso/conf.py:223
-#: sso/conf.py:239
-#: sso/conf.py:258
-#: sso/conf.py:279
-#: sso/conf.py:295
-#: sso/conf.py:314
-#: sso/conf.py:331
-#: sso/conf.py:347
-#: sso/conf.py:362
-#: sso/conf.py:379
-#: sso/conf.py:417
-#: sso/conf.py:458
+#: sso/conf.py:181 sso/conf.py:199 sso/conf.py:211 sso/conf.py:223
+#: sso/conf.py:239 sso/conf.py:258 sso/conf.py:279 sso/conf.py:295
+#: sso/conf.py:314 sso/conf.py:331 sso/conf.py:347 sso/conf.py:362
+#: sso/conf.py:379 sso/conf.py:417 sso/conf.py:458
 msgid "LDAP"
 msgstr "LDAP"
 
@@ -3219,16 +3079,16 @@ msgstr "Options de connexion à LDAP"
 msgid ""
 "Additional options to set for the LDAP connection.  LDAP referrals are "
 "disabled by default (to prevent certain LDAP queries from hanging with AD). "
-"Option names should be strings (e.g. \"OPT_REFERRALS\"). Refer to https://"
-"www.python-ldap.org/doc/html/ldap.html#options for possible options and "
-"values that can be set."
+"Option names should be strings (e.g. \"OPT_REFERRALS\"). Refer to "
+"https://www.python-ldap.org/doc/html/ldap.html#options for possible options "
+"and values that can be set."
 msgstr ""
 "Options supplémentaires à définir pour la connexion LDAP. Les références "
 "LDAP sont désactivées par défaut (pour empêcher certaines requêtes LDAP de "
 "se bloquer avec AD). Les noms d'options doivent être des chaînes (par "
-"exemple \"OPT_REFERRALS\"). Reportez-vous à https://www.python-ldap.org/doc/"
-"html/ldap.html#options afin de connaître les options possibles et les "
-"valeurs que vous pouvez définir."
+"exemple \"OPT_REFERRALS\"). Reportez-vous à https://www.python-"
+"ldap.org/doc/html/ldap.html#options afin de connaître les options possibles "
+"et les valeurs que vous pouvez définir."
 
 #: sso/conf.py:251
 msgid "LDAP User Search"
@@ -3240,14 +3100,14 @@ msgid ""
 "will be able to login to Tower.  The user should also be mapped into an "
 "Tower organization (as defined in the AUTH_LDAP_ORGANIZATION_MAP setting).  "
 "If multiple search queries need to be supported use of \"LDAPUnion\" is "
-"possible. See python-ldap documentation as linked at the top of this section."
-""
+"possible. See python-ldap documentation as linked at the top of this "
+"section."
 msgstr ""
 "Requête de recherche LDAP servant à retrouver des utilisateurs. Tout "
 "utilisateur qui correspond au modèle donné pourra se connecter à Tower. "
-"L'utilisateur doit également être mappé dans une organisation Tower (tel que "
-"défini dans le paramètre AUTH_LDAP_ORGANIZATION_MAP). Si plusieurs requêtes "
-"de recherche doivent être prises en charge, l'utilisation de \"LDAPUnion\" "
+"L'utilisateur doit également être mappé dans une organisation Tower (tel que"
+" défini dans le paramètre AUTH_LDAP_ORGANIZATION_MAP). Si plusieurs requêtes"
+" de recherche doivent être prises en charge, l'utilisation de \"LDAPUnion\" "
 "est possible. Se reporter à la documentation sur python-ldap en suivant le "
 "lien indiqué en haut de cette section."
 
@@ -3275,15 +3135,15 @@ msgstr "Mappe des attributs d'utilisateurs LDAP"
 #: sso/conf.py:290
 msgid ""
 "Mapping of LDAP user schema to Tower API user attributes (key is user "
-"attribute name, value is LDAP attribute name).  The default setting is valid "
-"for ActiveDirectory but users with other LDAP configurations may need to "
+"attribute name, value is LDAP attribute name).  The default setting is valid"
+" for ActiveDirectory but users with other LDAP configurations may need to "
 "change the values (not the keys) of the dictionary/hash-table."
 msgstr ""
 "Mappage du schéma utilisateur LDAP avec les attributs utilisateur d'API "
 "Tower (la clé est le nom de l'attribut utilisateur, la valeur est le nom de "
 "l'attribut LDAP). Le paramètre par défaut est valide pour ActiveDirectory, "
-"mais les utilisateurs ayant d'autres configurations LDAP peuvent être amenés "
-"à modifier les valeurs (et non les clés) du dictionnaire/de la table de "
+"mais les utilisateurs ayant d'autres configurations LDAP peuvent être amenés"
+" à modifier les valeurs (et non les clés) du dictionnaire/de la table de "
 "hachage."
 
 #: sso/conf.py:309
@@ -3292,9 +3152,9 @@ msgstr "Recherche de groupes LDAP"
 
 #: sso/conf.py:310
 msgid ""
-"Users in Tower are mapped to organizations based on their membership in LDAP "
-"groups. This setting defines the LDAP search query to find groups. Note that "
-"this, unlike the user search above, does not support LDAPSearchUnion."
+"Users in Tower are mapped to organizations based on their membership in LDAP"
+" groups. This setting defines the LDAP search query to find groups. Note "
+"that this, unlike the user search above, does not support LDAPSearchUnion."
 msgstr ""
 "Les utilisateurs de Tower sont mappés à des organisations en fonction de "
 "leur appartenance à des groupes LDAP. Ce paramètre définit la requête de "
@@ -3308,13 +3168,13 @@ msgstr "Type de groupe LDAP"
 
 #: sso/conf.py:328
 msgid ""
-"The group type may need to be changed based on the type of the LDAP server.  "
-"Values are listed at: http://pythonhosted.org/django-auth-ldap/groups."
-"html#types-of-groups"
+"The group type may need to be changed based on the type of the LDAP server."
+"  Values are listed at: http://pythonhosted.org/django-auth-ldap/groups.html"
+"#types-of-groups"
 msgstr ""
 "Il convient parfois de modifier le type de groupe en fonction du type de "
-"serveur LDAP. Les valeurs sont répertoriées à l'adresse suivante : http://"
-"pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
+"serveur LDAP. Les valeurs sont répertoriées à l'adresse suivante : "
+"http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
 
 #: sso/conf.py:342
 msgid "LDAP Require Group"
@@ -3342,8 +3202,8 @@ msgid ""
 "if a member of this group.  Only one deny group is supported."
 msgstr ""
 "NDD du groupe dont la connexion est refusée. S'il est spécifié, "
-"l'utilisateur n'est pas autorisé à se connecter s'il est membre de ce groupe."
-" Un seul groupe refusé est pris en charge."
+"l'utilisateur n'est pas autorisé à se connecter s'il est membre de ce "
+"groupe. Un seul groupe refusé est pris en charge."
 
 #: sso/conf.py:372
 msgid "LDAP User Flags By Group"
@@ -3371,57 +3231,29 @@ msgstr "Mappe d'organisations LDAP"
 
 #: sso/conf.py:392
 msgid ""
-"Mapping between organization admins/users and LDAP groups. This controls "
-"what users are placed into what Tower organizations relative to their LDAP "
-"group memberships. Keys are organization names. Organizations will be "
-"created if not present. Values are dictionaries defining the options for "
-"each organization's membership.  For each organization it is possible to "
-"specify what groups are automatically users of the organization and also "
-"what groups can administer the organization.\n"
+"Mapping between organization admins/users and LDAP groups. This controls what users are placed into what Tower organizations relative to their LDAP group memberships. Keys are organization names. Organizations will be created if not present. Values are dictionaries defining the options for each organization's membership.  For each organization it is possible to specify what groups are automatically users of the organization and also what groups can administer the organization.\n"
 "\n"
 " - admins: None, True/False, string or list of strings.\n"
 "   If None, organization admins will not be updated based on LDAP values.\n"
-"   If True, all users in LDAP will automatically be added as admins of the "
-"organization.\n"
-"   If False, no LDAP users will be automatically added as admins of the "
-"organization.\n"
-"   If a string or list of strings, specifies the group DN(s) that will be "
-"added of the organization if they match any of the specified groups.\n"
+"   If True, all users in LDAP will automatically be added as admins of the organization.\n"
+"   If False, no LDAP users will be automatically added as admins of the organization.\n"
+"   If a string or list of strings, specifies the group DN(s) that will be added of the organization if they match any of the specified groups.\n"
 " - remove_admins: True/False. Defaults to True.\n"
-"   If True, a user who is not an member of the given groups will be removed "
-"from the organization's administrative list.\n"
-" - users: None, True/False, string or list of strings. Same rules apply as "
-"for admins.\n"
-" - remove_users: True/False. Defaults to True. Same rules apply as for "
-"remove_admins."
+"   If True, a user who is not an member of the given groups will be removed from the organization's administrative list.\n"
+" - users: None, True/False, string or list of strings. Same rules apply as for admins.\n"
+" - remove_users: True/False. Defaults to True. Same rules apply as for remove_admins."
 msgstr ""
-"Mappage entre les administrateurs/utilisateurs de l'organisation et les "
-"groupes LDAP. Ce paramètre détermine les utilisateurs qui sont placés dans "
-"les organisations Tower par rapport à leurs appartenances à un groupe LDAP. "
-"Les clés sont les noms d'organisation. Les organisations seront créées si "
-"elles ne sont pas présentes. Les valeurs sont des dictionnaires définissant "
-"les options d'appartenance à chaque organisation. Pour chaque organisation, "
-"il est possible de spécifier les groupes qui sont automatiquement des "
-"utilisateurs de l'organisation et ceux qui peuvent administrer "
-"l'organisation.\n"
+"Mappage entre les administrateurs/utilisateurs de l'organisation et les groupes LDAP. Ce paramètre détermine les utilisateurs qui sont placés dans les organisations Tower par rapport à leurs appartenances à un groupe LDAP. Les clés sont les noms d'organisation. Les organisations seront créées si elles ne sont pas présentes. Les valeurs sont des dictionnaires définissant les options d'appartenance à chaque organisation. Pour chaque organisation, il est possible de spécifier les groupes qui sont automatiquement des utilisateurs de l'organisation et ceux qui peuvent administrer l'organisation.\n"
 "\n"
 " - admins : None, True/False, chaîne ou liste de chaînes.\n"
-"Si défini sur None, les administrateurs de l'organisation ne sont pas mis à "
-"jour en fonction des valeurs LDAP.\n"
-" Si défini sur True, tous les utilisateurs LDAP sont automatiquement ajoutés "
-"en tant qu'administrateurs de l'organisation.\n"
-" Si défini sur False, aucun utilisateur LDAP n'est automatiquement ajouté en "
-"tant qu'administrateur de l'organisation.\n"
-" Si une chaîne ou une liste de chaînes est entrée, elle spécifie le ou les "
-"NDD de groupe qui seront ajoutés à l'organisation s'ils correspondent à l'un "
-"des groupes spécifiés.\n"
+"Si défini sur None, les administrateurs de l'organisation ne sont pas mis à jour en fonction des valeurs LDAP.\n"
+" Si défini sur True, tous les utilisateurs LDAP sont automatiquement ajoutés en tant qu'administrateurs de l'organisation.\n"
+" Si défini sur False, aucun utilisateur LDAP n'est automatiquement ajouté en tant qu'administrateur de l'organisation.\n"
+" Si une chaîne ou une liste de chaînes est entrée, elle spécifie le ou les NDD de groupe qui seront ajoutés à l'organisation s'ils correspondent à l'un des groupes spécifiés.\n"
 " - remove_admins : True/False. Par défaut défini sur True.\n"
-" Si défini sur True, tout utilisateur qui n'est pas membre des groupes "
-"donnés est supprimé de la liste administrative de l'organisation.\n"
-" - users : None, True/False, chaîne ou liste de chaînes. Les mêmes règles "
-"s'appliquent que pour admins.\n"
-" - remove_users : True/False. Par défaut défini sur True. Les mêmes règles "
-"s'appliquent que pour remove_admins."
+" Si défini sur True, tout utilisateur qui n'est pas membre des groupes donnés est supprimé de la liste administrative de l'organisation.\n"
+" - users : None, True/False, chaîne ou liste de chaînes. Les mêmes règles s'appliquent que pour admins.\n"
+" - remove_users : True/False. Par défaut défini sur True. Les mêmes règles s'appliquent que pour remove_admins."
 
 #: sso/conf.py:440
 msgid "LDAP Team Map"
@@ -3429,41 +3261,23 @@ msgstr "Mappe d'équipes LDAP"
 
 #: sso/conf.py:441
 msgid ""
-"Mapping between team members (users) and LDAP groups. Keys are team names "
-"(will be created if not present). Values are dictionaries of options for "
-"each team's membership, where each can contain the following parameters:\n"
+"Mapping between team members (users) and LDAP groups. Keys are team names (will be created if not present). Values are dictionaries of options for each team's membership, where each can contain the following parameters:\n"
 "\n"
-" - organization: string. The name of the organization to which the team "
-"belongs. The team will be created if the combination of organization and "
-"team name does not exist. The organization will first be created if it does "
-"not exist.\n"
+" - organization: string. The name of the organization to which the team belongs. The team will be created if the combination of organization and team name does not exist. The organization will first be created if it does not exist.\n"
 " - users: None, True/False, string or list of strings.\n"
 "   If None, team members will not be updated.\n"
 "   If True/False, all LDAP users will be added/removed as team members.\n"
-"   If a string or list of strings, specifies the group DN(s). User will be "
-"added as a team member if the user is a member of ANY of these groups.\n"
-"- remove: True/False. Defaults to True. If True, a user who is not a member "
-"of the given groups will be removed from the team."
+"   If a string or list of strings, specifies the group DN(s). User will be added as a team member if the user is a member of ANY of these groups.\n"
+"- remove: True/False. Defaults to True. If True, a user who is not a member of the given groups will be removed from the team."
 msgstr ""
-"Mappage entre les membres d'équipe (utilisateurs) et les groupes LDAP. Les "
-"clés sont des noms d'équipe (seront créés s'ils ne sont pas présents). Les "
-"valeurs sont des dictionnaires d'options d'appartenance à chaque équipe, où "
-"chacune peut contenir les paramètres suivants :\n"
+"Mappage entre les membres d'équipe (utilisateurs) et les groupes LDAP. Les clés sont des noms d'équipe (seront créés s'ils ne sont pas présents). Les valeurs sont des dictionnaires d'options d'appartenance à chaque équipe, où chacune peut contenir les paramètres suivants :\n"
 "\n"
-" - organization : chaîne. Nom de l'organisation à laquelle l'équipe "
-"appartient. Une équipe est créée si la combinaison nom de l'organisation/nom "
-"de l'équipe n'existe pas. L'organisation sera d'abord créée si elle n'existe "
-"pas.\n"
+" - organization : chaîne. Nom de l'organisation à laquelle l'équipe appartient. Une équipe est créée si la combinaison nom de l'organisation/nom de l'équipe n'existe pas. L'organisation sera d'abord créée si elle n'existe pas.\n"
 " - users : None, True/False, chaîne ou liste de chaînes.\n"
 " Si défini sur None, les membres de l'équipe ne sont pas mis à jour.\n"
-" Si défini sur True/False, tous les utilisateurs LDAP seront ajoutés/"
-"supprimés en tant que membres d'équipe.\n"
-" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les NDD des "
-"groupes. L'utilisateur est ajouté en tant que membre d'équipe s'il est "
-"membre de l'UN de ces groupes.\n"
-"- remove : True/False. Par défaut défini sur True. Si défini sur True, tout "
-"utilisateur qui n'est pas membre des groupes donnés est supprimé de l'équipe."
-""
+" Si défini sur True/False, tous les utilisateurs LDAP seront ajoutés/supprimés en tant que membres d'équipe.\n"
+" Si une chaîne ou une liste de chaînes est entrée, elle spécifie les NDD des groupes. L'utilisateur est ajouté en tant que membre d'équipe s'il est membre de l'UN de ces groupes.\n"
+"- remove : True/False. Par défaut défini sur True. Si défini sur True, tout utilisateur qui n'est pas membre des groupes donnés est supprimé de l'équipe."
 
 #: sso/conf.py:484
 msgid "RADIUS Server"
@@ -3471,15 +3285,13 @@ msgstr "Serveur RADIUS"
 
 #: sso/conf.py:485
 msgid ""
-"Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this "
-"setting is empty."
+"Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this"
+" setting is empty."
 msgstr ""
-"Nom d'hôte/IP du serveur RADIUS. L'authentification RADIUS est désactivée si "
-"ce paramètre est vide."
+"Nom d'hôte/IP du serveur RADIUS. L'authentification RADIUS est désactivée si"
+" ce paramètre est vide."
 
-#: sso/conf.py:487
-#: sso/conf.py:501
-#: sso/conf.py:513
+#: sso/conf.py:487 sso/conf.py:501 sso/conf.py:513
 msgid "RADIUS"
 msgstr "RADIUS"
 
@@ -3510,17 +3322,12 @@ msgid ""
 "enabled. Provide this URL as the callback URL for your application."
 msgstr ""
 "Créez un projet sur https://console.developers.google.com/ afin d'obtenir "
-"une clé OAuth2 et un secret pour une application Web. Assurez-vous que l'API "
-"Google+ est activée. Entrez cette URL comme URL de rappel de votre "
+"une clé OAuth2 et un secret pour une application Web. Assurez-vous que l'API"
+" Google+ est activée. Entrez cette URL comme URL de rappel de votre "
 "application."
 
-#: sso/conf.py:533
-#: sso/conf.py:544
-#: sso/conf.py:555
-#: sso/conf.py:568
-#: sso/conf.py:582
-#: sso/conf.py:594
-#: sso/conf.py:606
+#: sso/conf.py:533 sso/conf.py:544 sso/conf.py:555 sso/conf.py:568
+#: sso/conf.py:582 sso/conf.py:594 sso/conf.py:606
 msgid "Google OAuth2"
 msgstr "OAuth2 pour Google"
 
@@ -3530,11 +3337,11 @@ msgstr "Clé OAuth2 pour Google"
 
 #: sso/conf.py:543
 msgid ""
-"The OAuth2 key from your web application at https://console.developers."
-"google.com/."
+"The OAuth2 key from your web application at "
+"https://console.developers.google.com/."
 msgstr ""
-"Clé OAuth2 de votre application Web sur https://console.developers.google."
-"com/."
+"Clé OAuth2 de votre application Web sur "
+"https://console.developers.google.com/."
 
 #: sso/conf.py:553
 msgid "Google OAuth2 Secret"
@@ -3542,11 +3349,11 @@ msgstr "Secret OAuth2 pour Google"
 
 #: sso/conf.py:554
 msgid ""
-"The OAuth2 secret from your web application at https://console.developers."
-"google.com/."
+"The OAuth2 secret from your web application at "
+"https://console.developers.google.com/."
 msgstr ""
-"Secret OAuth2 de votre application Web sur https://console.developers.google."
-"com/."
+"Secret OAuth2 de votre application Web sur "
+"https://console.developers.google.com/."
 
 #: sso/conf.py:565
 msgid "Google OAuth2 Whitelisted Domains"
@@ -3557,8 +3364,8 @@ msgid ""
 "Update this setting to restrict the domains who are allowed to login using "
 "Google OAuth2."
 msgstr ""
-"Mettez à jour ce paramètre pour limiter les domaines qui sont autorisés à se "
-"connecter à l'aide de l'authentification OAuth2 avec un compte Google."
+"Mettez à jour ce paramètre pour limiter les domaines qui sont autorisés à se"
+" connecter à l'aide de l'authentification OAuth2 avec un compte Google."
 
 #: sso/conf.py:577
 msgid "Google OAuth2 Extra Arguments"
@@ -3595,14 +3402,12 @@ msgid ""
 "obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this "
 "URL as the callback URL for your application."
 msgstr ""
-"Créez une application de développeur sur https://github.com/settings/"
-"developers pour obtenir une clé OAuth2 (ID client) et un secret (secret "
-"client). Entrez cette URL comme URL de rappel de votre application."
+"Créez une application de développeur sur "
+"https://github.com/settings/developers pour obtenir une clé OAuth2 (ID "
+"client) et un secret (secret client). Entrez cette URL comme URL de rappel "
+"de votre application."
 
-#: sso/conf.py:625
-#: sso/conf.py:636
-#: sso/conf.py:646
-#: sso/conf.py:658
+#: sso/conf.py:625 sso/conf.py:636 sso/conf.py:646 sso/conf.py:658
 #: sso/conf.py:670
 msgid "GitHub OAuth2"
 msgstr "OAuth2 pour GitHub"
@@ -3637,25 +3442,20 @@ msgstr "Mappe d'équipes OAuth2 pour GitHub"
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr "URL de rappel OAuth2 pour les organisations GitHub"
 
-#: sso/conf.py:685
-#: sso/conf.py:760
+#: sso/conf.py:685 sso/conf.py:760
 msgid ""
-"Create an organization-owned application at https://github.com/organizations/"
-"<yourorg>/settings/applications and obtain an OAuth2 key (Client ID) and "
-"secret (Client Secret). Provide this URL as the callback URL for your "
-"application."
+"Create an organization-owned application at "
+"https://github.com/organizations/<yourorg>/settings/applications and obtain "
+"an OAuth2 key (Client ID) and secret (Client Secret). Provide this URL as "
+"the callback URL for your application."
 msgstr ""
-"Créez une application appartenant à une organisation sur https://github.com/"
-"organizations/<votreorg>/settings/applications et obtenez une clé OAuth2 (ID "
-"client) et un secret (secret client). Entrez cette URL comme URL de rappel "
-"de votre application."
+"Créez une application appartenant à une organisation sur "
+"https://github.com/organizations/<votreorg>/settings/applications et obtenez"
+" une clé OAuth2 (ID client) et un secret (secret client). Entrez cette URL "
+"comme URL de rappel de votre application."
 
-#: sso/conf.py:689
-#: sso/conf.py:700
-#: sso/conf.py:710
-#: sso/conf.py:722
-#: sso/conf.py:733
-#: sso/conf.py:745
+#: sso/conf.py:689 sso/conf.py:700 sso/conf.py:710 sso/conf.py:722
+#: sso/conf.py:733 sso/conf.py:745
 msgid "GitHub Organization OAuth2"
 msgstr "OAuth2 pour les organisations GitHub"
 
@@ -3663,8 +3463,7 @@ msgstr "OAuth2 pour les organisations GitHub"
 msgid "GitHub Organization OAuth2 Key"
 msgstr "Clé OAuth2 pour les organisations GitHub"
 
-#: sso/conf.py:699
-#: sso/conf.py:774
+#: sso/conf.py:699 sso/conf.py:774
 msgid "The OAuth2 key (Client ID) from your GitHub organization application."
 msgstr "Clé OAuth2 (ID client) de votre application d'organisation GitHub."
 
@@ -3672,8 +3471,7 @@ msgstr "Clé OAuth2 (ID client) de votre application d'organisation GitHub."
 msgid "GitHub Organization OAuth2 Secret"
 msgstr "Secret OAuth2 pour les organisations GitHub"
 
-#: sso/conf.py:709
-#: sso/conf.py:784
+#: sso/conf.py:709 sso/conf.py:784
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub organization application."
 msgstr ""
@@ -3703,12 +3501,8 @@ msgstr "Mappe d'équipes OAuth2 pour les organisations GitHub"
 msgid "GitHub Team OAuth2 Callback URL"
 msgstr "URL de rappel OAuth2 pour les équipes GitHub"
 
-#: sso/conf.py:764
-#: sso/conf.py:775
-#: sso/conf.py:785
-#: sso/conf.py:797
-#: sso/conf.py:808
-#: sso/conf.py:820
+#: sso/conf.py:764 sso/conf.py:775 sso/conf.py:785 sso/conf.py:797
+#: sso/conf.py:808 sso/conf.py:820
 msgid "GitHub Team OAuth2"
 msgstr "OAuth2 pour les équipes GitHub"
 
@@ -3726,11 +3520,11 @@ msgstr "ID d'équipe GitHub"
 
 #: sso/conf.py:795
 msgid ""
-"Find the numeric team ID using the Github API: http://fabian-kostadinov."
-"github.io/2015/01/16/how-to-find-a-github-team-id/."
+"Find the numeric team ID using the Github API: http://fabian-"
+"kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
 msgstr ""
-"Recherchez votre ID d'équipe numérique à l'aide de l'API Github : http://"
-"fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
+"Recherchez votre ID d'équipe numérique à l'aide de l'API Github : http"
+"://fabian-kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
 
 #: sso/conf.py:806
 msgid "GitHub Team OAuth2 Organization Map"
@@ -3746,20 +3540,17 @@ msgstr "URL de rappel OAuth2 pour Azure AD"
 
 #: sso/conf.py:835
 msgid ""
-"Register an Azure AD application as described by https://msdn.microsoft.com/"
-"en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
+"Register an Azure AD application as described by https://msdn.microsoft.com"
+"/en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
 "secret (Client Secret). Provide this URL as the callback URL for your "
 "application."
 msgstr ""
-"Enregistrez une application AD Azure selon la procédure décrite sur https://"
-"msdn.microsoft.com/en-us/library/azure/dn132599.aspx et obtenez une clé "
-"OAuth2 (ID client) et un secret (secret client). Entrez cette URL comme URL "
-"de rappel de votre application."
+"Enregistrez une application AD Azure selon la procédure décrite sur "
+"https://msdn.microsoft.com/en-us/library/azure/dn132599.aspx et obtenez une "
+"clé OAuth2 (ID client) et un secret (secret client). Entrez cette URL comme "
+"URL de rappel de votre application."
 
-#: sso/conf.py:839
-#: sso/conf.py:850
-#: sso/conf.py:860
-#: sso/conf.py:872
+#: sso/conf.py:839 sso/conf.py:850 sso/conf.py:860 sso/conf.py:872
 #: sso/conf.py:884
 msgid "Azure AD OAuth2"
 msgstr "OAuth2 pour Azure AD"
@@ -3802,17 +3593,9 @@ msgstr ""
 "fournisseur d'identité (IdP) que vous avez configuré. Entrez votre ID "
 "d'entité SP et cette URL de rappel pour votre application."
 
-#: sso/conf.py:907
-#: sso/conf.py:921
-#: sso/conf.py:934
-#: sso/conf.py:948
-#: sso/conf.py:962
-#: sso/conf.py:980
-#: sso/conf.py:1002
-#: sso/conf.py:1021
-#: sso/conf.py:1041
-#: sso/conf.py:1075
-#: sso/conf.py:1088
+#: sso/conf.py:907 sso/conf.py:921 sso/conf.py:934 sso/conf.py:948
+#: sso/conf.py:962 sso/conf.py:980 sso/conf.py:1002 sso/conf.py:1021
+#: sso/conf.py:1041 sso/conf.py:1075 sso/conf.py:1088
 msgid "SAML"
 msgstr "SAML"
 
@@ -3846,11 +3629,11 @@ msgstr "Certificat public du fournisseur de services SAML"
 
 #: sso/conf.py:946
 msgid ""
-"Create a keypair for Tower to use as a service provider (SP) and include the "
-"certificate content here."
+"Create a keypair for Tower to use as a service provider (SP) and include the"
+" certificate content here."
 msgstr ""
-"Créez une paire de clés pour que Tower puisse être utilisé comme fournisseur "
-"de services (SP) et entrez le contenu du certificat ici."
+"Créez une paire de clés pour que Tower puisse être utilisé comme fournisseur"
+" de services (SP) et entrez le contenu du certificat ici."
 
 #: sso/conf.py:959
 msgid "SAML Service Provider Private Key"
@@ -3858,11 +3641,11 @@ msgstr "Clé privée du fournisseur de services SAML"
 
 #: sso/conf.py:960
 msgid ""
-"Create a keypair for Tower to use as a service provider (SP) and include the "
-"private key content here."
+"Create a keypair for Tower to use as a service provider (SP) and include the"
+" private key content here."
 msgstr ""
-"Créez une paire de clés pour que Tower puisse être utilisé comme fournisseur "
-"de services (SP) et entrez le contenu de la clé privée ici."
+"Créez une paire de clés pour que Tower puisse être utilisé comme fournisseur"
+" de services (SP) et entrez le contenu de la clé privée ici."
 
 #: sso/conf.py:978
 msgid "SAML Service Provider Organization Info"
@@ -3878,8 +3661,7 @@ msgstr ""
 msgid "SAML Service Provider Technical Contact"
 msgstr "Contact technique du fournisseur de services SAML"
 
-#: sso/conf.py:1001
-#: sso/conf.py:1020
+#: sso/conf.py:1001 sso/conf.py:1020
 msgid "Configure this setting with your contact information."
 msgstr "Configurez ce paramètre en vous servant de vos coordonnées."
 
@@ -3895,16 +3677,17 @@ msgstr "Fournisseurs d'identité compatibles SAML"
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
-"data using attribute names that differ from the default OIDs (https://github."
-"com/omab/python-social-auth/blob/master/social/backends/saml.py#L16). "
-"Attribute names may be overridden for each IdP."
+"data using attribute names that differ from the default OIDs "
+"(https://github.com/omab/python-social-"
+"auth/blob/master/social/backends/saml.py#L16). Attribute names may be "
+"overridden for each IdP."
 msgstr ""
-"Configurez l'ID d'entité, l'URL SSO et le certificat pour chaque fournisseur "
-"d'identité (IdP) utilisé. Plusieurs IdP SAML sont pris en charge. Certains "
-"IdP peuvent fournir des données utilisateur à l'aide de noms d'attributs qui "
-"diffèrent des OID par défaut (https://github.com/omab/python-social-auth/"
-"blob/master/social/backends/saml.py#L16). Les noms d'attributs peuvent être "
-"remplacés pour chaque IdP."
+"Configurez l'ID d'entité, l'URL SSO et le certificat pour chaque fournisseur"
+" d'identité (IdP) utilisé. Plusieurs IdP SAML sont pris en charge. Certains "
+"IdP peuvent fournir des données utilisateur à l'aide de noms d'attributs qui"
+" diffèrent des OID par défaut (https://github.com/omab/python-social-"
+"auth/blob/master/social/backends/saml.py#L16). Les noms d'attributs peuvent "
+"être remplacés pour chaque IdP."
 
 #: sso/conf.py:1073
 msgid "SAML Organization Map"
@@ -3915,7 +3698,6 @@ msgid "SAML Team Map"
 msgstr "Mappe d'équipes SAML"
 
 #: sso/fields.py:123
-#, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "Option(s) de connexion non valide(s) : {invalid_options}."
 
@@ -3932,21 +3714,18 @@ msgid "Subtree"
 msgstr "Sous-arborescence"
 
 #: sso/fields.py:202
-#, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr ""
 "Une liste de trois éléments était attendue, mais {length} a été obtenu à la "
 "place."
 
 #: sso/fields.py:203
-#, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr ""
 "Une instance de LDAPSearch était attendue, mais {input_type} a été obtenu à "
 "la place."
 
 #: sso/fields.py:239
-#, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
@@ -3955,90 +3734,72 @@ msgstr ""
 "{input_type} a été obtenu à la place."
 
 #: sso/fields.py:266
-#, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "Attribut(s) d'utilisateur non valide(s) : {invalid_attrs}."
 
 #: sso/fields.py:283
-#, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr ""
-"Une instance de LDAPGroupType était attendue, mais {input_type} a été obtenu "
-"à la place."
+"Une instance de LDAPGroupType était attendue, mais {input_type} a été obtenu"
+" à la place."
 
 #: sso/fields.py:308
-#, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "Marqueur d'utilisateur non valide : \"{invalid_flag}\"."
 
-#: sso/fields.py:324
-#: sso/fields.py:491
-#, python-brace-format
+#: sso/fields.py:324 sso/fields.py:491
 msgid ""
-"Expected None, True, False, a string or list of strings but got {input_type} "
-"instead."
+"Expected None, True, False, a string or list of strings but got {input_type}"
+" instead."
 msgstr ""
 "Les valeurs None, True, False, une chaîne ou une liste de chaînes étaient "
 "attendues, mais  {input_type} a été obtenu à la place."
 
 #: sso/fields.py:360
-#, python-brace-format
 msgid "Missing key(s): {missing_keys}."
 msgstr "Clé(s) manquante(s) : {missing_keys}."
 
 #: sso/fields.py:361
-#, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "Clé(s) non valide(s) : {invalid_keys}."
 
-#: sso/fields.py:410
-#: sso/fields.py:527
-#, python-brace-format
+#: sso/fields.py:410 sso/fields.py:527
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr "Clé(s) non valide(s) pour la mappe d'organisations : {invalid_keys}."
 
 #: sso/fields.py:428
-#, python-brace-format
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr "Clé obligatoire manquante pour la mappe d'équipes : {invalid_keys}."
 
-#: sso/fields.py:429
-#: sso/fields.py:546
-#, python-brace-format
+#: sso/fields.py:429 sso/fields.py:546
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr "Clé(s) non valide(s) pour la mappe d'équipes : {invalid_keys}."
 
 #: sso/fields.py:545
-#, python-brace-format
 msgid "Missing required key for team map: {missing_keys}."
 msgstr "Clé obligatoire manquante pour la mappe d'équipes : {missing_keys}."
 
 #: sso/fields.py:563
-#, python-brace-format
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr ""
-"Clé(s) obligatoire(s) manquante(s) pour l'enregistrement des infos organis. :"
-" {missing_keys}."
+"Clé(s) obligatoire(s) manquante(s) pour l'enregistrement des infos organis. "
+": {missing_keys}."
 
 #: sso/fields.py:576
-#, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr ""
-"Code(s) langage non valide(s) pour les infos organis. : {invalid_lang_codes}."
-""
+"Code(s) langage non valide(s) pour les infos organis. : "
+"{invalid_lang_codes}."
 
 #: sso/fields.py:595
-#, python-brace-format
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr "Clé(s) obligatoire(s) manquante(s) pour le contact : {missing_keys}."
 
 #: sso/fields.py:607
-#, python-brace-format
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr "Clé(s) obligatoire(s) manquante(s) pour l'IdP : {missing_keys}."
 
 #: sso/pipeline.py:24
-#, python-brace-format
 msgid "An account cannot be found for {0}"
 msgstr "Impossible de trouver un compte pour {0}"
 
@@ -4046,8 +3807,7 @@ msgstr "Impossible de trouver un compte pour {0}"
 msgid "Your account is inactive"
 msgstr "Votre compte est inactif"
 
-#: sso/validators.py:19
-#: sso/validators.py:44
+#: sso/validators.py:19 sso/validators.py:44
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
 msgstr ""
@@ -4064,8 +3824,7 @@ msgstr "NDD non valide : %s"
 msgid "Invalid filter: %s"
 msgstr "Filtre incorrect : %s"
 
-#: templates/error.html:4
-#: ui/templates/ui/index.html:8
+#: templates/error.html:4 ui/templates/ui/index.html:8
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
@@ -4081,8 +3840,7 @@ msgstr "Retour à Ansible Tower"
 msgid "Resize"
 msgstr "Redimensionner"
 
-#: templates/rest_framework/base.html:78
-#: templates/rest_framework/base.html:92
+#: templates/rest_framework/base.html:78 templates/rest_framework/base.html:92
 #, python-format
 msgid "Make a GET request on the %(name)s resource"
 msgstr "Appliquez une requête GET sur la ressource %(name)s"
@@ -4131,10 +3889,7 @@ msgstr "Appliquez une requête PUT sur la ressource %(name)s"
 msgid "Make a PATCH request on the %(name)s resource"
 msgstr "Appliquez une requête PATCH sur la ressource %(name)s"
 
-#: ui/apps.py:9
-#: ui/conf.py:22
-#: ui/conf.py:38
-#: ui/conf.py:53
+#: ui/apps.py:9 ui/conf.py:22 ui/conf.py:38 ui/conf.py:53
 msgid "UI"
 msgstr "IU"
 
@@ -4165,8 +3920,8 @@ msgstr "Infos de connexion personnalisées"
 #: ui/conf.py:32
 msgid ""
 "If needed, you can add specific information (such as a legal notice or a "
-"disclaimer) to a text box in the login modal using this setting. Any content "
-"added must be in plain text, as custom HTML or other markup languages are "
+"disclaimer) to a text box in the login modal using this setting. Any content"
+" added must be in plain text, as custom HTML or other markup languages are "
 "not supported. If multiple paragraphs of text are needed, new lines "
 "(paragraphs) must be escaped as `\\n` within the block of text."
 msgstr ""
@@ -4185,13 +3940,13 @@ msgstr "Logo personnalisé"
 
 #: ui/conf.py:49
 msgid ""
-"To set up a custom logo, provide a file that you create. For the custom logo "
-"to look its best, use a `.png` file with a transparent background. GIF, PNG "
-"and JPEG formats are supported."
+"To set up a custom logo, provide a file that you create. For the custom logo"
+" to look its best, use a `.png` file with a transparent background. GIF, PNG"
+" and JPEG formats are supported."
 msgstr ""
-"Pour configurer un logo personnalisé, chargez un fichier que vous avez créé. "
-"Pour optimiser l'affichage du logo personnalisé, utilisez un fichier `.png` "
-"avec un fond transparent. Les formats GIF, PNG et JPEG sont pris en charge."
+"Pour configurer un logo personnalisé, chargez un fichier que vous avez créé."
+" Pour optimiser l'affichage du logo personnalisé, utilisez un fichier `.png`"
+" avec un fond transparent. Les formats GIF, PNG et JPEG sont pris en charge."
 
 #: ui/fields.py:29
 msgid ""
@@ -4207,11 +3962,12 @@ msgstr "Données codées en base64 non valides dans l'URL de données"
 
 #: ui/templates/ui/index.html:49
 msgid ""
-"Your session will expire in <span id=\"remaining_seconds\" class=\"IdleModal-"
-"remainingSeconds\">60</span> seconds, would you like to continue?"
+"Your session will expire in <span id=\"remaining_seconds\" class"
+"=\"IdleModal-remainingSeconds\">60</span> seconds, would you like to "
+"continue?"
 msgstr ""
-"Votre session expirera dans <span id=\"remaining_seconds\" class=\"IdleModal-"
-"remainingSeconds\">60</span> secondes, voulez-vous continuer ?"
+"Votre session expirera dans <span id=\"remaining_seconds\" class"
+"=\"IdleModal-remainingSeconds\">60</span> secondes, voulez-vous continuer ?"
 
 #: ui/templates/ui/index.html:64
 msgid "CANCEL"
@@ -4225,35 +3981,29 @@ msgstr ""
 
 #: ui/templates/ui/index.html:122
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_form.days_to_keep."
-"$dirty && prompt_for_days_form.days_to_keep.$error.min\"> that is not "
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_form.days_to_keep.$dirty && "
+"prompt_for_days_form.days_to_keep.$error.min\"> that is not "
 "negative</span><span ng-show=\"prompt_for_days_form.days_to_keep.$dirty && "
-"prompt_for_days_form.days_to_keep.$error.max\"> that is lower than 9999</"
-"span>."
+"prompt_for_days_form.days_to_keep.$error.max\"> that is lower than "
+"9999</span>."
 msgstr ""
 "Entrez un entier<span ng-show=\"prompt_for_days_form.days_to_keep.$dirty && "
 "prompt_for_days_form.days_to_keep.$error.min\"> non négatif</span><span ng-"
-"show=\"prompt_for_days_form.days_to_keep.$dirty && prompt_for_days_form."
-"days_to_keep.$error.max\"> et inférieur à 9999</span>."
+"show=\"prompt_for_days_form.days_to_keep.$dirty && "
+"prompt_for_days_form.days_to_keep.$error.max\"> et inférieur à 9999</span>."
 
 #: ui/templates/ui/index.html:127
 msgid ""
-"For facts collected older than the time period specified, save one fact scan "
-"(snapshot) per time window (frequency). For example, facts older than 30 "
-"days are purged, while one weekly fact scan is kept.\n"
+"For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.\n"
 "                    <br>\n"
-"                    <br> CAUTION: Setting both numerical variables to \"0\" "
-"will delete all facts.\n"
+"                    <br> CAUTION: Setting both numerical variables to \"0\" will delete all facts.\n"
 "                    <br>\n"
 "                    <br>"
 msgstr ""
-"Pour les faits collectés en amont de la période spécifiée, enregistrez un "
-"scan des faits (instantané) par fenêtre temporelle (fréquence). Par exemple, "
-"les faits antérieurs à 30 jours sont purgés, tandis qu'un scan de faits "
-"hebdomadaire est conservé.\n"
+"Pour les faits collectés en amont de la période spécifiée, enregistrez un scan des faits (instantané) par fenêtre temporelle (fréquence). Par exemple, les faits antérieurs à 30 jours sont purgés, tandis qu'un scan de faits hebdomadaire est conservé.\n"
 " <br>\n"
-" <br> ATTENTION : le paramétrage des deux variables numériques sur \"0\" "
-"supprime l'ensemble des faits.\n"
+" <br> ATTENTION : le paramétrage des deux variables numériques sur \"0\" supprime l'ensemble des faits.\n"
 " <br>\n"
 " <br>"
 
@@ -4265,17 +4015,19 @@ msgstr ""
 
 #: ui/templates/ui/index.html:150
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.min\"> "
-"that is not negative</span><span ng-show=\"prompt_for_days_facts_form."
-"keep_amount.$dirty && prompt_for_days_facts_form.keep_amount.$error.max\"> "
-"that is lower than 9999</span>."
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
+"prompt_for_days_facts_form.keep_amount.$error.min\"> that is not "
+"negative</span><span ng-show=\"prompt_for_days_facts_form.keep_amount.$dirty"
+" && prompt_for_days_facts_form.keep_amount.$error.max\"> that is lower than "
+"9999</span>."
 msgstr ""
-"Entrez un entier<span ng-show=\"prompt_for_days_facts_form.keep_amount."
-"$dirty && prompt_for_days_facts_form.keep_amount.$error.min\"> non négatif</"
-"span><span ng-show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
-"prompt_for_days_facts_form.keep_amount.$error.max\"> et inférieur à 9999</"
-"span>."
+"Entrez un entier<span ng-"
+"show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
+"prompt_for_days_facts_form.keep_amount.$error.min\"> non négatif</span><span"
+" ng-show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
+"prompt_for_days_facts_form.keep_amount.$error.max\"> et inférieur à "
+"9999</span>."
 
 #: ui/templates/ui/index.html:155
 msgid "Select a frequency for snapshot retention"
@@ -4283,21 +4035,22 @@ msgstr "Sélectionnez une fréquence pour la conservation des instantanés"
 
 #: ui/templates/ui/index.html:169
 msgid ""
-"Please enter an integer<span ng-show=\"prompt_for_days_facts_form."
-"granularity_keep_amount.$dirty && prompt_for_days_facts_form."
-"granularity_keep_amount.$error.min\"> that is not negative</span><span ng-"
+"Please enter an integer<span ng-"
+"show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
+"prompt_for_days_facts_form.granularity_keep_amount.$error.min\"> that is not"
+" negative</span><span ng-"
 "show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
 "prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> that is "
 "lower than 9999</span>."
 msgstr ""
-"Entrez un entier<span ng-show=\"prompt_for_days_facts_form."
-"granularity_keep_amount.$dirty && prompt_for_days_facts_form."
-"granularity_keep_amount.$error.min\"> non négatif</span><span ng-show="
-"\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
+"Entrez un entier<span ng-"
+"show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
+"prompt_for_days_facts_form.granularity_keep_amount.$error.min\"> non "
+"négatif</span><span ng-"
+"show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
 "prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> et "
 "inférieur à 9999</span>."
 
 #: ui/templates/ui/index.html:175
 msgid "working..."
 msgstr "en cours..."
-
