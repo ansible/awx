@@ -114,7 +114,8 @@ export default
                 awToolTip: "Create a new host",
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ADD HOST',
-                ngShow: 'canAdd'
+                ngShow: 'canAdd',
+                dataPlacement: "top",
             }
         }
 
