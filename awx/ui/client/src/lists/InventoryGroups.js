@@ -96,7 +96,8 @@ export default
                 awToolTip: "Create a new group",
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ADD GROUP',
-                ngShow: 'canAdd'
+                ngShow: 'canAdd',
+                dataPlacement: "top",
             }
         },
 
