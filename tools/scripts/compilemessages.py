@@ -41,7 +41,7 @@ def popen_wrapper(args, os_err_exc_type=StandardError, stdout_encoding='utf-8'):
     except OSError as e:
         strerror = force_text(e.strerror, DEFAULT_LOCALE_ENCODING, strings_only=True)
         raise Exception(os_err_exc_type, os_err_exc_type('Error executing %s: %s' %
-                    (args[0], strerror)), sys.exc_info()[2])
+                                                         (args[0], strerror)), sys.exc_info()[2])
     output, errors = p.communicate()
     return (
         force_text(output, stdout_encoding, strings_only=True, errors='strict'),
@@ -141,13 +141,13 @@ if __name__ == "__main__":
                 po_path = os.path.join(dirpath, f)
                 if has_bom(po_path):
                     raise Exception("The %s file has a BOM (Byte Order Mark). "
-                                       "Django only supports .po files encoded in "
-                                       "UTF-8 and without any BOM." % po_path)
+                                    "Django only supports .po files encoded in "
+                                    "UTF-8 and without any BOM." % po_path)
                 base_path = os.path.splitext(po_path)[0]
                 # Check writability on first location
                 if i == 0 and not is_writable((base_path + '.mo')):
                     raise Exception("The po files under %s are in a seemingly not writable location. "
-                                      "mo files will not be updated/created." % dirpath)
+                                    "mo files will not be updated/created." % dirpath)
                 args = [program] + program_options + [
                     '-o', (base_path + '.mo'), (base_path + '.po')
                 ]
