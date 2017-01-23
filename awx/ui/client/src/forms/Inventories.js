@@ -11,8 +11,8 @@
  */
 
 export default
-angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
-    .factory('InventoryFormObject', ['i18n', function(i18n) {
+angular.module('InventoryFormDefinition', [])
+    .factory('InventoryForm', ['i18n', function(i18n) {
         return {
 
         addTitle: i18n._('New Inventory'),
@@ -181,19 +181,4 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             };
         }
 
-        };}])
-
-    .factory('InventoryForm', ['InventoryFormObject', 'ScanJobsList',
-        function(InventoryFormObject, ScanJobsList) {
-            return function() {
-                var itm;
-                for (itm in InventoryFormObject.related) {
-                    if (InventoryFormObject.related[itm].include === "ScanJobsList") {
-                        InventoryFormObject.related[itm] = ScanJobsList;
-                        InventoryFormObject.related[itm].generateList = true; // tell form generator to call list generator and inject a list
-                    }
-                }
-                return InventoryFormObject;
-            };
-        }
-    ]);
+    };}]);

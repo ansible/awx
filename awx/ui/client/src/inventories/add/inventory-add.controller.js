@@ -34,7 +34,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoryForm();
+        form = InventoryForm;
 
     init();
 
