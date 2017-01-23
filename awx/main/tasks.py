@@ -32,7 +32,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_process_init
+from celery.signals import celeryd_init, worker_ready
 from celery import current_app
 
 # Django
@@ -100,8 +100,9 @@ def _setup_tower_logger():
     logger = logging.getLogger('awx.main.tasks')
 
 
-@worker_process_init.connect
+@worker_ready.connect
 def task_set_logger_pre_run(*args, **kwargs):
+    cache.close()
     if settings.LOG_AGGREGATOR_ENABLED:
         _setup_tower_logger()
         logger.debug('Custom Tower logger configured for worker process.')

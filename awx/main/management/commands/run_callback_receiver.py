@@ -17,6 +17,7 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import connection as django_connection
 from django.db import DatabaseError
+from django.core.cache import cache as django_cache
 
 # AWX
 from awx.main.models import * # noqa
@@ -46,6 +47,7 @@ class CallbackBrokerWorker(ConsumerMixin):
 
         if use_workers:
             django_connection.close()
+            django_cache.close()
             for idx in range(settings.JOB_EVENT_WORKERS):
                 queue_actual = MPQueue(settings.JOB_EVENT_MAX_QUEUE_SIZE)
                 w = Process(target=self.callback_worker, args=(queue_actual, idx,))
@@ -85,8 +87,9 @@ class CallbackBrokerWorker(ConsumerMixin):
                 return queue_actual
             except Exception:
                 import traceback
-                traceback.print_exc()
+                tb = traceback.format_exc()
                 logger.warn("Could not write to queue %s" % preferred_queue)
+                logger.warn("Detail: {}".format(tb))
                 continue
         return None
 
@@ -113,8 +116,9 @@ class CallbackBrokerWorker(ConsumerMixin):
                     logger.error('Database Error Saving Job Event: {}'.format(e))
             except Exception as exc:
                 import traceback
-                traceback.print_exc()
+                tb = traceback.format_exc()
                 logger.error('Callback Task Processor Raised Exception: %r', exc)
+                logger.error('Detail: {}'.format(tb))
 
 
 class Command(NoArgsCommand):

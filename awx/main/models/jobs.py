@@ -1179,7 +1179,10 @@ class JobEvent(CreatedModifiedModel):
         # Try to find a parent event based on UUID.
         if parent_event_uuid:
             cache_key = '{}_{}'.format(kwargs['job_id'], parent_event_uuid)
-            parent_id = cache.get(cache_key)
+            try:
+                parent_id = cache.get(cache_key)
+            except Exception:
+                parent_id = None
             if parent_id is None:
                 parent_id = JobEvent.objects.filter(job_id=kwargs['job_id'], uuid=parent_event_uuid).only('id').values_list('id', flat=True).first()
                 if parent_id:
