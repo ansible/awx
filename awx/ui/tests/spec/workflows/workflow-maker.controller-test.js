@@ -38,6 +38,9 @@ describe('Controller: WorkflowMaker', () => {
             },
             nextIndex: 2
         };
+        scope.workflowJobTemplateObj = {
+            id: 1
+        };
         WorkflowHelpService = _WorkflowHelpService_;
 
         WorkflowMakerController = $controller('WorkflowMakerController', {
