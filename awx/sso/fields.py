@@ -153,12 +153,24 @@ class LDAPDNField(fields.CharField):
         super(LDAPDNField, self).__init__(**kwargs)
         self.validators.append(validate_ldap_dn)
 
+    def run_validation(self, data=empty):
+        value = super(LDAPDNField, self).run_validation(data)
+        # django-auth-ldap expects DN fields (like AUTH_LDAP_REQUIRE_GROUP)
+        # to be either a valid string or ``None`` (not an empty string)
+        return None if value == '' else value
+
 
 class LDAPDNWithUserField(fields.CharField):
 
     def __init__(self, **kwargs):
         super(LDAPDNWithUserField, self).__init__(**kwargs)
         self.validators.append(validate_ldap_dn_with_user)
+
+    def run_validation(self, data=empty):
+        value = super(LDAPDNWithUserField, self).run_validation(data)
+        # django-auth-ldap expects DN fields (like AUTH_LDAP_USER_DN_TEMPLATE)
+        # to be either a valid string or ``None`` (not an empty string)
+        return None if value == '' else value
 
 
 class LDAPFilterField(fields.CharField):

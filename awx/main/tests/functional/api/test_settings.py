@@ -86,6 +86,21 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com, ldap://ldap2.example.com'}, expect=200)
 
 
+@pytest.mark.parametrize('setting', [
+    'AUTH_LDAP_USER_DN_TEMPLATE',
+    'AUTH_LDAP_REQUIRE_GROUP',
+    'AUTH_LDAP_DENY_GROUP',
+])
+@pytest.mark.django_db
+def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
+                       setting):
+    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    patch(url, user=admin, data={setting: ''}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
+
+
 @pytest.mark.django_db
 def test_radius_settings(get, put, patch, delete, admin, enterprise_license, settings):
     url = reverse('api:setting_singleton_detail', args=('radius',))
