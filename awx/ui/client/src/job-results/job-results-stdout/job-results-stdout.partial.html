@@ -35,11 +35,14 @@
         <div class="JobResultsStdOut-numberColumnPreload"></div>
         <div id='lineAnchor' class="JobResultsStdOut-lineAnchor"></div>
         <div class="JobResultsStdOut-aLineOfStdOut"
-            ng-show="tooManyEvents">
+            ng-show="tooManyEvents || tooManyPastEvents">
             <div class="JobResultsStdOut-lineNumberColumn">
                 <span class="JobResultsStdOut-lineExpander">  </span>
             </div>
-            <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany">The standard output is too large to display.  Please specify additional filters to narrow the standard out.</div>
+            <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany"
+                ng-show="tooManyEvents">The standard output is too large to display.  Please specify additional filters to narrow the standard out.</div>
+            <div class="JobResultsStdOut-stdoutColumn JobResultsStdOut-stdoutColumn--tooMany"
+                ng-show="tooManyPastEvents">Too much previous output to display.  Showing running standard output.</div>
         </div>
         <div id="followAnchor"
             class="JobResultsStdOut-followAnchor">

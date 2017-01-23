@@ -6,6 +6,12 @@
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
 
+const defaultParams = {
+    page_size: "200",
+    order_by: 'start_line',
+    not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
+};
+
 export default {
     name: 'jobDetail',
     url: '/jobs/{id: int}',
@@ -24,11 +30,7 @@ export default {
     },
     params: {
         job_event_search: {
-            value: {
-                page_size: 100,
-                order_by: 'id',
-                not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
-            },
+            value: defaultParams,
             dynamic: true,
             squash: ''
         }
@@ -56,7 +58,7 @@ export default {
         // flashing as rest data comes in.  If the job is finished and
         // there's a playbook_on_stats event, go ahead and resolve the count
         // so you don't get that flashing!
-        count: ['jobData', 'jobResultsService', 'Rest', '$q', function(jobData, jobResultsService, Rest, $q) {
+        count: ['jobData', 'jobResultsService', 'Rest', '$q', '$stateParams', '$state', function(jobData, jobResultsService, Rest, $q, $stateParams, $state) {
             var defer = $q.defer();
             if (jobData.finished) {
                 // if the job is finished, grab the playbook_on_stats
@@ -92,6 +94,15 @@ export default {
                         }, countFinished: false});
                     });
             } else {
+                // make sure to not include any extra
+                // search params for a running job (because we can't filter
+                // incoming job events)
+                if (!_.isEqual($stateParams.job_event_search, defaultParams)) {
+                    let params = _.cloneDeep($stateParams);
+                    params.job_event_search = defaultParams;
+                    $state.go('.', params, { reload: true });
+                }
+
                 // job isn't finished so just send an empty count and read
                 // from events
                 defer.resolve({val: {

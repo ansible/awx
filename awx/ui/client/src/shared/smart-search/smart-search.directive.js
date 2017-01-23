@@ -15,6 +15,7 @@ export default ['templateUrl',
                 dataset: '=',
                 collection: '=',
                 searchTags: '=',
+                disableSearch: '='
             },
             controller: 'SmartSearchController',
             templateUrl: templateUrl('shared/smart-search/smart-search')
