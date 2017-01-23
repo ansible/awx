@@ -1975,7 +1975,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //html += "</div>\n"; // close well
                 html += "</div>\n"; // close list-wrapper div
 
-                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" iterator="${collection.iterator}">`;
+                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" iterator="${collection.iterator}" ng-hide="hidePagination">`;
                 return html;
             }
         };
