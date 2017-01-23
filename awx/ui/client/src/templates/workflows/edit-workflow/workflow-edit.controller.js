@@ -149,54 +149,7 @@
                 $scope.url = workflowJobTemplateData.url;
                 $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
 
-                let allNodes = [];
-                let page = 1;
-
-                let buildTreeFromNodes = function(){
-                    $scope.workflowTree = WorkflowService.buildTree({
-                        workflowNodes: allNodes
-                    });
-
-                    // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-                    // this workflowTree object and removing the children object for some reason (?)
-                    // This happens on occasion and I think is a race condition (?)
-                    if(!$scope.workflowTree.data.children) {
-                        $scope.workflowTree.data.children = [];
-                    }
-
-                    $scope.workflowTree.workflow_job_template_obj = $scope.workflow_job_template_obj;
-
-                    // In the partial, the workflow maker directive has an ng-if attribute which is pointed at this scope variable.
-                    // It won't get included until this the tree has been built - I'm open to better ways of doing this.
-                    $scope.includeWorkflowMaker = true;
-                };
-
-                let getNodes = function(){
-                    // Get the workflow nodes
-                    TemplatesService.getWorkflowJobTemplateNodes(id, page)
-                    .then(function(data){
-                        for(var i=0; i<data.data.results.length; i++) {
-                            allNodes.push(data.data.results[i]);
-                        }
-                        if(data.data.next) {
-                            // Get the next page
-                            page++;
-                            getNodes();
-                        }
-                        else {
-                            // This is the last page
-                            buildTreeFromNodes();
-                        }
-                    }, function(error){
-                        ProcessErrors($scope, error.data, error.status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get workflow job template nodes. GET returned ' +
-                            'status: ' + error.status
-                        });
-                    });
-                };
-
-                getNodes();
+                $scope.includeWorkflowMaker = true;
 
             }, function(error){
                 ProcessErrors($scope, error.data, error.status, form, {

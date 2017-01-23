@@ -1,4 +1,4 @@
-export default [function(){
+export default ['$q', function($q){
     return {
         searchTree: function(params) {
             // params.element
@@ -129,6 +129,8 @@ export default [function(){
         buildTree: function(params) {
             //params.workflowNodes
 
+            let deferred = $q.defer();
+
             let _this = this;
 
             let treeData = {
@@ -185,7 +187,9 @@ export default [function(){
                 treeData.data.children.push(branch);
             });
 
-            return treeData;
+            deferred.resolve(treeData);
+
+            return deferred.promise;
         },
         buildBranch: function(params) {
             // params.nodeId

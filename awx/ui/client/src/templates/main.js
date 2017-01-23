@@ -112,7 +112,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     },
                     views: {
                         'modal': {
-                            template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
+                            template: `<workflow-maker ng-if="includeWorkflowMaker" workflow-job-template-obj="workflow_job_template_obj" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(WorkflowMakerJobTemplateList, generateList) {

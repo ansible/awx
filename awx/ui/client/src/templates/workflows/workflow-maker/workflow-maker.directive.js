@@ -10,7 +10,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
     function(templateUrl, CreateDialog, Wait, $state) {
         return {
             scope: {
-                treeData: '=',
+                workflowJobTemplateObj: '=',
                 canAddWorkflowJobTemplate: '='
             },
             restrict: 'E',
