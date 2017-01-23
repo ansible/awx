@@ -10,7 +10,7 @@ const defaultParams = {
     page_size: "200",
     order_by: 'start_line',
     not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
-}
+};
 
 export default {
     name: 'jobDetail',
