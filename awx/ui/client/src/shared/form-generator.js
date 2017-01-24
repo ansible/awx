@@ -1836,7 +1836,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // smart-search directive
                 html += `
                 <div
-                    ng-hide="${itm}.length === 0 && (searchTags | isEmpty)">
+                    ng-hide="(${itm}.length === 0 && (searchTags | isEmpty)) || hideSmartSearch === true">
                         <smart-search
                             django-model="${itm}"
                             search-size="${width}"
