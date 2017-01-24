@@ -115,14 +115,14 @@ class SurveyJobTemplateMixin(models.Model):
         # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
             for survey_element in self.survey_spec.get("spec", []):
+                default = survey_element['default']
+                variable_key = survey_element['variable']
                 if survey_element.get('type') == 'password':
-                    default = survey_element.get('default', None)
-                    variable_key = survey_element['variable']
-                    if default is not None and variable_key in kwargs_extra_vars:
-                        value = kwargs_extra_vars[variable_key]
-                        if value.startswith('$encrypted$') and value != default:
+                    if variable_key in kwargs_extra_vars:
+                        kw_value = kwargs_extra_vars[variable_key]
+                        if kw_value.startswith('$encrypted$') and kw_value != default:
                             kwargs_extra_vars[variable_key] = default
-                extra_vars[survey_element['variable']] = survey_element['default']
+                extra_vars[variable_key] = default
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars
