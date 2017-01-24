@@ -2450,9 +2450,9 @@ class JobTemplateSurveySpec(GenericAPIView):
             return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
         if len(new_spec["spec"]) < 1:
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
+
         idx = 0
         variable_set = set()
-
         for survey_item in new_spec["spec"]:
             if not isinstance(survey_item, dict):
                 return Response(dict(error=_("Survey question %s is not a json object.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)

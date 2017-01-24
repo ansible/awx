@@ -105,20 +105,24 @@ class SurveyJobTemplateMixin(models.Model):
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
-        # Overwrite with job template extra vars with survey default vars
-        if self.survey_enabled and 'spec' in self.survey_spec:
-            for survey_element in self.survey_spec.get("spec", []):
-                if survey_element.get('type') == 'password':
-                    if 'default' in survey_element and survey_element['default'].startswith('$encrypted$'):
-                        continue
-                extra_vars[survey_element['variable']] = survey_element['default']
-
         # transform to dict
         if 'extra_vars' in kwargs:
             kwargs_extra_vars = kwargs['extra_vars']
             kwargs_extra_vars = parse_yaml_or_json(kwargs_extra_vars)
         else:
             kwargs_extra_vars = {}
+
+        # Overwrite with job template extra vars with survey default vars
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            for survey_element in self.survey_spec.get("spec", []):
+                if survey_element.get('type') == 'password':
+                    default = survey_element.get('default', None)
+                    variable_key = survey_element['variable']
+                    if default is not None and variable_key in kwargs_extra_vars:
+                        value = kwargs_extra_vars[variable_key]
+                        if value.startswith('$encrypted$') and value != default:
+                            kwargs_extra_vars[variable_key] = default
+                extra_vars[survey_element['variable']] = survey_element['default']
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars
@@ -150,7 +154,6 @@ class SurveyJobTemplateMixin(models.Model):
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
-
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != int:
