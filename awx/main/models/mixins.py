@@ -108,8 +108,10 @@ class SurveyJobTemplateMixin(models.Model):
         # Overwrite with job template extra vars with survey default vars
         if self.survey_enabled and 'spec' in self.survey_spec:
             for survey_element in self.survey_spec.get("spec", []):
-                if 'default' in survey_element and survey_element['default']:
-                    extra_vars[survey_element['variable']] = survey_element['default']
+                if survey_element.get('type') == 'password':
+                    if 'default' in survey_element and survey_element['default'].startswith('$encrypted$'):
+                        continue
+                extra_vars[survey_element['variable']] = survey_element['default']
 
         # transform to dict
         if 'extra_vars' in kwargs:
@@ -148,6 +150,7 @@ class SurveyJobTemplateMixin(models.Model):
                     if 'max' in survey_element and survey_element['max'] not in ["", None] and len(data[survey_element['variable']]) > int(survey_element['max']):
                         errors.append("'%s' value %s is too large (must be no more than %s)." %
                                       (survey_element['variable'], data[survey_element['variable']], survey_element['max']))
+
             elif survey_element['type'] == 'integer':
                 if survey_element['variable'] in data:
                     if type(data[survey_element['variable']]) != int:
