@@ -125,23 +125,16 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 return {}
 
         accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
-        ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
 
         ignored_dict = {}
-        missing_dict = {}
         for fd in ignored_fields:
             ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
         scan_errors = ujt_obj._extra_job_type_errors(accepted_fields)
         ignored_dict.update(scan_errors)
-        for fd in ['inventory', 'credential']:
-            if getattr(ujt_obj, "{}_id".format(fd)) is None and not (ask_for_vars_dict.get(fd, False) and fd in prompts_dict):
-                missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
 
         data = {}
         if ignored_dict:
             data['ignored'] = ignored_dict
-        if missing_dict:
-            data['missing'] = missing_dict
         return data
 
     def get_parent_nodes(self):

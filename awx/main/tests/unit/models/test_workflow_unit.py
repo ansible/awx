@@ -239,10 +239,3 @@ class TestWorkflowWarnings:
         assert 'job_type' in job_node_with_prompts.get_prompts_warnings()['ignored']
         assert 'inventory' in job_node_with_prompts.get_prompts_warnings()['ignored']
         assert len(job_node_with_prompts.get_prompts_warnings()['ignored']) == 2
-
-    def test_warn_missing_fields(self, job_node_no_prompts):
-        job_node_no_prompts.inventory = None
-        assert 'missing' in job_node_no_prompts.get_prompts_warnings()
-        assert 'inventory' in job_node_no_prompts.get_prompts_warnings()['missing']
-        assert 'credential' in job_node_no_prompts.get_prompts_warnings()['missing']
-        assert len(job_node_no_prompts.get_prompts_warnings()['missing']) == 2
