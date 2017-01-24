@@ -221,9 +221,12 @@ export function UsersEdit($scope, $rootScope, $location,
     init();
 
     function init() {
+        $scope.hidePagination = false;
+        $scope.hideSmartSearch = false;
         $scope.user_type_options = user_type_options;
         $scope.user_type = user_type_options[0];
         $scope.$watch('user_type', user_type_sync($scope));
+        $scope.$watch('is_superuser', hidePermissionsTabSmartSearchAndPaginationIfSuperUser($scope));
         Rest.setUrl(defaultUrl);
         Wait('start');
         Rest.get(defaultUrl).success(function(data) {
@@ -269,6 +272,20 @@ export function UsersEdit($scope, $rootScope, $location,
                     msg: i18n.sprintf(i18n._('Failed to retrieve user: %s. GET status: '), $stateParams.id) + status
                 });
             });
+    }
+
+    // Organizations and Teams tab pagination is hidden through other mechanism
+    function hidePermissionsTabSmartSearchAndPaginationIfSuperUser(scope) {
+        return function(isSuperuserNewValue) {
+            let shouldHide = isSuperuserNewValue;
+            if (shouldHide === true) {
+                scope.hidePagination = true;
+                scope.hideSmartSearch = true;
+            } else if (shouldHide === false) {
+                scope.hidePagination = false;
+                scope.hideSmartSearch = false;
+            }
+        };
     }
 
 

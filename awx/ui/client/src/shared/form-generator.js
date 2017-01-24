@@ -1844,7 +1844,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // smart-search directive
                 html += `
                 <div
-                    ng-hide="${itm}.length === 0 && (searchTags | isEmpty)">
+                    ng-hide="(${itm}.length === 0 && (searchTags | isEmpty)) || hideSmartSearch === true">
                         <smart-search
                             django-model="${itm}"
                             search-size="${width}"
@@ -1983,7 +1983,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //html += "</div>\n"; // close well
                 html += "</div>\n"; // close list-wrapper div
 
-                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" iterator="${collection.iterator}">`;
+                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" iterator="${collection.iterator}" ng-hide="hidePagination">`;
                 return html;
             }
         };
