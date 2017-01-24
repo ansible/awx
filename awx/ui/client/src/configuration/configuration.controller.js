@@ -67,7 +67,18 @@ export default [
                         if (data[key] !== null && typeof data[key] === 'object') {
                             if (Array.isArray(data[key])) {
                                 //handle arrays
-                                $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
+                                //having to do this particular check b/c
+                                // we want the options w/o a space, and
+                                // the ConfigurationUtils.arrayToList()
+                                // does a string.split(', ') w/ an extra space
+                                // behind the comma. 
+                                if(key === "AD_HOC_COMMANDS"){
+                                    $scope[key] = data[key].toString();
+                                }
+                                else{
+                                    $scope[key] = ConfigurationUtils.arrayToList(data[key], key);
+                                }
+
                             } else {
                                 //handle nested objects
                                 if(ConfigurationUtils.isEmpty(data[key])) {
@@ -284,6 +295,10 @@ export default [
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
+                    if(key === "AD_HOC_COMMANDS"){
+                        $scope.AD_HOC_COMMANDS = $scope.AD_HOC_COMMANDS.toString();
+                        $scope.$broadcast('adhoc_populated', null, false);
+                    }
                     loginUpdate();
                 })
                 .catch(function(error) {
