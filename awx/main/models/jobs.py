@@ -1013,22 +1013,14 @@ class JobEvent(CreatedModifiedModel):
                 updated_fields.add(field)
         return updated_fields
 
-    def _update_parent_failed_and_changed(self):
-        # Propagate failed and changed flags to parent events.
-        if self.parent_uuid:
-            parent = JobEvent.objects.filter(uuid=self.parent_uuid)
-            if parent.exists():
-                parent = parent[0]
-                update_fields = []
-                if self.failed and not parent.failed:
-                    parent.failed = True
-                    update_fields.append('failed')
-                if self.changed and not parent.changed:
-                    parent.changed = True
-                    update_fields.append('changed')
-                if update_fields:
-                    parent.save(update_fields=update_fields, from_parent_update=True)
-                    parent._update_parent_failed_and_changed()
+    def _update_parents_failed_and_changed(self):
+        # Update parent events to reflect failed, changed
+        runner_events = JobEvent.objects.filter(job=self.job,
+                                                event__startswith='runner_on')
+        changed_events = runner_events.filter(changed=True)
+        failed_events = runner_events.filter(failed=True)
+        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
+        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
@@ -1114,13 +1106,10 @@ class JobEvent(CreatedModifiedModel):
         super(JobEvent, self).save(*args, **kwargs)
         # Update related objects after this event is saved.
         if not from_parent_update:
-            if self.parent_uuid:
-                self._update_parent_failed_and_changed()
-            # FIXME: The update_hosts() call (and its queries) are the current
-            # performance bottleneck....
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
+                self._update_parents_failed_and_changed()
                 self._update_host_summary_from_stats()
 
     @classmethod
