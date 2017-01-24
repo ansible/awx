@@ -269,6 +269,7 @@ register(
     'AUTH_LDAP_USER_DN_TEMPLATE',
     field_class=fields.LDAPDNWithUserField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP User DN Template'),
     help_text=_('Alternative to user search, if user DNs are all of the same '
@@ -338,6 +339,7 @@ register(
     'AUTH_LDAP_REQUIRE_GROUP',
     field_class=fields.LDAPDNField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP Require Group'),
     help_text=_('Group DN required to login. If specified, user must be a member '
@@ -354,6 +356,7 @@ register(
     'AUTH_LDAP_DENY_GROUP',
     field_class=fields.LDAPDNField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP Deny Group'),
     help_text=_('Group DN denied from login. If specified, user will not be '

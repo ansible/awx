@@ -96,7 +96,12 @@ def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
                        setting):
     url = reverse('api:setting_singleton_detail', args=('ldap',))
     Setting.objects.create(key='LICENSE', value=enterprise_license)
+
     patch(url, user=admin, data={setting: ''}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
+
+    patch(url, user=admin, data={setting: None}, expect=200)
     resp = get(url, user=admin, expect=200)
     assert resp.data[setting] is None
 
