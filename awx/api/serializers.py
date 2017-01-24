@@ -2999,10 +2999,10 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, __ in SUMMARIZABLE_FK_FIELDS.items() + [('workflow_job_template', 0)]:
             if not hasattr(obj, fk):
                 continue
-            allm2m = getattr(obj, fk).distinct()
+            allm2m = getattr(obj, fk).all()
             if getattr(obj, fk).exists():
                 rel[fk] = []
                 for thisItem in allm2m:
@@ -3017,11 +3017,11 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items() + [('workflow_job_template', DEFAULT_SUMMARY_FIELDS)]:
             try:
                 if not hasattr(obj, fk):
                     continue
-                allm2m = getattr(obj, fk).distinct()
+                allm2m = getattr(obj, fk).all()
                 if getattr(obj, fk).exists():
                     summary_fields[fk] = []
                     for thisItem in allm2m:
