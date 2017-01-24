@@ -2421,7 +2421,7 @@ class JobTemplateSurveySpec(GenericAPIView):
             raise LicenseForbids(_('Your license does not allow '
                                    'adding surveys.'))
         survey_spec = obj.survey_spec
-        for pos, field in enumerate(survey_spec['spec']):
+        for pos, field in enumerate(survey_spec.get('spec', [])):
             if field.get('type') == 'password':
                 if 'default' in field and field['default']:
                     field['default'] = '$encrypted$'
