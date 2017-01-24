@@ -2503,8 +2503,8 @@ class JobEventSerializer(BaseSerializer):
         model = JobEvent
         fields = ('*', '-name', '-description', 'job', 'event', 'counter',
                   'event_display', 'event_data', 'event_level', 'failed',
-                  'changed', 'uuid', 'host', 'host_name', 'parent', 'playbook',
-                  'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
+                  'changed', 'uuid', 'parent_uuid', 'host', 'host_name', 'parent',
+                  'playbook', 'play', 'task', 'role', 'stdout', 'start_line', 'end_line',
                   'verbosity')
 
     def get_related(self, obj):
