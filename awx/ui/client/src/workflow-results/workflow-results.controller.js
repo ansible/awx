@@ -9,6 +9,7 @@ export default ['workflowData',
     'WorkflowService',
     'count',
     '$state',
+    'i18n',
     function(workflowData,
         workflowResultsService,
         workflowDataOptions,
@@ -19,7 +20,8 @@ export default ['workflowData',
         ParseVariableString,
         WorkflowService,
         count,
-        $state
+        $state,
+        i18n
     ) {
 
         var getTowerLinks = function() {
@@ -64,6 +66,9 @@ export default ['workflowData',
             $scope.count = count.val;
             $scope.showManualControls = false;
 
+            // stdout full screen toggle tooltip text
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
             // turn related api browser routes into tower routes
             getTowerLinks();
 
@@ -103,6 +108,12 @@ export default ['workflowData',
 
         $scope.toggleStdoutFullscreen = function() {
             $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+            if ($scope.stdoutFullScreen === true) {
+                $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+            } else if ($scope.stdoutFullScreen === false) {
+                $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+            }
         };
 
         $scope.deleteJob = function() {

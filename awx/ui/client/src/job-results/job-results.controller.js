@@ -6,6 +6,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     // download stdout tooltip text
     $scope.standardOutTooltip = i18n._('Download Output');
 
+    // stdout full screen toggle tooltip text
+    $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
     // this allows you to manage the timing of rest-call based events as
     // filters are updated.  see processPage for more info
     var currentContext = 1;
@@ -152,6 +155,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     $scope.stdoutFullScreen = false;
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+        if ($scope.stdoutFullScreen === true) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+        } else if ($scope.stdoutFullScreen === false) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+        }
     };
 
     $scope.deleteJob = function() {
