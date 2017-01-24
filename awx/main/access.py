@@ -2102,11 +2102,10 @@ class ActivityStreamAccess(BaseAccess):
          - custom inventory scripts
         '''
         qs = self.model.objects.all()
-        qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
                                  'permission', 'job_template', 'job', 'ad_hoc_command',
-                                 'notification_template', 'notification', 'label', 'role')
+                                 'notification_template', 'notification', 'label', 'role', 'actor')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
