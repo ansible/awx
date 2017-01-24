@@ -162,7 +162,10 @@ class SettingsWrapper(UserSettingsHolder):
     def _get_local(self, name):
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
-        cache_value = cache.get(cache_key, empty)
+        try:
+            cache_value = cache.get(cache_key, empty)
+        except ValueError:
+            cache_value = empty
         logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
         if cache_value == SETTING_CACHE_NOTSET:
             value = empty
