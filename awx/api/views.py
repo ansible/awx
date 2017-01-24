@@ -697,6 +697,7 @@ class OrganizationList(OrganizationCountsMixin, ListCreateAPIView):
     def get_queryset(self):
         qs = Organization.accessible_objects(self.request.user, 'read_role')
         qs = qs.select_related('admin_role', 'auditor_role', 'member_role', 'read_role')
+        qs = qs.prefetch_related('created_by', 'modified_by')
         return qs
 
     def create(self, request, *args, **kwargs):
