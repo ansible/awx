@@ -479,14 +479,14 @@ try:
 
                     job_template, _ = JobTemplate.objects.get_or_create(
                         name='%s Job Template %d Project %d' % (prefix, job_template_id, project_idx),
-                        inventory=inventory,
-                        project=project,
-                        credential=next(credential_gen),
                         defaults=dict(
+                            inventory=inventory,
+                            project=project,
+                            credential=next(credential_gen),
                             created_by=next(creator_gen),
                             modified_by=next(modifier_gen),
-                            playbook="debug.yml"),
-                        **extra_kwargs
+                            playbook="debug.yml",
+                            **extra_kwargs)
                     )
                     job_template._is_new = _
                     job_templates.append(job_template)
