@@ -572,7 +572,7 @@ languages: $(UI_DEPS_FLAG_FILE) check-po
 
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
-$(UI_DEPS_FLAG_FILE): awx/ui/package.json
+$(UI_DEPS_FLAG_FILE):
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
