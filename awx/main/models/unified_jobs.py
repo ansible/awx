@@ -20,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 from django.utils.encoding import smart_text
 from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 
 # Django-Polymorphic
 from polymorphic import PolymorphicModel
@@ -30,6 +31,7 @@ from djcelery.models import TaskMeta
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.schedules import Schedule
+from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import (
     decrypt_field, _inventory_updates,
     copy_model_by_class, copy_m2m_relationships
@@ -165,6 +167,20 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             return [x for x in unique_check if x != 'polymorphic_ctype']
         else:
             return super(UnifiedJobTemplate, self).unique_error_message(model_class, unique_check)
+
+    @classmethod
+    def accessible_pk_qs(cls, accessor, role_field):
+        '''
+        A re-implementation of accessible pk queryset for the "normal" unified JTs.
+        Does not return inventory sources or system JTs, these should
+        be handled inside of get_queryset where it is utilized.
+        '''
+        ujt_names = [c.__name__.lower() for c in cls.__subclasses__()
+                     if c.__name__.lower() not in ['inventorysource', 'systemjobtemplate']]
+        subclass_content_types = list(ContentType.objects.filter(
+            model__in=ujt_names).values_list('id', flat=True))
+
+        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field, content_types=subclass_content_types)
 
     def _perform_unique_checks(self, unique_checks):
         # Handle the list of unique fields returned above. Replace with an

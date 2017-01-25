@@ -7,6 +7,8 @@ import sys
 # Python
 from collections import defaultdict
 from optparse import make_option, OptionParser
+from datetime import datetime
+import logging
 
 
 # Django
@@ -84,6 +86,7 @@ options = vars(options)
 
 
 if options['preset']:
+    print ' Using preset data numbers set ' + str(options['preset'])
     # Read the numbers of resources from presets file, if provided
     presets_filename = os.path.abspath(os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'presets.tsv'))
@@ -180,6 +183,9 @@ def mock_save(self, *args, **kwargs):
 
 
 PrimordialModel.save = mock_save
+
+
+startTime = datetime.now()
 
 
 try:
@@ -488,7 +494,8 @@ try:
                     if project_idx == 0 and i == 0:
                         job_template.admin_role.members.add(jt_admin)
                 project_idx += 1
-                print('')
+                if n > 0:
+                    print('')
 
             print('# Creating %d Workflow Job Templates' % n_wfjts)
             org_idx = 0
@@ -509,7 +516,8 @@ try:
                     wfjt._is_new = _
                     wfjts.append(wfjt)
                 org_idx += 1
-                print('')
+                if n:
+                    print('')
 
             print('# Creating %d Workflow Job Template nodes' % n_nodes)
             wfjt_idx = 0
@@ -559,7 +567,8 @@ try:
                             parent_node.success_nodes.add(node)
                     parent_idx = (parent_idx + 7) % len(wfjt_nodes)
                 wfjt_idx += 1
-                print('')
+                if n:
+                    print('')
 
             print('# Creating %d Labels' % n_labels)
             org_idx = 0
@@ -578,7 +587,8 @@ try:
                     )
                     labels.append(label)
                 org_idx += 1
-                print('')
+                if n:
+                    print('')
             label_gen = yield_choice(labels)
 
             print('# Adding labels to job templates')
@@ -603,22 +613,28 @@ try:
                     wfjt.labels.add(next(label_gen))
                 wfjt_idx += 1
 
+            # Disable logging here, because it will mess up output format
+            logger = logging.getLogger('awx.main')
+            logger.propagate = False
+
             print('# Creating %d jobs' % n_jobs)
             group_idx = 0
             job_template_idx = 0
+            job_i = 0
             for n in spread(n_jobs, n_job_templates):
                 job_template = job_templates[job_template_idx]
                 for i in range(n):
                     sys.stdout.write('\r   Assigning %d to %s: %d     ' % (n, job_template.name, i+ 1))
                     sys.stdout.flush()
-                    job_stat = 'successful'
                     if len(jobs) % 4 == 0:
                         job_stat = 'failed'
                     elif len(jobs) % 11 == 0:
                         job_stat = 'canceled'
+                    else:
+                        job_stat = 'successful'
                     job, _ = Job.objects.get_or_create(
                         job_template=job_template,
-                        status=job_stat, name=job_template.name,
+                        status=job_stat, name="%s-%d" % (job_template.name, job_i),
                         project=job_template.project, inventory=job_template.inventory,
                         credential=job_template.credential,
                         cloud_credential=job_template.cloud_credential,
@@ -626,25 +642,28 @@ try:
                     )
                     job._is_new = _
                     jobs.append(job)
+                    job_i += 1
                     if not job._is_new:
+                        group_idx += 1
                         continue
-                    if i == n:
+                    if i + 1 == n:
                         job_template.last_job = job
                         if job_template.pk % 5 == 0:
                             job_template.current_job = job
                         job_template.save()
 
-                    with transaction.atomic():
-                        if job_template.inventory:
-                            inv_groups = [g for g in job_template.inventory.groups.all()]
-                            if len(inv_groups):
-                                JobHostSummary.objects.bulk_create([
-                                    JobHostSummary(
-                                        job=job, host=h, host_name=h.name, processed=1,
-                                        created=now(), modified=now()
-                                    )
-                                    for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
-                                ])
+                    if job._is_new:
+                        with transaction.atomic():
+                            if job_template.inventory:
+                                inv_groups = [g for g in job_template.inventory.groups.all()]
+                                if len(inv_groups):
+                                    JobHostSummary.objects.bulk_create([
+                                        JobHostSummary(
+                                            job=job, host=h, host_name=h.name, processed=1,
+                                            created=now(), modified=now()
+                                        )
+                                        for h in inv_groups[group_idx % len(inv_groups)].hosts.all()[:100]
+                                    ])
                     group_idx += 1
                 job_template_idx += 1
                 if n:
@@ -654,11 +673,11 @@ try:
             job_idx = 0
             for n in spread(n_job_events, n_jobs):
                 job = jobs[job_idx]
+                # Check if job already has events, for idempotence
                 if not job._is_new:
                     continue
                 sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
                 sys.stdout.flush()
-                # Check if job already has events, for idempotence
                 JobEvent.objects.bulk_create([
                     JobEvent(
                         created=now(),
@@ -677,3 +696,6 @@ try:
 except Rollback:
     print('Rolled back changes')
     pass
+
+print('')
+print('script execution time: {}'.format(datetime.now() - startTime))
