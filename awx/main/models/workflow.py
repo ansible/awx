@@ -245,8 +245,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
             for fd in ujt_obj._extra_job_type_errors(accepted_fields):
                 accepted_fields.pop(fd)
-            data.update(accepted_fields)
-            # TODO: decide what to do in the event of missing fields
+            data.update(accepted_fields)  # missing fields are handled in the scheduler
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
         for parent_node in self.get_parent_nodes():
@@ -488,10 +487,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
         return result
-
-    # TODO: Ask UI if this is needed ?
-    #def get_ui_url(self):
-    #    return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
 
     @property
     def task_impact(self):

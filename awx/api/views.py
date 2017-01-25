@@ -2771,7 +2771,7 @@ class WorkflowJobTemplateNodeChildrenBaseList(WorkflowsEnforcementMixin, Enforce
 
     model = WorkflowJobTemplateNode
     serializer_class = WorkflowJobTemplateNodeListSerializer
-    always_allow_superuser = True # TODO: RBAC
+    always_allow_superuser = True
     parent_model = WorkflowJobTemplateNode
     relationship = ''
     enforce_parent_relationship = 'workflow_job_template'
@@ -2869,7 +2869,6 @@ class WorkflowJobNodeAlwaysNodesList(WorkflowJobNodeChildrenBaseList):
     relationship = 'always_nodes'
 
 
-# TODO:
 class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJobTemplate
@@ -2877,18 +2876,7 @@ class WorkflowJobTemplateList(WorkflowsEnforcementMixin, ListCreateAPIView):
     always_allow_superuser = False
     new_in_310 = True
 
-    # TODO: RBAC
-    '''
-    def post(self, request, *args, **kwargs):
-        ret = super(WorkflowJobTemplateList, self).post(request, *args, **kwargs)
-        if ret.status_code == 201:
-            workflow_job_template = WorkflowJobTemplate.objects.get(id=ret.data['id'])
-            workflow_job_template.admin_role.members.add(request.user)
-        return ret
-    '''
 
-
-# TODO:
 class WorkflowJobTemplateDetail(WorkflowsEnforcementMixin, RetrieveUpdateDestroyAPIView):
 
     model = WorkflowJobTemplate
@@ -3006,7 +2994,6 @@ class WorkflowJobRelaunch(WorkflowsEnforcementMixin, GenericAPIView):
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-# TODO:
 class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     model = WorkflowJobTemplateNode
@@ -3022,7 +3009,6 @@ class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCre
         return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
 
-# TODO:
 class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = WorkflowJob
@@ -3101,7 +3087,6 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
     new_in_310 = True
 
 
-# TODO:
 class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
 
     model = WorkflowJob
@@ -3109,7 +3094,6 @@ class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
     new_in_310 = True
 
 
-# TODO:
 class WorkflowJobDetail(WorkflowsEnforcementMixin, RetrieveDestroyAPIView):
 
     model = WorkflowJob
@@ -3121,7 +3105,7 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
 
     model = WorkflowJobNode
     serializer_class = WorkflowJobNodeListSerializer
-    always_allow_superuser = True # TODO: RBAC
+    always_allow_superuser = True
     parent_model = WorkflowJob
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
