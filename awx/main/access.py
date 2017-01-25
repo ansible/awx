@@ -405,23 +405,24 @@ class UserAccess(BaseAccess):
 
     def get_queryset(self):
         if self.user.is_superuser or self.user.is_system_auditor:
-            return User.objects.all()
+            qs = User.objects.all()
 
-        if settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
+        elif settings.ORG_ADMINS_CAN_SEE_ALL_USERS and \
                 (self.user.admin_of_organizations.exists() or self.user.auditor_of_organizations.exists()):
-            return User.objects.all()
-
-        return (
-            User.objects.filter(
-                pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members')
-            ) |
-            User.objects.filter(
-                pk=self.user.id
-            ) |
-            User.objects.filter(
-                pk__in=Role.objects.filter(singleton_name__in = [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
-            )
-        ).distinct()
+            qs = User.objects.all()
+        else:
+            qs = (
+                User.objects.filter(
+                    pk__in=Organization.accessible_objects(self.user, 'read_role').values('member_role__members')
+                ) |
+                User.objects.filter(
+                    pk=self.user.id
+                ) |
+                User.objects.filter(
+                    pk__in=Role.objects.filter(singleton_name__in = [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]).values('members')
+                )
+            ).distinct()
+        return qs.prefetch_related('profile')
 
 
     def can_add(self, data):
@@ -488,7 +489,7 @@ class OrganizationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by').all()
+        return qs.prefetch_related('created_by', 'modified_by').all()
 
     @check_superuser
     def can_change(self, obj, data):
@@ -1216,7 +1217,7 @@ class JobAccess(BaseAccess):
     model = Job
 
     def get_queryset(self):
-        qs = self.model.objects.distinct()
+        qs = self.model.objects
         qs = qs.select_related('created_by', 'modified_by', 'job_template', 'inventory',
                                'project', 'credential', 'cloud_credential', 'job_template')
         qs = qs.prefetch_related('unified_job_template')
