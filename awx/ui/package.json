@@ -8,8 +8,6 @@
   "config": {
     "django_port": "8043",
     "django_host": "0.0.0.0",
-    "sauce_username": "leigh-johnson",
-    "sauce_access_key": "f740c3ad-c706-4e10-bb95-46e2cc50c2ac"
   },
   "engines": {
     "node": "^6.3.1",
@@ -25,8 +23,7 @@
     "pretest": "grunt clean:coverage",
     "test": "karma start karma.conf.js",
     "jshint": "grunt clean:jshint jshint:source --no-color",
-    "test:ci": "npm run test -- --single-run --reporter junit,dots --browsers=PhantomJS",
-    "test:saucelabs": "SAUCE_USERNAME=${npm_package_config_sauce_username} SAUCE_ACCESS_KEY=${npm_package_config_sauce_access_key} karma start karma.conf-saucelabs.js"
+    "test:ci": "npm run test -- --single-run --reporter junit,dots --browsers=PhantomJS"
   },
   "optionalDependencies": {
     "browser-sync": "^2.14.0",
