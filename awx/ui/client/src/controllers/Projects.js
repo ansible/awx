@@ -14,7 +14,7 @@
 export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, ProjectUpdate, Wait, GetChoices, Empty, Find, GetProjectIcon,
-    GetProjectToolTip, $filter, $state, rbacUiControlService, Dataset, i18n) {
+    GetProjectToolTip, $filter, $state, rbacUiControlService, Dataset, i18n, qs) {
 
     var list = ProjectList,
         defaultUrl = GetBasePath('projects');
@@ -95,6 +95,15 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
         }
     }
 
+    $scope.reloadList = function(){
+        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+        qs.search(path, $stateParams[`${list.iterator}_search`])
+        .then(function(searchResponse) {
+            $scope[`${list.iterator}_dataset`] = searchResponse.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        });
+    };
+
     $scope.$on(`ws-jobs`, function(e, data) {
         var project;
         $log.debug(data);
@@ -106,7 +115,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 $log.debug('Received event for project: ' + project.name);
                 $log.debug('Status changed to: ' + data.status);
                 if (data.status === 'successful' || data.status === 'failed') {
-                    $state.go('.', null, { reload: true });
+                    $scope.reloadList();
                 } else {
                     project.scm_update_tooltip = "SCM update currently running";
                     project.scm_type_class = "btn-disabled";
@@ -292,7 +301,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams',
     'Rest', 'Alert', 'ProjectList', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'ProjectUpdate', 'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon',
-    'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService', 'Dataset', 'i18n'
+    'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet'
 ];
 
 export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
