@@ -37,6 +37,12 @@ class Migration(migrations.Migration):
             name='uuid',
             field=models.CharField(default=b'', max_length=1024, editable=False),
         ),
+        # Job Parent Event UUID
+        migrations.AddField(
+            model_name='jobevent',
+            name='parent_uuid',
+            field=models.CharField(default=b'', max_length=1024, editable=False),
+        ),
         # Modify the HA Instance
         migrations.RemoveField(
             model_name='instance',
@@ -361,7 +367,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterIndexTogether(
             name='jobevent',
-            index_together=set([('job', 'event'), ('job', 'parent'), ('job', 'start_line'), ('job', 'uuid'), ('job', 'end_line')]),
+            index_together=set([('job', 'event'), ('job', 'parent_uuid'), ('job', 'start_line'), ('job', 'uuid'), ('job', 'end_line')]),
         ),
         # Tower state
         migrations.CreateModel(

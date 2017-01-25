@@ -811,7 +811,7 @@ class JobEvent(CreatedModifiedModel):
             ('job', 'uuid'),
             ('job', 'start_line'),
             ('job', 'end_line'),
-            ('job', 'parent'),
+            ('job', 'parent_uuid'),
         ]
 
     job = models.ForeignKey(
@@ -885,6 +885,11 @@ class JobEvent(CreatedModifiedModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        editable=False,
+    )
+    parent_uuid = models.CharField(
+        max_length=1024,
+        default='',
         editable=False,
     )
     counter = models.PositiveIntegerField(
@@ -967,28 +972,6 @@ class JobEvent(CreatedModifiedModel):
                 pass
         return msg
 
-    def _find_parent_id(self):
-        # Find the (most likely) parent event for this event.
-        parent_events = set()
-        if self.event in ('playbook_on_play_start', 'playbook_on_stats',
-                          'playbook_on_vars_prompt'):
-            parent_events.add('playbook_on_start')
-        elif self.event in ('playbook_on_notify', 'playbook_on_setup',
-                            'playbook_on_task_start',
-                            'playbook_on_no_hosts_matched',
-                            'playbook_on_no_hosts_remaining',
-                            'playbook_on_import_for_host',
-                            'playbook_on_not_import_for_host'):
-            parent_events.add('playbook_on_play_start')
-        elif self.event.startswith('runner_on_'):
-            parent_events.add('playbook_on_setup')
-            parent_events.add('playbook_on_task_start')
-        if parent_events:
-            qs = JobEvent.objects.filter(job_id=self.job_id, event__in=parent_events).order_by('-pk')
-            if self.pk:
-                qs = qs.filter(pk__lt=self.pk)
-            return qs.only('id').values_list('id', flat=True).first()
-
     def _update_from_event_data(self):
         # Update job event model fields from event data.
         updated_fields = set()
@@ -1030,20 +1013,14 @@ class JobEvent(CreatedModifiedModel):
                 updated_fields.add(field)
         return updated_fields
 
-    def _update_parent_failed_and_changed(self):
-        # Propagate failed and changed flags to parent events.
-        if self.parent_id:
-            parent = self.parent
-            update_fields = []
-            if self.failed and not parent.failed:
-                parent.failed = True
-                update_fields.append('failed')
-            if self.changed and not parent.changed:
-                parent.changed = True
-                update_fields.append('changed')
-            if update_fields:
-                parent.save(update_fields=update_fields, from_parent_update=True)
-                parent._update_parent_failed_and_changed()
+    def _update_parents_failed_and_changed(self):
+        # Update parent events to reflect failed, changed
+        runner_events = JobEvent.objects.filter(job=self.job,
+                                                event__startswith='runner_on')
+        changed_events = runner_events.filter(changed=True)
+        failed_events = runner_events.filter(failed=True)
+        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
+        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
@@ -1063,8 +1040,11 @@ class JobEvent(CreatedModifiedModel):
         qs = qs.exclude(job_events__pk=self.id).only('id')
         for host in qs:
             self.hosts.add(host)
-        if self.parent_id:
-            self.parent._update_hosts(qs.values_list('id', flat=True))
+        if self.parent_uuid:
+            parent = JobEvent.objects.filter(uuid=self.parent_uuid)
+            if parent.exists():
+                parent = parent[0]
+                parent._update_hosts(qs.values_list('id', flat=True))
 
     def _update_host_summary_from_stats(self):
         from awx.main.models.inventory import Host
@@ -1123,21 +1103,13 @@ class JobEvent(CreatedModifiedModel):
                     self.host_id = host_id
                     if 'host_id' not in update_fields:
                         update_fields.append('host_id')
-            # Update parent related field if not set.
-            if self.parent_id is None:
-                self.parent_id = self._find_parent_id()
-                if self.parent_id and 'parent_id' not in update_fields:
-                    update_fields.append('parent_id')
         super(JobEvent, self).save(*args, **kwargs)
         # Update related objects after this event is saved.
         if not from_parent_update:
-            if self.parent_id:
-                self._update_parent_failed_and_changed()
-            # FIXME: The update_hosts() call (and its queries) are the current
-            # performance bottleneck....
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
+                self._update_parents_failed_and_changed()
                 self._update_host_summary_from_stats()
 
     @classmethod
@@ -1159,14 +1131,10 @@ class JobEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
-        # Save UUID and parent UUID for determining parent-child relationship.
-        job_event_uuid = kwargs.get('uuid', None)
-        parent_event_uuid = kwargs.get('parent_uuid', None)
-
         # Sanity check: Don't honor keys that we don't recognize.
         valid_keys = {'job_id', 'event', 'event_data', 'playbook', 'play',
                       'role', 'task', 'created', 'counter', 'uuid', 'stdout',
-                      'start_line', 'end_line', 'verbosity'}
+                      'parent_uuid', 'start_line', 'end_line', 'verbosity'}
         for key in kwargs.keys():
             if key not in valid_keys:
                 kwargs.pop(key)
@@ -1176,29 +1144,9 @@ class JobEvent(CreatedModifiedModel):
         if event_data:
             artifact_dict = event_data.pop('artifact_data', None)
 
-        # Try to find a parent event based on UUID.
-        if parent_event_uuid:
-            cache_key = '{}_{}'.format(kwargs['job_id'], parent_event_uuid)
-            try:
-                parent_id = cache.get(cache_key)
-            except Exception:
-                parent_id = None
-            if parent_id is None:
-                parent_id = JobEvent.objects.filter(job_id=kwargs['job_id'], uuid=parent_event_uuid).only('id').values_list('id', flat=True).first()
-                if parent_id:
-                    print("Settings cache: {} with value {}".format(cache_key, parent_id))
-                    cache.set(cache_key, parent_id, 300)
-            if parent_id:
-                kwargs['parent_id'] = parent_id
-
         analytics_logger.info('Job event data saved.', extra=dict(event_model_data=kwargs))
 
         job_event = JobEvent.objects.create(**kwargs)
-
-        # Cache this job event ID vs. UUID for future parent lookups.
-        if job_event_uuid:
-            cache_key = '{}_{}'.format(kwargs['job_id'], job_event_uuid)
-            cache.set(cache_key, job_event.id, 300)
 
         # Save artifact data to parent job (if provided).
         if artifact_dict:
