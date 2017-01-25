@@ -7,6 +7,7 @@ import sys
 # Python
 from collections import defaultdict
 from optparse import make_option, OptionParser
+from datetime import datetime
 import logging
 
 
@@ -182,6 +183,9 @@ def mock_save(self, *args, **kwargs):
 
 
 PrimordialModel.save = mock_save
+
+
+startTime = datetime.now()
 
 
 try:
@@ -694,3 +698,4 @@ except Rollback:
     pass
 
 print('')
+print('script execution time: {}'.format(datetime.now() - startTime))
