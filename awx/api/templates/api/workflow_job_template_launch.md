@@ -12,8 +12,13 @@ workflow_job_template. The response will include the following fields:
   enabled survey (boolean, read-only)
 * `extra_vars`: Text which is the `extra_vars` field of this workflow_job_template
   (text, read-only)
-* `warnings`: JSON object listing warnings of all workflow_job_template_nodes
-  contained in this workflow_job_template (JSON object, read-only)
+* `node_templates_missing`: List of node ids of all nodes that have a
+  null `unified_job_template`, which will cause their branches to stop
+  execution (list, read-only)
+* `node_prompts_rejected`: List of node ids of all nodes that have
+  specified a field that will be rejected because its  `unified_job_template`
+  does not allow prompting for this field, this will not halt execution of
+  the branch but the field will be ignored (list, read-only)
 * `workflow_job_template_data`: JSON object listing general information of
   this workflow_job_template (JSON object, read-only)
 
