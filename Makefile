@@ -577,11 +577,11 @@ $(UI_DEPS_FLAG_FILE):
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-machine -- $(MAKEFLAGS)
+	$(NPM_BIN) --prefix awx/ui run ui-docker-machine -- $(MAKEFLAGS)
 
 # Native docker. Builds UI and raises BrowserSync & filesystem polling.
 ui-docker: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-cid -- $(MAKEFLAGS)
+	$(NPM_BIN) --prefix awx/ui run ui-docker -- $(MAKEFLAGS)
 
 # Builds UI with development UI without raising browser-sync or filesystem polling.
 ui-devel: $(UI_DEPS_FLAG_FILE)

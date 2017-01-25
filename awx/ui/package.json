@@ -7,15 +7,15 @@
   },
   "config": {
     "django_port": "8043",
-    "django_host": "0.0.0.0",
+    "django_host": "localhost"
   },
   "engines": {
     "node": "^6.3.1",
     "npm": "^3.10.3"
   },
   "scripts": {
-    "build-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev;",
-    "build-docker-cid": "ip=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $DOCkER_CID` | npm set config ansible-tower:django_host ${ip}; grunt dev;",
+    "ui-docker-machine": "ip=$(docker-machine ip $DOCKER_MACHINE_NAME); npm set ansible-tower:django_host ${ip}; grunt dev;",
+    "ui-docker": "grunt dev;",
     "build-devel": "grunt devNoSync",
     "pot": "grunt nggettext_extract",
     "languages": "grunt nggettext_compile",
