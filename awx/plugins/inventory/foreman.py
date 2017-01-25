@@ -53,6 +53,7 @@ class ForemanInventory(object):
         self.params = dict()  # Params of each host
         self.facts = dict()   # Facts of each host
         self.hostgroups = dict()  # host groups
+        self.session = None   # Requests session
 
     def run(self):
         if not self._read_settings():
@@ -173,14 +174,19 @@ class ForemanInventory(object):
                             help='Force refresh of cache by making API requests to foreman (default: False - use cache files)')
         self.args = parser.parse_args()
 
+    def _get_session(self):
+        if not self.session:
+            self.session = requests.session()
+            self.session.auth = HTTPBasicAuth(self.foreman_user, self.foreman_pw)
+            self.session.verify = self.foreman_ssl_verify
+        return self.session
+
     def _get_json(self, url, ignore_errors=None):
         page = 1
         results = []
+        s = self._get_session()
         while True:
-            ret = requests.get(url,
-                               auth=HTTPBasicAuth(self.foreman_user, self.foreman_pw),
-                               verify=self.foreman_ssl_verify,
-                               params={'page': page, 'per_page': 250})
+            ret = s.get(url, params={'page': page, 'per_page': 250})
             if ignore_errors and ret.status_code in ignore_errors:
                 break
             ret.raise_for_status()
@@ -299,7 +305,7 @@ class ForemanInventory(object):
             self.params[dns_name] = params
             self.facts[dns_name] = self._get_facts(host)
             self.push(self.inventory, 'all', dns_name)
-            self._write_cache()
+        self._write_cache()
 
     def _write_cache(self):
         self.write_to_cache(self.cache, self.cache_path_cache)
