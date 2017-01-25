@@ -390,7 +390,7 @@ class BaseDictWithChildField(fields.DictField):
             child_field = self.child_fields.get(k, None)
             if child_field:
                 value[k] = child_field.to_representation(v)
-            elif allow_unknown_keys:
+            elif self.allow_unknown_keys:
                 value[k] = v
         return value
 
