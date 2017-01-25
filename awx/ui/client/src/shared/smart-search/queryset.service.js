@@ -72,6 +72,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     key = key.replace(/__search_DEFAULT/g, "__search");
 
                     if (Array.isArray(value)){
+                        value = _.uniq(_.flattenDeep(value));
                         let concated = '';
                         angular.forEach(value, function(item){
                             if(item && typeof item === 'string') {
@@ -179,6 +180,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 };
 
                 if (Array.isArray(value)){
+                    value = _.uniq(_.flattenDeep(value));
                     return _.map(value, (item) => {
                         return decodeParamString(item);
                     });
@@ -204,6 +206,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                 // {key: [value1, value2, ...]} => ['key:value1', 'key:value2']
                 function encodeUrlString(value, key){
                     if (Array.isArray(value)){
+                        value = _.uniq(_.flattenDeep(value));
                         return _.map(value, (item) => {
                             return `${key}:${item}`;
                         });
@@ -225,6 +228,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         params[key] = value;
                     }
                     else if (Array.isArray(params[key])){
+                        params[key] = _.uniq(_.flattenDeep(params[key]));
                         params[key].push(value);
                     }
                     else {
