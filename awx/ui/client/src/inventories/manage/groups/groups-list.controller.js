@@ -77,7 +77,15 @@
 
         $scope.groupSelect = function(id){
             var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
-            $state.go('inventoryManage', {inventory_id: $stateParams.inventory_id, group: group}, {reload: true});
+            $state.go('inventoryManage', {
+                inventory_id: $stateParams.inventory_id,
+                group: group,
+                group_search: {
+                    page_size: '20',
+                    page: '1',
+                    order_by: 'name',
+                }
+            }, {reload: true});
         };
         $scope.createGroup = function(){
             $state.go('inventoryManage.addGroup');
