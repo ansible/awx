@@ -85,26 +85,22 @@ export default ['workflowData',
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
 
-            $scope.treeData = WorkflowService.buildTree({
+            WorkflowService.buildTree({
                 workflowNodes: workflowNodes
+            }).then(function(data){
+                $scope.treeData = data;
+
+                // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
+                // this treeData object and removing the children object for some reason (?)
+                // This happens on occasion and I think is a race condition (?)
+                if(!$scope.treeData.data.children) {
+                    $scope.treeData.data.children = [];
+                }
+
+                $scope.canAddWorkflowJobTemplate = false;
             });
 
-            // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-            // this treeData object and removing the children object for some reason (?)
-            // This happens on occasion and I think is a race condition (?)
-            if(!$scope.treeData.data.children) {
-                $scope.treeData.data.children = [];
-            }
-
-            $scope.canAddWorkflowJobTemplate = false;
-
         }
-
-        // var getTotalHostCount = function(count) {
-        //     return Object
-        //         .keys(count).reduce((acc, i) => acc += count[i], 0);
-        // };
-
 
         $scope.toggleStdoutFullscreen = function() {
             $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
