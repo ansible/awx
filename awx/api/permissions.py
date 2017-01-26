@@ -4,9 +4,6 @@
 # Python
 import logging
 
-# Django
-from django.http import Http404
-
 # Django REST Framework
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework import permissions
@@ -19,7 +16,8 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission']
+           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',
+           'HostPermission',]
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -95,13 +93,6 @@ class ModelAccessPermission(permissions.BasePermission):
         Perform basic permissions checking before delegating to the appropriate
         method based on the request method.
         '''
-
-        # Check that obj (if given) is active, otherwise raise a 404.
-        active = getattr(obj, 'active', getattr(obj, 'is_active', True))
-        if callable(active):
-            active = active()
-        if not active:
-            raise Http404()
 
         # Don't allow anonymous users. 401, not 403, hence no raised exception.
         if not request.user or request.user.is_anonymous():
@@ -216,3 +207,25 @@ class UserPermission(ModelAccessPermission):
         elif request.user.is_superuser:
             return True
         raise PermissionDenied()
+
+
+class HostPermission(ModelAccessPermission):
+    '''
+    Allow super super for all operations that don't add or update data.
+    Allow the request to flow through access.py so that even a super-user can't 
+    violate the license host count restriction.
+    '''
+
+    def check_options_permissions(self, request, view, obj=None):
+        view.always_allow_superuser = True
+        return super(HostPermission, self).check_options_permissions(request, view, obj)
+
+    def check_head_permissions(self, request, view, obj=None):
+        view.always_allow_superuser = True
+        return super(HostPermission, self).check_head_permissions(request, view, obj)
+
+    def check_get_permissions(self, request, view, obj=None):
+        view.always_allow_superuser = True
+        return super(HostPermission, self).check_get_permissions(request, view, obj)
+
+
