@@ -104,14 +104,30 @@
                         <label class="JobResults-resultRowLabel">
                             Explanation
                         </label>
-                        <div class="JobResults-resultRowText">
-                            {{job.job_explanation}}
+                        <div class="JobResults-resultRowText"
+                            ng-show="!previousTaskFailed">
+                                {{job.job_explanation}}
+                        </div>
+                        <div class="JobDetail-resultRowText "
+                        ng-show="previousTaskFailed">Previous Task Failed
+                            <a
+                                href=""
+                                id="explanation_help"
+                                aw-pop-over="{{ task_detail }}"
+                                aw-pop-over-watch="task_detail"
+                                data-placement="bottom"
+                                data-container="body" class="help-link" over-title="Failure Detail"
+                                title=""
+                                tabindex="-1">
+                                    <i class="fa fa-question-circle">
+                                    </i>
+                            </a>
                         </div>
                     </div>
 
                     <!-- RESULTS TRACEBACK DETAIL -->
                     <div class="JobResults-resultRow"
-                        ng-show="job.result_traceback">
+                        ng-show="job.result_traceback && !previousTaskFailed">
                         <label class="JobResults-resultRowLabel">
                             Results Traceback
                         </label>

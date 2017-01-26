@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels) {
     var toDestroy = [];
     var cancelRequests = false;
 
@@ -106,6 +106,38 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
+    $scope.previousTaskFailed = false;
+
+    toDestroy.push($scope.$watch('job.job_explanation', function(explanation) {
+        if (explanation && explanation.split(":")[0] === "Previous Task Failed") {
+            $scope.previousTaskFailed = true;
+
+            var taskObj = JSON.parse(explanation.substring(explanation.split(":")[0].length + 1));
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var fieldChoice = fieldChoices({
+                $scope: $scope,
+                url: 'api/v1/unified_jobs/',
+                field: 'type'
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            fieldChoice.then(function (choices) {
+                choices =
+                    fieldLabels({
+                        choices: choices
+                    });
+                $scope.explanation_fail_type = choices[taskObj.job_type];
+                $scope.explanation_fail_name = taskObj.job_name;
+                $scope.explanation_fail_id = taskObj.job_id;
+                $scope.task_detail = $scope.explanation_fail_type + " failed for " + $scope.explanation_fail_name + " with ID " + $scope.explanation_fail_id + ".";
+            });
+        } else {
+            $scope.previousTaskFailed = false;
+        }
+    }));
+
+
     // update the job_status value.  Use the cached rootScope value if there
     // is one.  This is a workaround when the rest call for the jobData is
     // made before some socket events come in for the job status
@@ -141,6 +173,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     if(jobData.result_traceback) {
         $scope.job.result_traceback = jobData.result_traceback.trim().split('\n').join('<br />');
     }
+
     // use options labels to manipulate display of details
     getTowerLabels();
 
