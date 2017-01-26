@@ -107,11 +107,11 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     }));
 
     $scope.previousTaskFailed = false;
-    $scope.hideTraceback = false;
 
     toDestroy.push($scope.$watch('job.job_explanation', function(explanation) {
         if (explanation && explanation.split(":")[0] === "Previous Task Failed") {
             $scope.previousTaskFailed = true;
+
             var taskObj = JSON.parse(explanation.substring(explanation.split(":")[0].length + 1));
             // return a promise from the options request with the permission type choices (including adhoc) as a param
             var fieldChoice = fieldChoices({
@@ -132,10 +132,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $scope.explanation_fail_id = taskObj.job_id;
                 $scope.task_detail = $scope.explanation_fail_type + " failed for " + $scope.explanation_fail_name + " with ID " + $scope.explanation_fail_id + ".";
             });
-
-            if(taskObj.job_type === "project_update"){
-                $scope.hideTraceback = true;
-            }
         } else {
             $scope.previousTaskFailed = false;
         }
