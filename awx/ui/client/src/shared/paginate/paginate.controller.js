@@ -1,8 +1,18 @@
 export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet',
     function($scope, $stateParams, $state, $filter, GetBasePath, qs) {
 
-        let pageSize = $stateParams[`${$scope.iterator}_search`].page_size || 20,
+        let pageSize,
             queryset, path;
+
+        // TODO: can we clean this if/else up?
+        if($scope.querySet) {
+            pageSize = $scope.querySet.page_size || 20;
+        }
+        else {
+            // Pull the page size from the url
+            pageSize = $stateParams[`${$scope.iterator}_search`].page_size || 20;
+        }
+
         $scope.pageSize = pageSize;
 
         function init() {
@@ -18,11 +28,27 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 return;
             }
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
-            $state.go('.', {
-                [$scope.iterator + '_search']: queryset
-            }, {notify: false});
+            if($scope.querySet) {
+                // merging $scope.querySet seems to destroy our initial reference which
+                // kills the two-way binding here.  To fix that, clone the queryset first
+                // and merge with that object.
+                let origQuerySet = _.cloneDeep($scope.querySet);
+                queryset = _.merge(origQuerySet, { page: page });
+
+            }
+            else {
+                queryset = _.merge($stateParams[`${$scope.iterator}_search`], { page: page });
+            }
+            if(!$scope.querySet) {
+                $state.go('.', {
+                    [$scope.iterator + '_search']: queryset
+                }, {notify: false});
+            }
             qs.search(path, queryset).then((res) => {
+                if($scope.querySet) {
+                    // Update the query set
+                    $scope.querySet = queryset;
+                }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
@@ -31,7 +57,12 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         };
 
         $scope.current = function() {
-            return parseInt($stateParams[`${$scope.iterator}_search`].page || '1');
+            if($scope.querySet) {
+                return parseInt($scope.querySet.page || '1');
+            }
+            else {
+                return parseInt($stateParams[`${$scope.iterator}_search`].page || '1');
+            }
         };
 
         $scope.last = function() {

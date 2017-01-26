@@ -20,7 +20,6 @@ export default ['i18n', function(i18n){
             status: {
                 label: '',
                 iconOnly: true,
-                searchable: false,
                 nosort: true,
                 icon: 'icon-job-{{ notification_template.status }}',
                 awPopOver: '{{ notification_template.template_status_html }}',

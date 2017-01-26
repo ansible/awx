@@ -29,7 +29,7 @@
                             <button class="btn btn-xs JobSubmission-revertButton" ng-hide="selected_inventory.id === defaults.inventory.id" ng-click="revertToDefaultInventory()">REVERT TO DEFAULT</button>
                         </div>
                     </div>
-                    <div id="job-submission-inventory-lookup"></div>
+                    <job-sub-inv-list ng-if="includeInventoryList"></job-sub-inv-list>
                 </div>
             </div>
             <div ng-if="ask_credential_on_launch  || password_needed" ng-show="step === 'credential'" class="JobSubmission-form">
@@ -44,7 +44,7 @@
                             <button class="btn btn-xs JobSubmission-revertButton" ng-hide="selected_credential.id === defaults.credential.id" ng-click="revertToDefaultCredential()">REVERT TO DEFAULT</button>
                         </div>
                     </div>
-                    <div id="job-submission-credential-lookup"></div>
+                    <job-sub-cred-list ng-if="includeCredentialList"></job-sub-cred-list>
                     <div ng-show="ssh_password_required || ssh_key_unlock_required || become_password_required || vault_password_required">
                         <div class="JobSubmission-instructions">Launching this job requires the passwords listed below. Enter and confirm each password before continuing.</div>
                         <form name="forms.credentialpasswords" autocomplete="off" novalidate>

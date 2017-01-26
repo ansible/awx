@@ -25,7 +25,7 @@ export default ['i18n', function(i18n){
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notification_templates/{{notifier.id}}',
+                linkTo: '/#/notification_templates/{{notifier.id}}'
             },
             notification_type: {
                 label: i18n._('Type'),
@@ -42,8 +42,7 @@ export default ['i18n', function(i18n){
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
-                nosort: true,
+                nosort: true
             },
             notification_templates_error: {
                 label: i18n._('Failure'),
@@ -54,8 +53,7 @@ export default ['i18n', function(i18n){
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
-                nosort: true,
+                nosort: true
             }
         },
         actions: {

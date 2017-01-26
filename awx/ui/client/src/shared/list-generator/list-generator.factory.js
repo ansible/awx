@@ -64,7 +64,6 @@
  * | linkTo | Wraps the field value with an &lt;a&gt; element. Set to the value of the href attribute. |
  * | ngClick | Wraps the field value with an &lt;a&gt; and adds the ng-click directive. Set to the JS expression that ng-click will evaluate. |
  * | nosort | true or false. Setting to false removes the ability to sort the table by the column. |
- * | searchable | true or fasel. Set to false if the field should not be included as in option in the search widget. |
  * | searchOnly | true or false. Set to true if the field should be included in the search widget but not included as a column in the generated HTML &lt;table&gt;. |
  * | searchOptions | Array of { name: 'Descriptive Name', value: 'api_value' } objects used to generate &lt;options&gt; for the &lt;select&gt; when searchType is 'select'. |
  * | searchType | One of the available search types defined in helpers/search.js. |
@@ -200,18 +199,19 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
                 if (options.showSearch === undefined || options.showSearch === true) {
                     html += `
-                    <div
-                        ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
-                            <smart-search
-                                django-model="${list.name}"
-                                search-size="${list.searchSize}"
-                                base-path="${list.basePath || list.name}"
-                                iterator="${list.iterator}"
-                                dataset="${list.iterator}_dataset"
-                                list="list"
-                                collection="${list.name}"
-                                search-tags="searchTags">
-                            </smart-search>
+                    <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
+                        <smart-search
+                            django-model="${list.name}"
+                            search-size="${list.searchSize}"
+                            base-path="${list.basePath || list.name}"
+                            iterator="${list.iterator}"
+                            dataset="${list.iterator}_dataset"
+                            list="list"
+                            collection="${list.name}"
+                            default-params="${list.iterator}_default_params"
+                            query-set="${list.iterator}_queryset"
+                            search-tags="searchTags">
+                        </smart-search>
                     </div>
                         `;
                 }
@@ -450,7 +450,8 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"
                     dataset="${list.iterator}_dataset"
-                    iterator="${list.iterator}">
+                    iterator="${list.iterator}"
+                    query-set="${list.iterator}_queryset">
                     </paginate></div>`;
                 }
 
@@ -499,7 +500,8 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                                 column-iterator="${list.iterator}"
                                 column-no-sort="${list.fields[fld].nosort}"
                                 column-label="${list.fields[fld].label}"
-                                column-custom-class="${customClass}">
+                                column-custom-class="${customClass}"
+                                query-set="${list.iterator}_queryset">
                             </th>`;
                     }
                 }
@@ -514,7 +516,8 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                             column-iterator="${list.iterator}"
                             column-no-sort="${list.fields.name.nosort}"
                             column-label="${list.fields.name.label}"
-                            column-custom-class="${customClass}">
+                            column-custom-class="${customClass}"
+                            query-set="${list.iterator}_queryset">
                         </th>`;
 
                     if(list.fields.info) {
@@ -529,7 +532,8 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                                     column-iterator="${list.iterator}"
                                     column-no-sort="${list.fields.info.nosort}"
                                     column-label="${list.fields.info.label}"
-                                    column-custom-class="${customClass}">
+                                    column-custom-class="${customClass}"
+                                    query-set="${list.iterator}_queryset">
                                 </th>`;
                     }
                 }
