@@ -37,6 +37,10 @@ class ResourceMixin(models.Model):
         '''
         return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
+    @classmethod
+    def accessible_pk_qs(cls, accessor, role_field):
+        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field)
+
     @staticmethod
     def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
         if type(accessor) == User:
