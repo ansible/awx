@@ -3473,6 +3473,22 @@ class GroupJobEventsList(BaseJobEventsList):
     parent_model = Group
 
 
+class JobJobEventsList(BaseJobEventsList):
+
+    parent_model = Job
+
+    def get_queryset(self):
+        job = self.get_parent_object()
+        self.check_parent_access(job)
+        qs = job.job_events.all()
+        qs = qs.select_related('host')
+        qs = qs.prefetch_related('hosts', 'children')
+        if self.request.user.is_superuser or self.request.user.is_system_auditor:
+            return qs.all()
+        host_qs = self.request.user.get_queryset(Host)
+        return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs))
+
+
 class AdHocCommandList(ListCreateAPIView):
 
     model = AdHocCommand
