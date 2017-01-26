@@ -212,7 +212,15 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 params.page = '1';
                 queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
                     if (object[key] && object[key] !== sourceValue){
-                        return [object[key], sourceValue];
+                        if(_.isArray(object[key])) {
+                            // Add the new value to the array and return
+                            object[key].push(sourceValue);
+                            return object[key];
+                        }
+                        else {
+                            // Start the array of keys
+                            return [object[key], sourceValue];
+                        }
                     }
                     else {
                         // // https://lodash.com/docs/3.10.1#merge
