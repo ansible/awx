@@ -53,8 +53,6 @@ def jobs(mocker):
 class TestJobSerializerGetRelated():
     @pytest.mark.parametrize("related_resource_name", [
         'job_events',
-        'job_plays',
-        'job_tasks',
         'relaunch',
         'labels',
     ])
