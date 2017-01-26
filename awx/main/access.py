@@ -614,7 +614,7 @@ class HostAccess(BaseAccess):
             return False
 
         # Check to see if we have enough licenses
-        self.check_license(add_host_name=data['name'])
+        self.check_license(add_host_name=data.get('name', None))
         return True
 
     def can_change(self, obj, data):
