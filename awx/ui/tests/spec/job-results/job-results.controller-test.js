@@ -4,7 +4,7 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels;
 
     jobData = {
         related: {}
@@ -78,6 +78,8 @@ describe('Controller: jobResultsController', () => {
             $provide.value('$state', $state);
             $provide.value('QuerySet', QuerySet);
             $provide.value('i18n', i18n);
+            $provide.value('fieldChoices', fieldChoices);
+            $provide.value('fieldLabels', fieldLabels);
         });
     };
 

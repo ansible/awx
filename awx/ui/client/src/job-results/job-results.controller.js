@@ -110,7 +110,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     $scope.hideTraceback = false;
 
     toDestroy.push($scope.$watch('job.job_explanation', function(explanation) {
-        if (explanation.split(":")[0] === "Previous Task Failed") {
+        if (explanation && explanation.split(":")[0] === "Previous Task Failed") {
             $scope.previousTaskFailed = true;
             var taskObj = JSON.parse(explanation.substring(explanation.split(":")[0].length + 1));
             // return a promise from the options request with the permission type choices (including adhoc) as a param
