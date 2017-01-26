@@ -2104,10 +2104,10 @@ class ActivityStreamAccess(BaseAccess):
         qs = self.model.objects.all()
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
-                                 'permission', 'job_template', 'job', 'ad_hoc_command',
+                                 'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
-                                 'schedule', 'role', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template')
+                                 'schedule', 'custom_inventory_script', 'unified_job_template',
+                                 'workflow_job_template', 'workflow_job')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 

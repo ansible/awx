@@ -83,6 +83,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'network_credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'net'),
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'elapsed'),
     'job_template': DEFAULT_SUMMARY_FIELDS,
+    'workflow_job_template': DEFAULT_SUMMARY_FIELDS,
+    'workflow_job': DEFAULT_SUMMARY_FIELDS,
     'schedule': DEFAULT_SUMMARY_FIELDS + ('next_run',),
     'unified_job_template': DEFAULT_SUMMARY_FIELDS + ('unified_job_type',),
     'last_job': DEFAULT_SUMMARY_FIELDS + ('finished', 'status', 'failed', 'license_error'),
@@ -2999,13 +3001,17 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, __ in SUMMARIZABLE_FK_FIELDS.items() + [('workflow_job_template', 0)]:
+        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).all()
             if getattr(obj, fk).exists():
                 rel[fk] = []
+                id_list = []
                 for thisItem in allm2m:
+                    if getattr(thisItem, 'id', None) in id_list:
+                        continue
+                    id_list.append(getattr(thisItem, 'id', None))
                     if fk == 'custom_inventory_script':
                         rel[fk].append(reverse('api:inventory_script_detail', args=(thisItem.id,)))
                     else:
@@ -3017,7 +3023,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items() + [('workflow_job_template', DEFAULT_SUMMARY_FIELDS)]:
+        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
                 if not hasattr(obj, fk):
                     continue
@@ -3050,6 +3056,9 @@ class ActivityStreamSerializer(BaseSerializer):
                                 thisItemDict[field] = fval
                         if fk == 'group':
                             thisItemDict['inventory_id'] = getattr(thisItem, 'inventory_id', None)
+                        if thisItemDict.get('id', None):
+                            if thisItemDict.get('id', None) in [obj_dict.get('id', None) for obj_dict in summary_fields[fk]]:
+                                continue
                         summary_fields[fk].append(thisItemDict)
             except ObjectDoesNotExist:
                 pass
