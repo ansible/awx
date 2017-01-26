@@ -220,6 +220,25 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // EVENT STUFF BELOW
 
+    var appendToBottom = function(mungedEvent){
+        // if we get here then the event type was either a
+        // header line, recap line, or one of the additional
+        // event types, so we append it to the bottom.
+        // These are the event types for captured
+        // stdout not directly related to playbook or runner
+        // events:
+        // (0, 'debug', _('Debug'), False),
+        // (0, 'verbose', _('Verbose'), False),
+        // (0, 'deprecated', _('Deprecated'), False),
+        // (0, 'warning', _('Warning'), False),
+        // (0, 'system_warning', _('System Warning'), False),
+        // (0, 'error', _('Error'), True),
+        angular
+            .element(".JobResultsStdOut-stdoutContainer")
+            .append($compile(mungedEvent
+                .stdout)($scope.events[mungedEvent
+                    .counter]));
+    };
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
     var processEvent = function(event, context) {
@@ -275,9 +294,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     $scope.events[mungedEvent.counter]
                         .event = mungedEvent;
 
-                    if (mungedEvent.stdout.indexOf("not_skeleton") > -1 &&
-                        mungedEvent.name.indexOf("plabyook_") > -1 ||
-                        mungedEvent.name.indexOf("runner_") > -1 ) {
+                    if (mungedEvent.stdout.indexOf("not_skeleton")) {
                         // put non-duplicate lines into the standard
                         // out pane where they should go (within the
                         // right header section, before the next line
@@ -292,11 +309,15 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                             .length) {
                             putIn = classList
                                 .filter(v => v.indexOf("task_") > -1)[0];
-                        } else {
+                        } else if(classList
+                            .filter(v => v.indexOf("play_") > -1)
+                            .length) {
                             putIn = classList
                                 .filter(v => v.indexOf("play_") > -1)[0];
+                        } else {
+                            appendToBottom(mungedEvent);
                         }
-                        
+
                         var putAfter;
                         var isDup = false;
                         $(".header_" + putIn + ",." + putIn)
@@ -323,26 +344,11 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                     .counter]));
                         }
 
+
                         classList = null;
                         putIn = null;
                     } else {
-                        // if we get here then the event type was either a
-                        // header line, recap line, or one of the additional
-                        // event types, so we append it to the bottom.
-                        // These are the event types for captured
-                        // stdout not directly related to playbook or runner
-                        // events:
-                        // (0, 'debug', _('Debug'), False),
-                        // (0, 'verbose', _('Verbose'), False),
-                        // (0, 'deprecated', _('Deprecated'), False),
-                        // (0, 'warning', _('Warning'), False),
-                        // (0, 'system_warning', _('System Warning'), False),
-                        // (0, 'error', _('Error'), True),
-                        angular
-                            .element(".JobResultsStdOut-stdoutContainer")
-                            .append($compile(mungedEvent
-                                .stdout)($scope.events[mungedEvent
-                                    .counter]));
+                        appendToBottom(mungedEvent);
                     }
 
                     // move the followAnchor to the bottom of the
