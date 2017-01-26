@@ -267,7 +267,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     // put stdout elements in stdout container
 
 
-                    function appendToBottom(mungedEvent){
+                    var appendToBottom = function(mungedEvent){
                         // if we get here then the event type was either a
                         // header line, recap line, or one of the additional
                         // event types, so we append it to the bottom.
@@ -285,7 +285,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                             .append($compile(mungedEvent
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
-                    }
+                    };
 
 
                     // this scopes the event to that particular
