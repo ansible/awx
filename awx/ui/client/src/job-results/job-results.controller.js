@@ -220,25 +220,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // EVENT STUFF BELOW
 
-    var appendToBottom = function(mungedEvent){
-        // if we get here then the event type was either a
-        // header line, recap line, or one of the additional
-        // event types, so we append it to the bottom.
-        // These are the event types for captured
-        // stdout not directly related to playbook or runner
-        // events:
-        // (0, 'debug', _('Debug'), False),
-        // (0, 'verbose', _('Verbose'), False),
-        // (0, 'deprecated', _('Deprecated'), False),
-        // (0, 'warning', _('Warning'), False),
-        // (0, 'system_warning', _('System Warning'), False),
-        // (0, 'error', _('Error'), True),
-        angular
-            .element(".JobResultsStdOut-stdoutContainer")
-            .append($compile(mungedEvent
-                .stdout)($scope.events[mungedEvent
-                    .counter]));
-    };
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
     var processEvent = function(event, context) {
@@ -284,6 +265,28 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
                 if(change === 'stdout'){
                     // put stdout elements in stdout container
+
+
+                    function appendToBottom(mungedEvent){
+                        // if we get here then the event type was either a
+                        // header line, recap line, or one of the additional
+                        // event types, so we append it to the bottom.
+                        // These are the event types for captured
+                        // stdout not directly related to playbook or runner
+                        // events:
+                        // (0, 'debug', _('Debug'), False),
+                        // (0, 'verbose', _('Verbose'), False),
+                        // (0, 'deprecated', _('Deprecated'), False),
+                        // (0, 'warning', _('Warning'), False),
+                        // (0, 'system_warning', _('System Warning'), False),
+                        // (0, 'error', _('Error'), True),
+                        angular
+                            .element(".JobResultsStdOut-stdoutContainer")
+                            .append($compile(mungedEvent
+                                .stdout)($scope.events[mungedEvent
+                                    .counter]));
+                    }
+
 
                     // this scopes the event to that particular
                     // block of stdout.
