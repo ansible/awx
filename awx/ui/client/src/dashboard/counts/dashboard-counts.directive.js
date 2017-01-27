@@ -61,7 +61,7 @@ export default
                                 label: i18n._("Projects")
                             },
                             {
-                                url: "/#/projects?project_search=status__in:failed",
+                                url: "/#/projects?project_search=status__in:failed,canceled",
                                 number: scope.data.projects.failed,
                                 label: i18n._("Project Sync Failures"),
                                 isFailureCount: true
