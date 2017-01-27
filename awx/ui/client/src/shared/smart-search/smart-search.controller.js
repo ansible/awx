@@ -201,7 +201,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 origQueryset = _.clone(queryset);
 
             // Remove leading/trailing whitespace if there is any
-            terms = terms.trim();
+            terms = (terms) ? terms.trim() : "";
 
             if(terms && terms !== '') {
                 // Split the terms up
