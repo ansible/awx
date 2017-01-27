@@ -766,9 +766,10 @@ class OutputEventFilter(object):
 
     EVENT_DATA_RE = re.compile(r'\x1b\[K((?:[A-Za-z0-9+/=]+\x1b\[\d+D)+)\x1b\[K')
 
-    def __init__(self, fileobj=None, event_callback=None):
+    def __init__(self, fileobj=None, event_callback=None, raw_callback=None):
         self._fileobj = fileobj
         self._event_callback = event_callback
+        self._raw_callback = raw_callback
         self._counter = 1
         self._start_line = 0
         self._buffer = ''
@@ -781,6 +782,8 @@ class OutputEventFilter(object):
         if self._fileobj:
             self._fileobj.write(data)
         self._buffer += data
+        if self._raw_callback:
+            self._raw_callback(data)
         while True:
             match = self.EVENT_DATA_RE.search(self._buffer)
             if not match:
