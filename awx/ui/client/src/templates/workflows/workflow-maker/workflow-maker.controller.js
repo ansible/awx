@@ -296,7 +296,11 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                         });
                     });
 
-                    $q.all(disassociatePromises.concat(editNodePromises))
+                    let deletePromises = $scope.treeData.data.deletedNodes.map(function(nodeId) {
+                        return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
+                    });
+
+                    $q.all(disassociatePromises.concat(editNodePromises, deletePromises))
                     .then(function() {
 
                         let associatePromises = $scope.associateRequests.map(function(request) {
@@ -307,11 +311,7 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                             });
                         });
 
-                        let deletePromises = $scope.treeData.data.deletedNodes.map(function(nodeId) {
-                            return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
-                        });
-
-                        $q.all(associatePromises.concat(deletePromises))
+                        $q.all(associatePromises)
                         .then(function() {
                             $scope.closeDialog();
                         });
