@@ -38,31 +38,34 @@ export function CredentialsList($scope, $rootScope, $location, $log,
 
     $scope.$on(`${list.iterator}_options`, function(event, data){
         $scope.options = data.data.actions.GET;
+        console.log($scope.options);
         optionsRequestDataProcessing();
     });
 
     $scope.$watchCollection(`${$scope.list.name}`, function() {
-            optionsRequestDataProcessing();
-        }
-    );
+        optionsRequestDataProcessing();
+    });
+
     // iterate over the list and add fields like type label, after the
     // OPTIONS request returns, or the list is sorted/paginated/searched
     function optionsRequestDataProcessing(){
-        $scope[list.name].forEach(function(item, item_idx) {
-            var itm = $scope[list.name][item_idx];
+        if ($scope[list.name] !== undefined) {
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
 
-            // Set the item type label
-            if (list.fields.kind && $scope.options &&
-                $scope.options.hasOwnProperty('kind')) {
-                    $scope.options.kind.choices.every(function(choice) {
-                        if (choice[0] === item.kind) {
-                            itm.kind_label = choice[1];
-                            return false;
-                        }
-                        return true;
-                    });
-            }
-        });
+                // Set the item type label
+                if (list.fields.kind && $scope.options &&
+                    $scope.options.hasOwnProperty('kind')) {
+                        $scope.options.kind.choices.every(function(choice) {
+                            if (choice[0] === item.kind) {
+                                itm.kind_label = choice[1];
+                                return false;
+                            }
+                            return true;
+                        });
+                }
+            });
+        }
     }
 
     $scope.addCredential = function() {
