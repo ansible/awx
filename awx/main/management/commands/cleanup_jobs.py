@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob
+from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob, Notification
 
 
 class Command(NoArgsCommand):
@@ -43,6 +43,9 @@ class Command(NoArgsCommand):
         make_option('--management-jobs', default=False,
                     action='store_true', dest='only_management_jobs',
                     help='Remove management jobs'),
+        make_option('--notifications', dest='only_notifications',
+                    action='store_true', default=False,
+                    help='Remove notifications'),
         make_option('--workflow-jobs', default=False,
                     action='store_true', dest='only_workflow_jobs',
                     help='Remove workflow jobs')
@@ -194,6 +197,28 @@ class Command(NoArgsCommand):
                 deleted += 1
         return skipped, deleted
 
+    def cleanup_notifications(self):
+        skipped, deleted = 0, 0
+        for notification in Notification.objects.all():
+            notification_display = '"{}" (started {}, {} type, {} sent)'.format(
+                unicode(notification), unicode(notification.created),
+                notification.notification_type, notification.notifications_sent)
+            if notification.status in ('pending',):
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s notification %s', action_text, notification.status, notification_display)
+                skipped += 1
+            elif notification.created >= self.cutoff:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, notification_display)
+                skipped += 1
+            else:
+                action_text = 'would delete' if self.dry_run else 'deleting'
+                self.logger.info('%s %s', action_text, notification_display)
+                if not self.dry_run:
+                    notification.delete()
+                deleted += 1
+        return skipped, deleted
+
     @transaction.atomic
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
@@ -204,7 +229,8 @@ class Command(NoArgsCommand):
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
             raise CommandError('--days specified is too large. Try something less than 99999 (about 270 years).')
-        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates', 'management_jobs', 'workflow_jobs')
+        model_names = ('jobs', 'ad_hoc_commands', 'project_updates', 'inventory_updates',
+                       'management_jobs', 'workflow_jobs', 'notifications')
         models_to_cleanup = set()
         for m in model_names:
             if options.get('only_%s' % m, False):
