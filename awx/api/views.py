@@ -2421,7 +2421,13 @@ class JobTemplateSurveySpec(GenericAPIView):
         if not feature_enabled('surveys'):
             raise LicenseForbids(_('Your license does not allow '
                                    'adding surveys.'))
-        return Response(obj.survey_spec)
+        survey_spec = obj.survey_spec
+        for pos, field in enumerate(survey_spec.get('spec', [])):
+            if field.get('type') == 'password':
+                if 'default' in field and field['default']:
+                    field['default'] = '$encrypted$'
+
+        return Response(survey_spec)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -2445,6 +2451,7 @@ class JobTemplateSurveySpec(GenericAPIView):
             return Response(dict(error=_("'spec' must be a list of items.")), status=status.HTTP_400_BAD_REQUEST)
         if len(new_spec["spec"]) < 1:
             return Response(dict(error=_("'spec' doesn't contain any items.")), status=status.HTTP_400_BAD_REQUEST)
+
         idx = 0
         variable_set = set()
         for survey_item in new_spec["spec"]:
@@ -2463,7 +2470,15 @@ class JobTemplateSurveySpec(GenericAPIView):
                 variable_set.add(survey_item['variable'])
             if "required" not in survey_item:
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
+
+            if survey_item["type"] == "password":
+                if "default" in survey_item and survey_item["default"].startswith('$encrypted$'):
+                    old_spec = obj.survey_spec
+                    for old_item in old_spec['spec']:
+                        if old_item['variable'] == survey_item['variable']:
+                            survey_item['default'] = old_item['default']
             idx += 1
+
         obj.survey_spec = new_spec
         obj.save(update_fields=['survey_spec'])
         return Response()
