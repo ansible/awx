@@ -2024,9 +2024,9 @@ class NotificationAccess(BaseAccess):
     model = Notification
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.prefetch_related('notification_template')
         if self.user.is_superuser or self.user.is_system_auditor:
-            return qs
+            return qs.all()
         return self.model.objects.filter(
             Q(notification_template__organization__in=self.user.admin_of_organizations) |
             Q(notification_template__organization__in=self.user.auditor_of_organizations)
