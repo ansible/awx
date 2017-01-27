@@ -16,8 +16,7 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',
-           'HostPermission',]
+           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',]
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -207,25 +206,5 @@ class UserPermission(ModelAccessPermission):
         elif request.user.is_superuser:
             return True
         raise PermissionDenied()
-
-
-class HostPermission(ModelAccessPermission):
-    '''
-    Allow super super for all operations that don't add or update data.
-    Allow the request to flow through access.py so that even a super-user can't 
-    violate the license host count restriction.
-    '''
-
-    def check_options_permissions(self, request, view, obj=None):
-        view.always_allow_superuser = True
-        return super(HostPermission, self).check_options_permissions(request, view, obj)
-
-    def check_head_permissions(self, request, view, obj=None):
-        view.always_allow_superuser = True
-        return super(HostPermission, self).check_head_permissions(request, view, obj)
-
-    def check_get_permissions(self, request, view, obj=None):
-        view.always_allow_superuser = True
-        return super(HostPermission, self).check_get_permissions(request, view, obj)
 
 

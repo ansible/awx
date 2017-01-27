@@ -1687,7 +1687,6 @@ class HostDetail(RetrieveUpdateDestroyAPIView):
     always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (HostPermission,)
 
 
 class InventoryHostsList(SubListCreateAttachDetachAPIView):
