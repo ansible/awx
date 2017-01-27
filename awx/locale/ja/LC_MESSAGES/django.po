@@ -1,4 +1,4 @@
-# suanand <suanand@redhat.com>, 2017. #zanata
+# asasaki <asasaki@redhat.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -62,7 +62,7 @@ msgstr "HTTP Basic 認証の有効化"
 msgid "Enable HTTP Basic Auth for the API Browser."
 msgstr "API ブラウザーの HTTP Basic 認証を有効にします。"
 
-#: api/generics.py:446
+#: api/generics.py:462
 msgid "\"id\" is required to disassociate"
 msgstr "関連付けを解除するには 「id」が必要です"
 
@@ -131,7 +131,11 @@ msgstr "管理ジョブ"
 msgid "Workflow Job"
 msgstr "ワークフロージョブ"
 
-#: api/serializers.py:655 api/serializers.py:713 api/views.py:3914
+#: api/serializers.py:254
+msgid "Workflow Template"
+msgstr ""
+
+#: api/serializers.py:656 api/serializers.py:714 api/views.py:3805
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -140,244 +144,244 @@ msgstr ""
 "標準出力が大きすぎて表示できません (%(text_size)d バイト)。サイズが %(supported_size)d "
 "バイトを超える場合はダウンロードのみがサポートされます。"
 
-#: api/serializers.py:728
+#: api/serializers.py:729
 msgid "Write-only field used to change the password."
 msgstr "パスワードを変更するために使用される書き込み専用フィールド。"
 
-#: api/serializers.py:730
+#: api/serializers.py:731
 msgid "Set if the account is managed by an external service"
 msgstr "アカウントが外部サービスで管理される場合に設定されます"
 
-#: api/serializers.py:754
+#: api/serializers.py:755
 msgid "Password required for new User."
 msgstr "新規ユーザーのパスワードを入力してください。"
 
-#: api/serializers.py:838
+#: api/serializers.py:839
 #, python-format
 msgid "Unable to change %s on user managed by LDAP."
 msgstr "LDAP で管理されたユーザーの %s を変更できません。"
 
-#: api/serializers.py:990
+#: api/serializers.py:991
 msgid "Organization is missing"
 msgstr "組織がありません"
 
-#: api/serializers.py:996
+#: api/serializers.py:997
 msgid "Array of playbooks available within this project."
 msgstr "このプロジェクト内で利用可能な一連の Playbook。"
 
-#: api/serializers.py:1178
+#: api/serializers.py:1179
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr "無効なポート指定: %s"
 
-#: api/serializers.py:1206 main/validators.py:192
+#: api/serializers.py:1207 main/validators.py:193
 msgid "Must be valid JSON or YAML."
 msgstr "有効な JSON または YAML である必要があります。"
 
-#: api/serializers.py:1263
+#: api/serializers.py:1264
 msgid "Invalid group name."
 msgstr "無効なグループ名。"
 
-#: api/serializers.py:1338
+#: api/serializers.py:1339
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr "スクリプトは hashbang シーケンスで開始する必要があります (例: .... #!/usr/bin/env python)"
 
-#: api/serializers.py:1391
+#: api/serializers.py:1392
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr "「source」が「custom」である場合、「source_script」を指定する必要があります。"
 
-#: api/serializers.py:1395
+#: api/serializers.py:1396
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr "「source_script」はインベントリーと同じ組織に属しません。"
 
-#: api/serializers.py:1397
+#: api/serializers.py:1398
 msgid "'source_script' doesn't exist."
 msgstr "「source_script」は存在しません。"
 
-#: api/serializers.py:1756
+#: api/serializers.py:1757
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
 msgstr ""
 "ユーザーを所有者ロールに追加するために使用される書き込み専用フィールドです。提供されている場合は、チームまたは組織のいずれも指定しないでください。作成時にのみ有効です。"
 
-#: api/serializers.py:1761
+#: api/serializers.py:1762
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
 msgstr ""
 "チームを所有者ロールに追加するために使用される書き込み専用フィールドです。提供されている場合は、ユーザーまたは組織のいずれも指定しないでください。作成時にのみ有効です。"
 
-#: api/serializers.py:1766
+#: api/serializers.py:1767
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not"
 " give either user or team."
 msgstr "組織ロールからパーミッションを継承します。作成時に提供される場合は、ユーザーまたはチームのいずれも指定しないでください。"
 
-#: api/serializers.py:1782
+#: api/serializers.py:1783
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr "「user」、「team」、または「organization」がありません。"
 
-#: api/serializers.py:1795
+#: api/serializers.py:1796
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr "認証情報の組織が設定され、一致している状態でチームに割り当てる必要があります。"
 
-#: api/serializers.py:1887
+#: api/serializers.py:1888
 msgid "This field is required."
 msgstr "このフィールドは必須です。"
 
-#: api/serializers.py:1889 api/serializers.py:1891
+#: api/serializers.py:1890 api/serializers.py:1892
 msgid "Playbook not found for project."
 msgstr "プロジェクトの Playbook が見つかりません。"
 
-#: api/serializers.py:1893
+#: api/serializers.py:1894
 msgid "Must select playbook for project."
 msgstr "プロジェクトの Playbook を選択してください。"
 
-#: api/serializers.py:1957 main/models/jobs.py:280
+#: api/serializers.py:1958 main/models/jobs.py:278
 msgid "Scan jobs must be assigned a fixed inventory."
 msgstr "スキャンジョブに固定インベントリーが割り当てられている必要があります。"
 
-#: api/serializers.py:1959 main/models/jobs.py:283
+#: api/serializers.py:1960 main/models/jobs.py:281
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr "ジョブタイプ「run」および「check」によりプロジェクトが割り当てられている必要があります。"
 
-#: api/serializers.py:1962
+#: api/serializers.py:1963
 msgid "Survey Enabled cannot be used with scan jobs."
 msgstr "Survey Enabled はスキャンジョブで使用できません。"
 
-#: api/serializers.py:2024
+#: api/serializers.py:2023
 msgid "Invalid job template."
 msgstr "無効なジョブテンプレート。"
 
-#: api/serializers.py:2109
+#: api/serializers.py:2108
 msgid "Credential not found or deleted."
 msgstr "認証情報が見つからないか、または削除されました。"
 
-#: api/serializers.py:2111
+#: api/serializers.py:2110
 msgid "Job Template Project is missing or undefined."
 msgstr "ジョブテンプレートプロジェクトが見つからないか、または定義されていません。"
 
-#: api/serializers.py:2113
+#: api/serializers.py:2112
 msgid "Job Template Inventory is missing or undefined."
 msgstr "ジョブテンプレートインベントリーが見つからないか、または定義されていません。"
 
-#: api/serializers.py:2398
+#: api/serializers.py:2397
 #, python-format
 msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
 msgstr "%(job_type)s は有効なジョブタイプではありません。%(choices)s を選択できます。"
 
-#: api/serializers.py:2403
+#: api/serializers.py:2402
 msgid "Workflow job template is missing during creation."
 msgstr "ワークフロージョブテンプレートが作成時に見つかりません。"
 
-#: api/serializers.py:2408
+#: api/serializers.py:2407
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr "ワークフロージョブテンプレート内に %s をネストできません"
 
-#: api/serializers.py:2646
+#: api/serializers.py:2645
 #, python-format
 msgid "Job Template '%s' is missing or undefined."
 msgstr "ジョブテンプレート「%s」が見つからない、または定義されていません。"
 
-#: api/serializers.py:2672
+#: api/serializers.py:2671
 msgid "Must be a valid JSON or YAML dictionary."
 msgstr "有効な JSON または YAML 辞書でなければなりません。"
 
-#: api/serializers.py:2817
+#: api/serializers.py:2813
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr "通知設定の必須フィールドがありません: notification_type"
 
-#: api/serializers.py:2840
+#: api/serializers.py:2836
 msgid "No values specified for field '{}'"
 msgstr "フィールド '{}' に値が指定されていません"
 
-#: api/serializers.py:2845
+#: api/serializers.py:2841
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "通知設定の必須フィールドがありません: {}。"
 
-#: api/serializers.py:2848
+#: api/serializers.py:2844
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "設定フィールド '{}' のタイプが正しくありません。{} が予期されました。"
 
-#: api/serializers.py:2901
+#: api/serializers.py:2897
 msgid "Inventory Source must be a cloud resource."
 msgstr "インベントリーソースはクラウドリソースでなければなりません。"
 
-#: api/serializers.py:2903
+#: api/serializers.py:2899
 msgid "Manual Project can not have a schedule set."
 msgstr "手動プロジェクトにはスケジュールを設定できません。"
 
-#: api/serializers.py:2925
+#: api/serializers.py:2921
 msgid ""
 "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr "DTSTART が rrule で必要です。値は、DSTART:YYYYMMDDTHHMMSSZ に一致する必要があります。"
 
-#: api/serializers.py:2927
+#: api/serializers.py:2923
 msgid "Multiple DTSTART is not supported."
 msgstr "複数の DTSTART はサポートされません。"
 
-#: api/serializers.py:2929
+#: api/serializers.py:2925
 msgid "RRULE require in rrule."
 msgstr "RRULE が rrule で必要です。"
 
-#: api/serializers.py:2931
+#: api/serializers.py:2927
 msgid "Multiple RRULE is not supported."
 msgstr "複数の RRULE はサポートされません。"
 
-#: api/serializers.py:2933
+#: api/serializers.py:2929
 msgid "INTERVAL required in rrule."
 msgstr "INTERVAL が rrule で必要です。"
 
-#: api/serializers.py:2935
+#: api/serializers.py:2931
 msgid "TZID is not supported."
 msgstr "TZID はサポートされません。"
 
-#: api/serializers.py:2937
+#: api/serializers.py:2933
 msgid "SECONDLY is not supported."
 msgstr "SECONDLY はサポートされません。"
 
-#: api/serializers.py:2939
+#: api/serializers.py:2935
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "複数の BYMONTHDAY はサポートされません。"
 
-#: api/serializers.py:2941
+#: api/serializers.py:2937
 msgid "Multiple BYMONTHs not supported."
 msgstr "複数の BYMONTH はサポートされません。"
 
-#: api/serializers.py:2943
+#: api/serializers.py:2939
 msgid "BYDAY with numeric prefix not supported."
 msgstr "数字の接頭辞のある BYDAY はサポートされません。"
 
-#: api/serializers.py:2945
+#: api/serializers.py:2941
 msgid "BYYEARDAY not supported."
 msgstr "BYYEARDAY はサポートされません。"
 
-#: api/serializers.py:2947
+#: api/serializers.py:2943
 msgid "BYWEEKNO not supported."
 msgstr "BYWEEKNO はサポートされません。"
 
-#: api/serializers.py:2951
+#: api/serializers.py:2947
 msgid "COUNT > 999 is unsupported."
 msgstr "COUNT > 999 はサポートされません。"
 
-#: api/serializers.py:2955
+#: api/serializers.py:2951
 msgid "rrule parsing failed validation."
 msgstr "rrule の構文解析で検証に失敗しました。"
 
-#: api/serializers.py:2973
+#: api/serializers.py:2969
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "オブジェクトの作成、更新または削除時の新規値および変更された値の概要"
 
-#: api/serializers.py:2975
+#: api/serializers.py:2971
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
@@ -386,7 +390,7 @@ msgstr ""
 "作成、更新、および削除イベントの場合、これは影響を受けたオブジェクトタイプになります。関連付けおよび関連付け解除イベントの場合、これは object2 "
 "に関連付けられたか、またはその関連付けが解除されたオブジェクトタイプになります。"
 
-#: api/serializers.py:2978
+#: api/serializers.py:2974
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated"
@@ -395,341 +399,321 @@ msgstr ""
 "作成、更新、および削除イベントの場合は設定されません。関連付けおよび関連付け解除イベントの場合、これは object1 "
 "が関連付けられるオブジェクトタイプになります。"
 
-#: api/serializers.py:2981
+#: api/serializers.py:2977
 msgid "The action taken with respect to the given object(s)."
 msgstr "指定されたオブジェクトについて実行されたアクション。"
 
-#: api/serializers.py:3081
+#: api/serializers.py:3077
 msgid "Unable to login with provided credentials."
 msgstr "提供される認証情報でログインできません。"
 
-#: api/serializers.py:3083
+#: api/serializers.py:3079
 msgid "Must include \"username\" and \"password\"."
 msgstr "「username」および「password」を含める必要があります。"
 
-#: api/views.py:96
+#: api/views.py:99
 msgid "Your license does not allow use of the activity stream."
 msgstr "お使いのライセンスではアクティビティーストリームを使用できません。"
 
-#: api/views.py:106
+#: api/views.py:109
 msgid "Your license does not permit use of system tracking."
 msgstr "お使いのライセンスではシステムトラッキングを使用できません。"
 
-#: api/views.py:116
+#: api/views.py:119
 msgid "Your license does not allow use of workflows."
 msgstr "お使いのライセンスではワークフローを使用できません。"
 
-#: api/views.py:124 templates/rest_framework/api.html:28
+#: api/views.py:127 templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: api/views.py:131 templates/rest_framework/api.html:4
+#: api/views.py:134 templates/rest_framework/api.html:4
 msgid "Ansible Tower REST API"
 msgstr "Ansible Tower REST API"
 
-#: api/views.py:147
+#: api/views.py:150
 msgid "Version 1"
 msgstr "バージョン 1"
 
-#: api/views.py:198
+#: api/views.py:201
 msgid "Ping"
 msgstr "Ping"
 
-#: api/views.py:227 conf/apps.py:12
+#: api/views.py:230 conf/apps.py:12
 msgid "Configuration"
 msgstr "設定"
 
-#: api/views.py:280
+#: api/views.py:283
 msgid "Invalid license data"
 msgstr "無効なライセンスデータ"
 
-#: api/views.py:282
+#: api/views.py:285
 msgid "Missing 'eula_accepted' property"
 msgstr "'eula_accepted' プロパティーがありません"
 
-#: api/views.py:286
+#: api/views.py:289
 msgid "'eula_accepted' value is invalid"
 msgstr "'eula_accepted' 値は無効です。"
 
-#: api/views.py:289
+#: api/views.py:292
 msgid "'eula_accepted' must be True"
 msgstr "'eula_accepted' は True でなければなりません"
 
-#: api/views.py:296
+#: api/views.py:299
 msgid "Invalid JSON"
 msgstr "無効な JSON"
 
-#: api/views.py:304
+#: api/views.py:307
 msgid "Invalid License"
 msgstr "無効なライセンス"
 
-#: api/views.py:314
+#: api/views.py:317
 msgid "Invalid license"
 msgstr "無効なライセンス"
 
-#: api/views.py:322
+#: api/views.py:325
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr "ライセンスの削除に失敗しました (%s)"
 
-#: api/views.py:327
+#: api/views.py:330
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
-#: api/views.py:433
+#: api/views.py:436
 msgid "Dashboard Jobs Graphs"
 msgstr "ダッシュボードのジョブグラフ"
 
-#: api/views.py:469
+#: api/views.py:472
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr "不明な期間 \"%s\""
 
-#: api/views.py:483
+#: api/views.py:486
 msgid "Schedules"
 msgstr "スケジュール"
 
-#: api/views.py:502
+#: api/views.py:505
 msgid "Schedule Jobs List"
 msgstr "スケジュールジョブの一覧"
 
-#: api/views.py:711
+#: api/views.py:715
 msgid "Your Tower license only permits a single organization to exist."
 msgstr "お使いの Tower ライセンスでは、単一組織のみの存在が許可されます。"
 
-#: api/views.py:932 api/views.py:1284
+#: api/views.py:940 api/views.py:1299
 msgid "Role 'id' field is missing."
 msgstr "ロール「id」フィールドがありません。"
 
-#: api/views.py:938 api/views.py:4182
+#: api/views.py:946 api/views.py:4081
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr "組織ロールをチームの子ロールとして割り当てることができません。"
 
-#: api/views.py:942 api/views.py:4196
+#: api/views.py:950 api/views.py:4095
 msgid "You cannot grant system-level permissions to a team."
 msgstr "システムレベルのパーミッションをチームに付与できません。"
 
-#: api/views.py:949 api/views.py:4188
+#: api/views.py:957 api/views.py:4087
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr "組織フィールドが設定されていないか、または別の組織に属する場合に認証情報のアクセス権をチームに付与できません"
 
-#: api/views.py:1039
+#: api/views.py:1047
 msgid "Cannot delete project."
 msgstr "プロジェクトを削除できません。"
 
-#: api/views.py:1068
+#: api/views.py:1076
 msgid "Project Schedules"
 msgstr "プロジェクトのスケジュール"
 
-#: api/views.py:1168 api/views.py:2252 api/views.py:3225
+#: api/views.py:1180 api/views.py:2270 api/views.py:3276
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr "関連付けられたワークフロージョブが実行中の場合、ジョブリソースを削除できません。"
 
-#: api/views.py:1244
+#: api/views.py:1257
 msgid "Me"
 msgstr "自分"
 
-#: api/views.py:1288 api/views.py:4137
+#: api/views.py:1303 api/views.py:4036
 msgid "You may not perform any action with your own admin_role."
 msgstr "独自の admin_role でアクションを実行することはできません。"
 
-#: api/views.py:1294 api/views.py:4141
+#: api/views.py:1309 api/views.py:4040
 msgid "You may not change the membership of a users admin_role"
 msgstr "ユーザーの admin_role のメンバーシップを変更することはできません"
 
-#: api/views.py:1299 api/views.py:4146
+#: api/views.py:1314 api/views.py:4045
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr "認証情報の組織に属さないユーザーに認証情報のアクセス権を付与することはできません"
 
-#: api/views.py:1303 api/views.py:4150
+#: api/views.py:1318 api/views.py:4049
 msgid "You cannot grant private credential access to another user"
 msgstr "非公開の認証情報のアクセス権を別のユーザーに付与することはできません"
 
-#: api/views.py:1401
+#: api/views.py:1416
 #, python-format
 msgid "Cannot change %s."
 msgstr "%s を変更できません。"
 
-#: api/views.py:1407
+#: api/views.py:1422
 msgid "Cannot delete user."
 msgstr "ユーザーを削除できません。"
 
-#: api/views.py:1553
+#: api/views.py:1570
 msgid "Cannot delete inventory script."
 msgstr "インベントリースクリプトを削除できません。"
 
-#: api/views.py:1788
+#: api/views.py:1805
 msgid "Fact not found."
 msgstr "ファクトが見つかりませんでした。"
 
-#: api/views.py:2108
+#: api/views.py:2125
 msgid "Inventory Source List"
 msgstr "インベントリーソース一覧"
 
-#: api/views.py:2136
+#: api/views.py:2153
 msgid "Cannot delete inventory source."
 msgstr "インベントリーソースを削除できません。"
 
-#: api/views.py:2144
+#: api/views.py:2161
 msgid "Inventory Source Schedules"
 msgstr "インベントリーソースのスケジュール"
 
-#: api/views.py:2173
+#: api/views.py:2191
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr "ソースが {} のいずれかである場合、通知テンプレートのみを割り当てることができます。"
 
-#: api/views.py:2380
+#: api/views.py:2402
 msgid "Job Template Schedules"
 msgstr "ジョブテンプレートスケジュール"
 
-#: api/views.py:2399 api/views.py:2409
+#: api/views.py:2422 api/views.py:2438
 msgid "Your license does not allow adding surveys."
 msgstr "お使いのライセンスでは Survey を追加できません。"
 
-#: api/views.py:2416
+#: api/views.py:2445
 msgid "'name' missing from survey spec."
 msgstr "Survey の指定に「name」がありません。"
 
-#: api/views.py:2418
+#: api/views.py:2447
 msgid "'description' missing from survey spec."
 msgstr "Survey の指定に「description」がありません。"
 
-#: api/views.py:2420
+#: api/views.py:2449
 msgid "'spec' missing from survey spec."
 msgstr "Survey の指定に「spec」がありません。"
 
-#: api/views.py:2422
+#: api/views.py:2451
 msgid "'spec' must be a list of items."
 msgstr "「spec」は項目の一覧にする必要があります。"
 
-#: api/views.py:2424
+#: api/views.py:2453
 msgid "'spec' doesn't contain any items."
 msgstr "「spec」には項目が含まれません。"
 
-#: api/views.py:2429
+#: api/views.py:2459
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "Survey の質問 %s は json オブジェクトではありません。"
 
-#: api/views.py:2431
+#: api/views.py:2461
 #, python-format
 msgid "'type' missing from survey question %s."
 msgstr "Survey の質問 %s に「type」がありません。"
 
-#: api/views.py:2433
+#: api/views.py:2463
 #, python-format
 msgid "'question_name' missing from survey question %s."
 msgstr "Survey の質問 %s に「question_name」がありません。"
 
-#: api/views.py:2435
+#: api/views.py:2465
 #, python-format
 msgid "'variable' missing from survey question %s."
 msgstr "Survey の質問 %s に「variable」がありません。"
 
-#: api/views.py:2437
+#: api/views.py:2467
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr "Survey の質問%(survey)s で「variable」の「%(item)s」が重複しています。"
 
-#: api/views.py:2442
+#: api/views.py:2472
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr "Survey の質問 %s に「required」がありません。"
 
-#: api/views.py:2641
+#: api/views.py:2683
 msgid "No matching host could be found!"
 msgstr "一致するホストが見つかりませんでした!"
 
-#: api/views.py:2644
+#: api/views.py:2686
 msgid "Multiple hosts matched the request!"
 msgstr "複数のホストが要求に一致しました!"
 
-#: api/views.py:2649
+#: api/views.py:2691
 msgid "Cannot start automatically, user input required!"
 msgstr "自動的に開始できません。ユーザー入力が必要です!"
 
-#: api/views.py:2656
+#: api/views.py:2698
 msgid "Host callback job already pending."
 msgstr "ホストのコールバックジョブがすでに保留中です。"
 
-#: api/views.py:2669
+#: api/views.py:2711
 msgid "Error starting job!"
 msgstr "ジョブの開始時にエラーが発生しました!"
 
-#: api/views.py:2995
+#: api/views.py:3040
 msgid "Workflow Job Template Schedules"
 msgstr "ワークフロージョブテンプレートのスケジュール"
 
-#: api/views.py:3131 api/views.py:3853
+#: api/views.py:3175 api/views.py:3714
 msgid "Superuser privileges needed."
 msgstr "スーパーユーザー権限が必要です。"
 
-#: api/views.py:3161
+#: api/views.py:3207
 msgid "System Job Template Schedules"
 msgstr "システムジョブテンプレートのスケジュール"
 
-#: api/views.py:3344
+#: api/views.py:3399
 msgid "Job Host Summaries List"
 msgstr "ジョブホスト概要一覧"
 
-#: api/views.py:3386
+#: api/views.py:3441
 msgid "Job Event Children List"
 msgstr "ジョブイベント子一覧"
 
-#: api/views.py:3395
+#: api/views.py:3450
 msgid "Job Event Hosts List"
 msgstr "ジョブイベントホスト一覧"
 
-#: api/views.py:3404
+#: api/views.py:3459
 msgid "Job Events List"
 msgstr "ジョブイベント一覧"
 
-#: api/views.py:3436
-msgid "Job Plays List"
-msgstr "ジョブプレイ一覧"
-
-#: api/views.py:3513
-msgid "Job Play Tasks List"
-msgstr "ジョブプレイタスク一覧"
-
-#: api/views.py:3529
-msgid "Job not found."
-msgstr "ジョブが見つかりませんでした。"
-
-#: api/views.py:3533
-msgid "'event_id' not provided."
-msgstr "「event_id」が指定されていません。"
-
-#: api/views.py:3537
-msgid "Parent event not found."
-msgstr "親イベントが見つかりませんでした。"
-
-#: api/views.py:3809
+#: api/views.py:3668
 msgid "Ad Hoc Command Events List"
 msgstr "アドホックコマンドイベント一覧"
 
-#: api/views.py:3963
+#: api/views.py:3862
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr "stdout ダウンロードファイルの生成中にエラーが発生しました: %s"
 
-#: api/views.py:4009
+#: api/views.py:3907
 msgid "Delete not allowed while there are pending notifications"
 msgstr "保留中の通知がある場合に削除は許可されません"
 
-#: api/views.py:4016
-msgid "NotificationTemplate Test"
-msgstr "通知テンプレートテスト"
+#: api/views.py:3914
+msgid "Notification Template Test"
+msgstr ""
 
-#: api/views.py:4131
+#: api/views.py:4030
 msgid "User 'id' field is missing."
 msgstr "ユーザー「id」フィールドがありません。"
 
-#: api/views.py:4174
+#: api/views.py:4073
 msgid "Team 'id' field is missing."
 msgstr "チーム「id」フィールドがありません。"
 
@@ -966,34 +950,40 @@ msgstr "機能 %s はアクティブなライセンスで有効にされてい�
 msgid "Features not found in active license."
 msgstr "各種機能はアクティブなライセンスにありません。"
 
-#: main/access.py:507 main/access.py:574 main/access.py:694 main/access.py:957
-#: main/access.py:1198 main/access.py:1587
+#: main/access.py:511 main/access.py:578 main/access.py:698 main/access.py:961
+#: main/access.py:1200 main/access.py:1597
 msgid "Resource is being used by running jobs"
 msgstr "リソースが実行中のジョブで使用されています"
 
-#: main/access.py:618
+#: main/access.py:622
 msgid "Unable to change inventory on a host."
 msgstr "ホストのインベントリーを変更できません。"
 
-#: main/access.py:630 main/access.py:675
+#: main/access.py:634 main/access.py:679
 msgid "Cannot associate two items from different inventories."
 msgstr "異なるインベントリーの 2 つの項目を関連付けることはできません。"
 
-#: main/access.py:663
+#: main/access.py:667
 msgid "Unable to change inventory on a group."
 msgstr "グループのインベントリーを変更できません。"
 
-#: main/access.py:877
+#: main/access.py:881
 msgid "Unable to change organization on a team."
 msgstr "チームの組織を変更できません。"
 
-#: main/access.py:890
+#: main/access.py:894
 msgid "The {} role cannot be assigned to a team"
 msgstr "{} ロールをチームに割り当てることができません"
 
-#: main/access.py:892
+#: main/access.py:896
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr "ユーザーの admin_role をチームに割り当てることができません"
+
+#: main/access.py:1670
+msgid ""
+"You do not have permission to the workflow job resources required for "
+"relaunch."
+msgstr ""
 
 #: main/apps.py:9
 msgid "Main"
@@ -1096,9 +1086,9 @@ msgstr "アドホックジョブで許可される Ansible モジュール"
 msgid "List of modules allowed to be used by ad-hoc jobs."
 msgstr "アドホックジョブで使用できるモジュール一覧。"
 
-#: main/conf.py:112 main/conf.py:121 main/conf.py:130 main/conf.py:139
-#: main/conf.py:148 main/conf.py:158 main/conf.py:168 main/conf.py:178
-#: main/conf.py:187 main/conf.py:199 main/conf.py:211 main/conf.py:223
+#: main/conf.py:112 main/conf.py:121 main/conf.py:130 main/conf.py:140
+#: main/conf.py:150 main/conf.py:160 main/conf.py:170 main/conf.py:180
+#: main/conf.py:190 main/conf.py:202 main/conf.py:214 main/conf.py:226
 msgid "Jobs"
 msgstr "ジョブ"
 
@@ -1121,39 +1111,39 @@ msgid ""
 "Create temporary working directories for isolated jobs in this location."
 msgstr "この場所に分離されたジョブの一時作業ディレクトリーを作成します。"
 
-#: main/conf.py:137
+#: main/conf.py:138
 msgid "Paths to hide from isolated jobs"
 msgstr "分離されたジョブから非表示にするパス"
 
-#: main/conf.py:138
+#: main/conf.py:139
 msgid "Additional paths to hide from isolated processes."
 msgstr "分離されたプロセスから非表示にする追加パス。"
 
-#: main/conf.py:146
+#: main/conf.py:148
 msgid "Paths to expose to isolated jobs"
 msgstr "分離されたジョブに公開するパス"
 
-#: main/conf.py:147
+#: main/conf.py:149
 msgid ""
 "Whitelist of paths that would otherwise be hidden to expose to isolated "
 "jobs."
 msgstr "分離されたジョブに公開されないように非表示にされることがあるパスのホワイトリスト。"
 
-#: main/conf.py:156
+#: main/conf.py:158
 msgid "Standard Output Maximum Display Size"
 msgstr "標準出力の最大表示サイズ"
 
-#: main/conf.py:157
+#: main/conf.py:159
 msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
 msgstr "出力のダウンロードを要求する前に表示される標準出力の最大サイズ (バイト単位)。"
 
-#: main/conf.py:166
+#: main/conf.py:168
 msgid "Job Event Standard Output Maximum Display Size"
 msgstr "ジョブイベントの標準出力の最大表示サイズ"
 
-#: main/conf.py:167
+#: main/conf.py:169
 msgid ""
 "Maximum Size of Standard Output in bytes to display for a single job or ad "
 "hoc command event. `stdout` will end with `…` when truncated."
@@ -1161,31 +1151,31 @@ msgstr ""
 "単一ジョブまたはアドホックコマンドイベントについて表示される標準出力の最大サイズ (バイト単位)。`stdout` は切り捨てが実行されると `…` "
 "で終了します。"
 
-#: main/conf.py:176
+#: main/conf.py:178
 msgid "Maximum Scheduled Jobs"
 msgstr "スケジュール済みジョブの最大数"
 
-#: main/conf.py:177
+#: main/conf.py:179
 msgid ""
 "Maximum number of the same job template that can be waiting to run when "
 "launching from a schedule before no more are created."
 msgstr "スケジュールからの起動時に実行を待機している同じジョブテンプレートの最大数です (これ以上作成されることはありません)。"
 
-#: main/conf.py:185
+#: main/conf.py:188
 msgid "Ansible Callback Plugins"
 msgstr "Ansible コールバックプラグイン"
 
-#: main/conf.py:186
+#: main/conf.py:189
 msgid ""
 "List of paths to search for extra callback plugins to be used when running "
 "jobs."
 msgstr "ジョブの実行時に使用される追加のコールバックプラグインについて検索するパスの一覧。"
 
-#: main/conf.py:196
+#: main/conf.py:199
 msgid "Default Job Timeout"
 msgstr "デフォルトのジョブタイムアウト"
 
-#: main/conf.py:197
+#: main/conf.py:200
 msgid ""
 "Maximum time to allow jobs to run. Use value of 0 to indicate that no "
 "timeout should be imposed. A timeout set on an individual job template will "
@@ -1194,11 +1184,11 @@ msgstr ""
 "ジョブの実行可能な最大時間。値 0 "
 "が使用されている場合はタイムアウトを設定できないことを示します。個別のジョブテンプレートに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:208
+#: main/conf.py:211
 msgid "Default Inventory Update Timeout"
 msgstr "デフォルトのインベントリー更新タイムアウト"
 
-#: main/conf.py:209
+#: main/conf.py:212
 msgid ""
 "Maximum time to allow inventory updates to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual inventory "
@@ -1207,11 +1197,11 @@ msgstr ""
 "インベントリー更新の実行可能な最大時間。値 0 "
 "が設定されている場合はタイムアウトを設定できないことを示します。個別のインベントリーソースに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:220
+#: main/conf.py:223
 msgid "Default Project Update Timeout"
 msgstr "デフォルトのプロジェクト更新タイムアウト"
 
-#: main/conf.py:221
+#: main/conf.py:224
 msgid ""
 "Maximum time to allow project updates to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual project "
@@ -1220,90 +1210,84 @@ msgstr ""
 "プロジェクト更新の実行可能な最大時間。値 0 "
 "が設定されている場合はタイムアウトを設定できないことを示します。個別のプロジェクトに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:231
-msgid "Logging Aggregator Receiving Host"
-msgstr "ログアグリゲーター受信ホスト"
+#: main/conf.py:234
+msgid "Logging Aggregator"
+msgstr ""
 
-#: main/conf.py:232
-msgid "External host maintain a log collector to send logs to"
-msgstr "外部ホストがログの送信先のログコレクターを維持します"
+#: main/conf.py:235
+msgid "Hostname/IP where external logs will be sent to."
+msgstr ""
 
-#: main/conf.py:233 main/conf.py:242 main/conf.py:252 main/conf.py:261
-#: main/conf.py:271 main/conf.py:286 main/conf.py:297 main/conf.py:306
+#: main/conf.py:236 main/conf.py:245 main/conf.py:255 main/conf.py:264
+#: main/conf.py:274 main/conf.py:288 main/conf.py:300 main/conf.py:309
 msgid "Logging"
 msgstr "ロギング"
 
-#: main/conf.py:240
-msgid "Logging Aggregator Receiving Port"
-msgstr "ログアグリゲーター受信ポート"
+#: main/conf.py:243
+msgid "Logging Aggregator Port"
+msgstr ""
 
-#: main/conf.py:241
-msgid "Port that the log collector is listening on"
-msgstr "ログコレクターがリッスンしているポート"
+#: main/conf.py:244
+msgid "Port on Logging Aggregator to send logs to (if required)."
+msgstr ""
 
-#: main/conf.py:250
-msgid "Logging Aggregator Type: Logstash, Loggly, Datadog, etc"
-msgstr "ログアグリゲーターのタイプ: Logstash、Loggly、Datadog など"
+#: main/conf.py:253
+msgid "Logging Aggregator Type"
+msgstr ""
 
-#: main/conf.py:251
-msgid "The type of log aggregator service to format messages for"
-msgstr "メッセージのフォーマットに使用するログアグリゲーターサービスのタイプ"
+#: main/conf.py:254
+msgid "Format messages for the chosen log aggregator."
+msgstr ""
 
-#: main/conf.py:259
-msgid "Logging Aggregator Username to Authenticate With"
-msgstr "認証に使用するログアグリゲーターのユーザー名"
+#: main/conf.py:262
+msgid "Logging Aggregator Username"
+msgstr ""
 
-#: main/conf.py:260
-msgid "Username for Logstash or others (basic auth)"
-msgstr "Logstash その他のユーザー名 (基本認証)"
+#: main/conf.py:263
+msgid "Username for external log aggregator (if required)."
+msgstr ""
 
-#: main/conf.py:269
-msgid "Logging Aggregator Password to Authenticate With"
-msgstr "認証に使用するログアグリゲーターのパスワード"
+#: main/conf.py:272
+msgid "Logging Aggregator Password/Token"
+msgstr ""
 
-#: main/conf.py:270
-msgid "Password for Logstash or others (basic auth)"
-msgstr "Logstash その他のパスワード (基本認証)"
+#: main/conf.py:273
+msgid ""
+"Password or authentication token for external log aggregator (if required)."
+msgstr ""
 
-#: main/conf.py:278
+#: main/conf.py:281
 msgid "Loggers to send data to the log aggregator from"
 msgstr "ログアグリゲーターにデータを送信するロガー"
 
-#: main/conf.py:279
+#: main/conf.py:282
 msgid ""
 "List of loggers that will send HTTP logs to the collector, these can include any or all of: \n"
-"activity_stream - logs duplicate to records entered in activity stream\n"
+"awx - Tower service logs\n"
+"activity_stream - activity stream records\n"
 "job_events - callback data from Ansible job events\n"
-"system_tracking - data generated from scan jobs\n"
-"Sending generic Tower logs must be configured through local_settings.pyinstead of this mechanism."
+"system_tracking - facts gathered from scan jobs."
 msgstr ""
-"HTTP ログをコレクターに送信するロガーの一覧です。これらには以下のいずれか、またはすべてが含まれます。\n"
-"activity_stream - アクティビティーストリームに入力されるレコードへのログの複製\n"
-"job_events - Ansible ジョブイベントからのコールバックデータ\n"
-"system_tracking - スキャンジョブから生成されるデータ\n"
-"汎用 Tower ログの送信は、このメカニズムの local_settings.pyinstead で設定する必要があります。"
 
-#: main/conf.py:293
-msgid ""
-"Flag denoting to send individual messages for each fact in system tracking"
-msgstr "システムトラッキングの各ファクトについての個別メッセージを送信することを示すフラグ"
-
-#: main/conf.py:294
-msgid ""
-"If not set, the data from system tracking will be sent inside of a single "
-"dictionary, but if set, separate requests will be sent for each package, "
-"service, etc. that is found in the scan."
+#: main/conf.py:295
+msgid "Log System Tracking Facts Individually"
 msgstr ""
-"設定されていない場合、システムトラッキングのデータが単一辞書内に送信されますが、設定されている場合は、スキャンで見つかる各パッケージ、サービスなどについての個別の要求が送信されます。"
 
-#: main/conf.py:304
-msgid "Flag denoting whether to use the external logger system"
-msgstr "外部ロガーシステムを使用するかどうかを示すフラグ"
-
-#: main/conf.py:305
+#: main/conf.py:296
 msgid ""
-"If not set, only normal settings data will be used to configure loggers."
-msgstr "設定されていない場合、標準設定データのみがロガーを設定するために使用されます。"
+"If set, system tracking facts will be sent for each package, service, "
+"orother item found in a scan, allowing for greater search query granularity."
+" If unset, facts will be sent as a single dictionary, allowing for greater "
+"efficiency in fact processing."
+msgstr ""
+
+#: main/conf.py:307
+msgid "Enable External Logging"
+msgstr ""
+
+#: main/conf.py:308
+msgid "Enable sending logs to external log aggregator."
+msgstr ""
 
 #: main/models/activity_stream.py:22
 msgid "Entity Created"
@@ -1329,7 +1313,7 @@ msgstr "エンティティーの別のエンティティーとの関連付けの
 msgid "No valid inventory."
 msgstr "有効なインベントリーはありません。"
 
-#: main/models/ad_hoc_commands.py:103 main/models/jobs.py:163
+#: main/models/ad_hoc_commands.py:103 main/models/jobs.py:161
 msgid "You must provide a machine / SSH credential."
 msgstr "マシン/SSH 認証情報を入力してください。"
 
@@ -1346,44 +1330,44 @@ msgstr "アドホックコマンドのサポートされていないモジュー
 msgid "No argument passed to %s module."
 msgstr "%s モジュールに渡される引数はありません。"
 
-#: main/models/ad_hoc_commands.py:220 main/models/jobs.py:767
+#: main/models/ad_hoc_commands.py:222 main/models/jobs.py:763
 msgid "Host Failed"
 msgstr "ホストの失敗"
 
-#: main/models/ad_hoc_commands.py:221 main/models/jobs.py:768
+#: main/models/ad_hoc_commands.py:223 main/models/jobs.py:764
 msgid "Host OK"
 msgstr "ホスト OK"
 
-#: main/models/ad_hoc_commands.py:222 main/models/jobs.py:771
+#: main/models/ad_hoc_commands.py:224 main/models/jobs.py:767
 msgid "Host Unreachable"
 msgstr "ホストに到達できません"
 
-#: main/models/ad_hoc_commands.py:227 main/models/jobs.py:770
+#: main/models/ad_hoc_commands.py:229 main/models/jobs.py:766
 msgid "Host Skipped"
 msgstr "ホストがスキップされました"
 
-#: main/models/ad_hoc_commands.py:237 main/models/jobs.py:798
+#: main/models/ad_hoc_commands.py:239 main/models/jobs.py:794
 msgid "Debug"
 msgstr "デバッグ"
 
-#: main/models/ad_hoc_commands.py:238 main/models/jobs.py:799
+#: main/models/ad_hoc_commands.py:240 main/models/jobs.py:795
 msgid "Verbose"
 msgstr "詳細"
 
-#: main/models/ad_hoc_commands.py:239 main/models/jobs.py:800
+#: main/models/ad_hoc_commands.py:241 main/models/jobs.py:796
 msgid "Deprecated"
 msgstr "非推奨"
 
-#: main/models/ad_hoc_commands.py:240 main/models/jobs.py:801
+#: main/models/ad_hoc_commands.py:242 main/models/jobs.py:797
 msgid "Warning"
 msgstr "警告"
 
-#: main/models/ad_hoc_commands.py:241 main/models/jobs.py:802
+#: main/models/ad_hoc_commands.py:243 main/models/jobs.py:798
 msgid "System Warning"
 msgstr "システム警告"
 
-#: main/models/ad_hoc_commands.py:242 main/models/jobs.py:803
-#: main/models/unified_jobs.py:62
+#: main/models/ad_hoc_commands.py:244 main/models/jobs.py:799
+#: main/models/unified_jobs.py:64
 msgid "Error"
 msgstr "エラー"
 
@@ -1495,164 +1479,172 @@ msgstr "Pbrun"
 msgid "Pfexec"
 msgstr "Pfexec"
 
-#: main/models/credential.py:101
+#: main/models/credential.py:53
+msgid "DZDO"
+msgstr ""
+
+#: main/models/credential.py:54
+msgid "Pmrun"
+msgstr ""
+
+#: main/models/credential.py:103
 msgid "Host"
 msgstr "ホスト"
 
-#: main/models/credential.py:102
+#: main/models/credential.py:104
 msgid "The hostname or IP address to use."
 msgstr "使用するホスト名または IP アドレス。"
 
-#: main/models/credential.py:108
+#: main/models/credential.py:110
 msgid "Username"
 msgstr "ユーザー名"
 
-#: main/models/credential.py:109
+#: main/models/credential.py:111
 msgid "Username for this credential."
 msgstr "この認証情報のユーザー名。"
 
-#: main/models/credential.py:115
+#: main/models/credential.py:117
 msgid "Password"
 msgstr "パスワード"
 
-#: main/models/credential.py:116
+#: main/models/credential.py:118
 msgid ""
 "Password for this credential (or \"ASK\" to prompt the user for machine "
 "credentials)."
 msgstr "この認証情報のパスワード (またはマシンの認証情報を求めるプロンプトを出すには 「ASK」)。"
 
-#: main/models/credential.py:123
+#: main/models/credential.py:125
 msgid "Security Token"
 msgstr "セキュリティートークン"
 
-#: main/models/credential.py:124
+#: main/models/credential.py:126
 msgid "Security Token for this credential"
 msgstr "この認証情報のセキュリティートークン"
 
-#: main/models/credential.py:130
+#: main/models/credential.py:132
 msgid "Project"
 msgstr "プロジェクト"
 
-#: main/models/credential.py:131
+#: main/models/credential.py:133
 msgid "The identifier for the project."
 msgstr "プロジェクトの識別子。"
 
-#: main/models/credential.py:137
+#: main/models/credential.py:139
 msgid "Domain"
 msgstr "ドメイン"
 
-#: main/models/credential.py:138
+#: main/models/credential.py:140
 msgid "The identifier for the domain."
 msgstr "ドメインの識別子。"
 
-#: main/models/credential.py:143
+#: main/models/credential.py:145
 msgid "SSH private key"
 msgstr "SSH 秘密鍵"
 
-#: main/models/credential.py:144
+#: main/models/credential.py:146
 msgid "RSA or DSA private key to be used instead of password."
 msgstr "パスワードの代わりに使用される RSA または DSA 秘密鍵。"
 
-#: main/models/credential.py:150
+#: main/models/credential.py:152
 msgid "SSH key unlock"
 msgstr "SSH キーのロック解除"
 
-#: main/models/credential.py:151
+#: main/models/credential.py:153
 msgid ""
 "Passphrase to unlock SSH private key if encrypted (or \"ASK\" to prompt the "
 "user for machine credentials)."
 msgstr ""
 "暗号化されている場合は SSH 秘密鍵のロックを解除するためのパスフレーズ (またはマシンの認証情報を求めるプロンプトを出すには「ASK」)。"
 
-#: main/models/credential.py:159
+#: main/models/credential.py:161
 msgid "Privilege escalation method."
 msgstr "権限昇格メソッド。"
 
-#: main/models/credential.py:165
+#: main/models/credential.py:167
 msgid "Privilege escalation username."
 msgstr "権限昇格ユーザー名。"
 
-#: main/models/credential.py:171
+#: main/models/credential.py:173
 msgid "Password for privilege escalation method."
 msgstr "権限昇格メソッドのパスワード。"
 
-#: main/models/credential.py:177
+#: main/models/credential.py:179
 msgid "Vault password (or \"ASK\" to prompt the user)."
 msgstr "Vault パスワード (またはユーザーにプロンプトを出すには「ASK」)。"
 
-#: main/models/credential.py:181
+#: main/models/credential.py:183
 msgid "Whether to use the authorize mechanism."
 msgstr "承認メカニズムを使用するかどうか。"
 
-#: main/models/credential.py:187
+#: main/models/credential.py:189
 msgid "Password used by the authorize mechanism."
 msgstr "承認メカニズムで使用されるパスワード。"
 
-#: main/models/credential.py:193
+#: main/models/credential.py:195
 msgid "Client Id or Application Id for the credential"
 msgstr "認証情報のクライアント ID またはアプリケーション ID"
 
-#: main/models/credential.py:199
+#: main/models/credential.py:201
 msgid "Secret Token for this credential"
 msgstr "この認証情報のシークレットトークン"
 
-#: main/models/credential.py:205
+#: main/models/credential.py:207
 msgid "Subscription identifier for this credential"
 msgstr "この認証情報のサブスクリプション識別子"
 
-#: main/models/credential.py:211
+#: main/models/credential.py:213
 msgid "Tenant identifier for this credential"
 msgstr "この認証情報のテナント識別子"
 
-#: main/models/credential.py:281
+#: main/models/credential.py:283
 msgid "Host required for VMware credential."
 msgstr "VMware 認証情報に必要なホスト。"
 
-#: main/models/credential.py:283
+#: main/models/credential.py:285
 msgid "Host required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なホスト。"
 
-#: main/models/credential.py:292
+#: main/models/credential.py:294
 msgid "Access key required for AWS credential."
 msgstr "AWS 認証情報に必要なアクセスキー。"
 
-#: main/models/credential.py:294
+#: main/models/credential.py:296
 msgid "Username required for Rackspace credential."
 msgstr "Rackspace 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:297
+#: main/models/credential.py:299
 msgid "Username required for VMware credential."
 msgstr "VMware 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:299
+#: main/models/credential.py:301
 msgid "Username required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:305
+#: main/models/credential.py:307
 msgid "Secret key required for AWS credential."
 msgstr "AWS 認証情報に必要なシークレットキー。"
 
-#: main/models/credential.py:307
+#: main/models/credential.py:309
 msgid "API key required for Rackspace credential."
 msgstr "Rackspace 認証情報に必要な API キー。"
 
-#: main/models/credential.py:309
+#: main/models/credential.py:311
 msgid "Password required for VMware credential."
 msgstr "VMware 認証情報に必要なパスワード。"
 
-#: main/models/credential.py:311
+#: main/models/credential.py:313
 msgid "Password or API key required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なパスワードまたは API キー。"
 
-#: main/models/credential.py:317
+#: main/models/credential.py:319
 msgid "Project name required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なプロジェクト名。"
 
-#: main/models/credential.py:344
+#: main/models/credential.py:346
 msgid "SSH key unlock must be set when SSH key is encrypted."
 msgstr "SSH キーの暗号化時に SSH キーのロック解除を設定する必要があります。"
 
-#: main/models/credential.py:350
+#: main/models/credential.py:352
 msgid "Credential cannot be assigned to both a user and team."
 msgstr "認証情報はユーザーとチームの両方に割り当てることができません。"
 
@@ -1782,7 +1774,7 @@ msgid "Inventory source(s) that created or modified this group."
 msgstr "このグループを作成または変更したインベントリーソース。"
 
 #: main/models/inventory.py:706 main/models/projects.py:42
-#: main/models/unified_jobs.py:386
+#: main/models/unified_jobs.py:402
 msgid "Manual"
 msgstr "手動"
 
@@ -1877,170 +1869,170 @@ msgstr "認証情報がクラウドソースに必要です。"
 
 #: main/models/inventory.py:1005
 #, python-format
-msgid "Invalid %(source)s region%(plural)s: %(region)s"
+msgid "Invalid %(source)s region: %(region)s"
 msgstr ""
 
-#: main/models/inventory.py:1031
+#: main/models/inventory.py:1030
 #, python-format
-msgid "Invalid filter expression%(plural)s: %(filter)s"
+msgid "Invalid filter expression: %(filter)s"
 msgstr ""
 
-#: main/models/inventory.py:1050
+#: main/models/inventory.py:1048
 #, python-format
-msgid "Invalid group by choice%(plural)s: %(choice)s"
+msgid "Invalid group by choice: %(choice)s"
 msgstr ""
 
-#: main/models/inventory.py:1198
+#: main/models/inventory.py:1195
 #, python-format
 msgid ""
 "Unable to configure this item for cloud sync. It is already managed by %s."
 msgstr "クラウド同期用にこの項目を設定できません。すでに %s によって管理されています。"
 
-#: main/models/inventory.py:1293
+#: main/models/inventory.py:1290
 msgid "Inventory script contents"
 msgstr "インベントリースクリプトの内容"
 
-#: main/models/inventory.py:1298
+#: main/models/inventory.py:1295
 msgid "Organization owning this inventory script"
 msgstr "このインベントリースクリプトを所有する組織"
 
-#: main/models/jobs.py:171
+#: main/models/jobs.py:169
 msgid "You must provide a network credential."
 msgstr "ネットワーク認証情報を指定する必要があります。"
 
-#: main/models/jobs.py:179
+#: main/models/jobs.py:177
 msgid ""
 "Must provide a credential for a cloud provider, such as Amazon Web Services "
 "or Rackspace."
 msgstr "Amazon Web Services または Rackspace などのクラウドプロバイダーの認証情報を指定する必要があります。"
 
-#: main/models/jobs.py:271
+#: main/models/jobs.py:269
 msgid "Job Template must provide 'inventory' or allow prompting for it."
 msgstr "ジョブテンプレートは「inventory」を指定するか、このプロンプトを許可する必要があります。"
 
-#: main/models/jobs.py:275
+#: main/models/jobs.py:273
 msgid "Job Template must provide 'credential' or allow prompting for it."
 msgstr "ジョブテンプレートは「credential」を指定するか、このプロンプトを許可する必要があります。"
 
-#: main/models/jobs.py:364
+#: main/models/jobs.py:362
 msgid "Cannot override job_type to or from a scan job."
 msgstr "スキャンジョブから/への job_type を上書きを実行できません。"
 
-#: main/models/jobs.py:367
+#: main/models/jobs.py:365
 msgid "Inventory cannot be changed at runtime for scan jobs."
 msgstr "インベントリーはスキャンジョブの実行時に変更できません。"
 
-#: main/models/jobs.py:433 main/models/projects.py:243
+#: main/models/jobs.py:431 main/models/projects.py:243
 msgid "SCM Revision"
 msgstr "SCM リビジョン"
 
-#: main/models/jobs.py:434
+#: main/models/jobs.py:432
 msgid "The SCM Revision from the Project used for this job, if available"
 msgstr "このジョブに使用されるプロジェクトからの SCM リビジョン (ある場合)"
 
-#: main/models/jobs.py:442
+#: main/models/jobs.py:440
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
 msgstr "SCM 更新タスクは、Playbook がジョブの実行で利用可能であったことを確認するために使用されます"
 
-#: main/models/jobs.py:666
+#: main/models/jobs.py:662
 msgid "job host summaries"
 msgstr "ジョブホストの概要"
 
-#: main/models/jobs.py:769
+#: main/models/jobs.py:765
 msgid "Host Failure"
 msgstr "ホストの失敗"
 
-#: main/models/jobs.py:772 main/models/jobs.py:786
+#: main/models/jobs.py:768 main/models/jobs.py:782
 msgid "No Hosts Remaining"
 msgstr "残りのホストがありません"
 
-#: main/models/jobs.py:773
+#: main/models/jobs.py:769
 msgid "Host Polling"
 msgstr "ホストのポーリング"
 
-#: main/models/jobs.py:774
+#: main/models/jobs.py:770
 msgid "Host Async OK"
 msgstr "ホストの非同期 OK"
 
-#: main/models/jobs.py:775
+#: main/models/jobs.py:771
 msgid "Host Async Failure"
 msgstr "ホストの非同期失敗"
 
-#: main/models/jobs.py:776
+#: main/models/jobs.py:772
 msgid "Item OK"
 msgstr "項目 OK"
 
-#: main/models/jobs.py:777
+#: main/models/jobs.py:773
 msgid "Item Failed"
 msgstr "項目の失敗"
 
-#: main/models/jobs.py:778
+#: main/models/jobs.py:774
 msgid "Item Skipped"
 msgstr "項目のスキップ"
 
-#: main/models/jobs.py:779
+#: main/models/jobs.py:775
 msgid "Host Retry"
 msgstr "ホストの再試行"
 
-#: main/models/jobs.py:781
+#: main/models/jobs.py:777
 msgid "File Difference"
 msgstr "ファイルの相違点"
 
-#: main/models/jobs.py:782
+#: main/models/jobs.py:778
 msgid "Playbook Started"
 msgstr "Playbook の開始"
 
-#: main/models/jobs.py:783
+#: main/models/jobs.py:779
 msgid "Running Handlers"
 msgstr "実行中のハンドラー"
 
-#: main/models/jobs.py:784
+#: main/models/jobs.py:780
 msgid "Including File"
 msgstr "組み込みファイル"
 
-#: main/models/jobs.py:785
+#: main/models/jobs.py:781
 msgid "No Hosts Matched"
 msgstr "一致するホストがありません"
 
-#: main/models/jobs.py:787
+#: main/models/jobs.py:783
 msgid "Task Started"
 msgstr "タスクの開始"
 
-#: main/models/jobs.py:789
+#: main/models/jobs.py:785
 msgid "Variables Prompted"
 msgstr "変数のプロモート"
 
-#: main/models/jobs.py:790
+#: main/models/jobs.py:786
 msgid "Gathering Facts"
 msgstr "ファクトの収集"
 
-#: main/models/jobs.py:791
+#: main/models/jobs.py:787
 msgid "internal: on Import for Host"
 msgstr "内部: ホストのインポート時"
 
-#: main/models/jobs.py:792
+#: main/models/jobs.py:788
 msgid "internal: on Not Import for Host"
 msgstr "内部: ホストの非インポート時"
 
-#: main/models/jobs.py:793
+#: main/models/jobs.py:789
 msgid "Play Started"
 msgstr "プレイの開始"
 
-#: main/models/jobs.py:794
+#: main/models/jobs.py:790
 msgid "Playbook Complete"
 msgstr "Playbook の完了"
 
-#: main/models/jobs.py:1240
+#: main/models/jobs.py:1200
 msgid "Remove jobs older than a certain number of days"
 msgstr "特定の日数より前のジョブを削除"
 
-#: main/models/jobs.py:1241
+#: main/models/jobs.py:1201
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "特定の日数より前のアクティビティーストリームのエントリーを削除"
 
-#: main/models/jobs.py:1242
+#: main/models/jobs.py:1202
 msgid "Purge and/or reduce the granularity of system tracking data"
 msgstr "システムトラッキングデータの詳細度の削除/削減"
 
@@ -2076,15 +2068,15 @@ msgstr "Webhook"
 msgid "IRC"
 msgstr "IRC"
 
-#: main/models/notifications.py:127 main/models/unified_jobs.py:57
+#: main/models/notifications.py:127 main/models/unified_jobs.py:59
 msgid "Pending"
 msgstr "保留中"
 
-#: main/models/notifications.py:128 main/models/unified_jobs.py:60
+#: main/models/notifications.py:128 main/models/unified_jobs.py:62
 msgid "Successful"
 msgstr "成功"
 
-#: main/models/notifications.py:129 main/models/unified_jobs.py:61
+#: main/models/notifications.py:129 main/models/unified_jobs.py:63
 msgid "Failed"
 msgstr "失敗"
 
@@ -2101,8 +2093,9 @@ msgid "Token is expired"
 msgstr "トークンは期限切れです"
 
 #: main/models/organization.py:213
-msgid "Maximum per-user sessions reached"
-msgstr "ユーザーあたりの最大セッション数に達しました。"
+msgid ""
+"The maximum number of allowed sessions for this user has been exceeded."
+msgstr ""
 
 #: main/models/organization.py:216
 msgid "Invalid token"
@@ -2238,80 +2231,84 @@ msgstr "スケジュールの iCal 繰り返しルールを表す値。"
 msgid "The next time that the scheduled action will run."
 msgstr "スケジュールされたアクションが次に実行される時間。"
 
-#: main/models/unified_jobs.py:56
+#: main/models/unified_jobs.py:58
 msgid "New"
 msgstr "新規"
 
-#: main/models/unified_jobs.py:58
+#: main/models/unified_jobs.py:60
 msgid "Waiting"
 msgstr "待機中"
 
-#: main/models/unified_jobs.py:59
+#: main/models/unified_jobs.py:61
 msgid "Running"
 msgstr "実行中"
 
-#: main/models/unified_jobs.py:63
+#: main/models/unified_jobs.py:65
 msgid "Canceled"
 msgstr "取り消されました"
 
-#: main/models/unified_jobs.py:67
+#: main/models/unified_jobs.py:69
 msgid "Never Updated"
 msgstr "更新されていません"
 
-#: main/models/unified_jobs.py:71 ui/templates/ui/index.html:85
+#: main/models/unified_jobs.py:73 ui/templates/ui/index.html:85
 #: ui/templates/ui/index.html.py:104
 msgid "OK"
 msgstr "OK"
 
-#: main/models/unified_jobs.py:72
+#: main/models/unified_jobs.py:74
 msgid "Missing"
 msgstr "不明"
 
-#: main/models/unified_jobs.py:76
+#: main/models/unified_jobs.py:78
 msgid "No External Source"
 msgstr "外部ソースがありません"
 
-#: main/models/unified_jobs.py:83
+#: main/models/unified_jobs.py:85
 msgid "Updating"
 msgstr "更新中"
 
-#: main/models/unified_jobs.py:387
+#: main/models/unified_jobs.py:403
 msgid "Relaunch"
 msgstr "再起動"
 
-#: main/models/unified_jobs.py:388
+#: main/models/unified_jobs.py:404
 msgid "Callback"
 msgstr "コールバック"
 
-#: main/models/unified_jobs.py:389
+#: main/models/unified_jobs.py:405
 msgid "Scheduled"
 msgstr "スケジュール済み"
 
-#: main/models/unified_jobs.py:390
+#: main/models/unified_jobs.py:406
 msgid "Dependency"
 msgstr "依存関係"
 
-#: main/models/unified_jobs.py:391
+#: main/models/unified_jobs.py:407
 msgid "Workflow"
 msgstr "ワークフロー"
 
-#: main/models/unified_jobs.py:437
+#: main/models/unified_jobs.py:408
+msgid "Sync"
+msgstr ""
+
+#: main/models/unified_jobs.py:454
 msgid "The Tower node the job executed on."
 msgstr "ジョブが実行される Tower ノード。"
 
-#: main/models/unified_jobs.py:463
+#: main/models/unified_jobs.py:480
 msgid "The date and time the job was queued for starting."
 msgstr "ジョブが開始のために待機した日時。"
 
-#: main/models/unified_jobs.py:469
+#: main/models/unified_jobs.py:486
 msgid "The date and time the job finished execution."
 msgstr "ジョブが実行を完了した日時。"
 
-#: main/models/unified_jobs.py:475
+#: main/models/unified_jobs.py:492
 msgid "Elapsed time in seconds that the job ran."
 msgstr "ジョブ実行の経過時間 (秒単位)"
 
-#: main/models/unified_jobs.py:497
+#: main/models/unified_jobs.py:514
 msgid ""
 "A status field to indicate the state of the job if it wasn't able to run and"
 " capture stdout"
@@ -2356,54 +2353,60 @@ msgstr "Twilio への接続時の例外: {}"
 msgid "Error sending notification webhook: {}"
 msgstr "通知 webhook の送信時のエラー: {}"
 
-#: main/tasks.py:139
+#: main/scheduler/__init__.py:130
+msgid ""
+"Job spawned from workflow could not start because it was not in the right "
+"state or required manual credentials"
+msgstr ""
+
+#: main/tasks.py:180
 msgid "Ansible Tower host usage over 90%"
 msgstr "Ansible Tower ホストの使用率が 90% を超えました"
 
-#: main/tasks.py:144
+#: main/tasks.py:185
 msgid "Ansible Tower license will expire soon"
 msgstr "Ansible Tower ライセンスがまもなく期限切れになります"
 
-#: main/tasks.py:197
+#: main/tasks.py:240
 msgid "status_str must be either succeeded or failed"
 msgstr "status_str は成功または失敗のいずれかである必要があります"
 
-#: main/utils/common.py:88
+#: main/utils/common.py:89
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "\"%s\" をブール値に変換できません"
 
-#: main/utils/common.py:242
+#: main/utils/common.py:243
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "サポートされない SCM タイプ \"%s\""
 
-#: main/utils/common.py:249 main/utils/common.py:261 main/utils/common.py:280
+#: main/utils/common.py:250 main/utils/common.py:262 main/utils/common.py:281
 #, python-format
 msgid "Invalid %s URL"
 msgstr "無効な %s URL"
 
-#: main/utils/common.py:251 main/utils/common.py:289
+#: main/utils/common.py:252 main/utils/common.py:290
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "サポートされていない %s URL"
 
-#: main/utils/common.py:291
+#: main/utils/common.py:292
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "ファイル:// URL のサポートされていないホスト \"%s\" "
 
-#: main/utils/common.py:293
+#: main/utils/common.py:294
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "%s URL にはホストが必要です"
 
-#: main/utils/common.py:311
+#: main/utils/common.py:312
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "%s への SSH アクセスではユーザー名を \"git\" にする必要があります。"
 
-#: main/utils/common.py:317
+#: main/utils/common.py:318
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "%s への SSH アクセスではユーザー名を \"hg\" にする必要があります。"
@@ -2516,187 +2519,195 @@ msgstr "サーバーエラー"
 msgid "A server error has occurred."
 msgstr "サーバーエラーが発生しました。"
 
-#: settings/defaults.py:600
+#: settings/defaults.py:611
 msgid "Chicago"
 msgstr "シカゴ"
 
-#: settings/defaults.py:601
+#: settings/defaults.py:612
 msgid "Dallas/Ft. Worth"
 msgstr "ダラス/フォートワース"
 
-#: settings/defaults.py:602
+#: settings/defaults.py:613
 msgid "Northern Virginia"
 msgstr "北バージニア"
 
-#: settings/defaults.py:603
+#: settings/defaults.py:614
 msgid "London"
 msgstr "ロンドン"
 
-#: settings/defaults.py:604
+#: settings/defaults.py:615
 msgid "Sydney"
 msgstr "シドニー"
 
-#: settings/defaults.py:605
+#: settings/defaults.py:616
 msgid "Hong Kong"
 msgstr "香港"
 
-#: settings/defaults.py:632
+#: settings/defaults.py:643
 msgid "US East (Northern Virginia)"
 msgstr "米国東部 (バージニア北部)"
 
-#: settings/defaults.py:633
+#: settings/defaults.py:644
 msgid "US East (Ohio)"
 msgstr "米国東部 (オハイオ)"
 
-#: settings/defaults.py:634
+#: settings/defaults.py:645
 msgid "US West (Oregon)"
 msgstr "米国西部 (オレゴン)"
 
-#: settings/defaults.py:635
+#: settings/defaults.py:646
 msgid "US West (Northern California)"
 msgstr "米国西部 (北カリフォルニア)"
 
-#: settings/defaults.py:636
+#: settings/defaults.py:647
+msgid "Canada (Central)"
+msgstr ""
+
+#: settings/defaults.py:648
 msgid "EU (Frankfurt)"
 msgstr "EU (フランクフルト)"
 
-#: settings/defaults.py:637
+#: settings/defaults.py:649
 msgid "EU (Ireland)"
 msgstr "EU (アイルランド)"
 
-#: settings/defaults.py:638
+#: settings/defaults.py:650
+msgid "EU (London)"
+msgstr ""
+
+#: settings/defaults.py:651
 msgid "Asia Pacific (Singapore)"
 msgstr "アジア太平洋 (シンガポール)"
 
-#: settings/defaults.py:639
+#: settings/defaults.py:652
 msgid "Asia Pacific (Sydney)"
 msgstr "アジア太平洋 (シドニー)"
 
-#: settings/defaults.py:640
+#: settings/defaults.py:653
 msgid "Asia Pacific (Tokyo)"
 msgstr "アジア太平洋 (東京)"
 
-#: settings/defaults.py:641
+#: settings/defaults.py:654
 msgid "Asia Pacific (Seoul)"
 msgstr "アジア太平洋 (ソウル)"
 
-#: settings/defaults.py:642
+#: settings/defaults.py:655
 msgid "Asia Pacific (Mumbai)"
 msgstr "アジア太平洋 (ムンバイ)"
 
-#: settings/defaults.py:643
+#: settings/defaults.py:656
 msgid "South America (Sao Paulo)"
 msgstr "南アメリカ (サンパウロ)"
 
-#: settings/defaults.py:644
+#: settings/defaults.py:657
 msgid "US West (GovCloud)"
 msgstr "米国西部 (GovCloud)"
 
-#: settings/defaults.py:645
+#: settings/defaults.py:658
 msgid "China (Beijing)"
 msgstr "中国 (北京)"
 
-#: settings/defaults.py:694
+#: settings/defaults.py:707
 msgid "US East (B)"
 msgstr "米国東部 (B)"
 
-#: settings/defaults.py:695
+#: settings/defaults.py:708
 msgid "US East (C)"
 msgstr "米国東部 (C)"
 
-#: settings/defaults.py:696
+#: settings/defaults.py:709
 msgid "US East (D)"
 msgstr "米国東部 (D)"
 
-#: settings/defaults.py:697
+#: settings/defaults.py:710
 msgid "US Central (A)"
 msgstr "米国中部 (A)"
 
-#: settings/defaults.py:698
+#: settings/defaults.py:711
 msgid "US Central (B)"
 msgstr "米国中部 (B)"
 
-#: settings/defaults.py:699
+#: settings/defaults.py:712
 msgid "US Central (C)"
 msgstr "米国中部 (C)"
 
-#: settings/defaults.py:700
+#: settings/defaults.py:713
 msgid "US Central (F)"
 msgstr "米国中部 (F)"
 
-#: settings/defaults.py:701
+#: settings/defaults.py:714
 msgid "Europe West (B)"
 msgstr "欧州西部 (B)"
 
-#: settings/defaults.py:702
+#: settings/defaults.py:715
 msgid "Europe West (C)"
 msgstr "欧州西部 (C)"
 
-#: settings/defaults.py:703
+#: settings/defaults.py:716
 msgid "Europe West (D)"
 msgstr "欧州西部 (D)"
 
-#: settings/defaults.py:704
+#: settings/defaults.py:717
 msgid "Asia East (A)"
 msgstr "アジア東部 (A)"
 
-#: settings/defaults.py:705
+#: settings/defaults.py:718
 msgid "Asia East (B)"
 msgstr "アジア東部 (B)"
 
-#: settings/defaults.py:706
+#: settings/defaults.py:719
 msgid "Asia East (C)"
 msgstr "アジア東部 (C)"
 
-#: settings/defaults.py:730
+#: settings/defaults.py:743
 msgid "US Central"
 msgstr "米国中部"
 
-#: settings/defaults.py:731
+#: settings/defaults.py:744
 msgid "US East"
 msgstr "米国東部"
 
-#: settings/defaults.py:732
+#: settings/defaults.py:745
 msgid "US East 2"
 msgstr "米国東部 2"
 
-#: settings/defaults.py:733
+#: settings/defaults.py:746
 msgid "US North Central"
 msgstr "米国中北部"
 
-#: settings/defaults.py:734
+#: settings/defaults.py:747
 msgid "US South Central"
 msgstr "米国中南部"
 
-#: settings/defaults.py:735
+#: settings/defaults.py:748
 msgid "US West"
 msgstr "米国西部"
 
-#: settings/defaults.py:736
+#: settings/defaults.py:749
 msgid "Europe North"
 msgstr "欧州北部"
 
-#: settings/defaults.py:737
+#: settings/defaults.py:750
 msgid "Europe West"
 msgstr "欧州西部"
 
-#: settings/defaults.py:738
+#: settings/defaults.py:751
 msgid "Asia Pacific East"
 msgstr "アジア太平洋東部"
 
-#: settings/defaults.py:739
+#: settings/defaults.py:752
 msgid "Asia Pacific Southeast"
 msgstr "アジア太平洋南東部"
 
-#: settings/defaults.py:740
+#: settings/defaults.py:753
 msgid "Japan East"
 msgstr "日本東部"
 
-#: settings/defaults.py:741
+#: settings/defaults.py:754
 msgid "Japan West"
 msgstr "日本西部"
 
-#: settings/defaults.py:742
+#: settings/defaults.py:755
 msgid "Brazil South"
 msgstr "ブラジル南部"
 
@@ -2851,9 +2862,9 @@ msgstr ""
 "認証は、このパラメーターが空の場合は無効になります。"
 
 #: sso/conf.py:181 sso/conf.py:199 sso/conf.py:211 sso/conf.py:223
-#: sso/conf.py:239 sso/conf.py:258 sso/conf.py:279 sso/conf.py:295
-#: sso/conf.py:314 sso/conf.py:331 sso/conf.py:347 sso/conf.py:362
-#: sso/conf.py:379 sso/conf.py:417 sso/conf.py:458
+#: sso/conf.py:239 sso/conf.py:258 sso/conf.py:280 sso/conf.py:296
+#: sso/conf.py:315 sso/conf.py:332 sso/conf.py:349 sso/conf.py:365
+#: sso/conf.py:382 sso/conf.py:420 sso/conf.py:461
 msgid "LDAP"
 msgstr "LDAP"
 
@@ -2924,11 +2935,11 @@ msgstr ""
 "設定で定義)。複数の検索クエリーがサポートされる必要がある場合、\"LDAPUnion\" を使用できます。このセクションの先頭にリンクされている "
 "python-ldap ドキュメントを参照してください。"
 
-#: sso/conf.py:273
+#: sso/conf.py:274
 msgid "LDAP User DN Template"
 msgstr "LDAP ユーザー DN テンプレート"
 
-#: sso/conf.py:274
+#: sso/conf.py:275
 msgid ""
 "Alternative to user search, if user DNs are all of the same format. This "
 "approach will be more efficient for user lookups than searching if it is "
@@ -2939,11 +2950,11 @@ msgstr ""
 "の形式がすべて同じである場合のユーザー検索の代替法になります。この方法は、組織の環境で使用可能であるかどうかを検索する場合よりも効率的なユーザー検索方法になります。この設定に値がある場合、それが"
 " AUTH_LDAP_USER_SEARCH の代わりに使用されます。"
 
-#: sso/conf.py:289
+#: sso/conf.py:290
 msgid "LDAP User Attribute Map"
 msgstr "LDAP ユーザー属性マップ"
 
-#: sso/conf.py:290
+#: sso/conf.py:291
 msgid ""
 "Mapping of LDAP user schema to Tower API user attributes (key is user "
 "attribute name, value is LDAP attribute name).  The default setting is valid"
@@ -2954,11 +2965,11 @@ msgstr ""
 "属性名です)。デフォルト設定は ActiveDirectory で有効ですが、他の LDAP 設定を持つユーザーは、辞書/ハッシュテーブルの値 "
 "(キーではない) を変更する必要ある場合があります。"
 
-#: sso/conf.py:309
+#: sso/conf.py:310
 msgid "LDAP Group Search"
 msgstr "LDAP グループ検索"
 
-#: sso/conf.py:310
+#: sso/conf.py:311
 msgid ""
 "Users in Tower are mapped to organizations based on their membership in LDAP"
 " groups. This setting defines the LDAP search query to find groups. Note "
@@ -2967,11 +2978,11 @@ msgstr ""
 "Tower のユーザーは LDAP グループのメンバーシップに基づいて組織にマップされます。この設定は、グループを検索できるように LDAP "
 "検索クエリーを定義します。上記のユーザー検索とは異なり、これは LDAPSearchUnion をサポートしないことに注意してください。"
 
-#: sso/conf.py:327
+#: sso/conf.py:328
 msgid "LDAP Group Type"
 msgstr "LDAP グループタイプ"
 
-#: sso/conf.py:328
+#: sso/conf.py:329
 msgid ""
 "The group type may need to be changed based on the type of the LDAP server."
 "  Values are listed at: http://pythonhosted.org/django-auth-ldap/groups.html"
@@ -2980,11 +2991,11 @@ msgstr ""
 "グループタイプは LDAP サーバーのタイプに基づいて変更する必要がある場合があります。値は以下に記載されています: "
 "http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
 
-#: sso/conf.py:342
+#: sso/conf.py:344
 msgid "LDAP Require Group"
 msgstr "LDAP 要求グループ"
 
-#: sso/conf.py:343
+#: sso/conf.py:345
 msgid ""
 "Group DN required to login. If specified, user must be a member of this "
 "group to login via LDAP. If not set, everyone in LDAP that matches the user "
@@ -2994,11 +3005,11 @@ msgstr ""
 "経由でログインするにはユーザーはこのグループのメンバーである必要があります。設定されていない場合は、ユーザー検索に一致する LDAP "
 "のすべてのユーザーが Tower 経由でログインできます。１つの要求グループのみがサポートされます。"
 
-#: sso/conf.py:358
+#: sso/conf.py:361
 msgid "LDAP Deny Group"
 msgstr "LDAP 拒否グループ"
 
-#: sso/conf.py:359
+#: sso/conf.py:362
 msgid ""
 "Group DN denied from login. If specified, user will not be allowed to login "
 "if a member of this group.  Only one deny group is supported."
@@ -3006,11 +3017,11 @@ msgstr ""
 "グループ DN がログインで拒否されます。指定されている場合、ユーザーはこのグループのメンバーの場合にログインできません。1 "
 "つの拒否グループのみがサポートされます。"
 
-#: sso/conf.py:372
+#: sso/conf.py:375
 msgid "LDAP User Flags By Group"
 msgstr "LDAP ユーザーフラグ (グループ別)"
 
-#: sso/conf.py:373
+#: sso/conf.py:376
 msgid ""
 "User profile flags updated from group membership (key is user attribute "
 "name, value is group DN).  These are boolean fields that are matched based "
@@ -3022,11 +3033,11 @@ msgstr ""
 "DN)。これらは、ユーザーが指定グループのメンバーであるかに基づいて一致するブール値フィールドです。is_superuser "
 "のみがこのメソッドで設定可能です。このフラグは、現在の LDAP 設定に基づいてログイン時に true および false に設定されます。"
 
-#: sso/conf.py:391
+#: sso/conf.py:394
 msgid "LDAP Organization Map"
 msgstr "LDAP 組織マップ"
 
-#: sso/conf.py:392
+#: sso/conf.py:395
 msgid ""
 "Mapping between organization admins/users and LDAP groups. This controls what users are placed into what Tower organizations relative to their LDAP group memberships. Keys are organization names. Organizations will be created if not present. Values are dictionaries defining the options for each organization's membership.  For each organization it is possible to specify what groups are automatically users of the organization and also what groups can administer the organization.\n"
 "\n"
@@ -3052,11 +3063,11 @@ msgstr ""
 " - users: None、True/False、文字列または文字列の一覧。管理者の場合と同じルールが適用されます。\n"
 " - remove_users: True/False。デフォルトで True に設定されます。remove_admins の場合と同じルールが適用されます。"
 
-#: sso/conf.py:440
+#: sso/conf.py:443
 msgid "LDAP Team Map"
 msgstr "LDAP チームマップ"
 
-#: sso/conf.py:441
+#: sso/conf.py:444
 msgid ""
 "Mapping between team members (users) and LDAP groups. Keys are team names (will be created if not present). Values are dictionaries of options for each team's membership, where each can contain the following parameters:\n"
 "\n"
@@ -3078,41 +3089,41 @@ msgstr ""
 " ユーザーがこれらのグループのいずれかのメンバーである場合、チームメンバーとして追加されます。\n"
 "- remove: True/False。デフォルトで True に設定されます。True の場合、指定グループのメンバーでないユーザーはチームから削除されます。"
 
-#: sso/conf.py:484
+#: sso/conf.py:487
 msgid "RADIUS Server"
 msgstr "RADIUS サーバー"
 
-#: sso/conf.py:485
+#: sso/conf.py:488
 msgid ""
 "Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this"
 " setting is empty."
 msgstr "RADIUS サーバーのホスト名/IP です。この設定が空の場合は RADIUS 認証は無効にされます。"
 
-#: sso/conf.py:487 sso/conf.py:501 sso/conf.py:513
+#: sso/conf.py:490 sso/conf.py:504 sso/conf.py:516
 msgid "RADIUS"
 msgstr "RADIUS"
 
-#: sso/conf.py:499
+#: sso/conf.py:502
 msgid "RADIUS Port"
 msgstr "RADIUS ポート"
 
-#: sso/conf.py:500
+#: sso/conf.py:503
 msgid "Port of RADIUS server."
 msgstr "RADIUS サーバーのポート。"
 
-#: sso/conf.py:511
+#: sso/conf.py:514
 msgid "RADIUS Secret"
 msgstr "RADIUS シークレット"
 
-#: sso/conf.py:512
+#: sso/conf.py:515
 msgid "Shared secret for authenticating to RADIUS server."
 msgstr "RADIUS サーバーに対して認証するための共有シークレット。"
 
-#: sso/conf.py:528
+#: sso/conf.py:531
 msgid "Google OAuth2 Callback URL"
 msgstr "Google OAuth2 コールバック URL"
 
-#: sso/conf.py:529
+#: sso/conf.py:532
 msgid ""
 "Create a project at https://console.developers.google.com/ to obtain an "
 "OAuth2 key and secret for a web application. Ensure that the Google+ API is "
@@ -3122,46 +3133,46 @@ msgstr ""
 "https://console.developers.google.com/ にプロジェクトを作成します。Google+ API "
 "が有効であることを確認します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:533 sso/conf.py:544 sso/conf.py:555 sso/conf.py:568
-#: sso/conf.py:582 sso/conf.py:594 sso/conf.py:606
+#: sso/conf.py:536 sso/conf.py:547 sso/conf.py:558 sso/conf.py:571
+#: sso/conf.py:585 sso/conf.py:597 sso/conf.py:609
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: sso/conf.py:542
+#: sso/conf.py:545
 msgid "Google OAuth2 Key"
 msgstr "Google OAuth2 キー"
 
-#: sso/conf.py:543
+#: sso/conf.py:546
 msgid ""
 "The OAuth2 key from your web application at "
 "https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 キー (https://console.developers.google.com/)。"
 
-#: sso/conf.py:553
+#: sso/conf.py:556
 msgid "Google OAuth2 Secret"
 msgstr "Google OAuth2 シークレット"
 
-#: sso/conf.py:554
+#: sso/conf.py:557
 msgid ""
 "The OAuth2 secret from your web application at "
 "https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 シークレット (https://console.developers.google.com/)。"
 
-#: sso/conf.py:565
+#: sso/conf.py:568
 msgid "Google OAuth2 Whitelisted Domains"
 msgstr "Google OAuth2 ホワイトリストドメイン"
 
-#: sso/conf.py:566
+#: sso/conf.py:569
 msgid ""
 "Update this setting to restrict the domains who are allowed to login using "
 "Google OAuth2."
 msgstr "この設定を更新し、Google OAuth2 を使用してログインできるドメインを制限します。"
 
-#: sso/conf.py:577
+#: sso/conf.py:580
 msgid "Google OAuth2 Extra Arguments"
 msgstr "Google OAuth2 追加引数"
 
-#: sso/conf.py:578
+#: sso/conf.py:581
 msgid ""
 "Extra arguments for Google OAuth2 login. When only allowing a single domain "
 "to authenticate, set to `{\"hd\": \"yourdomain.com\"}` and Google will not "
@@ -3171,19 +3182,19 @@ msgstr ""
 "Google OAuth2 ログインの追加引数です。単一ドメインの認証のみを許可する場合、`{\"hd\": \"yourdomain.com\"}` "
 "に設定すると、Google はユーザーが複数の Google アカウントでログインしている場合でもその他のアカウントを表示しません。"
 
-#: sso/conf.py:592
+#: sso/conf.py:595
 msgid "Google OAuth2 Organization Map"
 msgstr "Google OAuth2 組織マップ"
 
-#: sso/conf.py:604
+#: sso/conf.py:607
 msgid "Google OAuth2 Team Map"
 msgstr "Google OAuth2 チームマップ"
 
-#: sso/conf.py:620
+#: sso/conf.py:623
 msgid "GitHub OAuth2 Callback URL"
 msgstr "GitHub OAuth2 コールバック URL"
 
-#: sso/conf.py:621
+#: sso/conf.py:624
 msgid ""
 "Create a developer application at https://github.com/settings/developers to "
 "obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this "
@@ -3193,41 +3204,41 @@ msgstr ""
 "https://github.com/settings/developers に開発者アプリケーションを作成します。この URL "
 "をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:625 sso/conf.py:636 sso/conf.py:646 sso/conf.py:658
-#: sso/conf.py:670
+#: sso/conf.py:628 sso/conf.py:639 sso/conf.py:649 sso/conf.py:661
+#: sso/conf.py:673
 msgid "GitHub OAuth2"
 msgstr "GitHub OAuth2"
 
-#: sso/conf.py:634
+#: sso/conf.py:637
 msgid "GitHub OAuth2 Key"
 msgstr "GitHub OAuth2 キー"
 
-#: sso/conf.py:635
+#: sso/conf.py:638
 msgid "The OAuth2 key (Client ID) from your GitHub developer application."
 msgstr "GitHub 開発者アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:644
+#: sso/conf.py:647
 msgid "GitHub OAuth2 Secret"
 msgstr "GitHub OAuth2 シークレット"
 
-#: sso/conf.py:645
+#: sso/conf.py:648
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub developer application."
 msgstr "GitHub 開発者アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:656
+#: sso/conf.py:659
 msgid "GitHub OAuth2 Organization Map"
 msgstr "GitHub OAuth2 組織マップ"
 
-#: sso/conf.py:668
+#: sso/conf.py:671
 msgid "GitHub OAuth2 Team Map"
 msgstr "GitHub OAuth2 チームマップ"
 
-#: sso/conf.py:684
+#: sso/conf.py:687
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr "GitHub 組織 OAuth2 コールバック URL"
 
-#: sso/conf.py:685 sso/conf.py:760
+#: sso/conf.py:688 sso/conf.py:763
 msgid ""
 "Create an organization-owned application at "
 "https://github.com/organizations/<yourorg>/settings/applications and obtain "
@@ -3239,68 +3250,68 @@ msgstr ""
 " キー (クライアント ID) およびシークレット (クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL "
 "として指定します。"
 
-#: sso/conf.py:689 sso/conf.py:700 sso/conf.py:710 sso/conf.py:722
-#: sso/conf.py:733 sso/conf.py:745
+#: sso/conf.py:692 sso/conf.py:703 sso/conf.py:713 sso/conf.py:725
+#: sso/conf.py:736 sso/conf.py:748
 msgid "GitHub Organization OAuth2"
 msgstr "GitHub 組織 OAuth2"
 
-#: sso/conf.py:698
+#: sso/conf.py:701
 msgid "GitHub Organization OAuth2 Key"
 msgstr "GitHub 組織 OAuth2 キー"
 
-#: sso/conf.py:699 sso/conf.py:774
+#: sso/conf.py:702 sso/conf.py:777
 msgid "The OAuth2 key (Client ID) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:708
+#: sso/conf.py:711
 msgid "GitHub Organization OAuth2 Secret"
 msgstr "GitHub 組織 OAuth2 シークレット"
 
-#: sso/conf.py:709 sso/conf.py:784
+#: sso/conf.py:712 sso/conf.py:787
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:719
+#: sso/conf.py:722
 msgid "GitHub Organization Name"
 msgstr "GitHub 組織名"
 
-#: sso/conf.py:720
+#: sso/conf.py:723
 msgid ""
 "The name of your GitHub organization, as used in your organization's URL: "
 "https://github.com/<yourorg>/."
 msgstr "GitHub 組織の名前で、組織の URL (https://github.com/<yourorg>/) で使用されます。"
 
-#: sso/conf.py:731
+#: sso/conf.py:734
 msgid "GitHub Organization OAuth2 Organization Map"
 msgstr "GitHub 組織 OAuth2 組織マップ"
 
-#: sso/conf.py:743
+#: sso/conf.py:746
 msgid "GitHub Organization OAuth2 Team Map"
 msgstr "GitHub 組織 OAuth2 チームマップ"
 
-#: sso/conf.py:759
+#: sso/conf.py:762
 msgid "GitHub Team OAuth2 Callback URL"
 msgstr "GitHub チーム OAuth2 コールバック URL"
 
-#: sso/conf.py:764 sso/conf.py:775 sso/conf.py:785 sso/conf.py:797
-#: sso/conf.py:808 sso/conf.py:820
+#: sso/conf.py:767 sso/conf.py:778 sso/conf.py:788 sso/conf.py:800
+#: sso/conf.py:811 sso/conf.py:823
 msgid "GitHub Team OAuth2"
 msgstr "GitHub チーム OAuth2"
 
-#: sso/conf.py:773
+#: sso/conf.py:776
 msgid "GitHub Team OAuth2 Key"
 msgstr "GitHub チーム OAuth2 キー"
 
-#: sso/conf.py:783
+#: sso/conf.py:786
 msgid "GitHub Team OAuth2 Secret"
 msgstr "GitHub チーム OAuth2 シークレット"
 
-#: sso/conf.py:794
+#: sso/conf.py:797
 msgid "GitHub Team ID"
 msgstr "GitHub チーム ID"
 
-#: sso/conf.py:795
+#: sso/conf.py:798
 msgid ""
 "Find the numeric team ID using the Github API: http://fabian-"
 "kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
@@ -3308,19 +3319,19 @@ msgstr ""
 "Github API を使用して数値のチーム ID を検索します: http://fabian-"
 "kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/"
 
-#: sso/conf.py:806
+#: sso/conf.py:809
 msgid "GitHub Team OAuth2 Organization Map"
 msgstr "GitHub チーム OAuth2 組織マップ"
 
-#: sso/conf.py:818
+#: sso/conf.py:821
 msgid "GitHub Team OAuth2 Team Map"
 msgstr "GitHub チーム OAuth2 チームマップ"
 
-#: sso/conf.py:834
+#: sso/conf.py:837
 msgid "Azure AD OAuth2 Callback URL"
 msgstr "Azure AD OAuth2 コールバック URL"
 
-#: sso/conf.py:835
+#: sso/conf.py:838
 msgid ""
 "Register an Azure AD application as described by https://msdn.microsoft.com"
 "/en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
@@ -3331,40 +3342,40 @@ msgstr ""
 "us/library/azure/dn132599.aspx の説明に従って登録し、OAuth2 キー (クライアント ID) およびシークレット "
 "(クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:839 sso/conf.py:850 sso/conf.py:860 sso/conf.py:872
-#: sso/conf.py:884
+#: sso/conf.py:842 sso/conf.py:853 sso/conf.py:863 sso/conf.py:875
+#: sso/conf.py:887
 msgid "Azure AD OAuth2"
 msgstr "Azure AD OAuth2"
 
-#: sso/conf.py:848
+#: sso/conf.py:851
 msgid "Azure AD OAuth2 Key"
 msgstr "Azure AD OAuth2 キー"
 
-#: sso/conf.py:849
+#: sso/conf.py:852
 msgid "The OAuth2 key (Client ID) from your Azure AD application."
 msgstr "Azure AD アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:858
+#: sso/conf.py:861
 msgid "Azure AD OAuth2 Secret"
 msgstr "Azure AD OAuth2 シークレット"
 
-#: sso/conf.py:859
+#: sso/conf.py:862
 msgid "The OAuth2 secret (Client Secret) from your Azure AD application."
 msgstr "Azure AD アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:870
+#: sso/conf.py:873
 msgid "Azure AD OAuth2 Organization Map"
 msgstr "Azure AD OAuth2 組織マップ"
 
-#: sso/conf.py:882
+#: sso/conf.py:885
 msgid "Azure AD OAuth2 Team Map"
 msgstr "Azure AD OAuth2 チームマップ"
 
-#: sso/conf.py:903
+#: sso/conf.py:906
 msgid "SAML Service Provider Callback URL"
 msgstr "SAML サービスプロバイダーコールバック URL"
 
-#: sso/conf.py:904
+#: sso/conf.py:907
 msgid ""
 "Register Tower as a service provider (SP) with each identity provider (IdP) "
 "you have configured. Provide your SP Entity ID and this callback URL for "
@@ -3373,78 +3384,78 @@ msgstr ""
 "設定済みの各アイデンティティープロバイダー (IdP) で Tower をサービスプロバイダー (SP) として登録します。SP エンティティー ID "
 "およびアプリケーションのこのコールバック URL を指定します。"
 
-#: sso/conf.py:907 sso/conf.py:921 sso/conf.py:934 sso/conf.py:948
-#: sso/conf.py:962 sso/conf.py:980 sso/conf.py:1002 sso/conf.py:1021
-#: sso/conf.py:1041 sso/conf.py:1075 sso/conf.py:1088
+#: sso/conf.py:910 sso/conf.py:924 sso/conf.py:937 sso/conf.py:951
+#: sso/conf.py:965 sso/conf.py:983 sso/conf.py:1005 sso/conf.py:1024
+#: sso/conf.py:1044 sso/conf.py:1078 sso/conf.py:1091
 msgid "SAML"
 msgstr "SAML"
 
-#: sso/conf.py:918
+#: sso/conf.py:921
 msgid "SAML Service Provider Metadata URL"
 msgstr "SAML サービスプロバイダーメタデータ URL"
 
-#: sso/conf.py:919
+#: sso/conf.py:922
 msgid ""
 "If your identity provider (IdP) allows uploading an XML metadata file, you "
 "can download one from this URL."
 msgstr ""
 "アイデンティティープロバイダー (IdP) が XML メタデータファイルのアップロードを許可する場合、この URL からダウンロードできます。"
 
-#: sso/conf.py:931
+#: sso/conf.py:934
 msgid "SAML Service Provider Entity ID"
 msgstr "SAML サービスプロバイダーエンティティー ID"
 
-#: sso/conf.py:932
+#: sso/conf.py:935
 msgid ""
 "The application-defined unique identifier used as the audience of the SAML "
 "service provider (SP) configuration."
 msgstr "SAML サービスプロバイダー (SP) 設定の対象として使用されるアプリケーションで定義される固有識別子。"
 
-#: sso/conf.py:945
+#: sso/conf.py:948
 msgid "SAML Service Provider Public Certificate"
 msgstr "SAML サービスプロバイダーの公開証明書"
 
-#: sso/conf.py:946
+#: sso/conf.py:949
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " certificate content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに証明書の内容を組み込みます。"
 
-#: sso/conf.py:959
+#: sso/conf.py:962
 msgid "SAML Service Provider Private Key"
 msgstr "SAML サービスプロバイダーの秘密鍵｜"
 
-#: sso/conf.py:960
+#: sso/conf.py:963
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " private key content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに秘密鍵の内容を組み込みます。"
 
-#: sso/conf.py:978
+#: sso/conf.py:981
 msgid "SAML Service Provider Organization Info"
 msgstr "SAML サービスプロバイダーの組織情報"
 
-#: sso/conf.py:979
+#: sso/conf.py:982
 msgid "Configure this setting with information about your app."
 msgstr "アプリの情報でこの設定を行います。"
 
-#: sso/conf.py:1000
+#: sso/conf.py:1003
 msgid "SAML Service Provider Technical Contact"
 msgstr "SAML サービスプロバイダーテクニカルサポートの問い合わせ先"
 
-#: sso/conf.py:1001 sso/conf.py:1020
+#: sso/conf.py:1004 sso/conf.py:1023
 msgid "Configure this setting with your contact information."
 msgstr "問い合わせ先情報で設定を行います。"
 
-#: sso/conf.py:1019
+#: sso/conf.py:1022
 msgid "SAML Service Provider Support Contact"
 msgstr "SAML サービスプロバイダーサポートの問い合わせ先"
 
-#: sso/conf.py:1034
+#: sso/conf.py:1037
 msgid "SAML Enabled Identity Providers"
 msgstr "SAML で有効にされたアイデンティティープロバイダー"
 
-#: sso/conf.py:1035
+#: sso/conf.py:1038
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
@@ -3458,11 +3469,11 @@ msgstr ""
 "(https://github.com/omab/python-social-"
 "auth/blob/master/social/backends/saml.py#L16)。それぞれの IdP の属性名を上書きできます。"
 
-#: sso/conf.py:1073
+#: sso/conf.py:1076
 msgid "SAML Organization Map"
 msgstr "SAML 組織マップ"
 
-#: sso/conf.py:1086
+#: sso/conf.py:1089
 msgid "SAML Team Map"
 msgstr "SAML チームマップ"
 
@@ -3470,88 +3481,88 @@ msgstr "SAML チームマップ"
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "無効な接続オプション: {invalid_options}"
 
-#: sso/fields.py:182
+#: sso/fields.py:194
 msgid "Base"
 msgstr "ベース"
 
-#: sso/fields.py:183
+#: sso/fields.py:195
 msgid "One Level"
 msgstr "1 レベル"
 
-#: sso/fields.py:184
+#: sso/fields.py:196
 msgid "Subtree"
 msgstr "サブツリー"
 
-#: sso/fields.py:202
+#: sso/fields.py:214
 msgid "Expected a list of three items but got {length} instead."
 msgstr "3 つの項目の一覧が予期されましが、{length} が取得されました。"
 
-#: sso/fields.py:203
+#: sso/fields.py:215
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr "LDAPSearch のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:239
+#: sso/fields.py:251
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
 msgstr ""
 "LDAPSearch または LDAPSearchUnion のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:266
+#: sso/fields.py:278
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "無効なユーザー属性: {invalid_attrs}"
 
-#: sso/fields.py:283
+#: sso/fields.py:295
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr "LDAPGroupType のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:308
+#: sso/fields.py:323
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "無効なユーザーフラグ: \"{invalid_flag}\""
 
-#: sso/fields.py:324 sso/fields.py:491
+#: sso/fields.py:339 sso/fields.py:506
 msgid ""
 "Expected None, True, False, a string or list of strings but got {input_type}"
 " instead."
 msgstr "None、True、False、文字列または文字列の一覧が予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:360
+#: sso/fields.py:375
 msgid "Missing key(s): {missing_keys}."
 msgstr "キーがありません: {missing_keys}"
 
-#: sso/fields.py:361
+#: sso/fields.py:376
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "無効なキー: {invalid_keys}"
 
-#: sso/fields.py:410 sso/fields.py:527
+#: sso/fields.py:425 sso/fields.py:542
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr "組織マップの無効なキー: {invalid_keys}"
 
-#: sso/fields.py:428
+#: sso/fields.py:443
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr "チームマップの必要なキーがありません: {invalid_keys}"
 
-#: sso/fields.py:429 sso/fields.py:546
+#: sso/fields.py:444 sso/fields.py:561
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr "チームマップの無効なキー: {invalid_keys}"
 
-#: sso/fields.py:545
+#: sso/fields.py:560
 msgid "Missing required key for team map: {missing_keys}."
 msgstr "チームマップで必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:563
+#: sso/fields.py:578
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr "組織情報レコードで必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:576
+#: sso/fields.py:591
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr "組織情報の無効な言語コード: {invalid_lang_codes}"
 
-#: sso/fields.py:595
+#: sso/fields.py:610
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr "問い合わせ先の必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:607
+#: sso/fields.py:622
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr "IdP で必要なキーがありません: {missing_keys}"
 
