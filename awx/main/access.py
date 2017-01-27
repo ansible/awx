@@ -2102,11 +2102,12 @@ class ActivityStreamAccess(BaseAccess):
          - custom inventory scripts
         '''
         qs = self.model.objects.all()
-        qs = qs.select_related('actor')
         qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
                                  'inventory_update', 'credential', 'team', 'project', 'project_update',
-                                 'permission', 'job_template', 'job', 'ad_hoc_command',
-                                 'notification_template', 'notification', 'label', 'role')
+                                 'job_template', 'job', 'ad_hoc_command',
+                                 'notification_template', 'notification', 'label', 'role', 'actor',
+                                 'schedule', 'custom_inventory_script', 'unified_job_template',
+                                 'workflow_job_template', 'workflow_job')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 
@@ -2119,6 +2120,7 @@ class ActivityStreamAccess(BaseAccess):
         project_set = Project.accessible_objects(self.user, 'read_role')
         jt_set = JobTemplate.accessible_objects(self.user, 'read_role')
         team_set = Team.accessible_objects(self.user, 'read_role')
+        wfjt_set = WorkflowJobTemplate.accessible_objects(self.user, 'read_role')
 
         return qs.filter(
             Q(ad_hoc_command__inventory__in=inventory_set) |
@@ -2136,6 +2138,9 @@ class ActivityStreamAccess(BaseAccess):
             Q(project_update__project__in=project_set) |
             Q(job_template__in=jt_set) |
             Q(job__job_template__in=jt_set) |
+            Q(workflow_job_template__in=wfjt_set) |
+            Q(workflow_job_template_node__workflow_job_template__in=wfjt_set) |
+            Q(workflow_job__workflow_job_template__in=wfjt_set) |
             Q(notification_template__organization__in=auditing_orgs) |
             Q(notification__notification_template__organization__in=auditing_orgs) |
             Q(label__organization__in=auditing_orgs) |
