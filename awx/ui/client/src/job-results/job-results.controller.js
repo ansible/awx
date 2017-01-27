@@ -330,7 +330,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     $scope.events[mungedEvent.counter]
                         .event = mungedEvent;
 
-                    if (mungedEvent.stdout.indexOf("not_skeleton")) {
+                    if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
                         // put non-duplicate lines into the standard
                         // out pane where they should go (within the
                         // right header section, before the next line
