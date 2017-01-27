@@ -1981,7 +1981,7 @@ msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr ""
-"Les sources d'inventaire cloud (telles que% s) requièrent des informations "
+"Les sources d'inventaire cloud (telles que %s) requièrent des informations "
 "d'identification pour le service cloud correspondant."
 
 #: main/models/inventory.py:980
@@ -2522,7 +2522,7 @@ msgstr "status_str doit être une réussite ou un échec"
 #: main/utils/common.py:89
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
-msgstr "Impossible de convertir \"% s\" en booléen"
+msgstr "Impossible de convertir \"%s\" en booléen"
 
 #: main/utils/common.py:243
 #, python-format
@@ -3808,8 +3808,8 @@ msgstr "Votre compte est inactif"
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
 msgstr ""
-"Le ND doit inclure l'espace réservé \"%% (user)s\" pour le nom d'utilisateur"
-" : % s"
+"Le ND doit inclure l'espace réservé \"%%(user)s\" pour le nom d'utilisateur"
+" : %s"
 
 #: sso/validators.py:26
 #, python-format
