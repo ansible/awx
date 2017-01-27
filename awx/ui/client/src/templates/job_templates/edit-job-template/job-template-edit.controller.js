@@ -98,6 +98,7 @@ export default
                     Rest.setUrl(url);
                     Rest.get()
                         .success(function (data) {
+                            $scope.disablePlaybookBecausePermissionDenied = false;
                             $scope.playbook_options = [];
                             var playbookNotFound = true;
                             for (var i = 0; i < data.length; i++) {
@@ -118,6 +119,7 @@ export default
                         .error(function (ret,status_code) {
                             if (status_code === 403) {
                                 /* user doesn't have access to see the project, no big deal. */
+                                $scope.disablePlaybookBecausePermissionDenied = true;
                             } else {
                                 Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
                                     ' project or make the playbooks available on the file system.', 'alert-info');

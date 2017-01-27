@@ -121,7 +121,7 @@ export default
                     label: i18n._('Playbook'),
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)",
+                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || disablePlaybookBecausePermissionDenied",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
