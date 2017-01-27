@@ -285,7 +285,7 @@ class BaseAccess(object):
 
         return True  # User has access to both, permission check passed
 
-    def check_license(self, add_host=False, feature=None, check_expiration=True):
+    def check_license(self, add_host_name=None, feature=None, check_expiration=True):
         validation_info = TaskEnhancer().validate_enhancements()
         if ('test' in sys.argv or 'py.test' in sys.argv[0] or 'jenkins' in sys.argv) and not os.environ.get('SKIP_LICENSE_FIXUP_FOR_TEST', ''):
             validation_info['free_instances'] = 99999999
@@ -299,11 +299,14 @@ class BaseAccess(object):
 
         free_instances = validation_info.get('free_instances', 0)
         available_instances = validation_info.get('available_instances', 0)
-        if add_host and free_instances == 0:
-            raise PermissionDenied(_("License count of %s instances has been reached.") % available_instances)
-        elif add_host and free_instances < 0:
-            raise PermissionDenied(_("License count of %s instances has been exceeded.") % available_instances)
-        elif not add_host and free_instances < 0:
+
+        if add_host_name:
+            host_exists = Host.objects.filter(name=add_host_name).exists()
+            if not host_exists and free_instances == 0:
+                raise PermissionDenied(_("License count of %s instances has been reached.") % available_instances)
+            elif not host_exists and free_instances < 0:
+                raise PermissionDenied(_("License count of %s instances has been exceeded.") % available_instances)
+        elif not add_host_name and free_instances < 0:
             raise PermissionDenied(_("Host count exceeds available instances."))
 
         if feature is not None:
@@ -612,7 +615,7 @@ class HostAccess(BaseAccess):
             return False
 
         # Check to see if we have enough licenses
-        self.check_license(add_host=True)
+        self.check_license(add_host_name=data.get('name', None))
         return True
 
     def can_change(self, obj, data):
@@ -620,6 +623,11 @@ class HostAccess(BaseAccess):
         inventory_pk = get_pk_from_dict(data, 'inventory')
         if obj and inventory_pk and obj.inventory.pk != inventory_pk:
             raise PermissionDenied(_('Unable to change inventory on a host.'))
+
+        # Prevent renaming a host that might exceed license count
+        if 'name' in data:
+            self.check_license(add_host_name=data['name'])
+
         # Checks for admin or change permission on inventory, controls whether
         # the user can edit variable data.
         return obj and self.user in obj.inventory.admin_role

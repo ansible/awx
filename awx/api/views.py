@@ -1685,6 +1685,7 @@ class HostList(ListCreateAPIView):
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
 
+    always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
 
