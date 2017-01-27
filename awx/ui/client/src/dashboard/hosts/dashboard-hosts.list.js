@@ -42,8 +42,7 @@ export default [ 'i18n', function(i18n){
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-5 col-md-4 col-sm-4 hidden-xs elllipsis',
-                linkTo: "{{ '/#/inventories/' + host.inventory_id }}",
-                searchable: false
+                linkTo: "{{ '/#/inventories/' + host.inventory_id }}"
             },
             enabled: {
                 label: i18n._('Status'),

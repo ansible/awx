@@ -98,8 +98,7 @@ export default
                             label: i18n._('Role'),
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         }
                     }
                 },

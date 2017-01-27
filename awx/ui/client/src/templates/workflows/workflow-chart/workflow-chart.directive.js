@@ -784,7 +784,7 @@ export default [ '$state','moment',
                 }
             });
 
-            scope.$on('refreshWorkflowChart', function(){console.log(scope.treeData);
+            scope.$on('refreshWorkflowChart', function(){
                 if(scope.treeData) {
                     update();
                 }

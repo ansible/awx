@@ -2,12 +2,26 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
     function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService) {
 
         let path, relations,
+            defaults,
+            queryset,
+            stateChangeSuccessListener;
+
+        if($scope.defaultParams) {
+            defaults = $scope.defaultParams;
+        }
+        else {
             // steps through the current tree of $state configurations, grabs default search params
             defaults = _.find($state.$current.path, (step) => {
                 return step.params.hasOwnProperty(`${$scope.iterator}_search`);
-            }).params[`${$scope.iterator}_search`].config.value,
-            queryset = $stateParams[`${$scope.iterator}_search`],
-            stateChangeSuccessListener;
+            }).params[`${$scope.iterator}_search`].config.value;
+        }
+
+        if($scope.querySet) {
+            queryset = _.cloneDeep($scope.querySet);
+        }
+        else {
+            queryset = $stateParams[`${$scope.iterator}_search`];
+        }
 
         // build $scope.tags from $stateParams.QuerySet, build fieldset key
         init();
@@ -109,8 +123,13 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             let cleared = _.cloneDeep(defaults);
             delete cleared.page;
             queryset = cleared;
-            $state.go('.', {[$scope.iterator + '_search']: queryset}, {notify: false});
+            if(!$scope.querySet) {
+                $state.go('.', {[$scope.iterator + '_search']: queryset}, {notify: false});
+            }
             qs.search(path, queryset).then((res) => {
+                if($scope.querySet) {
+                    $scope.querySet = queryset;
+                }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
@@ -152,9 +171,14 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     delete queryset[key];
                 }
             });
-            $state.go('.', {
-                [$scope.iterator + '_search']: queryset }, {notify: false});
+            if(!$scope.querySet) {
+                $state.go('.', {
+                    [$scope.iterator + '_search']: queryset }, {notify: false});
+            }
             qs.search(path, queryset).then((res) => {
+                if($scope.querySet) {
+                    $scope.querySet = queryset;
+                }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
@@ -231,9 +255,14 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
-                $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {notify: false});
+                if(!$scope.querySet) {
+                    $state.go('.', {
+                        [$scope.iterator + '_search']: queryset }, {notify: false});
+                }
                 qs.search(path, queryset).then((res) => {
+                    if($scope.querySet) {
+                        $scope.querySet = queryset;
+                    }
                     $scope.dataset = res.data;
                     $scope.collection = res.data.results;
                 })
@@ -251,9 +280,14 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
             // This transition will not reload controllers/resolves/views
             // but will register new $stateParams[$scope.iterator + '_search'] terms
-            $state.go('.', {
-                [$scope.iterator + '_search']: queryset }, {notify: false});
+            if(!$scope.querySet) {
+                $state.go('.', {
+                    [$scope.iterator + '_search']: queryset }, {notify: false});
+            }
             qs.search(path, queryset).then((res) => {
+                if($scope.querySet) {
+                    $scope.querySet = queryset;
+                }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
