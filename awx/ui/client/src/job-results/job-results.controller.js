@@ -297,94 +297,35 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
 
                 if(change === 'stdout'){
-                    // put stdout elements in stdout container
+                    if (!$scope.events[mungedEvent.counter]) {
+                        // line hasn't been put in the pane yet
 
+                        // create new child scope
+                        $scope.events[mungedEvent.counter] = $scope.$new();
+                        $scope.events[mungedEvent.counter]
+                            .event = mungedEvent;
 
-                    var appendToBottom = function(mungedEvent){
-                        // if we get here then the event type was either a
-                        // header line, recap line, or one of the additional
-                        // event types, so we append it to the bottom.
-                        // These are the event types for captured
-                        // stdout not directly related to playbook or runner
-                        // events:
-                        // (0, 'debug', _('Debug'), False),
-                        // (0, 'verbose', _('Verbose'), False),
-                        // (0, 'deprecated', _('Deprecated'), False),
-                        // (0, 'warning', _('Warning'), False),
-                        // (0, 'system_warning', _('System Warning'), False),
-                        // (0, 'error', _('Error'), True),
-                        angular
+                        // let's see if we have a specific place to put it in
+                        // the pane
+                        let $prevElem = $(`.next_is_${mungedEvent.start_line}`);
+                        if ($prevElem.length) {
+                            // if so, put it there
+                            $(`.next_is_${mungedEvent.start_line}`)
+                                .after($compile(mungedEvent
+                                    .stdout)($scope.events[mungedEvent
+                                        .counter]));
+                        } else {
+                            // if not, put it at the bottom
+                            angular
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
-                    };
-
-
-                    // this scopes the event to that particular
-                    // block of stdout.
-                    // If you need to see the event a particular
-                    // stdout block is from, you can:
-                    // angular.element($0).scope().event
-                    $scope.events[mungedEvent.counter] = $scope.$new();
-                    $scope.events[mungedEvent.counter]
-                        .event = mungedEvent;
-
-                    if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
-                        // put non-duplicate lines into the standard
-                        // out pane where they should go (within the
-                        // right header section, before the next line
-                        // as indicated by start_line)
-                        window.$ = $;
-                        var putIn;
-                        var classList = $("div",
-                            "<div>"+mungedEvent.stdout+"</div>")
-                            .attr("class").split(" ");
-                        if (classList
-                            .filter(v => v.indexOf("task_") > -1)
-                            .length) {
-                            putIn = classList
-                                .filter(v => v.indexOf("task_") > -1)[0];
-                        } else if(classList
-                            .filter(v => v.indexOf("play_") > -1)
-                            .length) {
-                            putIn = classList
-                                .filter(v => v.indexOf("play_") > -1)[0];
-                        } else {
-                            appendToBottom(mungedEvent);
                         }
 
-                        var putAfter;
-                        var isDup = false;
-                        $(".header_" + putIn + ",." + putIn)
-                            .each((i, v) => {
-                                if (angular.element(v).scope()
-                                    .event.start_line < mungedEvent
-                                    .start_line) {
-                                    putAfter = v;
-                                } else if (angular.element(v).scope()
-                                    .event.start_line === mungedEvent
-                                    .start_line) {
-                                    isDup = true;
-                                    return false;
-                                } else if (angular.element(v).scope()
-                                    .event.start_line > mungedEvent
-                                    .start_line) {
-                                    return false;
-                                }
-                            });
-
-                        if (!isDup) {
-                            $(putAfter).after($compile(mungedEvent
-                                .stdout)($scope.events[mungedEvent
-                                    .counter]));
-                        }
-
-
-                        classList = null;
-                        putIn = null;
-                    } else {
-                        appendToBottom(mungedEvent);
+                        // delete ref to the elem because it might leak scope
+                        // if you don't
+                        $prevElem = null;
                     }
 
                     // move the followAnchor to the bottom of the
@@ -453,7 +394,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     };
 
     $scope.stdoutContainerAvailable.promise.then(() => {
-        getSkeleton(jobData.related.job_events + "?order_by=id&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
+        getSkeleton(jobData.related.job_events + "?order_by=start_line&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
     });
 
     var getEvents;
