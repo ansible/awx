@@ -3107,7 +3107,7 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(workflow_job_template=parent) |
-                         Q(workflow_job_template_node__workflow_job_template=parent))
+                         Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
 class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
