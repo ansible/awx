@@ -3,7 +3,8 @@ export default
     [   'InitiatePlaybookRun',
         'templateUrl',
         '$state',
-        function JobTemplatesList(InitiatePlaybookRun, templateUrl, $state) {
+        'Alert',
+        function JobTemplatesList(InitiatePlaybookRun, templateUrl, $state, Alert) {
             return {
                 restrict: 'E',
                 link: link,
@@ -32,7 +33,8 @@ export default
                         launch_url: job_template.url,
                         edit_url: job_template.url.replace('api/v1', '#'),
                         name: job_template.name,
-                        id: job_template.id
+                        id: job_template.id,
+                        type: job_template.type
                     }; });
 
                     scope.snapRows = (list.length < 4);
@@ -42,8 +44,23 @@ export default
                     return (status === "successful");
                 };
 
-                scope.launchJobTemplate = function(jobTemplateId){
-                    InitiatePlaybookRun({ scope: scope, id: jobTemplateId, job_type: 'job_template' });
+                scope.launchJobTemplate = function(template){
+                    if(template) {
+                            if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+                                InitiatePlaybookRun({ scope: scope, id: template.id, job_type: 'job_template' });
+                            }
+                            else if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                                InitiatePlaybookRun({ scope: scope, id: template.id, job_type: 'workflow_job_template' });
+                            }
+                            else {
+                                // Something went wrong - Let the user know that we're unable to launch because we don't know
+                                // what type of job template this is
+                                Alert('Error: Unable to determine template type', 'We were unable to determine this template\'s type while launching.');
+                            }
+                        }
+                        else {
+                            Alert('Error: Unable to launch template', 'Template parameter is missing');
+                        }
                 };
 
                 scope.editJobTemplate = function (jobTemplateId) {
