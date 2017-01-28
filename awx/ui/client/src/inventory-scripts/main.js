@@ -9,6 +9,7 @@ import inventoryScriptsAdd from './add/main';
 import inventoryScriptsEdit from './edit/main';
 import list from './inventory-scripts.list';
 import form from './inventory-scripts.form';
+import { N_ } from '../i18n';
 
 export default
 angular.module('inventoryScripts', [
@@ -62,7 +63,7 @@ angular.module('inventoryScripts', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        label: 'INVENTORY SCRIPTS'
+                        label: N_('INVENTORY SCRIPTS')
                     }
                 })
             });

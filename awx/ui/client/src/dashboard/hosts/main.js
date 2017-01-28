@@ -9,6 +9,7 @@ import form from './dashboard-hosts.form';
 import listController from './dashboard-hosts-list.controller';
 import editController from './dashboard-hosts-edit.controller';
 import service from './dashboard-hosts.service';
+import { N_ } from '../../i18n';
 
 export default
 angular.module('dashboardHosts', [])
@@ -51,7 +52,7 @@ angular.module('dashboardHosts', [])
                     },
                     ncyBreadcrumb: {
                         parent: 'dashboard',
-                        label: "HOSTS"
+                        label: N_("HOSTS")
                     },
                 })
             });

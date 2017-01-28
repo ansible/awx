@@ -9,6 +9,8 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
+ import { N_ } from '../i18n';
+
 export default ['$injector', '$stateExtender', '$log', function($injector, $stateExtender, $log) {
     return {
         /**
@@ -150,7 +152,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: `CREATE ${form.breadcrumbName || form.name}`
+                            label: N_('CREATE') + ` ${form.breadcrumbName || form.name}`
                         },
                         views: {
                             'form': {
@@ -492,7 +494,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 // }
                 return state;
             }
-            
+
             function buildRbacUserDirective() {
                 let states = [];
 

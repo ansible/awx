@@ -12,6 +12,7 @@ import inventoryManageListRoute from './manage/inventory-manage.route';
 import { copyMoveGroupRoute, copyMoveHostRoute } from './manage/copy-move/copy-move.route';
 import adHocRoute from './manage/adhoc/adhoc.route';
 import { templateUrl } from '../shared/template-url/template-url.factory';
+import { N_ } from '../i18n';
 export default
 angular.module('inventory', [
         inventoryAdd.name,
@@ -55,7 +56,7 @@ angular.module('inventory', [
                     searchPrefix: 'schedule',
                     ncyBreadcrumb: {
                         parent: 'inventoryManage.editGroup({group_id: parentObject.id})',
-                        label: 'SCHEDULES'
+                        label: N_('SCHEDULES')
                     },
                     resolve: {
                         Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath', 'groupData',
@@ -89,7 +90,7 @@ angular.module('inventory', [
                         '@': {
                             templateProvider: function(SchedulesList, generateList, ParentObject) {
                                 // include name of parent resource in listTitle
-                                SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                                SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                                 let html = generateList.build({
                                     list: SchedulesList,
                                     mode: 'edit'
@@ -106,7 +107,7 @@ angular.module('inventory', [
                     name: 'inventoryManage.editGroup.schedules.add',
                     url: '/add',
                     ncyBreadcrumb: {
-                        label: "CREATE SCHEDULE"
+                        label: N_("CREATE SCHEDULE")
                     },
                     views: {
                         'form': {

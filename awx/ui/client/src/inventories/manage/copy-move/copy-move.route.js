@@ -4,6 +4,7 @@
  * All Rights Reserved
  *************************************************/
 import {templateUrl} from '../../../shared/template-url/template-url.factory';
+import { N_ } from '../../../i18n';
 
 import CopyMoveGroupsController from './copy-move-groups.controller';
 import CopyMoveHostsController from './copy-move-hosts.controller';
@@ -25,7 +26,7 @@ var copyMoveGroupRoute = {
         }
     },
     ncyBreadcrumb: {
-        label: "COPY OR MOVE {{item.name}}"
+        label: N_("COPY OR MOVE") + " {{item.name}}"
     },
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath', 'group',
@@ -61,7 +62,7 @@ var copyMoveHostRoute = {
     url: '/copy-move-host/{host_id}',
     searchPrefix: 'copy',
     ncyBreadcrumb: {
-        label: "COPY OR MOVE {{item.name}}"
+        label: N_("COPY OR MOVE") + " {{item.name}}"
     },
     resolve: {
         Dataset: ['CopyMoveGroupList', 'QuerySet', '$stateParams', 'GetBasePath',

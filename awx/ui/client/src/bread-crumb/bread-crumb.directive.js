@@ -1,6 +1,6 @@
 export default
-    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService',
-    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService) {
+    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n',
+    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService, i18n) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -103,7 +103,7 @@ export default
                         if(features){
                             scope.loadingLicense = false;
                             scope.activityStreamActive = (toState.name === 'activityStream') ? true : false;
-                            scope.activityStreamTooltip = (toState.name === 'activityStream') ? 'Hide Activity Stream' : 'View Activity Stream';
+                            scope.activityStreamTooltip = (toState.name === 'activityStream') ? i18n._('Hide Activity Stream') : i18n._('View Activity Stream');
                             scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || toState.name ==='activityStream') ? true : false;
                         }
                     }

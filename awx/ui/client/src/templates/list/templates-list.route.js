@@ -4,11 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
+ import { N_ } from '../../i18n';
+
 export default {
     name: 'templates',
     route: '/templates',
     ncyBreadcrumb: {
-        label: "TEMPLATES"
+        label: N_("TEMPLATES")
     },
     data: {
         activityStream: true,
