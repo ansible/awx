@@ -14,11 +14,11 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, Prompt, InitiatePlaybookRun,
-    TemplatesService, $state, $filter) {
+    TemplatesService, $state) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
-        form = InventoryForm(),
+        form = InventoryForm,
         inventory_id = $stateParams.inventory_id,
         master = {},
         fld, json_data, data;
@@ -32,7 +32,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         form.formFieldSize = null;
         $scope.inventory_id = inventory_id;
 
-        $scope.$watch('invnentory_obj.summary_fields.user_capabilities.edit', function(val) {
+        $scope.$watch('inventory_obj.summary_fields.user_capabilities.edit', function(val) {
             if (val === false) {
                 $scope.canAdd = false;
             }
@@ -125,54 +125,11 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
         $state.go('inventories');
     };
 
-    $scope.addScanJob = function() {
-        $location.path($location.path() + '/job_templates/add');
-    };
-
-    $scope.launchScanJob = function() {
-        InitiatePlaybookRun({ scope: $scope, id: this.scan_job_template.id });
-    };
-
-    $scope.scheduleScanJob = function() {
-        $location.path('/job_templates/' + this.scan_job_template.id + '/schedules');
-    };
-
-    $scope.editScanJob = function() {
-        $location.path($location.path() + '/job_templates/' + this.scan_job_template.id);
-    };
-
-    $scope.deleteScanJob = function () {
-        var id = this.scan_job_template.id ,
-          action = function () {
-            $('#prompt-modal').modal('hide');
-            Wait('start');
-            TemplatesService.deleteJobTemplate(id)
-                .success(function () {
-                  $('#prompt-modal').modal('hide');
-                  // @issue: OLD SEARCH
-                  // $scope.search(form.related.scan_job_templates.iterator);
-                })
-                .error(function (data) {
-                    Wait('stop');
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                        msg: 'DELETE returned status: ' + status });
-                });
-        };
-
-        Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the job template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(this.scan_job_template.name) + '</div>',
-            action: action,
-            actionText: 'DELETE'
-        });
-
-    };
-
 }
 
 export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'InventoryForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString', 'Prompt', 'InitiatePlaybookRun',
-    'TemplatesService', '$state', '$filter', InventoriesEdit,
+    'TemplatesService', '$state', InventoriesEdit,
 ];

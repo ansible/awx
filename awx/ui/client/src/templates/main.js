@@ -14,6 +14,7 @@ import workflowEdit from './workflows/edit-workflow/main';
 import labels from './labels/main';
 import workflowChart from './workflows/workflow-chart/main';
 import workflowMaker from './workflows/workflow-maker/main';
+import workflowControls from './workflows/workflow-controls/main';
 import templatesListRoute from './list/templates-list.route';
 import workflowService from './workflows/workflow.service';
 import templateCopyService from './copy-template/template-copy.service';
@@ -21,7 +22,7 @@ import templateCopyService from './copy-template/template-copy.service';
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
         jobTemplatesEdit.name, labels.name, workflowAdd.name, workflowEdit.name,
-        workflowChart.name, workflowMaker.name
+        workflowChart.name, workflowMaker.name, workflowControls.name
     ])
     .service('TemplatesService', templatesService)
     .service('WorkflowService', workflowService)
@@ -102,7 +103,8 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         },
                         inventory_source_search: {
                             value: {
-                                page_size: '5'
+                                page_size: '5',
+                                not__source: ''
                             },
                             squash: true,
                             dynamic: true
@@ -110,11 +112,11 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     },
                     views: {
                         'modal': {
-                            template: ` <workflow-maker ng-if="includeWorkflowMaker" tree-data="workflowTree" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
+                            template: `<workflow-maker ng-if="includeWorkflowMaker" workflow-job-template-obj="workflow_job_template_obj" can-add-workflow-job-template="canAddWorkflowJobTemplate"></workflow-maker>`
                         },
                         'jobTemplateList@templates.editWorkflowJobTemplate.workflowMaker': {
                             templateProvider: function(WorkflowMakerJobTemplateList, generateList) {
-                                //debugger;
+
                                 let html = generateList.build({
                                     list: WorkflowMakerJobTemplateList,
                                     input_type: 'radio',
@@ -132,9 +134,22 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope.list = list;
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+                                        $scope.$watch('job_templates', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.job_templates.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.job_templates[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.job_templates[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_job_template = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.job_templates.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -152,8 +167,28 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
 
                                     $scope.$on('templateSelected', function(e, options) {
                                         if(options.activeTab !== 'jobs') {
-                                            // Clear out any selected job
+                                            $scope.job_templates.forEach(function(row, i) {
+                                                $scope.job_templates[i].checked = 0;
+                                            });
                                         }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.job_templates.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.job_templates[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.job_templates[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.job_templates.forEach(function(row, i) {
+                                            $scope.job_templates[i].checked = 0;
+                                        });
                                     });
                                 }
                             ]
@@ -180,9 +215,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
+                                        $scope.$watch('workflow_inventory_sources', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.workflow_inventory_sources[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.workflow_inventory_sources[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_inventory_source = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.workflow_inventory_sources.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -199,9 +246,29 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'project_sync') {
-
+                                        if(options.activeTab !== 'inventory_sync') {
+                                            $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                $scope.workflow_inventory_sources[i].checked = 0;
+                                            });
                                         }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.workflow_inventory_sources[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.workflow_inventory_sources[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.workflow_inventory_sources.forEach(function(row, i) {
+                                            $scope.workflow_inventory_sources[i].checked = 0;
+                                        });
                                     });
                                 }
                             ]
@@ -226,9 +293,21 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                         $scope[`${list.iterator}_dataset`] = Dataset.data;
                                         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
+                                        $scope.$watch('projects', function(){
+                                            if($scope.selectedTemplate){
+                                                $scope.projects.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.projects[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.projects[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        });
                                     }
 
-                                    $scope.toggle_project = function(id) {
+                                    $scope.toggle_row = function(id) {
 
                                         $scope.projects.forEach(function(row, i) {
                                             if (row.id === id) {
@@ -245,9 +324,29 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
-                                        if(options.activeTab !== 'inventory_sync') {
-
+                                        if(options.activeTab !== 'project_sync') {
+                                            $scope.projects.forEach(function(row, i) {
+                                                $scope.projects[i].checked = 0;
+                                            });
                                         }
+                                        else {
+                                            if($scope.selectedTemplate){
+                                                $scope.projects.forEach(function(row, i) {
+                                                    if(row.id === $scope.selectedTemplate.id) {
+                                                        $scope.projects[i].checked = 1;
+                                                    }
+                                                    else {
+                                                        $scope.projects[i].checked = 0;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+
+                                    $scope.$on('clearWorkflowLists', function() {
+                                        $scope.projects.forEach(function(row, i) {
+                                            $scope.projects[i].checked = 0;
+                                        });
                                     });
                                 }
                             ]
@@ -293,6 +392,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     };
 
                                     $scope.$on('templateSelected', function(e, options) {
+
                                         resetPromptFields();
                                         // Loop across the preset values and attach them to scope
                                         _.forOwn(options.presetValues, function(value, key) {
@@ -342,9 +442,16 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                 delete list.fields.smart_status;
                                 delete list.fields.labels;
                                 delete list.fieldActions;
-                                list.fields.name.columnClass = "col-md-11";
+                                list.fields.name.columnClass = "col-md-8";
                                 list.iterator = 'job_template';
                                 list.name = 'job_templates';
+                                list.fields.info = {
+                                    ngInclude: "'/static/partials/job-template-details.html'",
+                                    type: 'template',
+                                    columnClass: 'col-md-3',
+                                    label: '',
+                                    nosort: true
+                                };
 
                                 return list;
                             }
@@ -379,6 +486,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                             dynamic: true
                         }
                     },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
                     views: {
                         'related': {
                             templateProvider: function(ListDefinition, generateList) {
@@ -393,8 +503,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         }
                     },
                     resolve: {
-                        ListDefinition: ['InventoryList', function(list) {
+                        ListDefinition: ['InventoryList', function(InventoryList) {
                             // mutate the provided list definition here
+                            let list = _.cloneDeep(InventoryList);
+                            list.lookupConfirmText = 'SELECT';
                             return list;
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -429,6 +541,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                             dynamic: true
                         }
                     },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
                     views: {
                         'related': {
                             templateProvider: function(ListDefinition, generateList) {
@@ -443,8 +558,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         }
                     },
                     resolve: {
-                        ListDefinition: ['CredentialList', function(list) {
-                            // mutate the provided list definition here
+                        ListDefinition: ['CredentialList', function(CredentialList) {
+                            let list = _.cloneDeep(CredentialList);
+                            list.lookupConfirmText = 'SELECT';
                             return list;
                         }],
                         Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',

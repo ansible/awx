@@ -16,8 +16,8 @@ export default {
             value: {
                 // default params will not generate search tags
                 order_by: '-timestamp',
-                or__object1: null,
-                or__object2: null
+                or__object1__in: null,
+                or__object2__in: null
             }
         }
     },
@@ -46,7 +46,16 @@ export default {
         Dataset: ['StreamList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                let stateParams = $stateParams[`${list.iterator}_search`];
+                // Sending or__object1__in=null will result in an api error response so lets strip
+                // these out.  This should only be null when hitting the All Activity page.
+                if(stateParams.or__object1__in && stateParams.or__object1__in === null) {
+                    delete stateParams.or__object1__in;
+                }
+                if(stateParams.or__object2__in && stateParams.or__object2__in === null) {
+                    delete stateParams.or__object2__in;
+                }
+                return qs.search(path, stateParams);
             }
         ],
         features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',

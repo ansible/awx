@@ -23,7 +23,9 @@ angular.module('dashboardHosts', [])
                 name: 'dashboardHosts',
                 url: '/home/hosts',
                 lazyLoad: () => stateDefinitions.generateTree({
-                    url: '/home/hosts',
+                    urls: {
+                        list: '/home/hosts'
+                    },
                     parent: 'dashboardHosts',
                     modes: ['edit'],
                     list: 'DashboardHostsList',
@@ -31,6 +33,17 @@ angular.module('dashboardHosts', [])
                     controllers: {
                         list: listController,
                         edit: editController
+                    },
+                    resolve: {
+                        edit: {
+                            host: ['Rest', '$stateParams', 'GetBasePath',
+                                function(Rest, $stateParams, GetBasePath) {
+                                    let path = GetBasePath('hosts') + $stateParams.host_id;
+                                    Rest.setUrl(path);
+                                    return Rest.get();
+                                }
+                            ]
+                        }
                     },
                     data: {
                         activityStream: true,

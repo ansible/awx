@@ -5,42 +5,31 @@
     flex: 0 0 auto;
     width: 100%;
     margin-top: 10px;
+    margin-bottom: 15px;
 }
 
-.WorkflowStatusBar-ok,
-.WorkflowStatusBar-changed,
-.WorkflowStatusBar-unreachable,
-.WorkflowStatusBar-failures,
-.WorkflowStatusBar-skipped,
+.WorkflowStatusBar-successful,
+.WorkflowStatusBar-failed,
+.WorkflowStatusBar-pending,
 .WorkflowStatusBar-noData {
     height: 15px;
     border-top: 5px solid @default-bg;
     border-bottom: 5px solid @default-bg;
 }
 
-.WorkflowStatusBar-ok {
+.WorkflowStatusBar-successful {
     background-color: @default-succ;
     display: flex;
     flex: 0 0 auto;
 }
 
-.WorkflowStatusBar-changed {
-    background-color: @default-warning;
-    flex: 0 0 auto;
-}
-
-.WorkflowStatusBar-unreachable {
-    background-color: @default-unreachable;
-    flex: 0 0 auto;
-}
-
-.WorkflowStatusBar-failures {
+.WorkflowStatusBar-failed {
     background-color: @default-err;
     flex: 0 0 auto;
 }
 
-.WorkflowStatusBar-skipped {
-    background-color: @default-link;
+.WorkflowStatusBar-pending {
+    background-color: @b7grey;
     flex: 0 0 auto;
 }
 
@@ -58,23 +47,14 @@
     border-radius: 5px;
 }
 
-.WorkflowStatusBar-tooltipBadge--ok {
+.WorkflowStatusBar-tooltipBadge--successful {
     background-color: @default-succ;
 }
 
-.WorkflowStatusBar-tooltipBadge--unreachable {
-    background-color: @default-unreachable;
-}
-
-.WorkflowStatusBar-tooltipBadge--skipped {
-    background-color: @default-link;
-}
-
-.WorkflowStatusBar-tooltipBadge--changed {
-    background-color: @default-warning;
-}
-
-.WorkflowStatusBar-tooltipBadge--failures {
+.WorkflowStatusBar-tooltipBadge--failed {
     background-color: @default-err;
+}
 
+.WorkflowStatusBar-tooltipBadge--pending {
+    background-color: @b7grey;
 }

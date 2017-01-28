@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
         // editTitle: 'Authorization Configuration',
         name: 'configuration_ldap_template',
@@ -21,7 +21,8 @@ export default function() {
                 reset: 'AUTH_LDAP_BIND_DN'
             },
             AUTH_LDAP_BIND_PASSWORD: {
-                type: 'password'
+                type: 'sensitive',
+                hasShowInputButton: true,
             },
             AUTH_LDAP_USER_SEARCH: {
                 type: 'textarea',
@@ -84,8 +85,8 @@ export default function() {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: 'Reset All',
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',
@@ -97,3 +98,4 @@ export default function() {
         }
     };
 }
+];

@@ -17,7 +17,7 @@ import eventQueueService from './event-queue.service';
 import parseStdoutService from './parse-stdout.service';
 
 export default
-    angular.module('jobResults', [hostStatusBar.name, jobResultsStdOut.name, hostEvent.name])
+    angular.module('jobResults', [hostStatusBar.name, jobResultsStdOut.name, hostEvent.name, 'angularMoment'])
         .run(['$stateExtender', function($stateExtender) {
             $stateExtender.addState(route);
         }])

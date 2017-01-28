@@ -4,19 +4,35 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
-    function(GetBasePath, ProcessErrors, $q, $http, Rest) {
+export default ['$rootScope', 'GetBasePath', 'ProcessErrors', '$q', '$http', 'Rest',
+    function($rootScope, GetBasePath, ProcessErrors, $q, $http, Rest) {
         var url = GetBasePath('settings');
 
         return {
             getConfigurationOptions: function() {
                 var deferred = $q.defer();
+                var returnData = {};
+
                 Rest.setUrl(url + '/all');
                 Rest.options()
                     .success(function(data) {
-                        var returnData = data.actions.PUT;
-                        //LICENSE is read only, returning here explicitly for display
-                        returnData.LICENSE = data.actions.GET.LICENSE;
+                        // Compare GET actions with PUT actions and flag discrepancies
+                        // for disabling in the UI
+                        var getActions = data.actions.GET;
+                        var getKeys = _.keys(getActions);
+                        var putActions = data.actions.PUT;
+
+                        _.each(getKeys, function(key) {
+                            if(putActions[key]) {
+                                returnData[key] = putActions[key];
+                            } else {
+                                returnData[key] = _.extend(getActions[key], {
+                                                        required: false,
+                                                        disabled: true
+                                                    });
+                            }
+                        });
+
                         deferred.resolve(returnData);
                     })
                     .error(function(error) {

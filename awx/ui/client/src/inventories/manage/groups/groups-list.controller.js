@@ -46,6 +46,10 @@
         }
 
         function buildStatusIndicators(group){
+            if (group === undefined || group === null) {
+                group = {};
+            }
+
             let group_status, hosts_status;
 
             group_status = GetSyncStatusMsg({
@@ -73,7 +77,15 @@
 
         $scope.groupSelect = function(id){
             var group = $stateParams.group === undefined ? [id] : _($stateParams.group).concat(id).value();
-            $state.go('inventoryManage', {inventory_id: $stateParams.inventory_id, group: group}, {reload: true});
+            $state.go('inventoryManage', {
+                inventory_id: $stateParams.inventory_id,
+                group: group,
+                group_search: {
+                    page_size: '20',
+                    page: '1',
+                    order_by: 'name',
+                }
+            }, {reload: true});
         };
         $scope.createGroup = function(){
             $state.go('inventoryManage.addGroup');
@@ -142,10 +154,14 @@
 
         $scope.$on(`ws-jobs`, function(e, data){
             var group = Find({ list: $scope.groups, key: 'id', val: data.group_id });
+
+            if (group === undefined || group === null) {
+                group = {};
+            }
+
             if(data.status === 'failed' || data.status === 'successful'){
                 $state.reload();
-            }
-            else{
+            } else {
                 var status = GetSyncStatusMsg({
                     status: data.status,
                     has_inventory_sources: group.has_inventory_sources,

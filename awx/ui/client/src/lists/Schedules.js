@@ -31,7 +31,7 @@ export default
             name: {
                 key: true,
                 label: 'Name',
-                ngClick: "editSchedule(schedule.id)",
+                ngClick: "editSchedule(schedule)",
                 columnClass: "col-md-3 col-sm-3 col-xs-6"
             },
             dtstart: {
@@ -73,7 +73,7 @@ export default
         fieldActions: {
             edit: {
                 label: 'Edit',
-                ngClick: "editSchedule(schedule.id)",
+                ngClick: "editSchedule(schedule)",
                 icon: 'icon-edit',
                 awToolTip: 'Edit schedule',
                 dataPlacement: 'top',
@@ -81,7 +81,7 @@ export default
             },
             view: {
                 label: 'View',
-                ngClick: "editSchedule(schedule.id)",
+                ngClick: "editSchedule(schedule)",
                 awToolTip: 'View schedule',
                 dataPlacement: 'top',
                 ngShow: '!schedule.summary_fields.user_capabilities.edit'

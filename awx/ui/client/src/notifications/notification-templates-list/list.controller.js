@@ -29,34 +29,38 @@
              $scope.list = list;
              $scope[`${list.iterator}_dataset`] = Dataset.data;
              $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
-
-             GetChoices({
-                 scope: $scope,
-                 url: defaultUrl,
-                 field: 'notification_type',
-                 variable: 'notification_type_options',
-                 callback: 'choicesReadyNotifierList'
-             });
          }
 
-         $scope.removeChoicesHere = $scope.$on('choicesReadyNotifierList', function() {
-             list.fields.notification_type.searchOptions = $scope.notification_type_options;
-
-             if ($rootScope.addedItem) {
-                 $scope.addedItem = $rootScope.addedItem;
-                 delete $rootScope.addedItem;
-             }
-             $scope.notification_templates.forEach(function(notification_template, i) {
-                 setStatus(notification_template);
-                 $scope.notification_type_options.forEach(function(type) {
-                     if (type.value === notification_template.notification_type) {
-                         $scope.notification_templates[i].notification_type = type.label;
-                         var recent_notifications = notification_template.summary_fields.recent_notifications;
-                         $scope.notification_templates[i].status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
-                     }
-                 });
+             $scope.$on(`notification_template_options`, function(event, data){
+                 $scope.options = data.data.actions.GET;
+                 optionsRequestDataProcessing();
              });
-         });
+
+             $scope.$watchCollection("notification_templates", function() {
+                    optionsRequestDataProcessing();
+                 }
+             );
+             // iterate over the list and add fields like type label, after the
+             // OPTIONS request returns, or the list is sorted/paginated/searched.
+             function optionsRequestDataProcessing(){
+                 $scope[list.name].forEach(function(item, item_idx) {
+                     var itm = $scope[list.name][item_idx];
+                     // Set the item type label
+                     if (list.fields.notification_type && $scope.options &&
+                         $scope.options.hasOwnProperty('notification_type')) {
+                             $scope.options.notification_type.choices.every(function(choice) {
+                                 if (choice[0] === item.notification_type) {
+                                     itm.type_label = choice[1];
+                                     var recent_notifications = itm.summary_fields.recent_notifications;
+                                     itm.status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
+                                     return false;
+                                 }
+                                 return true;
+                             });
+                     }
+                     setStatus(itm);
+                 });
+             }
 
          function setStatus(notification_template) {
              var html, recent_notifications = notification_template.summary_fields.recent_notifications;

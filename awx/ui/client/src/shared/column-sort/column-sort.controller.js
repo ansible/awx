@@ -1,9 +1,7 @@
 export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
     function($scope, $state, qs, GetBasePath) {
 
-        let queryset, path,
-            order_by = $state.params[`${$scope.columnIterator}_search`].order_by,
-            activeField = isDescending(order_by) ? order_by.substring(1, order_by.length) : order_by;
+        let queryset, path;
 
         function isDescending(str) {
                 if (str){
@@ -15,14 +13,16 @@ export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
                 }
         }
         function invertOrderBy(str) {
-            return order_by.charAt(0) === '-' ? `${str.substring(1, str.length)}` : `-${str}`;
+            return str.charAt(0) === '-' ? `${str.substring(1, str.length)}` : `-${str}`;
         }
         $scope.orderByIcon = function() {
+            let order_by = $scope.querySet ? $scope.querySet.order_by : $state.params[`${$scope.columnIterator}_search`].order_by;
             // column sort is inactive
-            if (activeField !== $scope.columnField) {
+            if (order_by !== $scope.columnField && order_by !== invertOrderBy($scope.columnField)) {
                 return 'fa-sort';
             }
             // column sort is active (governed by order_by) and descending
+
             else if (isDescending(order_by)) {
                 return 'fa-sort-down';
             }
@@ -33,18 +33,33 @@ export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
         };
 
         $scope.toggleColumnOrderBy = function() {
-            // toggle active sort order
-            if (activeField === $scope.columnField) {
+            let order_by = $scope.querySet ? $scope.querySet.order_by : $state.params[`${$scope.columnIterator}_search`].order_by;
+
+            if (order_by === $scope.columnField || order_by === invertOrderBy($scope.columnField)) {
                 order_by = invertOrderBy(order_by);
             }
             // set new active sort order
             else {
                 order_by = $scope.columnField;
             }
-            queryset = _.merge($state.params[`${$scope.columnIterator}_search`], { order_by: order_by });
+            if($scope.querySet) {
+                // merging $scope.querySet seems to destroy our initial reference which
+                // kills the two-way binding here.  To fix that, clone the queryset first
+                // and merge with that object.
+                let origQuerySet = _.cloneDeep($scope.querySet);
+                queryset = _.merge(origQuerySet, { order_by: order_by });
+            }
+            else {
+                queryset = _.merge($state.params[`${$scope.columnIterator}_search`], { order_by: order_by });
+            }
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            $state.go('.', { [$scope.iterator + '_search']: queryset });
+            if(!$scope.querySet) {
+                $state.go('.', { [$scope.columnIterator + '_search']: queryset }, {notify: false});
+            }
             qs.search(path, queryset).then((res) =>{
+                if($scope.querySet) {
+                    $scope.querySet = queryset;
+                }
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });

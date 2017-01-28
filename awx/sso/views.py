@@ -25,6 +25,8 @@ logger = logging.getLogger('awx.sso.views')
 
 class BaseRedirectView(RedirectView):
 
+    permanent = True
+
     def get_redirect_url(self, *args, **kwargs):
         last_path = self.request.COOKIES.get('lastPath', '')
         last_path = urllib.quote(urllib.unquote(last_path).strip('"'))
@@ -83,7 +85,11 @@ class MetadataView(View):
             'saml',
             redirect_uri=complete_url,
         )
-        metadata, errors = saml_backend.generate_metadata_xml()
+        try:
+            metadata, errors = saml_backend.generate_metadata_xml()
+        except Exception as e:
+            logger.exception('unable to generate SAML metadata')
+            errors = e
         if not errors:
             return HttpResponse(content=metadata, content_type='text/xml')
         else:

@@ -1,4 +1,53 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels) {
+    var toDestroy = [];
+    var cancelRequests = false;
+
+    // download stdout tooltip text
+    $scope.standardOutTooltip = i18n._('Download Output');
+
+    // stdout full screen toggle tooltip text
+    $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
+    // this allows you to manage the timing of rest-call based events as
+    // filters are updated.  see processPage for more info
+    var currentContext = 1;
+    $scope.firstCounterFromSocket = -1;
+
+    // if the user enters the page mid-run, reset the search to include a param
+    // to only grab events less than the first counter from the websocket events
+    toDestroy.push($scope.$watch('firstCounterFromSocket', function(counter) {
+        if (counter > -1) {
+            // make it so that the search include a counter less than the
+            // first counter from the socket
+            let params = _.cloneDeep($stateParams.job_event_search);
+            params.counter__lte = "" + counter;
+
+            Dataset = QuerySet.search(jobData.related.job_events,
+                params);
+
+            Dataset.then(function(actualDataset) {
+                $scope.job_event_dataset = actualDataset.data;
+            });
+        }
+    }));
+
+    // used for tag search
+    $scope.job_event_dataset = Dataset.data;
+
+    // used for tag search
+    $scope.list = {
+        basePath: jobData.related.job_events,
+        defaultSearchParams: function(term){
+            return {
+                or__stdout__icontains: term,
+            };
+        },
+    };
+
+    // used for tag search
+    $scope.job_events = $scope.job_event_dataset.results;
+
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
             if ($scope.job.related[key]) {
@@ -15,6 +64,7 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
         $scope.machine_credential_link = getTowerLink('credential');
         $scope.cloud_credential_link = getTowerLink('cloud_credential');
         $scope.network_credential_link = getTowerLink('network_credential');
+        $scope.schedule_link = getTowerLink('schedule');
     };
 
     // uses options to set scope variables to their readable string
@@ -30,7 +80,6 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
             }
         };
 
-        $scope.status_label = getTowerLabel('status');
         $scope.type_label = getTowerLabel('job_type');
         $scope.verbosity_label = getTowerLabel('verbosity');
     };
@@ -46,19 +95,83 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.labels = jobLabels;
     $scope.jobFinished = jobFinished;
 
+    // update label in left pane and tooltip in right pane when the job_status
+    // changes
+    toDestroy.push($scope.$watch('job_status', function(status) {
+        if (status) {
+            $scope.status_label = $scope.jobOptions.status.choices
+                .filter(val => val[0] === status)
+                .map(val => val[1])[0];
+            $scope.status_tooltip = "Job " + $scope.status_label;
+        }
+    }));
+
+    $scope.previousTaskFailed = false;
+
+    toDestroy.push($scope.$watch('job.job_explanation', function(explanation) {
+        if (explanation && explanation.split(":")[0] === "Previous Task Failed") {
+            $scope.previousTaskFailed = true;
+
+            var taskObj = JSON.parse(explanation.substring(explanation.split(":")[0].length + 1));
+            // return a promise from the options request with the permission type choices (including adhoc) as a param
+            var fieldChoice = fieldChoices({
+                $scope: $scope,
+                url: 'api/v1/unified_jobs/',
+                field: 'type'
+            });
+
+            // manipulate the choices from the options request to be set on
+            // scope and be usable by the list form
+            fieldChoice.then(function (choices) {
+                choices =
+                    fieldLabels({
+                        choices: choices
+                    });
+                $scope.explanation_fail_type = choices[taskObj.job_type];
+                $scope.explanation_fail_name = taskObj.job_name;
+                $scope.explanation_fail_id = taskObj.job_id;
+                $scope.task_detail = $scope.explanation_fail_type + " failed for " + $scope.explanation_fail_name + " with ID " + $scope.explanation_fail_id + ".";
+            });
+        } else {
+            $scope.previousTaskFailed = false;
+        }
+    }));
+
+
+    // update the job_status value.  Use the cached rootScope value if there
+    // is one.  This is a workaround when the rest call for the jobData is
+    // made before some socket events come in for the job status
+    if ($rootScope['lastSocketStatus' + jobData.id]) {
+        $scope.job_status = $rootScope['lastSocketStatus' + jobData.id];
+        delete $rootScope['lastSocketStatus' + jobData.id];
+    } else {
+        $scope.job_status = jobData.status;
+    }
+
     // turn related api browser routes into tower routes
     getTowerLinks();
+
+    // the links below can't be set in getTowerLinks because the
+    // links on the UI don't directly match the corresponding URL
+    // on the API browser
     if(jobData.summary_fields && jobData.summary_fields.job_template &&
         jobData.summary_fields.job_template.id){
             $scope.job_template_link = `/#/templates/job_template/${$scope.job.summary_fields.job_template.id}`;
     }
     if(jobData.summary_fields && jobData.summary_fields.project_update &&
         jobData.summary_fields.project_update.status){
-         $scope.project_status = jobData.summary_fields.project_update.status;
+            $scope.project_status = jobData.summary_fields.project_update.status;
     }
     if(jobData.summary_fields && jobData.summary_fields.project_update &&
         jobData.summary_fields.project_update.id){
-        $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+            $scope.project_update_link = `/#/scm_update/${jobData.summary_fields.project_update.id}`;
+    }
+    if(jobData.summary_fields && jobData.summary_fields.source_workflow_job &&
+        jobData.summary_fields.source_workflow_job.id){
+            $scope.workflow_result_link = `/#/workflows/${jobData.summary_fields.source_workflow_job.id}`;
+    }
+    if(jobData.result_traceback) {
+        $scope.job.result_traceback = jobData.result_traceback.trim().split('\n').join('<br />');
     }
 
     // use options labels to manipulate display of details
@@ -75,6 +188,12 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
     $scope.stdoutFullScreen = false;
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+        if ($scope.stdoutFullScreen === true) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+        } else if ($scope.stdoutFullScreen === false) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+        }
     };
 
     $scope.deleteJob = function() {
@@ -121,98 +240,189 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
 
     $scope.events = {};
 
+    // For elapsed time while a job is running, compute the differnce in seconds,
+    // from the time the job started until now. Moment() returns the current
+    // time as a moment object.
+    var start = ($scope.job.started === null) ? moment() : moment($scope.job.started);
+    if(jobFinished === false){
+        var elapsedInterval = setInterval(function(){
+            let now = moment();
+            $scope.job.elapsed = now.diff(start, 'seconds');
+        }, 1000);
+    }
+
     // EVENT STUFF BELOW
 
     // This is where the async updates to the UI actually happen.
     // Flow is event queue munging in the service -> $scope setting in here
-    var processEvent = function(event) {
+    var processEvent = function(event, context) {
+        // only care about filter context checking when the event comes
+        // as a rest call
+        if (context && context !== currentContext) {
+            return;
+        }
         // put the event in the queue
-        eventQueue.populate(event).then(mungedEvent => {
-            // make changes to ui based on the event returned from the queue
-            if (mungedEvent.changes) {
-                mungedEvent.changes.forEach(change => {
-                    // we've got a change we need to make to the UI!
-                    // update the necessary scope and make the change
-                    if (change === 'startTime' && !$scope.job.start) {
-                        $scope.job.start = mungedEvent.startTime;
-                    }
+        var mungedEvent = eventQueue.populate(event);
 
-                    if (change === 'count' && !$scope.countFinished) {
-                        // for all events that affect the host count,
-                        // update the status bar as well as the host
-                        // count badge
-                        $scope.count = mungedEvent.count;
-                        $scope.hostCount = getTotalHostCount(mungedEvent
-                            .count);
-                    }
+        // make changes to ui based on the event returned from the queue
+        if (mungedEvent.changes) {
+            mungedEvent.changes.forEach(change => {
+                // we've got a change we need to make to the UI!
+                // update the necessary scope and make the change
+                if (change === 'startTime' && !$scope.job.start) {
+                    $scope.job.start = mungedEvent.startTime;
+                }
 
-                    if (change === 'playCount') {
-                        $scope.playCount = mungedEvent.playCount;
-                    }
+                if (change === 'count' && !$scope.countFinished) {
+                    // for all events that affect the host count,
+                    // update the status bar as well as the host
+                    // count badge
+                    $scope.count = mungedEvent.count;
+                    $scope.hostCount = getTotalHostCount(mungedEvent
+                        .count);
+                }
 
-                    if (change === 'taskCount') {
-                        $scope.taskCount = mungedEvent.taskCount;
-                    }
+                if (change === 'finishedTime'  && !$scope.job.finished) {
+                    $scope.job.finished = mungedEvent.finishedTime;
+                    $scope.jobFinished = true;
+                    $scope.followTooltip = "Jump to last line of standard out.";
+                }
 
-                    if (change === 'finishedTime'  && !$scope.job.finished) {
-                        $scope.job.finished = mungedEvent.finishedTime;
-                        $scope.jobFinished = true;
-                        $scope.followTooltip = "Jump to last line of standard out.";
-                    }
+                if (change === 'countFinished') {
+                    // the playbook_on_stats event actually lets
+                    // us know that we don't need to iteratively
+                    // look at event to update the host counts
+                    // any more.
+                    $scope.countFinished = true;
+                }
 
-                    if (change === 'countFinished') {
-                        // the playbook_on_stats event actually lets
-                        // us know that we don't need to iteratively
-                        // look at event to update the host counts
-                        // any more.
-                        $scope.countFinished = true;
-                    }
+                if(change === 'stdout'){
+                    // put stdout elements in stdout container
 
-                    if(change === 'stdout'){
-                        // put stdout elements in stdout container
 
-                        // this scopes the event to that particular
-                        // block of stdout.
-                        // If you need to see the event a particular
-                        // stdout block is from, you can:
-                        // angular.element($0).scope().event
-                        $scope.events[mungedEvent.counter] = $scope.$new();
-                        $scope.events[mungedEvent.counter]
-                            .event = mungedEvent;
-
+                    var appendToBottom = function(mungedEvent){
+                        // if we get here then the event type was either a
+                        // header line, recap line, or one of the additional
+                        // event types, so we append it to the bottom.
+                        // These are the event types for captured
+                        // stdout not directly related to playbook or runner
+                        // events:
+                        // (0, 'debug', _('Debug'), False),
+                        // (0, 'verbose', _('Verbose'), False),
+                        // (0, 'deprecated', _('Deprecated'), False),
+                        // (0, 'warning', _('Warning'), False),
+                        // (0, 'system_warning', _('System Warning'), False),
+                        // (0, 'error', _('Error'), True),
                         angular
                             .element(".JobResultsStdOut-stdoutContainer")
                             .append($compile(mungedEvent
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
+                    };
 
-                        // move the followAnchor to the bottom of the
-                        // container
-                        $(".JobResultsStdOut-followAnchor")
-                            .appendTo(".JobResultsStdOut-stdoutContainer");
 
-                        // if follow is engaged,
-                        // scroll down to the followAnchor
-                        if ($scope.followEngaged) {
-                            if (!$scope.followScroll) {
-                                $scope.followScroll = function() {
-                                    $log.error("follow scroll undefined, standard out directive not loaded yet?");
-                                };
-                            }
-                            $scope.followScroll();
+                    // this scopes the event to that particular
+                    // block of stdout.
+                    // If you need to see the event a particular
+                    // stdout block is from, you can:
+                    // angular.element($0).scope().event
+                    $scope.events[mungedEvent.counter] = $scope.$new();
+                    $scope.events[mungedEvent.counter]
+                        .event = mungedEvent;
+
+                    if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
+                        // put non-duplicate lines into the standard
+                        // out pane where they should go (within the
+                        // right header section, before the next line
+                        // as indicated by start_line)
+                        window.$ = $;
+                        var putIn;
+                        var classList = $("div",
+                            "<div>"+mungedEvent.stdout+"</div>")
+                            .attr("class").split(" ");
+                        if (classList
+                            .filter(v => v.indexOf("task_") > -1)
+                            .length) {
+                            putIn = classList
+                                .filter(v => v.indexOf("task_") > -1)[0];
+                        } else if(classList
+                            .filter(v => v.indexOf("play_") > -1)
+                            .length) {
+                            putIn = classList
+                                .filter(v => v.indexOf("play_") > -1)[0];
+                        } else {
+                            appendToBottom(mungedEvent);
                         }
-                    }
-                });
-            }
 
-            // the changes have been processed in the ui, mark it in the queue
+                        var putAfter;
+                        var isDup = false;
+                        $(".header_" + putIn + ",." + putIn)
+                            .each((i, v) => {
+                                if (angular.element(v).scope()
+                                    .event.start_line < mungedEvent
+                                    .start_line) {
+                                    putAfter = v;
+                                } else if (angular.element(v).scope()
+                                    .event.start_line === mungedEvent
+                                    .start_line) {
+                                    isDup = true;
+                                    return false;
+                                } else if (angular.element(v).scope()
+                                    .event.start_line > mungedEvent
+                                    .start_line) {
+                                    return false;
+                                }
+                            });
+
+                        if (!isDup) {
+                            $(putAfter).after($compile(mungedEvent
+                                .stdout)($scope.events[mungedEvent
+                                    .counter]));
+                        }
+
+
+                        classList = null;
+                        putIn = null;
+                    } else {
+                        appendToBottom(mungedEvent);
+                    }
+
+                    // move the followAnchor to the bottom of the
+                    // container
+                    $(".JobResultsStdOut-followAnchor")
+                        .appendTo(".JobResultsStdOut-stdoutContainer");
+
+                    // if follow is engaged,
+                    // scroll down to the followAnchor
+                    if ($scope.followEngaged) {
+                        if (!$scope.followScroll) {
+                            $scope.followScroll = function() {
+                                $log.error("follow scroll undefined, standard out directive not loaded yet?");
+                            };
+                        }
+                        $scope.followScroll();
+                    }
+                }
+            });
+
+            // the changes have been processed in the ui, mark it in the
+            // queue
             eventQueue.markProcessed(event);
-        });
+        }
     };
 
-    // PULL! grab completed event data and process each event
-    // TODO: implement retry logic in case one of these requests fails
-    var getEvents = function(url) {
+    $scope.stdoutContainerAvailable = $q.defer();
+    $scope.hasSkeleton = $q.defer();
+
+    eventQueue.initialize();
+
+    $scope.playCount = 0;
+    $scope.taskCount = 0;
+
+    // get header and recap lines
+    var skeletonPlayCount = 0;
+    var skeletonTaskCount = 0;
+    var getSkeleton = function(url) {
         jobResultsService.getEvents(url)
             .then(events => {
                 events.results.forEach(event => {
@@ -220,28 +430,219 @@ export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count'
                     // coming over the websocket
                     event.event_name = event.event;
                     delete event.event;
+
+                    // increment play and task count
+                    if (event.event_name === "playbook_on_play_start") {
+                        skeletonPlayCount++;
+                    } else if (event.event_name === "playbook_on_task_start") {
+                        skeletonTaskCount++;
+                    }
+
                     processEvent(event);
                 });
                 if (events.next) {
-                    getEvents(events.next);
+                    getSkeleton(events.next);
+                } else {
+                    // after the skeleton requests have completed,
+                    // put the play and task count into the dom
+                    $scope.playCount = skeletonPlayCount;
+                    $scope.taskCount = skeletonTaskCount;
+                    $scope.hasSkeleton.resolve("skeleton resolved");
                 }
             });
     };
-    getEvents($scope.job.related.job_events);
 
-    // Processing of job_events messages from the websocket
-    $scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
-        processEvent(data);
+    $scope.stdoutContainerAvailable.promise.then(() => {
+        getSkeleton(jobData.related.job_events + "?order_by=id&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
     });
 
+    var getEvents;
+
+    var processPage = function(events, context) {
+        // currentContext is the context of the filter when this request
+        // to processPage was made
+        //
+        // currentContext is the context of the filter currently
+        //
+        // if they are not the same, make sure to stop process events/
+        // making rest calls for next pages/etc. (you can see context is
+        // also passed into getEvents and processEvent and similar checks
+        // exist in these functions)
+        //
+        // also, if the page doesn't contain results (i.e.: the response
+        // returns an error), don't process the page
+        if (context !== currentContext || events === undefined ||
+            events.results === undefined) {
+            return;
+        }
+
+        events.results.forEach(event => {
+            // get the name in the same format as the data
+            // coming over the websocket
+            event.event_name = event.event;
+            delete event.event;
+
+            processEvent(event, context);
+        });
+        if (events.next && !cancelRequests) {
+            getEvents(events.next, context);
+        } else {
+            // put those paused events into the pane
+            $scope.gotPreviouslyRanEvents.resolve("");
+        }
+    };
+
+    // grab non-header recap lines
+    getEvents = function(url, context) {
+        if (context !== currentContext) {
+            return;
+        }
+
+        jobResultsService.getEvents(url)
+            .then(events => {
+                processPage(events, context);
+            });
+    };
+
+    // grab non-header recap lines
+    toDestroy.push($scope.$watch('job_event_dataset', function(val) {
+        if (val) {
+            eventQueue.initialize();
+
+            Object.keys($scope.events)
+                .forEach(v => {
+                    // dont destroy scope events for skeleton lines
+                    let name = $scope.events[v].event.name;
+
+                    if (!(name === "playbook_on_play_start" ||
+                        name === "playbook_on_task_start" ||
+                        name === "playbook_on_stats")) {
+                        $scope.events[v].$destroy();
+                        $scope.events[v] = null;
+                        delete $scope.events[v];
+                    }
+                });
+
+            // pause websocket events from coming in to the pane
+            $scope.gotPreviouslyRanEvents = $q.defer();
+            currentContext += 1;
+
+            let context = currentContext;
+
+            $( ".JobResultsStdOut-aLineOfStdOut.not_skeleton" ).remove();
+            $scope.hasSkeleton.promise.then(() => {
+                if (val.count > parseInt(val.maxEvents)) {
+                    $(".header_task").hide();
+                    $(".header_play").hide();
+                    $scope.standardOutTooltip = '<div class="JobResults-downloadTooLarge"><div>' +
+                        i18n._('The output is too large to display. Please download.') +
+                        '</div>' +
+                        '<div class="JobResults-downloadTooLarge--icon">' +
+                        '<span class="fa-stack fa-lg">' +
+                        '<i class="fa fa-circle fa-stack-1x"></i>' +
+                        '<i class="fa fa-stack-1x icon-job-stdout-download-tooltip"></i>' +
+                        '</span>' +
+                        '</div>' +
+                        '</div>';
+
+                    if ($scope.job_status === "successful" ||
+                        $scope.job_status === "failed" ||
+                        $scope.job_status === "error" ||
+                        $scope.job_status === "canceled") {
+                        $scope.tooManyEvents = true;
+                        $scope.tooManyPastEvents = false;
+                    } else {
+                        $scope.tooManyPastEvents = true;
+                        $scope.tooManyEvents = false;
+                        $scope.gotPreviouslyRanEvents.resolve("");
+                    }
+                } else {
+                    $(".header_task").show();
+                    $(".header_play").show();
+                    $scope.tooManyEvents = false;
+                    $scope.tooManyPastEvents = false;
+                    processPage(val, context);
+                }
+            });
+        }
+    }));
+
+
+
+    // Processing of job_events messages from the websocket
+    toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+
+        // use the lowest counter coming over the socket to retrigger pull data
+        // to only be for stuff lower than that id
+        //
+        // only do this for entering the jobs page mid-run (thus the
+        // data.counter is 1 conditional
+        if (data.counter === 1) {
+          $scope.firstCounterFromSocket = -2;
+        }
+
+        if ($scope.firstCounterFromSocket !== -2 &&
+            $scope.firstCounterFromSocket === -1 ||
+            data.counter < $scope.firstCounterFromSocket) {
+                $scope.firstCounterFromSocket = data.counter;
+        }
+
+        $q.all([$scope.gotPreviouslyRanEvents.promise,
+            $scope.hasSkeleton.promise]).then(() => {
+            // put the line in the
+            // standard out pane (and increment play and task
+            // count if applicable)
+            if (data.event_name === "playbook_on_play_start") {
+                $scope.playCount++;
+            } else if (data.event_name === "playbook_on_task_start") {
+                $scope.taskCount++;
+            }
+            processEvent(data);
+        });
+    }));
+
     // Processing of job-status messages from the websocket
-    $scope.$on(`ws-jobs`, function(e, data) {
-        if (parseInt(data.unified_job_id, 10) === parseInt($scope.job.id,10)) {
-            $scope.job.status = data.status;
-        }
-        if (parseInt(data.project_id, 10) === parseInt($scope.job.project,10)) {
+    toDestroy.push($scope.$on(`ws-jobs`, function(e, data) {
+        if (parseInt(data.unified_job_id, 10) ===
+            parseInt($scope.job.id,10)) {
+            // controller is defined, so set the job_status
+            $scope.job_status = data.status;
+            if (data.status === "successful" ||
+                data.status === "failed" ||
+                data.status === "error" ||
+                data.status === "canceled") {
+                    clearInterval(elapsedInterval);
+                    // When the fob is finished retrieve the job data to
+                    // correct anything that was out of sync from the job run
+                    jobResultsService.getJobData($scope.job.id).then(function(data){
+                        $scope.job = data;
+                    });
+            }
+        } else if (parseInt(data.project_id, 10) ===
+            parseInt($scope.job.project,10)) {
+            // this is a project status update message, so set the
+            // project status in the left pane
             $scope.project_status = data.status;
-            $scope.project_update_link = `/#/scm_update/${data.unified_job_id}`;
+            $scope.project_update_link = `/#/scm_update/${data
+                .unified_job_id}`;
+        } else {
+            // controller was previously defined, but is not yet defined
+            // for this job.  cache the socket status on root scope
+            $rootScope['lastSocketStatus' + data.unified_job_id] = data.status;
         }
+    }));
+
+    $scope.$on('$destroy', function(){
+        $( ".JobResultsStdOut-aLineOfStdOut" ).remove();
+        cancelRequests = true;
+        eventQueue.initialize();
+        Object.keys($scope.events)
+            .forEach(v => {
+                $scope.events[v].$destroy();
+                $scope.events[v] = null;
+            });
+        $scope.events = {};
+        clearInterval(elapsedInterval);
+        toDestroy.forEach(closureFunc => closureFunc());
     });
 }];

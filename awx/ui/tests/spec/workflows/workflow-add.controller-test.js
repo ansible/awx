@@ -84,6 +84,10 @@ describe('Controller: WorkflowAdd', () => {
             .whenGET('/api')
             .respond(200, '');
 
+        $httpBackend
+            .whenGET(/\/static\/*/)
+            .respond(200, {});
+
         TemplatesService.getLabelOptions = jasmine.createSpy('getLabelOptions').and.returnValue(getLabelsDeferred.promise);
         TemplatesService.createWorkflowJobTemplate = jasmine.createSpy('createWorkflowJobTemplate').and.returnValue(createWorkflowJobTemplateDeferred.promise);
 

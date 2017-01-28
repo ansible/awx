@@ -18,14 +18,14 @@ export default ['i18n', function(i18n){
         iterator: 'notification',
         index: false,
         hover: false,
-        emptyListText: "This list is populated by notification templates added from the&nbsp;<a ui-sref='notifications.add'>Notifications</a>&nbsp;section",
+        emptyListText: i18n.sprintf(i18n._("This list is populated by notification templates added from the %sNotifications%s section"), "&nbsp;<a ui-sref='notifications.add'>", "</a>&nbsp;"),
         basePath: 'notification_templates',
         fields: {
             name: {
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
-                linkTo: '/#/notification_templates/{{notifier.id}}',
+                linkTo: '/#/notification_templates/{{notifier.id}}'
             },
             notification_type: {
                 label: i18n._('Type'),
@@ -42,8 +42,7 @@ export default ['i18n', function(i18n){
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
-                nosort: true,
+                nosort: true
             },
             notification_templates_error: {
                 label: i18n._('Failure'),
@@ -54,13 +53,12 @@ export default ['i18n', function(i18n){
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
-                nosort: true,
+                nosort: true
             }
         },
         actions: {
             add: {
-                label: 'Add Notification',
+                label: i18n._('Add Notification'),
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addNotificationTemplate()',
                 awToolTip: i18n._('Create a new notification template'),

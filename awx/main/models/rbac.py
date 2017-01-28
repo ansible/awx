@@ -427,6 +427,9 @@ class Role(models.Model):
     def is_ancestor_of(self, role):
         return role.ancestors.filter(id=self.id).exists()
 
+    def is_singleton(self):
+        return self.singleton_name in [ROLE_SINGLETON_SYSTEM_ADMINISTRATOR, ROLE_SINGLETON_SYSTEM_AUDITOR]
+
 
 class RoleAncestorEntry(models.Model):
 

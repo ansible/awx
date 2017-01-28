@@ -8,7 +8,7 @@ import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 var hostEventModal = {
     name: 'jobDetail.host-event',
-    url: '/task/:taskId/host-event/:eventId',
+    url: '/host-event/:eventId',
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-modal'),
     'abstract': false,

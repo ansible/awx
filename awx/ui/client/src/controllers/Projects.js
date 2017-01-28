@@ -14,7 +14,7 @@
 export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
     Rest, Alert, ProjectList, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, ProjectUpdate, Wait, GetChoices, Empty, Find, GetProjectIcon,
-    GetProjectToolTip, $filter, $state, rbacUiControlService, Dataset, i18n) {
+    GetProjectToolTip, $filter, $state, rbacUiControlService, Dataset, i18n, qs) {
 
     var list = ProjectList,
         defaultUrl = GetBasePath('projects');
@@ -38,9 +38,38 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
         $rootScope.flashMessage = null;
     }
 
-    $scope.$watch(`${list.name}`, function() {
-        _.forEach($scope[list.name], buildTooltips);
+    $scope.$on(`${list.iterator}_options`, function(event, data){
+        $scope.options = data.data.actions.GET;
+        optionsRequestDataProcessing();
     });
+
+    $scope.$watchCollection(`${$scope.list.name}`, function() {
+            optionsRequestDataProcessing();
+        }
+    );
+
+    // iterate over the list and add fields like type label, after the
+    // OPTIONS request returns, or the list is sorted/paginated/searched
+    function optionsRequestDataProcessing(){
+        $scope[list.name].forEach(function(item, item_idx) {
+            var itm = $scope[list.name][item_idx];
+
+            // Set the item type label
+            if (list.fields.scm_type && $scope.options &&
+                    $scope.options.hasOwnProperty('scm_type')) {
+                        $scope.options.scm_type.choices.every(function(choice) {
+                            if (choice[0] === item.scm_type) {
+                            itm.type_label = choice[1];
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                buildTooltips(itm);
+
+        });
+    }
 
     function buildTooltips(project) {
         project.statusIcon = GetProjectIcon(project.status);
@@ -66,6 +95,15 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
         }
     }
 
+    $scope.reloadList = function(){
+        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+        qs.search(path, $stateParams[`${list.iterator}_search`])
+        .then(function(searchResponse) {
+            $scope[`${list.iterator}_dataset`] = searchResponse.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        });
+    };
+
     $scope.$on(`ws-jobs`, function(e, data) {
         var project;
         $log.debug(data);
@@ -77,7 +115,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 $log.debug('Received event for project: ' + project.name);
                 $log.debug('Status changed to: ' + data.status);
                 if (data.status === 'successful' || data.status === 'failed') {
-                    $state.go('.', null, { reload: true });
+                    $scope.reloadList();
                 } else {
                     project.scm_update_tooltip = "SCM update currently running";
                     project.scm_type_class = "btn-disabled";
@@ -147,13 +185,15 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                     if (parseInt($state.params.project_id) === id) {
                         $state.go("^", null, { reload: true });
                     } else {
-                        // @issue: OLD SEARCH
-                        // $scope.search(list.iterator);
+                        $state.go('.', null, {reload: true});
                     }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'),
                         msg: i18n.sprintf(i18n._('Call to %s failed. DELETE returned status: '), url) + status });
+                })
+                .finally(function() {
+                    Wait('stop');
                 });
         };
 
@@ -261,7 +301,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
 ProjectsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$stateParams',
     'Rest', 'Alert', 'ProjectList', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'ProjectUpdate', 'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon',
-    'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService', 'Dataset', 'i18n'
+    'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet'
 ];
 
 export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
@@ -281,7 +321,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
             .success(function(data) {
                 if (!data.actions.POST) {
                     $state.go("^");
-                    Alert('Permission Error', 'You do not have permission to add a project.', 'alert-info');
+                    Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
                 }
         });
 
@@ -465,7 +505,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             });
             $scope.project_local_paths = opts;
             $scope.local_path = $scope.project_local_paths[0];
-            $scope.base_dir = 'You do not have access to view this property';
+            $scope.base_dir = i18n._('You do not have access to view this property');
             $scope.$emit('pathsReady');
         }
 
@@ -555,7 +595,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             })
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
-                    msg: i18n._('Failed to retrieve project: ') + id + i18n._('. GET status: ') + status
+                    msg: i18n.sprintf(i18n._('Failed to retrieve project: %s. GET status: '), id) + status
                 });
             });
     });
@@ -620,7 +660,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 $state.go($state.current, {}, { reload: true });
             })
             .error(function(data, status) {
-                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
+                ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Failed to update project: %s. PUT status: '), id) + status });
             });
     };
 
@@ -638,7 +678,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 })
                 .error(function(data, status) {
                     $('#prompt-modal').modal('hide');
-                    ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                    ProcessErrors($scope, data, status, null, { hdr: i18n._('Error!'), msg: i18n.sprintf(i18n._('Call to %s failed. POST returned status: '), url) + status });
                 });
         };
 
@@ -646,7 +686,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
             hdr: i18n._('Delete'),
             body: '<div class="Prompt-bodyQuery">' + i18n.sprintf(i18n._('Are you sure you want to remove the %s below from %s?'), title, $scope.name) + '</div>' + '<div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
     };
 
@@ -654,7 +694,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
-            $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
+            $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? i18n._('Revision #') : i18n._('SCM Branch');
         }
 
         // Dynamically update popover values
@@ -690,7 +730,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.project_obj.scm_type === "Manual" || Empty($scope.project_obj.scm_type)) {
             // ignore
         } else if ($scope.project_obj.status === 'updating' || $scope.project_obj.status === 'running' || $scope.project_obj.status === 'pending') {
-            Alert('Update in Progress', i18n._('The SCM update process is running.'), 'alert-info');
+            Alert(i18n._('Update in Progress'), i18n._('The SCM update process is running.'), 'alert-info');
         } else {
             ProjectUpdate({ scope: $scope, project_id: $scope.project_obj.id });
         }

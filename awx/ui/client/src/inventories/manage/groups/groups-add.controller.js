@@ -31,9 +31,10 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
         }
 
         $scope.lookupCredential = function(){
+            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
             $state.go('.credential', {
                 credential_search: {
-                    kind: $scope.source.value,
+                    kind: kind,
                     page_size: '5',
                     page: '1'
                 }
@@ -111,6 +112,13 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
         };
         $scope.sourceChange = function(source) {
             source = source.value;
+            if (source === 'custom'){
+                $scope.credentialBasePath = GetBasePath('inventory_script');
+            }
+            // equal to case 'ec2' || 'rax' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack'
+            else{
+                $scope.credentialBasePath = (source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source === '' ? '' : '?kind=' + (source));
+            }
             if (source === 'ec2' || source === 'custom' || source === 'vmware' || source === 'openstack') {
                 ParseTypeChange({
                     scope: $scope,
@@ -119,6 +127,7 @@ export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList
                     parse_variable: 'envParseType'
                 });
             }
+
             // reset fields
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint

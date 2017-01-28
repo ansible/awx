@@ -31,10 +31,14 @@ describe('parseStdoutService', () => {
             unstyledLine = 'ok: [host-00]';
             expect(parseStdoutService.prettify(line, unstyled)).toBe(unstyledLine);
         });
+
+        it('can return empty strings', () => {
+            expect(parseStdoutService.prettify("")).toBe("");
+        });
     });
 
     describe('getLineClasses()', () => {
-        xit('creates a string that is used as a class', () => {
+        it('creates a string that is used as a class', () => {
             let headerEvent = {
                 event_name: 'playbook_on_task_start',
                 event_data: {
@@ -44,12 +48,15 @@ describe('parseStdoutService', () => {
             };
             let lineNum = 3;
             let line = "TASK [setup] *******************************************************************";
-            let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
+            let styledLine =  " header_task header_task_80dd087c-268b-45e8-9aab-1083bcfd9364 actual_header play_0f667a23-d9ab-4128-a735-80566bcdbca0 line_num_3";
             expect(parseStdoutService.getLineClasses(headerEvent, line, lineNum)).toBe(styledLine);
         });
     });
 
     describe('getStartTime()', () => {
+        // TODO: the problem is that the date here calls moment, and thus
+        // the date will be timezone'd in the string (this could be
+        // different based on where you are)
         xit('creates returns a badge with the start time of the event', () => {
             let headerEvent = {
                 event_name: 'playbook_on_play_start',
@@ -115,6 +122,19 @@ describe('parseStdoutService', () => {
 
             expect(returnedEvent).toEqual(expectedReturn);
         });
+
+        it('deals correctly with capped lines', () => {
+            let mockEvent = {
+                start_line: 7,
+                end_line: 11,
+                stdout: "a\r\nb\r\nc..."
+            };
+            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."], [11, "[1;imLine capped.[0m"]];
+
+            let returnedEvent = parseStdoutService.getLineArr(mockEvent);
+
+            expect(returnedEvent).toEqual(expectedReturn);
+        });
     });
 
     describe('parseStdout()', () => {
@@ -143,7 +163,7 @@ describe('parseStdoutService', () => {
             expect(parseStdoutService.getCollapseIcon)
                 .toHaveBeenCalledWith(mockEvent, 'line1');
             expect(parseStdoutService.getAnchorTags)
-                .toHaveBeenCalledWith(mockEvent, "prettified_line");
+                .toHaveBeenCalledWith(mockEvent);
             expect(parseStdoutService.prettify)
                 .toHaveBeenCalledWith('line1');
             expect(parseStdoutService.getStartTimeBadge)
@@ -173,7 +193,7 @@ describe('parseStdoutService', () => {
             spyOn(parseStdoutService, 'getCollapseIcon').and
                 .returnValue("collapse_icon_dom");
             spyOn(parseStdoutService, 'getAnchorTags').and
-                .returnValue("anchor_tag_dom");
+                .returnValue(`" anchor_tag_dom`);
             spyOn(parseStdoutService, 'prettify').and
                 .returnValue("prettified_line");
             spyOn(parseStdoutService, 'getStartTimeBadge').and
@@ -184,7 +204,7 @@ describe('parseStdoutService', () => {
             var expectedString = `
 <div class="JobResultsStdOut-aLineOfStdOutline_classes">
     <div class="JobResultsStdOut-lineNumberColumn">collapse_icon_dom13</div>
-    <div class="JobResultsStdOut-stdoutColumn">anchor_tag_dom </div>
+    <div class="JobResultsStdOut-stdoutColumn" anchor_tag_dom>prettified_line </div>
 </div>`;
             expect(returnedString).toBe(expectedString);
         });

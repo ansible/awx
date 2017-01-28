@@ -1,0 +1,15 @@
+resource	medium	Jan2017	jobs1k	jobs10k	jobs50k	jobs100k
+organizations	500	1	1	1	1	1
+users	5000	3	3	3	3	3
+teams	500	2	2	2	2	2
+projects	1000	30	30	30	30	30
+job_templates	2000	127	127	127	127	127
+credentials	2000	50	50	50	50	50
+inventories	2000	6	6	6	6	6
+inventory_groups	500	15	15	15	15	15
+inventory_hosts	2500	15	15	15	15	15
+wfjts	100	0	0	0	0	0
+nodes	1000	0	0	0	0	0
+labels	1000	0	0	0	0	0
+jobs	1000	157208	1000	10000	50000	100000
+job_events	1000	3370942	20000	200000	1000000	2000000

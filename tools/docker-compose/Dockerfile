@@ -6,11 +6,17 @@ FROM centos:7
 # ENV LC_ALL en_US.UTF-8
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
-ADD requirements/requirements.txt requirements/requirements_ansible.txt requirements/requirements_dev.txt requirements/requirements_jenkins.txt /tmp/requirements/
+ADD requirements/requirements.txt \
+requirements/requirements_ansible.txt \
+requirements/requirements_dev.txt \
+requirements/requirements_ansible_uninstall.txt \
+requirements/requirements_tower_uninstall.txt \
+requirements/requirements_dev_uninstall.txt \
+/tmp/requirements/
 RUN yum -y update && yum -y install curl epel-release
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
-RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap
+RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap zanata-python-client gettext
 RUN pip install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower

@@ -12,7 +12,7 @@
 
 export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
-    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n) {
 
     ClearScope();
 
@@ -22,6 +22,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // This scope variable controls whether or not the left panel is shown and the right panel
     // is expanded to take up the full screen
     $scope.stdoutFullScreen = false;
+    $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
     // Listen for job status updates that may come across via sockets.  We need to check the payload
     // to see whethere the updated job is the one that we're currently looking at.
@@ -58,6 +59,10 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.credential_name = (data.summary_fields.credential) ? data.summary_fields.credential.name : '';
                 $scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
                 $scope.cloud_credential_url = (data.cloud_credential) ? '/#/credentials/' + data.cloud_credential : '';
+                if(data.summary_fields && data.summary_fields.source_workflow_job &&
+                    data.summary_fields.source_workflow_job.id){
+                        $scope.workflow_result_link = `/#/workflows/${data.summary_fields.source_workflow_job.id}`;
+                }
                 $scope.playbook = data.playbook;
                 $scope.credential = data.credential;
                 $scope.cloud_credential = data.cloud_credential;
@@ -223,6 +228,13 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // Click binding for the expand/collapse button on the standard out log
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+        if ($scope.stdoutFullScreen === true) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+        } else if ($scope.stdoutFullScreen === false) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
+        }
     };
 
     $scope.deleteJob = function() {
@@ -255,4 +267,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
     '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
     'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
-    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n'];

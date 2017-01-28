@@ -7,7 +7,8 @@ export default ['templateUrl',
                 collection: '=',
                 dataset: '=',
                 iterator: '@',
-                basePath: '@'
+                basePath: '@',
+                querySet: '='
             },
             controller: 'PaginateController',
             templateUrl: templateUrl('shared/paginate/paginate')

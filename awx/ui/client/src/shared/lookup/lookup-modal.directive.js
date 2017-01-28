@@ -19,19 +19,75 @@ export default ['templateUrl', function(templateUrl) {
 
                 element.find('.modal-body').append(clone);
 
+                scope.init();
+
             });
             $('#form-modal').modal('show');
         },
         controller: ['$scope', '$state', function($scope, $state) {
+
+            $scope.init = function() {
+                let list = $scope.list;
+                if($state.params.selected) {
+                    $scope.currentSelection = {
+                        name: null,
+                        id: parseInt($state.params.selected)
+                    };
+                }
+                $scope.$watch(list.name, function(){
+                    selectRowIfPresent();
+                });
+            };
+
+            function selectRowIfPresent(){
+                let list = $scope.list;
+                if($scope.currentSelection && $scope.currentSelection.id) {
+                    $scope[list.name].forEach(function(row) {
+                        if (row.id === $scope.currentSelection.id) {
+                            row.checked = true;
+                        }
+                    });
+                }
+            }
+
             $scope.saveForm = function() {
                 let list = $scope.list;
-                $scope.$parent[`${list.iterator}_name`] = $scope.selection[list.iterator].name;
-                $scope.$parent[list.iterator] = $scope.selection[list.iterator].id;
+                if($scope.currentSelection.name !== null) {
+                    $scope.$parent[`${list.iterator}_name`] = $scope.currentSelection.name;
+                }
+                $scope.$parent[list.iterator] = $scope.currentSelection.id;
                 $state.go('^');
             };
+
             $scope.cancelForm = function() {
                 $state.go('^');
             };
+
+            $scope.toggle_row = function(rowId) {
+                let list = $scope.list;
+                let count = 0;
+                $scope[list.name].forEach(function(row) {
+                    if (row.id === rowId) {
+                        if (row.checked) {
+                            row.success_class = 'success';
+                        } else {
+                            row.checked = true;
+                            row.success_class = '';
+                        }
+                        $scope.currentSelection = {
+                            name: row.name,
+                            id: row.id
+                        };
+                    } else {
+                        row.checked = 0;
+                        row.success_class = '';
+                    }
+                    if (row.checked) {
+                        count++;
+                    }
+                });
+            };
+
         }]
     };
 }];

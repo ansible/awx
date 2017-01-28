@@ -125,23 +125,16 @@ class WorkflowNodeBase(CreatedModifiedModel):
                 return {}
 
         accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**prompts_dict)
-        ask_for_vars_dict = ujt_obj._ask_for_vars_dict()
 
         ignored_dict = {}
-        missing_dict = {}
         for fd in ignored_fields:
             ignored_dict[fd] = 'Workflow node provided field, but job template is not set to ask on launch'
         scan_errors = ujt_obj._extra_job_type_errors(accepted_fields)
         ignored_dict.update(scan_errors)
-        for fd in ['inventory', 'credential']:
-            if getattr(ujt_obj, fd) is None and not (ask_for_vars_dict.get(fd, False) and fd in prompts_dict):
-                missing_dict[fd] = 'Job Template does not have this field and workflow node does not provide it'
 
         data = {}
         if ignored_dict:
             data['ignored'] = ignored_dict
-        if missing_dict:
-            data['missing'] = missing_dict
         return data
 
     def get_parent_nodes(self):
@@ -245,8 +238,7 @@ class WorkflowJobNode(WorkflowNodeBase):
             accepted_fields, ignored_fields = ujt_obj._accept_or_ignore_job_kwargs(**self.prompts_dict())
             for fd in ujt_obj._extra_job_type_errors(accepted_fields):
                 accepted_fields.pop(fd)
-            data.update(accepted_fields)
-            # TODO: decide what to do in the event of missing fields
+            data.update(accepted_fields)  # missing fields are handled in the scheduler
         # build ancestor artifacts, save them to node model for later
         aa_dict = {}
         for parent_node in self.get_parent_nodes():
@@ -366,7 +358,9 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     @classmethod
     def _get_unified_jt_copy_names(cls):
-        return (super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names() +
+        base_list = super(WorkflowJobTemplate, cls)._get_unified_jt_copy_names()
+        base_list.remove('labels')
+        return (base_list +
                 ['survey_spec', 'survey_enabled', 'organization'])
 
     def get_absolute_url(self):
@@ -390,8 +384,8 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
                     success=list(success_notification_templates),
                     any=list(any_notification_templates))
 
-    def create_workflow_job(self, **kwargs):
-        workflow_job = self.create_unified_job(**kwargs)
+    def create_unified_job(self, **kwargs):
+        workflow_job = super(WorkflowJobTemplate, self).create_unified_job(**kwargs)
         workflow_job.copy_nodes_from_original(original=self)
         return workflow_job
 
@@ -416,28 +410,27 @@ class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTempl
 
     def can_start_without_user_input(self):
         '''Return whether WFJT can be launched without survey passwords.'''
-        return not bool(self.variables_needed_to_start)
+        return not bool(
+            self.variables_needed_to_start or
+            self.node_templates_missing() or
+            self.node_prompts_rejected())
 
-    def get_warnings(self):
-        warning_data = {}
-        for node in self.workflow_job_template_nodes.all():
-            if node.unified_job_template is None:
-                warning_data[node.pk] = 'Node is missing a linked unified_job_template'
-                continue
+    def node_templates_missing(self):
+        return [node.pk for node in self.workflow_job_template_nodes.filter(
+                unified_job_template__isnull=True).all()]
+
+    def node_prompts_rejected(self):
+        node_list = []
+        for node in self.workflow_job_template_nodes.prefetch_related('unified_job_template').all():
             node_prompts_warnings = node.get_prompts_warnings()
             if node_prompts_warnings:
-                warning_data[node.pk] = node_prompts_warnings
-        return warning_data
+                node_list.append(node.pk)
+        return node_list
 
     def user_copy(self, user):
         new_wfjt = self.copy_unified_jt()
         new_wfjt.copy_nodes_from_original(original=self, user=user)
         return new_wfjt
-
-
-# Stub in place because of old migrations, can remove if migrations are squashed
-class WorkflowJobInheritNodesMixin(object):
-    pass
 
 
 class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificationMixin):
@@ -487,10 +480,6 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
             str_arr.append("- node #{0} spawns {1}".format(node.id, node_job_description))
         result['body'] = '\n'.join(str_arr)
         return result
-
-    # TODO: Ask UI if this is needed ?
-    #def get_ui_url(self):
-    #    return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/workflow_jobs/{}".format(self.pk))
 
     @property
     def task_impact(self):

@@ -20,7 +20,7 @@ var hostEventModal = {
                 return res.data.results[0]; });
         }],
         hostResults: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
-            return JobDetailService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
+            return JobDetailService.getJobEventChildren($stateParams.taskUuid).then(res => res.data.results);
         }]
     },
     onExit: function() {

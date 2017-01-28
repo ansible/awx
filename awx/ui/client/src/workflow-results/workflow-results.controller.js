@@ -7,6 +7,9 @@ export default ['workflowData',
     'ParseTypeChange',
     'ParseVariableString',
     'WorkflowService',
+    'count',
+    '$state',
+    'i18n',
     function(workflowData,
         workflowResultsService,
         workflowDataOptions,
@@ -15,7 +18,10 @@ export default ['workflowData',
         $scope,
         ParseTypeChange,
         ParseVariableString,
-        WorkflowService
+        WorkflowService,
+        count,
+        $state,
+        i18n
     ) {
 
         var getTowerLinks = function() {
@@ -57,6 +63,11 @@ export default ['workflowData',
             $scope.workflow_nodes = workflowNodes;
             $scope.workflowOptions = workflowDataOptions.actions.GET;
             $scope.labels = jobLabels;
+            $scope.count = count.val;
+            $scope.showManualControls = false;
+
+            // stdout full screen toggle tooltip text
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
             // turn related api browser routes into tower routes
             getTowerLinks();
@@ -74,29 +85,31 @@ export default ['workflowData',
             // Click binding for the expand/collapse button on the standard out log
             $scope.stdoutFullScreen = false;
 
-            $scope.treeData = WorkflowService.buildTree({
+            WorkflowService.buildTree({
                 workflowNodes: workflowNodes
+            }).then(function(data){
+                $scope.treeData = data;
+
+                // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
+                // this treeData object and removing the children object for some reason (?)
+                // This happens on occasion and I think is a race condition (?)
+                if(!$scope.treeData.data.children) {
+                    $scope.treeData.data.children = [];
+                }
+
+                $scope.canAddWorkflowJobTemplate = false;
             });
-
-            // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-            // this treeData object and removing the children object for some reason (?)
-            // This happens on occasion and I think is a race condition (?)
-            if(!$scope.treeData.data.children) {
-                $scope.treeData.data.children = [];
-            }
-
-            $scope.canAddWorkflowJobTemplate = false;
 
         }
 
-        // var getTotalHostCount = function(count) {
-        //     return Object
-        //         .keys(count).reduce((acc, i) => acc += count[i], 0);
-        // };
-
-
         $scope.toggleStdoutFullscreen = function() {
             $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+            if ($scope.stdoutFullScreen === true) {
+                $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+            } else if ($scope.stdoutFullScreen === false) {
+                $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+            }
         };
 
         $scope.deleteJob = function() {
@@ -111,24 +124,78 @@ export default ['workflowData',
             workflowResultsService.relaunchJob($scope);
         };
 
-        init();
+        $scope.toggleManualControls = function() {
+            $scope.showManualControls = !$scope.showManualControls;
+        };
 
-        $scope.$on(`ws-workflow_events-${$scope.workflow.id}`, function(e, data) {
+        $scope.lessLabels = false;
+        $scope.toggleLessLabels = function() {
+            if (!$scope.lessLabels) {
+                $('#workflow-results-labels').slideUp(200);
+                $scope.lessLabels = true;
+            }
+            else {
+                $('#workflow-results-labels').slideDown(200);
+                $scope.lessLabels = false;
+            }
+        };
 
-            WorkflowService.updateStatusOfNode({
-                treeData: $scope.treeData,
-                nodeId: data.workflow_node_id,
-                status: data.status,
-                unified_job_id: data.unified_job_id
+        $scope.panChart = function(direction) {
+            $scope.$broadcast('panWorkflowChart', {
+                direction: direction
             });
+        };
 
-            $scope.$broadcast("refreshWorkflowChart");
-        });
+        $scope.zoomChart = function(zoom) {
+            $scope.$broadcast('zoomWorkflowChart', {
+                zoom: zoom
+            });
+        };
+
+        $scope.resetChart = function() {
+            $scope.$broadcast('resetWorkflowChart');
+        };
+
+        $scope.workflowZoomed = function(zoom) {
+            $scope.$broadcast('workflowZoomed', {
+                zoom: zoom
+            });
+        };
+
+        init();
 
         // Processing of job-status messages from the websocket
         $scope.$on(`ws-jobs`, function(e, data) {
+            // Update the workflow job's unified job:
             if (parseInt(data.unified_job_id, 10) === parseInt($scope.workflow.id,10)) {
-                $scope.workflow.status = data.status;
+                    $scope.workflow.status = data.status;
+
+                    if(data.status === "successful" || data.status === "failed"){
+                        $state.go('.', null, { reload: true });
+                    }
+            }
+            // Update the jobs spawned by the workflow:
+            if(data.hasOwnProperty('workflow_job_id') &&
+                parseInt(data.workflow_job_id, 10) === parseInt($scope.workflow.id,10)){
+
+                    WorkflowService.updateStatusOfNode({
+                        treeData: $scope.treeData,
+                        nodeId: data.workflow_node_id,
+                        status: data.status,
+                        unified_job_id: data.unified_job_id
+                    });
+
+                    $scope.workflow_nodes.forEach(node => {
+                        if(parseInt(node.id) === parseInt(data.workflow_node_id)){
+                            node.summary_fields.job = {
+                                    status: data.status
+                            };
+                        }
+                    });
+
+                    $scope.count = workflowResultsService
+                        .getCounts($scope.workflow_nodes);
+                    $scope.$broadcast("refreshWorkflowChart");
             }
         });
 }];

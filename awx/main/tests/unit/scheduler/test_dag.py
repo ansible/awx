@@ -5,7 +5,7 @@ import pytest
 # AWX
 from awx.main.scheduler.dag_simple import SimpleDAG
 from awx.main.scheduler.dag_workflow import WorkflowDAG
-from awx.main.models import Job
+from awx.main.models import Job, JobTemplate
 from awx.main.models.workflow import WorkflowJobNode
 
 
@@ -72,6 +72,7 @@ def factory_node():
         if status:
             j = Job(status=status)
             wfn.job = j
+        wfn.unified_job_template = JobTemplate(name='JT{}'.format(id))
         return wfn
     return fn
 

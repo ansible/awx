@@ -13,7 +13,7 @@ module.exports = {
         },
         options: {
             proxy: {
-                target: `${django_host}:${django_port}`,
+                target: `https://${django_host}:${django_port}`,
                 ws: true
             },
             keepalive: false,

@@ -12,7 +12,7 @@ export default
     .value('CopyMoveGroupList', {
 
         name: 'groups',
-        iterator: 'group',
+        iterator: 'copy',
         selectTitle: 'Copy Groups',
         index: false,
         well: false,
@@ -22,5 +22,6 @@ export default
                 key: true,
                 label: 'Target Group Name'
             }
-        }
+        },
+        basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/groups'
     });

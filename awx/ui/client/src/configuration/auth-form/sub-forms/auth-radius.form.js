@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
         // editTitle: 'Authorization Configuration',
         name: 'configuration_radius_template',
@@ -21,7 +21,8 @@ export default function() {
                 reset: 'RADIUS_PORT'
             },
             RADIUS_SECRET: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'RADIUS_SECRET'
             }
         },
@@ -29,8 +30,8 @@ export default function() {
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: 'Reset All',
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',
@@ -42,3 +43,4 @@ export default function() {
         }
     };
 }
+];

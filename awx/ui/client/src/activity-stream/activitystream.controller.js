@@ -12,6 +12,7 @@
 function activityStreamController($scope, $state, subTitle, Stream, GetTargetTitle, list, Dataset) {
 
     init();
+    initOmitSmartTags();
 
     function init() {
         // search init
@@ -33,6 +34,20 @@ function activityStreamController($scope, $state, subTitle, Stream, GetTargetTit
         });
     }
 
+    // Specification of smart-tags omission from the UI is done in the route/state init.
+    // A limitation is that this specficiation is static and the key for which to be omitted from
+    // the smart-tags must be known at that time.
+    // In the case of activity stream, we won't to dynamically ommit the resource for which we are
+    // displaying the activity stream for. i.e. 'project', 'credential', etc.
+    function initOmitSmartTags() {
+        let defaults, route = _.find($state.$current.path, (step) => {
+            return step.params.hasOwnProperty('activity_search');
+        });
+        if (route && $state.params.target !== undefined) {
+            defaults = route.params.activity_search.config.value;
+            defaults[$state.params.target] = null;
+        }
+    }
 }
 
 export default ['$scope', '$state', 'subTitle', 'Stream', 'GetTargetTitle', 'StreamList', 'Dataset', activityStreamController];

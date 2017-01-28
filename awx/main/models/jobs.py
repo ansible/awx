@@ -4,14 +4,12 @@
 # Python
 import datetime
 import hmac
-import json
 import logging
 import time
 from urlparse import urljoin
 
 # Django
 from django.conf import settings
-from django.core.cache import cache
 from django.db import models
 from django.db.models import Q, Count
 from django.utils.dateparse import parse_datetime
@@ -589,22 +587,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
                          hosts=all_hosts))
         return data
 
-    def handle_extra_data(self, extra_data):
-        extra_vars = {}
-        if isinstance(extra_data, dict):
-            extra_vars = extra_data
-        elif extra_data is None:
-            return
-        else:
-            if extra_data == "":
-                return
-            try:
-                extra_vars = json.loads(extra_data)
-            except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
-        evars = self.extra_vars_dict
-        evars.update(extra_vars)
-        self.update_fields(extra_vars=json.dumps(evars))
+    def _resources_sufficient_for_launch(self):
+        if self.job_type == PERM_INVENTORY_SCAN:
+            return self.inventory_id is not None
+        return not (self.inventory_id is None or self.project_id is None)
 
     def display_artifacts(self):
         '''
@@ -653,6 +639,16 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Job"
+
+    '''
+    Canceling a job also cancels the implicit project update with launch_type
+    run.
+    '''
+    def cancel(self):
+        res = super(Job, self).cancel()
+        if self.project_update:
+            self.project_update.cancel()
+        return res
 
 
 class JobHostSummary(CreatedModifiedModel):
@@ -814,7 +810,7 @@ class JobEvent(CreatedModifiedModel):
             ('job', 'uuid'),
             ('job', 'start_line'),
             ('job', 'end_line'),
-            ('job', 'parent'),
+            ('job', 'parent_uuid'),
         ]
 
     job = models.ForeignKey(
@@ -888,6 +884,11 @@ class JobEvent(CreatedModifiedModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        editable=False,
+    )
+    parent_uuid = models.CharField(
+        max_length=1024,
+        default='',
         editable=False,
     )
     counter = models.PositiveIntegerField(
@@ -970,28 +971,6 @@ class JobEvent(CreatedModifiedModel):
                 pass
         return msg
 
-    def _find_parent_id(self):
-        # Find the (most likely) parent event for this event.
-        parent_events = set()
-        if self.event in ('playbook_on_play_start', 'playbook_on_stats',
-                          'playbook_on_vars_prompt'):
-            parent_events.add('playbook_on_start')
-        elif self.event in ('playbook_on_notify', 'playbook_on_setup',
-                            'playbook_on_task_start',
-                            'playbook_on_no_hosts_matched',
-                            'playbook_on_no_hosts_remaining',
-                            'playbook_on_import_for_host',
-                            'playbook_on_not_import_for_host'):
-            parent_events.add('playbook_on_play_start')
-        elif self.event.startswith('runner_on_'):
-            parent_events.add('playbook_on_setup')
-            parent_events.add('playbook_on_task_start')
-        if parent_events:
-            qs = JobEvent.objects.filter(job_id=self.job_id, event__in=parent_events).order_by('-pk')
-            if self.pk:
-                qs = qs.filter(pk__lt=self.pk)
-            return qs.only('id').values_list('id', flat=True).first()
-
     def _update_from_event_data(self):
         # Update job event model fields from event data.
         updated_fields = set()
@@ -1033,20 +1012,14 @@ class JobEvent(CreatedModifiedModel):
                 updated_fields.add(field)
         return updated_fields
 
-    def _update_parent_failed_and_changed(self):
-        # Propagate failed and changed flags to parent events.
-        if self.parent_id:
-            parent = self.parent
-            update_fields = []
-            if self.failed and not parent.failed:
-                parent.failed = True
-                update_fields.append('failed')
-            if self.changed and not parent.changed:
-                parent.changed = True
-                update_fields.append('changed')
-            if update_fields:
-                parent.save(update_fields=update_fields, from_parent_update=True)
-                parent._update_parent_failed_and_changed()
+    def _update_parents_failed_and_changed(self):
+        # Update parent events to reflect failed, changed
+        runner_events = JobEvent.objects.filter(job=self.job,
+                                                event__startswith='runner_on')
+        changed_events = runner_events.filter(changed=True)
+        failed_events = runner_events.filter(failed=True)
+        JobEvent.objects.filter(uuid__in=changed_events.values_list('parent_uuid', flat=True)).update(changed=True)
+        JobEvent.objects.filter(uuid__in=failed_events.values_list('parent_uuid', flat=True)).update(failed=True)
 
     def _update_hosts(self, extra_host_pks=None):
         # Update job event hosts m2m from host_name, propagate to parent events.
@@ -1066,15 +1039,18 @@ class JobEvent(CreatedModifiedModel):
         qs = qs.exclude(job_events__pk=self.id).only('id')
         for host in qs:
             self.hosts.add(host)
-        if self.parent_id:
-            self.parent._update_hosts(qs.values_list('id', flat=True))
+        if self.parent_uuid:
+            parent = JobEvent.objects.filter(uuid=self.parent_uuid)
+            if parent.exists():
+                parent = parent[0]
+                parent._update_hosts(qs.values_list('id', flat=True))
 
     def _update_host_summary_from_stats(self):
         from awx.main.models.inventory import Host
         hostnames = set()
         try:
-            for v in self.event_data.values():
-                hostnames.update(v.keys())
+            for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                hostnames.update(self.event_data.get(stat, {}).keys())
         except AttributeError: # In case event_data or v isn't a dict.
             pass
         with ignore_inventory_computed_fields():
@@ -1126,21 +1102,13 @@ class JobEvent(CreatedModifiedModel):
                     self.host_id = host_id
                     if 'host_id' not in update_fields:
                         update_fields.append('host_id')
-            # Update parent related field if not set.
-            if self.parent_id is None:
-                self.parent_id = self._find_parent_id()
-                if self.parent_id and 'parent_id' not in update_fields:
-                    update_fields.append('parent_id')
         super(JobEvent, self).save(*args, **kwargs)
         # Update related objects after this event is saved.
         if not from_parent_update:
-            if self.parent_id:
-                self._update_parent_failed_and_changed()
-            # FIXME: The update_hosts() call (and its queries) are the current
-            # performance bottleneck....
             if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
                 self._update_hosts()
             if self.event == 'playbook_on_stats':
+                self._update_parents_failed_and_changed()
                 self._update_host_summary_from_stats()
 
     @classmethod
@@ -1162,48 +1130,40 @@ class JobEvent(CreatedModifiedModel):
         except (KeyError, ValueError):
             kwargs.pop('created', None)
 
-        # Save UUID and parent UUID for determining parent-child relationship.
-        job_event_uuid = kwargs.get('uuid', None)
-        parent_event_uuid = kwargs.get('parent_uuid', None)
-        artifact_dict = kwargs.get('artifact_data', None)
-
         # Sanity check: Don't honor keys that we don't recognize.
         valid_keys = {'job_id', 'event', 'event_data', 'playbook', 'play',
                       'role', 'task', 'created', 'counter', 'uuid', 'stdout',
-                      'start_line', 'end_line', 'verbosity'}
+                      'parent_uuid', 'start_line', 'end_line', 'verbosity'}
         for key in kwargs.keys():
             if key not in valid_keys:
                 kwargs.pop(key)
 
-        # Try to find a parent event based on UUID.
-        if parent_event_uuid:
-            cache_key = '{}_{}'.format(kwargs['job_id'], parent_event_uuid)
-            parent_id = cache.get(cache_key)
-            if parent_id is None:
-                parent_id = JobEvent.objects.filter(job_id=kwargs['job_id'], uuid=parent_event_uuid).only('id').values_list('id', flat=True).first()
-                if parent_id:
-                    print("Settings cache: {} with value {}".format(cache_key, parent_id))
-                    cache.set(cache_key, parent_id, 300)
-            if parent_id:
-                kwargs['parent_id'] = parent_id
+        event_data = kwargs.get('event_data', None)
+        artifact_dict = None
+        if event_data:
+            artifact_dict = event_data.pop('artifact_data', None)
 
         analytics_logger.info('Job event data saved.', extra=dict(event_model_data=kwargs))
 
         job_event = JobEvent.objects.create(**kwargs)
 
-        # Cache this job event ID vs. UUID for future parent lookups.
-        if job_event_uuid:
-            cache_key = '{}_{}'.format(kwargs['job_id'], job_event_uuid)
-            cache.set(cache_key, job_event.id, 300)
-
         # Save artifact data to parent job (if provided).
         if artifact_dict:
-            event_data = kwargs.get('event_data', None)
             if event_data and isinstance(event_data, dict):
-                res = event_data.get('res', None)
-                if res and isinstance(res, dict):
-                    if res.get('_ansible_no_log', False):
-                        artifact_dict['_ansible_no_log'] = True
+                # Note: Core has not added support for marking artifacts as 
+                # sensitive yet. Going forward, core will not use
+                # _ansible_no_log to denote sensitive set_stats calls.
+                # Instead, they plan to add a flag outside of the traditional
+                # no_log mechanism. no_log will not work for this feature,
+                # in core, because sensitive data is scrubbed before sending
+                # data to the callback. The playbook_on_stats is the callback
+                # in which the set_stats data is used.
+
+                # Again, the sensitive artifact feature has not yet landed in
+                # core. The below is how we mark artifacts payload as
+                # senstive
+                # artifact_dict['_ansible_no_log'] = True
+                #
                 parent_job = Job.objects.filter(pk=kwargs['job_id']).first()
                 if parent_job and parent_job.artifacts != artifact_dict:
                     parent_job.artifacts = artifact_dict
@@ -1327,23 +1287,6 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
 
     def get_ui_url(self):
         return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
-
-    def handle_extra_data(self, extra_data):
-        extra_vars = {}
-        if isinstance(extra_data, dict):
-            extra_vars = extra_data
-        elif extra_data is None:
-            return
-        else:
-            if extra_data == "":
-                return
-            try:
-                extra_vars = json.loads(extra_data)
-            except Exception as e:
-                logger.warn("Exception deserializing extra vars: " + str(e))
-        evars = self.extra_vars_dict
-        evars.update(extra_vars)
-        self.update_fields(extra_vars=json.dumps(evars))
 
     @property
     def task_impact(self):

@@ -30,7 +30,8 @@ export default
                 dataPlacement: 'right',
                 icon: "icon-job-{{ project.statusIcon }}",
                 columnClass: "List-staticColumn--smallStatus",
-                nosort: true
+                nosort: true,
+                excludeModal: true
             },
             name: {
                 key: true,
@@ -38,16 +39,17 @@ export default
                 columnClass: "col-lg-4 col-md-4 col-sm-5 col-xs-7 List-staticColumnAdjacent",
                 modalColumnClass: 'col-md-8'
             },
+            scm_type: {
+                label: i18n._('Type'),
+                ngBind: 'project.type_label',
+                excludeModal: true,
+                columnClass: 'col-lg-2 col-md-2 col-sm-3 hidden-xs'
+            },
             scm_revision: {
                 label: i18n._('Revision'),
                 excludeModal: true,
-                columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs',
+                columnClass: 'col-lg-4 col-md-2 col-sm-3 hidden-xs',
                 class: 'List-staticColumnAdjacent--monospace'
-            },
-            scm_type: {
-                label: i18n._('Type'),
-                excludeModal: true,
-                columnClass: 'col-lg-3 col-md-2 col-sm-3 hidden-xs'
             },
             last_updated: {
                 label: i18n._('Last Updated'),
@@ -59,6 +61,14 @@ export default
         },
 
         actions: {
+            refresh: {
+                mode: 'all',
+                awToolTip: i18n._("Refresh the page"),
+                ngClick: "refresh()",
+                ngShow: "socketStatus === 'error'",
+                actionClass: 'btn List-buttonDefault',
+                buttonContent: i18n._('REFRESH')
+            },
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addProject()',
@@ -66,14 +76,6 @@ export default
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ' + i18n._('ADD'),
                 ngShow: "canAdd"
-            },
-            refresh: {
-                mode: 'all',
-                awToolTip: i18n._("Refresh the page"),
-                ngClick: "refresh()",
-                ngShow: "socketStatus == 'error'",
-                actionClass: 'btn List-buttonDefault',
-                buttonContent: i18n._('REFRESH')
             }
         },
 

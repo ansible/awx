@@ -4,19 +4,24 @@
  * All Rights Reserved
  *************************************************/
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
         name: 'configuration_google_oauth_template',
         showActions: true,
         showHeader: false,
 
         fields: {
+            SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL: {
+                type: 'text',
+                reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_CALLBACK_URL'
+            },
             SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: {
                 type: 'text',
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_KEY'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: {
-                type: 'text',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET'
             },
             SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS: {
@@ -30,14 +35,28 @@ export default function() {
                 codeMirror: true,
                 rows: 6,
                 class: 'Form-textAreaLabel Form-formGroup--fullWidth',
+            },
+            SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_ORGANIZATION_MAP',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
+            },
+            SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP: {
+                type: 'textarea',
+                reset: 'SOCIAL_AUTH_GOOGLE_OAUTH2_TEAM_MAP',
+                rows: 6,
+                codeMirror: true,
+                class: 'Form-textAreaLabel Form-formGroup--fullWidth'
             }
         },
 
         buttons: {
             reset: {
                 ngClick: 'vm.resetAllConfirm()',
-                label: 'Reset All',
-                class: 'Form-button--left Form-cancelButton'
+                label: i18n._('Revert all to default'),
+                class: 'Form-resetAll'
             },
             cancel: {
                 ngClick: 'vm.formCancel()',
@@ -49,3 +68,4 @@ export default function() {
         }
     };
 }
+];

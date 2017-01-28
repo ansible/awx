@@ -37,7 +37,7 @@
 }
 .WorkflowMaker-contentHolder {
     display: flex;
-    border: 1px solid #EBEBEB;
+    border: 1px solid @default-list-header-bg;
     height: ~"calc(100% - 85px)";
 }
 .WorkflowMaker-contentLeft {
@@ -47,7 +47,7 @@
 }
 .WorkflowMaker-contentRight {
     flex: 0 0 400px;
-    border-left: 1px solid #EBEBEB;
+    border-left: 1px solid @default-list-header-bg;
     padding: 20px;
     height: 100%;
     overflow-y: scroll;
@@ -120,14 +120,14 @@
     margin-bottom: 20px;
 }
 .WorkflowMaker-formHelp {
-    color: #707070;
+    color: @default-interface-txt;
 }
 .WorkflowMaker-formLists {
     margin-bottom: 20px;
 }
 .WorkflowMaker-formTitle {
     display: flex;
-    color: #707070;
+    color: @default-interface-txt;
     margin-right: 10px;
 }
 .WorkflowMaker-formLabel {
@@ -140,13 +140,13 @@
     display: flex;
 }
 .WorkflowMaker-totalJobs {
-    margin-right: 10px;
+    margin-right: 5px;
 }
 .WorkflowLegend-maker {
     display: flex;
     height: 40px;
     line-height: 40px;
-    color: #707070;
+    color: @default-interface-txt;
 }
 .WorkflowLegend-maker--left {
     display: flex;
@@ -154,9 +154,10 @@
     padding-left: 20px;
 }
 .WorkflowLegend-maker--right {
-    flex: 0 0 170px;
+    flex: 0 0 215px;
     text-align: right;
     padding-right: 20px;
+    position: relative;
 }
 .WorkflowLegend-onSuccessLegend {
     height: 4px;
@@ -167,21 +168,21 @@
 .WorkflowLegend-onFailLegend {
     height: 4px;
     width: 20px;
-    background-color: #d9534f;
+    background-color: @default-err;
     margin: 18px 5px 18px 0px;
 }
 .WorkflowLegend-alwaysLegend {
     height: 4px;
     width: 20px;
-    background-color: #337ab7;
+    background-color: @default-link;
     margin: 18px 5px 18px 0px;
 }
 .WorkflowLegend-letterCircle{
     border-radius: 50%;
     width: 20px;
     height: 20px;
-    background: #848992;
-    color: #FFF;
+    background: @default-icon;
+    color: @default-bg;
     text-align: center;
     margin: 10px 5px 10px 0px;
     line-height: 20px;
@@ -191,7 +192,7 @@
     height: 40px;
     line-height: 40px;
     padding-left: 20px;
-    border: 1px solid #F6F6F6;
+    border: 1px solid @default-no-items-bord;
     margin-top:10px;
 }
 .WorkflowLegend-legendItem {
@@ -199,4 +200,46 @@
 }
 .WorkflowLegend-legendItem:not(:last-child) {
     padding-right: 20px;
+}
+.WorkflowLegend-details--left {
+    display: flex;
+    flex: 1 0 auto;
+}
+.WorkflowLegend-details--right {
+    flex: 0 0 44px;
+    text-align: right;
+    padding-right: 20px;
+    position:relative;
+}
+.WorkflowMaker-manualControlsIcon {
+    color: @default-icon;
+    vertical-align: middle;
+    font-size: 1.2em;
+    margin-left: 10px;
+}
+.WorkflowMaker-manualControlsIcon:hover {
+    color: @default-link-hov;
+    cursor: pointer;
+}
+.WorkflowMaker-manualControlsIcon--active {
+    color: @default-link-hov;
+}
+.WorkflowMaker-manualControls {
+    position: absolute;
+    left: -77px;
+    height: 60px;
+    width: 293px;
+    background-color: @default-bg;
+    display: flex;
+    border: 1px solid @default-list-header-bg;
+}
+.WorkflowLegend-manualControls {
+    position: absolute;
+    left: -245px;
+    top: 38px;
+    height: 60px;
+    width: 290px;
+    background-color: @default-bg;
+    display: flex;
+    border: 1px solid @default-list-header-bg;
 }

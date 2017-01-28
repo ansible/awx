@@ -66,6 +66,17 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
 
 
 @pytest.mark.django_db
+def test_reject_dict_extra_vars_patch(patch, job_template_factory, admin_user):
+    # Expect a string for extra_vars, raise 400 in this case that would
+    # otherwise have been saved incorrectly
+    jt = job_template_factory(
+        'jt', organization='org1', project='prj', inventory='inv', credential='cred'
+    ).job_template
+    patch(reverse('api:job_template_detail', args=(jt.id,)),
+          {'extra_vars': {'foo': 5}}, admin_user, expect=400)
+
+
+@pytest.mark.django_db
 def test_edit_playbook(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     objs.job_template.admin_role.members.add(alice)

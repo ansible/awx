@@ -463,10 +463,112 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
     return {
         require: 'ngModel',
         link: function(scope, elm, attrs, fieldCtrl) {
-
             let query,
                 basePath,
-                defer = $q.defer();
+                defer = $q.defer(),
+                autopopulateLookup,
+                modelKey = attrs.ngModel,
+                modelName = attrs.source,
+                watcher = attrs.awRequiredWhen || undefined,
+                watchBasePath;
+
+            if (attrs.autopopulatelookup !== undefined) {
+               autopopulateLookup = JSON.parse(attrs.autopopulatelookup);
+            } else {
+               autopopulateLookup = true;
+            }
+
+
+            // The following block of code is for instances where the
+            // lookup field is reused by varying sub-forms. Example: The groups
+            // form will change it's credential lookup based on the
+            // source type. The basepath the lookup should utilize is dynamic
+            // in this case. You'd configure the "watchBasePath" key on the
+            // field's configuration in the form configuration field.
+            if (attrs.watchbasepath !== undefined) {
+                watchBasePath = attrs.watchbasepath;
+                scope.$watch(watchBasePath, (newValue) => {
+                    if(newValue !== undefined && fieldIsAutopopulatable()){
+                        _doAutoPopulate();
+                    }
+                });
+            }
+
+            function _doAutoPopulate() {
+                let query = '?role_level=use_role';
+
+                if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
+                    basePath = scope[attrs.watchbasepath];
+                    query = '&role_level=use_role';
+                }
+                else {
+                    basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
+                    switch(modelName) {
+                        case 'credential':
+                            query = '?kind=ssh&role_level=use_role';
+                            break;
+                        case 'network_credential':
+                            query = '?kind=net&role_level=use_role';
+                            break;
+                        case 'organization':
+                            query = '?role_level=admin_role';
+                            break;
+                        case 'inventory_script':
+                            query = '?role_level=admin_role';
+                            break;
+                    }
+
+                }
+
+                Rest.setUrl(`${basePath}` + query);
+                Rest.get()
+                .success(function (data) {
+                    if (data.count === 1) {
+                        scope[modelKey] = data.results[0].name;
+                        scope[modelName] = data.results[0].id;
+                    }
+                });
+            }
+
+            if (fieldIsAutopopulatable()) {
+                _doAutoPopulate();
+            }
+
+            // This checks to see if the field meets the criteria to
+            // autopopulate:
+            // Population rules:
+            // - add form only
+            // - lookup is required
+            // - lookup is not promptable
+            // - user must only have access to 1 item the lookup is for
+            function fieldIsAutopopulatable() {
+                if (autopopulateLookup === false) {
+                    return false;
+                }
+                if (scope.mode === "add") {
+                    if(watcher){
+                        scope.$watch(watcher, () => {
+                            if(Boolean(scope.$eval(watcher)) === true){
+
+                                // if we get here then the field is required
+                                // by way of awRequiredWhen
+                                // and is a candidate for autopopulation
+
+                                _doAutoPopulate();
+                            }
+                        });
+                    }
+                    else if (attrs.required === true) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
 
             // query the API to see if field value corresponds to a valid resource
             // .ng-pending will be applied to the directive element while the request is outstanding
@@ -484,7 +586,36 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 function applyValidation(viewValue) {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
-                    query = query.replace(/\:value/, encodeURI(viewValue));
+                    query = query.replace(/\:value/, encodeURIComponent(viewValue));
+
+                    let base = ctrl.$name.split('_name')[0];
+                    if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
+                        basePath = scope[attrs.watchbasepath];
+                        query += '&role_level=use_role';
+                        query = query.replace('?', '&');
+                    }
+                    else {
+                        switch(base) {
+                            case 'credential':
+                                query += '&kind=ssh&role_level=use_role';
+                                break;
+                            case 'network_credential':
+                                query += '&kind=net&role_level=use_role';
+                                break;
+                            case 'cloud_credential':
+                                query += '&cloud=true&role_level=use_role';
+                                break;
+                            case 'organization':
+                                query += '&role_level=admin_role';
+                                break;
+                            case 'inventory_script':
+                                query += '&role_level=admin_role';
+                                break;
+                            default:
+                                query += '&role_level=use_role';
+                        }
+                    }
+
                     Rest.setUrl(`${basePath}${query}`);
                     // https://github.com/ansible/ansible-tower/issues/3549
                     // capturing both success/failure conditions in .then() promise
@@ -620,12 +751,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 
             if (attrs.tipWatch) {
                 // Add dataTipWatch: 'variable_name'
-                scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
-                    if (newVal !== oldVal) {
-                        // Where did fixTitle come from?:
-                        //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                        $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
-                    }
+                scope.$watch(attrs.tipWatch, function(newVal) {
+                    // Where did fixTitle come from?:
+                    //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
+                    $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
                 });
             }
         }
@@ -1130,6 +1259,55 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 } else {
                     Alert('Error', 'There was an error reading the selected file.');
                 }
+            });
+        }
+    };
+}])
+
+.directive('awPasswordToggle', [function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element) {
+            $(element).click(function() {
+                var buttonInnerHTML = $(element).html();
+                if (buttonInnerHTML.indexOf("Show") > -1) {
+                    $(element).html("Hide");
+                    $(element).closest('.input-group').find('input').first().attr("type", "text");
+                } else {
+                    $(element).html("Show");
+                    $(element).closest('.input-group').find('input').first().attr("type", "password");
+                }
+            });
+        }
+    };
+}])
+
+.directive('awEnterKey', [function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.bind("keydown keypress", function(event) {
+                var keyCode = event.which || event.keyCode;
+                if (keyCode === 13) {
+                    scope.$apply(function() {
+                        scope.$eval(attrs.awEnterKey);
+                    });
+                    event.preventDefault();
+                }
+            });
+        }
+    };
+}])
+
+.directive('awTruncateBreadcrumb', ['BreadCrumbService', function(BreadCrumbService) {
+    return {
+        restrict: 'A',
+        scope: {
+            breadcrumbStep: '='
+        },
+        link: function(scope) {
+            scope.$watch('breadcrumbStep.ncyBreadcrumbLabel', function(){
+                BreadCrumbService.truncateCrumbs();
             });
         }
     };

@@ -64,7 +64,7 @@ class MemObject(object):
         all_vars = {}
         files_found = 0
         for suffix in ('', '.yml', '.yaml', '.json'):
-            path = ''.join([base_path, suffix])
+            path = ''.join([base_path, suffix]).encode("utf-8")
             if not os.path.exists(path):
                 continue
             if not os.path.isfile(path):
@@ -462,7 +462,7 @@ class ExecutableJsonLoader(BaseLoader):
         # to set their variables
         for k,v in self.all_group.all_hosts.iteritems():
             if 'hostvars' not in _meta:
-                data = self.command_to_json([self.source, '--host', k])
+                data = self.command_to_json([self.source, '--host', k.encode("utf-8")])
             else:
                 data = _meta['hostvars'].get(k, {})
             if isinstance(data, dict):
@@ -482,6 +482,7 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     # good naming conventions
     source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
+    source = source.replace('vmware.py', 'vmware_inventory.py')
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group
     if not os.path.exists(source):
@@ -1191,7 +1192,7 @@ class Command(NoArgsCommand):
 
     def check_license(self):
         license_info = TaskEnhancer().validate_enhancements()
-        if not license_info or len(license_info) == 0:
+        if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No Tower license found!')
         available_instances = license_info.get('available_instances', 0)
@@ -1252,6 +1253,12 @@ class Command(NoArgsCommand):
             self.host_filter_re = re.compile(self.host_filter)
         except re.error:
             raise CommandError('invalid regular expression for --host-filter')
+
+        '''
+        TODO: Remove this deprecation when we remove support for rax.py
+        '''
+        if self.source == "rax.py":
+            self.logger.info("Rackspace inventory sync is Deprecated in Tower 3.1.0 and support for Rackspace will be removed in a future release.")
 
         begin = time.time()
         self.load_inventory_from_database()

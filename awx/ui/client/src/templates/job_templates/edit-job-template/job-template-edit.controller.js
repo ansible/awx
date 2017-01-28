@@ -423,23 +423,20 @@ export default
                 if (data.related &&
                     data.related.callback) {
                     Alert('Callback URL',
-`
-<div>
-    <p>Host callbacks are enabled for this template. The callback URL is:</p>
-    <p style=\"padding: 10px 0;\">
-        <strong>
-            ${$scope.callback_server_path}
-            ${data.related.callback}
-        </string>
-    </p>
-    <p>The host configuration key is:
-        <strong>
-            ${$filter('sanitize')(data.host_config_key)}
-        </string>
-    </p>
-</div>
+`Host callbacks are enabled for this template. The callback URL is:
+<p style=\"padding: 10px 0;\">
+    <strong>
+        ${$scope.callback_server_path}
+        ${data.related.callback}
+    </strong>
+</p>
+<p>The host configuration key is:
+    <strong>
+        ${$filter('sanitize')(data.host_config_key)}
+    </strong>
+</p>
 `,
-                        'alert-info', saveCompleted, null, null,
+                        'alert-danger', saveCompleted, null, null,
                         null, true);
                 }
                 var orgDefer = $q.defer();

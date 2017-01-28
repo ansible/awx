@@ -269,6 +269,7 @@ register(
     'AUTH_LDAP_USER_DN_TEMPLATE',
     field_class=fields.LDAPDNWithUserField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP User DN Template'),
     help_text=_('Alternative to user search, if user DNs are all of the same '
@@ -331,12 +332,14 @@ register(
     category=_('LDAP'),
     category_slug='ldap',
     feature_required='ldap',
+    default='MemberDNGroupType',
 )
 
 register(
     'AUTH_LDAP_REQUIRE_GROUP',
     field_class=fields.LDAPDNField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP Require Group'),
     help_text=_('Group DN required to login. If specified, user must be a member '
@@ -353,6 +356,7 @@ register(
     'AUTH_LDAP_DENY_GROUP',
     field_class=fields.LDAPDNField,
     allow_blank=True,
+    allow_null=True,
     default='',
     label=_('LDAP Deny Group'),
     help_text=_('Group DN denied from login. If specified, user will not be '
@@ -924,13 +928,12 @@ register(
 
 register(
     'SOCIAL_AUTH_SAML_SP_ENTITY_ID',
-    field_class=fields.URLField,
-    schemes=('http', 'https'),
+    field_class=fields.CharField,
     allow_blank=True,
     default='',
     label=_('SAML Service Provider Entity ID'),
-    help_text=_('Set to a URL for a domain name you own (does not need to be a '
-                'valid URL; only used as a unique ID).'),
+    help_text=_('The application-defined unique identifier used as the '
+                'audience of the SAML service provider (SP) configuration.'),
     category=_('SAML'),
     category_slug='saml',
     feature_required='enterprise_auth',

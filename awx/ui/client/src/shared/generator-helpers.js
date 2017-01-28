@@ -467,7 +467,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     Attr(field, 'columnClass') : "";
                 html += `
 <td ${classList}>
-    <role-list class=\"RoleList\">
+    <role-list delete-target=\"${list.iterator}\" class=\"RoleList\">
     </role-list>
 </td>
                 `;
@@ -476,7 +476,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     Attr(field, 'columnClass') : "";
                 html += `
 <td ${classList}>
-    <role-list class=\"RoleList\" team-role-list="true">
+    <role-list delete-target=\"${list.iterator}\" class=\"RoleList\" team-role-list="true">
     </role-list>
 </td>
                 `;
@@ -526,8 +526,7 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 }
                 html += "\" ";
                 html += field.columnNgClass ? " ng-class=\"" + field.columnNgClass + "\"": "";
-                html += (options.mode === 'lookup' || options.mode === 'select') ? " ng-click=\"toggle_" + list.iterator +
-                    "(" + list.iterator + ".id)\"" : "";
+                html += (options.mode === 'lookup' || options.mode === 'select') ? " ng-click=\"toggle_row(" + list.iterator + ".id)\"" : "";
                 html += (field.columnShow) ? Attr(field, 'columnShow') : "";
                 html += (field.ngBindHtml) ? "ng-bind-html=\"" + field.ngBindHtml + "\" " : "";
                 html += (field.columnClick) ? "ng-click=\"" + field.columnClick + "\" " : "";
@@ -592,6 +591,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     }
                 }
                 else {
+                    if(field.simpleTip) {
+                        html += `<span aw-tool-tip="${field.simpleTip.awToolTip}" data-placement=${field.simpleTip.dataPlacement}>`;
+                    }
                     // Add icon:
                     if (field.ngShowIcon) {
                         html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
@@ -615,6 +617,9 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                     // Add additional text:
                     if (field.text) {
                         html += field.text;
+                    }
+                    if(field.simpleTip) {
+                        html += `</span>`;
                     }
                 }
 

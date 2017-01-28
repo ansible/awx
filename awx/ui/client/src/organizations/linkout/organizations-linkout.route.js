@@ -99,6 +99,7 @@ export default [{
             list.iterator = 'add_user';
             list.name = 'add_users';
             list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
             delete list.actions;
             delete list.fieldActions;
             return list;
@@ -155,7 +156,7 @@ export default [{
     url: '/:organization_id/inventories',
     searchPrefix: 'inventory',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsInventories,
             templateProvider: function(OrgInventoryList, generateList) {
                 let html = generateList.build({
@@ -201,7 +202,7 @@ export default [{
     url: '/:organization_id/projects',
     searchPrefix: 'project',
     views: {
-        'form@': {
+        'form': {
             controller: OrganizationsProjects,
             templateProvider: function(OrgProjectList, generateList) {
                 let html = generateList.build({
@@ -230,8 +231,8 @@ export default [{
         features: ['FeaturesService', function(FeaturesService) {
             return FeaturesService.get();
         }],
-        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', function(InventoryList, GetBasePath, $stateParams) {
-            let list = _.cloneDeep(InventoryList);
+        OrgProjectList: ['ProjectList', 'GetBasePath', '$stateParams', function(ProjectList, GetBasePath, $stateParams) {
+            let list = _.cloneDeep(ProjectList);
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
@@ -297,6 +298,9 @@ export default [{
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.iterator = 'job_template';
             list.name = 'job_templates';
+            list.basePath = "job_templates";
+            list.fields.type.ngBind = "job_template.type_label";
+            list.fields.smart_status.ngInclude = "'/static/partials/organizations-job-template-smart-status.html'";
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -386,6 +390,7 @@ export default [{
                 }
             };
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
+            list.listTitle = 'Admins';
             return list;
         }],
         AddAdminList: ['UserList', function(UserList) {
@@ -394,6 +399,7 @@ export default [{
             list.iterator = 'add_user';
             list.name = 'add_users';
             list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
             delete list.actions;
             delete list.fieldActions;
             return list;

@@ -10,9 +10,8 @@ DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
-COMPOSE_TAG ?= devel
 # NOTE: This defaults the container image version to the branch that's active
-# COMPOSE_TAG ?= $(GIT_BRANCH)
+COMPOSE_TAG ?= $(GIT_BRANCH)
 
 COMPOSE_HOST ?= $(shell hostname)
 
@@ -176,7 +175,6 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 .DEFAULT_GOAL := build
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
-	requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
@@ -286,8 +284,10 @@ requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
 		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	else \
 	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
+	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
@@ -295,29 +295,24 @@ requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
 	else \
 	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
+	pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
 	fi
 
 requirements_tower_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
-	fi
-
-# Install third-party requirements needed for running unittests in jenkins
-requirements_jenkins:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate && pip install -Ir requirements/requirements_jenkins.txt; \
-	else \
-		pip install -Ir requirements/requirements_jenkins.txt; \
+		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
 	fi
 
 requirements: requirements_ansible requirements_tower
 
 requirements_dev: requirements requirements_tower_dev
 
-requirements_test: requirements requirements_jenkins
+requirements_test: requirements
 
 # "Install" ansible-tower package in development mode.
 develop:
@@ -407,7 +402,7 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=60 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/var/lib/awx/awxfifo --lazy-apps
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -433,7 +428,7 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST) -n celery@$(COMPOSE_HOST)
 	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
@@ -511,6 +506,14 @@ test_tox:
 # Alias existing make target so old versions run against Jekins the same way
 test_jenkins : test_coverage
 
+# Make fake data
+DATA_GEN_PRESET = ""
+bulk_data:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
+
 # l10n TASKS
 # --------------------------------------
 
@@ -559,10 +562,7 @@ messages:
 # generate l10n .json .mo
 languages: $(UI_DEPS_FLAG_FILE) check-po
 	$(NPM_BIN) --prefix awx/ui run languages
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py compilemessages
+	$(PYTHON) tools/scripts/compilemessages.py
 
 # End l10n TASKS
 # --------------------------------------
@@ -572,16 +572,16 @@ languages: $(UI_DEPS_FLAG_FILE) check-po
 
 ui-deps: $(UI_DEPS_FLAG_FILE)
 
-$(UI_DEPS_FLAG_FILE): awx/ui/package.json
+$(UI_DEPS_FLAG_FILE):
 	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
 	touch $(UI_DEPS_FLAG_FILE)
 
 ui-docker-machine: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-machine -- $(MAKEFLAGS)
+	$(NPM_BIN) --prefix awx/ui run ui-docker-machine -- $(MAKEFLAGS)
 
 # Native docker. Builds UI and raises BrowserSync & filesystem polling.
 ui-docker: $(UI_DEPS_FLAG_FILE)
-	$(NPM_BIN) --prefix awx/ui run build-docker-cid -- $(MAKEFLAGS)
+	$(NPM_BIN) --prefix awx/ui run ui-docker -- $(MAKEFLAGS)
 
 # Builds UI with development UI without raising browser-sync or filesystem polling.
 ui-devel: $(UI_DEPS_FLAG_FILE)
@@ -589,8 +589,7 @@ ui-devel: $(UI_DEPS_FLAG_FILE)
 
 ui-release: $(UI_RELEASE_FLAG_FILE)
 
-# todo: include languages target when .po deliverables are added to source control
-$(UI_RELEASE_FLAG_FILE): $(UI_DEPS_FLAG_FILE)
+$(UI_RELEASE_FLAG_FILE): languages $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) --prefix awx/ui run build-release
 	touch $(UI_RELEASE_FLAG_FILE)
 
@@ -690,7 +689,7 @@ rpm-build:
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
-	cp packaging/rpm/$(NAME).te rpm-build/
+	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/

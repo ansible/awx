@@ -16,6 +16,7 @@ index = IndexView.as_view()
 
 class PortalRedirectView(RedirectView):
 
+    permanent = True
     url = '/#/portal'
 
 portal_redirect = PortalRedirectView.as_view()

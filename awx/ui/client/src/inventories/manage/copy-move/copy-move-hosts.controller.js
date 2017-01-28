@@ -5,13 +5,13 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'generateList', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host',
-    function($scope, $state, $stateParams, GenerateList, HostManageService, GetBasePath, CopyMoveGroupList, host){
-        var list = CopyMoveGroupList,
-            view = GenerateList;
+    ['$scope', '$state', '$stateParams', 'generateList', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host', 'Dataset',
+    function($scope, $state, $stateParams, GenerateList, HostManageService, GetBasePath, CopyMoveGroupList, host, Dataset){
+        var list = CopyMoveGroupList;
+
         $scope.item = host;
         $scope.submitMode = 'copy';
-        $scope['toggle_'+ list.iterator] = function(id){
+        $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
@@ -40,29 +40,11 @@
             }
         };
         var init = function(){
-            var url = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
-            list.basePath = url;
-            view.inject(list, {
-                mode: 'lookup',
-                id: 'copyMove-list',
-                scope: $scope,
-                input_type: 'radio'
-            });
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-            // @issue: OLD SEARCH
-            // SearchInit({
-            //     scope: $scope,
-            //     set: list.name,
-            //     list: list,
-            //     url: url
-            // });
-            // PaginateInit({
-            //     scope: $scope,
-            //     list: list,
-            //     url : url,
-            //     mode: 'lookup'
-            // });
-            // $scope.search(list.iterator, null, true, false);
         };
         init();
     }];

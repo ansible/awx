@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Django REST Framework
+from django.conf import settings
 from rest_framework import pagination
 from rest_framework.utils.urls import replace_query_param
 
@@ -9,11 +10,13 @@ from rest_framework.utils.urls import replace_query_param
 class Pagination(pagination.PageNumberPagination):
 
     page_size_query_param = 'page_size'
+    max_page_size = settings.MAX_PAGE_SIZE
 
     def get_next_link(self):
         if not self.page.has_next():
             return None
         url = self.request and self.request.get_full_path() or ''
+        url = url.encode('utf-8')
         page_number = self.page.next_page_number()
         return replace_query_param(url, self.page_query_param, page_number)
 
@@ -21,5 +24,6 @@ class Pagination(pagination.PageNumberPagination):
         if not self.page.has_previous():
             return None
         url = self.request and self.request.get_full_path() or ''
+        url = url.encode('utf-8')
         page_number = self.page.previous_page_number()
         return replace_query_param(url, self.page_query_param, page_number)

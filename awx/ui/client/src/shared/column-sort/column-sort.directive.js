@@ -12,6 +12,7 @@ export default ['templateUrl', function(templateUrl) {
             columnIterator: '@',
             columnField: '@',
             columnLabel: '@',
+            querySet: '='
         },
         controller: 'ColumnSortController',
         templateUrl: templateUrl('shared/column-sort/column-sort')

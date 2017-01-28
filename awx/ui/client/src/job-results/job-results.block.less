@@ -148,4 +148,66 @@
     background-color: @default-bg;
     border-radius: 5px;
     color: @default-interface-txt;
+    margin-right: -5px;
+}
+
+.JobResults-panelRight {
+    display: flex;
+    flex-direction: column;
+}
+
+.StandardOut-panelHeader {
+    flex: initial;
+}
+
+.StandardOut-panelHeader--jobIsRunning {
+    margin-bottom: 20px;
+}
+
+host-status-bar {
+    flex: initial;
+    margin-bottom: 20px;
+}
+
+smart-search {
+    flex: initial;
+}
+
+job-results-standard-out {
+    flex: 1;
+    display: flex
+}
+
+.JobResults-extraVarsHelp {
+    margin-left: 10px;
+    color: @default-icon;
+}
+
+.JobResults .CodeMirror.cm-s-default,
+.JobResults .CodeMirror-line {
+    background-color: #f6f6f6;
+}
+
+.JobResults .CodeMirror-gutter.CodeMirror-lint-markers,
+.JobResults .CodeMirror-gutter.CodeMirror-linenumbers {
+    background-color: #ebebeb;
+    color: @b7grey;
+}
+
+.JobResults .CodeMirror-lines {
+    cursor: default;
+}
+
+.JobResults .CodeMirror-cursors {
+    display: none;
+}
+
+.JobResults-downloadTooLarge {
+    display: flex;
+}
+
+.JobResults-downloadTooLarge--icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

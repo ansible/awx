@@ -130,8 +130,8 @@ Conversely de-provisioning a node will remove capacity from the cluster.
 It's important to note that not all nodes are required to be provisioned with an equal capacity.
 
 Project updates behave differently than they did before. Previously they were ordinary jobs that ran on a single node. It's now important that
-they run successfully on any node that could potentially run a job. Project updates will now fan out to all nodes in the cluster. Success or failure of
-project updates will be conditional upon them succeeding on all nodes.
+they run successfully on any node that could potentially run a job. Project's will now sync themselves to the correct version on the node immediately
+prior to running the job.
 
 ## Acceptance Criteria
 
@@ -143,7 +143,7 @@ When verifying acceptance we should ensure the following statements are true
 * De-provisioning should be supported via a management command
 * All jobs, inventory updates, and project updates should run successfully
 * Jobs should be able to run on all hosts
-* Project updates should manifest their data on all hosts simultaneously
+* Project updates should manifest their data on the host that will run the job immediately prior to the job running
 * Tower should be able to reasonably survive the removal of all nodes in the cluster
 * Tower should behave in a predictable fashiong during network partitioning
 

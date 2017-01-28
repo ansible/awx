@@ -11,8 +11,8 @@
  */
 
 export default
-angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
-    .factory('InventoryFormObject', ['i18n', function(i18n) {
+angular.module('InventoryFormDefinition', [])
+    .factory('InventoryForm', ['i18n', function(i18n) {
         return {
 
         addTitle: i18n._('New Inventory'),
@@ -78,7 +78,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             },
             close: {
                 ngClick: 'formCancel()',
-                ngHide: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngShow: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
                 ngClick: 'formSave()',
@@ -103,7 +103,7 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
                     add: {
                         label: i18n._('Add'),
                         ngClick: "$state.go('.add')",
-                        awToolTip: 'Add a permission',
+                        awToolTip: i18n._('Add a permission'),
                         actionClass: 'btn List-buttonSubmit',
                         buttonContent: '&#43; ADD',
                         ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -181,19 +181,4 @@ angular.module('InventoryFormDefinition', ['ScanJobsListDefinition'])
             };
         }
 
-        };}])
-
-    .factory('InventoryForm', ['InventoryFormObject', 'ScanJobsList',
-        function(InventoryFormObject, ScanJobsList) {
-            return function() {
-                var itm;
-                for (itm in InventoryFormObject.related) {
-                    if (InventoryFormObject.related[itm].include === "ScanJobsList") {
-                        InventoryFormObject.related[itm] = ScanJobsList;
-                        InventoryFormObject.related[itm].generateList = true; // tell form generator to call list generator and inject a list
-                    }
-                }
-                return InventoryFormObject;
-            };
-        }
-    ]);
+    };}]);

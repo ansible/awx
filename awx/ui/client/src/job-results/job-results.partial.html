@@ -15,7 +15,7 @@
                 <div class="JobResults-panelHeader">
                     <div
                         class="JobResults-panelHeaderText">
-                        RESULTS
+                        DETAILS
                     </div>
 
                     <!-- LEFT PANE HEADER ACTIONS -->
@@ -36,9 +36,9 @@
                         <button class="List-actionButton
                                 List-actionButton--delete"
                             data-placement="top"
-                            ng-click="deleteJob()"
-                            ng-show="job_status.status == 'running' ||
-                                job_status.status=='pending' "
+                            ng-click="cancelJob()"
+                            ng-show="job_status == 'running' ||
+                                job_status=='pending' "
                             aw-tool-tip="Cancel"
                             data-original-title="" title="">
                             <i class="fa fa-minus-circle"></i>
@@ -49,8 +49,8 @@
                                 List-actionButton--delete"
                             data-placement="top"
                             ng-click="deleteJob()"
-                            ng-hide="job_status.status == 'running' ||
-                                job_status.status == 'pending' "
+                            ng-hide="job_status == 'running' ||
+                                job_status == 'pending' "
                             aw-tool-tip="Delete"
                             data-original-title=""
                             title="">
@@ -61,6 +61,19 @@
 
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
+
+                    <!-- STATUS DETAIL -->
+                    <div class="JobResults-resultRow">
+                        <label class="JobResults-resultRowLabel">
+                             Status
+                         </label>
+                         <div class="JobResults-resultRowText">
+                             <i	class="JobResults-statusResultIcon
+                                     fa
+                                     icon-job-{{ job_status }}">
+                             </i> {{ status_label }}
+                         </div>
+                     </div>
 
                     <!-- START TIME DETAIL -->
                     <div class="JobResults-resultRow"
@@ -84,6 +97,45 @@
                                 longDate) || "Not Finished" }}
                         </div>
                     </div>
+
+                    <!-- EXPLANATION DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.job_explanation">
+                        <label class="JobResults-resultRowLabel">
+                            Explanation
+                        </label>
+                        <div class="JobResults-resultRowText"
+                            ng-show="!previousTaskFailed">
+                                {{job.job_explanation}}
+                        </div>
+                        <div class="JobDetail-resultRowText "
+                        ng-show="previousTaskFailed">Previous Task Failed
+                            <a
+                                href=""
+                                id="explanation_help"
+                                aw-pop-over="{{ task_detail }}"
+                                aw-pop-over-watch="task_detail"
+                                data-placement="bottom"
+                                data-container="body" class="help-link" over-title="Failure Detail"
+                                title=""
+                                tabindex="-1">
+                                    <i class="fa fa-question-circle">
+                                    </i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- RESULTS TRACEBACK DETAIL -->
+                    <div class="JobResults-resultRow"
+                        ng-show="job.result_traceback && !previousTaskFailed">
+                        <label class="JobResults-resultRowLabel">
+                            Results Traceback
+                        </label>
+                        <div class="JobResults-resultRowText"
+                            ng-bind-html="job.result_traceback">
+                        </div>
+                    </div>
+
 
                     <!-- TEMPLATE DETAIL -->
                     <div class="JobResults-resultRow"
@@ -135,6 +187,22 @@
                         </div>
                     </div>
 
+                    <!-- SCHEDULED BY DETAIL -->
+                    <div class="JobResults-resultRow toggle-show"
+                        ng-show="job.summary_fields.schedule.name">
+                        <label
+                            class="JobResults-resultRowLabel">
+                            Launched By
+                        </label>
+                        <div class="JobResults-resultRowText">
+                            <a href="{{ scheduled_by_link }}"
+                                aw-tool-tip="Edit the Schedule"
+                                data-placement="top">
+                                {{ job.summary_fields.schedule.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- INVENTORY DETAIL -->
                     <div class="JobResults-resultRow"
                         ng-show="job.summary_fields.inventory.name">
@@ -158,6 +226,7 @@
                         </label>
                         <div class="JobResults-resultRowText">
                             <a href="{{ project_update_link }}"
+                                ng-hide="job.summary_fields.project.scm_type===''"
                                 aw-tool-tip="View project sync results"
                                 data-placement="top">
                                 <i class="JobResults-statusResultIcon
@@ -301,6 +370,10 @@
                         <label class="JobResults-resultRowLabel
                             JobResults-resultRowLabel--fullWidth">
                             Extra Variables
+                            <i class="JobResults-extraVarsHelp fa fa-question-circle"
+                                aw-tool-tip="Read only view of extra variables added to the job template."
+                                data-placement="top">
+                            </i>
                         </label>
                         <textarea
                             rows="6"
@@ -348,135 +421,6 @@
                         </div>
                     </div>
 
-                    <!-- STATUS DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Status
-                        </label>
-                        <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9">
-                            <i
-                                class="JobResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job.status }}">
-                            </i> {{ status_label }}
-                        </div>
-                    </div> -->
-
-                    <!-- SCHEDULED BY DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow toggle-show"
-                        ng-show="job.summary_fields.schedule_by.username">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Launched By
-                        </label>
-                        <div class="JobResults-resultRowText">
-                            <a href="{{ scheduled_by_link }}"
-                                aw-tool-tip="Edit the Schedule"
-                                data-placement="top">
-                                {{ job.summary_fields.scheduled_by.username }}
-                            </a>
-                        </div>
-                    </div> -->
-
-                    <!-- ELAPSED TIME DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow toggle-show"
-                        ng-show="job_status.started">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Elapsed
-                        </label>
-                        <div class="JobResults-resultRowText">
-                            {{ job_status.elapsed }}
-                        </div>
-                    </div> -->
-
-                    <!-- EXPLANATION DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show"
-                        ng-show="job_status.explanation">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-2
-                                col-sm-2 col-xs-3
-                                control-label">
-                            Explanation
-                        </label> -->
-
-                        <!-- PREVIOUS TASK SUCCEEDED -->
-                        <!-- <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="!previousTaskFailed"
-                            ng-bind-html="job_status.explanation">
-                            <i
-                                class="JobResults-statusIcon--results
-                                    fa
-                                    icon-job-{{ job_status.status }}">
-                            </i> {{ job_status.status_label }}
-                        </div> -->
-
-                        <!-- PREVIOUS TASK FAILED -->
-                        <!-- <div class="JobResults-resultRowText
-                            col-lg-10 col-md-10 col-sm-10 col-xs-9
-                            job_status_explanation"
-                            ng-show="previousTaskFailed">
-                            Previous Task Failed
-                            <a
-                                href=""
-                                id="explanation_help"
-                                aw-pop-over="{{ task_detail }}"
-                                aw-pop-over-watch="task_detail"
-                                data-placement="bottom"
-                                data-container="body"
-                                class="help-link"
-                                over-title="Failure Detail"
-                                title=""
-                                tabindex="-1">
-                                <i class="fa fa-question-circle">
-                                </i>
-                            </a>
-                        </div> -->
-
-                    <!-- </div> -->
-
-                    <!-- RESULTS TRACEBACK DETAIL -->
-                    <!-- <div
-                        class="form-group
-                            JobResults-resultRow
-                            toggle-show" ng-show="job.result_traceback">
-                        <label
-                            class="JobResults-resultRowLabel
-                                col-lg-2 col-md-12
-                                col-sm-12 col-xs-12">
-                            Results Traceback
-                        </label>
-                        <div class="JobResults-resultRowText
-                            col-lg-10 col-md-12 col-sm-12 col-xs-12
-                            job_status_traceback"
-                            ng-bind-html="job.result_traceback">
-                        </div>
-                    </div> -->
-
                 </div>
 
             </div>
@@ -484,13 +428,18 @@
 
         <!-- RIGHT PANE -->
         <div class="JobResults-rightSide">
-            <div class="Panel">
+            <div class="Panel JobResults-panelRight">
 
                 <!-- RIGHT PANE HEADER -->
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="JobResults-statusResultIcon
-                            fa icon-job-{{ job.status }}">
+                            fa icon-job-{{ job_status }}"
+                            ng-show="stdoutFullScreen"
+                            aw-tool-tip="Job {{status_label}}"
+                            data-tip-watch="status_tooltip"
+                            aw-tip-placement="top"
+                            data-original-title>
                         </i>
                         {{ job.name }}
                     </div>
@@ -517,8 +466,16 @@
                         <div class="JobResults-badgeTitle">
                             Hosts
                         </div>
-                        <span class="badge List-titleBadge">
+                        <span class="badge List-titleBadge"
+                            ng-if="jobFinished">
                             {{ hostCount || 0}}
+                        </span>
+
+                        <span class="badge List-titleBadge"
+                            aw-tool-tip="The host count will update when the job is complete."
+                            data-placement="top"
+                            ng-if="!jobFinished">
+                            <i class="fa fa-ellipsis-h"></i>
                         </span>
 
                         <!-- ELAPSED TIME -->
@@ -535,7 +492,8 @@
 
                         <!-- FULL-SCREEN TOGGLE ACTION -->
                         <button class="StandardOut-actionButton"
-                            aw-tool-tip="Toggle Output"
+                            aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
+                            data-tip-watch="toggleStdoutFullscreenTooltip"
                             data-placement="top"
                             ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
                             ng-click="toggleStdoutFullscreen()">
@@ -546,9 +504,10 @@
                         <a ng-show="job.status === 'failed' ||
                             job.status === 'successful' ||
                             job.status === 'canceled'"
-                            href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download&token={{ token }}">
+                            href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download">
                             <button class="StandardOut-actionButton"
-                                aw-tool-tip="Download Output"
+                                aw-tool-tip="{{ standardOutTooltip }}"
+                                data-tip-watch="standardOutTooltip"
                                 data-placement="top">
                                 <i class="fa fa-download"></i>
                             </button>
@@ -557,6 +516,17 @@
                     </div>
                 </div>
                 <host-status-bar></host-status-bar>
+                <smart-search
+                    django-model="job_events"
+                    base-path="{{list.basePath}}"
+                    iterator="job_event"
+                    list="list"
+                    collection="job_events"
+                    dataset="job_event_dataset"
+                    search-tags="searchTags"
+                    disable-search="job_status == 'running' ||
+                        job_status=='pending'">
+                </smart-search>
                 <job-results-standard-out></job-results-standard-out>
             </div>
 

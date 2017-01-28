@@ -1,6 +1,6 @@
 
 export default
-    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location) {
+    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location, $rootScope) {
 
             // This factory gathers up all the job launch data and POST's it.
 
@@ -120,8 +120,8 @@ export default
                     Rest.post(job_launch_data)
                     .success(function(data) {
                         Wait('stop');
-                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command || data.workflow_job;
-                        if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
+                        var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
+                        if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
                             var goToJobDetails = function(state) {
@@ -131,7 +131,8 @@ export default
                             if(_.has(data, 'job')) {
                                 goToJobDetails('jobDetail');
                             }
-                            else if(_.has(data, 'workflow_job')) {
+                            else if(data.type && data.type === 'workflow_job') {
+                                job = data.id;
                                 goToJobDetails('workflowResults');
                             }
                             else if(_.has(data, 'ad_hoc_command')) {
@@ -207,5 +208,6 @@ LaunchJob.$inject =
         'Empty',
         'GetBasePath',
         '$state',
-        '$location'
+        '$location',
+        '$rootScope'
     ];

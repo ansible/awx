@@ -38,17 +38,17 @@ def test_send_notifications_list(mocker):
     mock_job = mocker.MagicMock(spec=UnifiedJob)
     patches.append(mocker.patch('awx.main.models.UnifiedJob.objects.get', return_value=mock_job))
 
-    mock_notification = mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})
-    patches.append(mocker.patch('awx.main.models.Notification.objects.get', return_value=mock_notification))
+    mock_notifications = [mocker.MagicMock(spec=Notification, subject="test", body={'hello': 'world'})]
+    patches.append(mocker.patch('awx.main.models.Notification.objects.filter', return_value=mock_notifications))
 
     with apply_patches(patches):
         send_notifications([1,2], job_id=1)
-        assert Notification.objects.get.call_count == 2
-        assert mock_notification.status == "successful"
-        assert mock_notification.save.called
+        assert Notification.objects.filter.call_count == 1
+        assert mock_notifications[0].status == "successful"
+        assert mock_notifications[0].save.called
 
         assert mock_job.notifications.add.called
-        assert mock_job.notifications.add.called_with(mock_notification)
+        assert mock_job.notifications.add.called_with(*mock_notifications)
 
 
 @pytest.mark.parametrize("current_instances,call_count", [(91, 2), (89,1)])

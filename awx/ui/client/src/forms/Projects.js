@@ -79,7 +79,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 ngShow: "scm_type.value == 'manual' " ,
                 awPopOver: '<p>' + i18n._('Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                     'Together the base path and selected playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
+                    '<p>' + i18n.sprintf(i18n._('Change %s under "Configure Tower" to change this location.'), 'PROJECTS_ROOT') + '</p>',
                 dataTitle: i18n._('Project Base Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
@@ -95,9 +95,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                     init: false
                 },
                 ngShow: "scm_type.value == 'manual' && !showMissingPlaybooksAlert",
-                awPopOver: '<p>' + i18n._('Select from the list of directories found in the base path.' +
-                    'Together the base path and the playbook directory provide the full path used to locate playbooks.') + '</p>' +
-                    '<p>' + i18n.sprintf(i18n._('Use %s in your environment settings file to determine the base path value.'), 'PROJECTS_ROOT') + '</p>',
+                awPopOver: '<p>' + i18n._('Select from the list of directories found in the Project Base Path. ' +
+                    'Together the base path and the playbook directory provide the full path used to locate playbooks.') + '</p>',
                 dataTitle: i18n._('Project Path'),
                 dataContainer: 'body',
                 dataPlacement: 'right',
@@ -186,7 +185,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 type: 'number',
                 integer: true,
                 min: 0,
-                ngShow: "scm_update_on_launch && projectSelected && scm_type.value !== 'manual'",
+                ngShow: "scm_update_on_launch && scm_type.value !== 'manual'",
                 spinner: true,
                 "default": '0',
                 awPopOver: '<p>' + i18n._('Time in seconds to consider a project to be current. During job runs and callbacks the task system will ' +
@@ -242,18 +241,18 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
 
                 fields: {
                     username: {
-                        label: 'User',
+                        label: i18n._('User'),
                         uiSref: 'users({user_id: field.id})',
                         class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                     },
                     role: {
-                        label: 'Role',
+                        label: i18n._('Role'),
                         type: 'role',
                         noSort: true,
                         class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                     },
                     team_roles: {
-                        label: 'Team Roles',
+                        label: i18n._('Team Roles'),
                         type: 'team_roles',
                         noSort: true,
                         class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',

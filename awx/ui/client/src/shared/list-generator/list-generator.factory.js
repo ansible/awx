@@ -64,7 +64,6 @@
  * | linkTo | Wraps the field value with an &lt;a&gt; element. Set to the value of the href attribute. |
  * | ngClick | Wraps the field value with an &lt;a&gt; and adds the ng-click directive. Set to the JS expression that ng-click will evaluate. |
  * | nosort | true or false. Setting to false removes the ability to sort the table by the column. |
- * | searchable | true or fasel. Set to false if the field should not be included as in option in the search widget. |
  * | searchOnly | true or false. Set to true if the field should be included in the search widget but not included as a column in the generated HTML &lt;table&gt;. |
  * | searchOptions | Array of { name: 'Descriptive Name', value: 'api_value' } objects used to generate &lt;options&gt; for the &lt;select&gt; when searchType is 'select'. |
  * | searchType | One of the available search types defined in helpers/search.js. |
@@ -134,7 +133,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     base, action, fld, cnt, field_action, fAction, itm;
 
                 if (options.mode !== 'lookup') {
-                    if (options.title !== false) {
+                    if (options.title !== false && list.title !== false) {
                         html += "<div class=\"List-header\">";
                         html += "<div class=\"List-title\">";
 
@@ -200,18 +199,19 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
                 if (options.showSearch === undefined || options.showSearch === true) {
                     html += `
-                    <div
-                        ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
-                            <smart-search
-                                django-model="${list.name}"
-                                search-size="${list.searchSize}"
-                                base-path="${list.basePath || list.name}"
-                                iterator="${list.iterator}"
-                                dataset="${list.iterator}_dataset"
-                                list="list"
-                                collection="${list.name}"
-                                search-tags="searchTags">
-                            </smart-search>
+                    <div ng-hide="${list.name}.length === 0 && (searchTags | isEmpty)">
+                        <smart-search
+                            django-model="${list.name}"
+                            search-size="${list.searchSize}"
+                            base-path="${list.basePath || list.name}"
+                            iterator="${list.iterator}"
+                            dataset="${list.iterator}_dataset"
+                            list="list"
+                            collection="${list.name}"
+                            default-params="${list.iterator}_default_params"
+                            query-set="${list.iterator}_queryset"
+                            search-tags="searchTags">
+                        </smart-search>
                     </div>
                         `;
                 }
@@ -241,9 +241,11 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                html += `<div class="List-noItems" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
-                html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
-                html += "</div>";
+                if (options.showEmptyPanel === undefined || options.showEmptyPanel === true){
+                    html += `<div class="List-noItems" ng-show="${list.name}.length === 0 && (searchTags | isEmpty)">`;
+                    html += (list.emptyListText) ? list.emptyListText :  i18n._("PLEASE ADD ITEMS TO THIS LIST");
+                    html += "</div>";
+                }
 
                 // Add a title and optionally a close button (used on Inventory->Groups)
                 if (options.mode !== 'lookup' && list.showTitle) {
@@ -309,13 +311,13 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 }
 
                 if (list.multiSelect) {
-                    innerTable += '<td class="col-xs-1 select-column List- List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
+                    innerTable += '<td class="col-xs-1 select-column List-staticColumn--smallStatus"><select-list-item item=\"' + list.iterator + '\"></select-list-item></td>';
                 }
 
                 // Change layout if a lookup list, place radio buttons before labels
                 if (options.mode === 'lookup') {
                     if (options.input_type === "radio") { //added by JT so that lookup forms can be either radio inputs or check box inputs
-                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="selection.${list.iterator}" ng-value="{id: ${list.iterator}.id, name: ${list.iterator}.name}"/></td>`;
+                        innerTable += `<td class="List-tableCell"> <input type="radio" ng-model="${list.iterator}.checked" ng-value="1" ng-false-value="0" name="check_${list.iterator}_{{${list.iterator}.id}}" ng-click="toggle_row(${list.iterator}.id)"></td>`;
                     } else { // its assumed that options.input_type = checkbox
                         innerTable += "<td class=\"List-tableCell select-column List-staticColumn--smallStatus\"><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
                             list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
@@ -355,6 +357,16 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                     innerTable += "<td class=\"List-actionsContainer\"><div class=\"List-actionButtonCell List-tableCell\">";
 
+                    let handleEditStateParams = function(stateParams){
+                        let matchingConditions = [];
+
+                        angular.forEach(stateParams, function(stateParam) {
+                            matchingConditions.push(`$stateParams['` + stateParam + `'] == ${list.iterator}.id`);
+                        });
+
+                        return matchingConditions;
+                    };
+
                     for (field_action in list.fieldActions) {
                         if (field_action !== 'columnClass') {
                             if (list.fieldActions[field_action].type && list.fieldActions[field_action].type === 'DropDown') {
@@ -376,8 +388,19 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                                 innerTable += "class=\"List-actionButton ";
                                 innerTable += (field_action === 'delete' || field_action === 'cancel') ? "List-actionButton--delete" : "";
                                 innerTable += "\" ";
-                                // rowBeingEdited === '{{ " + list.iterator + ".id }}' && listBeingEdited === '" + list.name + "' ? 'List-tableRow--selected' : ''";
-                                innerTable += (field_action === 'edit') ? `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`: '';
+                                if(field_action === 'edit') {
+                                    // editStateParams allows us to handle cases where a list might have different types of resources in it.  As a result the edit
+                                    // icon might now always point to the same state and differing states may have differing stateParams.  Specifically this occurs
+                                    // on the Templates list where editing a workflow job template takes you to a state where the param is workflow_job_template_id.
+                                    // You can also edit a Job Template from this list so the stateParam there would be job_template_id.
+                                    if(list.fieldActions[field_action].editStateParams) {
+                                        let matchingConditions = handleEditStateParams(list.fieldActions[field_action].editStateParams);
+                                        innerTable += `ng-class="{'List-editButton--selected' : ${matchingConditions.join(' || ')}}"`;
+                                    }
+                                    else {
+                                        innerTable += `ng-class="{'List-editButton--selected' : $stateParams['${list.iterator}_id'] == ${list.iterator}.id}"`;
+                                    }
+                                }
                                 innerTable += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                                 innerTable += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
                                 innerTable += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : "";
@@ -422,12 +445,15 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     html += "</div>\n";
                 }
 
-                html += `<paginate
+                if (options.paginate === undefined || options.paginate === true) {
+                    html += `<paginate
                     base-path="${list.basePath || list.name}"
                     collection="${list.name}"
                     dataset="${list.iterator}_dataset"
-                    iterator="${list.iterator}">
+                    iterator="${list.iterator}"
+                    query-set="${list.iterator}_queryset">
                     </paginate></div>`;
+                }
 
                 return html;
             },
@@ -464,18 +490,19 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                 if (options.mode !== 'lookup'){
                     for (fld in list.fields) {
-                    let customClass = list.fields[fld].columnClass || '';
-                    html += `<th
-                            base-path="${list.basePath || list.name}"
-                            collection="${list.name}"
-                            dataset="${list.iterator}_dataset"
-                            column-sort
-                            column-field="${fld}"
-                            column-iterator="${list.iterator}"
-                            column-no-sort="${list.fields[fld].nosort}"
-                            column-label="${list.fields[fld].label}"
-                            column-custom-class="${customClass}">
-                        </th>`;
+                        let customClass = list.fields[fld].columnClass || '';
+                        html += `<th
+                                base-path="${list.basePath || list.name}"
+                                collection="${list.name}"
+                                dataset="${list.iterator}_dataset"
+                                column-sort
+                                column-field="${fld}"
+                                column-iterator="${list.iterator}"
+                                column-no-sort="${list.fields[fld].nosort}"
+                                column-label="${list.fields[fld].label}"
+                                column-custom-class="${customClass}"
+                                query-set="${list.iterator}_queryset">
+                            </th>`;
                     }
                 }
                 if (options.mode === 'lookup') {
@@ -485,13 +512,30 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                             collection="${list.name}"
                             dataset="${list.iterator}_dataset"
                             column-sort
-                            column-field="${name}"
+                            column-field="name"
                             column-iterator="${list.iterator}"
                             column-no-sort="${list.fields.name.nosort}"
                             column-label="${list.fields.name.label}"
-                            column-custom-class="${customClass}">
+                            column-custom-class="${customClass}"
+                            query-set="${list.iterator}_queryset">
                         </th>`;
 
+                    if(list.fields.info) {
+                        customClass = list.fields.name.modalColumnClass || '';
+                        html += `<th
+                                    class="List-tableHeader--info"
+                                    base-path="${list.basePath || list.name}"
+                                    collection="${list.name}"
+                                    dataset="${list.iterator}_dataset"
+                                    column-sort
+                                    column-field="info"
+                                    column-iterator="${list.iterator}"
+                                    column-no-sort="${list.fields.info.nosort}"
+                                    column-label="${list.fields.info.label}"
+                                    column-custom-class="${customClass}"
+                                    query-set="${list.iterator}_queryset">
+                                </th>`;
+                    }
                 }
                 if (options.mode === 'select') {
                     html += "<th class=\"List-tableHeader col-lg-1 col-md-1 col-sm-2 col-xs-2\">Select</th>";

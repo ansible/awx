@@ -16,9 +16,10 @@ export default
         .factory('WorkflowFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Workflow'),
+            addTitle: i18n._('New Workflow Job Template'),
             editTitle: '{{ name }}',
             name: 'workflow_job_template',
+            breadcrumbName: i18n._('WORKFLOW'),
             base: 'workflow',
             basePath: 'workflow_job_templates',
             // the top-most node of generated state tree
@@ -120,10 +121,10 @@ export default
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
-                            label: 'Add',
-                            awToolTip: 'Add a permission',
+                            label: i18n._('Add'),
+                            awToolTip: i18n._('Add a permission'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD',
+                            buttonContent: '&#43; '+ i18n._('ADD'),
                             ngShow: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                         }
                     },

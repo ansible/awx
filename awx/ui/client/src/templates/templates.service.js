@@ -84,10 +84,14 @@ export default ['Rest', 'GetBasePath', '$q', function(Rest, GetBasePath, $q){
           Rest.setUrl(url);
           return Rest.get();
       },
-      getWorkflowJobTemplateNodes: function(id) {
+      getWorkflowJobTemplateNodes: function(id, page) {
           var url = GetBasePath('workflow_job_templates');
 
           url = url + id + '/workflow_nodes';
+
+          if(page) {
+              url += '/?page=' + page;
+          }
 
           Rest.setUrl(url);
           return Rest.get();

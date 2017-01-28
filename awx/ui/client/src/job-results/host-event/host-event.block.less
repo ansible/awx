@@ -20,20 +20,14 @@
 .HostEvent .CodeMirror{
 	overflow-x: hidden;
 }
-.HostEvent-controls button.HostEvent-close{
-    color: #FFFFFF;
-    text-transform: uppercase;
-    padding-left: 15px;
-    padding-right: 15px;
- 	background-color: @default-link;
-	border-color: @default-link;
- 	&:hover{
- 		background-color: @default-link-hov;
-		border-color: @default-link-hov;
- 	}
+
+.HostEvent-close:hover{
+    color: @btn-txt;
+    background-color: @btn-bg-hov;
 }
+
 .HostEvent-body{
-	margin-bottom: 10px;
+	margin-bottom: 20px;
 }
 .HostEvent-tab {
     color: @btn-txt;
@@ -106,12 +100,12 @@
 }
 .HostEvent .modal-body{
     max-height: 500px;
-	padding: 20px;
+	padding: 0px!important;
     overflow-y: auto;
 }
 .HostEvent-nav{
 	padding-top: 12px;
-	padding-bottom: 12px;
+	padding-bottom: 20px;
 }
 .HostEvent-field{
 	margin-bottom: 8px;
@@ -164,10 +158,11 @@
     border-radius: 5px;
     border: 1px solid #ccc;
     font-style: normal;
+    background-color: @default-no-items-bord;
 }
 
 .HostEvent-numberColumnPreload {
-    background-color: @default-no-items-bord;
+    background-color: @default-list-header-bg;
     height: 198px;
     border-right: 1px solid #ccc;
     width: 30px;
@@ -175,7 +170,7 @@
 }
 
 .HostEvent-numberColumn {
-    background-color: @default-no-items-bord;
+    background-color: @default-list-header-bg;
     border-right: 1px solid #ccc;
     border-bottom-left-radius: 5px;
     color: #999;

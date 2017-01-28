@@ -33,10 +33,6 @@
         $scope.parseType = 'yaml';
         $scope.includeWorkflowMaker = false;
 
-        $scope.editRequests = [];
-        $scope.associateRequests = [];
-        $scope.disassociateRequests = [];
-
         function init() {
 
             // Select2-ify the lables input
@@ -111,33 +107,6 @@
                     });
                 });
 
-            // Get the workflow nodes
-            TemplatesService.getWorkflowJobTemplateNodes(id)
-            .then(function(data){
-
-                $scope.workflowTree = WorkflowService.buildTree({
-                    workflowNodes: data.data.results
-                });
-
-                // TODO: I think that the workflow chart directive (and eventually d3) is meddling with
-                // this workflowTree object and removing the children object for some reason (?)
-                // This happens on occasion and I think is a race condition (?)
-                if(!$scope.workflowTree.data.children) {
-                    $scope.workflowTree.data.children = [];
-                }
-
-                // In the partial, the workflow maker directive has an ng-if attribute which is pointed at this scope variable.
-                // It won't get included until this the tree has been built - I'm open to better ways of doing this.
-                $scope.includeWorkflowMaker = true;
-
-            }, function(error){
-                ProcessErrors($scope, error.data, error.status, form, {
-                    hdr: 'Error!',
-                    msg: 'Failed to get workflow job template nodes. GET returned ' +
-                    'status: ' + error.status
-                });
-            });
-
             // Go out and GET the workflow job temlate data needed to populate the form
             TemplatesService.getWorkflowJobTemplate(id)
             .then(function(data){
@@ -180,6 +149,8 @@
                 $scope.url = workflowJobTemplateData.url;
                 $scope.survey_enabled = workflowJobTemplateData.survey_enabled;
 
+                $scope.includeWorkflowMaker = true;
+
             }, function(error){
                 ProcessErrors($scope, error.data, error.status, form, {
                     hdr: 'Error!',
@@ -188,160 +159,6 @@
                 });
             });
         }
-
-        function recursiveNodeUpdates(params, completionCallback) {
-            // params.parentId
-            // params.node
-
-            let generatePostUrl = function(){
-
-                let base = (params.parentId) ? GetBasePath('workflow_job_template_nodes') + params.parentId : $scope.workflow_job_template_obj.related.workflow_nodes;
-
-                if(params.parentId) {
-                    if(params.node.edgeType === 'success') {
-                        base += "/success_nodes";
-                    }
-                    else if(params.node.edgeType === 'failure') {
-                        base += "/failure_nodes";
-                    }
-                    else if(params.node.edgeType === 'always') {
-                        base += "/always_nodes";
-                    }
-                }
-
-                return base;
-
-            };
-
-            let buildSendableNodeData = function() {
-                // Create the node
-                let sendableNodeData = {
-                    unified_job_template: params.node.unifiedJobTemplate.id
-                };
-
-                // Check to see if the user has provided any prompt values that are different
-                // from the defaults in the job template
-
-                if(params.node.unifiedJobTemplate.type === "job_template" && params.node.promptValues) {
-                    if(params.node.unifiedJobTemplate.ask_credential_on_launch) {
-                        sendableNodeData.credential = !params.node.promptValues.credential || params.node.unifiedJobTemplate.summary_fields.credential.id !== params.node.promptValues.credential.id ? params.node.promptValues.credential.id : null;
-                    }
-                    if(params.node.unifiedJobTemplate.ask_inventory_on_launch) {
-                        sendableNodeData.inventory = !params.node.promptValues.inventory || params.node.unifiedJobTemplate.summary_fields.inventory.id !== params.node.promptValues.inventory.id ? params.node.promptValues.inventory.id : null;
-                    }
-                    if(params.node.unifiedJobTemplate.ask_limit_on_launch) {
-                        sendableNodeData.limit =  !params.node.promptValues.limit || params.node.unifiedJobTemplate.limit !== params.node.promptValues.limit ? params.node.promptValues.limit : null;
-                    }
-                    if(params.node.unifiedJobTemplate.ask_job_type_on_launch) {
-                        sendableNodeData.job_type =  !params.node.promptValues.job_type || params.node.unifiedJobTemplate.job_type !== params.node.promptValues.job_type ? params.node.promptValues.job_type : null;
-                    }
-                    if(params.node.unifiedJobTemplate.ask_tags_on_launch) {
-                        sendableNodeData.job_tags =  !params.node.promptValues.job_tags || params.node.unifiedJobTemplate.job_tags !== params.node.promptValues.job_tags ? params.node.promptValues.job_tags : null;
-                    }
-                    if(params.node.unifiedJobTemplate.ask_skip_tags_on_launch) {
-                        sendableNodeData.skip_tags =  !params.node.promptValues.skip_tags || params.node.unifiedJobTemplate.skip_tags !== params.node.promptValues.skip_tags ? params.node.promptValues.skip_tags : null;
-                    }
-                }
-
-                return sendableNodeData;
-            };
-
-            let continueRecursing = function(parentId) {
-                $scope.totalIteratedNodes++;
-
-                if($scope.totalIteratedNodes === $scope.workflowTree.data.totalNodes) {
-                    // We're done recursing, lets move on
-                    completionCallback();
-                }
-                else {
-                    if(params.node.children && params.node.children.length > 0) {
-                        _.forEach(params.node.children, function(child) {
-                            if(child.edgeType === "success") {
-                                recursiveNodeUpdates({
-                                    parentId: parentId,
-                                    node: child
-                                }, completionCallback);
-                            }
-                            else if(child.edgeType === "failure") {
-                                recursiveNodeUpdates({
-                                    parentId: parentId,
-                                    node: child
-                                }, completionCallback);
-                            }
-                            else if(child.edgeType === "always") {
-                                recursiveNodeUpdates({
-                                    parentId: parentId,
-                                    node: child
-                                }, completionCallback);
-                            }
-                        });
-                    }
-                }
-            };
-
-            if(params.node.isNew) {
-
-                TemplatesService.addWorkflowNode({
-                    url: generatePostUrl(),
-                    data: buildSendableNodeData()
-                })
-                .then(function(data) {
-                    continueRecursing(data.data.id);
-                }, function(error) {
-                    ProcessErrors($scope, error.data, error.status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to add workflow node. ' +
-                        'POST returned status: ' +
-                        error.status
-                    });
-                });
-            }
-            else {
-                if(params.node.edited || !params.node.originalParentId || (params.node.originalParentId && params.parentId !== params.node.originalParentId)) {
-
-                    if(params.node.edited) {
-
-                        $scope.editRequests.push({
-                            id: params.node.nodeId,
-                            data: buildSendableNodeData()
-                        });
-
-                    }
-
-                    if((params.node.originalParentId && params.parentId !== params.node.originalParentId) || params.node.originalEdge !== params.node.edgeType) {//beep
-
-                        $scope.disassociateRequests.push({
-                            parentId: params.node.originalParentId,
-                            nodeId: params.node.nodeId,
-                            edge: params.node.originalEdge
-                        });
-
-                        // Can only associate if we have a parent.
-                        // If we don't have a parent then this is a root node
-                        // and the act of disassociating will make it a root node
-                        if(params.parentId) {
-                            $scope.associateRequests.push({
-                                parentId: params.parentId,
-                                nodeId: params.node.nodeId,
-                                edge: params.node.edgeType
-                            });
-                        }
-
-                    }
-                    else if(!params.node.originalParentId && params.parentId) {
-                        // This used to be a root node but is now not a root node
-                        $scope.associateRequests.push({
-                            parentId: params.parentId,
-                            nodeId: params.node.nodeId,
-                            edge: params.node.edgeType
-                        });
-                    }
-
-                }
-
-            continueRecursing(params.node.nodeId);
-        }
-    }
 
     $scope.openWorkflowMaker = function() {
         $state.go('.workflowMaker');
@@ -392,231 +209,97 @@
                 .filter("[data-label-is-present=true]")
                 .map((i, val) => ({name: $(val).text()}));
 
-                $scope.totalIteratedNodes = 0;
+                TemplatesService.updateWorkflowJobTemplate({
+                    id: id,
+                    data: data
+                }).then(function(){
 
-                // TODO: this is the only way that I could figure out to get
-                // these promise arrays to play nicely.  I tried to just append
-                // a single promise to deletePromises but it just wasn't working
-                let editWorkflowJobTemplate = [id].map(function(id) {
-                    return TemplatesService.updateWorkflowJobTemplate({
-                        id: id,
-                        data: data
-                    });
-                });
+                    var orgDefer = $q.defer();
+                    var associationDefer = $q.defer();
+                    var associatedLabelsDefer = $q.defer();
 
-                if($scope.workflowTree && $scope.workflowTree.data && $scope.workflowTree.data.children && $scope.workflowTree.data.children.length > 0) {
-                    let completionCallback = function() {
-
-                        let disassociatePromises = $scope.disassociateRequests.map(function(request) {
-                            return TemplatesService.disassociateWorkflowNode({
-                                parentId: request.parentId,
-                                nodeId: request.nodeId,
-                                edge: request.edge
+                    var getNext = function(data, arr, resolve) {
+                        Rest.setUrl(data.next);
+                        Rest.get()
+                            .success(function (data) {
+                                if (data.next) {
+                                    getNext(data, arr.concat(data.results), resolve);
+                                } else {
+                                    resolve.resolve(arr.concat(data.results));
+                                }
                             });
-                        });
-
-                        let editNodePromises = $scope.editRequests.map(function(request) {
-                            return TemplatesService.editWorkflowNode({
-                                id: request.id,
-                                data: request.data
-                            });
-                        });
-
-                        $q.all(disassociatePromises.concat(editNodePromises).concat(editWorkflowJobTemplate))
-                        .then(function() {
-
-                            let associatePromises = $scope.associateRequests.map(function(request) {
-                                return TemplatesService.associateWorkflowNode({
-                                    parentId: request.parentId,
-                                    nodeId: request.nodeId,
-                                    edge: request.edge
-                                });
-                            });
-
-                            let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                                return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
-                            });
-
-                            $q.all(associatePromises.concat(deletePromises))
-                            .then(function() {
-
-                                var orgDefer = $q.defer();
-                                var associationDefer = $q.defer();
-                                var associatedLabelsDefer = $q.defer();
-
-                                var getNext = function(data, arr, resolve) {
-                                    Rest.setUrl(data.next);
-                                    Rest.get()
-                                        .success(function (data) {
-                                            if (data.next) {
-                                                getNext(data, arr.concat(data.results), resolve);
-                                            } else {
-                                                resolve.resolve(arr.concat(data.results));
-                                            }
-                                        });
-                                };
-
-                                Rest.setUrl($scope.workflow_job_template_obj.related.labels);
-
-                                Rest.get()
-                                    .success(function(data) {
-                                        if (data.next) {
-                                            getNext(data, data.results, associatedLabelsDefer);
-                                        } else {
-                                            associatedLabelsDefer.resolve(data.results);
-                                        }
-                                    });
-
-                                associatedLabelsDefer.promise.then(function (current) {
-                                    current = current.map(data => data.id);
-                                    var labelsToAdd = $scope.labels
-                                        .map(val => val.value);
-                                    var labelsToDisassociate = current
-                                        .filter(val => labelsToAdd
-                                            .indexOf(val) === -1)
-                                        .map(val => ({id: val, disassociate: true}));
-                                    var labelsToAssociate = labelsToAdd
-                                        .filter(val => current
-                                            .indexOf(val) === -1)
-                                        .map(val => ({id: val, associate: true}));
-                                    var pass = labelsToDisassociate
-                                        .concat(labelsToAssociate);
-                                    associationDefer.resolve(pass);
-                                });
-
-                                Rest.setUrl(GetBasePath("organizations"));
-                                Rest.get()
-                                    .success(function(data) {
-                                        orgDefer.resolve(data.results[0].id);
-                                    });
-
-                                orgDefer.promise.then(function(orgId) {
-                                    var toPost = [];
-                                    $scope.newLabels = $scope.newLabels
-                                        .map(function(i, val) {
-                                            val.organization = orgId;
-                                            return val;
-                                        });
-
-                                    $scope.newLabels.each(function(i, val) {
-                                        toPost.push(val);
-                                    });
-
-                                    associationDefer.promise.then(function(arr) {
-                                        toPost = toPost
-                                            .concat(arr);
-
-                                        Rest.setUrl($scope.workflow_job_template_obj.related.labels);
-
-                                        var defers = [];
-                                        for (var i = 0; i < toPost.length; i++) {
-                                            defers.push(Rest.post(toPost[i]));
-                                        }
-                                        $q.all(defers)
-                                            .then(function() {
-                                                $state.go('templates.editWorkflowJobTemplate', {id: id}, {reload: true});
-                                            });
-                                    });
-                                });
-
-                            });
-                        });
                     };
 
-                    _.forEach($scope.workflowTree.data.children, function(child) {
-                        recursiveNodeUpdates({
-                            node: child
-                        }, completionCallback);
-                    });
-                }
-                else {
+                    Rest.setUrl($scope.workflow_job_template_obj.related.labels);
 
-                    let deletePromises = $scope.workflowTree.data.deletedNodes.map(function(nodeId) {
-                        return TemplatesService.deleteWorkflowJobTemplateNode(nodeId);
-                    });
-
-                    $q.all(deletePromises.concat(editWorkflowJobTemplate))
-                    .then(function() {
-                        var orgDefer = $q.defer();
-                        var associationDefer = $q.defer();
-                        var associatedLabelsDefer = $q.defer();
-
-                        var getNext = function(data, arr, resolve) {
-                            Rest.setUrl(data.next);
-                            Rest.get()
-                                .success(function (data) {
-                                    if (data.next) {
-                                        getNext(data, arr.concat(data.results), resolve);
-                                    } else {
-                                        resolve.resolve(arr.concat(data.results));
-                                    }
-                                });
-                        };
-
-                        Rest.setUrl($scope.workflow_job_template_obj.related.labels);
-
-                        Rest.get()
-                            .success(function(data) {
-                                if (data.next) {
-                                    getNext(data, data.results, associatedLabelsDefer);
-                                } else {
-                                    associatedLabelsDefer.resolve(data.results);
-                                }
-                            });
-
-                        associatedLabelsDefer.promise.then(function (current) {
-                            current = current.map(data => data.id);
-                            var labelsToAdd = $scope.labels
-                                .map(val => val.value);
-                            var labelsToDisassociate = current
-                                .filter(val => labelsToAdd
-                                    .indexOf(val) === -1)
-                                .map(val => ({id: val, disassociate: true}));
-                            var labelsToAssociate = labelsToAdd
-                                .filter(val => current
-                                    .indexOf(val) === -1)
-                                .map(val => ({id: val, associate: true}));
-                            var pass = labelsToDisassociate
-                                .concat(labelsToAssociate);
-                            associationDefer.resolve(pass);
+                    Rest.get()
+                        .success(function(data) {
+                            if (data.next) {
+                                getNext(data, data.results, associatedLabelsDefer);
+                            } else {
+                                associatedLabelsDefer.resolve(data.results);
+                            }
                         });
 
-                        Rest.setUrl(GetBasePath("organizations"));
-                        Rest.get()
-                            .success(function(data) {
-                                orgDefer.resolve(data.results[0].id);
+                    associatedLabelsDefer.promise.then(function (current) {
+                        current = current.map(data => data.id);
+                        var labelsToAdd = $scope.labels
+                            .map(val => val.value);
+                        var labelsToDisassociate = current
+                            .filter(val => labelsToAdd
+                                .indexOf(val) === -1)
+                            .map(val => ({id: val, disassociate: true}));
+                        var labelsToAssociate = labelsToAdd
+                            .filter(val => current
+                                .indexOf(val) === -1)
+                            .map(val => ({id: val, associate: true}));
+                        var pass = labelsToDisassociate
+                            .concat(labelsToAssociate);
+                        associationDefer.resolve(pass);
+                    });
+
+                    Rest.setUrl(GetBasePath("organizations"));
+                    Rest.get()
+                        .success(function(data) {
+                            orgDefer.resolve(data.results[0].id);
+                        });
+
+                    orgDefer.promise.then(function(orgId) {
+                        var toPost = [];
+                        $scope.newLabels = $scope.newLabels
+                            .map(function(i, val) {
+                                val.organization = orgId;
+                                return val;
                             });
 
-                        orgDefer.promise.then(function(orgId) {
-                            var toPost = [];
-                            $scope.newLabels = $scope.newLabels
-                                .map(function(i, val) {
-                                    val.organization = orgId;
-                                    return val;
+                        $scope.newLabels.each(function(i, val) {
+                            toPost.push(val);
+                        });
+
+                        associationDefer.promise.then(function(arr) {
+                            toPost = toPost
+                                .concat(arr);
+
+                            Rest.setUrl($scope.workflow_job_template_obj.related.labels);
+
+                            var defers = [];
+                            for (var i = 0; i < toPost.length; i++) {
+                                defers.push(Rest.post(toPost[i]));
+                            }
+                            $q.all(defers)
+                                .then(function() {
+                                    $state.go('templates.editWorkflowJobTemplate', {id: id}, {reload: true});
                                 });
-
-                            $scope.newLabels.each(function(i, val) {
-                                toPost.push(val);
-                            });
-
-                            associationDefer.promise.then(function(arr) {
-                                toPost = toPost
-                                    .concat(arr);
-
-                                Rest.setUrl($scope.workflow_job_template_obj.related.labels);
-
-                                var defers = [];
-                                for (var i = 0; i < toPost.length; i++) {
-                                    defers.push(Rest.post(toPost[i]));
-                                }
-                                $q.all(defers)
-                                    .then(function() {
-                                        $state.go('templates.editWorkflowJobTemplate', {id: id}, {reload: true});
-                                    });
-                            });
                         });
                     });
-                }
+
+                }, function(error){
+                    ProcessErrors($scope, error.data, error.status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to update workflow job template. PUT returned ' +
+                        'status: ' + error.status
+                    });
+                });
 
             } catch (err) {
                 Wait('stop');

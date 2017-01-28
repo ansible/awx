@@ -64,7 +64,6 @@ export default function() {
                 basePath: 'credentials',
                 sourceModel: 'credential',
                 sourceField: 'name',
-                ngClick: 'lookUpCredential()',
                 class: 'squeeze',
                 awPopOver: '<p>Select the credential you want to use when ' +
                     'accessing the remote hosts to run the command. ' +

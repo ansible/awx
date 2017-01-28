@@ -1,9 +1,11 @@
-The components listed herein have been integrated into Ansible, Inc.’s
-distribution of Ansible Tower. Ansible, Inc. supports Tower’s use of and
+The components listed herein have been integrated into Red Hat, Inc.'s
+distribution of Ansible Tower.  Red Hat, Inc.  supports Tower’s use of and
 interactions with these components for both development and production
-purposes, subject to applicable terms and conditions. Unless otherwise
-agreed to in writing, the use of Ansible Tower is subject to the Ansible
-Software Subscription and Services Agreement located at
-http://www.ansible.com/subscription-agreement. Ansible Tower is a
-proprietary product offered by Ansible, Inc. and its use is not intended to
-prohibit the rights under any open source license.
+purposes, subject to applicable terms and conditions.  Unless otherwise
+agreed to in writing, the use of Ansible Tower is subject to the Red Hat End
+User License Agreement located at
+https://www.redhat.com/en/about/red-hat-end-user-license-agreements
+and Red Hat Enterprise Agreement located at
+https://www.redhat.com/en/about/licenses-us.  Ansible Tower is a proprietary
+product offered by Red Hat, Inc.  and its use is not intended to prohibit
+the rights under any open source license.

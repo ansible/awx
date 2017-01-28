@@ -74,6 +74,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                  scope.projectPopOver = "<p>" + i18n._("The project value") + "</p>";
                  scope.hostPopOver = "<p>" + i18n._("The host value") + "</p>";
                  scope.ssh_key_data_api_error = '';
+
                  if (!Empty(scope.kind)) {
                      // Apply kind specific settings
                      switch (scope.kind.value) {
@@ -146,18 +147,20 @@ angular.module('CredentialsHelper', ['Utilities'])
                             scope.password_required = true;
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
-                            scope.hostLabel = i18n._("Satellite 6 Host");
-                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address name which %s" +
-                                "corresponds to your Red Hat Satellite 6 server."), "<br />");
+                            scope.hostLabel = i18n._("Satellite 6 URL");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL which corresponds to your %s" +
+                                "Red Hat Satellite 6 server. %s" +
+                                "For example, %s"), "<br />", "<br />", "https://satellite.example.org");
                          break;
                          case 'cloudforms':
                             scope.username_required = true;
                             scope.password_required = true;
                             scope.passwordLabel = i18n._('Password');
                             scope.host_required = true;
-                            scope.hostLabel = i18n._("CloudForms Host");
-                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the hostname or IP address for the virtual %s" +
-                                " machine which is hosting the CloudForm appliance."), "<br />");
+                            scope.hostLabel = i18n._("CloudForms URL");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL for the virtual machine which %s" +
+                                "corresponds to your CloudForm instance. %s" +
+                                "For example, %s"), "<br />", "<br />", "https://cloudforms.example.org");
                          break;
                          case 'net':
                             scope.username_required = true;
@@ -202,6 +205,111 @@ angular.module('CredentialsHelper', ['Utilities'])
          }
 ])
 
+.factory('BecomeMethodChange', ['Empty', 'i18n',
+         function (Empty, i18n) {
+             return function (params) {
+                console.log('become method has changed');
+                 var scope = params.scope;
+
+                 if (!Empty(scope.kind)) {
+                     // Apply kind specific settings
+                     switch (scope.kind.value) {
+                         case 'aws':
+                             scope.aws_required = true;
+                         break;
+                         case 'rax':
+                             scope.rackspace_required = true;
+                             scope.username_required = true;
+                         break;
+                         case 'ssh':
+                             scope.usernameLabel = i18n._('Username'); //formally 'SSH Username'
+                             scope.becomeUsernameLabel = i18n._('Privilege Escalation Username');
+                             scope.becomePasswordLabel = i18n._('Privilege Escalation Password');
+                         break;
+                         case 'scm':
+                             scope.sshKeyDataLabel = i18n._('SCM Private Key');
+                             scope.passwordLabel = i18n._('Password');
+                         break;
+                         case 'gce':
+                             scope.usernameLabel = i18n._('Service Account Email Address');
+                             scope.sshKeyDataLabel = i18n._('RSA Private Key');
+                             scope.email_required = true;
+                             scope.key_required = true;
+                             scope.project_required = true;
+                             scope.key_description =  i18n._('Paste the contents of the PEM file associated with the service account email.');
+                             scope.projectLabel = i18n._("Project");
+                             scope.project_required = false;
+                             scope.projectPopOver = "<p>" + i18n._("The Project ID is the " +
+                             "GCE assigned identification. It is constructed as " +
+                             "two words followed by a three digit number.  Such " +
+                             "as: ") + "</p><p>adjective-noun-000</p>";
+                         break;
+                         case 'azure':
+                             scope.sshKeyDataLabel = i18n._('Management Certificate');
+                             scope.subscription_required = true;
+                             scope.key_required = true;
+                             scope.key_description = i18n._("Paste the contents of the PEM file that corresponds to the certificate you uploaded in the Microsoft Azure console.");
+                         break;
+                         case 'azure_rm':
+                             scope.usernameLabel = i18n._("Username");
+                             scope.subscription_required = true;
+                             scope.passwordLabel = i18n._('Password');
+                             scope.azure_rm_required = true;
+                         break;
+                         case 'vmware':
+                             scope.username_required = true;
+                             scope.host_required = true;
+                             scope.password_required = true;
+                             scope.hostLabel = "vCenter Host";
+                             scope.passwordLabel = i18n._('Password');
+                             scope.hostPopOver = i18n._("Enter the hostname or IP address which corresponds to your VMware vCenter.");
+                         break;
+                         case 'openstack':
+                             scope.hostLabel = i18n._("Host (Authentication URL)");
+                             scope.projectLabel = i18n._("Project (Tenant Name)");
+                             scope.domainLabel = i18n._("Domain Name");
+                             scope.password_required = true;
+                             scope.project_required = true;
+                             scope.host_required = true;
+                             scope.username_required = true;
+                             scope.projectPopOver = "<p>" + i18n._("This is the tenant name. " +
+                                 " This value is usually the same " +
+                                 " as the username.") + "</p>";
+                             scope.hostPopOver = "<p>" + i18n._("The host to authenticate with.") +
+                                 "<br />" + i18n.sprintf(i18n._("For example, %s"), "https://openstack.business.com/v2.0/");
+                         break;
+                         case 'satellite6':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = i18n._('Password');
+                            scope.host_required = true;
+                            scope.hostLabel = i18n._("Satellite 6 URL");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL which corresponds to your %s" +
+                                "Red Hat Satellite 6 server. %s" +
+                                "For example, %s"), "<br />", "<br />", "https://satellite.example.org");
+                         break;
+                         case 'cloudforms':
+                            scope.username_required = true;
+                            scope.password_required = true;
+                            scope.passwordLabel = i18n._('Password');
+                            scope.host_required = true;
+                            scope.hostLabel = i18n._("CloudForms URL");
+                            scope.hostPopOver = i18n.sprintf(i18n._("Enter the URL for the virtual machine which %s" +
+                                "corresponds to your CloudForm instance. %s" +
+                                "For example, %s"), "<br />", "<br />", "https://cloudforms.example.org");
+                         break;
+                         case 'net':
+                            scope.username_required = true;
+                            scope.password_required = false;
+                            scope.passwordLabel = i18n._('Password');
+                            scope.sshKeyDataLabel = i18n._('SSH Key');
+                         break;
+                     }
+                 }
+             };
+         }
+])
+
 
 .factory('OwnerChange', [
     function () {
@@ -223,8 +331,8 @@ angular.module('CredentialsHelper', ['Utilities'])
 }
 ])
 
-.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state',
-         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state) {
+.factory('FormSave', ['$rootScope', '$location', 'Alert', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait', '$state', 'i18n',
+         function ($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state, i18n) {
              return function (params) {
                  var scope = params.scope,
                  mode = params.mode,
@@ -289,14 +397,12 @@ angular.module('CredentialsHelper', ['Utilities'])
 
                          Wait('stop');
                          var base = $location.path().replace(/^\//, '').split('/')[0];
-                             if (base === 'credentials') {
-                             ReturnToCaller();
+                         if (base === 'credentials') {
+                             $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
                          }
                          else {
                              ReturnToCaller(1);
                          }
-                         $state.go('credentials.edit', {credential_id: data.id}, {reload: true});
-
                      })
                      .error(function (data, status) {
                          Wait('stop');
@@ -305,12 +411,12 @@ angular.module('CredentialsHelper', ['Utilities'])
                          // the error there.  The ssh_key_unlock field is not shown when the kind of credential is gce/azure and as a result the
                          // error is never shown.  In the future, the API will hopefully either behave or respond differently.
                          if(status && status === 400 && data && data.ssh_key_unlock && (scope.kind.value === 'gce' || scope.kind.value === 'azure')) {
-                             scope.ssh_key_data_api_error = "Encrypted credentials are not supported.";
+                             scope.ssh_key_data_api_error = i18n._("Encrypted credentials are not supported.");
                          }
                          else {
                              ProcessErrors(scope, data, status, form, {
-                                 hdr: 'Error!',
-                                 msg: 'Failed to create new Credential. POST status: ' + status
+                                 hdr: i18n._('Error!'),
+                                 msg: i18n._('Failed to create new Credential. POST status: ') + status
                              });
                          }
                      });
@@ -325,8 +431,8 @@ angular.module('CredentialsHelper', ['Utilities'])
                      .error(function (data, status) {
                          Wait('stop');
                          ProcessErrors(scope, data, status, form, {
-                             hdr: 'Error!',
-                             msg: 'Failed to update Credential. PUT status: ' + status
+                             hdr: i18n._('Error!'),
+                             msg: i18n._('Failed to update Credential. PUT status: ') + status
                          });
                      });
                 }

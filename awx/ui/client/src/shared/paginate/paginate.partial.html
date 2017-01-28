@@ -8,14 +8,14 @@
                 </a>
             </li>
             <!-- previous -->
-            <li class="Paginate-controls--previous Paginate-controls--item" ng-class="{disabled: current() == 1}">
+            <li class="Paginate-controls--previous Paginate-controls--item" ng-class="{disabled: current() === 1}">
                 <a href ng-click="toPage(current() - 1)">
                     <i class="fa fa-angle-left"></i>
                 </a>
             </li>
             <!-- range -->
             <li class="Paginate-controls--item" ng-repeat="page in pageRange">
-                <a href ng-class="{'Paginate-controls--active': page == current()}" ng-click="toPage(page)">{{ page }}</a>
+                <a href ng-class="{'Paginate-controls--active': page === current()}" ng-click="toPage(page)">{{ page }}</a>
             </li>
             <!-- next -->
             <li class="Paginate-controls--next Paginate-controls--item" ng-hide="current() === last()">

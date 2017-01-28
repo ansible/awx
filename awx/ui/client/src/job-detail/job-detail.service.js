@@ -129,9 +129,9 @@ export default
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         },
-        getJobEventChildren: function(id){
+        getJobEventChildren: function(uuid){
             var url = GetBasePath('job_events');
-            url = url + id + '/children/?order_by=host_name';
+            url = `${url}?parent__uuid=${uuid}&order_by=host_name`;
             Rest.setUrl(url);
             return Rest.get()
                 .success(function(data){

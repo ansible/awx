@@ -24,15 +24,6 @@ else
 fi
 
 cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
-
-# Check if we need to build dependencies
-#if [ -f "awx/lib/.deps_built" ]; then
-#    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
-#else
-#SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" make requirements_dev
-#    touch awx/lib/.deps_built
-#fi
-
 cp /tmp/ansible-tower.egg-link /venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
 
 # Tower bootstrapping
@@ -41,6 +32,7 @@ make migrate
 make init
 
 mkdir -p /tower_devel/awx/public/static
+mkdir -p /tower_devel/awx/ui/static
 
 # Start the service
 make honcho

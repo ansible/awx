@@ -153,12 +153,24 @@ class LDAPDNField(fields.CharField):
         super(LDAPDNField, self).__init__(**kwargs)
         self.validators.append(validate_ldap_dn)
 
+    def run_validation(self, data=empty):
+        value = super(LDAPDNField, self).run_validation(data)
+        # django-auth-ldap expects DN fields (like AUTH_LDAP_REQUIRE_GROUP)
+        # to be either a valid string or ``None`` (not an empty string)
+        return None if value == '' else value
+
 
 class LDAPDNWithUserField(fields.CharField):
 
     def __init__(self, **kwargs):
         super(LDAPDNWithUserField, self).__init__(**kwargs)
         self.validators.append(validate_ldap_dn_with_user)
+
+    def run_validation(self, data=empty):
+        value = super(LDAPDNWithUserField, self).run_validation(data)
+        # django-auth-ldap expects DN fields (like AUTH_LDAP_USER_DN_TEMPLATE)
+        # to be either a valid string or ``None`` (not an empty string)
+        return None if value == '' else value
 
 
 class LDAPFilterField(fields.CharField):
@@ -299,7 +311,10 @@ class LDAPGroupTypeField(fields.ChoiceField):
         data = super(LDAPGroupTypeField, self).to_internal_value(data)
         if not data:
             return None
-        return getattr(django_auth_ldap.config, data)()
+        if data.endswith('MemberDNGroupType'):
+            return getattr(django_auth_ldap.config, data)(member_attr='member')
+        else:
+            return getattr(django_auth_ldap.config, data)()
 
 
 class LDAPUserFlagsField(fields.DictField):
@@ -375,7 +390,7 @@ class BaseDictWithChildField(fields.DictField):
             child_field = self.child_fields.get(k, None)
             if child_field:
                 value[k] = child_field.to_representation(v)
-            elif allow_unknown_keys:
+            elif self.allow_unknown_keys:
                 value[k] = v
         return value
 

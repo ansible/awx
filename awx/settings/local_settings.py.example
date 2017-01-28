@@ -48,7 +48,7 @@ if is_testing(sys.argv):
     MONGO_DB = 'system_tracking_test'
 
 # Celery AMQP configuration.
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'amqp://guest:guest@localhost:5672'
 
 # Set True to enable additional logging from the job_event_callback plugin
 JOB_CALLBACK_DEBUG = False
@@ -71,7 +71,7 @@ SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html

@@ -156,6 +156,7 @@ class APIView(views.APIView):
             'new_in_240': getattr(self, 'new_in_240', False),
             'new_in_300': getattr(self, 'new_in_300', False),
             'new_in_310': getattr(self, 'new_in_310', False),
+            'deprecated': getattr(self, 'deprecated', False),
         }
 
     def get_description(self, html=False):
@@ -267,8 +268,23 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
         fields = []
         for field in self.model._meta.fields:
             if field.name in ('username', 'first_name', 'last_name', 'email',
-                              'name', 'description', 'email'):
+                              'name', 'description'):
                 fields.append(field.name)
+        return fields
+
+    @property
+    def related_search_fields(self):
+        fields = []
+        for field in self.model._meta.fields:
+            if field.name.endswith('_role'):
+                continue
+            if getattr(field, 'related_model', None):
+                fields.append('{}__search'.format(field.name))
+        for rel in self.model._meta.related_objects:
+            name = rel.get_accessor_name()
+            if name.endswith('_set'):
+                continue
+            fields.append('{}__search'.format(name))
         return fields
 
 
@@ -543,14 +559,12 @@ class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass
 
 
-class ResourceAccessList(ListAPIView):
+class ResourceAccessList(ParentMixin, ListAPIView):
 
     serializer_class = ResourceAccessListElementSerializer
 
     def get_queryset(self):
-        self.object_id = self.kwargs['pk']
-        resource_model = getattr(self, 'resource_model')
-        obj = get_object_or_404(resource_model, pk=self.object_id)
+        obj = self.get_parent_object()
 
         content_type = ContentType.objects.get_for_model(obj)
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))

@@ -20,12 +20,12 @@ export default ['templateUrl', function(templateUrl) {
                 {label: 'Hosts', value: 'host'},
                 {label: 'Inventories', value: 'inventory'},
                 {label: 'Inventory Scripts', value: 'inventory_script'},
-                {label: 'Job Templates', value: 'job_template'},
                 {label: 'Jobs', value: 'job'},
                 {label: 'Organizations', value: 'organization'},
                 {label: 'Projects', value: 'project'},
                 {label: 'Schedules', value: 'schedule'},
                 {label: 'Teams', value: 'team'},
+                {label: 'Templates', value: 'template'},
                 {label: 'Users', value: 'user'}
             ];
 
@@ -37,12 +37,12 @@ export default ['templateUrl', function(templateUrl) {
             $scope.changeStreamTarget = function(){
                 if($scope.streamTarget && $scope.streamTarget === 'dashboard') {
                     // Just navigate to the base activity stream
-                    $state.go('activityStream');
+                    $state.go('activityStream', {target: null, activity_search: {page_size:"20", order_by: '-timestamp'}});
                 }
                 else {
                     let search =  _.merge($stateParams.activity_search, {
-                        or__object1: $scope.streamTarget,
-                        or__object2: $scope.streamTarget
+                        or__object1__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget
                     });
                     // Attach the taget to the query parameters
                     $state.go('activityStream', {target: $scope.streamTarget, activity_search: search});

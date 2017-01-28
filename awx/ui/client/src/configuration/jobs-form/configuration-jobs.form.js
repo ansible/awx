@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
- export default function() {
+ export default ['i18n', function(i18n) {
      return {
          showHeader: false,
          name: 'configuration_jobs_template',
@@ -46,14 +46,26 @@
              },
              AWX_PROOT_ENABLED: {
                  type: 'toggleSwitch',
-             }
+             },
+             DEFAULT_JOB_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_JOB_TIMEOUT',
+             },
+             DEFAULT_INVENTORY_UPDATE_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_INVENTORY_UPDATE_TIMEOUT',
+             },
+             DEFAULT_PROJECT_UPDATE_TIMEOUT: {
+                 type: 'text',
+                 reset: 'DEFAULT_PROJECT_UPDATE_TIMEOUT',
+             },
          },
 
          buttons: {
              reset: {
                  ngClick: 'vm.resetAllConfirm()',
-                 label: 'Reset All',
-                 class: 'Form-button--left Form-cancelButton'
+                 label: i18n._('Revert all to default'),
+                 class: 'Form-resetAll'
              },
              cancel: {
                  ngClick: 'vm.formCancel()',
@@ -64,4 +76,4 @@
              }
          }
      };
- }
+ }];

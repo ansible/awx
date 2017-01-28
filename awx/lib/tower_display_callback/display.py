@@ -26,7 +26,7 @@ import uuid
 from ansible.utils.display import Display
 
 # Tower Display Callback
-from tower_display_callback.events import event_context
+from .events import event_context
 
 __all__ = []
 

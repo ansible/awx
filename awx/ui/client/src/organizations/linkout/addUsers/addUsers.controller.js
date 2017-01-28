@@ -12,9 +12,9 @@
  */
 
 export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath',
-'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait',
+'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window',
 function($scope, $rootScope, ProcessErrors, GetBasePath,
-    SelectionInit, templateUrl, $state, Rest, $q, Wait) {
+    SelectionInit, templateUrl, $state, Rest, $q, Wait, $window) {
     $scope.$on("linkLists", function() {
 
         if ($state.current.name.split(".")[1] === "users") {
@@ -32,8 +32,20 @@ function($scope, $rootScope, ProcessErrors, GetBasePath,
             $scope.add_users = $scope.$parent.add_user_dataset.results;
 
             $scope.selectedItems = [];
-            $scope.$on('selectedOrDeselected', ()=>{
-                throw {name: 'NotYetImplemented'};
+            $scope.$on('selectedOrDeselected', function(e, value) {
+                let item = value.value;
+
+                if (item.isSelected) {
+                    $scope.selectedItems.push(item.id);
+                }
+                else {
+                    // _.remove() Returns the new array of removed elements.
+                    // This will pull all the values out of the array that don't
+                    // match the deselected item effectively removing it
+                    $scope.selectedItems = _.remove($scope.selectedItems, function(selectedItem) {
+                        return selectedItem !== item.id;
+                    });
+                }
             });
         }
 
@@ -42,7 +54,7 @@ function($scope, $rootScope, ProcessErrors, GetBasePath,
             var url, listToClose,
 
             payloads = $scope.selectedItems.map(function(val) {
-                return {id: val.id};
+                return {id: val};
             });
 
             url = $scope.$parent.orgRelatedUrls[$scope.addUsersType];
@@ -68,6 +80,12 @@ function($scope, $rootScope, ProcessErrors, GetBasePath,
                         ': POST returned status' + error.status
                     });
                 });
+        };
+
+        $scope.linkoutUser = function(userId) {
+            // Open the edit user form in a new tab so as not to navigate the user
+            // away from the modal
+            $window.open('/#/users/' + userId,'_blank');
         };
     });
 }];

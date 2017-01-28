@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions
 from rest_framework import metadata
 from rest_framework import serializers
-from rest_framework.relations import RelatedField
+from rest_framework.relations import RelatedField, ManyRelatedField
 from rest_framework.request import clone_request
 
 # Ansible Tower
@@ -75,7 +75,7 @@ class Metadata(metadata.SimpleMetadata):
         elif getattr(field, 'fields', None):
             field_info['children'] = self.get_serializer_info(field)
 
-        if hasattr(field, 'choices') and not isinstance(field, RelatedField):
+        if not isinstance(field, (RelatedField, ManyRelatedField)) and hasattr(field, 'choices'):
             field_info['choices'] = [(choice_value, choice_name) for choice_value, choice_name in field.choices.items()]
 
         # Indicate if a field is write-only.
@@ -182,6 +182,10 @@ class Metadata(metadata.SimpleMetadata):
         # Add search fields if available from the view.
         if getattr(view, 'search_fields', None):
             metadata['search_fields'] = view.search_fields
+
+        # Add related search fields if available from the view.
+        if getattr(view, 'related_search_fields', None):
+            metadata['related_search_fields'] = view.related_search_fields
 
         return metadata
 

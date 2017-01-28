@@ -20,7 +20,7 @@ from django.core.urlresolvers import reverse
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.models.notifications import JobNotificationMixin
+from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
 from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
@@ -157,18 +157,20 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     @property
     def notification_templates(self):
-        all_inventory_sources = set()
+        all_orgs = set()
         for h in self.hosts.all():
-            for invsrc in h.inventory_sources.all():
-                all_inventory_sources.add(invsrc)
+            all_orgs.add(h.inventory.organization)
         active_templates = dict(error=set(),
                                 success=set(),
                                 any=set())
-        for invsrc in all_inventory_sources:
-            notifications_dict = invsrc.notification_templates
-            for notification_type in active_templates.keys():
-                for templ in notifications_dict[notification_type]:
-                    active_templates[notification_type].add(templ)
+        base_notification_templates = NotificationTemplate.objects
+        for org in all_orgs:
+            for templ in base_notification_templates.filter(organization_notification_templates_for_errors=org):
+                active_templates['error'].add(templ)
+            for templ in base_notification_templates.filter(organization_notification_templates_for_success=org):
+                active_templates['success'].add(templ)
+            for templ in base_notification_templates.filter(organization_notification_templates_for_any=org):
+                active_templates['any'].add(templ)
         active_templates['error'] = list(active_templates['error'])
         active_templates['any'] = list(active_templates['any'])
         active_templates['success'] = list(active_templates['success'])

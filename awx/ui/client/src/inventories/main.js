@@ -25,7 +25,7 @@ angular.module('inventory', [
             // This means inventoryManage states will not be registered correctly on page refresh, unless they're registered at the same time as the inventories state tree
             let stateTree, inventories,
                 addGroup, editGroup, addHost, editHost,
-                listSchedules, addSchedule, editSchedule,
+                listSchedules, addSchedule, editSchedule, adhocCredentialLookup,
                 stateDefinitions = stateDefinitionsProvider.$get(),
                 stateExtender = $stateExtenderProvider.$get();
 
@@ -66,7 +66,19 @@ angular.module('inventory', [
                         ],
                         ParentObject: ['groupData', function(groupData) {
                             return groupData;
-                        }]
+                        }],
+                        UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                            function(Rest, GetBasePath, $stateParams, $q) {
+                                Rest.setUrl(GetBasePath('unified_jobs'));
+                                var val = $q.defer();
+                                Rest.options()
+                                    .then(function(data) {
+                                        val.resolve(data.data);
+                                    }, function(data) {
+                                        val.reject(data);
+                                    });
+                                return val.promise;
+                            }]
                     },
                     views: {
                         // clear form template when views render in this substate
@@ -83,7 +95,7 @@ angular.module('inventory', [
                                     mode: 'edit'
                                 });
                                 html = generateList.wrapPanel(html);
-                                return html;
+                                return generateList.insertFormView() + html;
                             },
                             controller: 'schedulerListController'
                         }
@@ -195,6 +207,60 @@ angular.module('inventory', [
                     },
                 });
 
+                adhocCredentialLookup = {
+                    searchPrefix: 'credential',
+                    name: 'inventoryManage.adhoc.credential',
+                    url: '/credential',
+                    data: {
+                        formChildState: true
+                    },
+                    params: {
+                        credential_search: {
+                            value: {
+                                page_size: '5'
+                            },
+                            squash: true,
+                            dynamic: true
+                        }
+                    },
+                    ncyBreadcrumb: {
+                        skip: true
+                    },
+                    views: {
+                        'related': {
+                            templateProvider: function(ListDefinition, generateList) {
+                                let list_html = generateList.build({
+                                    mode: 'lookup',
+                                    list: ListDefinition,
+                                    input_type: 'radio'
+                                });
+                                return `<lookup-modal>${list_html}</lookup-modal>`;
+
+                            }
+                        }
+                    },
+                    resolve: {
+                        ListDefinition: ['CredentialList', function(CredentialList) {
+                            let list = _.cloneDeep(CredentialList);
+                            list.lookupConfirmText = 'SELECT';
+                            return list;
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath',
+                            (list, qs, $stateParams, GetBasePath) => {
+                                let path = GetBasePath(list.name) || GetBasePath(list.basePath);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ]
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#form-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                };
+
                 return Promise.all([
                     inventories,
                     addGroup,
@@ -210,6 +276,7 @@ angular.module('inventory', [
                             stateExtender.buildDefinition(copyMoveGroupRoute),
                             stateExtender.buildDefinition(copyMoveHostRoute),
                             stateExtender.buildDefinition(adHocRoute),
+                            stateExtender.buildDefinition(adhocCredentialLookup)
 
                         ])
                     };

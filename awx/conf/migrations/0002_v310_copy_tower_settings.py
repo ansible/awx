@@ -64,11 +64,11 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('conf', '0001_initial'),
-        ('main', '0036_v310_jobevent_uuid'),
+        ('main', '0034_v310_release'),
     ]
 
     run_before = [
-        ('main', '0037_v310_remove_tower_settings'),
+        ('main', '0035_v310_remove_tower_settings'),
     ]
 
     operations = [

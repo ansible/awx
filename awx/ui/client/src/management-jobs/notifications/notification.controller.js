@@ -5,55 +5,33 @@
  *************************************************/
 
 export default
-    [   '$rootScope','Wait', 'generateList', 'NotificationsList',
-        'GetBasePath' , 'Rest' ,
-        'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
-        'ngToast', '$compile', '$filter','ToggleNotification',
-        'NotificationsListInit', '$stateParams', 'management_job',
+    [   'NotificationsList', 'GetBasePath', 'ToggleNotification', 'NotificationsListInit',
+        '$stateParams', 'Dataset', '$scope',
         function(
-            $rootScope,Wait, GenerateList, NotificationsList,
-            GetBasePath, Rest,
-            ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
-            $compile, $filter, ToggleNotification, NotificationsListInit,
-            $stateParams, management_job) {
-            var scope = $rootScope.$new(),
-                url = GetBasePath('notification_templates'),
-                defaultUrl = GetBasePath('system_job_templates'),
-                list,
-                view = GenerateList,
+            NotificationsList, GetBasePath, ToggleNotification, NotificationsListInit,
+            $stateParams, Dataset, $scope) {
+            var defaultUrl = GetBasePath('system_job_templates'),
+                list = NotificationsList,
                 id = $stateParams.management_id;
 
-            list = _.cloneDeep(NotificationsList);
-            delete list.actions.add;
-            list.listTitle = `${management_job.name} <div class="List-titleLockup"></div> Notifications`;
-            list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
-            list.searchRowActions = {
-                add: {
-                    label: 'Add Notification',
-                    mode: 'all', // One of: edit, select, all
-                    ngClick: 'addNotificationTemplate()',
-                    awToolTip: 'Create a new notification template',
-                    actionClass: 'btn List-buttonSubmit',
-                    buttonContent: '&#43; ADD NOTIFICATION TEMPLATE'
-                }
-            };
-            view.inject( list, {
-                mode: 'edit',
-                cancelButton: true,
-                scope: scope
-            });
+            function init() {
+                $scope.list = list;
+                $scope[`${list.iterator}_dataset`] = Dataset.data;
+                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
-            NotificationsListInit({
-                scope: scope,
-                url: defaultUrl,
-                id: id
-            });
+                NotificationsListInit({
+                    scope: $scope,
+                    url: defaultUrl,
+                    id: id
+                });
 
-            scope.formCancel = function() {
-                $state.go('managementJobsList');
-            };
+                $scope.$watch(`${list.iterator}_dataset`, function() {
+                    // The list data has changed and we need to update which notifications are on/off
+                    $scope.$emit('relatednotifications');
+                });
+            }
 
-            scope.toggleNotification = function(event, notifier_id, column) {
+            $scope.toggleNotification = function(event, notifier_id, column) {
                 var notifier = this.notification;
                 try {
                     $(event.target).tooltip('hide');
@@ -62,60 +40,15 @@ export default
                     // ignore
                 }
                 ToggleNotification({
-                    scope: scope,
-                    url: defaultUrl,
-                    id: id,
+                    scope: $scope,
+                    url: defaultUrl + id,
                     notifier: notifier,
                     column: column,
                     callback: 'NotificationRefresh'
                 });
             };
 
-            if (scope.removePostRefresh) {
-                scope.removePostRefresh();
-            }
-            scope.removePostRefresh = scope.$on('PostRefresh', function () {
-                scope.$emit('relatednotifications');
-            });
-
-            if (scope.removeChoicesHere) {
-                scope.removeChoicesHere();
-            }
-            scope.removeChoicesHere = scope.$on('choicesReadyNotifierList', function () {
-                list.fields.notification_type.searchOptions = scope.notification_type_options;
-
-                // @issue: OLD SEARCH
-                // SearchInit({
-                //     scope: scope,
-                //     set: 'notifications',
-                //     list: list,
-                //     url: url
-                // });
-
-                if ($rootScope.addedItem) {
-                    scope.addedItem = $rootScope.addedItem;
-                    delete $rootScope.addedItem;
-                }
-
-                // @issue: OLD SEARCH
-                // PaginateInit({
-                //     scope: scope,
-                //     list: list,
-                //     url: url
-                // });
-                //
-                // scope.search(list.iterator);
-
-            });
-
-            GetChoices({
-                scope: scope,
-                url: url,
-                field: 'notification_type',
-                variable: 'notification_type_options',
-                callback: 'choicesReadyNotifierList'
-            });
-
+            init();
 
         }
     ];

@@ -99,7 +99,8 @@ angular.module('LoadConfigHelper', ['Utilities'])
                     configInit();
 
                 }).error(function(error) {
-                    console.log(error);
+                    $log.debug(error);
+                    configInit();
                 });
 
         };

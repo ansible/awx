@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ '$state',
-    function($state) {
+export default [ '$state','moment',
+    function($state, moment) {
 
     return {
         scope: {
@@ -14,25 +14,20 @@ export default [ '$state',
             addNode: '&',
             editNode: '&',
             deleteNode: '&',
+            workflowZoomed: '&',
             mode: '@'
         },
         restrict: 'E',
         link: function(scope, element) {
 
-            scope.$watch('canAddWorkflowJobTemplate', function() {
-                // Redraw the graph if permissions change
-                update();
-            });
-
             let margin = {top: 20, right: 20, bottom: 20, left: 20},
                 width = 950,
-                height = 590 - margin.top - margin.bottom,
+                height = 550,
                 i = 0,
-                rectW = 120,
-                rectH = 60,
+                nodeW = 120,
+                nodeH = 60,
                 rootW = 60,
-                rootH = 40,
-                m = [40, 240, 40, 240];
+                rootH = 40;
 
             let tree = d3.layout.tree()
                     .size([height, width]);
@@ -41,12 +36,25 @@ export default [ '$state',
                      .x(function(d){return d.x;})
                      .y(function(d){return d.y;});
 
+            let zoomObj = d3.behavior.zoom().scaleExtent([0.5, 2]);
+
+            let baseSvg = d3.select(element[0]).append("svg")
+                .attr("width", width - margin.right - margin.left)
+                .attr("height", height - margin.top - margin.bottom)
+                .attr("class", "WorkflowChart-svg")
+                .call(zoomObj
+                    .on("zoom", naturalZoom)
+                );
+
+            let svgGroup = baseSvg.append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
             function lineData(d){
 
-                let sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + rectW;
-                let sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + rectH / 2;
+                let sourceX = d.source.isStartNode ? d.source.y + rootW : d.source.y + nodeW;
+                let sourceY = d.source.isStartNode ? d.source.x + 10 + rootH / 2 : d.source.x + nodeH / 2;
                 let targetX = d.target.y;
-                let targetY = d.target.x + rectH / 2;
+                let targetY = d.target.x + nodeH / 2;
 
                 let points = [
                     {
@@ -76,33 +84,76 @@ export default [ '$state',
                 }
             }
 
-            let baseSvg = d3.select(element[0]).append("svg")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("class", "WorkflowChart-svg")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-                .call(d3.behavior.zoom()
-                    .scaleExtent([0.5, 5])
-                    .on("zoom", zoom)
-                );
+            function rounded_rect(x, y, w, h, r, tl, tr, bl, br) {
+                var retval;
+                retval  = "M" + (x + r) + "," + y;
+                retval += "h" + (w - 2*r);
+                if (tr) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + r; }
+                else { retval += "h" + r; retval += "v" + r; }
+                retval += "v" + (h - 2*r);
+                if (br) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + r; }
+                else { retval += "v" + r; retval += "h" + -r; }
+                retval += "h" + (2*r - w);
+                if (bl) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + -r; }
+                else { retval += "h" + -r; retval += "v" + -r; }
+                retval += "v" + (2*r - h);
+                if (tl) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + -r; }
+                else { retval += "v" + -r; retval += "h" + r; }
+                retval += "z";
+                return retval;
+            }
 
-            let svgGroup = baseSvg.append("g");
-
-            function zoom() {
+            // This is the zoom function called by using the mousewheel/click and drag
+            function naturalZoom() {
                 let scale = d3.event.scale,
-                    translation = d3.event.translate,
-                    tbound = -height * scale,
-                    bbound = height * scale,
-                    lbound = (-width + m[1]) * scale,
-                    rbound = (width - m[3]) * scale;
-                  // limit translation to thresholds
-                  translation = [
-                      Math.max(Math.min(translation[0], rbound), lbound),
-                      Math.max(Math.min(translation[1], bbound), tbound)
-                  ];
+                    translation = d3.event.translate;
 
+                translation = [translation[0] + (margin.left*scale), translation[1] + (margin.top*scale)];
 
                 svgGroup.attr("transform", "translate(" + translation + ")scale(" + scale + ")");
+
+                scope.workflowZoomed({
+                    zoom: scale
+                });
+            }
+
+            // This is the zoom that gets called when the user interacts with the manual zoom controls
+            function manualZoom(zoom) {
+                let scale = zoom / 100,
+                translation = zoomObj.translate(),
+                origZoom = zoomObj.scale(),
+                unscaledOffsetX = (translation[0] + ((width*origZoom) - width)/2)/origZoom,
+                unscaledOffsetY = (translation[1] + ((height*origZoom) - height)/2)/origZoom,
+                translateX = unscaledOffsetX*scale - ((scale*width)-width)/2,
+                translateY = unscaledOffsetY*scale - ((scale*height)-height)/2;
+
+                svgGroup.attr("transform", "translate(" + [translateX + (margin.left*scale), translateY + (margin.top*scale)] + ")scale(" + scale + ")");
+                zoomObj.scale(scale);
+                zoomObj.translate([translateX, translateY]);
+            }
+
+            function manualPan(direction) {
+                let scale = zoomObj.scale(),
+                    distance = 150 * scale,
+                    translateX,
+                    translateY,
+                    translateCoords = zoomObj.translate();
+                if (direction === 'left' || direction === 'right') {
+                    translateX = direction === 'left' ? translateCoords[0] - distance : translateCoords[0] + distance;
+                    translateY = translateCoords[1];
+                } else if (direction === 'up' || direction === 'down') {
+                    translateX = translateCoords[0];
+                    translateY = direction === 'up' ? translateCoords[1] - distance : translateCoords[1] + distance;
+                }
+                svgGroup.attr("transform", "translate(" + translateX + "," + translateY + ")scale(" + scale + ")");
+                zoomObj.translate([translateX, translateY]);
+            }
+
+            function resetZoomAndPan() {
+                svgGroup.attr("transform", "translate(" + margin.left + "," + margin.top + ")scale(" + 1 + ")");
+                // Update the zoomObj
+                zoomObj.scale(1);
+                zoomObj.translate([0,0]);
             }
 
             function update() {
@@ -119,57 +170,92 @@ export default [ '$state',
                     .attr("class", "node")
                     .attr("id", function(d){return "node-" + d.id;})
                     .attr("parent", function(d){return d.parent ? d.parent.id : null;})
-                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-                    .attr("fill", "red");
+                    .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
                 nodeEnter.each(function(d) {
                     let thisNode = d3.select(this);
-                    if(d.isStartNode) {
+                    if(d.isStartNode && scope.mode === 'details') {
+                        // Overwrite the default root height and width and replace it with a small blue square
+                        rootW = 25;
+                        rootH = 25;
                         thisNode.append("rect")
-                            .attr("width", 60)
-                            .attr("height", 40)
+                            .attr("width", rootW)
+                            .attr("height", rootH)
+                            .attr("y", 10)
+                            .attr("rx", 5)
+                            .attr("ry", 5)
+                            .attr("fill", "#337ab7")
+                            .attr("class", "WorkflowChart-rootNode");
+                    }
+                    else if(d.isStartNode && scope.mode !== 'details') {
+                        thisNode.append("rect")
+                            .attr("width", rootW)
+                            .attr("height", rootH)
                             .attr("y", 10)
                             .attr("rx", 5)
                             .attr("ry", 5)
                             .attr("fill", "#5cb85c")
                             .attr("class", "WorkflowChart-rootNode")
                             .call(add_node);
-                        thisNode.append("path")
-                            .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + 30 + "," + 30 + ")"; })
-                            .attr("d", d3.svg.symbol()
-                                .size(120)
-                                .type("cross")
-                            )
-                            .call(add_node);
                         thisNode.append("text")
-                            .attr("x", 14)
-                            .attr("y", 0)
+                            .attr("x", 13)
+                            .attr("y", 30)
                             .attr("dy", ".35em")
-                            .attr("class", "WorkflowChart-defaultText")
-                            .text(function () { return "START"; });
+                            .attr("class", "WorkflowChart-startText")
+                            .text(function () { return "START"; })
+                            .call(add_node);
                     }
                     else {
                         thisNode.append("rect")
-                            .attr("width", rectW)
-                            .attr("height", rectH)
+                            .attr("width", nodeW)
+                            .attr("height", nodeH)
                             .attr("rx", 5)
                             .attr("ry", 5)
-                            .attr('stroke', function(d) { return d.isActiveEdit ? "#337ab7" : "#D7D7D7"; })
-                            .attr('stroke-width', function(d){ return d.isActiveEdit ? "2px" : "1px"; })
+                            .attr('stroke', function(d) {
+                                if(d.job && d.job.status) {
+                                    if(d.job.status === "successful"){
+                                        return "#5cb85c";
+                                    }
+                                    else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                        return "#d9534f";
+                                    }
+                                    else {
+                                        return "#D7D7D7";
+                                    }
+                                }
+                                else {
+                                    return "#D7D7D7";
+                                }
+                            })
+                            .attr('stroke-width', "2px")
                             .attr("class", function(d) {
                                 return d.placeholder ? "rect placeholder" : "rect";
                             });
 
+                        thisNode.append("path")
+                            .attr("d", rounded_rect(1, 0, 5, nodeH, 5, 1, 0, 1, 0))
+                            .attr("class", "WorkflowChart-activeNode")
+                            .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
+
                         thisNode.append("text")
-                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
+                            .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
+                            .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : nodeH / 2; })
                             .attr("dy", ".35em")
-                            .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
+                            .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
                             .attr("class", "WorkflowChart-defaultText WorkflowChart-nameText")
                             .text(function (d) {
                                 return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                             }).each(wrap);
+
+                        thisNode.append("foreignObject")
+                             .attr("x", 43)
+                             .attr("y", 45)
+                             .style("font-size","0.7em")
+                             .attr("class", "WorkflowChart-conflictText")
+                             .html(function () {
+                                 return "<span class=\"WorkflowChart-conflictIcon\">\uf06a</span><span> EDGE CONFLICT</span>";
+                             })
+                             .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
 
                         thisNode.append("foreignObject")
                             .attr("x", 17)
@@ -183,13 +269,13 @@ export default [ '$state',
                             .style("display", function(d) { return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
 
                         thisNode.append("circle")
-                            .attr("cy", rectH)
+                            .attr("cy", nodeH)
                             .attr("r", 10)
                             .attr("class", "WorkflowChart-nodeTypeCircle")
                             .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
 
                         thisNode.append("text")
-                            .attr("y", rectH)
+                            .attr("y", nodeH)
                             .attr("dy", ".35em")
                             .attr("text-anchor", "middle")
                             .attr("class", "WorkflowChart-nodeTypeLetter")
@@ -199,8 +285,8 @@ export default [ '$state',
                             .style("display", function(d) { return d.unifiedJobTemplate && (d.unifiedJobTemplate.type === "project" || d.unifiedJobTemplate.unified_job_type === "project_update" || d.unifiedJobTemplate.type === "inventory_source" || d.unifiedJobTemplate.unified_job_type === "inventory_update") ? null : "none"; });
 
                         thisNode.append("rect")
-                            .attr("width", rectW)
-                            .attr("height", rectH)
+                            .attr("width", nodeW)
+                            .attr("height", nodeH)
                             .attr("class", "transparentRect")
                             .call(edit_node)
                             .on("mouseover", function(d) {
@@ -216,18 +302,18 @@ export default [ '$state',
                                 }
                             });
                         thisNode.append("text")
-                            .attr("x", rectW - 50)
-                            .attr("y", rectH - 10)
+                            .attr("x", nodeW - 50)
+                            .attr("y", nodeH - 10)
                             .attr("dy", ".35em")
                             .attr("class", "WorkflowChart-detailsLink")
-                            .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; })
+                            .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; })
                             .text(function () {
                                 return "DETAILS";
                             })
                             .call(details);
                         thisNode.append("circle")
                             .attr("id", function(d){return "node-" + d.id + "-add";})
-                            .attr("cx", rectW)
+                            .attr("cx", nodeW)
                             .attr("r", 10)
                             .attr("class", "addCircle nodeCircle")
                             .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
@@ -247,7 +333,7 @@ export default [ '$state',
                         thisNode.append("path")
                             .attr("class", "nodeAddCross WorkflowChart-hoverPath")
                             .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + rectW + "," + 0 + ")"; })
+                            .attr("transform", function() { return "translate(" + nodeW + "," + 0 + ")"; })
                             .attr("d", d3.svg.symbol()
                                 .size(60)
                                 .type("cross")
@@ -268,8 +354,8 @@ export default [ '$state',
                             });
                         thisNode.append("circle")
                             .attr("id", function(d){return "node-" + d.id + "-remove";})
-                            .attr("cx", rectW)
-                            .attr("cy", rectH)
+                            .attr("cx", nodeW)
+                            .attr("cy", nodeH)
                             .attr("r", 10)
                             .attr("class", "removeCircle")
                             .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
@@ -289,7 +375,7 @@ export default [ '$state',
                         thisNode.append("path")
                             .attr("class", "nodeRemoveCross WorkflowChart-hoverPath")
                             .style("fill", "white")
-                            .attr("transform", function() { return "translate(" + rectW + "," + rectH + ") rotate(-45)"; })
+                            .attr("transform", function() { return "translate(" + nodeW + "," + nodeH + ") rotate(-45)"; })
                             .attr("d", d3.svg.symbol()
                                 .size(60)
                                 .type("cross")
@@ -315,7 +401,7 @@ export default [ '$state',
                                 let statusClass = "WorkflowChart-nodeStatus ";
 
                                 if(d.job){
-                                    switch(d.job.jobStatus) {
+                                    switch(d.job.status) {
                                         case "pending":
                                             statusClass = "workflowChart-nodeStatus--running";
                                             break;
@@ -331,15 +417,37 @@ export default [ '$state',
                                         case "failed":
                                             statusClass = "workflowChart-nodeStatus--failed";
                                             break;
+                                        case "error":
+                                            statusClass = "workflowChart-nodeStatus--failed";
+                                            break;
                                     }
                                 }
 
                                 return statusClass;
                             })
-                            .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
+                            .style("display", function(d) { return d.job && d.job.status ? null : "none"; })
                             .attr("cy", 10)
                             .attr("cx", 10)
                             .attr("r", 6);
+
+                        thisNode.append("foreignObject")
+                             .attr("x", 5)
+                             .attr("y", 43)
+                             .style("font-size","0.7em")
+                             .attr("class", "WorkflowChart-elapsed")
+                             .html(function (d) {
+                                 if(d.job && d.job.elapsed) {
+                                     let elapsedMs = d.job.elapsed * 1000;
+                                     let elapsedMoment = moment.duration(elapsedMs);
+                                     let paddedElapsedMoment = Math.floor(elapsedMoment.asHours()) < 10 ? "0" + Math.floor(elapsedMoment.asHours()) : Math.floor(elapsedMoment.asHours());
+                                     let elapsedString = paddedElapsedMoment + moment.utc(elapsedMs).format(":mm:ss");
+                                     return "<div class=\"WorkflowChart-elapsedHolder\"><span>" + elapsedString + "</span></div>";
+                                 }
+                                 else {
+                                     return "";
+                                 }
+                             })
+                             .style("display", function(d) { return (d.job && d.job.elapsed) ? null : "none"; });
                     }
                 });
 
@@ -347,7 +455,7 @@ export default [ '$state',
 
                 let link = svgGroup.selectAll("g.link")
                     .data(links, function(d) {
-                        return d.target.id;
+                        return d.source.id + "-" + d.target.id;
                     });
 
                 let linkEnter = link.enter().append("g")
@@ -380,10 +488,10 @@ export default [ '$state',
                 linkEnter.append("circle")
                      .attr("id", function(d){return "link-" + d.source.id + "-" + d.target.id + "-add";})
                      .attr("cx", function(d) {
-                         return (d.target.y + d.source.y + rectW) / 2;
+                         return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                      })
                      .attr("cy", function(d) {
-                         return (d.target.x + d.source.x + rectH) / 2;
+                         return (d.source.isStartNode) ? ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
                      })
                      .attr("r", 10)
                      .attr("class", "addCircle linkCircle")
@@ -405,7 +513,16 @@ export default [ '$state',
                 linkEnter.append("path")
                      .attr("class", "linkCross")
                      .style("fill", "white")
-                     .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; })
+                     .attr("transform", function(d) {
+                         let translate;
+                         if(d.source.isStartNode) {
+                             translate = "translate(" + (d.target.y + d.source.y + rootW) / 2 + "," + ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 + ")";
+                         }
+                         else {
+                             translate = "translate(" + (d.target.y + d.source.y + nodeW) / 2 + "," + (d.target.x + d.source.x + nodeH) / 2 + ")";
+                         }
+                         return translate;
+                     })
                      .attr("d", d3.svg.symbol()
                          .size(60)
                          .type("cross")
@@ -467,24 +584,48 @@ export default [ '$state',
                 t.selectAll(".linkCircle")
                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
                     .attr("cx", function(d) {
-                        return (d.target.y + d.source.y + rectW) / 2;
+                        return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                     })
                     .attr("cy", function(d) {
-                        return (d.target.x + d.source.x + rectH) / 2;
+                        return (d.source.isStartNode) ? ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 : (d.target.x + d.source.x + nodeH) / 2;
                     });
 
                 t.selectAll(".linkCross")
                     .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
-                    .attr("transform", function(d) { return "translate(" + (d.target.y + d.source.y + rectW) / 2 + "," + (d.target.x + d.source.x + rectH) / 2 + ")"; });
+                    .attr("transform", function(d) {
+                        let translate;
+                        if(d.source.isStartNode) {
+                            translate = "translate(" + (d.target.y + d.source.y + rootW) / 2 + "," + ((d.target.x + 10 + rootH/2) + (d.source.x + nodeH/2)) / 2 + ")";
+                        }
+                        else {
+                            translate = "translate(" + (d.target.y + d.source.y + nodeW) / 2 + "," + (d.target.x + d.source.x + nodeH) / 2 + ")";
+                        }
+                        return translate;
+                    });
 
                 t.selectAll(".rect")
-                    .attr('stroke', function(d) { return d.isActiveEdit ? "#337ab7" : "#D7D7D7"; })
-                    .attr('stroke-width', function(d){ return d.isActiveEdit ? "2px" : "1px"; })
+                    .attr('stroke', function(d) {
+                        if(d.job && d.job.status) {
+                            if(d.job.status === "successful"){
+                                return "#5cb85c";
+                            }
+                            else if (d.job.status === "failed" || d.job.status === "error" || d.job.status === "cancelled") {
+                                return "#d9534f";
+                            }
+                            else {
+                                return "#D7D7D7";
+                            }
+                        }
+                        else {
+                            return "#D7D7D7";
+                        }
+                     })
                     .attr("class", function(d) {
                         return d.placeholder ? "rect placeholder" : "rect";
                     });
 
                 t.selectAll(".node")
+                    .attr("parent", function(d){return d.parent ? d.parent.id : null;})
                     .attr("transform", function(d) {d.px = d.x; d.py = d.y; return "translate(" + d.y + "," + d.x + ")"; });
 
                 t.selectAll(".WorkflowChart-nodeTypeCircle")
@@ -502,7 +643,7 @@ export default [ '$state',
                         let statusClass = "WorkflowChart-nodeStatus ";
 
                         if(d.job){
-                            switch(d.job.jobStatus) {
+                            switch(d.job.status) {
                                 case "pending":
                                     statusClass += "workflowChart-nodeStatus--running";
                                     break;
@@ -518,17 +659,20 @@ export default [ '$state',
                                 case "failed":
                                     statusClass += "workflowChart-nodeStatus--failed";
                                     break;
+                                case "error":
+                                    statusClass = "workflowChart-nodeStatus--failed";
+                                    break;
                             }
                         }
 
                         return statusClass;
                     })
-                    .style("display", function(d) { return d.job && d.job.jobStatus ? null : "none"; })
+                    .style("display", function(d) { return d.job && d.job.status ? null : "none"; })
                     .transition()
                     .duration(0)
                     .attr("r", 6)
                     .each(function(d) {
-                        if(d.job && d.job.jobStatus && (d.job.jobStatus === "pending" || d.job.jobStatus === "waiting" || d.job.jobStatus === "running")) {
+                        if(d.job && d.job.status && (d.job.status === "pending" || d.job.status === "waiting" || d.job.status === "running")) {
                             // Pulse the circle
                             var circle = d3.select(this);
                 			(function repeat() {
@@ -545,18 +689,27 @@ export default [ '$state',
                     });
 
                 t.selectAll(".WorkflowChart-nameText")
-                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 20 : rectW / 2; })
-                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? 10 : rectH / 2; })
-                    .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.jobStatus) ? "inherit" : "middle"; })
+                    .attr("x", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 20 : nodeW / 2; })
+                    .attr("y", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? 10 : nodeH / 2; })
+                    .attr("text-anchor", function(d){ return (scope.mode === 'details' && d.job && d.job.status) ? "inherit" : "middle"; })
                     .text(function (d) {
                         return (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? wrap(d.unifiedJobTemplate.name) : "";
                     });
 
                 t.selectAll(".WorkflowChart-detailsLink")
-                    .style("display", function(d){ return d.job && d.job.jobStatus && d.job.unified_job_id ? null : "none"; });
+                    .style("display", function(d){ return d.job && d.job.status && d.job.id ? null : "none"; });
 
                 t.selectAll(".WorkflowChart-incompleteText")
                     .style("display", function(d){ return d.unifiedJobTemplate || d.placeholder ? "none" : null; });
+
+                t.selectAll(".WorkflowChart-conflictText")
+                    .style("display", function(d) { return (d.edgeConflict && !d.placeholder) ? null : "none"; });
+
+                t.selectAll(".WorkflowChart-activeNode")
+                    .style("display", function(d) { return d.isActiveEdit ? null : "none"; });
+
+                t.selectAll(".WorkflowChart-elapsed")
+                    .style("display", function(d) { return (d.job && d.job.elapsed) ? null : "none"; });
 
             }
 
@@ -610,22 +763,50 @@ export default [ '$state',
                     d3.select(this).style("text-decoration", null);
                 });
                 this.on("click", function(d) {
-                    if(d.job.unified_job_id && d.unifiedJobTemplate) {
+                    if(d.job.id && d.unifiedJobTemplate) {
                         if(d.unifiedJobTemplate.unified_job_type === 'job') {
-                            $state.go('jobDetail', {id: d.job.unified_job_id});
+                            $state.go('jobDetail', {id: d.job.id});
                         }
                         else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
-                            $state.go('inventorySyncStdout', {id: d.job.unified_job_id});
+                            $state.go('inventorySyncStdout', {id: d.job.id});
                         }
                         else if(d.unifiedJobTemplate.unified_job_type === 'project_update') {
-                            $state.go('scmUpdateStdout', {id: d.job.unified_job_id});
+                            $state.go('scmUpdateStdout', {id: d.job.id});
                         }
                     }
                 });
             }
 
+            scope.$watch('canAddWorkflowJobTemplate', function() {
+                // Redraw the graph if permissions change
+                if(scope.treeData) {
+                    update();
+                }
+            });
+
             scope.$on('refreshWorkflowChart', function(){
-                update();
+                if(scope.treeData) {
+                    update();
+                }
+            });
+
+            scope.$on('panWorkflowChart', function(evt, params) {
+                manualPan(params.direction);
+            });
+
+            scope.$on('resetWorkflowChart', function(){
+                resetZoomAndPan();
+            });
+
+            scope.$on('zoomWorkflowChart', function(evt, params) {
+                manualZoom(params.zoom);
+            });
+
+            let clearWatchTreeData = scope.$watch('treeData', function(newVal) {
+                if(newVal) {
+                    update();
+                    clearWatchTreeData();
+                }
             });
 
         }

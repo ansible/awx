@@ -729,18 +729,6 @@ legend {
 .navigation {
   margin: 15px 0 15px 0;
 }
-  .modal-body {
-      .alert {
-          padding: 0;
-          border: none;
-          margin: 0;
-      }
-      .alert-danger {
-          background-color: @default-bg;
-          border: none;
-          color: @default-interface-txt;
-      }
-  }
 
 .footer-navigation {
   margin: 10px 0 10px 0;
@@ -1104,6 +1092,7 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-stopped:before,
   .icon-job-error:before,
   .icon-job-canceled:before,
+  .icon-job-stdout-download-tooltip:before,
   .icon-job-unreachable:before {
       content: "\f06a";
   }
@@ -1141,6 +1130,7 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-stopped,
   .icon-job-error,
   .icon-job-failed,
+  .icon-job-stdout-download-tooltip,
   .icon-job-canceled {
       color: @red;
   }
@@ -1638,17 +1628,19 @@ tr td button i {
 }
 
 /* overrides to TB modal */
+.modal-content {
+    padding: 20px;
+}
 
 .modal-header {
     color: @default-interface-txt;
-    margin: .1em 0;
     white-space: nowrap;
     width: 90%;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
     border: none;
-    padding: 12px 14px 0 12px;
+    padding: 0;
 }
 
 .modal {
@@ -1677,8 +1669,18 @@ tr td button i {
 }
 
 .modal-body {
-    padding: 20px 14px 7px 14px;
     min-height: 120px;
+    padding: 20px 0;
+    
+    .alert {
+        padding: 10px;
+        margin: 0;
+    }
+    .alert-danger {
+        background-color: @default-bg;
+        border: none;
+        color: @default-interface-txt;
+      }
 }
 
 #prompt-modal .modal-body {
@@ -1690,15 +1692,15 @@ tr td button i {
 }
 
 .modal-footer {
-    padding: .3em 1em .5em .4em;
+    padding: 0;
     border: none;
+    margin-top: 0;
 
     .btn.btn-primary {
       text-transform: uppercase;
       background-color: @default-succ;
       border-color: @default-succ;
       padding: 5px 15px;
-      margin: .5em .4em .5em 0;
       cursor: pointer;
 
       &:hover {
@@ -1720,8 +1722,7 @@ tr td button i {
 
 
 /* PW progress bar */
-.pw-progress {
-  margin-top: 10px;
+.pw-progress {  margin-top: 10px;
 
   li {
     line-height: normal;
@@ -2219,10 +2220,6 @@ a:hover {
     font-family: 'Open Sans';
 }
 
-.modal-body .alert {
-    padding: 10px;
-}
-
 .WorkflowBadge{
     background-color: @b7grey;
     border-radius: 10px;
@@ -2236,4 +2233,9 @@ a:hover {
     margin-left: 5px;
     padding-left: 2px;
     width: 14px;
+}
+
+button[disabled],
+html input[disabled] {
+    cursor: not-allowed;
 }

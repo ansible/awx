@@ -53,9 +53,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
 
                     formStates = _.map(params.modes, (mode) => this.generateFormNode(mode, form, params));
                     states = states.concat(_.flatten(formStates));
-                    $log.debug('*** Generated State Tree', states);
-                    resolve({ states: states });
                 }
+
+                $log.debug('*** Generated State Tree', states);
+                resolve({ states: states });
             });
         },
 
@@ -68,7 +69,8 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          * @returns {object} a list state definition
          */
         generateListNode: function(list, params) {
-            let state;
+            let state,
+                url = params.urls && params.urls.list ? params.urls.list : (params.url ? params.url : `/${list.name}`);
 
             // allows passed-in params to specify a custom templateUrl
             // otherwise, use html returned by generateList.build() to fulfill templateProvider fn
@@ -90,7 +92,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
             state = $stateExtender.buildDefinition({
                 searchPrefix: list.iterator,
                 name: params.parent,
-                url: (params.url || `/${list.name}`),
+                url: url,
                 data: params.data,
                 ncyBreadcrumb: {
                     label: list.title
@@ -135,14 +137,17 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          * @returns {array} Array of state definitions required by form mode [{...}, {...}, ...]
          */
         generateFormNode: function(mode, form, params) {
-            let formNode, states = [];
+            let formNode,
+                states = [],
+                url;
             switch (mode) {
                 case 'add':
+                    url = params.urls && params.urls.add ? params.urls.add : (params.url ? params.url : '/add');
                     // breadcrumbName necessary for resources that are more than one word like
                     // job templates.  form.name can't have spaces in it or it busts form gen
                     formNode = $stateExtender.buildDefinition({
                         name: params.name || `${params.parent}.add`,
-                        url: params.url || '/add',
+                        url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
                             label: `CREATE ${form.breadcrumbName || form.name}`
@@ -171,9 +176,10 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     }
                     break;
                 case 'edit':
-                    formNode = $stateExtender.buildDefinition({
+                    url = params.urls && params.urls.edit ? params.urls.edit : (params.url ? params.url : `/:${form.name}_id`);
+                    let formNodeState = {
                         name: params.name || `${params.parent}.edit`,
-                        url: (params.url || `/:${form.name}_id`),
+                        url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
                             label: '{{parentObject.name || name}}'
@@ -209,8 +215,15 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                     return Rest.get();
                                 }
                             ]
-                        }
-                    });
+                        },
+                    };
+                    if (params.data && params.data.activityStreamTarget) {
+                        formNodeState.data = {};
+                        formNodeState.data.activityStreamId = params.data.activityStreamTarget + '_id';
+
+                    }
+                    formNode = $stateExtender.buildDefinition(formNodeState);
+
                     if (params.resolve && params.resolve.edit) {
                         formNode.resolve = _.merge(formNode.resolve, params.resolve.edit);
                     }
@@ -230,7 +243,84 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          */
         generateFormListDefinitions: function(form, formStateDefinition) {
 
-            function buildPermissionDirective() {
+            function buildRbacUserTeamDirective(){
+                let states = [];
+
+                states.push($stateExtender.buildDefinition({
+                    name: `${formStateDefinition.name}.permissions.add`,
+                    squashSearchUrl: true,
+                    url: '/add-permissions',
+                    params: {
+                        project_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
+                        },
+                        job_template_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
+                        },
+                        workflow_template_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
+                        },
+                        inventory_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
+                        },
+                        credential_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
+                        }
+                    },
+                    views: {
+                        [`modal@${formStateDefinition.name}`]: {
+                            template: `<add-rbac-user-team resolve="$resolve" title="Add Permissions"></add-rbac-user-team>`
+                        }
+                    },
+                    resolve: {
+                        jobTemplatesDataset: ['QuerySet', '$stateParams', 'GetBasePath',
+                            function(qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath('job_templates');
+                                return qs.search(path, $stateParams.job_template_search);
+                            }
+                        ],
+                        workflowTemplatesDataset: ['QuerySet', '$stateParams', 'GetBasePath',
+                            function(qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath('workflow_job_templates');
+                                return qs.search(path, $stateParams.workflow_template_search);
+                            }
+                        ],
+                        projectsDataset: ['ProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        inventoriesDataset: ['InventoryList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#add-permissions-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                }));
+                return states;
+            }
+
+            function buildRbacResourceDirective() {
                 let states = [];
 
                 states.push($stateExtender.buildDefinition({
@@ -249,7 +339,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-permissions users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData"></add-permissions>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="Add Users / Teams"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -278,13 +368,192 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 return states;
             }
 
+            function buildNotificationState(field) {
+                let state,
+                    list = field.include ? $injector.get(field.include) : field;
+                state = $stateExtender.buildDefinition({
+                    searchPrefix: `${list.iterator}`,
+                    name: `${formStateDefinition.name}.${list.iterator}s`,
+                    url: `/${list.iterator}s`,
+                    ncyBreadcrumb: {
+                        parent: `${formStateDefinition.name}`,
+                        label: `${field.iterator}s`
+                    },
+                    params: {
+                        [list.iterator + '_search']: {
+                            value: { order_by: field.order_by ? field.order_by : 'name' }
+                        }
+                    },
+                    views: {
+                        'related': {
+                            templateProvider: function(FormDefinition, GenerateForm) {
+                                let html = GenerateForm.buildCollection({
+                                    mode: 'edit',
+                                    related: `${list.iterator}s`,
+                                    form: typeof(FormDefinition) === 'function' ?
+                                        FormDefinition() : FormDefinition
+                                });
+                                return html;
+                            },
+                            controller: ['$scope', 'ListDefinition', 'Dataset', 'ToggleNotification', 'NotificationsListInit', 'GetBasePath', '$stateParams', 'inventorySourceData',
+                                function($scope, list, Dataset, ToggleNotification, NotificationsListInit, GetBasePath, $stateParams, inventorySourceData) {
+                                    var url , params = $stateParams, id;
+                                    if(params.hasOwnProperty('project_id')){
+                                        id = params.project_id;
+                                        url = GetBasePath('projects');
+                                    }
+                                    if(params.hasOwnProperty('job_template_id')){
+                                        id = params.job_template_id;
+                                        url = GetBasePath('job_templates');
+                                    }
+                                    if(params.hasOwnProperty('workflow_job_template_id')){
+                                        id = params.workflow_job_template_id;
+                                        url = GetBasePath('workflow_job_templates');
+                                    }
+                                    if(params.hasOwnProperty('inventory_id')){
+                                        id = inventorySourceData.id;
+                                        url = GetBasePath('inventory_sources');
+                                    }
+                                    if(params.hasOwnProperty('organization_id')){
+                                        id = params.organization_id;
+                                        url = GetBasePath('organizations');
+                                    }
+                                    function init() {
+                                        $scope.list = list;
+                                        $scope[`${list.iterator}_dataset`] = Dataset.data;
+                                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+
+                                        NotificationsListInit({
+                                            scope: $scope,
+                                            url: url,
+                                            id: id
+                                        });
+
+                                        $scope.$watch(`${list.iterator}_dataset`, function() {
+                                            // The list data has changed and we need to update which notifications are on/off
+                                            $scope.$emit('relatednotifications');
+                                        });
+                                    }
+
+                                    $scope.toggleNotification = function(event, notifier_id, column) {
+                                        var notifier = this.notification;
+                                        try {
+                                            $(event.target).tooltip('hide');
+                                        }
+                                        catch(e) {
+                                            // ignore
+                                        }
+                                        ToggleNotification({
+                                            scope: $scope,
+                                            url: url + id,
+                                            notifier: notifier,
+                                            column: column,
+                                            callback: 'NotificationRefresh'
+                                        });
+                                    };
+
+                                    init();
+
+                                }
+                            ]
+                        }
+                    },
+                    resolve: {
+                        ListDefinition: () => {
+                            return list;
+                        },
+                        inventorySourceData: ['$stateParams', 'GroupManageService', function($stateParams, GroupManageService) {
+                            if($stateParams.hasOwnProperty('group_id')){
+                                return GroupManageService.getInventorySource({ group: $stateParams.group_id }).then(res => res.data.results[0]);
+                            }
+                            else{
+                                return null;
+                            }
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope',
+                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope) => {
+                                // allow related list definitions to use interpolated $rootScope / $stateParams in basePath field
+                                let path, interpolator;
+                                if (GetBasePath(list.basePath)) {
+                                    path = GetBasePath(list.basePath);
+                                } else {
+                                    interpolator = $interpolate(list.basePath);
+                                    path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
+                                }
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ]
+                    }
+                });
+                // // appy any default search parameters in form definition
+                // if (field.search) {
+                //     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
+                // }
+                return state;
+            }
+            
+            function buildRbacUserDirective() {
+                let states = [];
+
+                states.push($stateExtender.buildDefinition({
+                    name: `${formStateDefinition.name}.users.add`,
+                    squashSearchUrl: true,
+                    url: '/add-user',
+                    params: {
+                        user_search: {
+                            value: { order_by: 'username', page_size: '5' },
+                            dynamic: true,
+                        }
+                    },
+                    views: {
+                        [`modal@${formStateDefinition.name}`]: {
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="Add Users"></add-rbac-resource>`
+                        }
+                    },
+                    resolve: {
+                        usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams.user_search);
+
+                            }
+                        ]
+                    },
+                    onExit: function($state) {
+                        if ($state.transition) {
+                            $('#add-permissions-modal').modal('hide');
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        }
+                    },
+                }));
+                return states;
+            }
+
             function buildListNodes(field) {
                 let states = [];
-                states.push(buildListDefinition(field));
-                if (field.iterator === 'permission' && field.actions && field.actions.add) {
-                    states.push(buildPermissionDirective());
+                if(field.iterator === 'notification'){
+                    states.push(buildNotificationState(field));
                     states = _.flatten(states);
                 }
+                else{
+                    states.push(buildListDefinition(field));
+                    if (field.iterator === 'permission' && field.actions && field.actions.add) {
+                        if (form.name === 'user' || form.name === 'team'){
+                            states.push(buildRbacUserTeamDirective());
+                        }
+                        else {
+                            states.push(buildRbacResourceDirective());
+                        }
+                    }
+                    else if (field.iterator === 'user' && field.actions && field.actions.add) {
+                        if(form.name === 'team') {
+                            states.push(buildRbacUserDirective());
+                        }
+                    }
+                }
+                states = _.flatten(states);
                 return states;
             }
 
@@ -366,7 +635,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     searchPrefix: field.sourceModel,
                     //squashSearchUrl: true, @issue enable
                     name: `${formStateDefinition.name}.${field.sourceModel}`,
-                    url: `/${field.sourceModel}`,
+                    url: `/${field.sourceModel}?selected`,
                     // a lookup field's basePath takes precedence over generic list definition's basePath, if supplied
                     data: {
                         basePath: field.basePath || null,
@@ -374,8 +643,14 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     params: {
                         [field.sourceModel + '_search']: {
-                            value: { page_size: '5' }
+                            value: {
+                                page_size: '5',
+                                role_level: 'use_role'
+                            }
                         }
+                    },
+                    ncyBreadcrumb: {
+                        skip: true
                     },
                     views: {
                         'modal': {
@@ -410,6 +685,11 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                 } else {
                                     interpolator = $interpolate(list.basePath);
                                     path = interpolator({ $rootScope: $rootScope, $stateParams: $stateParams });
+                                }
+                                // Need to change the role_level here b/c organizations and inventory scripts
+                                // don't have a "use_role", only "admin_role" and "read_role"
+                                if(list.iterator === "organization" || list.iterator === "inventory_script"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                 }
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }

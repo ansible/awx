@@ -14,7 +14,10 @@ def argv_ready(argv):
 class argv_placeholder(object):
 
     def __del__(self):
-        argv_ready(sys.argv)
+        try:
+            argv_ready(sys.argv)
+        except:
+            pass
 
 
 if hasattr(sys, 'argv'):

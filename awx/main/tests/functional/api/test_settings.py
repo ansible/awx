@@ -45,6 +45,27 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
 
 
 @pytest.mark.django_db
+def test_jobs_settings(get, put, patch, delete, admin):
+    url = reverse('api:setting_singleton_detail', args=('jobs',))
+    get(url, user=admin, expect=200)
+    delete(url, user=admin, expect=204)
+    response = get(url, user=admin, expect=200)
+    data = dict(response.data.items())
+    put(url, user=admin, data=data, expect=200)
+    patch(url, user=admin, data={'AWX_PROOT_HIDE_PATHS': ['/home']}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == ['/home']
+    data.pop('AWX_PROOT_HIDE_PATHS')
+    data.pop('AWX_PROOT_SHOW_PATHS')
+    data.pop('AWX_ANSIBLE_CALLBACK_PLUGINS')
+    put(url, user=admin, data=data, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == []
+    assert response.data['AWX_PROOT_SHOW_PATHS'] == []
+    assert response.data['AWX_ANSIBLE_CALLBACK_PLUGINS'] == []
+
+
+@pytest.mark.django_db
 def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     url = reverse('api:setting_singleton_detail', args=('ldap',))
     get(url, user=admin, expect=404)
@@ -63,6 +84,26 @@ def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com ldap://ldap2.example.com'}, expect=200)
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com,ldap://ldap2.example.com'}, expect=200)
     patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com, ldap://ldap2.example.com'}, expect=200)
+
+
+@pytest.mark.parametrize('setting', [
+    'AUTH_LDAP_USER_DN_TEMPLATE',
+    'AUTH_LDAP_REQUIRE_GROUP',
+    'AUTH_LDAP_DENY_GROUP',
+])
+@pytest.mark.django_db
+def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
+                       setting):
+    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+
+    patch(url, user=admin, data={setting: ''}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
+
+    patch(url, user=admin, data={setting: None}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
 
 
 @pytest.mark.django_db

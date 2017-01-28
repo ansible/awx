@@ -4,22 +4,22 @@ describe('Controller: WorkflowMaker', () => {
     // Setup
     let scope,
         WorkflowMakerController,
-        WorkflowHelpService;
+        TemplatesService,
+        q,
+        getWorkflowJobTemplateNodesDeferred;
 
     beforeEach(angular.mock.module('Tower'));
-    beforeEach(angular.mock.module('templates', ($provide) => {
+    beforeEach(angular.mock.module('templates', () => {
 
-        WorkflowHelpService = jasmine.createSpyObj('WorkflowHelpService', [
-            'closeDialog',
-            'addPlaceholderNode',
-            'getSiblingConnectionTypes'
-        ]);
-
-        $provide.value('WorkflowHelpService', WorkflowHelpService);
+        TemplatesService = {
+            getWorkflowJobTemplateNodes: function(){
+                return angular.noop;
+            }
+        };
 
     }));
 
-    beforeEach(angular.mock.inject( ($rootScope, $controller, _WorkflowHelpService_) => {
+    beforeEach(angular.mock.inject( ($rootScope, $controller, $q) => {
         scope = $rootScope.$new();
         scope.closeDialog = jasmine.createSpy();
         scope.treeData = {
@@ -38,19 +38,22 @@ describe('Controller: WorkflowMaker', () => {
             },
             nextIndex: 2
         };
-        WorkflowHelpService = _WorkflowHelpService_;
-
+        scope.workflowJobTemplateObj = {
+            id: 1
+        };
+        q = $q;
+        getWorkflowJobTemplateNodesDeferred = q.defer();
+        TemplatesService.getWorkflowJobTemplateNodes = jasmine.createSpy('getWorkflowJobTemplateNodes').and.returnValue(getWorkflowJobTemplateNodesDeferred.promise);
         WorkflowMakerController = $controller('WorkflowMakerController', {
             $scope: scope,
-            WorkflowHelpService: WorkflowHelpService
+            TemplatesService: TemplatesService
         });
-
     }));
 
-    describe('scope.saveWorkflowMaker()', () => {
+    describe('scope.closeWorkflowMaker()', () => {
 
         it('should close the dialog', ()=>{
-            scope.saveWorkflowMaker();
+            scope.closeWorkflowMaker();
             expect(scope.closeDialog).toHaveBeenCalled();
         });
 

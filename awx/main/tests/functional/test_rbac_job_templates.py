@@ -259,22 +259,37 @@ def test_associate_label(label, user, job_template):
 
 
 @pytest.mark.django_db
-def test_move_schedule_to_JT_no_access(job_template, rando):
-    schedule = Schedule.objects.create(
-        unified_job_template=job_template,
-        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
-    job_template.admin_role.members.add(rando)
-    jt2 = JobTemplate.objects.create(name="other-jt")
-    access = ScheduleAccess(rando)
-    assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+class TestJobTemplateSchedules:
+
+    rrule = 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+    rrule2 = 'DTSTART:20151117T050000Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1'
+
+    @pytest.fixture
+    def jt2(self):
+        return JobTemplate.objects.create(name="other-jt")
+
+    def test_move_schedule_to_JT_no_access(self, job_template, rando, jt2):
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule)
+        job_template.admin_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
 
 
-@pytest.mark.django_db
-def test_move_schedule_from_JT_no_access(job_template, rando):
-    schedule = Schedule.objects.create(
-        unified_job_template=job_template,
-        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
-    jt2 = JobTemplate.objects.create(name="other-jt")
-    jt2.admin_role.members.add(rando)
-    access = ScheduleAccess(rando)
-    assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+    def test_move_schedule_from_JT_no_access(self, job_template, rando, jt2):
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule)
+        jt2.admin_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+
+
+    def test_can_create_schedule_with_execute(self, job_template, rando):
+        job_template.execute_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert access.can_add({'unified_job_template': job_template})
+
+
+    def test_can_modify_ones_own_schedule(self, job_template, rando):
+        job_template.execute_role.members.add(rando)
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule, created_by=rando)
+        access = ScheduleAccess(rando)
+        assert access.can_change(schedule, {'rrule': self.rrule2})

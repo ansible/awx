@@ -43,7 +43,7 @@ export default
                     label: 'Variables',
                     type: 'textarea',
                     class: 'Form-textAreaLabel Form-formGroup--fullWidth',
-                    rows: 12,
+                    rows: 6,
                     'default': '---',
                     dataTitle: 'Group Variables',
                     dataPlacement: 'right',
@@ -69,6 +69,11 @@ export default
                     ngModel: 'source'
                 },
                 credential: {
+                    // initializes a default value for this search param
+                    // search params with default values set will not generate user-interactable search tags
+                    search: {
+                        kind: null
+                    },
                     label: 'Cloud Credential',
                     type: 'lookup',
                     list: 'CredentialList',
@@ -81,7 +86,8 @@ export default
                         reqExpression: "cloudCredentialRequired",
                         init: "false"
                     },
-                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    watchBasePath: "credentialBasePath"
                 },
                 source_regions: {
                     label: 'Regions',
@@ -212,8 +218,8 @@ export default
                     dataTitle: "Source Variables",
                     dataPlacement: 'right',
                     awPopOver: "<p>Override variables found in vmware.ini and used by the inventory update script. For a detailed description of these variables " +
-                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/vmware.ini\" target=\"_blank\">" +
-                        "view vmware.ini in the Ansible github repo.</a></p>" +
+                        "<a href=\"https://github.com/ansible/ansible/blob/devel/contrib/inventory/vmware_inventory.ini\" target=\"_blank\">" +
+                        "view vmware_inventory.ini in the Ansible github repo.</a></p>" +
                         "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                         "JSON:<br />\n" +
                         "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -354,6 +360,7 @@ export default
                         GroupFormObject.related[itm] = angular.copy(NotificationsList);
                         GroupFormObject.related[itm].generateList = true;
                         GroupFormObject.related[itm].disabled = "source === undefined || source.value === ''";
+                        GroupFormObject.related[itm].ngClick = "$state.go('inventoryManage.editGroup.notifications')";
                     }
                 }
                 return GroupFormObject;

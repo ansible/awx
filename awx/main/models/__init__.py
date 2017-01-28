@@ -76,7 +76,12 @@ User.add_to_class('auditor_of_organizations', user_get_auditor_of_organizations)
 @property
 def user_is_system_auditor(user):
     if not hasattr(user, '_is_system_auditor'):
-        user._is_system_auditor = Role.objects.filter(role_field='system_auditor', id=user.id).exists()
+        if user.pk:
+            user._is_system_auditor = user.roles.filter(
+                singleton_name='system_auditor', role_field='system_auditor').exists()
+        else:
+            # Odd case where user is unsaved, this should never be relied on
+            return False
     return user._is_system_auditor
 
 

@@ -9,7 +9,8 @@ export default [ 'templateUrl',
     function(templateUrl) {
     return {
         scope: {
-            jobs: '='
+            jobs: '=',
+            templateType: '=?',
         },
         templateUrl: templateUrl('smart-status/smart-status'),
         restrict: 'E',

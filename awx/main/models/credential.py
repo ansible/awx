@@ -50,6 +50,8 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         ('su', _('Su')),
         ('pbrun', _('Pbrun')),
         ('pfexec', _('Pfexec')),
+        ('dzdo', _('DZDO')),
+        ('pmrun', _('Pmrun')),
         #('runas',  _('Runas')),
     ]
 

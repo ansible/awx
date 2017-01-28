@@ -32,7 +32,8 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init
+from celery.signals import celeryd_init, worker_ready
+from celery import current_app
 
 # Django
 from django.conf import settings
@@ -43,7 +44,6 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.core.cache import cache
-from django.utils.log import configure_logging
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
@@ -76,7 +76,8 @@ logger = logging.getLogger('awx.main.tasks')
 def celery_startup(conf=None, **kwargs):
     # Re-init all schedules
     # NOTE: Rework this during the Rampart work
-    logger.info("Syncing Tower Schedules")
+    startup_logger = logging.getLogger('awx.main.tasks')
+    startup_logger.info("Syncing Tower Schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
@@ -85,19 +86,58 @@ def celery_startup(conf=None, **kwargs):
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 
-@task(queue='broadcast_all')
-def clear_cache_keys(cache_keys):
-    set_of_keys = set([key for key in cache_keys])
+def _setup_tower_logger():
+    global logger
+    from django.utils.log import configure_logging
+    LOGGING_DICT = settings.LOGGING
+    if settings.LOG_AGGREGATOR_ENABLED:
+        LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
+        LOGGING_DICT['handlers']['http_receiver']['async'] = False
+        if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
+            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
+                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
+    configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
+    logger = logging.getLogger('awx.main.tasks')
+
+
+@worker_ready.connect
+def task_set_logger_pre_run(*args, **kwargs):
+    cache.close()
+    if settings.LOG_AGGREGATOR_ENABLED:
+        _setup_tower_logger()
+        logger.debug('Custom Tower logger configured for worker process.')
+
+
+def _uwsgi_reload():
+    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
+    logger.warn('Initiating uWSGI chain reload of server')
+    TRIGGER_CHAIN_RELOAD = 'c'
+    with open('/var/lib/awx/awxfifo', 'w') as awxfifo:
+        awxfifo.write(TRIGGER_CHAIN_RELOAD)
+
+
+def _reset_celery_logging():
+    # Worker logger reloaded, now send signal to restart pool
+    app = current_app._get_current_object()
+    app.control.broadcast('pool_restart', arguments={'reload': True},
+                          destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
+
+
+def _clear_cache_keys(set_of_keys):
     logger.debug('cache delete_many(%r)', set_of_keys)
     cache.delete_many(set_of_keys)
+
+
+@task(queue='broadcast_all')
+def process_cache_changes(cache_keys):
+    logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
+        process_cache_changes.request))
+    set_of_keys = set([key for key in cache_keys])
+    _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            LOGGING = settings.LOGGING
-            if settings.LOG_AGGREGATOR_ENABLED:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-            else:
-                LOGGING['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSNullHandler'
-            configure_logging(settings.LOGGING_CONFIG, LOGGING)
+            _uwsgi_reload()
+            _reset_celery_logging()
             break
 
 
@@ -107,8 +147,12 @@ def send_notifications(notification_list, job_id=None):
         raise TypeError("notification_list should be of type list")
     if job_id is not None:
         job_actual = UnifiedJob.objects.get(id=job_id)
-    for notification_id in notification_list:
-        notification = Notification.objects.get(id=notification_id)
+
+    notifications = Notification.objects.filter(id__in=notification_list)
+    if job_id is not None:
+        job_actual.notifications.add(*notifications)
+
+    for notification in notifications:
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
@@ -119,12 +163,11 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
         finally:
             notification.save()
-        if job_id is not None:
-            job_actual.notifications.add(notification)
 
 
 @task(bind=True, queue='default')
 def run_administrative_checks(self):
+    logger.warn("Running administrative checks.")
     if not settings.TOWER_ADMIN_ALERTS:
         return
     validation_info = TaskEnhancer().validate_enhancements()
@@ -146,11 +189,13 @@ def run_administrative_checks(self):
 
 @task(bind=True, queue='default')
 def cleanup_authtokens(self):
+    logger.warn("Cleaning up expired authtokens.")
     AuthToken.objects.filter(expires__lt=now()).delete()
 
 
 @task(bind=True)
 def cluster_node_heartbeat(self):
+    logger.debug("Cluster node heartbeat task.")
     inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
     if inst.exists():
         inst = inst[0]
@@ -370,9 +415,12 @@ class BaseTask(Task):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
                     self.open_fifo_write(path, data)
+                # Ansible network modules do not yet support ssh-agent.
+                # Instead, ssh private key file is explicitly passed via an
+                # env variable.
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -452,7 +500,7 @@ class BaseTask(Task):
         for k,v in env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
-            elif k.startswith('ANSIBLE_'):
+            elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
             elif hidden_re.search(k):
                 env[k] = HIDDEN_PASSWORD
@@ -616,7 +664,7 @@ class BaseTask(Task):
                         for child_proc in child_procs:
                             os.kill(child_proc.pid, signal.SIGKILL)
                         os.kill(main_proc.pid, signal.SIGKILL)
-                    except TypeError:
+                    except (TypeError, psutil.Error):
                         os.kill(job.pid, signal.SIGKILL)
             else:
                 os.kill(job.pid, signal.SIGTERM)
@@ -706,6 +754,11 @@ class BaseTask(Task):
                 stdout_handle.close()
             except Exception:
                 pass
+
+        instance = self.update_model(pk)
+        if instance.cancel_flag:
+            status = 'canceled'
+
         instance = self.update_model(pk, status=status, result_traceback=tb,
                                      output_replacements=output_replacements,
                                      **extra_update_fields)
@@ -807,8 +860,10 @@ class RunJob(BaseTask):
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['TOWER_HOST'] = settings.TOWER_URL_BASE
+        env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -865,10 +920,14 @@ class RunJob(BaseTask):
             env['ANSIBLE_NET_USERNAME'] = network_cred.username
             env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
 
+            ssh_keyfile = kwargs.get('private_data_files', {}).get('network_credential', '')
+            if ssh_keyfile:
+                env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
+
             authorize = network_cred.authorize
             env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
             if authorize:
-                env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] = decrypt_field(network_cred, 'authorize_password')
+                env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
@@ -984,21 +1043,23 @@ class RunJob(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunJob, self).get_password_prompts()
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
         return d
 
     def get_stdout_handle(self, instance):
@@ -1012,6 +1073,10 @@ class RunJob(BaseTask):
 
             def job_event_callback(event_data):
                 event_data.setdefault('job_id', instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
                 dispatcher.dispatch(event_data)
         else:
             def job_event_callback(event_data):
@@ -1027,8 +1092,15 @@ class RunJob(BaseTask):
         private_data_files = kwargs.get('private_data_files', {})
         if 'credential' in private_data_files:
             return private_data_files.get('credential')
-        elif 'network_credential' in private_data_files:
-            return private_data_files.get('network_credential')
+        '''
+        Note: Don't inject network ssh key data into ssh-agent for network
+        credentials because the ansible modules do not yet support it.
+        We will want to add back in support when/if Ansible network modules
+        support this.
+        '''
+        #elif 'network_credential' in private_data_files:
+        #    return private_data_files.get('network_credential')
+
         return ''
 
     def should_use_proot(self, instance, **kwargs):
@@ -1042,17 +1114,18 @@ class RunJob(BaseTask):
             local_project_sync = job.project.create_project_update(launch_type="sync")
             local_project_sync.job_type = 'run'
             local_project_sync.save()
+            # save the associated project update before calling run() so that a
+            # cancel() call on the job can cancel the project update
+            job = self.update_model(job.pk, project_update=local_project_sync)
+
             project_update_task = local_project_sync._get_task_class()
             try:
                 project_update_task().run(local_project_sync.id)
-                job.scm_revision = job.project.scm_revision
-                job.project_update = local_project_sync
-                job.save()
+                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
             except Exception:
-                job.status = 'failed'
-                job.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                                      ('project_update', local_project_sync.name, local_project_sync.id)
-                job.save()
+                job = self.update_model(job.pk, status='failed',
+                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % 
+                                                         ('project_update', local_project_sync.name, local_project_sync.id)))
                 raise
 
     def post_run_hook(self, job, status, **kwargs):
@@ -1222,12 +1295,12 @@ class RunProjectUpdate(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
-        d[re.compile(r'^Username for.*:\s*?$', re.M)] = 'scm_username'
-        d[re.compile(r'^Password for.*:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'scm_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'Username for.*:\s*?$', re.M)] = 'scm_username'
+        d[re.compile(r'Password for.*:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'\S+?@\S+?\'s\s+?password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'scm_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         # FIXME: Configure whether we should auto accept host keys?
         d[re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M)] = 'yes'
         return d
@@ -1338,10 +1411,22 @@ class RunInventoryUpdate(BaseTask):
                                                          'password'))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
-            section = 'defaults'
+            credential = inventory_update.credential
+
+            section = 'vmware'
             cp.add_section(section)
+            cp.set('vmware', 'cache_max_age', 0)
+
+            cp.set('vmware', 'username', credential.username)
+            cp.set('vmware', 'password', decrypt_field(credential, 'password'))
+            cp.set('vmware', 'server', credential.host)
+
             vmware_opts = dict(inventory_update.source_vars_dict.items())
-            vmware_opts.setdefault('guests_only', 'True')
+            if inventory_update.instance_filters:
+                vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
+            if inventory_update.group_by:
+                vmware_opts.setdefault('groupby_patterns', inventory_update.groupby_patterns)
+
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
@@ -1362,7 +1447,9 @@ class RunInventoryUpdate(BaseTask):
 
             section = 'ansible'
             cp.add_section(section)
-            cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
+            cp.set(section, 'group_patterns', os.environ.get('SATELLITE6_GROUP_PATTERNS', []))
+            cp.set(section, 'want_facts', True)
+            cp.set(section, 'group_prefix', os.environ.get('SATELLITE6_GROUP_PREFIX', 'foreman_'))
 
             section = 'cache'
             cp.add_section(section)
@@ -1459,10 +1546,7 @@ class RunInventoryUpdate(BaseTask):
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
-            env['VMWARE_INI'] = cloud_credential
-            env['VMWARE_HOST'] = passwords.get('source_host', '')
-            env['VMWARE_USER'] = passwords.get('source_username', '')
-            env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+            env['VMWARE_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
             env['AZURE_CERT_PATH'] = cloud_credential
@@ -1647,6 +1731,7 @@ class RunAdHocCommand(BaseTask):
         env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
         env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -1722,20 +1807,22 @@ class RunAdHocCommand(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunAdHocCommand, self).get_password_prompts()
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         return d
 
     def get_stdout_handle(self, instance):
@@ -1749,6 +1836,10 @@ class RunAdHocCommand(BaseTask):
 
             def ad_hoc_command_event_callback(event_data):
                 event_data.setdefault('ad_hoc_command_id', instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
                 dispatcher.dispatch(event_data)
         else:
             def ad_hoc_command_event_callback(event_data):
@@ -1788,7 +1879,9 @@ class RunSystemJob(BaseTask):
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
                 args.extend(['--days', str(json_vars.get('days', 60))])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands'])
+                args.extend(['--jobs', '--project-updates', '--inventory-updates',
+                             '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
+                             '--notifications'])
             if system_job.job_type == 'cleanup_facts':
                 if 'older_than' in json_vars:
                     args.extend(['--older_than', str(json_vars['older_than'])])

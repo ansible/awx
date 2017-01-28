@@ -34,9 +34,8 @@ export default
             link: function(scope, element, attrs, multiSelectList) {
 
                 scope.decoratedItem = multiSelectList.registerItem(scope.item);
-                scope.isSelected = scope.decoratedItem.isSelected ? true : false;
 
-                scope.$watch('isSelected', function(value) {
+                scope.$watch('item.isSelected', function(value) {
                     if (value === true) {
                         multiSelectList.selectItem(scope.decoratedItem);
                     } else if (value === false) {

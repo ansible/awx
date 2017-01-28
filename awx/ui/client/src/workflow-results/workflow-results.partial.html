@@ -15,7 +15,7 @@
                 <div class="WorkflowResults-panelHeader">
                     <div
                         class="WorkflowResults-panelHeaderText">
-                        RESULTS
+                        DETAILS
                     </div>
 
                     <!-- LEFT PANE HEADER ACTIONS -->
@@ -62,6 +62,19 @@
                 <!-- LEFT PANE DETAILS GROUP -->
                 <div>
 
+                    <!-- STATUS DETAIL -->
+                    <div class="WorkflowResults-resultRow">
+                        <label class="WorkflowResults-resultRowLabel">
+                             Status
+                         </label>
+                         <div class="WorkflowResults-resultRowText">
+                             <i	class="WorkflowResults-statusResultIcon
+                                     fa
+                                     icon-job-{{ workflow.status }}">
+                             </i> {{ status_label }}
+                         </div>
+                     </div>
+
                     <!-- START TIME DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.started">
@@ -82,32 +95,6 @@
                         <div class="WorkflowResults-resultRowText">
                             {{ (workflow.finished |
                                 longDate) || "Not Finished" }}
-                        </div>
-                    </div>
-
-                    <!-- TEMPLATE DETAIL -->
-                    <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.name">
-                        <label class="WorkflowResults-resultRowLabel">
-                            Template
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            <a href="{{ workflow_template_link }}"
-                                aw-tool-tip="Edit the job template"
-                                data-placement="top">
-                                {{ workflow.name }}
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- JOB TYPE DETAIL -->
-                    <div class="WorkflowResults-resultRow"
-                        ng-show="workflow.type">
-                        <label class="WorkflowResults-resultRowLabel">
-                            Job Type
-                        </label>
-                        <div class="WorkflowResults-resultRowText">
-                            Workflow Job
                         </div>
                     </div>
 
@@ -134,6 +121,10 @@
                         <label class="WorkflowResults-resultRowLabel
                             WorkflowResults-resultRowLabel--fullWidth">
                             Extra Variables
+                            <i class="WorkflowResults-extraVarsHelp fa fa-question-circle"
+                                aw-tool-tip="Read only view of extra variables added to the workflow."
+                                data-placement="top">
+                            </i>
                         </label>
                         <textarea
                             rows="6"
@@ -147,11 +138,27 @@
                     <!-- LABELS DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="labels && labels.length > 0">
-                        <label class="WorkflowResults-resultRowLabel
-                            WorkflowResults-resultRowLabel--fullWidth">
-                            Labels
-                        </label>
-                        <div class="LabelList
+                        <div class="WorkflowResults-resultRow">
+                            <a class="WorkflowResults-resultRowLabel
+                                WorkflowResults-resultRowLabel--fullWidth"
+                                ng-show="lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="WorkflowResults-expandArrow
+                                    fa fa-caret-right"></i>
+                            </a>
+                            <a class="WorkflowResults-resultRowLabel
+                                WorkflowResults-resultRowLabel--fullWidth"
+                                ng-show="!lessLabels"
+                                href=""
+                                ng-click="toggleLessLabels()">
+                                    Labels
+                                <i class="WorkflowResults-expandArrow
+                                    fa fa-caret-down"></i>
+                            </a>
+                        </div>
+                        <div id="workflow-results-labels" class="LabelList
                             WorkflowResults-resultRowText
                             WorkflowResults-resultRowText--fullWidth">
                             <div ng-repeat="label in labels"
@@ -164,6 +171,8 @@
                             </div>
                         </div>
                     </div>
+                    <!-- end of labels-->
+
                 </div>
 
             </div>
@@ -177,7 +186,11 @@
                 <div class="StandardOut-panelHeader">
                     <div class="StandardOut-panelHeaderText">
                         <i class="WorkflowResults-statusResultIcon
-                            fa icon-job-{{ workflow.status }}">
+                            fa icon-job-{{ workflow.status }}"
+                            ng-show="stdoutFullScreen"
+                            aw-tool-tip="Job {{status_label}}"
+                            aw-tip-placement="top"
+                            data-original-title>
                         </i>
                         {{ workflow.name }}
                     </div>
@@ -206,7 +219,8 @@
 
                         <!-- FULL-SCREEN TOGGLE ACTION -->
                         <button class="StandardOut-actionButton"
-                            aw-tool-tip="Toggle Output"
+                            aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
+                            data-tip-watch="toggleStdoutFullscreenTooltip"
                             data-placement="top"
                             ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
                             ng-click="toggleStdoutFullscreen()">
@@ -217,29 +231,37 @@
                 </div>
                 <workflow-status-bar></workflow-status-bar>
                 <div class="WorkflowLegend-details">
-                    <div class="WorkflowLegend-legendItem">KEY:</div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-onSuccessLegend"></div>
-                        <div>On Success</div>
+                    <div class="WorkflowLegend-details--left">
+                        <div class="WorkflowLegend-legendItem">KEY:</div>
+                        <div class="WorkflowLegend-legendItem">
+                            <div class="WorkflowLegend-onSuccessLegend"></div>
+                            <div>On Success</div>
+                        </div>
+                        <div class="WorkflowLegend-legendItem">
+                            <div class="WorkflowLegend-onFailLegend"></div>
+                            <div>On Fail</div>
+                        </div>
+                        <div class="WorkflowLegend-legendItem">
+                            <div class="WorkflowLegend-alwaysLegend"></div>
+                            <div>Always</div>
+                        </div>
+                        <div class="WorkflowLegend-legendItem">
+                            <div class="WorkflowLegend-letterCircle">P</div>
+                            <div>Project Sync</div>
+                        </div>
+                        <div class="WorkflowLegend-legendItem">
+                            <div class="WorkflowLegend-letterCircle">I</div>
+                            <div>Inventory Sync</div>
+                        </div>
                     </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-onFailLegend"></div>
-                        <div>On Fail</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-alwaysLegend"></div>
-                        <div>Always</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-letterCircle">P</div>
-                        <div>Project Sync</div>
-                    </div>
-                    <div class="WorkflowLegend-legendItem">
-                        <div class="WorkflowLegend-letterCircle">I</div>
-                        <div>Inventory Sync</div>
+                    <div class="WorkflowLegend-details--right">
+                        <i ng-class="{'WorkflowMaker-manualControlsIcon--active': showManualControls}" class="fa fa-cog WorkflowMaker-manualControlsIcon" aria-hidden="true" alt="Controls" ng-click="toggleManualControls()"></i>
+                        <div ng-show="showManualControls" class="WorkflowLegend-manualControls noselect">
+                            <workflow-controls class="WorkflowControls" pan-chart="panChart(direction)" zoom-chart="zoomChart(zoom)" reset-chart="resetChart()"></workflow-controls>
+                        </div>
                     </div>
                 </div>
-                <workflow-chart tree-data="treeData.data" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
+                <workflow-chart tree-data="treeData.data" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="details" class="WorkflowMaker-chart"></workflow-chart>
             </div>
 
         </div>

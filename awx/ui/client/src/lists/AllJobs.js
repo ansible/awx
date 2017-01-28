@@ -7,7 +7,8 @@
 
 export default
     angular.module('AllJobsDefinition', ['sanitizeFilter', 'capitalizeFilter'])
-    .value( 'AllJobsList', {
+    .factory('AllJobsList', ['i18n', function(i18n) {
+    return {
 
         name: 'jobs',
         basePath: 'unified_jobs',
@@ -16,6 +17,9 @@ export default
         index: false,
         hover: true,
         well: false,
+        emptyListText: i18n._('No jobs have yet run.'),
+        title: false,
+
         fields: {
             status: {
                 label: '',
@@ -43,7 +47,7 @@ export default
                 ngClick: "viewJobDetails(job)",
                 badgePlacement: 'right',
                 badgeCustom: true,
-                badgeIcon: `<a href="{{ workflow_result_link }}"
+                badgeIcon: `<a href="{{ job.workflow_result_link }}"
                     aw-tool-tip="View workflow results"
                     data-placement="top"
                     data-original-title="" title="">
@@ -86,7 +90,7 @@ export default
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
             "view": {
                 mode: "all",
-                ngClick: "viewJob(job.id)",
+                ngClick: "viewJobDetails(job)",
                 awToolTip: "View the job",
                 dataPlacement: "top"
             },
@@ -113,4 +117,5 @@ export default
                 ngShow: "(job.status !== 'running' && job.status !== 'waiting' && job.status !== 'pending') && job.summary_fields.user_capabilities.delete"
             }
         }
-    });
+    };
+}]);

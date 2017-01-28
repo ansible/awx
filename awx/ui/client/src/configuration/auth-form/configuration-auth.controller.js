@@ -6,6 +6,7 @@
 
 export default [
     '$scope',
+    '$rootScope',
     '$state',
     '$stateParams',
     '$timeout',
@@ -22,9 +23,11 @@ export default [
     'ConfigurationUtils',
     'CreateSelect2',
     'GenerateForm',
+    'i18n',
     'ParseTypeChange',
     function(
         $scope,
+        $rootScope,
         $state,
         $stateParams,
         $timeout,
@@ -41,6 +44,7 @@ export default [
         ConfigurationUtils,
         CreateSelect2,
         GenerateForm,
+        i18n,
         ParseTypeChange
     ) {
         var authVm = this;
@@ -60,10 +64,10 @@ export default [
                 authVm.activeAuthForm = authVm.dropdownValue;
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
             } else {
-                var msg = 'You have unsaved changes. Would you like to proceed <strong>without</strong> saving?';
-                var title = 'Warning: Unsaved Changes';
+                var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
+                var title = i18n._('Warning: Unsaved Changes');
                 var buttons = [{
-                    label: "Discard changes",
+                    label: i18n._('Discard changes'),
                     "class": "btn Form-cancelButton",
                     "id": "formmodal-cancel-button",
                     onClick: function() {
@@ -74,7 +78,7 @@ export default [
                         $('#FormModal-dialog').dialog('close');
                     }
                 }, {
-                    label: "Save changes",
+                    label: i18n._('Save changes'),
                     onClick: function() {
                         $scope.$parent.vm.formSave()
                         .then(function() {
@@ -94,14 +98,14 @@ export default [
         };
 
         var dropdownOptions = [
-            {label: 'Azure AD', value: 'azure'},
-			{label: 'Github', value: 'github'},
-            {label: 'Github Org', value: 'github_org'},
-            {label: 'Github Team', value: 'github_team'},
-            {label: 'Google OAuth2', value: 'google_oauth'},
-            {label: 'LDAP', value: 'ldap'},
-            {label: 'RADIUS', value: 'radius'},
-            {label: 'SAML', value: 'saml'}
+            {label: i18n._('Azure AD'), value: 'azure'},
+			{label: i18n._('GitHub'), value: 'github'},
+            {label: i18n._('GitHub Org'), value: 'github_org'},
+            {label: i18n._('GitHub Team'), value: 'github_team'},
+            {label: i18n._('Google OAuth2'), value: 'google_oauth'},
+            {label: i18n._('LDAP'), value: 'ldap'},
+            {label: i18n._('RADIUS'), value: 'radius'},
+            {label: i18n._('SAML'), value: 'saml'}
         ];
 
         CreateSelect2({
@@ -136,7 +140,6 @@ export default [
             }, ];
 
         var forms = _.pluck(authForms, 'formDef');
-
         _.each(forms, function(form) {
             var keys = _.keys(form.fields);
             _.each(keys, function(key) {
@@ -154,6 +157,8 @@ export default [
                 }
                 addFieldInfo(form, key);
             });
+            // Disable the save button for system auditors
+            form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
 
         function addFieldInfo(form, key) {
@@ -165,7 +170,10 @@ export default [
                 dataPlacement: 'top',
                 placeholder: ConfigurationUtils.formatPlaceholder($scope.$parent.configDataResolve[key].placeholder, key) || null,
                 dataTitle: $scope.$parent.configDataResolve[key].label,
-                required: $scope.$parent.configDataResolve[key].required
+                required: $scope.$parent.configDataResolve[key].required,
+                ngDisabled: $rootScope.user_is_system_auditor,
+                disabled: $scope.$parent.configDataResolve[key].disabled || null,
+                readonly: $scope.$parent.configDataResolve[key].readonly || null,
             });
         }
 
@@ -197,7 +205,8 @@ export default [
                                scope: $scope.$parent,
                                variable: field.name,
                                parse_variable: 'parseType',
-                               field_id: form.formDef.name + '_' + field.name
+                               field_id: form.formDef.name + '_' + field.name,
+                               readonly: true,
                              });
                         }
                     });
@@ -217,7 +226,7 @@ export default [
                 CreateSelect2({
                     element: '#configuration_ldap_template_AUTH_LDAP_GROUP_TYPE',
                     multiple: false,
-                    placeholder: 'Select group types',
+                    placeholder: i18n._('Select group types'),
                     opts: opts
                 });
                 // Fix for bug where adding selected opts causes form to be $dirty and triggering modal

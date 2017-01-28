@@ -4,9 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
-import roleList from './roleList.directive';
-import addPermissions from './addPermissions/main';
+import roleList from './rbac-role-column/roleList.directive';
+import addRbacResource from './add-rbac-resource/main';
+import addRbacUserTeam from './add-rbac-user-team/main';
 
 export default
-    angular.module('access', [addPermissions.name])
+    angular.module('RbacModule', [
+    	addRbacResource.name,
+    	addRbacUserTeam.name
+    	])
         .directive('roleList', roleList);

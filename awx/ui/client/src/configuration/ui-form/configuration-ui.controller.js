@@ -6,20 +6,24 @@
 
  export default [
      '$scope',
+     '$rootScope',
      '$state',
      '$timeout',
      'ConfigurationUiForm',
      'ConfigurationService',
      'CreateSelect2',
      'GenerateForm',
+     'i18n',
      function(
         $scope,
+        $rootScope,
         $state,
         $timeout,
         ConfigurationUiForm,
         ConfigurationService,
         CreateSelect2,
-        GenerateForm
+        GenerateForm,
+        i18n
      ) {
          var uiVm = this;
          var generator = GenerateForm;
@@ -43,6 +47,9 @@
              addFieldInfo(form, key);
          });
 
+         // Disable the save button for system auditors
+         form.buttons.save.disabled = $rootScope.user_is_system_auditor;
+
          function addFieldInfo(form, key) {
              _.extend(form.fields[key], {
                  awPopOver: $scope.$parent.configDataResolve[key].help_text,
@@ -51,7 +58,10 @@
                  toggleSource: key,
                  dataPlacement: 'top',
                  dataTitle: $scope.$parent.configDataResolve[key].label,
-                 required: $scope.$parent.configDataResolve[key].required
+                 required: $scope.$parent.configDataResolve[key].required,
+                 ngDisabled: $rootScope.user_is_system_auditor,
+                 disabled: $scope.$parent.configDataResolve[key].disabled || null,
+                 readonly: $scope.$parent.configDataResolve[key].readonly || null,
              });
          }
 
@@ -71,7 +81,7 @@
                  CreateSelect2({
                      element: '#configuration_ui_template_PENDO_TRACKING_STATE',
                      multiple: false,
-                     placeholder: 'Select commands',
+                     placeholder: i18n._('Select commands'),
                      opts: [{
                          id: $scope.$parent.PENDO_TRACKING_STATE,
                          text: $scope.$parent.PENDO_TRACKING_STATE

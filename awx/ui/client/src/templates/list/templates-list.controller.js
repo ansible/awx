@@ -4,10 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Alert',
-    'TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'InitiatePlaybookRun', 'Wait', '$state', '$filter', 'Dataset', 'rbacUiControlService', 'TemplatesService',
-    'QuerySet', 'GetChoices', 'TemplateCopyService',
+export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
+    'Alert','TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
+    'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
+    'GetChoices', 'TemplateCopyService',
     function(
         $scope, $rootScope, $location, $stateParams, Rest, Alert,
         TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
@@ -36,37 +37,39 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
             $scope.list = list;
             $scope[`${list.iterator}_dataset`] = Dataset.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            $scope.options = {};
 
             $rootScope.flashMessage = null;
+        }
 
-            if ($scope.removeChoicesReady) {
-                $scope.removeChoicesReady();
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
+
+        $scope.$watchCollection('templates', function() {
+                optionsRequestDataProcessing();
             }
-            $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
-                $scope[list.name].forEach(function(item, item_idx) {
-                    var itm = $scope[list.name][item_idx];
+        );
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
 
-                    // Set the item type label
-                    if (list.fields.type) {
-                        $scope.type_choices.every(function(choice) {
-                            if (choice.value === item.type) {
-                                itm.type_label = choice.label;
-                                return false;
-                            }
-                            return true;
-                        });
-                    }
-                });
-            });
-
-            GetChoices({
-                scope: $scope,
-                url: GetBasePath('unified_job_templates'),
-                field: 'type',
-                variable: 'type_choices',
-                callback: 'choicesReady'
+                // Set the item type label
+                if (list.fields.type && $scope.options.hasOwnProperty('type')) {
+                    $scope.options.type.choices.every(function(choice) {
+                        if (choice[0] === item.type) {
+                            itm.type_label = choice[1];
+                            return false;
+                        }
+                        return true;
+                    });
+                }
             });
         }
+
 
         $scope.$on(`ws-jobs`, function () {
             // @issue - this is no longer quite as ham-fisted but I'd like for someone else to take a peek
@@ -107,7 +110,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
            if(template) {
                     Prompt({
                         hdr: 'Delete',
-                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the ' + (template.type === "Workflow Job Template" ? 'workflow ' : '') + 'job template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
+                        body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
                         action: function() {
 
                             function handleSuccessfulDelete() {
@@ -128,7 +131,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
                                         msg: 'Call to delete workflow job template failed. DELETE returned status: ' + status });
                                 });
                             }
@@ -138,8 +141,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                                     handleSuccessfulDelete();
                                 }, function (data) {
                                     Wait('stop');
-                                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Call to delete job template failed. DELETE returned status: ' + status });
+                                    ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
+                                        msg: 'Call to delete job template failed. DELETE returned status: ' + data.status });
                                 });
                             }
                             else {
@@ -217,7 +220,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
                     .then(function(result) {
 
                         if(result.data.can_copy) {
-                            if(!result.data.warnings || _.isEmpty(result.data.warnings)) {
+                            if(result.data.can_copy_without_user_input) {
                                 // Go ahead and copy the workflow - the user has full priveleges on all the resources
                                 TemplateCopyService.copyWorkflow(template.id)
                                 .then(function(result) {
@@ -232,18 +235,40 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest', 'Al
 
                                 let bodyHtml = `
                                     <div class="Prompt-bodyQuery">
-                                        You may not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and may result in an incomplete workflow.
+                                        You do not have access to all resources used by this workflow.  Resources that you don\'t have access to will not be copied and will result in an incomplete workflow.
                                     </div>
                                     <div class="Prompt-bodyTarget">`;
 
-                                        // Go and grab all of the warning strings
-                                        _.forOwn(result.data.warnings, function(warning) {
-                                            if(warning) {
-                                                _.forOwn(warning, function(warningString) {
-                                                    bodyHtml += '<div>' + warningString + '</div>';
-                                                });
-                                            }
-                                         } );
+                                        // List the unified job templates user can not access
+                                        if (result.data.templates_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Unified Job Templates that can not be copied<ul>';
+                                            _.forOwn(result.data.templates_unable_to_copy, function(ujt) {
+                                                if(ujt) {
+                                                    bodyHtml += '<li>' + ujt + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted inventories user can not access
+                                        if (result.data.inventories_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted inventories that can not be copied<ul>';
+                                            _.forOwn(result.data.inventories_unable_to_copy, function(inv) {
+                                                if(inv) {
+                                                    bodyHtml += '<li>' + inv + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
+                                        // List the prompted credentials user can not access
+                                        if (result.data.credentials_unable_to_copy.length > 0) {
+                                            bodyHtml += '<div>Node prompted credentials that can not be copied<ul>';
+                                            _.forOwn(result.data.credentials_unable_to_copy, function(cred) {
+                                                if(cred) {
+                                                    bodyHtml += '<li>' + cred + '</li>';
+                                                }
+                                            });
+                                            bodyHtml += '</ul></div>';
+                                        }
 
                                     bodyHtml += '</div>';
 

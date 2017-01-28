@@ -1,4 +1,4 @@
-export default [function(){
+export default ['$q', function($q){
     return {
         searchTree: function(params) {
             // params.element
@@ -46,6 +46,8 @@ export default [function(){
                         child.edgeType = "always";
                     }
 
+                    child.parent = parentNode;
+
                     parentNode.children.push(child);
                 });
             }
@@ -81,9 +83,10 @@ export default [function(){
             if(params.betweenTwoNodes) {
                 _.forEach(parentNode.children, function(child, index) {
                     if(child.id === params.parent.target.id) {
-                        placeholder.children.push(angular.copy(child));
+                        placeholder.children.push(child);
                         parentNode.children[index] = placeholder;
                         placeholderRef = parentNode.children[index];
+                        child.parent = parentNode.children[index];
                         return false;
                     }
                 });
@@ -102,6 +105,7 @@ export default [function(){
         },
         getSiblingConnectionTypes: function(params) {
             // params.parentId
+            // params.childId
             // params.tree
 
             let siblingConnectionTypes = {};
@@ -114,7 +118,7 @@ export default [function(){
             if(parentNode.children && parentNode.children.length > 0) {
                 // Loop across them and add the types as keys to siblingConnectionTypes
                 _.forEach(parentNode.children, function(child) {
-                    if(!child.placeholder && child.edgeType) {
+                    if(child.id !== params.childId && !child.placeholder && child.edgeType) {
                         siblingConnectionTypes[child.edgeType] = true;
                     }
                 });
@@ -124,6 +128,8 @@ export default [function(){
         },
         buildTree: function(params) {
             //params.workflowNodes
+
+            let deferred = $q.defer();
 
             let _this = this;
 
@@ -156,13 +162,13 @@ export default [function(){
                 allNodeIds.push(node.id);
 
                 _.forEach(node.success_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
                 _.forEach(node.failure_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
                 _.forEach(node.always_nodes, function(nodeId){
-                nonRootNodeIds.push(nodeId);
+                    nonRootNodeIds.push(nodeId);
                 });
             });
 
@@ -181,7 +187,9 @@ export default [function(){
                 treeData.data.children.push(branch);
             });
 
-            return treeData;
+            deferred.resolve(treeData);
+
+            return deferred.promise;
         },
         buildBranch: function(params) {
             // params.nodeId
@@ -219,15 +227,14 @@ export default [function(){
                 treeNode.originalParentId = params.parentId;
             }
 
-            if(params.nodesObj[params.nodeId].summary_fields.job) {
-                treeNode.job = {
-                    jobStatus: params.nodesObj[params.nodeId].summary_fields.job.status,
-                    unified_job_id: params.nodesObj[params.nodeId].summary_fields.job.id
-                };
-            }
+            if(params.nodesObj[params.nodeId].summary_fields) {
+                if(params.nodesObj[params.nodeId].summary_fields.job) {
+                    treeNode.job = _.clone(params.nodesObj[params.nodeId].summary_fields.job);
+                }
 
-            if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
-                treeNode.unifiedJobTemplate = _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template);
+                if(params.nodesObj[params.nodeId].summary_fields.unified_job_template) {
+                    treeNode.unifiedJobTemplate = _.clone(params.nodesObj[params.nodeId].summary_fields.unified_job_template);
+                }
             }
 
             // Loop across the success nodes and add them recursively
@@ -278,11 +285,45 @@ export default [function(){
 
             if(matchingNode) {
                 matchingNode.job = {
-                    jobStatus: params.status,
-                    unified_job_id: params.unified_job_id
+                    status: params.status,
+                    id: params.unified_job_id
                 };
             }
 
+        },
+        checkForEdgeConflicts: function(params) {
+            //params.treeData
+            //params.edgeFlags
+
+            let hasAlways = false;
+            let hasSuccessFailure = false;
+            let _this = this;
+
+            _.forEach(params.treeData.children, function(child) {
+                // Flip the flag to false for now - we'll set it to true later on
+                // if we detect a conflict
+                child.edgeConflict = false;
+                if(child.edgeType === 'always') {
+                    hasAlways = true;
+                }
+                else if(child.edgeType === 'success' || child.edgeType === 'failure') {
+                    hasSuccessFailure = true;
+                }
+
+                _this.checkForEdgeConflicts({
+                    treeData: child,
+                    edgeFlags: params.edgeFlags
+                });
+            });
+
+            if(hasAlways && hasSuccessFailure) {
+                // We have a conflict
+                _.forEach(params.treeData.children, function(child) {
+                    child.edgeConflict = true;
+                });
+
+                params.edgeFlags.conflict = true;
+            }
         }
     };
 }];

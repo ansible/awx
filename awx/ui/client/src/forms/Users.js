@@ -121,6 +121,7 @@ export default
                 organizations: {
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
+                    emptyListText: i18n._('Please add user to an Organization.'),
                     search: {
                         page_size: '10'
                     },
@@ -136,10 +137,10 @@ export default
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
@@ -157,14 +158,14 @@ export default
                     open: false,
                     index: false,
                     actions: {},
-                    emptyListText: 'This user is not a member of any teams',
+                    emptyListText: i18n._('This user is not a member of any teams'),
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
                     //hideOnSuperuser: true // RBAC defunct
@@ -173,14 +174,13 @@ export default
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
                     search: {
                         page_size: '10',
-                        // @todo ask about name field / serializer on this endpoint
                         order_by: 'id'
                     },
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: i18n._('Granted permissions'),
+                    title: i18n._('Permissions'),
                     iterator: 'permission',
                     open: false,
                     index: false,
@@ -203,12 +203,16 @@ export default
                             noSort: true
                         },
                     },
-                    // @issue https://github.com/ansible/ansible-tower/issues/3487
-                    // actions: {
-                    //     add: {
-
-                    //     }
-                    // }
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Grant Permission'),
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            ngShow: '(!is_superuser && (user_obj.summary_fields.user_capabilities.edit || canAdd))'
+                        }
+                    },
                     fieldActions: {
                         "delete": {
                             label: i18n._('Remove'),

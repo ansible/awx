@@ -56,15 +56,19 @@
                     </div>
                 </div>
                 <div class="WorkflowLegend-maker--right">
-                    <span class="WorkflowMaker-totalJobs">TOTAL JOBS</span>
+                    <span class="WorkflowMaker-totalJobs">TOTAL TEMPLATES</span>
                     <span class="badge List-titleBadge" ng-bind="treeData.data.totalNodes"></span>
+                    <i ng-class="{'WorkflowMaker-manualControlsIcon--active': showManualControls}" class="fa fa-cog WorkflowMaker-manualControlsIcon" aria-hidden="true" alt="Controls" ng-click="toggleManualControls()"></i>
+                    <div ng-show="showManualControls" class="WorkflowMaker-manualControls noselect">
+                        <workflow-controls class="WorkflowControls" pan-chart="panChart(direction)" zoom-chart="zoomChart(zoom)" reset-chart="resetChart()"></workflow-controls>
+                    </div>
                 </div>
             </div>
-            <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="edit" class="WorkflowMaker-chart"></workflow-chart>
+            <workflow-chart tree-data="treeData.data" add-node="startAddNode(parent, betweenTwoNodes)" edit-node="startEditNode(nodeToEdit)" delete-node="startDeleteNode(nodeToDelete)" workflow-zoomed="workflowZoomed(zoom)" can-add-workflow-job-template="canAddWorkflowJobTemplate" mode="edit" class="WorkflowMaker-chart"></workflow-chart>
         </div>
         <div class="WorkflowMaker-contentRight">
             <div class="WorkflowMaker-formTitle">{{(workflowMakerFormConfig.nodeMode === 'edit' && nodeBeingEdited) ? ((nodeBeingEdited.unifiedJobTemplate && nodeBeingEdited.unifiedJobTemplate.name) ? nodeBeingEdited.unifiedJobTemplate.name : "EDIT TEMPLATE") : "ADD A TEMPLATE"}}</div>
-            <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'">Please hover over a template and click the Add button.</div>
+            <div class="WorkflowMaker-formHelp" ng-show="workflowMakerFormConfig.nodeMode === 'idle'" ng-bind="treeData.data.totalNodes === 0 ? 'Please click the start button to build your workflow.' : 'Please hover over a template for additional options.'"></div>
             <div class="WorkflowMaker-form" ng-show="workflowMakerFormConfig.nodeMode === 'add' || workflowMakerFormConfig.nodeMode === 'edit'">
                 <div class="Form-tabHolder">
                     <div class="Form-tab" ng-class="{'is-selected': workflowMakerFormConfig.activeTab === 'jobs'}" ng-click="toggleFormTab('jobs')">JOBS</div>
@@ -82,6 +86,6 @@
     </div>
     <div class="WorkflowMaker-buttonHolder">
         <button type="button" class="btn btn-sm WorkflowMaker-cancelButton" ng-click="closeWorkflowMaker()"> Close</button>
-        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate"> Save</button>
+        <button type="button" class="btn btn-sm WorkflowMaker-saveButton" ng-click="saveWorkflowMaker()" ng-show="workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate" ng-disabled="edgeFlags.conflict"> Save</button>
     </div>
 </div>

@@ -210,7 +210,7 @@ class AuthToken(BaseModel):
     REASON_CHOICES = [
         ('', _('Token not invalidated')),
         ('timeout_reached', _('Token is expired')),
-        ('limit_reached', _('Maximum per-user sessions reached')),
+        ('limit_reached', _('The maximum number of allowed sessions for this user has been exceeded.')),
         # invalid_token is not a used data-base value, but is returned by the
         # api when a token is not found
         ('invalid_token', _('Invalid token')),

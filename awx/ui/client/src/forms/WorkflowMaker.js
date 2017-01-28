@@ -33,27 +33,27 @@ export default
                 edgeType: {
                     label: i18n._('Type'),
                     type: 'radio_group',
-                    ngShow: 'selectedTemplate && showTypeOptions',
+                    ngShow: 'selectedTemplate && edgeFlags.showTypeOptions',
                     ngDisabled: '!canAddWorkflowJobTemplate',
                     options: [
                         {
                             label: i18n._('On&nbsp;Success'),
                             value: 'success',
-                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
+                            ngShow: '!edgeFlags.typeRestriction || edgeFlags.typeRestriction === "successFailure"'
                         },
                         {
                             label: i18n._('On&nbsp;Failure'),
                             value: 'failure',
-                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "successFailure"'
+                            ngShow: '!edgeFlags.typeRestriction || edgeFlags.typeRestriction === "successFailure"'
                         },
                         {
                             label: i18n._('Always'),
                             value: 'always',
-                            ngShow: '!edgeTypeRestriction || edgeTypeRestriction === "always"'
+                            ngShow: '!edgeFlags.typeRestriction || edgeFlags.typeRestriction === "always"'
                         }
                     ],
                     awRequiredWhen: {
-                        reqExpression: 'showTypeOptions'
+                        reqExpression: 'edgeFlags.showTypeOptions'
                     }
                 },
                 credential: {
@@ -170,7 +170,7 @@ export default
                     ngClick: 'cancelNodeForm()',
                     ngShow: '!canAddWorkflowJobTemplate'
                 },
-                save: {
+                select: {
                     ngClick: 'saveNodeForm()',
                     ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate",
                     ngShow: 'canAddWorkflowJobTemplate'

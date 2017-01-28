@@ -73,7 +73,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -152,8 +152,29 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
 
+# Returned in the header on event api lists as a recommendation to the UI
+# on how many events to display before truncating/hiding
+RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 4000
+
+# The maximum size of the ansible callback event's res data structure
+# beyond this limit and the value will be removed
+MAX_EVENT_RES_DATA = 700000
+
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
+
+JOB_EVENT_WORKERS = 4
+
+JOB_EVENT_MAX_QUEUE_SIZE = 10000
+
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = True
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = True
+
+# Limit CSRF cookies to browser sessions
+CSRF_COOKIE_AGE = None
 
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
@@ -223,6 +244,7 @@ INSTALLED_APPS = (
 
 INTERNAL_IPS = ('127.0.0.1',)
 
+MAX_PAGE_SIZE = 200
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
@@ -359,7 +381,7 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 # Initialize Django-Celery.
 djcelery.setup_loader()
 
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_DEFAULT_QUEUE = 'default'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -367,6 +389,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TRACK_STARTED = True
 CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
+CELERYD_POOL_RESTARTS = True
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
@@ -491,6 +514,9 @@ SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
 SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
 
+SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
+SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
+
 SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
 SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
 SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
@@ -518,23 +544,12 @@ ANSIBLE_FORCE_COLOR = True
 # the celery task.
 AWX_TASK_ENV = {}
 
-# Maximum number of job events processed by the callback receiver worker process
-# before it recycles
-JOB_EVENT_RECYCLE_THRESHOLD = 3000
-
-# Number of workers used to proecess job events in parallel
-JOB_EVENT_WORKERS = 4
-
-# Maximum number of job events that can be waiting on a single worker queue before
-# it can be skipped as too busy
-JOB_EVENT_MAX_QUEUE_SIZE = 100
-
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
 # Enable bubblewrap support for running jobs (playbook runs only).
 # Note: This setting may be overridden by database settings.
-AWX_PROOT_ENABLED = False
+AWX_PROOT_ENABLED = True
 
 # Command/path to bubblewrap.
 AWX_PROOT_CMD = 'bwrap'
@@ -629,8 +644,10 @@ EC2_REGION_NAMES = {
     'us-east-2': _('US East (Ohio)'),
     'us-west-2': _('US West (Oregon)'),
     'us-west-1': _('US West (Northern California)'),
+    'ca-central-1': _('Canada (Central)'),
     'eu-central-1': _('EU (Frankfurt)'),
     'eu-west-1': _('EU (Ireland)'),
+    'eu-west-2': _('EU (London)'),
     'ap-southeast-1': _('Asia Pacific (Singapore)'),
     'ap-southeast-2': _('Asia Pacific (Sydney)'),
     'ap-northeast-1': _('Asia Pacific (Tokyo)'),
@@ -666,11 +683,11 @@ VMWARE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
-VMWARE_ENABLED_VAR = 'vmware_powerState'
-VMWARE_ENABLED_VALUE = 'poweredOn'
+VMWARE_ENABLED_VAR = 'guest.gueststate'
+VMWARE_ENABLED_VALUE = 'running'
 
 # Inventory variable name containing the unique instance ID.
-VMWARE_INSTANCE_ID_VAR = 'vmware_uuid'
+VMWARE_INSTANCE_ID_VAR = 'config.instanceuuid'
 
 # Filter for allowed group and host names when importing inventory
 # from VMware.
@@ -780,6 +797,8 @@ SATELLITE6_GROUP_FILTER = r'^.+$'
 SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
+SATELLITE6_GROUP_PREFIX = 'foreman_'
+SATELLITE6_GROUP_PATTERNS = ["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]
 
 # ---------------------
 # ----- CloudForms -----
@@ -873,7 +892,7 @@ LOGGING = {
         },
         'http_receiver': {
             'class': 'awx.main.utils.handlers.HTTPSNullHandler',
-            'level': 'INFO',
+            'level': 'DEBUG',
             'formatter': 'json',
             'host': '',
         },
@@ -972,7 +991,7 @@ LOGGING = {
             'handlers': ['callback_receiver'],
         },
         'awx.main.tasks': {
-            'handlers': ['task_system']
+            'handlers': ['task_system'],
         },
         'awx.main.scheduler': {
             'handlers': ['task_system'],
@@ -996,21 +1015,9 @@ LOGGING = {
             'propagate': False,
         },
         'awx.analytics': {
-            'handlers': ['null'],
+            'handlers': ['http_receiver'],
             'level': 'INFO',
             'propagate': False
-        },
-        'awx.analytics.job_events': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.activity_stream': {
-            'handlers': ['null'],
-            'level': 'INFO'
-        },
-        'awx.analytics.system_tracking': {
-            'handlers': ['null'],
-            'level': 'INFO'
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],

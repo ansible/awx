@@ -27,6 +27,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
+                line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
                 line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;32m/g, '<span class="ansi32">');
@@ -64,12 +65,12 @@ export default ['$log', 'moment', function($log, moment){
             return line;
         },
         // adds anchor tags and tooltips to host status lines
-        getAnchorTags: function(event, line){
+        getAnchorTags: function(event){
             if(event.event_name.indexOf("runner_") === -1){
-                return line;
+                return `"`;
             }
             else{
-                return `<a ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskId: ${event.parent} })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top">${line}</a>`;
+                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
             }
 
         },
@@ -104,7 +105,8 @@ export default ['$log', 'moment', function($log, moment){
                 if (event.event_data.play_uuid) {
                     string += " play_" + event.event_data.play_uuid;
                 }
-            } else {
+            } else if (event.event_name !== "playbook_on_stats"){
+                string += " not_skeleton";
                 // host status or debug line
 
                 // these get classed by their parent play if applicable
@@ -184,7 +186,6 @@ export default ['$log', 'moment', function($log, moment){
         data-uuid="${clickClass}">
     </i>
 </span>`;
-                // console.log(expandDom);
                 return expandDom;
             } else {
                 // non-header lines don't get an expander
@@ -192,10 +193,22 @@ export default ['$log', 'moment', function($log, moment){
             }
         },
         getLineArr: function(event) {
-            return _
-                .zip(_.range(event.start_line + 1,
-                    event.end_line + 1),
-                    event.stdout.replace("\t", "        ").split("\r\n").slice(0, -1));
+            let lineNums = _.range(event.start_line + 1,
+                event.end_line + 1);
+
+            let lines = event.stdout
+                .replace("\t", "        ")
+                .split("\r\n");
+
+            if (lineNums.length > lines.length) {
+                let padBy = lineNums.length - lines.length;
+
+                for (let i = 0; i <= padBy; i++) {
+                    lines.push("[1;imLine capped.[0m");
+                }
+            }
+
+            return _.zip(lineNums, lines).slice(0, -1);
         },
         // public function that provides the parsed stdout line, given a
         // job_event
@@ -216,7 +229,7 @@ export default ['$log', 'moment', function($log, moment){
                     return `
 <div class="JobResultsStdOut-aLineOfStdOut${this.getLineClasses(event, lineArr[1], lineArr[0])}">
     <div class="JobResultsStdOut-lineNumberColumn">${this.getCollapseIcon(event, lineArr[1])}${lineArr[0]}</div>
-    <div class="JobResultsStdOut-stdoutColumn">${this.getAnchorTags(event, this.prettify(lineArr[1]))} ${this.getStartTimeBadge(event, lineArr[1] )}</div>
+    <div class="JobResultsStdOut-stdoutColumn${this.getAnchorTags(event)}>${this.prettify(lineArr[1])} ${this.getStartTimeBadge(event, lineArr[1])}</div>
 </div>`;
                 });
 

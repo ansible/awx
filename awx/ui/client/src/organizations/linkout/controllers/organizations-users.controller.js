@@ -29,6 +29,7 @@ export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '
             Rest.get()
                 .success(function(data) {
                     $scope.organization_name = data.name;
+                    $scope.name = data.name;
                     $scope.org_id = data.id;
 
                     $scope.orgRelatedUrls = data.related;
@@ -37,7 +38,7 @@ export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '
         }
 
         $scope.addUsers = function() {
-            $compile("<add-users add-users-type='user' class='AddUsers'></add-users>")($scope);
+            $compile("<add-users add-users-type='users' class='AddUsers'></add-users>")($scope);
         };
 
         $scope.editUser = function(id) {

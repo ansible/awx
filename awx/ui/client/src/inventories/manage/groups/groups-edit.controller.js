@@ -58,9 +58,10 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
         };
 
         $scope.lookupCredential = function(){
+            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
             $state.go('.credential', {
                 credential_search: {
-                    kind: $scope.source.value,
+                    kind: kind,
                     page_size: '5',
                     page: '1'
                 }
@@ -122,7 +123,7 @@ export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'Parse
             $scope.source = source;
             if (source.value === 'ec2' || source.value === 'custom' ||
                 source.value === 'vmware' || source.value === 'openstack') {
-                $scope[source.value + '_variables'] = $scope[source.value + '_variables'] === null ? '---' : $scope[source.value + '_variables'];
+                $scope[source.value + '_variables'] = $scope[source.value + '_variables'] === (null || undefined) ? '---' : $scope[source.value + '_variables'];
                 ParseTypeChange({
                     scope: $scope,
                     field_id: source.value + '_variables',

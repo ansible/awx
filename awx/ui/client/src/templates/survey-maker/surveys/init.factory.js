@@ -52,7 +52,8 @@ export default
                     // and closing the modal after success
                     DeleteSurvey({
                         scope: scope,
-                        id: id
+                        id: id,
+                        templateType: templateType
                     });
             };
 

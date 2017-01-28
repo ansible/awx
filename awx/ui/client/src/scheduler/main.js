@@ -45,7 +45,19 @@ export default
                         let path = `${GetBasePath('job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -119,7 +131,19 @@ export default
                         let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -190,7 +214,19 @@ export default
                         let path = `${GetBasePath('projects')}${$stateParams.id}`;
                         Rest.setUrl(path);
                         return Rest.get(path).then((res) => res.data);
-                    }]
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     '@': {
@@ -238,33 +274,46 @@ export default
             // upcoming scheduled jobs
             $stateExtender.addState({
                 searchPrefix: 'schedule',
-                name: 'jobs.scheduled',
-                route: '/scheduled',
+                name: 'jobs.schedules',
+                route: '/schedules',
                 params: {
                     schedule_search: {
                         value: {
                             next_run__isnull: 'false',
-                            order_by: 'next_run'
+                            order_by: 'unified_job_template__polymorphic_ctype__model'
                         }
                     }
                 },
                 data: {
-                    activityStream: true,
-                    activityStreamTarget: 'job',
-                    activityStreamId: 'id'
+                    activityStream: false,
                 },
                 ncyBreadcrumb: {
                     parent: 'jobs',
                     label: 'SCHEDULED'
                 },
                 resolve: {
+                    SchedulesList: ['ScheduledJobsList', function(list){
+                        return list;
+                    }],
                     Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = GetBasePath('schedules');
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
                         }
                     ],
-                    ParentObject: [() =>{return null;}]
+                    ParentObject: [() =>{return {endpoint:'/api/v1/schedules'}; }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
                 },
                 views: {
                     'list@jobs': {

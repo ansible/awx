@@ -149,7 +149,6 @@ var tower = angular.module('Tower', [
     'InventoryHostsDefinition',
     'HostsHelper',
     'AWFilters',
-    'ScanJobsListDefinition',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
@@ -385,6 +384,10 @@ var tower = angular.module('Tower', [
             };
             $rootScope.$stateParams = $stateParams;
 
+            $state.defaultErrorHandler(function(error) {
+                $log.debug(`$state.defaultErrorHandler: ${error}`);
+            });
+
             I18NInit();
             $stateExtender.addState({
                 name: 'dashboard',
@@ -464,21 +467,6 @@ var tower = angular.module('Tower', [
                 }
             });
 
-
-            $stateExtender.addState({
-                name: 'teamUsers',
-                url: '/teams/:team_id/users',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: UsersList,
-                resolve: {
-                    Users: ['UsersList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                    }]
-                }
-            });
-
-
             $stateExtender.addState({
                 name: 'userCredentials',
                 url: '/users/:user_id/credentials',
@@ -509,58 +497,6 @@ var tower = angular.module('Tower', [
                     label: N_('SOCKETS')
                 }
             });
-
-            $rootScope.addPermission = function(scope) {
-                $compile("<add-permissions class='AddPermissions'></add-permissions>")(scope);
-            };
-            $rootScope.addPermissionWithoutTeamTab = function(scope) {
-                $compile("<add-permissions class='AddPermissions' without-team-permissions='true'></add-permissions>")(scope);
-            };
-
-            $rootScope.deletePermission = function(user, accessListEntry) {
-                let entry = accessListEntry;
-
-                let action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-
-                    let url;
-                    if (entry.team_id) {
-                        url = GetBasePath("teams") + entry.team_id + "/roles/";
-                    } else {
-                        url = GetBasePath("users") + user.id + "/roles/";
-                    }
-
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": entry.id })
-                        .success(function() {
-                            Wait('stop');
-                            $state.go('.', null, { reload: true });
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Failed to remove access.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                if (accessListEntry.team_id) {
-                    Prompt({
-                        hdr: `Team access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from the team <span class="Prompt-emphasis">${$filter('sanitize')(entry.team_name)}</span>. This will affect all members of the team. If you would like to only remove access for this particular user, please remove them from the team.</div>`,
-                        action: action,
-                        actionText: 'REMOVE TEAM ACCESS'
-                    });
-                } else {
-                    Prompt({
-                        hdr: `User access removal`,
-                        body: `<div class="Prompt-bodyQuery">Please confirm that you would like to remove <span class="Prompt-emphasis">${entry.name}</span> access from <span class="Prompt-emphasis">${user.username}</span>.</div>`,
-                        action: action,
-                        actionText: 'REMOVE'
-                    });
-                }
-            };
 
             $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
                 var action = function() {
@@ -681,9 +617,52 @@ var tower = angular.module('Tower', [
 
                 $rootScope.crumbCache = [];
 
-                // $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState) {
-                //     SocketService.subscribe(toState, toParams);
-                // });
+                $rootScope.$on("$stateChangeStart", function (event, next) {
+                    // Remove any lingering intervals
+                    // except on jobDetails.* states
+                    var jobDetailStates = [
+                        'jobDetail',
+                        'jobDetail.host-summary',
+                        'jobDetail.host-event.details',
+                        'jobDetail.host-event.json',
+                        'jobDetail.host-events',
+                        'jobDetail.host-event.stdout'
+                    ];
+                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
+                        window.clearInterval($rootScope.jobDetailInterval);
+                    }
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
+                        window.clearInterval($rootScope.jobStdOutInterval);
+                    }
+
+                    // On each navigation request, check that the user is logged in
+                    if (!/^\/(login|logout)/.test($location.path())) {
+                        // capture most recent URL, excluding login/logout
+                        $rootScope.lastPath = $location.path();
+                        $rootScope.enteredPath = $location.path();
+                        $cookieStore.put('lastPath', $location.path());
+                    }
+
+                    if (Authorization.isUserLoggedIn() === false) {
+                        if (next.name !== "signIn") {
+                            $state.go('signIn');
+                        }
+                    } else if ($rootScope && $rootScope.sessionTimer && $rootScope.sessionTimer.isExpired()) {
+                      // gets here on timeout
+                        if (next.name !== "signIn") {
+                            $state.go('signIn');
+                        }
+                    } else {
+                        if ($rootScope.current_user === undefined || $rootScope.current_user === null) {
+                            Authorization.restoreUserInfo(); //user must have hit browser refresh
+                        }
+                        if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
+                            // if not headed to /login or /logout, then check the license
+                            CheckLicense.test(event);
+                        }
+                    }
+                    activateTab();
+                });
 
                 $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState) {
 

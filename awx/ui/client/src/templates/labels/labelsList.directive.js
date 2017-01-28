@@ -8,7 +8,8 @@ export default
         'Prompt',
         '$q',
         '$filter',
-        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter) {
+        '$state',
+        function(templateUrl, Wait, Rest, GetBasePath, ProcessErrors, Prompt, $q, $filter, $state) {
             return {
                 restrict: 'E',
                 scope: false,
@@ -54,29 +55,37 @@ export default
                         scope.seeMoreInactive = true;
                     };
 
-                    scope.deleteLabel = function(templateId, templateName, labelId, labelName) {
+                    scope.deleteLabel = function(template, label) {
                         var action = function () {
                             $('#prompt-modal').modal('hide');
                             scope.seeMoreInactive = true;
                             Wait('start');
-                            var url = GetBasePath("job_templates") + templateId + "/labels/";
-                            Rest.setUrl(url);
-                            Rest.post({"disassociate": true, "id": labelId})
-                                .success(function () {
-                                    // @issue: OLD SEARCH
-                                    // scope.search("job_template", scope.$parent.job_template_page);
-                                    Wait('stop');
-                                })
-                                .error(function (data, status) {
-                                    Wait('stop');
-                                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                        msg: 'Could not disassociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
-                                });
+                            let url;
+                            if(template.type === 'job_template') {
+                                url = GetBasePath("job_templates") + template.id + "/labels/";
+                            }
+                            else if(template.type === 'workflow_job_template') {
+                                url = GetBasePath("workflow_job_templates") + template.id + "/labels/";
+                            }
+
+                            if(url) {
+                                Rest.setUrl(url);
+                                Rest.post({"disassociate": true, "id": label.id})
+                                    .success(function () {
+                                        Wait('stop');
+                                        $state.go('.', null, {reload: true});
+                                    })
+                                    .error(function (data, status) {
+                                        Wait('stop');
+                                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                            msg: 'Could not disassociate label from JT.  Call to ' + url + ' failed. DELETE returned status: ' + status });
+                                    });
+                            }
                         };
 
                         Prompt({
-                            hdr: 'Remove Label from ' + templateName ,
-                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(labelName) + '</span> label.</div>',
+                            hdr: 'Remove Label from ' + template.name ,
+                            body: '<div class="Prompt-bodyQuery">Confirm  the removal of the <span class="Prompt-emphasis">' + $filter('sanitize')(label.name) + '</span> label.</div>',
                             action: action,
                             actionText: 'REMOVE'
                         });

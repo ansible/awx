@@ -43,11 +43,11 @@ export default
                     ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
-                    // interpolated with $rootScope
-                    basePath: "{{$rootScope.current_user.is_superuser ? 'api/v1/organizations' : $rootScope.current_user.url + 'admin_of_organizations'}}",
+                    basePath: 'organizations',
                     ngShow: 'canShareCredential',
                     label: i18n._('Organization'),
                     type: 'lookup',
+                    autopopulateLookup: false,
                     list: 'OrganizationList',
                     sourceModel: 'organization',
                     sourceField: 'name',
@@ -231,7 +231,8 @@ export default
                     subCheckbox: {
                         variable: 'ssh_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'ssh_password\', \'undefined\')'
+                        ngChange: 'ask(\'ssh_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
@@ -263,7 +264,7 @@ export default
                 "ssh_key_unlock": {
                     label: i18n._('Private Key Passphrase'),
                     type: 'sensitive',
-                    ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
+                    ngShow: "kind.value === 'ssh' || kind.value === 'scm' || kind.value === 'net'",
                     ngDisabled: "keyEntered === false || ssh_key_unlock_ask || !(credential_obj.summary_fields.user_capabilities.edit || canAdd)",
                     subCheckbox: {
                         variable: 'ssh_key_unlock_ask',
@@ -288,7 +289,8 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     subForm: 'credentialSubForm',
-                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngChange: 'becomeMethodChange()',
                 },
                 "become_username": {
                     labelBind: 'becomeUsernameLabel',
@@ -308,7 +310,8 @@ export default
                     subCheckbox: {
                         variable: 'become_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'become_password\', \'undefined\')'
+                        ngChange: 'ask(\'become_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
@@ -393,7 +396,8 @@ export default
                     subCheckbox: {
                         variable: 'vault_password_ask',
                         text: i18n._('Ask at runtime?'),
-                        ngChange: 'ask(\'vault_password\', \'undefined\')'
+                        ngChange: 'ask(\'vault_password\', \'undefined\')',
+                        ngDisabled: false,
                     },
                     hasShowInputButton: true,
                     autocomplete: false,
@@ -420,9 +424,12 @@ export default
 
             related: {
                 permissions: {
-                    disabled: 'disablePermissionAssignment',
+                    disabled: '(organization === undefined ? true : false)',
+                    // Do not transition the state if organization is undefined
+                    ngClick: `(organization === undefined ? true : false)||$state.go('credentials.edit.permissions')`,
                     awToolTip: '{{permissionsTooltip}}',
                     dataTipWatch: 'permissionsTooltip',
+                    awToolTipTabEnabledInEditMode: true,
                     dataPlacement: 'top',
                     basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {
@@ -454,15 +461,13 @@ export default
                             label: i18n._('Role'),
                             type: 'role',
                             noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
                             noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
+                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
                 }

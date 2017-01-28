@@ -4,19 +4,24 @@
  * All Rights Reserved
  *************************************************/
 
- export default function() {
+ export default ['i18n', function(i18n) {
      return {
          name: 'configuration_azure_template',
          showActions: true,
          showHeader: false,
 
          fields: {
+             SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL: {
+                 type: 'text',
+                 reset: 'SOCIAL_AUTH_AZUREAD_OAUTH2_CALLBACK_URL'
+             },
              SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: {
                  type: 'text',
                  reset: 'SOCIAL_AUTH_AZUREAD_OAUTH2_KEY'
              },
              SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: {
-                 type: 'text',
+                 type: 'sensitive',
+                 hasShowInputButton: true,
                  reset: 'SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET'
              },
              SOCIAL_AUTH_AZUREAD_OAUTH2_ORGANIZATION_MAP: {
@@ -38,8 +43,8 @@
          buttons: {
              reset: {
                  ngClick: 'vm.resetAllConfirm()',
-                 label: 'Reset All',
-                 class: 'Form-button--left Form-cancelButton'
+                 label: i18n._('Revert all to default'),
+                 class: 'Form-resetAll'
              },
              cancel: {
                  ngClick: 'vm.formCancel()',
@@ -51,3 +56,4 @@
          }
      };
  }
+];

@@ -37,8 +37,12 @@ class ResourceMixin(models.Model):
         '''
         return ResourceMixin._accessible_objects(cls, accessor, role_field)
 
+    @classmethod
+    def accessible_pk_qs(cls, accessor, role_field):
+        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field)
+
     @staticmethod
-    def _accessible_objects(cls, accessor, role_field):
+    def _accessible_pk_qs(cls, accessor, role_field, content_types=None):
         if type(accessor) == User:
             ancestor_roles = accessor.roles.all()
         elif type(accessor) == Role:
@@ -47,14 +51,22 @@ class ResourceMixin(models.Model):
             accessor_type = ContentType.objects.get_for_model(accessor)
             ancestor_roles = Role.objects.filter(content_type__pk=accessor_type.id,
                                                  object_id=accessor.id)
-        qs = cls.objects.filter(pk__in =
-                                RoleAncestorEntry.objects.filter(
-                                    ancestor__in=ancestor_roles,
-                                    content_type_id = ContentType.objects.get_for_model(cls).id,
-                                    role_field = role_field
-                                ).values_list('object_id').distinct()
-                                )
-        return qs
+
+        if content_types is None:
+            ct_kwarg = dict(content_type_id = ContentType.objects.get_for_model(cls).id)
+        else:
+            ct_kwarg = dict(content_type_id__in = content_types)
+
+        return RoleAncestorEntry.objects.filter(
+            ancestor__in = ancestor_roles,
+            role_field = role_field,
+            **ct_kwarg
+        ).values_list('object_id').distinct()
+
+
+    @staticmethod
+    def _accessible_objects(cls, accessor, role_field):
+        return cls.objects.filter(pk__in = ResourceMixin._accessible_pk_qs(cls, accessor, role_field))
 
 
     def get_permissions(self, accessor):
@@ -105,18 +117,24 @@ class SurveyJobTemplateMixin(models.Model):
         # Job Template extra_vars
         extra_vars = self.extra_vars_dict
 
-        # Overwrite with job template extra vars with survey default vars
-        if self.survey_enabled and 'spec' in self.survey_spec:
-            for survey_element in self.survey_spec.get("spec", []):
-                if 'default' in survey_element and survey_element['default']:
-                    extra_vars[survey_element['variable']] = survey_element['default']
-
         # transform to dict
         if 'extra_vars' in kwargs:
             kwargs_extra_vars = kwargs['extra_vars']
             kwargs_extra_vars = parse_yaml_or_json(kwargs_extra_vars)
         else:
             kwargs_extra_vars = {}
+
+        # Overwrite with job template extra vars with survey default vars
+        if self.survey_enabled and 'spec' in self.survey_spec:
+            for survey_element in self.survey_spec.get("spec", []):
+                default = survey_element['default']
+                variable_key = survey_element['variable']
+                if survey_element.get('type') == 'password':
+                    if variable_key in kwargs_extra_vars:
+                        kw_value = kwargs_extra_vars[variable_key]
+                        if kw_value.startswith('$encrypted$') and kw_value != default:
+                            kwargs_extra_vars[variable_key] = default
+                extra_vars[variable_key] = default
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars

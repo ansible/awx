@@ -97,7 +97,8 @@ export default
                 actionClass: 'btn List-buttonDefault system-tracking',
                 ngDisabled: 'systemTrackingDisabled || !hostsSelected',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: true
             },
             refresh: {
                 mode: 'all',
@@ -113,7 +114,8 @@ export default
                 awToolTip: "Create a new host",
                 actionClass: 'btn List-buttonSubmit',
                 buttonContent: '&#43; ADD HOST',
-                ngShow: 'canAdd'
+                ngShow: 'canAdd',
+                dataPlacement: "top",
             }
         }
 

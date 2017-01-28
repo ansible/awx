@@ -67,15 +67,25 @@ export default ['Rest', 'Wait',
                             master[fld] = data[fld];
                         }
 
-                        if (form.fields[fld].type === 'checkbox_group') {
-                            // Loop across the group and put the child data on scope
-                            for (var j = 0; j < form.fields[fld].fields.length; j++) {
-                                if (data.notification_configuration[form.fields[fld].fields[j].name]) {
-                                    $scope[form.fields[fld].fields[j].name] = data.notification_configuration[form.fields[fld].fields[j].name];
-                                    master[form.fields[fld].fields[j].name] = data.notification_configuration[form.fields[fld].fields[j].name];
-                                }
+                        if(form.fields[fld].type === 'radio_group') {
+                            if(data.notification_configuration.use_ssl === true){
+                                $scope.email_options = "use_ssl";
+                                master.email_options = "use_ssl";
+                                $scope.use_ssl = true;
+                                master.use_ssl = true;
+                                $scope.use_tls = false;
+                                master.use_tls = false;
                             }
-                        } else {
+                            if(data.notification_configuration.use_tls === true){
+                                $scope.email_options = "use_tls";
+                                master.email_options = "use_tls";
+                                $scope.use_ssl = false;
+                                master.use_ssl = false;
+                                $scope.use_tls = true;
+                                master.use_tls = true;
+                            }
+                        }
+                        else {
                             if (data.notification_configuration[fld]) {
                                 $scope[fld] = data.notification_configuration[fld];
                                 master[fld] = data.notification_configuration[fld];
@@ -84,7 +94,7 @@ export default ['Rest', 'Wait',
                                     if (form.fields[fld].name === 'headers') {
                                         $scope[fld] = JSON.stringify($scope[fld], null, 2);
                                     } else {
-                                        $scope[fld] = $scope[fld].toString().replace(',', '\n');
+                                        $scope[fld] = $scope[fld].join('\n');
                                     }
                                 }
                             }
@@ -193,6 +203,17 @@ export default ['Rest', 'Wait',
             });
         };
 
+        $scope.emailOptionsChange = function () {
+            if ($scope.email_options === 'use_ssl') {
+                $scope.use_ssl = true;
+                $scope.use_tls = false;
+            }
+            else if ($scope.email_options === 'use_tls') {
+                $scope.use_ssl = false;
+                $scope.use_tls = true;
+            }
+        };
+
         $scope.formSave = function() {
             var params,
                 v = $scope.notification_type.value;
@@ -220,10 +241,10 @@ export default ['Rest', 'Wait',
                 if (field.type === 'number') {
                     $scope[i] = Number($scope[i]);
                 }
-                if (field.name === "username" && $scope.notification_type.value === "email" && value === null) {
+                if (i === "username" && $scope.notification_type.value === "email" && (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
-                if (field.type === 'sensitive' && value === null) {
+                if (field.type === 'sensitive' && (value === null || value === undefined)) {
                     $scope[i] = "";
                 }
                 return $scope[i];
@@ -233,13 +254,10 @@ export default ['Rest', 'Wait',
                 .filter(i => (form.fields[i].ngShow && form.fields[i].ngShow.indexOf(v) > -1))
                 .map(i => [i, processValue($scope[i], i, form.fields[i])]));
 
-            delete params.notification_configuration.checkbox_group;
+                delete params.notification_configuration.email_options;
 
-            for (var j = 0; j < form.fields.checkbox_group.fields.length; j++) {
-                if (form.fields.checkbox_group.fields[j].ngShow && form.fields.checkbox_group.fields[j].ngShow.indexOf(v) > -1) {
-                    params.notification_configuration[form.fields.checkbox_group.fields[j].name] = Boolean($scope[form.fields.checkbox_group.fields[j].name]);
-                }
-            }
+                params.notification_configuration.use_ssl = Boolean($scope.use_ssl);
+                params.notification_configuration.use_tls = Boolean($scope.use_tls);
 
             Wait('start');
             Rest.setUrl(url + id + '/');

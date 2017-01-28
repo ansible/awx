@@ -63,9 +63,11 @@
 
 export default
     [   '$scope', '$location', 'GetBasePath', 'Empty', 'Wait', 'Rest', 'ProcessErrors',
-        'LaunchJob', '$state', 'generateList', 'InventoryList', 'CredentialList', 'ParseTypeChange', 'GetSurveyQuestions',
+        'LaunchJob', '$state', 'generateList', 'InventoryList', 'CredentialList', 'ParseTypeChange',
+        'GetSurveyQuestions',
         function($scope, $location, GetBasePath, Empty, Wait, Rest, ProcessErrors,
-            LaunchJob, $state, GenerateList, InventoryList, CredentialList, ParseTypeChange, GetSurveyQuestions) {
+            LaunchJob, $state, GenerateList, InventoryList, CredentialList, ParseTypeChange,
+            GetSurveyQuestions) {
 
             var launch_url;
 
@@ -145,7 +147,7 @@ export default
                     }
                 }
                 else {
-                    if($scope.submitJobType && $scope.submitJobType === 'workflow_job_template') {
+                    if($scope.submitJobType && $scope.submitJobType === 'workflow_job') {
                         launch_url = GetBasePath('workflow_jobs') + $scope.submitJobId + '/relaunch/';
                     }
                     else {
@@ -296,100 +298,10 @@ export default
 
             $scope.getListsAndSurvey = function() {
                 if($scope.ask_inventory_on_launch) {
-                    // @issue: OLD SEARCH
-                    // var inventory_url = GetBasePath('inventory');
-
-                    var invList = _.cloneDeep(InventoryList);
-                    invList.fields.status.searchable = false;
-                    invList.fields.organization.searchable = false;
-                    invList.fields.has_inventory_sources.searchable = false;
-                    invList.fields.has_active_failures.searchable = false;
-                    invList.fields.inventory_sources_with_failures.searchable = false;
-
-                    GenerateList.inject(invList, {
-                        mode: 'lookup',
-                        id: 'job-submission-inventory-lookup',
-                        scope: $scope,
-                        input_type: 'radio'
-                    });
-
-                    // @issue: OLD SEARCH
-                    // SearchInit({
-                    //     scope: $scope,
-                    //     set: InventoryList.name,
-                    //     list: InventoryList,
-                    //     url: inventory_url
-                    // });
-                    //
-                    // PaginateInit({
-                    //     scope: $scope,
-                    //     list: InventoryList,
-                    //     url: inventory_url,
-                    //     mode: 'lookup'
-                    // });
-                    //
-                    // $scope.search(InventoryList.iterator);
-
-                    $scope.$watchCollection('inventories', function () {
-                        if($scope.selected_inventory) {
-                            // Loop across the inventories and see if one of them should be "checked"
-                            $scope.inventories.forEach(function(row, i) {
-                                if (row.id === $scope.selected_inventory.id) {
-                                    $scope.inventories[i].checked = 1;
-                                }
-                                else {
-                                    $scope.inventories[i].checked = 0;
-                                }
-                            });
-                        }
-                    });
+                    $scope.includeInventoryList = true;
                 }
                 if($scope.ask_credential_on_launch) {
-                    // @issue: OLD SEARCH
-                    // var credential_url = GetBasePath('credentials') + '?kind=ssh';
-
-                    var credList = _.cloneDeep(CredentialList);
-                    credList.basePath = GetBasePath('credentials') + '?kind=ssh';
-                    credList.fields.description.searchable = false;
-                    credList.fields.kind.searchable = false;
-
-                    GenerateList.inject(credList, {
-                        mode: 'lookup',
-                        id: 'job-submission-credential-lookup',
-                        scope: $scope,
-                        input_type: 'radio'
-                    });
-
-                    // @issue: OLD SEARCH
-                    // SearchInit({
-                    //     scope: $scope,
-                    //     set: CredentialList.name,
-                    //     list: CredentialList,
-                    //     url: credential_url
-                    // });
-                    //
-                    // PaginateInit({
-                    //     scope: $scope,
-                    //     list: CredentialList,
-                    //     url: credential_url,
-                    //     mode: 'lookup'
-                    // });
-                    //
-                    // $scope.search(CredentialList.iterator);
-
-                    $scope.$watchCollection('credentials', function () {
-                        if($scope.selected_credential) {
-                            // Loop across the inventories and see if one of them should be "checked"
-                            $scope.credentials.forEach(function(row, i) {
-                                if (row.id === $scope.selected_credential.id) {
-                                    $scope.credentials[i].checked = 1;
-                                }
-                                else {
-                                    $scope.credentials[i].checked = 0;
-                                }
-                            });
-                        }
-                    });
+                    $scope.includeCredentialList = true;
                 }
                 if($scope.survey_enabled) {
                     GetSurveyQuestions({
@@ -561,6 +473,15 @@ export default
                 $scope.parseType = $scope.other_prompt_data.parseType;
                 $scope.parseTypeChange('parseType', 'jobLaunchVariables');
             };
+
+            $scope.$on('inventorySelected', function(evt, selectedRow){
+                $scope.selected_inventory = _.cloneDeep(selectedRow);
+            });
+
+            $scope.$on('credentialSelected', function(evt, selectedRow){
+                $scope.selected_credential = _.cloneDeep(selectedRow);
+                updateRequiredPasswords();
+            });
 
         }
     ];

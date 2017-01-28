@@ -13,7 +13,7 @@
 
 
 export function JobsListController($state, $rootScope, $log, $scope, $compile, $stateParams,
-    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset, GetChoices) {
+    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset) {
 
     ClearScope();
 
@@ -28,37 +28,44 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
         $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
 
         $scope.showJobType = true;
+    }
 
-        _.forEach($scope[list.name], buildTooltips);
-        if ($scope.removeChoicesReady) {
-            $scope.removeChoicesReady();
+    $scope.$on(`${list.iterator}_options`, function(event, data){
+        $scope.options = data.data.actions.GET;
+        optionsRequestDataProcessing();
+    });
+
+    $scope.$watchCollection(`${$scope.list.name}`, function() {
+            optionsRequestDataProcessing();
         }
-        $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
-            $scope[list.name].forEach(function(item, item_idx) {
-                var itm = $scope[list.name][item_idx];
+    );
 
-                // Set the item type label
-                if (list.fields.type) {
-                    $scope.type_choices.every(function(choice) {
-                        if (choice.value === item.type) {
-                            itm.type_label = choice.label;
+    // iterate over the list and add fields like type label, after the
+    // OPTIONS request returns, or the list is sorted/paginated/searched
+    function optionsRequestDataProcessing(){
+
+        $scope[list.name].forEach(function(item, item_idx) {
+            var itm = $scope[list.name][item_idx];
+
+            if(item.summary_fields && item.summary_fields.source_workflow_job &&
+                item.summary_fields.source_workflow_job.id){
+                    item.workflow_result_link = `/#/workflows/${item.summary_fields.source_workflow_job.id}`;
+            }
+
+            // Set the item type label
+            if (list.fields.type && $scope.options &&
+                    $scope.options.hasOwnProperty('type')) {
+                        $scope.options.type.choices.every(function(choice) {
+                            if (choice[0] === item.type) {
+                            itm.type_label = choice[1];
                             return false;
                         }
                         return true;
                     });
                 }
-            });
-        });
-
-        GetChoices({
-            scope: $scope,
-            url: GetBasePath('unified_jobs'),
-            field: 'type',
-            variable: 'type_choices',
-            callback: 'choicesReady'
+                buildTooltips(itm);
         });
     }
-
     function buildTooltips(job) {
         job.status_tip = 'Job ' + job.status + ". Click for details.";
     }
@@ -80,7 +87,7 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
             typeId = job.inventory_source;
         } else if (job.type === 'project_update') {
             typeId = job.project;
-        } else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command') {
+        } else if (job.type === 'job' || job.type === "system_job" || job.type === 'ad_hoc_command' || job.type === 'workflow_job') {
             typeId = job.id;
         }
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
@@ -128,5 +135,5 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
 }
 
 JobsListController.$inject = ['$state', '$rootScope', '$log', '$scope', '$compile', '$stateParams',
-    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset', 'GetChoices'
+    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset'
 ];

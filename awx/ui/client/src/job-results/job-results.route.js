@@ -6,9 +6,16 @@
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
 
+const defaultParams = {
+    page_size: "200",
+    order_by: 'start_line',
+    not__event__in: 'playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats'
+};
+
 export default {
     name: 'jobDetail',
-    url: '/jobs/:id',
+    url: '/jobs/{id: int}',
+    searchPrefix: 'job_event',
     ncyBreadcrumb: {
         parent: 'jobs',
         label: '{{ job.id }} - {{ job.name }}'
@@ -21,27 +28,24 @@ export default {
             }
         }
     },
+    params: {
+        job_event_search: {
+            value: defaultParams,
+            dynamic: true,
+            squash: ''
+        }
+    },
     resolve: {
         // the GET for the particular job
-        jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', function(Rest, GetBasePath, $stateParams, $q, $state, Alert) {
-            Rest.setUrl(GetBasePath('jobs') + $stateParams.id);
-            var val = $q.defer();
-            Rest.get()
-                .then(function(data) {
-                    val.resolve(data.data);
-                }, function(data) {
-                    val.reject(data);
-
-                    if (data.status === 404) {
-                        Alert('Job Not Found', 'Cannot find job.', 'alert-info');
-                    } else if (data.status === 403) {
-                        Alert('Insufficient Permissions', 'You do not have permission to view this job.', 'alert-info');
-                    }
-
-                    $state.go('jobs');
-                });
-            return val.promise;
+        jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', 'jobResultsService', function(Rest, GetBasePath, $stateParams, $q, $state, Alert, jobResultsService) {
+            return jobResultsService.getJobData($stateParams.id);
         }],
+        Dataset: ['QuerySet', '$stateParams', 'jobData',
+            function(qs, $stateParams, jobData) {
+                let path = jobData.related.job_events;
+                return qs.search(path, $stateParams[`job_event_search`]);
+            }
+        ],
         // used to signify if job is completed or still running
         jobFinished: ['jobData', function(jobData) {
             if (jobData.finished) {
@@ -54,7 +58,7 @@ export default {
         // flashing as rest data comes in.  If the job is finished and
         // there's a playbook_on_stats event, go ahead and resolve the count
         // so you don't get that flashing!
-        count: ['jobData', 'jobResultsService', 'Rest', '$q', function(jobData, jobResultsService, Rest, $q) {
+        count: ['jobData', 'jobResultsService', 'Rest', '$q', '$stateParams', '$state', function(jobData, jobResultsService, Rest, $q, $stateParams, $state) {
             var defer = $q.defer();
             if (jobData.finished) {
                 // if the job is finished, grab the playbook_on_stats
@@ -90,6 +94,15 @@ export default {
                         }, countFinished: false});
                     });
             } else {
+                // make sure to not include any extra
+                // search params for a running job (because we can't filter
+                // incoming job events)
+                if (!_.isEqual($stateParams.job_event_search, defaultParams)) {
+                    let params = _.cloneDeep($stateParams);
+                    params.job_event_search = defaultParams;
+                    $state.go('.', params, { reload: true });
+                }
+
                 // job isn't finished so just send an empty count and read
                 // from events
                 defer.resolve({val: {
@@ -147,11 +160,6 @@ export default {
                 });
             return val.promise;
         }],
-        // This clears out the event queue, otherwise it'd be full of events
-        // for previous job results the user had navigated to
-        eventQueueInit: ['eventQueue', function(eventQueue) {
-            eventQueue.initialize();
-        }]
     },
     templateUrl: templateUrl('job-results/job-results'),
     controller: 'jobResultsController'
