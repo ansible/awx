@@ -625,7 +625,7 @@ class HostAccess(BaseAccess):
             raise PermissionDenied(_('Unable to change inventory on a host.'))
 
         # Prevent renaming a host that might exceed license count
-        if 'name' in data:
+        if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
 
         # Checks for admin or change permission on inventory, controls whether
