@@ -473,7 +473,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS ?= awx/main/tests
+TEST_DIRS ?= awx/main/tests awx/conf/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -485,7 +485,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
