@@ -678,7 +678,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
-                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">` + i18n._("Reset") + `</a>`;
+                            var resetMessage = i18n._('Reset');
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">${resetMessage}</a>`;
                         }
 
                         html += "\n\t</label>\n";
@@ -1271,7 +1272,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (i = 0; i < field.options.length; i++) {
                             html += "<label class=\"radio-inline ";
-                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\""; 
+                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\"";
                             html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
                             html += ">";
                             html += "<input type=\"radio\" ";

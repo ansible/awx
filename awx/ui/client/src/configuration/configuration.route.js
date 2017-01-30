@@ -6,6 +6,7 @@
 
  import {templateUrl} from '../shared/template-url/template-url.factory';
  import ConfigurationController from './configuration.controller';
+ import { N_ } from '../i18n';
 
 // Import form controllers
  import ConfigurationAuthController from './auth-form/configuration-auth.controller';
