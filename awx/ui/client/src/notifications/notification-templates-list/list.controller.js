@@ -7,10 +7,12 @@
  export default ['$rootScope', '$scope', 'Wait', 'generateList', 'NotificationTemplatesList',
      'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', 'GetChoices',
      'Empty', 'Find', 'ngToast', '$compile', '$filter', 'Dataset', 'rbacUiControlService',
+     'i18n',
      function(
          $rootScope, $scope, Wait, GenerateList, NotificationTemplatesList,
          GetBasePath, Rest, ProcessErrors, Prompt, $state, GetChoices,
-         Empty, Find, ngToast, $compile, $filter, Dataset, rbacUiControlService) {
+         Empty, Find, ngToast, $compile, $filter, Dataset, rbacUiControlService,
+         i18n) {
 
          var defaultUrl = GetBasePath('notification_templates'),
              list = NotificationTemplatesList;
@@ -68,8 +70,8 @@
                  html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                  html += "<thead>\n";
                  html += "<tr>";
-                 html += "<th>Status</th>";
-                 html += "<th>Time</th>";
+                 html += "<th>" + i18n._("Status") + "</th>";
+                 html += "<th>" + i18n._("Time") + "</th>";
                  html += "</tr>\n";
                  html += "</thead>\n";
                  html += "<tbody>\n";
@@ -83,7 +85,7 @@
                  html += "</tbody>\n";
                  html += "</table>\n";
              } else {
-                 html = "<p>No recent notifications.</p>\n";
+                 html = "<p>" + i18n._("No recent notifications.") + "</p>\n";
              }
              notification_template.template_status_html = html;
          }
@@ -110,7 +112,7 @@
                  })
                  .catch(function() {
                      ngToast.danger({
-                         content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
+                         content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> ` + i18n._('Notification Failed.'),
                      });
                  });
 
@@ -179,12 +181,12 @@
                          });
                      });
              };
-             var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the notification template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
+             var bodyHtml = '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the notification template below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
              Prompt({
-                 hdr: 'Delete',
+                 hdr: i18n._('Delete'),
                  body: bodyHtml,
                  action: action,
-                 actionText: 'DELETE'
+                 actionText: i18n._('DELETE')
              });
          };
      }

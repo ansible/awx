@@ -7,11 +7,12 @@
 
 export default
     angular.module('JobEventsListDefinition', [])
-    .value('JobEventList', {
+    .factory('JobEventList', ['i18n', function(i18n) {
+    return {
 
         name: 'jobevents',
         iterator: 'jobevent',
-        editTitle: 'Job Events',
+        editTitle: i18n._('Job Events'),
         index: false,
         hover: true,
         "class": "condensed",
@@ -27,27 +28,27 @@ export default
             //},
             events: {
                 href: '/#/job_events/{{ job_id }}',
-                label: 'Events',
+                label: i18n._('Events'),
                 active: true,
                 icon: 'icon-list-ul'
             },
             hosts: {
                 href: '/#/job_host_summaries/{{ job_id }}',
-                label: 'Host Summary',
+                label: i18n._('Host Summary'),
                 icon: 'icon-laptop'
             }
         },
 
         fields: {
             created: {
-                label: 'Created On',
+                label: i18n._('Created On'),
                 columnClass: 'col-lg-1 col-md-1 hidden-sm hidden-xs',
                 key: true,
                 nosort: true,
                 noLink: true
             },
             status: {
-                label: 'Status',
+                label: i18n._('Status'),
                 showValue: false,
                 columnClass: 'col-sm-1 col-xs-2 text-center',
                 nosort: true,
@@ -61,7 +62,7 @@ export default
                 badgeNgClick: 'viewJobEvent(jobevent.id)'
             },
             event_display: {
-                label: 'Event',
+                label: i18n._('Event'),
                 hasChildren: true,
                 ngClick: 'toggleChildren(jobevent.id, jobevent.related.children)',
                 nosort: true,
@@ -69,7 +70,7 @@ export default
                 appendHTML: 'jobevent.event_detail'
             },
             host: {
-                label: 'Host',
+                label: i18n._('Host'),
                 ngBind: 'jobevent.summary_fields.host.name',
                 ngHref: '{{ jobevent.hostLink }}',
                 nosort: true,
@@ -85,7 +86,7 @@ export default
                 awToolTip: 'Refresh the page',
                 ngClick: 'refresh()',
                 actionClass: 'btn List-buttonDefault',
-                buttonContent: 'REFRESH'
+                buttonContent: i18n._('REFRESH')
             }
         },
 
@@ -94,10 +95,10 @@ export default
             columnClass: 'col-sm-1 col-xs-2',
 
             view: {
-                label: 'View',
+                label: i18n._('View'),
                 ngClick: 'viewJobEvent(jobevent.id)',
-                awToolTip: 'View event details',
+                awToolTip: i18n._('View event details'),
                 dataPlacement: 'top'
             }
         }
-    });
+    };}]);

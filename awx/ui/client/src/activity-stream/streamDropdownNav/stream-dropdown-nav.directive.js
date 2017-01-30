@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['templateUrl', function(templateUrl) {
+export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
     return {
         restrict: 'E',
         scope: true,
@@ -15,18 +15,18 @@ export default ['templateUrl', function(templateUrl) {
             $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
 
             $scope.options = [
-                {label: 'All Activity', value: 'dashboard'},
-                {label: 'Credentials', value: 'credential'},
-                {label: 'Hosts', value: 'host'},
-                {label: 'Inventories', value: 'inventory'},
-                {label: 'Inventory Scripts', value: 'inventory_script'},
-                {label: 'Jobs', value: 'job'},
-                {label: 'Organizations', value: 'organization'},
-                {label: 'Projects', value: 'project'},
-                {label: 'Schedules', value: 'schedule'},
-                {label: 'Teams', value: 'team'},
-                {label: 'Templates', value: 'template'},
-                {label: 'Users', value: 'user'}
+                {label: i18n._('All Activity'), value: 'dashboard'},
+                {label: i18n._('Credentials'), value: 'credential'},
+                {label: i18n._('Hosts'), value: 'host'},
+                {label: i18n._('Inventories'), value: 'inventory'},
+                {label: i18n._('Inventory Scripts'), value: 'inventory_script'},
+                {label: i18n._('Jobs'), value: 'job'},
+                {label: i18n._('Organizations'), value: 'organization'},
+                {label: i18n._('Projects'), value: 'project'},
+                {label: i18n._('Schedules'), value: 'schedule'},
+                {label: i18n._('Teams'), value: 'team'},
+                {label: i18n._('Templates'), value: 'template'},
+                {label: i18n._('Users'), value: 'user'}
             ];
 
             CreateSelect2({

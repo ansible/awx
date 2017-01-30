@@ -48,35 +48,35 @@ export default
             };
         }])
 
-        .factory('GetProjectToolTip', [ function() {
+        .factory('GetProjectToolTip', ['i18n', function(i18n) {
             return function(status) {
                 var result = '';
                 switch (status) {
                     case 'n/a':
                     case 'ok':
                     case 'never updated':
-                        result = 'No SCM updates have run for this project';
+                        result = i18n._('No SCM updates have run for this project');
                         break;
                     case 'pending':
                     case 'waiting':
                     case 'new':
-                        result = 'Queued. Click for details';
+                        result = i18n._('Queued. Click for details');
                         break;
                     case 'updating':
                     case 'running':
-                        result = 'Running! Click for details';
+                        result = i18n._('Running! Click for details');
                         break;
                     case 'successful':
-                        result = 'Success! Click for details';
+                        result = i18n._('Success! Click for details');
                         break;
                     case 'failed':
-                        result = 'Failed. Click for details';
+                        result = i18n._('Failed. Click for details');
                         break;
                     case 'missing':
-                        result = 'Missing. Click for details';
+                        result = i18n._('Missing. Click for details');
                         break;
                     case 'canceled':
-                        result = 'Canceled. Click for details';
+                        result = i18n._('Canceled. Click for details');
                         break;
                 }
                 return result;

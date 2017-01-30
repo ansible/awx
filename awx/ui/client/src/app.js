@@ -99,6 +99,8 @@ var tower = angular.module('Tower', [
     require('angular-tz-extensions'),
     require('lr-infinite-scroll'),
     require('ng-toast'),
+    'gettext',
+    'I18N',
     uiRouter,
     'ui.router.state.events',
 
@@ -201,8 +203,6 @@ var tower = angular.module('Tower', [
     scheduler.name,
     'ApiModelHelper',
     'ActivityStreamHelper',
-    'gettext',
-    'I18N',
     'WorkflowFormDefinition',
     'InventorySourcesListDefinition',
     'WorkflowMakerFormDefinition'
@@ -290,6 +290,9 @@ var tower = angular.module('Tower', [
                                 "jobs": ["status_changed"]
                             }
                         }
+                    },
+                    ncyBreadcrumb: {
+                        label: N_('PROJECTS')
                     }
                 })
             });
@@ -371,12 +374,12 @@ var tower = angular.module('Tower', [
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'I18NInit',
+        'FeaturesService', '$filter', 'SocketService',
         function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, I18NInit) {
+            $filter, SocketService) {
 
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
@@ -388,7 +391,6 @@ var tower = angular.module('Tower', [
                 $log.debug(`$state.defaultErrorHandler: ${error}`);
             });
 
-            I18NInit();
             $stateExtender.addState({
                 name: 'dashboard',
                 url: '/home',

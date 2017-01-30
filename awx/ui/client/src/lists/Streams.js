@@ -14,7 +14,7 @@ export default
         iterator: 'activity',
         basePath: 'activity_stream',
         editTitle: i18n._('Activity Stream'),
-        listTitle: '<span translate>Activity Stream</span><span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
+        listTitle: i18n._('Activity Stream') + '<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
         listTitleBadge: false,
         emptyListText: i18n._('There are no events to display at this time'),
         selectInstructions: '',
@@ -54,7 +54,7 @@ export default
                 awToolTip: i18n._("Refresh the page"),
                 ngClick: "refreshStream()",
                 actionClass: 'btn List-buttonDefault ActivityStream-refreshButton',
-                buttonContent: 'REFRESH'
+                buttonContent: i18n._('REFRESH')
             }
         },
 

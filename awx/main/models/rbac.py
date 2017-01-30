@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.utils.translation import ugettext_lazy as _
 
 
 # AWX
@@ -33,29 +34,29 @@ ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='system_administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR='system_auditor'
 
 role_names = {
-    'system_administrator' : 'System Administrator',
-    'system_auditor'       : 'System Auditor',
-    'adhoc_role'           : 'Ad Hoc',
-    'admin_role'           : 'Admin',
-    'auditor_role'         : 'Auditor',
-    'execute_role'         : 'Execute',
-    'member_role'          : 'Member',
-    'read_role'            : 'Read',
-    'update_role'          : 'Update',
-    'use_role'             : 'Use',
+    'system_administrator' : _('System Administrator'),
+    'system_auditor'       : _('System Auditor'),
+    'adhoc_role'           : _('Ad Hoc'),
+    'admin_role'           : _('Admin'),
+    'auditor_role'         : _('Auditor'),
+    'execute_role'         : _('Execute'),
+    'member_role'          : _('Member'),
+    'read_role'            : _('Read'),
+    'update_role'          : _('Update'),
+    'use_role'             : _('Use'),
 }
 
 role_descriptions = {
-    'system_administrator' : 'Can manage all aspects of the system',
-    'system_auditor'       : 'Can view all settings on the system',
-    'adhoc_role'           : 'May run ad hoc commands on an inventory',
-    'admin_role'           : 'Can manage all aspects of the %s',
-    'auditor_role'         : 'Can view all settings for the %s',
-    'execute_role'         : 'May run the %s',
-    'member_role'          : 'User is a member of the %s',
-    'read_role'            : 'May view settings for the %s',
-    'update_role'          : 'May update project or inventory or group using the configured source update system',
-    'use_role'             : 'Can use the %s in a job template',
+    'system_administrator' : _('Can manage all aspects of the system'),
+    'system_auditor'       : _('Can view all settings on the system'),
+    'adhoc_role'           : _('May run ad hoc commands on an inventory'),
+    'admin_role'           : _('Can manage all aspects of the %s'),
+    'auditor_role'         : _('Can view all settings for the %s'),
+    'execute_role'         : _('May run the %s'),
+    'member_role'          : _('User is a member of the %s'),
+    'read_role'            : _('May view settings for the %s'),
+    'update_role'          : _('May update project or inventory or group using the configured source update system'),
+    'use_role'             : _('Can use the %s in a job template'),
 }
 
 

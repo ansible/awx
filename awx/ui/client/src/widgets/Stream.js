@@ -92,8 +92,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('BuildDescription', ['BuildAnchor', '$log',
-    function (BuildAnchor, $log) {
+.factory('BuildDescription', ['BuildAnchor', '$log', 'i18n',
+    function (BuildAnchor, $log, i18n) {
         return function (activity) {
 
             var pastTense = function(operation){
@@ -212,7 +212,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
             catch(err){
                 $log.debug(err);
-                activity.description = 'Event summary not available';
+                activity.description = i18n._('Event summary not available');
             }
         };
     }
@@ -258,10 +258,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
 .factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
     'ProcessErrors', 'Wait', 'StreamList', 'generateList', 'FormatDate', 'BuildDescription',
-    'ShowDetail',
+    'ShowDetail', 'i18n',
     function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
         Wait, StreamList, GenerateList, FormatDate,
-        BuildDescription, ShowDetail) {
+        BuildDescription, ShowDetail, i18n) {
         return function (params) {
 
             var list = _.cloneDeep(StreamList),
@@ -297,7 +297,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
             if ($state.params.target === 'credential') {
                 list.fields.customSearchField = {
-                    label: 'Credential',
+                    label: i18n._('Credential'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'credential',
@@ -305,7 +305,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'host') {
                 list.fields.customSearchField = {
-                    label: 'Host',
+                    label: i18n._('Host'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'host',
@@ -313,7 +313,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'inventory') {
                 list.fields.customSearchField = {
-                    label: 'Inventory',
+                    label: i18n._('Inventory'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'inventory',
@@ -321,7 +321,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'inventory_script') {
                 list.fields.customSearchField = {
-                    label: 'Inventory Script',
+                    label: i18n._('Inventory Script'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'custom_inventory_script',
@@ -329,7 +329,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'job_template') {
                 list.fields.customSearchField = {
-                    label: 'Job Template',
+                    label: i18n._('Job Template'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'job_template',
@@ -337,7 +337,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'job') {
                 list.fields.customSearchField = {
-                    label: 'Job',
+                    label: i18n._('Job'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'job',
@@ -345,7 +345,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'organization') {
                 list.fields.customSearchField = {
-                    label: 'Organization',
+                    label: i18n._('Organization'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'organization',
@@ -353,7 +353,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'project') {
                 list.fields.customSearchField = {
-                    label: 'Project',
+                    label: i18n._('Project'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'project',
@@ -361,7 +361,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'schedule') {
                 list.fields.customSearchField = {
-                    label: 'Schedule',
+                    label: i18n._('Schedule'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'schedule',
@@ -369,7 +369,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'team') {
                 list.fields.customSearchField = {
-                    label: 'Team',
+                    label: i18n._('Team'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'team',
@@ -377,7 +377,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 };
             } else if ($state.params.target === 'user') {
                 list.fields.customSearchField = {
-                    label: 'User',
+                    label: i18n._('User'),
                     searchType: 'text',
                     searchOnly: 'true',
                     sourceModel: 'user',

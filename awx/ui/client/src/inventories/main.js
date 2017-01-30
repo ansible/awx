@@ -287,6 +287,9 @@ angular.module('inventory', [
             stateTree = {
                 name: 'inventories',
                 url: '/inventories',
+                ncyBreadcrumb: {
+                    label: N_("INVENTORIES")
+                },
                 lazyLoad: () => generateStateTree()
             };
 

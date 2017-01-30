@@ -85,7 +85,7 @@ angular.module('notifications', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        name: N_('NOTIFICATIONS')
+                        label: N_('NOTIFICATIONS')
                     }
                 })
             });
