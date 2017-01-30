@@ -285,6 +285,10 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             if name.endswith('_set'):
                 continue
             fields.append('{}__search'.format(name))
+        for relationship in self.model._meta.local_many_to_many:
+            if relationship.related_model._meta.app_label != 'main':
+                continue
+            fields.append('{}__search'.format(relationship.name))
         return fields
 
 
