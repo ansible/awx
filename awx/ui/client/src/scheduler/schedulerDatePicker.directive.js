@@ -17,7 +17,8 @@ export default
                     date: '=',
                     minDate: '=',
                     autoUpdate: '=?',
-                    inputClass: '&'
+                    inputClass: '&',
+                    disabled: '=?'
                 },
                 templateUrl: templateUrl('system-tracking/date-picker/date-picker'),
                 link: function(scope, element, attrs) {

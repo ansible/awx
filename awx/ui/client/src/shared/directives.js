@@ -981,6 +981,15 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     }
                 }
             };
+
+            // hack to get ngDisabled to work
+            if (attrs.ngDisabled) {
+                scope.$watch(attrs.ngDisabled, function(val) {
+                    opts.disabled = (val === true) ? true : false;
+                    $(elm).spinner(opts);
+                });
+            }
+
             if (disabled) {
                 opts.disabled = true;
             }
