@@ -3475,6 +3475,13 @@ class HostJobEventsList(BaseJobEventsList):
 
     parent_model = Host
 
+    def get_queryset(self):
+        parent_obj = self.get_parent_object()
+        self.check_parent_access(parent_obj)
+        qs = self.request.user.get_queryset(self.model).filter(
+            Q(host=parent_obj) | Q(hosts=parent_obj)).distinct()
+        return qs
+
 
 class GroupJobEventsList(BaseJobEventsList):
 
