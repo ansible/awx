@@ -22,4 +22,3 @@ class ConfConfig(AppConfig):
                 if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
                     LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
             configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
-        # checks.register(SettingsWrapper._check_settings)
