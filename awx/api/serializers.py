@@ -1956,16 +1956,25 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         return res
 
     def validate(self, attrs):
-        survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
-        job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
-        inventory = attrs.get('inventory', self.instance and self.instance.inventory or None)
-        project = attrs.get('project', self.instance and self.instance.project or None)
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
+        survey_enabled = get_field_from_model_or_attrs('survey_enabled')
+        job_type = get_field_from_model_or_attrs('job_type')
+        inventory = get_field_from_model_or_attrs('inventory')
+        credential = get_field_from_model_or_attrs('credential')
+        project = get_field_from_model_or_attrs('project')
+
+        prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if job_type == "scan":
             if inventory is None or attrs.get('ask_inventory_on_launch', False):
                 raise serializers.ValidationError({'inventory': _('Scan jobs must be assigned a fixed inventory.')})
         elif project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
+        elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
+            raise serializers.ValidationError({'credential': prompting_error_message})
+        elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
+            raise serializers.ValidationError({'inventory': prompting_error_message})
 
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
             raise serializers.ValidationError({'survey_enabled': _('Survey Enabled cannot be used with scan jobs.')})
