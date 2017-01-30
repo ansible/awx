@@ -140,7 +140,7 @@ export default
                 awToolTip: "{{ group.group_schedule_tooltip }}",
                 ngClass: "group.scm_type_class",
                 dataPlacement: 'top',
-                ngShow: "!(group.summary_fields.inventory_source.source === '') && group.summary_fields.user_capabilities.schedule"
+                ngShow: "!(group.summary_fields.inventory_source.source === '')"
             },
             edit: {
                 //label: 'Edit',
