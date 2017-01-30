@@ -26,7 +26,7 @@
                     <span class="AddPermissions-directionNumber">
                         1
                     </span>
-                    <div>
+                    <div translate>
                         Please select resources from the lists below.
                     </div>
                 </div>
@@ -34,30 +34,30 @@
                 <div class="Form-tabHolder">
                     <div class="Form-tab"
                         ng-click="selectTab('job_templates')"
-                        ng-class="{'is-selected': tab.job_templates }">
+                        ng-class="{'is-selected': tab.job_templates }" translate>
                         Job Templates
                     </div>
                     <div class="Form-tab"
                         ng-click="selectTab('workflow_templates')"
                         ng-class="{'is-selected': tab.workflow_templates}"
-                    >
+                    translate>
                         Workflow Templates
                     </div>
                     <div class="Form-tab"
                         ng-click="selectTab('projects')"
-                        ng-class="{'is-selected': tab.projects }">
+                        ng-class="{'is-selected': tab.projects }" translate>
                         Projects
                     </div>
                     <div class="Form-tab"
                         ng-click="selectTab('inventories')"
                         ng-class="{'is-selected': tab.inventories}"
-                    >
+                    translate>
                         Inventories
                     </div>
                     <div class="Form-tab"
                         ng-click="selectTab('credentials')"
                         ng-class="{'is-selected': tab.credentials}"
-                    >
+                    translate>
                         Credentials
                     </div>
                 </div>
@@ -86,10 +86,10 @@
                         <span class="AddPermissions-directionNumber">
                             2
                         </span>
-                        Please assign roles to the selected resources
+                        <translate>Please assign roles to the selected resources</translate>
                         <div class="AddPermissions-keyToggle btn"
                             ng-class="{'is-active': showKeyPane}"
-                            ng-click="toggleKeyPane()">
+                            ng-click="toggleKeyPane()" translate>
                             Key
                         </div>
                     </div>
@@ -97,34 +97,34 @@
                         <div class="Form-tab"
                             ng-click="selectTab('job_templates')"
                             ng-class="{'is-selected': tab.job_templates }"
-                            ng-show="showSection2Tab('job_templates')">
+                            ng-show="showSection2Tab('job_templates')" translate>
                             Job Templates
                         </div>
                         <div class="Form-tab"
                             ng-click="selectTab('workflow_templates')"
                             ng-class="{'is-selected': tab.workflow_templates }"
-                            ng-show="showSection2Tab('workflow_templates')">
+                            ng-show="showSection2Tab('workflow_templates')" translate>
                             Workflow Templates
                         </div>
                         <div class="Form-tab"
                             ng-click="selectTab('projects')"
                             ng-class="{'is-selected': tab.projects}"
                             ng-show="showSection2Tab('projects')"
-                        >
+                        translate>
                             Projects
                         </div>
                         <div class="Form-tab"
                             ng-click="selectTab('inventories')"
                             ng-class="{'is-selected': tab.inventories}"
                             ng-show="showSection2Tab('inventories')"
-                        >
+                        translate>
                             Inventories
                         </div>
                         <div class="Form-tab"
                             ng-click="selectTab('credentials')"
                             ng-class="{'is-selected': tab.credentials}"
                             ng-show="showSection2Tab('credentials')"
-                        >
+                        translate>
                             Credentials
                         </div>
                     </div>
@@ -170,13 +170,13 @@
                 <div class="buttons Form-buttons AddPermissions-buttons">
                     <button type="button"
                         class="btn btn-sm Form-cancelButton"
-                        ng-click="closeModal()">
+                        ng-click="closeModal()" translate>
                         Cancel
                     </button>
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="saveForm()"
-                        ng-disabled="!saveEnabled()">
+                        ng-disabled="!saveEnabled()" translate>
                         Save
                     </button>
                 </div>

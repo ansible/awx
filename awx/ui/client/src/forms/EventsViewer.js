@@ -12,73 +12,74 @@
 
 export default
     angular.module('EventsViewerFormDefinition', [])
-        .value('EventsViewerForm', {
+        .factory('EventsViewerForm', ['i18n', function(i18n) {
+        return {
 
             fields: {
                 host_name: {
-                    label: 'Host',
-                    section: 'Event'
+                    label: i18n._('Host'),
+                    section: i18n._('Event')
                 },
                 status: {
-                    label: 'Status',
-                    section: 'Event'
+                    labellabel: i18n._('Status'),
+                    section: i18n._('Event')
                 },
                 id: {
-                    label: 'ID',
-                    section: 'Event'
+                    labellabel: i18n._('ID'),
+                    section: i18n._('Event')
                 },
                 created: {
-                    label: 'Created On',
-                    section: 'Event'
+                    labellabel: i18n._('Created On'),
+                    section: i18n._('Event')
                 },
                 role: {
-                    label: 'Role',
-                    section: 'Event'
+                    labellabel: i18n._('Role'),
+                    section: i18n._('Event')
                 },
                 play: {
-                    label: 'Play',
+                    labellabel: i18n._('Play'),
                     type: 'text',
-                    section: 'Event'
+                    section: i18n._('Event')
                 },
                 task: {
-                    label: 'Task',
-                    section: 'Event'
+                    labellabel: i18n._('Task'),
+                    section: i18n._('Event')
                 },
                 item: {
-                    label: 'Item',
-                    section: 'Event'
+                    labellabel: i18n._('Item'),
+                    section: i18n._('Event')
                 },
                 module_name: {
-                    label: 'Module',
-                    section: 'Event'
+                    labellabel: i18n._('Module'),
+                    section: i18n._('Event')
                 },
                 module_args: {
-                    label: 'Arguments',
-                    section: 'Event'
+                    labellabel: i18n._('Arguments'),
+                    section: i18n._('Event')
                 },
                 rc: {
-                    label: 'Return Code',
-                    section: 'Results'
+                    labellabel: i18n._('Return Code'),
+                    section: i18n._('Results')
                 },
                 msg: {
-                    label: 'Message',
-                    section: 'Results'
+                    labellabel: i18n._('Message'),
+                    section: i18n._('Results')
                 },
                 results: {
-                    label: 'Results',
-                    section: 'Results'
+                    labellabel: i18n._('Results'),
+                    section: i18n._('Results')
                 },
                 start: {
-                    label: 'Start',
-                    section: 'Timing'
+                    labellabel: i18n._('Start'),
+                    section: i18n._('Timing')
                 },
                 end: {
-                    label: 'End',
-                    section: 'Timing'
+                    labellabel: i18n._('End'),
+                    section: i18n._('Timing')
                 },
                 delta: {
-                    label: 'Elapsed',
-                    section: 'Timing'
+                    labellabel: i18n._('Elapsed'),
+                    section: i18n._('Timing')
                 }
             }
-        });
+        };}]);

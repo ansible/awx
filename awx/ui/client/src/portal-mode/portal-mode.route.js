@@ -1,6 +1,7 @@
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import { PortalModeJobTemplatesController } from './portal-mode-job-templates.controller';
 import { PortalModeJobsController } from './portal-mode-jobs.controller';
+import { N_ } from '../i18n';
 
 // Using multiple named views requires a parent layout
 // https://github.com/angular-ui/ui-router/wiki/Multiple-Named-Views
@@ -8,7 +9,7 @@ export default {
     name: 'portalMode',
     url: '/portal?{group_search:queryset}{host_search:queryset}',
     ncyBreadcrumb: {
-        label: 'MY VIEW'
+        label: N_('MY VIEW')
     },
     params: {
         job_search: {

@@ -9,6 +9,7 @@ import addController from './schedulerAdd.controller';
 import editController from './schedulerEdit.controller';
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import schedulerDatePicker from './schedulerDatePicker.directive';
+import { N_ } from '../i18n';
 
 export default
     angular.module('scheduler', [])
@@ -32,7 +33,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
                     Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -63,7 +64,7 @@ export default
                     '@': {
                         templateProvider: function(SchedulesList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
                                 list: SchedulesList,
                                 mode: 'edit'
@@ -86,7 +87,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'jobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 }
             });
             $stateExtender.addState({
@@ -118,7 +119,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
                     Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -149,7 +150,7 @@ export default
                     '@': {
                         templateProvider: function(SchedulesList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
                                 list: SchedulesList,
                                 mode: 'edit'
@@ -172,7 +173,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'workflowJobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 }
             });
             $stateExtender.addState({
@@ -201,7 +202,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'projects.edit({project_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
                     Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -232,7 +233,7 @@ export default
                     '@': {
                         templateProvider: function(SchedulesList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
                                 list: SchedulesList,
                                 mode: 'edit'
@@ -249,7 +250,7 @@ export default
                 name: 'projectSchedules.add',
                 route: '/add',
                 ncyBreadcrumb: {
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 },
                 views: {
                     'form': {
@@ -289,7 +290,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'jobs',
-                    label: 'SCHEDULED'
+                    label: N_('SCHEDULED')
                 },
                 resolve: {
                     SchedulesList: ['ScheduledJobsList', function(list){

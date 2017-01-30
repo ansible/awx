@@ -132,18 +132,18 @@ export default
                     fields: {
                         username: {
                             key: true,
-                            label: 'User',
+                            label: i18n._('User'),
                             linkBase: 'users',
                             class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             type: 'role',
                             noSort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                         },
                         team_roles: {
-                            label: 'Team Roles',
+                            label: i18n._('Team Roles'),
                             type: 'team_roles',
                             noSort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',

@@ -7,10 +7,10 @@
 
 export default ['$stateParams', '$scope', '$rootScope', '$location',
     '$log', '$compile', 'Rest', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset', 'i18n',
     function($stateParams, $scope, $rootScope, $location,
         $log, $compile, Rest, OrganizationList, Alert, Prompt, ClearScope,
-        ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset) {
+        ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset, i18n) {
 
         ClearScope();
 
@@ -162,10 +162,10 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             };
 
             Prompt({
-                hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the organization below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                hdr: i18n._('Delete'),
+                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the organization below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                 action: action,
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
         };
     }

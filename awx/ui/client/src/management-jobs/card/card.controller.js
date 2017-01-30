@@ -10,11 +10,11 @@ export default
     [   'Wait', '$compile',  'CreateDialog', 'GetBasePath' ,
         'SchedulesList', 'Rest' ,
         'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
-        '$scope', 'CreateSelect2',
+        '$scope', 'CreateSelect2', 'i18n',
         function( Wait, $compile, CreateDialog, GetBasePath,
             SchedulesList, Rest, ProcessErrors,
             managementJobsListObject, $rootScope, $state, $scope,
-            CreateSelect2) {
+            CreateSelect2, i18n) {
 
                 var defaultUrl = GetBasePath('system_job_templates') + "?order_by=name";
 
@@ -26,8 +26,8 @@ export default
                             Wait('stop');
                         })
                         .error(function(data, status){
-                            ProcessErrors($scope, data, status, null, {hdr: 'Error!',
-                            msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
+                            ProcessErrors($scope, data, status, null, {hdr: i18n._('Error!'),
+                            msg: i18n.sprintf(i18n._('Call to %s failed. Return status: %d'), (defaultUrl === undefined) ? "undefined" : defaultUrl, status )});
                         });
                 };
                 getManagementJobs();
@@ -145,8 +145,10 @@ export default
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
-                                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                                msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
+                                            let template_id = scope.job_template_id;
+                                            template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                                            ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
+                                                msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
                                         });
                                 },
                                 "class": "btn btn-primary",
@@ -233,8 +235,10 @@ export default
                                             $state.go('managementJobStdout', {id: data.system_job}, {reload:true});
                                         })
                                         .error(function(data, status) {
-                                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                                msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
+                                            let template_id = scope.job_template_id;
+                                            template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                                            ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
+                                                msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
                                         });
                                 },
                                 "class": "btn btn-primary",

@@ -5,6 +5,7 @@
  *************************************************/
 
  import {templateUrl} from '../../../shared/template-url/template-url.factory';
+ import { N_ } from '../../../i18n';
 
 export default {
     url: '/adhoc',
@@ -22,6 +23,6 @@ export default {
         }
     },
     ncyBreadcrumb: {
-        label: "RUN COMMAND"
+        label: N_("RUN COMMAND")
     }
 };

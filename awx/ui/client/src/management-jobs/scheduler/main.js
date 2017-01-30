@@ -9,6 +9,7 @@ import { templateUrl } from '../../shared/template-url/template-url.factory';
 import controller from '../../scheduler/schedulerList.controller';
 import addController from '../../scheduler/schedulerAdd.controller';
 import editController from '../../scheduler/schedulerEdit.controller';
+import { N_ } from '../../i18n';
 
 export default
 angular.module('managementJobScheduler', [])
@@ -22,13 +23,13 @@ angular.module('managementJobScheduler', [])
             route: '/management_jobs/:id/schedules',
             ncyBreadcrumb: {
                 parent: 'managementJobsList',
-                label: 'SCHEDULES'
+                label: N_('SCHEDULES')
             },
             views: {
                 '@': {
                     templateProvider: function(SchedulesList, generateList, ParentObject) {
                         // include name of parent resource in listTitle
-                        SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                        SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                         let html = generateList.build({
                             list: SchedulesList,
                             mode: 'edit'
@@ -70,7 +71,7 @@ angular.module('managementJobScheduler', [])
             route: '/add',
             ncyBreadcrumb: {
                 parent: 'managementJobSchedules',
-                label: 'CREATE SCHEDULED JOB'
+                label: N_('CREATE SCHEDULED JOB')
             },
             views: {
                 'form': {
@@ -84,7 +85,7 @@ angular.module('managementJobScheduler', [])
             route: '/edit/:schedule_id',
             ncyBreadcrumb: {
                 parent: 'managementJobSchedules',
-                label: 'EDIT SCHEDULED JOB'
+                label: N_('EDIT SCHEDULED JOB')
             },
             views: {
                 'form': {

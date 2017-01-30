@@ -23,7 +23,7 @@ export default ['i18n', function(i18n){
                 nosort: true,
                 icon: 'icon-job-{{ notification_template.status }}',
                 awPopOver: '{{ notification_template.template_status_html }}',
-                dataTitle: "Recent Notifications",
+                dataTitle: i18n._("Recent Notifications"),
                 dataPlacement: 'right',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus'
             },

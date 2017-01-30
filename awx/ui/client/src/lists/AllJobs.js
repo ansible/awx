@@ -13,7 +13,7 @@ export default
         name: 'jobs',
         basePath: 'unified_jobs',
         iterator: 'job',
-        editTitle: 'All Jobs',
+        editTitle: i18n._('All Jobs'),
         index: false,
         hover: true,
         well: false,
@@ -42,13 +42,13 @@ export default
                 noLink: true
             },
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
                 ngClick: "viewJobDetails(job)",
                 badgePlacement: 'right',
                 badgeCustom: true,
                 badgeIcon: `<a href="{{ job.workflow_result_link }}"
-                    aw-tool-tip="View workflow results"
+                    aw-tool-tip=i18n._("View workflow results")
                     data-placement="top"
                     data-original-title="" title="">
                     <i class="WorkflowBadge"
@@ -58,14 +58,14 @@ export default
                 </a>`
             },
             type: {
-                label: 'Type',
+                label: i18n._('Type'),
                 ngBind: 'job.type_label',
                 link: false,
                 columnClass: "col-lg-2 hidden-md hidden-sm hidden-xs",
                 columnShow: "showJobType",
             },
             finished: {
-                label: 'Finished',
+                label: i18n._('Finished'),
                 noLink: true,
                 filter: "longDate",
                 columnClass: "col-lg-2 col-md-3 col-sm-3 hidden-xs",
@@ -73,7 +73,7 @@ export default
                 desc: true
             },
             labels: {
-                label: 'Labels',
+                label: i18n._('Labels'),
                 type: 'labels',
                 nosort: true,
                 showDelete: false,
@@ -91,28 +91,28 @@ export default
             "view": {
                 mode: "all",
                 ngClick: "viewJobDetails(job)",
-                awToolTip: "View the job",
+                awToolTip: i18n._("View the job"),
                 dataPlacement: "top"
             },
             submit: {
                 icon: 'icon-rocket',
                 mode: 'all',
                 ngClick: 'relaunchJob($event, job.id)',
-                awToolTip: 'Relaunch using the same parameters',
+                awToolTip: i18n._('Relaunch using the same parameters'),
                 dataPlacement: 'top',
                 ngShow: "!(job.type == 'system_job') && job.summary_fields.user_capabilities.start"
             },
             cancel: {
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
-                awToolTip: 'Cancel the job',
+                awToolTip: i18n._('Cancel the job'),
                 dataPlacement: 'top',
                 ngShow: "(job.status === 'running'|| job.status === 'waiting' || job.status === 'pending') && job.summary_fields.user_capabilities.start"
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteJob(job.id)',
-                awToolTip: 'Delete the job',
+                awToolTip: i18n._('Delete the job'),
                 dataPlacement: 'top',
                 ngShow: "(job.status !== 'running' && job.status !== 'waiting' && job.status !== 'pending') && job.summary_fields.user_capabilities.delete"
             }

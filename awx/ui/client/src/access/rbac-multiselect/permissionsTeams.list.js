@@ -5,7 +5,7 @@
  *************************************************/
 
 
- export default function() {
+ export default ['i18n', function(i18n) {
     return {
         searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         name: 'teams',
@@ -15,19 +15,20 @@
         multiSelectExtended: true,
         index: false,
         hover: true,
-        emptyListText : 'No Teams exist',
+        emptyListText : i18n._('No Teams exist'),
         fields: {
             name: {
                 key: true,
-                label: 'name'
+                label: i18n._('name')
             },
             organization: {
-                label: 'organization',
+                label: i18n._('organization'),
                 ngBind: 'team.summary_fields.organization.name',
                 sourceModel: 'organization',
-                sourceField: 'name'
+                sourceField: 'name',
+                searchable: true
             }
         }
 
     };
-}
+}];

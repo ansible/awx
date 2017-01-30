@@ -13,7 +13,8 @@
 
 export function CredentialsList($scope, $rootScope, $location, $log,
     $stateParams, Rest, Alert, CredentialList, Prompt, ClearScope,
-    ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
+    ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
+    i18n) {
 
     ClearScope();
 
@@ -100,24 +101,24 @@ export function CredentialsList($scope, $rootScope, $location, $log,
         };
 
         Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the credential below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+            hdr: i18n._('Delete'),
+            body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the credential below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
     };
 }
 
 CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'CredentialList', 'Prompt', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset'
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n'
 ];
 
 
 export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, GetChoices, Empty, KindChange, BecomeMethodChange,
-    OwnerChange, FormSave, $state, CreateSelect2) {
+    OwnerChange, FormSave, $state, CreateSelect2, i18n) {
     ClearScope();
 
     // Inject dynamic view
@@ -157,7 +158,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
         GenerateForm.applyDefaults(form, $scope);
 
         $scope.keyEntered = false;
-        $scope.permissionsTooltip = 'Please save before assigning permissions';
+        $scope.permissionsTooltip = i18n._('Please save before assigning permissions');
 
         // determine if the currently logged-in user may share this credential
         // previous commentary said: "$rootScope.current_user isn't available because a call to the config endpoint hasn't finished resolving yet"
@@ -284,7 +285,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'BecomeMethodChange',
-    'OwnerChange', 'FormSave', '$state', 'CreateSelect2'
+    'OwnerChange', 'FormSave', '$state', 'CreateSelect2', 'i18n'
 ];
 
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
@@ -574,10 +575,10 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
         };
 
         Prompt({
-            hdr: 'Delete',
-            body: '<div class="Prompt-bodyQuery">Are you sure you want to remove the ' + title + ' below from ' + $scope.name + '?</div><div class="Prompt-bodyTarget">' + name + '</div>',
+            hdr: i18n._('Delete'),
+            body: '<div class="Prompt-bodyQuery">' + i18n.sprintf(i18n._('Are you sure you want to remove the %s below from %s?'), title, $scope.name) + '</div><div class="Prompt-bodyTarget">' + name + '</div>',
             action: action,
-            actionText: 'DELETE'
+            actionText: i18n._('DELETE')
         });
 
     };
