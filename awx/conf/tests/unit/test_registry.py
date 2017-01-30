@@ -17,10 +17,19 @@ from awx.conf.registry import SettingsRegistry
 
 @pytest.fixture()
 def reg(request):
+    """
+    This fixture initializes an awx settings registry object and passes it as
+    an argument into the test function.
+    """
     cache = LocMemCache(str(uuid4()), {})  # make a new random cache each time
     settings = LazySettings()
     registry = SettingsRegistry(settings)
-    defaults = request.node.get_marker('defaults')
+
+    # @pytest.mark.readonly can be used to mark specific setting values as
+    # "read-only".  This is analogous to manually specifying a setting on the
+    # filesystem (e.g., in a local_settings.py in development, or in
+    # /etc/tower/conf.d/<something>.py)
+    defaults = request.node.get_marker('readonly')
     if defaults:
         settings.configure(**defaults.kwargs)
     settings._wrapped = SettingsWrapper(settings._wrapped,
@@ -271,7 +280,7 @@ def test_field_with_custom_mixin(reg):
     assert field.is_great() is True
 
 
-@pytest.mark.defaults(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
 def test_default_value_from_settings(reg):
     reg.register(
         'AWX_SOME_SETTING',
@@ -284,7 +293,7 @@ def test_default_value_from_settings(reg):
     assert field.default == 'DEFAULT'
 
 
-@pytest.mark.defaults(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
 def test_default_value_from_settings_with_custom_representation(reg):
     class LowercaseCharField(fields.CharField):
 

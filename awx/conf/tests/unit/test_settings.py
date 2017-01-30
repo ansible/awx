@@ -26,6 +26,14 @@ def apply_patches(_patches):
 
 @pytest.fixture()
 def settings(request):
+    """
+    This fixture initializes a Django settings object that wraps our
+    `awx.conf.settings.SettingsWrapper` and passes it as an argument into the
+    test function.
+
+    This mimics the work done by `awx.conf.settings.SettingsWrapper.initialize`
+    on `django.conf.settings`.
+    """
     cache = LocMemCache(str(uuid4()), {})  # make a new random cache each time
     settings = LazySettings()
     registry = SettingsRegistry(settings)

@@ -87,6 +87,10 @@ class SettingsWrapper(UserSettingsHolder):
         ``SettingsWrapper.initialize`` at app startup time when settings are
         parsed.
         """
+
+        # These values have to be stored via self.__dict__ in this way to get
+        # around the magic __setattr__ method on this class (which is used to
+        # store API-assigned settings in the database).
         self.__dict__['default_settings'] = default_settings
         self.__dict__['_awx_conf_settings'] = self
         self.__dict__['_awx_conf_preload_expires'] = None
