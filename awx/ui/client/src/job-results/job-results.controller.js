@@ -308,7 +308,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                         // let's see if we have a specific place to put it in
                         // the pane
                         let $prevElem = $(`.next_is_${mungedEvent.start_line}`);
-                        if ($prevElem.length) {
+                        if ($prevElem && $prevElem.length) {
                             // if so, put it there
                             $(`.next_is_${mungedEvent.start_line}`)
                                 .after($compile(mungedEvent
