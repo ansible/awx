@@ -2109,7 +2109,7 @@ class ActivityStreamAccess(BaseAccess):
                                  'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
                                  'schedule', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template', 'workflow_job')
+                                 'workflow_job_template', 'workflow_job', 'workflow_job_template_node')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 

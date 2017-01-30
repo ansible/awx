@@ -2973,6 +2973,10 @@ class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()
     object_association = serializers.SerializerMethodField()
+    # Needed related fields that are not in the default summary fields
+    extra_listing = [
+        ('workflow_job_template_node', ('id', 'unified_job_template_id'))
+    ]
 
     class Meta:
         model = ActivityStream
@@ -3014,7 +3018,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, __ in SUMMARIZABLE_FK_FIELDS.items() + self.extra_listing:
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).all()
@@ -3036,7 +3040,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items() + self.extra_listing:
             try:
                 if not hasattr(obj, fk):
                     continue
