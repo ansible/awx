@@ -980,6 +980,12 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def to_representation(self, obj):
+        ret = super(ProjectSerializer, self).to_representation(obj)
+        if obj.scm_type == '':
+            ret['scm_revision'] = ''
+        return ret
+
     def validate(self, attrs):
         organization = None
         if 'organization' in attrs:
