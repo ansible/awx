@@ -78,6 +78,12 @@ export default ['$log', 'moment', function($log, moment){
         // .JobResultsStdOut-aLineOfStdOut element
         getLineClasses: function(event, line, lineNum) {
             var string = "";
+
+            if (lineNum === event.end_line) {
+                // used to tell you where to put stuff in the pane
+                string += ` next_is_${event.end_line + 1}`;
+            }
+
             if (event.event_name === "playbook_on_play_start") {
                 // play header classes
                 string += " header_play";
