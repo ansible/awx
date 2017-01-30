@@ -1314,6 +1314,15 @@ class RunProjectUpdate(BaseTask):
         '''
         return kwargs.get('private_data_files', {}).get('scm_credential', '')
 
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = ProjectUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
     def post_run_hook(self, instance, status, **kwargs):
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
@@ -1665,6 +1674,15 @@ class RunInventoryUpdate(BaseTask):
         if settings.DEBUG:
             args.append('--traceback')
         return args
+
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunInventoryUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = InventoryUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
