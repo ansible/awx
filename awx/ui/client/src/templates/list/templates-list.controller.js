@@ -113,10 +113,11 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                         body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(template.name) + '</div>',
                         action: function() {
 
-                            function handleSuccessfulDelete() {
-                                // TODO: look at this
-                                if (parseInt($state.params.id) === template.id) {
-                                    $state.go("^", null, {reload: true});
+                            function handleSuccessfulDelete(isWorkflow) {
+                                let stateParamId = isWorkflow ? $state.params.workflow_job_template_id : $state.params.job_template_id;
+                                if (parseInt(stateParamId) === template.id) {
+                                    // Move the user back to the templates list
+                                    $state.go("templates", null, {reload: true});
                                 } else {
                                     $state.go(".", null, {reload: true});
                                 }
@@ -128,7 +129,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
                             if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
                                 TemplatesService.deleteWorkflowJobTemplate(template.id)
                                 .then(function () {
-                                    handleSuccessfulDelete();
+                                    handleSuccessfulDelete(true);
                                 }, function (data) {
                                     Wait('stop');
                                     ProcessErrors($scope, data, data.status, null, { hdr: 'Error!',
