@@ -7,8 +7,7 @@ import time
 
 # Django
 from django.conf import settings, UserSettingsHolder
-from django.core.cache import cache
-from django.core import checks
+from django.core.cache import cache as django_cache
 from django.core.exceptions import ImproperlyConfigured
 from django.db import ProgrammingError, OperationalError
 
@@ -65,35 +64,46 @@ def _log_database_error():
 class SettingsWrapper(UserSettingsHolder):
 
     @classmethod
-    def initialize(cls):
+    def initialize(cls, cache=None, registry=None):
+        """
+        Used to initialize and wrap the Django settings context.
+
+        :param cache: the Django cache backend to use for caching setting
+        values.  ``django.core.cache`` is used by default.
+        :param registry: the settings registry instance used.  The global
+        ``awx.conf.settings_registry`` is used by default.
+        """
         if not getattr(settings, '_awx_conf_settings', False):
-            settings_wrapper = cls(settings._wrapped)
+            settings_wrapper = cls(
+                settings._wrapped,
+                cache=cache or django_cache,
+                registry=registry or settings_registry
+            )
             settings._wrapped = settings_wrapper
 
-    @classmethod
-    def _check_settings(cls, app_configs, **kwargs):
-        errors = []
-        # FIXME: Warn if database not available!
-        for setting in Setting.objects.filter(key__in=settings_registry.get_registered_settings(), user__isnull=True):
-            field = settings_registry.get_setting_field(setting.key)
-            try:
-                field.to_internal_value(setting.value)
-            except Exception as e:
-                errors.append(checks.Error(str(e)))
-        return errors
+    def __init__(self, default_settings, cache, registry):
+        """
+        This constructor is generally not called directly, but by
+        ``SettingsWrapper.initialize`` at app startup time when settings are
+        parsed.
+        """
 
-    def __init__(self, default_settings):
+        # These values have to be stored via self.__dict__ in this way to get
+        # around the magic __setattr__ method on this class (which is used to
+        # store API-assigned settings in the database).
         self.__dict__['default_settings'] = default_settings
         self.__dict__['_awx_conf_settings'] = self
         self.__dict__['_awx_conf_preload_expires'] = None
         self.__dict__['_awx_conf_preload_lock'] = threading.RLock()
         self.__dict__['_awx_conf_init_readonly'] = False
+        self.__dict__['cache'] = cache
+        self.__dict__['registry'] = registry
 
     def _get_supported_settings(self):
-        return settings_registry.get_registered_settings()
+        return self.registry.get_registered_settings()
 
     def _get_writeable_settings(self):
-        return settings_registry.get_registered_settings(read_only=False)
+        return self.registry.get_registered_settings(read_only=False)
 
     def _get_cache_value(self, value):
         if value is None:
@@ -124,11 +134,11 @@ class SettingsWrapper(UserSettingsHolder):
                         file_default = None
                     if file_default != init_default and file_default is not None:
                         logger.warning('Setting %s has been marked read-only!', key)
-                        settings_registry._registry[key]['read_only'] = True
+                        self.registry._registry[key]['read_only'] = True
                     self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.
-        if cache.get('_awx_conf_preload_expires', empty) is not empty:
+        if self.cache.get('_awx_conf_preload_expires', empty) is not empty:
             return
         # Initialize all database-configurable settings with a marker value so
         # to indicate from the cache that the setting is not configured without
@@ -138,7 +148,7 @@ class SettingsWrapper(UserSettingsHolder):
         for setting in Setting.objects.filter(key__in=settings_to_cache.keys(), user__isnull=True).order_by('pk'):
             if settings_to_cache[setting.key] != SETTING_CACHE_NOTSET:
                 continue
-            if settings_registry.is_setting_encrypted(setting.key):
+            if self.registry.is_setting_encrypted(setting.key):
                 value = decrypt_field(setting, 'value')
             else:
                 value = setting.value
@@ -148,7 +158,7 @@ class SettingsWrapper(UserSettingsHolder):
             for key, value in settings_to_cache.items():
                 if value != SETTING_CACHE_NOTSET:
                     continue
-                field = settings_registry.get_setting_field(key)
+                field = self.registry.get_setting_field(key)
                 try:
                     settings_to_cache[key] = self._get_cache_value(field.get_default())
                 except SkipField:
@@ -157,13 +167,13 @@ class SettingsWrapper(UserSettingsHolder):
         settings_to_cache = dict([(Setting.get_cache_key(k), v) for k, v in settings_to_cache.items()])
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
         logger.debug('cache set_many(%r, %r)', settings_to_cache, SETTING_CACHE_TIMEOUT)
-        cache.set_many(settings_to_cache, SETTING_CACHE_TIMEOUT)
+        self.cache.set_many(settings_to_cache, SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name):
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
-            cache_value = cache.get(cache_key, empty)
+            cache_value = self.cache.get(cache_key, empty)
         except ValueError:
             cache_value = empty
         logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
@@ -177,7 +187,7 @@ class SettingsWrapper(UserSettingsHolder):
             value = {}
         else:
             value = cache_value
-        field = settings_registry.get_setting_field(name)
+        field = self.registry.get_setting_field(name)
         if value is empty:
             setting = None
             if not field.read_only:
@@ -198,8 +208,10 @@ class SettingsWrapper(UserSettingsHolder):
             if value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
                 value = SETTING_CACHE_NOTSET
             if cache_value != value:
-                logger.debug('cache set(%r, %r, %r)', cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
-                cache.set(cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
+                logger.debug('cache set(%r, %r, %r)', cache_key,
+                             self._get_cache_value(value),
+                             SETTING_CACHE_TIMEOUT)
+                self.cache.set(cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:
                 value = field.get_default()
@@ -214,7 +226,9 @@ class SettingsWrapper(UserSettingsHolder):
                 else:
                     return field.run_validation(value)
             except:
-                logger.warning('The current value "%r" for setting "%s" is invalid.', value, name, exc_info=True)
+                logger.warning(
+                    'The current value "%r" for setting "%s" is invalid.',
+                    value, name, exc_info=True)
         return empty
 
     def _get_default(self, name):
@@ -234,7 +248,7 @@ class SettingsWrapper(UserSettingsHolder):
         return self._get_default(name)
 
     def _set_local(self, name, value):
-        field = settings_registry.get_setting_field(name)
+        field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to set read only setting "%s".', name)
             raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
@@ -244,7 +258,8 @@ class SettingsWrapper(UserSettingsHolder):
             setting_value = field.run_validation(data)
             db_value = field.to_representation(setting_value)
         except Exception as e:
-            logger.exception('Unable to assign value "%r" to setting "%s".', value, name, exc_info=True)
+            logger.exception('Unable to assign value "%r" to setting "%s".',
+                             value, name, exc_info=True)
             raise e
 
         setting = Setting.objects.filter(key=name, user__isnull=True).order_by('pk').first()
@@ -264,7 +279,7 @@ class SettingsWrapper(UserSettingsHolder):
             setattr(self.default_settings, name, value)
 
     def _del_local(self, name):
-        field = settings_registry.get_setting_field(name)
+        field = self.registry.get_setting_field(name)
         if field.read_only:
             logger.warning('Attempt to delete read only setting "%s".', name)
             raise ImproperlyConfigured('Setting "%s" is read only.'.format(name))
@@ -282,7 +297,8 @@ class SettingsWrapper(UserSettingsHolder):
     def __dir__(self):
         keys = []
         with _log_database_error():
-            for setting in Setting.objects.filter(key__in=self._get_supported_settings(), user__isnull=True):
+            for setting in Setting.objects.filter(
+                    key__in=self._get_supported_settings(), user__isnull=True):
                 # Skip returning settings that have been overridden but are
                 # considered to be "not set".
                 if setting.value is None and SETTING_CACHE_NOTSET == SETTING_CACHE_NONE:
