@@ -130,7 +130,7 @@ class SurveyJobTemplateMixin(models.Model):
                 default = survey_element.get('default')
                 variable_key = survey_element.get('variable')
                 if survey_element.get('type') == 'password':
-                    if variable_key in kwargs_extra_vars:
+                    if variable_key in kwargs_extra_vars and default:
                         kw_value = kwargs_extra_vars[variable_key]
                         if kw_value.startswith('$encrypted$') and kw_value != default:
                             kwargs_extra_vars[variable_key] = default
