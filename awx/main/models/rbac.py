@@ -10,7 +10,6 @@ import re
 # Django
 from django.db import models, transaction, connection
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import ugettext_lazy as _
