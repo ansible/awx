@@ -25,6 +25,7 @@ export default
                 ngClick: "toggleSchedule($event, schedule.id)",
                 nosort: true,
                 awToolTip: "{{ schedule.play_tip }}",
+                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: 'top'
             },

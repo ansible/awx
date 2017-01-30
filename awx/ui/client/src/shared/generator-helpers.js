@@ -509,12 +509,16 @@ angular.module('GeneratorHelpers', [systemStatus.name])
                 html += (field['class']) ? " " + field['class'] : "";
                 html += " " + field.columnClass;
                 html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".";
-                html += (field.flag) ? field.flag : "enabled";
-                html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + list.iterator + "." ;
+                html += (field.flag) ? field.flag : "enabled\}' ";
+                html += "aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ";
+                html += (field['ngDisabled']) ? `ng-disabled="${field['ngDisabled']}" ` : "";
+                html += "ng-show='" + list.iterator + "." ;
                 html += (field.flag) ? field.flag : 'enabled';
-                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + list.iterator + "." ;
+                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</button><button ";
+                html += (field['ngDisabled']) ? `ng-disabled="${field['ngDisabled']}" ` : "";
+                html += "ng-show='!" + list.iterator + "." ;
                 html += (field.flag) ? field.flag : "enabled";
-                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></td>";
+                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</button></div></td>";
             } else {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
