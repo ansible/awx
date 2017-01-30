@@ -42,7 +42,7 @@
                 </label>
                 <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
                     <scheduler-date-picker date="schedulerStartDt"
-                      disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                     </scheduler-date-picker>
                 </div>
                 <div class="error"
@@ -370,6 +370,7 @@
                             data-toggle="buttons-checkbox"
                             id="weekdaySelect">
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDaySUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -378,6 +379,7 @@
                                 Sun
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayMOClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -386,6 +388,7 @@
                                 Mon
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayTUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -394,6 +397,7 @@
                                 Tue
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayWEClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -402,6 +406,7 @@
                                 Wed
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayTHClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -410,6 +415,7 @@
                                 Thu
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayFRClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -418,6 +424,7 @@
                                 Fri
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDaySAClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
