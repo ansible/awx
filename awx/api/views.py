@@ -1436,6 +1436,7 @@ class CredentialList(ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
+    capabilities_prefetch = ['admin', 'use']
 
 
 class CredentialOwnerUsersList(SubListAPIView):

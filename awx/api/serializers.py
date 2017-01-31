@@ -1730,11 +1730,11 @@ class CredentialSerializer(BaseSerializer):
             owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
         ))
 
-        parents = obj.admin_role.parents.exclude(object_id__isnull=True)
-        if parents.count() > 0:
+        parents = [role for role in obj.admin_role.parents.all() if role.object_id is not None]
+        if parents:
             res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url()})
-        elif obj.admin_role.members.count() > 0:
-            user = obj.admin_role.members.first()
+        elif len(obj.admin_role.members.all()) > 0:
+            user = obj.admin_role.members.all()[0]
             res.update({'user': reverse('api:user_detail', args=(user.pk,))})
 
         return res
@@ -1752,7 +1752,7 @@ class CredentialSerializer(BaseSerializer):
                 'url': reverse('api:user_detail', args=(user.pk,)),
             })
 
-        for parent in obj.admin_role.parents.exclude(object_id__isnull=True).all():
+        for parent in [role for role in obj.admin_role.parents.all() if role.object_id is not None]:
             summary_dict['owners'].append({
                 'id': parent.content_object.pk,
                 'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
