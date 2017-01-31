@@ -893,11 +893,5 @@ clean-elk:
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
 
-mongo-debug-ui:
-	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
-
-mongo-container:
-	docker run -it --link tools_mongo_1:mongo --rm mongo sh -c 'exec mongo "$MONGO_PORT_27017_TCP_ADDR:$MONGO_PORT_27017_TCP_PORT/system_tracking_dev"'
-
 psql-container:
-	docker run -it --link tools_postgres_1:postgres --rm postgres:9.4.1 sh -c 'exec psql -h "$$POSTGRES_PORT_5432_TCP_ADDR" -p "$$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'
