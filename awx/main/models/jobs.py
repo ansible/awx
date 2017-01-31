@@ -609,6 +609,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
                          if k in job_extra_vars]
         return_content = content
         for val in password_list:
+            if len(val) == 0:
+                continue  # avoids memory errors
             return_content = PlainTextCleaner.remove_sensitive(return_content, val)
         return return_content
 
