@@ -721,7 +721,7 @@ class BaseTask(Task):
             stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
-                    raise RuntimeError('proot is not installed')
+                    raise RuntimeError('bubblewrap is not installed')
                 kwargs['proot_temp_dir'] = build_proot_temp_dir()
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
@@ -1609,7 +1609,6 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
         args.append('--source')
-
         # If this is a cloud-based inventory (e.g. from AWS, Rackspace, etc.)
         # then we need to set some extra flags based on settings in
         # Tower.
@@ -1665,10 +1664,7 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(runpath)
             args.append("--custom")
-            # try:
-            #     shutil.rmtree(runpath, True)
-            # except OSError:
-            #     pass
+            self.custom_dir_path.append(runpath)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:
@@ -1689,6 +1685,19 @@ class RunInventoryUpdate(BaseTask):
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
+    def pre_run_hook(self, instance, **kwargs):
+        self.custom_dir_path = []
+
+    def post_run_hook(self, instance, status, **kwargs):
+        print("In post run hook")
+        if self.custom_dir_path:
+            for p in self.custom_dir_path:
+                try:
+                    shutil.rmtree(p, True)
+                except OSError:
+                    pass
+
 
 
 class RunAdHocCommand(BaseTask):
