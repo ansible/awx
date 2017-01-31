@@ -987,6 +987,9 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         return ret
 
     def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
         organization = None
         if 'organization' in attrs:
             organization = attrs['organization']
@@ -997,6 +1000,10 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         if not organization and not view.request.user.is_superuser:
             # Only allow super users to create orgless projects
             raise serializers.ValidationError(_('Organization is missing'))
+        elif get_field_from_model_or_attrs('scm_type') == '':
+            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
+                if get_field_from_model_or_attrs(fd):
+                    raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
         return super(ProjectSerializer, self).validate(attrs)
 
 
