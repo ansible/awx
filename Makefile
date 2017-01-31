@@ -45,7 +45,7 @@ ifeq ($(OFFICIAL),yes)
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
