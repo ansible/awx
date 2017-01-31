@@ -20,6 +20,7 @@ export default
 
         fields: {
             toggleSchedule: {
+                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",

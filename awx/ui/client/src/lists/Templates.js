@@ -94,7 +94,6 @@ export default
                 ngClick: 'scheduleJob(template)',
                 awToolTip: i18n._('Schedule future job template runs'),
                 dataPlacement: 'top',
-                ngShow: 'template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: i18n._('Copy'),
