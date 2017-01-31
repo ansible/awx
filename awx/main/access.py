@@ -1549,7 +1549,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
             missing_credentials = []
             missing_inventories = []
             qs = obj.workflow_job_template_nodes
-            qs.select_related('unified_job_template', 'inventory', 'credential')
+            qs = qs.prefetch_related('unified_job_template', 'inventory__use_role', 'credential__use_role')
             for node in qs.all():
                 node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
