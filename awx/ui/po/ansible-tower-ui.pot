@@ -233,6 +233,7 @@ msgstr ""
 
 #: client/src/lists/AllJobs.js:16
 #: client/src/portal-mode/portal-mode-jobs.partial.html:7
+#: client/src/portal-mode/portal-mode-layout.partial.html:12
 msgid "All Jobs"
 msgstr ""
 
@@ -628,8 +629,8 @@ msgstr ""
 msgid "Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned."
 msgstr ""
 
-#: client/src/inventory-scripts/inventory-scripts.form.js:50
-#: client/src/inventory-scripts/inventory-scripts.form.js:60
+#: client/src/inventory-scripts/inventory-scripts.form.js:53
+#: client/src/inventory-scripts/inventory-scripts.form.js:63
 msgid "Custom Script"
 msgstr ""
 
@@ -738,7 +739,7 @@ msgstr ""
 #: client/src/forms/Users.js:143
 #: client/src/forms/Users.js:168
 #: client/src/forms/Workflows.js:41
-#: client/src/inventory-scripts/inventory-scripts.form.js:32
+#: client/src/inventory-scripts/inventory-scripts.form.js:35
 #: client/src/inventory-scripts/inventory-scripts.list.js:25
 #: client/src/lists/Credentials.js:34
 #: client/src/lists/PortalJobTemplates.js:29
@@ -799,7 +800,7 @@ msgstr ""
 msgid "Download Output"
 msgstr ""
 
-#: client/src/inventory-scripts/inventory-scripts.form.js:58
+#: client/src/inventory-scripts/inventory-scripts.form.js:61
 msgid "Drag and drop your custom inventory script file here or create one in the field to import your custom inventory."
 msgstr ""
 
@@ -1309,6 +1310,10 @@ msgstr ""
 msgid "INVENTORIES"
 msgstr ""
 
+#: client/src/inventory-scripts/inventory-scripts.form.js:23
+msgid "INVENTORY SCRIPT"
+msgstr ""
+
 #: client/src/helpers/ActivityStream.js:44
 #: client/src/inventory-scripts/main.js:66
 msgid "INVENTORY SCRIPTS"
@@ -1330,11 +1335,11 @@ msgstr ""
 msgid "IRC Server Port"
 msgstr ""
 
-#: client/src/shared/paginate/paginate.partial.html:39
+#: client/src/shared/paginate/paginate.partial.html:43
 msgid ""
 "ITEMS&nbsp;\n"
 "            <span>{{dataRange}}</span>\n"
-"            <span translate=\"\">of {{dataCount()}}</span>"
+"            <span>of {{dataCount()}}</span>"
 msgstr ""
 
 #: client/src/login/authenticationServices/timer.factory.js:157
@@ -1694,6 +1699,7 @@ msgid "Module Args"
 msgstr ""
 
 #: client/src/portal-mode/portal-mode-jobs.partial.html:4
+#: client/src/portal-mode/portal-mode-layout.partial.html:10
 msgid "My Jobs"
 msgstr ""
 
@@ -1738,7 +1744,7 @@ msgstr ""
 #: client/src/forms/Users.js:165
 #: client/src/forms/Users.js:190
 #: client/src/forms/Workflows.js:34
-#: client/src/inventory-scripts/inventory-scripts.form.js:25
+#: client/src/inventory-scripts/inventory-scripts.form.js:28
 #: client/src/inventory-scripts/inventory-scripts.list.js:20
 #: client/src/lists/AllJobs.js:45
 #: client/src/lists/CompletedJobs.js:43
@@ -1979,7 +1985,7 @@ msgstr ""
 #: client/src/forms/Users.js:59
 #: client/src/forms/Workflows.js:47
 #: client/src/forms/Workflows.js:53
-#: client/src/inventory-scripts/inventory-scripts.form.js:37
+#: client/src/inventory-scripts/inventory-scripts.form.js:40
 #: client/src/inventory-scripts/inventory-scripts.list.js:30
 #: client/src/lists/Inventories.js:52
 #: client/src/lists/Teams.js:35
@@ -2726,7 +2732,7 @@ msgstr ""
 msgid "Schedules"
 msgstr ""
 
-#: client/src/inventory-scripts/inventory-scripts.form.js:59
+#: client/src/inventory-scripts/inventory-scripts.form.js:62
 msgid "Script must begin with a hashbang sequence: i.e.... %s"
 msgstr ""
 
@@ -3565,10 +3571,6 @@ msgstr ""
 
 #: client/src/access/rbac-multiselect/permissionsTeams.list.js:22
 msgid "name"
-msgstr ""
-
-#: client/src/shared/paginate/paginate.partial.html:41
-msgid "of {{dataCount()}}"
 msgstr ""
 
 #: client/src/access/rbac-multiselect/permissionsTeams.list.js:25

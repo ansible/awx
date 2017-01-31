@@ -18,6 +18,9 @@ export default ['i18n', function(i18n) {
         name: 'inventory_script',
         basePath: 'inventory_scripts',
         stateTree: 'inventoryScripts',
+        // I18N for "CREATE INVENTORY_SCRIPT"
+        // on /#/inventory_scripts/add
+        breadcrumbName: i18n._('INVENTORY SCRIPT'),
         showActions: true,
 
         fields: {

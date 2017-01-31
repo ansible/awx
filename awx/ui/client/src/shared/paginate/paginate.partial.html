@@ -36,9 +36,13 @@
         </span>
     </div>
     <div class="Paginate-total page-label" ng-hide="dataCount === 0">
+        <!-- TODO: Move the ITEMS line into paginate.directive.js
+             so that i18n.sprintf("A of B") can be used but
+             it seems $sce.trustAsHtml() does not work with html tag.
+         -->
         <span translate>ITEMS&nbsp;
             <span>{{dataRange}}</span>
-            <span translate>of {{dataCount()}}</span>
+            <span>of {{dataCount()}}</span>
         </span>
     </div>
 </div>
