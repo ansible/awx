@@ -114,7 +114,7 @@ export default
             },
             view: {
                 label: i18n._('View'),
-                ngClick: "editJobTemplate(template.id)",
+                ngClick: "editJobTemplate(template)",
                 awToolTip: i18n._('View template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',
