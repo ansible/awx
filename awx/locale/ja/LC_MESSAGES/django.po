@@ -1,10 +1,11 @@
+# Shane McDonald <shanemcd@redhat.com>, 2017. #zanata
 # asasaki <asasaki@redhat.com>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-15 12:05+0530\n"
-"PO-Revision-Date: 2017-01-20 12:04+0000\n"
+"PO-Revision-Date: 2017-01-31 07:33+0000\n"
 "Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -14,128 +15,129 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0\n"
 "X-Generator: Zanata 3.9.6\n"
 
-#: api/authentication.py:67
+#: awx/api/authentication.py:67
 msgid "Invalid token header. No credentials provided."
 msgstr "無効なトークンヘッダーです。認証情報が提供されていません。"
 
-#: api/authentication.py:70
+#: awx/api/authentication.py:70
 msgid "Invalid token header. Token string should not contain spaces."
 msgstr "無効なトークンヘッダーです。トークン文字列にはスペースを含めることができません。"
 
-#: api/authentication.py:105
+#: awx/api/authentication.py:105
 msgid "User inactive or deleted"
 msgstr "ユーザーが非アクティブか、または削除されています"
 
-#: api/authentication.py:161
+#: awx/api/authentication.py:161
 msgid "Invalid task token"
 msgstr "無効なタスクトークン"
 
-#: api/conf.py:12
+#: awx/api/conf.py:12
 msgid "Idle Time Force Log Out"
 msgstr "アイドル時間、強制ログアウト"
 
-#: api/conf.py:13
+#: awx/api/conf.py:13
 msgid ""
 "Number of seconds that a user is inactive before they will need to login "
 "again."
 msgstr "ユーザーが再ログインするまでに非アクティブな状態になる秒数です。"
 
-#: api/conf.py:14 api/conf.py:24 api/conf.py:33 sso/conf.py:124
-#: sso/conf.py:135 sso/conf.py:147 sso/conf.py:162
+#: awx/api/conf.py:14 awx/api/conf.py:24 awx/api/conf.py:33
+#: awx/sso/conf.py:124 awx/sso/conf.py:135 awx/sso/conf.py:147
+#: awx/sso/conf.py:162
 msgid "Authentication"
 msgstr "認証"
 
-#: api/conf.py:22
+#: awx/api/conf.py:22
 msgid "Maximum number of simultaneous logins"
 msgstr "同時ログインの最大数"
 
-#: api/conf.py:23
+#: awx/api/conf.py:23
 msgid ""
 "Maximum number of simultaneous logins a user may have. To disable enter -1."
 msgstr "ユーザーが実行できる同時ログインの最大数です。無効にするには -1 を入力します。"
 
-#: api/conf.py:31
+#: awx/api/conf.py:31
 msgid "Enable HTTP Basic Auth"
 msgstr "HTTP Basic 認証の有効化"
 
-#: api/conf.py:32
+#: awx/api/conf.py:32
 msgid "Enable HTTP Basic Auth for the API Browser."
 msgstr "API ブラウザーの HTTP Basic 認証を有効にします。"
 
-#: api/generics.py:462
+#: awx/api/generics.py:466
 msgid "\"id\" is required to disassociate"
 msgstr "関連付けを解除するには 「id」が必要です"
 
-#: api/metadata.py:50
+#: awx/api/metadata.py:50
 msgid "Database ID for this {}."
 msgstr "この{}のデータベース ID。"
 
-#: api/metadata.py:51
+#: awx/api/metadata.py:51
 msgid "Name of this {}."
 msgstr "この{}の名前。"
 
-#: api/metadata.py:52
+#: awx/api/metadata.py:52
 msgid "Optional description of this {}."
 msgstr "この{}のオプションの説明。"
 
-#: api/metadata.py:53
+#: awx/api/metadata.py:53
 msgid "Data type for this {}."
 msgstr "この{}のデータタイプ。"
 
-#: api/metadata.py:54
+#: awx/api/metadata.py:54
 msgid "URL for this {}."
 msgstr "この{}の URL。"
 
-#: api/metadata.py:55
+#: awx/api/metadata.py:55
 msgid "Data structure with URLs of related resources."
 msgstr "関連リソースの URL のあるデータ構造。"
 
-#: api/metadata.py:56
+#: awx/api/metadata.py:56
 msgid "Data structure with name/description for related resources."
 msgstr "関連リソースの名前/説明のあるデータ構造。"
 
-#: api/metadata.py:57
+#: awx/api/metadata.py:57
 msgid "Timestamp when this {} was created."
 msgstr "この {} の作成時のタイムスタンプ。"
 
-#: api/metadata.py:58
+#: awx/api/metadata.py:58
 msgid "Timestamp when this {} was last modified."
 msgstr "この {} の最終変更時のタイムスタンプ。"
 
-#: api/parsers.py:31
+#: awx/api/parsers.py:31
 #, python-format
 msgid "JSON parse error - %s"
 msgstr "JSON パースエラー: %s"
 
-#: api/serializers.py:248
+#: awx/api/serializers.py:250
 msgid "Playbook Run"
 msgstr "Playbook 実行"
 
-#: api/serializers.py:249
+#: awx/api/serializers.py:251
 msgid "Command"
 msgstr "コマンド"
 
-#: api/serializers.py:250
+#: awx/api/serializers.py:252
 msgid "SCM Update"
 msgstr "SCM 更新"
 
-#: api/serializers.py:251
+#: awx/api/serializers.py:253
 msgid "Inventory Sync"
 msgstr "インベントリーの同期"
 
-#: api/serializers.py:252
+#: awx/api/serializers.py:254
 msgid "Management Job"
 msgstr "管理ジョブ"
 
-#: api/serializers.py:253
+#: awx/api/serializers.py:255
 msgid "Workflow Job"
 msgstr "ワークフロージョブ"
 
-#: api/serializers.py:254
+#: awx/api/serializers.py:256
 msgid "Workflow Template"
 msgstr ""
 
-#: api/serializers.py:656 api/serializers.py:714 api/views.py:3805
+#: awx/api/serializers.py:658 awx/api/serializers.py:716 awx/api/views.py:3817
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -144,244 +146,252 @@ msgstr ""
 "標準出力が大きすぎて表示できません (%(text_size)d バイト)。サイズが %(supported_size)d "
 "バイトを超える場合はダウンロードのみがサポートされます。"
 
-#: api/serializers.py:729
+#: awx/api/serializers.py:731
 msgid "Write-only field used to change the password."
 msgstr "パスワードを変更するために使用される書き込み専用フィールド。"
 
-#: api/serializers.py:731
+#: awx/api/serializers.py:733
 msgid "Set if the account is managed by an external service"
 msgstr "アカウントが外部サービスで管理される場合に設定されます"
 
-#: api/serializers.py:755
+#: awx/api/serializers.py:757
 msgid "Password required for new User."
 msgstr "新規ユーザーのパスワードを入力してください。"
 
-#: api/serializers.py:839
+#: awx/api/serializers.py:841
 #, python-format
 msgid "Unable to change %s on user managed by LDAP."
 msgstr "LDAP で管理されたユーザーの %s を変更できません。"
 
-#: api/serializers.py:991
+#: awx/api/serializers.py:1002
 msgid "Organization is missing"
 msgstr "組織がありません"
 
-#: api/serializers.py:997
+#: awx/api/serializers.py:1006
+msgid "Update options must be set to false for manual projects."
+msgstr ""
+
+#: awx/api/serializers.py:1012
 msgid "Array of playbooks available within this project."
 msgstr "このプロジェクト内で利用可能な一連の Playbook。"
 
-#: api/serializers.py:1179
+#: awx/api/serializers.py:1194
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr "無効なポート指定: %s"
 
-#: api/serializers.py:1207 main/validators.py:193
+#: awx/api/serializers.py:1222 awx/main/validators.py:193
 msgid "Must be valid JSON or YAML."
 msgstr "有効な JSON または YAML である必要があります。"
 
-#: api/serializers.py:1264
+#: awx/api/serializers.py:1279
 msgid "Invalid group name."
 msgstr "無効なグループ名。"
 
-#: api/serializers.py:1339
+#: awx/api/serializers.py:1354
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr "スクリプトは hashbang シーケンスで開始する必要があります (例: .... #!/usr/bin/env python)"
 
-#: api/serializers.py:1392
+#: awx/api/serializers.py:1407
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr "「source」が「custom」である場合、「source_script」を指定する必要があります。"
 
-#: api/serializers.py:1396
+#: awx/api/serializers.py:1411
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr "「source_script」はインベントリーと同じ組織に属しません。"
 
-#: api/serializers.py:1398
+#: awx/api/serializers.py:1413
 msgid "'source_script' doesn't exist."
 msgstr "「source_script」は存在しません。"
 
-#: api/serializers.py:1757
+#: awx/api/serializers.py:1772
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
 msgstr ""
 "ユーザーを所有者ロールに追加するために使用される書き込み専用フィールドです。提供されている場合は、チームまたは組織のいずれも指定しないでください。作成時にのみ有効です。"
 
-#: api/serializers.py:1762
+#: awx/api/serializers.py:1777
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
 msgstr ""
 "チームを所有者ロールに追加するために使用される書き込み専用フィールドです。提供されている場合は、ユーザーまたは組織のいずれも指定しないでください。作成時にのみ有効です。"
 
-#: api/serializers.py:1767
+#: awx/api/serializers.py:1782
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not"
 " give either user or team."
 msgstr "組織ロールからパーミッションを継承します。作成時に提供される場合は、ユーザーまたはチームのいずれも指定しないでください。"
 
-#: api/serializers.py:1783
+#: awx/api/serializers.py:1798
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr "「user」、「team」、または「organization」がありません。"
 
-#: api/serializers.py:1796
+#: awx/api/serializers.py:1811
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr "認証情報の組織が設定され、一致している状態でチームに割り当てる必要があります。"
 
-#: api/serializers.py:1888
+#: awx/api/serializers.py:1903
 msgid "This field is required."
 msgstr "このフィールドは必須です。"
 
-#: api/serializers.py:1890 api/serializers.py:1892
+#: awx/api/serializers.py:1905 awx/api/serializers.py:1907
 msgid "Playbook not found for project."
 msgstr "プロジェクトの Playbook が見つかりません。"
 
-#: api/serializers.py:1894
+#: awx/api/serializers.py:1909
 msgid "Must select playbook for project."
 msgstr "プロジェクトの Playbook を選択してください。"
 
-#: api/serializers.py:1958 main/models/jobs.py:278
+#: awx/api/serializers.py:1975
+msgid "Must either set a default value or ask to prompt on launch."
+msgstr ""
+
+#: awx/api/serializers.py:1978 awx/main/models/jobs.py:278
 msgid "Scan jobs must be assigned a fixed inventory."
 msgstr "スキャンジョブに固定インベントリーが割り当てられている必要があります。"
 
-#: api/serializers.py:1960 main/models/jobs.py:281
+#: awx/api/serializers.py:1980 awx/main/models/jobs.py:281
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr "ジョブタイプ「run」および「check」によりプロジェクトが割り当てられている必要があります。"
 
-#: api/serializers.py:1963
+#: awx/api/serializers.py:1987
 msgid "Survey Enabled cannot be used with scan jobs."
 msgstr "Survey Enabled はスキャンジョブで使用できません。"
 
-#: api/serializers.py:2023
+#: awx/api/serializers.py:2047
 msgid "Invalid job template."
 msgstr "無効なジョブテンプレート。"
 
-#: api/serializers.py:2108
+#: awx/api/serializers.py:2132
 msgid "Credential not found or deleted."
 msgstr "認証情報が見つからないか、または削除されました。"
 
-#: api/serializers.py:2110
+#: awx/api/serializers.py:2134
 msgid "Job Template Project is missing or undefined."
 msgstr "ジョブテンプレートプロジェクトが見つからないか、または定義されていません。"
 
-#: api/serializers.py:2112
+#: awx/api/serializers.py:2136
 msgid "Job Template Inventory is missing or undefined."
 msgstr "ジョブテンプレートインベントリーが見つからないか、または定義されていません。"
 
-#: api/serializers.py:2397
+#: awx/api/serializers.py:2421
 #, python-format
 msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
 msgstr "%(job_type)s は有効なジョブタイプではありません。%(choices)s を選択できます。"
 
-#: api/serializers.py:2402
+#: awx/api/serializers.py:2426
 msgid "Workflow job template is missing during creation."
 msgstr "ワークフロージョブテンプレートが作成時に見つかりません。"
 
-#: api/serializers.py:2407
+#: awx/api/serializers.py:2431
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr "ワークフロージョブテンプレート内に %s をネストできません"
 
-#: api/serializers.py:2645
+#: awx/api/serializers.py:2669
 #, python-format
 msgid "Job Template '%s' is missing or undefined."
 msgstr "ジョブテンプレート「%s」が見つからない、または定義されていません。"
 
-#: api/serializers.py:2671
+#: awx/api/serializers.py:2695
 msgid "Must be a valid JSON or YAML dictionary."
 msgstr "有効な JSON または YAML 辞書でなければなりません。"
 
-#: api/serializers.py:2813
+#: awx/api/serializers.py:2837
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr "通知設定の必須フィールドがありません: notification_type"
 
-#: api/serializers.py:2836
+#: awx/api/serializers.py:2860
 msgid "No values specified for field '{}'"
 msgstr "フィールド '{}' に値が指定されていません"
 
-#: api/serializers.py:2841
+#: awx/api/serializers.py:2865
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr "通知設定の必須フィールドがありません: {}。"
 
-#: api/serializers.py:2844
+#: awx/api/serializers.py:2868
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr "設定フィールド '{}' のタイプが正しくありません。{} が予期されました。"
 
-#: api/serializers.py:2897
+#: awx/api/serializers.py:2921
 msgid "Inventory Source must be a cloud resource."
 msgstr "インベントリーソースはクラウドリソースでなければなりません。"
 
-#: api/serializers.py:2899
+#: awx/api/serializers.py:2923
 msgid "Manual Project can not have a schedule set."
 msgstr "手動プロジェクトにはスケジュールを設定できません。"
 
-#: api/serializers.py:2921
+#: awx/api/serializers.py:2945
 msgid ""
 "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr "DTSTART が rrule で必要です。値は、DSTART:YYYYMMDDTHHMMSSZ に一致する必要があります。"
 
-#: api/serializers.py:2923
+#: awx/api/serializers.py:2947
 msgid "Multiple DTSTART is not supported."
 msgstr "複数の DTSTART はサポートされません。"
 
-#: api/serializers.py:2925
+#: awx/api/serializers.py:2949
 msgid "RRULE require in rrule."
 msgstr "RRULE が rrule で必要です。"
 
-#: api/serializers.py:2927
+#: awx/api/serializers.py:2951
 msgid "Multiple RRULE is not supported."
 msgstr "複数の RRULE はサポートされません。"
 
-#: api/serializers.py:2929
+#: awx/api/serializers.py:2953
 msgid "INTERVAL required in rrule."
 msgstr "INTERVAL が rrule で必要です。"
 
-#: api/serializers.py:2931
+#: awx/api/serializers.py:2955
 msgid "TZID is not supported."
 msgstr "TZID はサポートされません。"
 
-#: api/serializers.py:2933
+#: awx/api/serializers.py:2957
 msgid "SECONDLY is not supported."
 msgstr "SECONDLY はサポートされません。"
 
-#: api/serializers.py:2935
+#: awx/api/serializers.py:2959
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr "複数の BYMONTHDAY はサポートされません。"
 
-#: api/serializers.py:2937
+#: awx/api/serializers.py:2961
 msgid "Multiple BYMONTHs not supported."
 msgstr "複数の BYMONTH はサポートされません。"
 
-#: api/serializers.py:2939
+#: awx/api/serializers.py:2963
 msgid "BYDAY with numeric prefix not supported."
 msgstr "数字の接頭辞のある BYDAY はサポートされません。"
 
-#: api/serializers.py:2941
+#: awx/api/serializers.py:2965
 msgid "BYYEARDAY not supported."
 msgstr "BYYEARDAY はサポートされません。"
 
-#: api/serializers.py:2943
+#: awx/api/serializers.py:2967
 msgid "BYWEEKNO not supported."
 msgstr "BYWEEKNO はサポートされません。"
 
-#: api/serializers.py:2947
+#: awx/api/serializers.py:2971
 msgid "COUNT > 999 is unsupported."
 msgstr "COUNT > 999 はサポートされません。"
 
-#: api/serializers.py:2951
+#: awx/api/serializers.py:2975
 msgid "rrule parsing failed validation."
 msgstr "rrule の構文解析で検証に失敗しました。"
 
-#: api/serializers.py:2969
+#: awx/api/serializers.py:2997
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr "オブジェクトの作成、更新または削除時の新規値および変更された値の概要"
 
-#: api/serializers.py:2971
+#: awx/api/serializers.py:2999
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
@@ -390,7 +400,7 @@ msgstr ""
 "作成、更新、および削除イベントの場合、これは影響を受けたオブジェクトタイプになります。関連付けおよび関連付け解除イベントの場合、これは object2 "
 "に関連付けられたか、またはその関連付けが解除されたオブジェクトタイプになります。"
 
-#: api/serializers.py:2974
+#: awx/api/serializers.py:3002
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated"
@@ -399,654 +409,703 @@ msgstr ""
 "作成、更新、および削除イベントの場合は設定されません。関連付けおよび関連付け解除イベントの場合、これは object1 "
 "が関連付けられるオブジェクトタイプになります。"
 
-#: api/serializers.py:2977
+#: awx/api/serializers.py:3005
 msgid "The action taken with respect to the given object(s)."
 msgstr "指定されたオブジェクトについて実行されたアクション。"
 
-#: api/serializers.py:3077
+#: awx/api/serializers.py:3112
 msgid "Unable to login with provided credentials."
 msgstr "提供される認証情報でログインできません。"
 
-#: api/serializers.py:3079
+#: awx/api/serializers.py:3114
 msgid "Must include \"username\" and \"password\"."
 msgstr "「username」および「password」を含める必要があります。"
 
-#: api/views.py:99
+#: awx/api/views.py:99
 msgid "Your license does not allow use of the activity stream."
 msgstr "お使いのライセンスではアクティビティーストリームを使用できません。"
 
-#: api/views.py:109
+#: awx/api/views.py:109
 msgid "Your license does not permit use of system tracking."
 msgstr "お使いのライセンスではシステムトラッキングを使用できません。"
 
-#: api/views.py:119
+#: awx/api/views.py:119
 msgid "Your license does not allow use of workflows."
 msgstr "お使いのライセンスではワークフローを使用できません。"
 
-#: api/views.py:127 templates/rest_framework/api.html:28
+#: awx/api/views.py:127 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr "REST API"
 
-#: api/views.py:134 templates/rest_framework/api.html:4
+#: awx/api/views.py:134 awx/templates/rest_framework/api.html:4
 msgid "Ansible Tower REST API"
 msgstr "Ansible Tower REST API"
 
-#: api/views.py:150
+#: awx/api/views.py:150
 msgid "Version 1"
 msgstr "バージョン 1"
 
-#: api/views.py:201
+#: awx/api/views.py:201
 msgid "Ping"
 msgstr "Ping"
 
-#: api/views.py:230 conf/apps.py:12
+#: awx/api/views.py:230 awx/conf/apps.py:12
 msgid "Configuration"
 msgstr "設定"
 
-#: api/views.py:283
+#: awx/api/views.py:283
 msgid "Invalid license data"
 msgstr "無効なライセンスデータ"
 
-#: api/views.py:285
+#: awx/api/views.py:285
 msgid "Missing 'eula_accepted' property"
 msgstr "'eula_accepted' プロパティーがありません"
 
-#: api/views.py:289
+#: awx/api/views.py:289
 msgid "'eula_accepted' value is invalid"
 msgstr "'eula_accepted' 値は無効です。"
 
-#: api/views.py:292
+#: awx/api/views.py:292
 msgid "'eula_accepted' must be True"
 msgstr "'eula_accepted' は True でなければなりません"
 
-#: api/views.py:299
+#: awx/api/views.py:299
 msgid "Invalid JSON"
 msgstr "無効な JSON"
 
-#: api/views.py:307
+#: awx/api/views.py:307
 msgid "Invalid License"
 msgstr "無効なライセンス"
 
-#: api/views.py:317
+#: awx/api/views.py:317
 msgid "Invalid license"
 msgstr "無効なライセンス"
 
-#: api/views.py:325
+#: awx/api/views.py:325
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr "ライセンスの削除に失敗しました (%s)"
 
-#: api/views.py:330
+#: awx/api/views.py:330
 msgid "Dashboard"
 msgstr "ダッシュボード"
 
-#: api/views.py:436
+#: awx/api/views.py:436
 msgid "Dashboard Jobs Graphs"
 msgstr "ダッシュボードのジョブグラフ"
 
-#: api/views.py:472
+#: awx/api/views.py:472
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr "不明な期間 \"%s\""
 
-#: api/views.py:486
+#: awx/api/views.py:486
 msgid "Schedules"
 msgstr "スケジュール"
 
-#: api/views.py:505
+#: awx/api/views.py:505
 msgid "Schedule Jobs List"
 msgstr "スケジュールジョブの一覧"
 
-#: api/views.py:715
+#: awx/api/views.py:715
 msgid "Your Tower license only permits a single organization to exist."
 msgstr "お使いの Tower ライセンスでは、単一組織のみの存在が許可されます。"
 
-#: api/views.py:940 api/views.py:1299
+#: awx/api/views.py:940 awx/api/views.py:1299
 msgid "Role 'id' field is missing."
 msgstr "ロール「id」フィールドがありません。"
 
-#: api/views.py:946 api/views.py:4081
+#: awx/api/views.py:946 awx/api/views.py:4093
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr "組織ロールをチームの子ロールとして割り当てることができません。"
 
-#: api/views.py:950 api/views.py:4095
+#: awx/api/views.py:950 awx/api/views.py:4107
 msgid "You cannot grant system-level permissions to a team."
 msgstr "システムレベルのパーミッションをチームに付与できません。"
 
-#: api/views.py:957 api/views.py:4087
+#: awx/api/views.py:957 awx/api/views.py:4099
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr "組織フィールドが設定されていないか、または別の組織に属する場合に認証情報のアクセス権をチームに付与できません"
 
-#: api/views.py:1047
+#: awx/api/views.py:1047
 msgid "Cannot delete project."
 msgstr "プロジェクトを削除できません。"
 
-#: api/views.py:1076
+#: awx/api/views.py:1076
 msgid "Project Schedules"
 msgstr "プロジェクトのスケジュール"
 
-#: api/views.py:1180 api/views.py:2270 api/views.py:3276
+#: awx/api/views.py:1180 awx/api/views.py:2271 awx/api/views.py:3284
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr "関連付けられたワークフロージョブが実行中の場合、ジョブリソースを削除できません。"
 
-#: api/views.py:1257
+#: awx/api/views.py:1257
 msgid "Me"
 msgstr "自分"
 
-#: api/views.py:1303 api/views.py:4036
+#: awx/api/views.py:1303 awx/api/views.py:4048
 msgid "You may not perform any action with your own admin_role."
 msgstr "独自の admin_role でアクションを実行することはできません。"
 
-#: api/views.py:1309 api/views.py:4040
+#: awx/api/views.py:1309 awx/api/views.py:4052
 msgid "You may not change the membership of a users admin_role"
 msgstr "ユーザーの admin_role のメンバーシップを変更することはできません"
 
-#: api/views.py:1314 api/views.py:4045
+#: awx/api/views.py:1314 awx/api/views.py:4057
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr "認証情報の組織に属さないユーザーに認証情報のアクセス権を付与することはできません"
 
-#: api/views.py:1318 api/views.py:4049
+#: awx/api/views.py:1318 awx/api/views.py:4061
 msgid "You cannot grant private credential access to another user"
 msgstr "非公開の認証情報のアクセス権を別のユーザーに付与することはできません"
 
-#: api/views.py:1416
+#: awx/api/views.py:1416
 #, python-format
 msgid "Cannot change %s."
 msgstr "%s を変更できません。"
 
-#: api/views.py:1422
+#: awx/api/views.py:1422
 msgid "Cannot delete user."
 msgstr "ユーザーを削除できません。"
 
-#: api/views.py:1570
+#: awx/api/views.py:1570
 msgid "Cannot delete inventory script."
 msgstr "インベントリースクリプトを削除できません。"
 
-#: api/views.py:1805
+#: awx/api/views.py:1806
 msgid "Fact not found."
 msgstr "ファクトが見つかりませんでした。"
 
-#: api/views.py:2125
+#: awx/api/views.py:2126
 msgid "Inventory Source List"
 msgstr "インベントリーソース一覧"
 
-#: api/views.py:2153
+#: awx/api/views.py:2154
 msgid "Cannot delete inventory source."
 msgstr "インベントリーソースを削除できません。"
 
-#: api/views.py:2161
+#: awx/api/views.py:2162
 msgid "Inventory Source Schedules"
 msgstr "インベントリーソースのスケジュール"
 
-#: api/views.py:2191
+#: awx/api/views.py:2192
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr "ソースが {} のいずれかである場合、通知テンプレートのみを割り当てることができます。"
 
-#: api/views.py:2402
+#: awx/api/views.py:2403
 msgid "Job Template Schedules"
 msgstr "ジョブテンプレートスケジュール"
 
-#: api/views.py:2422 api/views.py:2438
+#: awx/api/views.py:2423 awx/api/views.py:2439
 msgid "Your license does not allow adding surveys."
 msgstr "お使いのライセンスでは Survey を追加できません。"
 
-#: api/views.py:2445
+#: awx/api/views.py:2446
 msgid "'name' missing from survey spec."
 msgstr "Survey の指定に「name」がありません。"
 
-#: api/views.py:2447
+#: awx/api/views.py:2448
 msgid "'description' missing from survey spec."
 msgstr "Survey の指定に「description」がありません。"
 
-#: api/views.py:2449
+#: awx/api/views.py:2450
 msgid "'spec' missing from survey spec."
 msgstr "Survey の指定に「spec」がありません。"
 
-#: api/views.py:2451
+#: awx/api/views.py:2452
 msgid "'spec' must be a list of items."
 msgstr "「spec」は項目の一覧にする必要があります。"
 
-#: api/views.py:2453
+#: awx/api/views.py:2454
 msgid "'spec' doesn't contain any items."
 msgstr "「spec」には項目が含まれません。"
 
-#: api/views.py:2459
+#: awx/api/views.py:2460
 #, python-format
 msgid "Survey question %s is not a json object."
 msgstr "Survey の質問 %s は json オブジェクトではありません。"
 
-#: api/views.py:2461
+#: awx/api/views.py:2462
 #, python-format
 msgid "'type' missing from survey question %s."
 msgstr "Survey の質問 %s に「type」がありません。"
 
-#: api/views.py:2463
+#: awx/api/views.py:2464
 #, python-format
 msgid "'question_name' missing from survey question %s."
 msgstr "Survey の質問 %s に「question_name」がありません。"
 
-#: api/views.py:2465
+#: awx/api/views.py:2466
 #, python-format
 msgid "'variable' missing from survey question %s."
 msgstr "Survey の質問 %s に「variable」がありません。"
 
-#: api/views.py:2467
+#: awx/api/views.py:2468
 #, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr "Survey の質問%(survey)s で「variable」の「%(item)s」が重複しています。"
 
-#: api/views.py:2472
+#: awx/api/views.py:2473
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr "Survey の質問 %s に「required」がありません。"
 
-#: api/views.py:2683
+#: awx/api/views.py:2684
 msgid "No matching host could be found!"
 msgstr "一致するホストが見つかりませんでした!"
 
-#: api/views.py:2686
+#: awx/api/views.py:2687
 msgid "Multiple hosts matched the request!"
 msgstr "複数のホストが要求に一致しました!"
 
-#: api/views.py:2691
+#: awx/api/views.py:2692
 msgid "Cannot start automatically, user input required!"
 msgstr "自動的に開始できません。ユーザー入力が必要です!"
 
-#: api/views.py:2698
+#: awx/api/views.py:2699
 msgid "Host callback job already pending."
 msgstr "ホストのコールバックジョブがすでに保留中です。"
 
-#: api/views.py:2711
+#: awx/api/views.py:2712
 msgid "Error starting job!"
 msgstr "ジョブの開始時にエラーが発生しました!"
 
-#: api/views.py:3040
+#: awx/api/views.py:3041
 msgid "Workflow Job Template Schedules"
 msgstr "ワークフロージョブテンプレートのスケジュール"
 
-#: api/views.py:3175 api/views.py:3714
+#: awx/api/views.py:3183 awx/api/views.py:3726
 msgid "Superuser privileges needed."
 msgstr "スーパーユーザー権限が必要です。"
 
-#: api/views.py:3207
+#: awx/api/views.py:3215
 msgid "System Job Template Schedules"
 msgstr "システムジョブテンプレートのスケジュール"
 
-#: api/views.py:3399
+#: awx/api/views.py:3407
 msgid "Job Host Summaries List"
 msgstr "ジョブホスト概要一覧"
 
-#: api/views.py:3441
+#: awx/api/views.py:3449
 msgid "Job Event Children List"
 msgstr "ジョブイベント子一覧"
 
-#: api/views.py:3450
+#: awx/api/views.py:3458
 msgid "Job Event Hosts List"
 msgstr "ジョブイベントホスト一覧"
 
-#: api/views.py:3459
+#: awx/api/views.py:3467
 msgid "Job Events List"
 msgstr "ジョブイベント一覧"
 
-#: api/views.py:3668
+#: awx/api/views.py:3680
 msgid "Ad Hoc Command Events List"
 msgstr "アドホックコマンドイベント一覧"
 
-#: api/views.py:3862
+#: awx/api/views.py:3874
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr "stdout ダウンロードファイルの生成中にエラーが発生しました: %s"
 
-#: api/views.py:3907
+#: awx/api/views.py:3919
 msgid "Delete not allowed while there are pending notifications"
 msgstr "保留中の通知がある場合に削除は許可されません"
 
-#: api/views.py:3914
+#: awx/api/views.py:3926
 msgid "Notification Template Test"
 msgstr ""
 
-#: api/views.py:4030
+#: awx/api/views.py:4042
 msgid "User 'id' field is missing."
 msgstr "ユーザー「id」フィールドがありません。"
 
-#: api/views.py:4073
+#: awx/api/views.py:4085
 msgid "Team 'id' field is missing."
 msgstr "チーム「id」フィールドがありません。"
 
-#: conf/conf.py:20
+#: awx/conf/conf.py:20
 msgid "Bud Frogs"
 msgstr "Bud Frogs"
 
-#: conf/conf.py:21
+#: awx/conf/conf.py:21
 msgid "Bunny"
 msgstr "Bunny"
 
-#: conf/conf.py:22
+#: awx/conf/conf.py:22
 msgid "Cheese"
 msgstr "Cheese"
 
-#: conf/conf.py:23
+#: awx/conf/conf.py:23
 msgid "Daemon"
 msgstr "Daemon"
 
-#: conf/conf.py:24
+#: awx/conf/conf.py:24
 msgid "Default Cow"
 msgstr "Default Cow"
 
-#: conf/conf.py:25
+#: awx/conf/conf.py:25
 msgid "Dragon"
 msgstr "Dragon"
 
-#: conf/conf.py:26
+#: awx/conf/conf.py:26
 msgid "Elephant in Snake"
 msgstr "Elephant in Snake"
 
-#: conf/conf.py:27
+#: awx/conf/conf.py:27
 msgid "Elephant"
 msgstr "Elephant"
 
-#: conf/conf.py:28
+#: awx/conf/conf.py:28
 msgid "Eyes"
 msgstr "Eyes"
 
-#: conf/conf.py:29
+#: awx/conf/conf.py:29
 msgid "Hello Kitty"
 msgstr "Hello Kitty"
 
-#: conf/conf.py:30
+#: awx/conf/conf.py:30
 msgid "Kitty"
 msgstr "Kitty"
 
-#: conf/conf.py:31
+#: awx/conf/conf.py:31
 msgid "Luke Koala"
 msgstr "Luke Koala"
 
-#: conf/conf.py:32
+#: awx/conf/conf.py:32
 msgid "Meow"
 msgstr "Meow"
 
-#: conf/conf.py:33
+#: awx/conf/conf.py:33
 msgid "Milk"
 msgstr "Milk"
 
-#: conf/conf.py:34
+#: awx/conf/conf.py:34
 msgid "Moofasa"
 msgstr "Moofasa"
 
-#: conf/conf.py:35
+#: awx/conf/conf.py:35
 msgid "Moose"
 msgstr "Moose"
 
-#: conf/conf.py:36
+#: awx/conf/conf.py:36
 msgid "Ren"
 msgstr "Ren"
 
-#: conf/conf.py:37
+#: awx/conf/conf.py:37
 msgid "Sheep"
 msgstr "Sheep"
 
-#: conf/conf.py:38
+#: awx/conf/conf.py:38
 msgid "Small Cow"
 msgstr "Small Cow"
 
-#: conf/conf.py:39
+#: awx/conf/conf.py:39
 msgid "Stegosaurus"
 msgstr "Stegosaurus"
 
-#: conf/conf.py:40
+#: awx/conf/conf.py:40
 msgid "Stimpy"
 msgstr "Stimpy"
 
-#: conf/conf.py:41
+#: awx/conf/conf.py:41
 msgid "Super Milker"
 msgstr "Super Milker"
 
-#: conf/conf.py:42
+#: awx/conf/conf.py:42
 msgid "Three Eyes"
 msgstr "Three Eyes"
 
-#: conf/conf.py:43
+#: awx/conf/conf.py:43
 msgid "Turkey"
 msgstr "Turkey"
 
-#: conf/conf.py:44
+#: awx/conf/conf.py:44
 msgid "Turtle"
 msgstr "Turtle"
 
-#: conf/conf.py:45
+#: awx/conf/conf.py:45
 msgid "Tux"
 msgstr "Tux"
 
-#: conf/conf.py:46
+#: awx/conf/conf.py:46
 msgid "Udder"
 msgstr "Udder"
 
-#: conf/conf.py:47
+#: awx/conf/conf.py:47
 msgid "Vader Koala"
 msgstr "Vader Koala"
 
-#: conf/conf.py:48
+#: awx/conf/conf.py:48
 msgid "Vader"
 msgstr "Vader"
 
-#: conf/conf.py:49
+#: awx/conf/conf.py:49
 msgid "WWW"
 msgstr "WWW"
 
-#: conf/conf.py:52
+#: awx/conf/conf.py:52
 msgid "Cow Selection"
 msgstr "Cow Selection"
 
-#: conf/conf.py:53
+#: awx/conf/conf.py:53
 msgid "Select which cow to use with cowsay when running jobs."
 msgstr "ジョブの実行時に cowsay で使用する cow を選択します。"
 
-#: conf/conf.py:54 conf/conf.py:75
+#: awx/conf/conf.py:54 awx/conf/conf.py:75
 msgid "Cows"
 msgstr "Cows"
 
-#: conf/conf.py:73
+#: awx/conf/conf.py:73
 msgid "Example Read-Only Setting"
 msgstr "読み取り専用設定の例"
 
-#: conf/conf.py:74
+#: awx/conf/conf.py:74
 msgid "Example setting that cannot be changed."
 msgstr "変更不可能な設定例"
 
-#: conf/conf.py:93
+#: awx/conf/conf.py:93
 msgid "Example Setting"
 msgstr "設定例"
 
-#: conf/conf.py:94
+#: awx/conf/conf.py:94
 msgid "Example setting which can be different for each user."
 msgstr "ユーザーごとに異なる設定例"
 
-#: conf/conf.py:95 conf/registry.py:67 conf/views.py:46
+#: awx/conf/conf.py:95 awx/conf/registry.py:76 awx/conf/views.py:46
 msgid "User"
 msgstr "ユーザー"
 
-#: conf/fields.py:38
+#: awx/conf/fields.py:38
 msgid "Enter a valid URL"
 msgstr "無効な URL の入力"
 
-#: conf/license.py:19
+#: awx/conf/license.py:19
 msgid "Your Tower license does not allow that."
 msgstr "お使いの Tower ライセンスではこれを許可しません。"
 
-#: conf/management/commands/migrate_to_database_settings.py:41
+#: awx/conf/management/commands/migrate_to_database_settings.py:41
 msgid "Only show which settings would be commented/migrated."
 msgstr "コメント/移行する設定についてのみ表示します。"
 
-#: conf/management/commands/migrate_to_database_settings.py:48
+#: awx/conf/management/commands/migrate_to_database_settings.py:48
 msgid ""
 "Skip over settings that would raise an error when commenting/migrating."
 msgstr "コメント/移行時にエラーを発生させる設定をスキップします。"
 
-#: conf/management/commands/migrate_to_database_settings.py:55
+#: awx/conf/management/commands/migrate_to_database_settings.py:55
 msgid "Skip commenting out settings in files."
 msgstr "ファイル内の設定のコメント化をスキップします。"
 
-#: conf/management/commands/migrate_to_database_settings.py:61
+#: awx/conf/management/commands/migrate_to_database_settings.py:61
 msgid "Backup existing settings files with this suffix."
 msgstr "この接尾辞を持つ既存の設定ファイルをバックアップします。"
 
-#: conf/registry.py:55
+#: awx/conf/registry.py:64 awx/conf/tests/unit/test_registry.py:169
+#: awx/conf/tests/unit/test_registry.py:192
+#: awx/conf/tests/unit/test_registry.py:196
+#: awx/conf/tests/unit/test_registry.py:201
+#: awx/conf/tests/unit/test_registry.py:208
 msgid "All"
 msgstr "すべて"
 
-#: conf/registry.py:56
+#: awx/conf/registry.py:65 awx/conf/tests/unit/test_registry.py:170
+#: awx/conf/tests/unit/test_registry.py:193
+#: awx/conf/tests/unit/test_registry.py:197
+#: awx/conf/tests/unit/test_registry.py:202
+#: awx/conf/tests/unit/test_registry.py:209
 msgid "Changed"
 msgstr "変更済み"
 
-#: conf/registry.py:68
+#: awx/conf/registry.py:77
 msgid "User-Defaults"
 msgstr "ユーザー設定"
 
-#: conf/views.py:38
+#: awx/conf/tests/unit/test_registry.py:46
+#: awx/conf/tests/unit/test_registry.py:56
+#: awx/conf/tests/unit/test_registry.py:72
+#: awx/conf/tests/unit/test_registry.py:87
+#: awx/conf/tests/unit/test_registry.py:100
+#: awx/conf/tests/unit/test_registry.py:106
+#: awx/conf/tests/unit/test_registry.py:126
+#: awx/conf/tests/unit/test_registry.py:140
+#: awx/conf/tests/unit/test_registry.py:146
+#: awx/conf/tests/unit/test_registry.py:159
+#: awx/conf/tests/unit/test_registry.py:171
+#: awx/conf/tests/unit/test_registry.py:180
+#: awx/conf/tests/unit/test_registry.py:198
+#: awx/conf/tests/unit/test_registry.py:210
+#: awx/conf/tests/unit/test_registry.py:219
+#: awx/conf/tests/unit/test_registry.py:225
+#: awx/conf/tests/unit/test_registry.py:237
+#: awx/conf/tests/unit/test_registry.py:245
+#: awx/conf/tests/unit/test_registry.py:288
+#: awx/conf/tests/unit/test_registry.py:306
+#: awx/conf/tests/unit/test_settings.py:67
+#: awx/conf/tests/unit/test_settings.py:81
+#: awx/conf/tests/unit/test_settings.py:97
+#: awx/conf/tests/unit/test_settings.py:110
+#: awx/conf/tests/unit/test_settings.py:127
+#: awx/conf/tests/unit/test_settings.py:143
+#: awx/conf/tests/unit/test_settings.py:162
+#: awx/conf/tests/unit/test_settings.py:183
+#: awx/conf/tests/unit/test_settings.py:197
+#: awx/conf/tests/unit/test_settings.py:221
+#: awx/conf/tests/unit/test_settings.py:241
+#: awx/conf/tests/unit/test_settings.py:258 awx/main/conf.py:19
+#: awx/main/conf.py:29 awx/main/conf.py:39 awx/main/conf.py:48
+#: awx/main/conf.py:60 awx/main/conf.py:78 awx/main/conf.py:103
+msgid "System"
+msgstr "システム"
+
+#: awx/conf/tests/unit/test_registry.py:165
+#: awx/conf/tests/unit/test_registry.py:172
+#: awx/conf/tests/unit/test_registry.py:187
+#: awx/conf/tests/unit/test_registry.py:203
+#: awx/conf/tests/unit/test_registry.py:211
+#, fuzzy
+msgid "OtherSystem"
+msgstr "システム"
+
+#: awx/conf/views.py:38
 msgid "Setting Categories"
 msgstr "設定カテゴリー"
 
-#: conf/views.py:61
+#: awx/conf/views.py:61
 msgid "Setting Detail"
 msgstr "設定の詳細"
 
-#: main/access.py:255
+#: awx/main/access.py:255
 #, python-format
 msgid "Bad data found in related field %s."
 msgstr "関連フィールド %s に不正データが見つかりました。"
 
-#: main/access.py:296
+#: awx/main/access.py:296
 msgid "License is missing."
 msgstr "ライセンスが見つかりません。"
 
-#: main/access.py:298
+#: awx/main/access.py:298
 msgid "License has expired."
 msgstr "ライセンスの有効期限が切れました。"
 
-#: main/access.py:303
+#: awx/main/access.py:306
 #, python-format
 msgid "License count of %s instances has been reached."
 msgstr "%s インスタンスのライセンス数に達しました。"
 
-#: main/access.py:305
+#: awx/main/access.py:308
 #, python-format
 msgid "License count of %s instances has been exceeded."
 msgstr "%s インスタンスのライセンス数を超えました。"
 
-#: main/access.py:307
+#: awx/main/access.py:310
 msgid "Host count exceeds available instances."
 msgstr "ホスト数が利用可能なインスタンスの上限を上回っています。"
 
-#: main/access.py:311
+#: awx/main/access.py:314
 #, python-format
 msgid "Feature %s is not enabled in the active license."
 msgstr "機能 %s はアクティブなライセンスで有効にされていません。"
 
-#: main/access.py:313
+#: awx/main/access.py:316
 msgid "Features not found in active license."
 msgstr "各種機能はアクティブなライセンスにありません。"
 
-#: main/access.py:511 main/access.py:578 main/access.py:698 main/access.py:961
-#: main/access.py:1200 main/access.py:1597
+#: awx/main/access.py:514 awx/main/access.py:581 awx/main/access.py:706
+#: awx/main/access.py:969 awx/main/access.py:1208 awx/main/access.py:1605
 msgid "Resource is being used by running jobs"
 msgstr "リソースが実行中のジョブで使用されています"
 
-#: main/access.py:622
+#: awx/main/access.py:625
 msgid "Unable to change inventory on a host."
 msgstr "ホストのインベントリーを変更できません。"
 
-#: main/access.py:634 main/access.py:679
+#: awx/main/access.py:642 awx/main/access.py:687
 msgid "Cannot associate two items from different inventories."
 msgstr "異なるインベントリーの 2 つの項目を関連付けることはできません。"
 
-#: main/access.py:667
+#: awx/main/access.py:675
 msgid "Unable to change inventory on a group."
 msgstr "グループのインベントリーを変更できません。"
 
-#: main/access.py:881
+#: awx/main/access.py:889
 msgid "Unable to change organization on a team."
 msgstr "チームの組織を変更できません。"
 
-#: main/access.py:894
+#: awx/main/access.py:902
 msgid "The {} role cannot be assigned to a team"
 msgstr "{} ロールをチームに割り当てることができません"
 
-#: main/access.py:896
+#: awx/main/access.py:904
 msgid "The admin_role for a User cannot be assigned to a team"
 msgstr "ユーザーの admin_role をチームに割り当てることができません"
 
-#: main/access.py:1670
+#: awx/main/access.py:1678
 msgid ""
 "You do not have permission to the workflow job resources required for "
 "relaunch."
 msgstr ""
 
-#: main/apps.py:9
+#: awx/main/apps.py:9
 msgid "Main"
 msgstr "メイン"
 
-#: main/conf.py:17
+#: awx/main/conf.py:17
 msgid "Enable Activity Stream"
 msgstr "アクティビティーストリームの有効化"
 
-#: main/conf.py:18
+#: awx/main/conf.py:18
 msgid "Enable capturing activity for the Tower activity stream."
 msgstr "Tower アクティビティーストリームのアクティビティーのキャプチャーを有効にします。"
 
-#: main/conf.py:19 main/conf.py:29 main/conf.py:39 main/conf.py:48
-#: main/conf.py:60 main/conf.py:78 main/conf.py:103
-msgid "System"
-msgstr "システム"
-
-#: main/conf.py:27
+#: awx/main/conf.py:27
 msgid "Enable Activity Stream for Inventory Sync"
 msgstr "インベントリー同期のアクティビティティーストリームの有効化"
 
-#: main/conf.py:28
+#: awx/main/conf.py:28
 msgid ""
 "Enable capturing activity for the Tower activity stream when running "
 "inventory sync."
 msgstr "インベントリー同期の実行時に Tower アクティビティーストリームのアクティビティーのキャプチャーを有効にします。"
 
-#: main/conf.py:37
+#: awx/main/conf.py:37
 msgid "All Users Visible to Organization Admins"
 msgstr "組織管理者に表示されるすべてのユーザー"
 
-#: main/conf.py:38
+#: awx/main/conf.py:38
 msgid ""
 "Controls whether any Organization Admin can view all users, even those not "
 "associated with their Organization."
 msgstr "組織管理者が、それぞれの組織に関連付けられていないすべてのユーザーを閲覧できるかどうかを制御します。"
 
-#: main/conf.py:46
+#: awx/main/conf.py:46
 msgid "Enable Tower Administrator Alerts"
 msgstr "Tower 管理者アラートの有効化"
 
-#: main/conf.py:47
+#: awx/main/conf.py:47
 msgid ""
 "Allow Tower to email Admin users for system events that may require "
 "attention."
 msgstr "Tower から管理者ユーザーに対し、注意を要する可能性のあるシステムイベントについてのメールを送信することを許可します。"
 
-#: main/conf.py:57
+#: awx/main/conf.py:57
 msgid "Base URL of the Tower host"
 msgstr "Tower ホストのベース URL"
 
-#: main/conf.py:58
+#: awx/main/conf.py:58
 msgid ""
 "This setting is used by services like notifications to render a valid url to"
 " the Tower host."
 msgstr "この設定は、有効な URL を Tower ホストにレンダリングする通知などのサービスで使用されます。"
 
-#: main/conf.py:67
+#: awx/main/conf.py:67
 msgid "Remote Host Headers"
 msgstr "リモートホストヘッダー"
 
-#: main/conf.py:68
+#: awx/main/conf.py:68
 msgid ""
 "HTTP headers and meta keys to search to determine remote host name or IP. Add additional items to this list, such as \"HTTP_X_FORWARDED_FOR\", if behind a reverse proxy.\n"
 "\n"
@@ -1066,11 +1125,11 @@ msgstr ""
 "Host: 127.0.0.1\n"
 "REMOTE_HOST_HEADERS = ['HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR', 'REMOTE_HOST']"
 
-#: main/conf.py:99
+#: awx/main/conf.py:99
 msgid "Tower License"
 msgstr "Tower ライセンス"
 
-#: main/conf.py:100
+#: awx/main/conf.py:100
 msgid ""
 "The license controls which features and functionality are enabled in Tower. "
 "Use /api/v1/config/ to update or change the license."
@@ -1078,72 +1137,73 @@ msgstr ""
 "ライセンスによって、Tower で有効にされる特長および機能が制御されます。ライセンスを更新または変更するには、/api/v1/config/ "
 "を使用します。"
 
-#: main/conf.py:110
+#: awx/main/conf.py:110
 msgid "Ansible Modules Allowed for Ad Hoc Jobs"
 msgstr "アドホックジョブで許可される Ansible モジュール"
 
-#: main/conf.py:111
+#: awx/main/conf.py:111
 msgid "List of modules allowed to be used by ad-hoc jobs."
 msgstr "アドホックジョブで使用できるモジュール一覧。"
 
-#: main/conf.py:112 main/conf.py:121 main/conf.py:130 main/conf.py:140
-#: main/conf.py:150 main/conf.py:160 main/conf.py:170 main/conf.py:180
-#: main/conf.py:190 main/conf.py:202 main/conf.py:214 main/conf.py:226
+#: awx/main/conf.py:112 awx/main/conf.py:121 awx/main/conf.py:130
+#: awx/main/conf.py:140 awx/main/conf.py:150 awx/main/conf.py:160
+#: awx/main/conf.py:170 awx/main/conf.py:180 awx/main/conf.py:190
+#: awx/main/conf.py:202 awx/main/conf.py:214 awx/main/conf.py:226
 msgid "Jobs"
 msgstr "ジョブ"
 
-#: main/conf.py:119
+#: awx/main/conf.py:119
 msgid "Enable job isolation"
 msgstr "ジョブの分離の有効化"
 
-#: main/conf.py:120
+#: awx/main/conf.py:120
 msgid ""
 "Isolates an Ansible job from protected parts of the Tower system to prevent "
 "exposing sensitive information."
 msgstr "機密情報の公開を防ぐために Tower システムの保護された部分から Ansible ジョブを分離します。"
 
-#: main/conf.py:128
+#: awx/main/conf.py:128
 msgid "Job isolation execution path"
 msgstr "ジョブ分離の実行パス"
 
-#: main/conf.py:129
+#: awx/main/conf.py:129
 msgid ""
 "Create temporary working directories for isolated jobs in this location."
 msgstr "この場所に分離されたジョブの一時作業ディレクトリーを作成します。"
 
-#: main/conf.py:138
+#: awx/main/conf.py:138
 msgid "Paths to hide from isolated jobs"
 msgstr "分離されたジョブから非表示にするパス"
 
-#: main/conf.py:139
+#: awx/main/conf.py:139
 msgid "Additional paths to hide from isolated processes."
 msgstr "分離されたプロセスから非表示にする追加パス。"
 
-#: main/conf.py:148
+#: awx/main/conf.py:148
 msgid "Paths to expose to isolated jobs"
 msgstr "分離されたジョブに公開するパス"
 
-#: main/conf.py:149
+#: awx/main/conf.py:149
 msgid ""
 "Whitelist of paths that would otherwise be hidden to expose to isolated "
 "jobs."
 msgstr "分離されたジョブに公開されないように非表示にされることがあるパスのホワイトリスト。"
 
-#: main/conf.py:158
+#: awx/main/conf.py:158
 msgid "Standard Output Maximum Display Size"
 msgstr "標準出力の最大表示サイズ"
 
-#: main/conf.py:159
+#: awx/main/conf.py:159
 msgid ""
 "Maximum Size of Standard Output in bytes to display before requiring the "
 "output be downloaded."
 msgstr "出力のダウンロードを要求する前に表示される標準出力の最大サイズ (バイト単位)。"
 
-#: main/conf.py:168
+#: awx/main/conf.py:168
 msgid "Job Event Standard Output Maximum Display Size"
 msgstr "ジョブイベントの標準出力の最大表示サイズ"
 
-#: main/conf.py:169
+#: awx/main/conf.py:169
 msgid ""
 "Maximum Size of Standard Output in bytes to display for a single job or ad "
 "hoc command event. `stdout` will end with `…` when truncated."
@@ -1151,31 +1211,31 @@ msgstr ""
 "単一ジョブまたはアドホックコマンドイベントについて表示される標準出力の最大サイズ (バイト単位)。`stdout` は切り捨てが実行されると `…` "
 "で終了します。"
 
-#: main/conf.py:178
+#: awx/main/conf.py:178
 msgid "Maximum Scheduled Jobs"
 msgstr "スケジュール済みジョブの最大数"
 
-#: main/conf.py:179
+#: awx/main/conf.py:179
 msgid ""
 "Maximum number of the same job template that can be waiting to run when "
 "launching from a schedule before no more are created."
 msgstr "スケジュールからの起動時に実行を待機している同じジョブテンプレートの最大数です (これ以上作成されることはありません)。"
 
-#: main/conf.py:188
+#: awx/main/conf.py:188
 msgid "Ansible Callback Plugins"
 msgstr "Ansible コールバックプラグイン"
 
-#: main/conf.py:189
+#: awx/main/conf.py:189
 msgid ""
 "List of paths to search for extra callback plugins to be used when running "
 "jobs."
 msgstr "ジョブの実行時に使用される追加のコールバックプラグインについて検索するパスの一覧。"
 
-#: main/conf.py:199
+#: awx/main/conf.py:199
 msgid "Default Job Timeout"
 msgstr "デフォルトのジョブタイムアウト"
 
-#: main/conf.py:200
+#: awx/main/conf.py:200
 msgid ""
 "Maximum time to allow jobs to run. Use value of 0 to indicate that no "
 "timeout should be imposed. A timeout set on an individual job template will "
@@ -1184,11 +1244,11 @@ msgstr ""
 "ジョブの実行可能な最大時間。値 0 "
 "が使用されている場合はタイムアウトを設定できないことを示します。個別のジョブテンプレートに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:211
+#: awx/main/conf.py:211
 msgid "Default Inventory Update Timeout"
 msgstr "デフォルトのインベントリー更新タイムアウト"
 
-#: main/conf.py:212
+#: awx/main/conf.py:212
 msgid ""
 "Maximum time to allow inventory updates to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual inventory "
@@ -1197,11 +1257,11 @@ msgstr ""
 "インベントリー更新の実行可能な最大時間。値 0 "
 "が設定されている場合はタイムアウトを設定できないことを示します。個別のインベントリーソースに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:223
+#: awx/main/conf.py:223
 msgid "Default Project Update Timeout"
 msgstr "デフォルトのプロジェクト更新タイムアウト"
 
-#: main/conf.py:224
+#: awx/main/conf.py:224
 msgid ""
 "Maximum time to allow project updates to run. Use value of 0 to indicate "
 "that no timeout should be imposed. A timeout set on an individual project "
@@ -1210,57 +1270,58 @@ msgstr ""
 "プロジェクト更新の実行可能な最大時間。値 0 "
 "が設定されている場合はタイムアウトを設定できないことを示します。個別のプロジェクトに設定されるタイムアウトはこれを上書きします。"
 
-#: main/conf.py:234
+#: awx/main/conf.py:234
 msgid "Logging Aggregator"
 msgstr ""
 
-#: main/conf.py:235
+#: awx/main/conf.py:235
 msgid "Hostname/IP where external logs will be sent to."
 msgstr ""
 
-#: main/conf.py:236 main/conf.py:245 main/conf.py:255 main/conf.py:264
-#: main/conf.py:274 main/conf.py:288 main/conf.py:300 main/conf.py:309
+#: awx/main/conf.py:236 awx/main/conf.py:245 awx/main/conf.py:255
+#: awx/main/conf.py:264 awx/main/conf.py:274 awx/main/conf.py:288
+#: awx/main/conf.py:300 awx/main/conf.py:309
 msgid "Logging"
 msgstr "ロギング"
 
-#: main/conf.py:243
+#: awx/main/conf.py:243
 msgid "Logging Aggregator Port"
 msgstr ""
 
-#: main/conf.py:244
+#: awx/main/conf.py:244
 msgid "Port on Logging Aggregator to send logs to (if required)."
 msgstr ""
 
-#: main/conf.py:253
+#: awx/main/conf.py:253
 msgid "Logging Aggregator Type"
 msgstr ""
 
-#: main/conf.py:254
+#: awx/main/conf.py:254
 msgid "Format messages for the chosen log aggregator."
 msgstr ""
 
-#: main/conf.py:262
+#: awx/main/conf.py:262
 msgid "Logging Aggregator Username"
 msgstr ""
 
-#: main/conf.py:263
+#: awx/main/conf.py:263
 msgid "Username for external log aggregator (if required)."
 msgstr ""
 
-#: main/conf.py:272
+#: awx/main/conf.py:272
 msgid "Logging Aggregator Password/Token"
 msgstr ""
 
-#: main/conf.py:273
+#: awx/main/conf.py:273
 msgid ""
 "Password or authentication token for external log aggregator (if required)."
 msgstr ""
 
-#: main/conf.py:281
+#: awx/main/conf.py:281
 msgid "Loggers to send data to the log aggregator from"
 msgstr "ログアグリゲーターにデータを送信するロガー"
 
-#: main/conf.py:282
+#: awx/main/conf.py:282
 msgid ""
 "List of loggers that will send HTTP logs to the collector, these can include any or all of: \n"
 "awx - Tower service logs\n"
@@ -1269,11 +1330,11 @@ msgid ""
 "system_tracking - facts gathered from scan jobs."
 msgstr ""
 
-#: main/conf.py:295
+#: awx/main/conf.py:295
 msgid "Log System Tracking Facts Individually"
 msgstr ""
 
-#: main/conf.py:296
+#: awx/main/conf.py:296
 msgid ""
 "If set, system tracking facts will be sent for each package, service, "
 "orother item found in a scan, allowing for greater search query granularity."
@@ -1281,1040 +1342,1137 @@ msgid ""
 "efficiency in fact processing."
 msgstr ""
 
-#: main/conf.py:307
+#: awx/main/conf.py:307
 msgid "Enable External Logging"
 msgstr ""
 
-#: main/conf.py:308
+#: awx/main/conf.py:308
 msgid "Enable sending logs to external log aggregator."
 msgstr ""
 
-#: main/models/activity_stream.py:22
+#: awx/main/models/activity_stream.py:22
 msgid "Entity Created"
 msgstr "エンティティーの作成"
 
-#: main/models/activity_stream.py:23
+#: awx/main/models/activity_stream.py:23
 msgid "Entity Updated"
 msgstr "エンティティーの更新"
 
-#: main/models/activity_stream.py:24
+#: awx/main/models/activity_stream.py:24
 msgid "Entity Deleted"
 msgstr "エンティティーの削除"
 
-#: main/models/activity_stream.py:25
+#: awx/main/models/activity_stream.py:25
 msgid "Entity Associated with another Entity"
 msgstr "エンティティーの別のエンティティーへの関連付け"
 
-#: main/models/activity_stream.py:26
+#: awx/main/models/activity_stream.py:26
 msgid "Entity was Disassociated with another Entity"
 msgstr "エンティティーの別のエンティティーとの関連付けの解除"
 
-#: main/models/ad_hoc_commands.py:96
+#: awx/main/models/ad_hoc_commands.py:96
 msgid "No valid inventory."
 msgstr "有効なインベントリーはありません。"
 
-#: main/models/ad_hoc_commands.py:103 main/models/jobs.py:161
+#: awx/main/models/ad_hoc_commands.py:103 awx/main/models/jobs.py:161
 msgid "You must provide a machine / SSH credential."
 msgstr "マシン/SSH 認証情報を入力してください。"
 
-#: main/models/ad_hoc_commands.py:114 main/models/ad_hoc_commands.py:122
+#: awx/main/models/ad_hoc_commands.py:114
+#: awx/main/models/ad_hoc_commands.py:122
 msgid "Invalid type for ad hoc command"
 msgstr "アドホックコマンドの無効なタイプ"
 
-#: main/models/ad_hoc_commands.py:117
+#: awx/main/models/ad_hoc_commands.py:117
 msgid "Unsupported module for ad hoc commands."
 msgstr "アドホックコマンドのサポートされていないモジュール。"
 
-#: main/models/ad_hoc_commands.py:125
+#: awx/main/models/ad_hoc_commands.py:125
 #, python-format
 msgid "No argument passed to %s module."
 msgstr "%s モジュールに渡される引数はありません。"
 
-#: main/models/ad_hoc_commands.py:222 main/models/jobs.py:763
+#: awx/main/models/ad_hoc_commands.py:222 awx/main/models/jobs.py:763
 msgid "Host Failed"
 msgstr "ホストの失敗"
 
-#: main/models/ad_hoc_commands.py:223 main/models/jobs.py:764
+#: awx/main/models/ad_hoc_commands.py:223 awx/main/models/jobs.py:764
 msgid "Host OK"
 msgstr "ホスト OK"
 
-#: main/models/ad_hoc_commands.py:224 main/models/jobs.py:767
+#: awx/main/models/ad_hoc_commands.py:224 awx/main/models/jobs.py:767
 msgid "Host Unreachable"
 msgstr "ホストに到達できません"
 
-#: main/models/ad_hoc_commands.py:229 main/models/jobs.py:766
+#: awx/main/models/ad_hoc_commands.py:229 awx/main/models/jobs.py:766
 msgid "Host Skipped"
 msgstr "ホストがスキップされました"
 
-#: main/models/ad_hoc_commands.py:239 main/models/jobs.py:794
+#: awx/main/models/ad_hoc_commands.py:239 awx/main/models/jobs.py:794
 msgid "Debug"
 msgstr "デバッグ"
 
-#: main/models/ad_hoc_commands.py:240 main/models/jobs.py:795
+#: awx/main/models/ad_hoc_commands.py:240 awx/main/models/jobs.py:795
 msgid "Verbose"
 msgstr "詳細"
 
-#: main/models/ad_hoc_commands.py:241 main/models/jobs.py:796
+#: awx/main/models/ad_hoc_commands.py:241 awx/main/models/jobs.py:796
 msgid "Deprecated"
 msgstr "非推奨"
 
-#: main/models/ad_hoc_commands.py:242 main/models/jobs.py:797
+#: awx/main/models/ad_hoc_commands.py:242 awx/main/models/jobs.py:797
 msgid "Warning"
 msgstr "警告"
 
-#: main/models/ad_hoc_commands.py:243 main/models/jobs.py:798
+#: awx/main/models/ad_hoc_commands.py:243 awx/main/models/jobs.py:798
 msgid "System Warning"
 msgstr "システム警告"
 
-#: main/models/ad_hoc_commands.py:244 main/models/jobs.py:799
-#: main/models/unified_jobs.py:64
+#: awx/main/models/ad_hoc_commands.py:244 awx/main/models/jobs.py:799
+#: awx/main/models/unified_jobs.py:64
 msgid "Error"
 msgstr "エラー"
 
-#: main/models/base.py:45 main/models/base.py:51 main/models/base.py:56
+#: awx/main/models/base.py:45 awx/main/models/base.py:51
+#: awx/main/models/base.py:56
 msgid "Run"
 msgstr "実行"
 
-#: main/models/base.py:46 main/models/base.py:52 main/models/base.py:57
+#: awx/main/models/base.py:46 awx/main/models/base.py:52
+#: awx/main/models/base.py:57
 msgid "Check"
 msgstr "チェック"
 
-#: main/models/base.py:47
+#: awx/main/models/base.py:47
 msgid "Scan"
 msgstr "スキャン"
 
-#: main/models/base.py:61
+#: awx/main/models/base.py:61
 msgid "Read Inventory"
 msgstr "インベントリーの読み取り"
 
-#: main/models/base.py:62
+#: awx/main/models/base.py:62
 msgid "Edit Inventory"
 msgstr "インベントリーの編集"
 
-#: main/models/base.py:63
+#: awx/main/models/base.py:63
 msgid "Administrate Inventory"
 msgstr "インベントリーの管理"
 
-#: main/models/base.py:64
+#: awx/main/models/base.py:64
 msgid "Deploy To Inventory"
 msgstr "インベントリーへのデプロイ"
 
-#: main/models/base.py:65
+#: awx/main/models/base.py:65
 msgid "Deploy To Inventory (Dry Run)"
 msgstr "インベントリーへのデプロイ (ドライラン)"
 
-#: main/models/base.py:66
+#: awx/main/models/base.py:66
 msgid "Scan an Inventory"
 msgstr "インベントリーのスキャン"
 
-#: main/models/base.py:67
+#: awx/main/models/base.py:67
 msgid "Create a Job Template"
 msgstr "ジョブテンプレートの作成"
 
-#: main/models/credential.py:33
+#: awx/main/models/credential.py:33
 msgid "Machine"
 msgstr "マシン"
 
-#: main/models/credential.py:34
+#: awx/main/models/credential.py:34
 msgid "Network"
 msgstr "ネットワーク"
 
-#: main/models/credential.py:35
+#: awx/main/models/credential.py:35
 msgid "Source Control"
 msgstr "ソースコントロール"
 
-#: main/models/credential.py:36
+#: awx/main/models/credential.py:36
 msgid "Amazon Web Services"
 msgstr "Amazon Web サービス"
 
-#: main/models/credential.py:37
+#: awx/main/models/credential.py:37
 msgid "Rackspace"
 msgstr "Rackspace"
 
-#: main/models/credential.py:38 main/models/inventory.py:713
+#: awx/main/models/credential.py:38 awx/main/models/inventory.py:713
 msgid "VMware vCenter"
 msgstr "VMware vCenter"
 
-#: main/models/credential.py:39 main/models/inventory.py:714
+#: awx/main/models/credential.py:39 awx/main/models/inventory.py:714
 msgid "Red Hat Satellite 6"
 msgstr "Red Hat Satellite 6"
 
-#: main/models/credential.py:40 main/models/inventory.py:715
+#: awx/main/models/credential.py:40 awx/main/models/inventory.py:715
 msgid "Red Hat CloudForms"
 msgstr "Red Hat CloudForms"
 
-#: main/models/credential.py:41 main/models/inventory.py:710
+#: awx/main/models/credential.py:41 awx/main/models/inventory.py:710
 msgid "Google Compute Engine"
 msgstr "Google Compute Engine"
 
-#: main/models/credential.py:42 main/models/inventory.py:711
+#: awx/main/models/credential.py:42 awx/main/models/inventory.py:711
 msgid "Microsoft Azure Classic (deprecated)"
 msgstr "Microsoft Azure Classic (非推奨)"
 
-#: main/models/credential.py:43 main/models/inventory.py:712
+#: awx/main/models/credential.py:43 awx/main/models/inventory.py:712
 msgid "Microsoft Azure Resource Manager"
 msgstr "Microsoft Azure Resource Manager"
 
-#: main/models/credential.py:44 main/models/inventory.py:716
+#: awx/main/models/credential.py:44 awx/main/models/inventory.py:716
 msgid "OpenStack"
 msgstr "OpenStack"
 
-#: main/models/credential.py:48
+#: awx/main/models/credential.py:48
 msgid "None"
 msgstr "なし"
 
-#: main/models/credential.py:49
+#: awx/main/models/credential.py:49
 msgid "Sudo"
 msgstr "Sudo"
 
-#: main/models/credential.py:50
+#: awx/main/models/credential.py:50
 msgid "Su"
 msgstr "Su"
 
-#: main/models/credential.py:51
+#: awx/main/models/credential.py:51
 msgid "Pbrun"
 msgstr "Pbrun"
 
-#: main/models/credential.py:52
+#: awx/main/models/credential.py:52
 msgid "Pfexec"
 msgstr "Pfexec"
 
-#: main/models/credential.py:53
+#: awx/main/models/credential.py:53
 msgid "DZDO"
 msgstr ""
 
-#: main/models/credential.py:54
+#: awx/main/models/credential.py:54
 msgid "Pmrun"
 msgstr ""
 
-#: main/models/credential.py:103
+#: awx/main/models/credential.py:103
 msgid "Host"
 msgstr "ホスト"
 
-#: main/models/credential.py:104
+#: awx/main/models/credential.py:104
 msgid "The hostname or IP address to use."
 msgstr "使用するホスト名または IP アドレス。"
 
-#: main/models/credential.py:110
+#: awx/main/models/credential.py:110
 msgid "Username"
 msgstr "ユーザー名"
 
-#: main/models/credential.py:111
+#: awx/main/models/credential.py:111
 msgid "Username for this credential."
 msgstr "この認証情報のユーザー名。"
 
-#: main/models/credential.py:117
+#: awx/main/models/credential.py:117
 msgid "Password"
 msgstr "パスワード"
 
-#: main/models/credential.py:118
+#: awx/main/models/credential.py:118
 msgid ""
 "Password for this credential (or \"ASK\" to prompt the user for machine "
 "credentials)."
 msgstr "この認証情報のパスワード (またはマシンの認証情報を求めるプロンプトを出すには 「ASK」)。"
 
-#: main/models/credential.py:125
+#: awx/main/models/credential.py:125
 msgid "Security Token"
 msgstr "セキュリティートークン"
 
-#: main/models/credential.py:126
+#: awx/main/models/credential.py:126
 msgid "Security Token for this credential"
 msgstr "この認証情報のセキュリティートークン"
 
-#: main/models/credential.py:132
+#: awx/main/models/credential.py:132
 msgid "Project"
 msgstr "プロジェクト"
 
-#: main/models/credential.py:133
+#: awx/main/models/credential.py:133
 msgid "The identifier for the project."
 msgstr "プロジェクトの識別子。"
 
-#: main/models/credential.py:139
+#: awx/main/models/credential.py:139
 msgid "Domain"
 msgstr "ドメイン"
 
-#: main/models/credential.py:140
+#: awx/main/models/credential.py:140
 msgid "The identifier for the domain."
 msgstr "ドメインの識別子。"
 
-#: main/models/credential.py:145
+#: awx/main/models/credential.py:145
 msgid "SSH private key"
 msgstr "SSH 秘密鍵"
 
-#: main/models/credential.py:146
+#: awx/main/models/credential.py:146
 msgid "RSA or DSA private key to be used instead of password."
 msgstr "パスワードの代わりに使用される RSA または DSA 秘密鍵。"
 
-#: main/models/credential.py:152
+#: awx/main/models/credential.py:152
 msgid "SSH key unlock"
 msgstr "SSH キーのロック解除"
 
-#: main/models/credential.py:153
+#: awx/main/models/credential.py:153
 msgid ""
 "Passphrase to unlock SSH private key if encrypted (or \"ASK\" to prompt the "
 "user for machine credentials)."
 msgstr ""
 "暗号化されている場合は SSH 秘密鍵のロックを解除するためのパスフレーズ (またはマシンの認証情報を求めるプロンプトを出すには「ASK」)。"
 
-#: main/models/credential.py:161
+#: awx/main/models/credential.py:161
 msgid "Privilege escalation method."
 msgstr "権限昇格メソッド。"
 
-#: main/models/credential.py:167
+#: awx/main/models/credential.py:167
 msgid "Privilege escalation username."
 msgstr "権限昇格ユーザー名。"
 
-#: main/models/credential.py:173
+#: awx/main/models/credential.py:173
 msgid "Password for privilege escalation method."
 msgstr "権限昇格メソッドのパスワード。"
 
-#: main/models/credential.py:179
+#: awx/main/models/credential.py:179
 msgid "Vault password (or \"ASK\" to prompt the user)."
 msgstr "Vault パスワード (またはユーザーにプロンプトを出すには「ASK」)。"
 
-#: main/models/credential.py:183
+#: awx/main/models/credential.py:183
 msgid "Whether to use the authorize mechanism."
 msgstr "承認メカニズムを使用するかどうか。"
 
-#: main/models/credential.py:189
+#: awx/main/models/credential.py:189
 msgid "Password used by the authorize mechanism."
 msgstr "承認メカニズムで使用されるパスワード。"
 
-#: main/models/credential.py:195
+#: awx/main/models/credential.py:195
 msgid "Client Id or Application Id for the credential"
 msgstr "認証情報のクライアント ID またはアプリケーション ID"
 
-#: main/models/credential.py:201
+#: awx/main/models/credential.py:201
 msgid "Secret Token for this credential"
 msgstr "この認証情報のシークレットトークン"
 
-#: main/models/credential.py:207
+#: awx/main/models/credential.py:207
 msgid "Subscription identifier for this credential"
 msgstr "この認証情報のサブスクリプション識別子"
 
-#: main/models/credential.py:213
+#: awx/main/models/credential.py:213
 msgid "Tenant identifier for this credential"
 msgstr "この認証情報のテナント識別子"
 
-#: main/models/credential.py:283
+#: awx/main/models/credential.py:283
 msgid "Host required for VMware credential."
 msgstr "VMware 認証情報に必要なホスト。"
 
-#: main/models/credential.py:285
+#: awx/main/models/credential.py:285
 msgid "Host required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なホスト。"
 
-#: main/models/credential.py:294
+#: awx/main/models/credential.py:294
 msgid "Access key required for AWS credential."
 msgstr "AWS 認証情報に必要なアクセスキー。"
 
-#: main/models/credential.py:296
+#: awx/main/models/credential.py:296
 msgid "Username required for Rackspace credential."
 msgstr "Rackspace 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:299
+#: awx/main/models/credential.py:299
 msgid "Username required for VMware credential."
 msgstr "VMware 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:301
+#: awx/main/models/credential.py:301
 msgid "Username required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なユーザー名。"
 
-#: main/models/credential.py:307
+#: awx/main/models/credential.py:307
 msgid "Secret key required for AWS credential."
 msgstr "AWS 認証情報に必要なシークレットキー。"
 
-#: main/models/credential.py:309
+#: awx/main/models/credential.py:309
 msgid "API key required for Rackspace credential."
 msgstr "Rackspace 認証情報に必要な API キー。"
 
-#: main/models/credential.py:311
+#: awx/main/models/credential.py:311
 msgid "Password required for VMware credential."
 msgstr "VMware 認証情報に必要なパスワード。"
 
-#: main/models/credential.py:313
+#: awx/main/models/credential.py:313
 msgid "Password or API key required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なパスワードまたは API キー。"
 
-#: main/models/credential.py:319
+#: awx/main/models/credential.py:319
 msgid "Project name required for OpenStack credential."
 msgstr "OpenStack 認証情報に必要なプロジェクト名。"
 
-#: main/models/credential.py:346
+#: awx/main/models/credential.py:346
 msgid "SSH key unlock must be set when SSH key is encrypted."
 msgstr "SSH キーの暗号化時に SSH キーのロック解除を設定する必要があります。"
 
-#: main/models/credential.py:352
+#: awx/main/models/credential.py:352
 msgid "Credential cannot be assigned to both a user and team."
 msgstr "認証情報はユーザーとチームの両方に割り当てることができません。"
 
-#: main/models/fact.py:21
+#: awx/main/models/fact.py:21
 msgid "Host for the facts that the fact scan captured."
 msgstr "ファクトスキャンがキャプチャーしたファクトのホスト。"
 
-#: main/models/fact.py:26
+#: awx/main/models/fact.py:26
 msgid "Date and time of the corresponding fact scan gathering time."
 msgstr "対応するファクトスキャン収集時間の日時。"
 
-#: main/models/fact.py:29
+#: awx/main/models/fact.py:29
 msgid ""
 "Arbitrary JSON structure of module facts captured at timestamp for a single "
 "host."
 msgstr "単一ホストのタイムスタンプでキャプチャーされるモジュールファクトの任意の JSON 構造。"
 
-#: main/models/inventory.py:45
+#: awx/main/models/inventory.py:45
 msgid "inventories"
 msgstr "インベントリー"
 
-#: main/models/inventory.py:52
+#: awx/main/models/inventory.py:52
 msgid "Organization containing this inventory."
 msgstr "このインベントリーを含む組織。"
 
-#: main/models/inventory.py:58
+#: awx/main/models/inventory.py:58
 msgid "Inventory variables in JSON or YAML format."
 msgstr "JSON または YAML 形式のインベントリー変数。"
 
-#: main/models/inventory.py:63
+#: awx/main/models/inventory.py:63
 msgid "Flag indicating whether any hosts in this inventory have failed."
 msgstr "このインベントリーのホストが失敗したかどうかを示すフラグ。"
 
-#: main/models/inventory.py:68
+#: awx/main/models/inventory.py:68
 msgid "Total number of hosts in this inventory."
 msgstr "このインべントリー内のホストの合計数。"
 
-#: main/models/inventory.py:73
+#: awx/main/models/inventory.py:73
 msgid "Number of hosts in this inventory with active failures."
 msgstr "アクティブなエラーのあるこのインベントリー内のホストの数。"
 
-#: main/models/inventory.py:78
+#: awx/main/models/inventory.py:78
 msgid "Total number of groups in this inventory."
 msgstr "このインべントリー内のグループの合計数。"
 
-#: main/models/inventory.py:83
+#: awx/main/models/inventory.py:83
 msgid "Number of groups in this inventory with active failures."
 msgstr "アクティブなエラーのあるこのインベントリー内のグループの数。"
 
-#: main/models/inventory.py:88
+#: awx/main/models/inventory.py:88
 msgid ""
 "Flag indicating whether this inventory has any external inventory sources."
 msgstr "このインベントリーに外部のインベントリーソースがあるかどうかを示すフラグ。"
 
-#: main/models/inventory.py:93
+#: awx/main/models/inventory.py:93
 msgid ""
 "Total number of external inventory sources configured within this inventory."
 msgstr "このインベントリー内で設定される外部インベントリーソースの合計数。"
 
-#: main/models/inventory.py:98
+#: awx/main/models/inventory.py:98
 msgid "Number of external inventory sources in this inventory with failures."
 msgstr "エラーのあるこのインベントリー内の外部インベントリーソースの数。"
 
-#: main/models/inventory.py:339
+#: awx/main/models/inventory.py:339
 msgid "Is this host online and available for running jobs?"
 msgstr "このホストはオンラインで、ジョブを実行するために利用できますか?"
 
-#: main/models/inventory.py:345
+#: awx/main/models/inventory.py:345
 msgid ""
 "The value used by the remote inventory source to uniquely identify the host"
 msgstr "ホストを一意に識別するためにリモートインベントリーソースで使用される値"
 
-#: main/models/inventory.py:350
+#: awx/main/models/inventory.py:350
 msgid "Host variables in JSON or YAML format."
 msgstr "JSON または YAML 形式のホスト変数。"
 
-#: main/models/inventory.py:372
+#: awx/main/models/inventory.py:372
 msgid "Flag indicating whether the last job failed for this host."
 msgstr "このホストの最後のジョブが失敗したかどうかを示すフラグ。"
 
-#: main/models/inventory.py:377
+#: awx/main/models/inventory.py:377
 msgid ""
 "Flag indicating whether this host was created/updated from any external "
 "inventory sources."
 msgstr "このホストが外部インベントリーソースから作成/更新されたかどうかを示すフラグ。"
 
-#: main/models/inventory.py:383
+#: awx/main/models/inventory.py:383
 msgid "Inventory source(s) that created or modified this host."
 msgstr "このホストを作成または変更したインベントリーソース。"
 
-#: main/models/inventory.py:474
+#: awx/main/models/inventory.py:474
 msgid "Group variables in JSON or YAML format."
 msgstr "JSON または YAML 形式のグループ変数。"
 
-#: main/models/inventory.py:480
+#: awx/main/models/inventory.py:480
 msgid "Hosts associated directly with this group."
 msgstr "このグループに直接関連付けられたホスト。"
 
-#: main/models/inventory.py:485
+#: awx/main/models/inventory.py:485
 msgid "Total number of hosts directly or indirectly in this group."
 msgstr "このグループに直接的または間接的に属するホストの合計数。"
 
-#: main/models/inventory.py:490
+#: awx/main/models/inventory.py:490
 msgid "Flag indicating whether this group has any hosts with active failures."
 msgstr "このグループにアクティブなエラーのあるホストがあるかどうかを示すフラグ。"
 
-#: main/models/inventory.py:495
+#: awx/main/models/inventory.py:495
 msgid "Number of hosts in this group with active failures."
 msgstr "アクティブなエラーのあるこのグループ内のホストの数。"
 
-#: main/models/inventory.py:500
+#: awx/main/models/inventory.py:500
 msgid "Total number of child groups contained within this group."
 msgstr "このグループに含まれる子グループの合計数。"
 
-#: main/models/inventory.py:505
+#: awx/main/models/inventory.py:505
 msgid "Number of child groups within this group that have active failures."
 msgstr "アクティブなエラーのあるこのグループ内の子グループの数。"
 
-#: main/models/inventory.py:510
+#: awx/main/models/inventory.py:510
 msgid ""
 "Flag indicating whether this group was created/updated from any external "
 "inventory sources."
 msgstr "このグループが外部インベントリーソースから作成/更新されたかどうかを示すフラグ。"
 
-#: main/models/inventory.py:516
+#: awx/main/models/inventory.py:516
 msgid "Inventory source(s) that created or modified this group."
 msgstr "このグループを作成または変更したインベントリーソース。"
 
-#: main/models/inventory.py:706 main/models/projects.py:42
-#: main/models/unified_jobs.py:402
+#: awx/main/models/inventory.py:706 awx/main/models/projects.py:42
+#: awx/main/models/unified_jobs.py:402
 msgid "Manual"
 msgstr "手動"
 
-#: main/models/inventory.py:707
+#: awx/main/models/inventory.py:707
 msgid "Local File, Directory or Script"
 msgstr "ローカルファイル、ディレクトリーまたはスクリプト"
 
-#: main/models/inventory.py:708
+#: awx/main/models/inventory.py:708
 msgid "Rackspace Cloud Servers"
 msgstr "Rackspace クラウドサーバー"
 
-#: main/models/inventory.py:709
+#: awx/main/models/inventory.py:709
 msgid "Amazon EC2"
 msgstr "Amazon EC2"
 
-#: main/models/inventory.py:717
+#: awx/main/models/inventory.py:717
 msgid "Custom Script"
 msgstr "カスタムスクリプト"
 
-#: main/models/inventory.py:828
+#: awx/main/models/inventory.py:828
 msgid "Inventory source variables in YAML or JSON format."
 msgstr "YAML または JSON 形式のインベントリーソース変数。"
 
-#: main/models/inventory.py:847
+#: awx/main/models/inventory.py:847
 msgid ""
 "Comma-separated list of filter expressions (EC2 only). Hosts are imported "
 "when ANY of the filters match."
 msgstr "カンマ区切りのフィルター式の一覧 (EC2 のみ) です。ホストは、フィルターのいずれかが一致する場合にインポートされます。"
 
-#: main/models/inventory.py:853
+#: awx/main/models/inventory.py:853
 msgid "Limit groups automatically created from inventory source (EC2 only)."
 msgstr "インベントリーソースから自動的に作成されるグループを制限します (EC2 のみ)。"
 
-#: main/models/inventory.py:857
+#: awx/main/models/inventory.py:857
 msgid "Overwrite local groups and hosts from remote inventory source."
 msgstr "リモートインベントリーソースからのローカルグループおよびホストを上書きします。"
 
-#: main/models/inventory.py:861
+#: awx/main/models/inventory.py:861
 msgid "Overwrite local variables from remote inventory source."
 msgstr "リモートインベントリーソースからのローカル変数を上書きします。"
 
-#: main/models/inventory.py:893
+#: awx/main/models/inventory.py:893
 msgid "Availability Zone"
 msgstr "アベイラビリティーゾーン"
 
-#: main/models/inventory.py:894
+#: awx/main/models/inventory.py:894
 msgid "Image ID"
 msgstr "イメージ ID"
 
-#: main/models/inventory.py:895
+#: awx/main/models/inventory.py:895
 msgid "Instance ID"
 msgstr "インスタンス ID"
 
-#: main/models/inventory.py:896
+#: awx/main/models/inventory.py:896
 msgid "Instance Type"
 msgstr "インスタンスタイプ"
 
-#: main/models/inventory.py:897
+#: awx/main/models/inventory.py:897
 msgid "Key Name"
 msgstr "キー名"
 
-#: main/models/inventory.py:898
+#: awx/main/models/inventory.py:898
 msgid "Region"
 msgstr "リージョン"
 
-#: main/models/inventory.py:899
+#: awx/main/models/inventory.py:899
 msgid "Security Group"
 msgstr "セキュリティーグループ"
 
-#: main/models/inventory.py:900
+#: awx/main/models/inventory.py:900
 msgid "Tags"
 msgstr "タグ"
 
-#: main/models/inventory.py:901
+#: awx/main/models/inventory.py:901
 msgid "VPC ID"
 msgstr "VPC ID"
 
-#: main/models/inventory.py:902
+#: awx/main/models/inventory.py:902
 msgid "Tag None"
 msgstr "タグ None"
 
-#: main/models/inventory.py:973
+#: awx/main/models/inventory.py:973
 #, python-format
 msgid ""
 "Cloud-based inventory sources (such as %s) require credentials for the "
 "matching cloud service."
 msgstr "クラウドベースのインベントリーソース (%s など) には一致するクラウドサービスの認証情報が必要です。"
 
-#: main/models/inventory.py:980
+#: awx/main/models/inventory.py:980
 msgid "Credential is required for a cloud source."
 msgstr "認証情報がクラウドソースに必要です。"
 
-#: main/models/inventory.py:1005
+#: awx/main/models/inventory.py:1005
 #, python-format
 msgid "Invalid %(source)s region: %(region)s"
 msgstr ""
 
-#: main/models/inventory.py:1030
+#: awx/main/models/inventory.py:1030
 #, python-format
 msgid "Invalid filter expression: %(filter)s"
 msgstr ""
 
-#: main/models/inventory.py:1048
+#: awx/main/models/inventory.py:1048
 #, python-format
 msgid "Invalid group by choice: %(choice)s"
 msgstr ""
 
-#: main/models/inventory.py:1195
+#: awx/main/models/inventory.py:1195
 #, python-format
 msgid ""
 "Unable to configure this item for cloud sync. It is already managed by %s."
 msgstr "クラウド同期用にこの項目を設定できません。すでに %s によって管理されています。"
 
-#: main/models/inventory.py:1290
+#: awx/main/models/inventory.py:1290
 msgid "Inventory script contents"
 msgstr "インベントリースクリプトの内容"
 
-#: main/models/inventory.py:1295
+#: awx/main/models/inventory.py:1295
 msgid "Organization owning this inventory script"
 msgstr "このインベントリースクリプトを所有する組織"
 
-#: main/models/jobs.py:169
+#: awx/main/models/jobs.py:169
 msgid "You must provide a network credential."
 msgstr "ネットワーク認証情報を指定する必要があります。"
 
-#: main/models/jobs.py:177
+#: awx/main/models/jobs.py:177
 msgid ""
 "Must provide a credential for a cloud provider, such as Amazon Web Services "
 "or Rackspace."
 msgstr "Amazon Web Services または Rackspace などのクラウドプロバイダーの認証情報を指定する必要があります。"
 
-#: main/models/jobs.py:269
+#: awx/main/models/jobs.py:269
 msgid "Job Template must provide 'inventory' or allow prompting for it."
 msgstr "ジョブテンプレートは「inventory」を指定するか、このプロンプトを許可する必要があります。"
 
-#: main/models/jobs.py:273
+#: awx/main/models/jobs.py:273
 msgid "Job Template must provide 'credential' or allow prompting for it."
 msgstr "ジョブテンプレートは「credential」を指定するか、このプロンプトを許可する必要があります。"
 
-#: main/models/jobs.py:362
+#: awx/main/models/jobs.py:362
 msgid "Cannot override job_type to or from a scan job."
 msgstr "スキャンジョブから/への job_type を上書きを実行できません。"
 
-#: main/models/jobs.py:365
+#: awx/main/models/jobs.py:365
 msgid "Inventory cannot be changed at runtime for scan jobs."
 msgstr "インベントリーはスキャンジョブの実行時に変更できません。"
 
-#: main/models/jobs.py:431 main/models/projects.py:243
+#: awx/main/models/jobs.py:431 awx/main/models/projects.py:243
 msgid "SCM Revision"
 msgstr "SCM リビジョン"
 
-#: main/models/jobs.py:432
+#: awx/main/models/jobs.py:432
 msgid "The SCM Revision from the Project used for this job, if available"
 msgstr "このジョブに使用されるプロジェクトからの SCM リビジョン (ある場合)"
 
-#: main/models/jobs.py:440
+#: awx/main/models/jobs.py:440
 msgid ""
 "The SCM Refresh task used to make sure the playbooks were available for the "
 "job run"
 msgstr "SCM 更新タスクは、Playbook がジョブの実行で利用可能であったことを確認するために使用されます"
 
-#: main/models/jobs.py:662
+#: awx/main/models/jobs.py:662
 msgid "job host summaries"
 msgstr "ジョブホストの概要"
 
-#: main/models/jobs.py:765
+#: awx/main/models/jobs.py:765
 msgid "Host Failure"
 msgstr "ホストの失敗"
 
-#: main/models/jobs.py:768 main/models/jobs.py:782
+#: awx/main/models/jobs.py:768 awx/main/models/jobs.py:782
 msgid "No Hosts Remaining"
 msgstr "残りのホストがありません"
 
-#: main/models/jobs.py:769
+#: awx/main/models/jobs.py:769
 msgid "Host Polling"
 msgstr "ホストのポーリング"
 
-#: main/models/jobs.py:770
+#: awx/main/models/jobs.py:770
 msgid "Host Async OK"
 msgstr "ホストの非同期 OK"
 
-#: main/models/jobs.py:771
+#: awx/main/models/jobs.py:771
 msgid "Host Async Failure"
 msgstr "ホストの非同期失敗"
 
-#: main/models/jobs.py:772
+#: awx/main/models/jobs.py:772
 msgid "Item OK"
 msgstr "項目 OK"
 
-#: main/models/jobs.py:773
+#: awx/main/models/jobs.py:773
 msgid "Item Failed"
 msgstr "項目の失敗"
 
-#: main/models/jobs.py:774
+#: awx/main/models/jobs.py:774
 msgid "Item Skipped"
 msgstr "項目のスキップ"
 
-#: main/models/jobs.py:775
+#: awx/main/models/jobs.py:775
 msgid "Host Retry"
 msgstr "ホストの再試行"
 
-#: main/models/jobs.py:777
+#: awx/main/models/jobs.py:777
 msgid "File Difference"
 msgstr "ファイルの相違点"
 
-#: main/models/jobs.py:778
+#: awx/main/models/jobs.py:778
 msgid "Playbook Started"
 msgstr "Playbook の開始"
 
-#: main/models/jobs.py:779
+#: awx/main/models/jobs.py:779
 msgid "Running Handlers"
 msgstr "実行中のハンドラー"
 
-#: main/models/jobs.py:780
+#: awx/main/models/jobs.py:780
 msgid "Including File"
 msgstr "組み込みファイル"
 
-#: main/models/jobs.py:781
+#: awx/main/models/jobs.py:781
 msgid "No Hosts Matched"
 msgstr "一致するホストがありません"
 
-#: main/models/jobs.py:783
+#: awx/main/models/jobs.py:783
 msgid "Task Started"
 msgstr "タスクの開始"
 
-#: main/models/jobs.py:785
+#: awx/main/models/jobs.py:785
 msgid "Variables Prompted"
 msgstr "変数のプロモート"
 
-#: main/models/jobs.py:786
+#: awx/main/models/jobs.py:786
 msgid "Gathering Facts"
 msgstr "ファクトの収集"
 
-#: main/models/jobs.py:787
+#: awx/main/models/jobs.py:787
 msgid "internal: on Import for Host"
 msgstr "内部: ホストのインポート時"
 
-#: main/models/jobs.py:788
+#: awx/main/models/jobs.py:788
 msgid "internal: on Not Import for Host"
 msgstr "内部: ホストの非インポート時"
 
-#: main/models/jobs.py:789
+#: awx/main/models/jobs.py:789
 msgid "Play Started"
 msgstr "プレイの開始"
 
-#: main/models/jobs.py:790
+#: awx/main/models/jobs.py:790
 msgid "Playbook Complete"
 msgstr "Playbook の完了"
 
-#: main/models/jobs.py:1200
+#: awx/main/models/jobs.py:1200
 msgid "Remove jobs older than a certain number of days"
 msgstr "特定の日数より前のジョブを削除"
 
-#: main/models/jobs.py:1201
+#: awx/main/models/jobs.py:1201
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr "特定の日数より前のアクティビティーストリームのエントリーを削除"
 
-#: main/models/jobs.py:1202
+#: awx/main/models/jobs.py:1202
 msgid "Purge and/or reduce the granularity of system tracking data"
 msgstr "システムトラッキングデータの詳細度の削除/削減"
 
-#: main/models/label.py:29
+#: awx/main/models/label.py:29
 msgid "Organization this label belongs to."
 msgstr "このラベルが属する組織。"
 
-#: main/models/notifications.py:31
+#: awx/main/models/notifications.py:31
 msgid "Email"
 msgstr "メール"
 
-#: main/models/notifications.py:32
+#: awx/main/models/notifications.py:32
 msgid "Slack"
 msgstr "Slack"
 
-#: main/models/notifications.py:33
+#: awx/main/models/notifications.py:33
 msgid "Twilio"
 msgstr "Twilio"
 
-#: main/models/notifications.py:34
+#: awx/main/models/notifications.py:34
 msgid "Pagerduty"
 msgstr "Pagerduty"
 
-#: main/models/notifications.py:35
+#: awx/main/models/notifications.py:35
 msgid "HipChat"
 msgstr "HipChat"
 
-#: main/models/notifications.py:36
+#: awx/main/models/notifications.py:36
 msgid "Webhook"
 msgstr "Webhook"
 
-#: main/models/notifications.py:37
+#: awx/main/models/notifications.py:37
 msgid "IRC"
 msgstr "IRC"
 
-#: main/models/notifications.py:127 main/models/unified_jobs.py:59
+#: awx/main/models/notifications.py:127 awx/main/models/unified_jobs.py:59
 msgid "Pending"
 msgstr "保留中"
 
-#: main/models/notifications.py:128 main/models/unified_jobs.py:62
+#: awx/main/models/notifications.py:128 awx/main/models/unified_jobs.py:62
 msgid "Successful"
 msgstr "成功"
 
-#: main/models/notifications.py:129 main/models/unified_jobs.py:63
+#: awx/main/models/notifications.py:129 awx/main/models/unified_jobs.py:63
 msgid "Failed"
 msgstr "失敗"
 
-#: main/models/organization.py:157
+#: awx/main/models/organization.py:157
 msgid "Execute Commands on the Inventory"
 msgstr "インベントリーでのコマンドの実行"
 
-#: main/models/organization.py:211
+#: awx/main/models/organization.py:211
 msgid "Token not invalidated"
 msgstr "トークンが無効にされませんでした"
 
-#: main/models/organization.py:212
+#: awx/main/models/organization.py:212
 msgid "Token is expired"
 msgstr "トークンは期限切れです"
 
-#: main/models/organization.py:213
+#: awx/main/models/organization.py:213
 msgid ""
 "The maximum number of allowed sessions for this user has been exceeded."
 msgstr ""
 
-#: main/models/organization.py:216
+#: awx/main/models/organization.py:216
 msgid "Invalid token"
 msgstr "無効なトークン"
 
-#: main/models/organization.py:233
+#: awx/main/models/organization.py:233
 msgid "Reason the auth token was invalidated."
 msgstr "認証トークンが無効にされた理由。"
 
-#: main/models/organization.py:272
+#: awx/main/models/organization.py:272
 msgid "Invalid reason specified"
 msgstr "無効な理由が特定されました"
 
-#: main/models/projects.py:43
+#: awx/main/models/projects.py:43
 msgid "Git"
 msgstr "Git"
 
-#: main/models/projects.py:44
+#: awx/main/models/projects.py:44
 msgid "Mercurial"
 msgstr "Mercurial"
 
-#: main/models/projects.py:45
+#: awx/main/models/projects.py:45
 msgid "Subversion"
 msgstr "Subversion"
 
-#: main/models/projects.py:71
+#: awx/main/models/projects.py:71
 msgid ""
 "Local path (relative to PROJECTS_ROOT) containing playbooks and related "
 "files for this project."
 msgstr "このプロジェクトの Playbook および関連するファイルを含むローカルパス (PROJECTS_ROOT との相対)。"
 
-#: main/models/projects.py:80
+#: awx/main/models/projects.py:80
 msgid "SCM Type"
 msgstr "SCM タイプ"
 
-#: main/models/projects.py:81
+#: awx/main/models/projects.py:81
 msgid "Specifies the source control system used to store the project."
 msgstr "プロジェクトを保存するために使用されるソースコントロールシステムを指定します。"
 
-#: main/models/projects.py:87
+#: awx/main/models/projects.py:87
 msgid "SCM URL"
 msgstr "SCM URL"
 
-#: main/models/projects.py:88
+#: awx/main/models/projects.py:88
 msgid "The location where the project is stored."
 msgstr "プロジェクトが保存される場所。"
 
-#: main/models/projects.py:94
+#: awx/main/models/projects.py:94
 msgid "SCM Branch"
 msgstr "SCM ブランチ"
 
-#: main/models/projects.py:95
+#: awx/main/models/projects.py:95
 msgid "Specific branch, tag or commit to checkout."
 msgstr "チェックアウトする特定のブランチ、タグまたはコミット。"
 
-#: main/models/projects.py:99
+#: awx/main/models/projects.py:99
 msgid "Discard any local changes before syncing the project."
 msgstr "ローカル変更を破棄してからプロジェクトを同期します。"
 
-#: main/models/projects.py:103
+#: awx/main/models/projects.py:103
 msgid "Delete the project before syncing."
 msgstr "プロジェクトを削除してから同期します。"
 
-#: main/models/projects.py:116
+#: awx/main/models/projects.py:116
 msgid "The amount of time to run before the task is canceled."
 msgstr "タスクが取り消される前の実行時間。"
 
-#: main/models/projects.py:130
+#: awx/main/models/projects.py:130
 msgid "Invalid SCM URL."
 msgstr "無効な SCM URL。"
 
-#: main/models/projects.py:133
+#: awx/main/models/projects.py:133
 msgid "SCM URL is required."
 msgstr "SCM URL が必要です。"
 
-#: main/models/projects.py:142
+#: awx/main/models/projects.py:142
 msgid "Credential kind must be 'scm'."
 msgstr "認証情報の種類は 'scm' にする必要があります。"
 
-#: main/models/projects.py:157
+#: awx/main/models/projects.py:157
 msgid "Invalid credential."
 msgstr "無効な認証情報。"
 
-#: main/models/projects.py:229
+#: awx/main/models/projects.py:229
 msgid "Update the project when a job is launched that uses the project."
 msgstr "プロジェクトを使用するジョブの起動時にプロジェクトを更新します。"
 
-#: main/models/projects.py:234
+#: awx/main/models/projects.py:234
 msgid ""
 "The number of seconds after the last project update ran that a newproject "
 "update will be launched as a job dependency."
 msgstr "新規プロジェクトの更新がジョブの依存関係として起動される最終プロジェクト更新後の秒数。"
 
-#: main/models/projects.py:244
+#: awx/main/models/projects.py:244
 msgid "The last revision fetched by a project update"
 msgstr "プロジェクト更新で取得される最新リビジョン"
 
-#: main/models/projects.py:251
+#: awx/main/models/projects.py:251
 msgid "Playbook Files"
 msgstr "Playbook ファイル"
 
-#: main/models/projects.py:252
+#: awx/main/models/projects.py:252
 msgid "List of playbooks found in the project"
 msgstr "プロジェクトにある Playbook の一覧"
 
-#: main/models/rbac.py:122
+#: awx/main/models/rbac.py:36
+#, fuzzy
+msgid "System Administrator"
+msgstr "インベントリーの管理"
+
+#: awx/main/models/rbac.py:37
+#, fuzzy
+msgid "System Auditor"
+msgstr "システム"
+
+#: awx/main/models/rbac.py:38
+msgid "Ad Hoc"
+msgstr ""
+
+#: awx/main/models/rbac.py:39
+msgid "Admin"
+msgstr ""
+
+#: awx/main/models/rbac.py:40
+msgid "Auditor"
+msgstr ""
+
+#: awx/main/models/rbac.py:41
+msgid "Execute"
+msgstr ""
+
+#: awx/main/models/rbac.py:42
+msgid "Member"
+msgstr ""
+
+#: awx/main/models/rbac.py:43
+msgid "Read"
+msgstr ""
+
+#: awx/main/models/rbac.py:44
+#, fuzzy
+msgid "Update"
+msgstr "SCM 更新"
+
+#: awx/main/models/rbac.py:45
+#, fuzzy
+msgid "Use"
+msgstr "ユーザー"
+
+#: awx/main/models/rbac.py:49
+msgid "Can manage all aspects of the system"
+msgstr ""
+
+#: awx/main/models/rbac.py:50
+msgid "Can view all settings on the system"
+msgstr ""
+
+#: awx/main/models/rbac.py:51
+#, fuzzy
+msgid "May run ad hoc commands on an inventory"
+msgstr "インベントリーでのコマンドの実行"
+
+#: awx/main/models/rbac.py:52
+#, python-format
+msgid "Can manage all aspects of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:53
+#, python-format
+msgid "Can view all settings for the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:54
+#, python-format
+msgid "May run the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:55
+#, python-format
+msgid "User is a member of the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:56
+#, python-format
+msgid "May view settings for the %s"
+msgstr ""
+
+#: awx/main/models/rbac.py:57
+msgid ""
+"May update project or inventory or group using the configured source update "
+"system"
+msgstr ""
+
+#: awx/main/models/rbac.py:58
+#, fuzzy, python-format
+msgid "Can use the %s in a job template"
+msgstr "ジョブテンプレートの作成"
+
+#: awx/main/models/rbac.py:122
 msgid "roles"
 msgstr "ロール"
 
-#: main/models/rbac.py:438
+#: awx/main/models/rbac.py:438
 msgid "role_ancestors"
 msgstr "role_ancestors"
 
-#: main/models/schedules.py:69
+#: awx/main/models/schedules.py:69
 msgid "Enables processing of this schedule by Tower."
 msgstr "Tower によるこのスケジュールの処理を有効にします。"
 
-#: main/models/schedules.py:75
+#: awx/main/models/schedules.py:75
 msgid "The first occurrence of the schedule occurs on or after this time."
 msgstr "スケジュールの最初のオカレンスはこの時間またはこの時間の後に生じます。"
 
-#: main/models/schedules.py:81
+#: awx/main/models/schedules.py:81
 msgid ""
 "The last occurrence of the schedule occurs before this time, aftewards the "
 "schedule expires."
 msgstr "スケジュールの最後のオカレンスはこの時間の前に生じます。その後スケジュールが期限切れになります。"
 
-#: main/models/schedules.py:85
+#: awx/main/models/schedules.py:85
 msgid "A value representing the schedules iCal recurrence rule."
 msgstr "スケジュールの iCal 繰り返しルールを表す値。"
 
-#: main/models/schedules.py:91
+#: awx/main/models/schedules.py:91
 msgid "The next time that the scheduled action will run."
 msgstr "スケジュールされたアクションが次に実行される時間。"
 
-#: main/models/unified_jobs.py:58
+#: awx/main/models/unified_jobs.py:58
 msgid "New"
 msgstr "新規"
 
-#: main/models/unified_jobs.py:60
+#: awx/main/models/unified_jobs.py:60
 msgid "Waiting"
 msgstr "待機中"
 
-#: main/models/unified_jobs.py:61
+#: awx/main/models/unified_jobs.py:61
 msgid "Running"
 msgstr "実行中"
 
-#: main/models/unified_jobs.py:65
+#: awx/main/models/unified_jobs.py:65
 msgid "Canceled"
 msgstr "取り消されました"
 
-#: main/models/unified_jobs.py:69
+#: awx/main/models/unified_jobs.py:69
 msgid "Never Updated"
 msgstr "更新されていません"
 
-#: main/models/unified_jobs.py:73 ui/templates/ui/index.html:85
-#: ui/templates/ui/index.html.py:104
+#: awx/main/models/unified_jobs.py:73 awx/ui/templates/ui/index.html:85
+#: awx/ui/templates/ui/index.html.py:104
 msgid "OK"
 msgstr "OK"
 
-#: main/models/unified_jobs.py:74
+#: awx/main/models/unified_jobs.py:74
 msgid "Missing"
 msgstr "不明"
 
-#: main/models/unified_jobs.py:78
+#: awx/main/models/unified_jobs.py:78
 msgid "No External Source"
 msgstr "外部ソースがありません"
 
-#: main/models/unified_jobs.py:85
+#: awx/main/models/unified_jobs.py:85
 msgid "Updating"
 msgstr "更新中"
 
-#: main/models/unified_jobs.py:403
+#: awx/main/models/unified_jobs.py:403
 msgid "Relaunch"
 msgstr "再起動"
 
-#: main/models/unified_jobs.py:404
+#: awx/main/models/unified_jobs.py:404
 msgid "Callback"
 msgstr "コールバック"
 
-#: main/models/unified_jobs.py:405
+#: awx/main/models/unified_jobs.py:405
 msgid "Scheduled"
 msgstr "スケジュール済み"
 
-#: main/models/unified_jobs.py:406
+#: awx/main/models/unified_jobs.py:406
 msgid "Dependency"
 msgstr "依存関係"
 
-#: main/models/unified_jobs.py:407
+#: awx/main/models/unified_jobs.py:407
 msgid "Workflow"
 msgstr "ワークフロー"
 
-#: main/models/unified_jobs.py:408
+#: awx/main/models/unified_jobs.py:408
 msgid "Sync"
 msgstr ""
 
-#: main/models/unified_jobs.py:454
+#: awx/main/models/unified_jobs.py:454
 msgid "The Tower node the job executed on."
 msgstr "ジョブが実行される Tower ノード。"
 
-#: main/models/unified_jobs.py:480
+#: awx/main/models/unified_jobs.py:480
 msgid "The date and time the job was queued for starting."
 msgstr "ジョブが開始のために待機した日時。"
 
-#: main/models/unified_jobs.py:486
+#: awx/main/models/unified_jobs.py:486
 msgid "The date and time the job finished execution."
 msgstr "ジョブが実行を完了した日時。"
 
-#: main/models/unified_jobs.py:492
+#: awx/main/models/unified_jobs.py:492
 msgid "Elapsed time in seconds that the job ran."
 msgstr "ジョブ実行の経過時間 (秒単位)"
 
-#: main/models/unified_jobs.py:514
+#: awx/main/models/unified_jobs.py:514
 msgid ""
 "A status field to indicate the state of the job if it wasn't able to run and"
 " capture stdout"
 msgstr "stdout の実行およびキャプチャーを実行できない場合のジョブの状態を示すための状態フィールド"
 
-#: main/notifications/base.py:17 main/notifications/email_backend.py:28
+#: awx/main/notifications/base.py:17
+#: awx/main/notifications/email_backend.py:28
 msgid ""
 "{} #{} had status {} on Ansible Tower, view details at {}\n"
 "\n"
@@ -2322,400 +2480,401 @@ msgstr ""
 "{} #{} には Ansible Tower のステータス {} があります。詳細については {} で確認してください\n"
 "\n"
 
-#: main/notifications/hipchat_backend.py:46
+#: awx/main/notifications/hipchat_backend.py:46
 msgid "Error sending messages: {}"
 msgstr "メッセージの送信時のエラー: {}"
 
-#: main/notifications/hipchat_backend.py:48
+#: awx/main/notifications/hipchat_backend.py:48
 msgid "Error sending message to hipchat: {}"
 msgstr "メッセージの hipchat への送信時のエラー: {}"
 
-#: main/notifications/irc_backend.py:54
+#: awx/main/notifications/irc_backend.py:54
 msgid "Exception connecting to irc server: {}"
 msgstr "irc サーバーへの接続時の例外: {}"
 
-#: main/notifications/pagerduty_backend.py:39
+#: awx/main/notifications/pagerduty_backend.py:39
 msgid "Exception connecting to PagerDuty: {}"
 msgstr "PagerDuty への接続時の例外: {}"
 
-#: main/notifications/pagerduty_backend.py:48
-#: main/notifications/slack_backend.py:52
-#: main/notifications/twilio_backend.py:46
+#: awx/main/notifications/pagerduty_backend.py:48
+#: awx/main/notifications/slack_backend.py:52
+#: awx/main/notifications/twilio_backend.py:46
 msgid "Exception sending messages: {}"
 msgstr "メッセージの送信時の例外: {}"
 
-#: main/notifications/twilio_backend.py:36
+#: awx/main/notifications/twilio_backend.py:36
 msgid "Exception connecting to Twilio: {}"
 msgstr "Twilio への接続時の例外: {}"
 
-#: main/notifications/webhook_backend.py:38
-#: main/notifications/webhook_backend.py:40
+#: awx/main/notifications/webhook_backend.py:38
+#: awx/main/notifications/webhook_backend.py:40
 msgid "Error sending notification webhook: {}"
 msgstr "通知 webhook の送信時のエラー: {}"
 
-#: main/scheduler/__init__.py:130
+#: awx/main/scheduler/__init__.py:130
 msgid ""
 "Job spawned from workflow could not start because it was not in the right "
 "state or required manual credentials"
 msgstr ""
 
-#: main/tasks.py:180
+#: awx/main/tasks.py:180
 msgid "Ansible Tower host usage over 90%"
 msgstr "Ansible Tower ホストの使用率が 90% を超えました"
 
-#: main/tasks.py:185
+#: awx/main/tasks.py:185
 msgid "Ansible Tower license will expire soon"
 msgstr "Ansible Tower ライセンスがまもなく期限切れになります"
 
-#: main/tasks.py:240
+#: awx/main/tasks.py:240
 msgid "status_str must be either succeeded or failed"
 msgstr "status_str は成功または失敗のいずれかである必要があります"
 
-#: main/utils/common.py:89
+#: awx/main/utils/common.py:89
 #, python-format
 msgid "Unable to convert \"%s\" to boolean"
 msgstr "\"%s\" をブール値に変換できません"
 
-#: main/utils/common.py:243
+#: awx/main/utils/common.py:243
 #, python-format
 msgid "Unsupported SCM type \"%s\""
 msgstr "サポートされない SCM タイプ \"%s\""
 
-#: main/utils/common.py:250 main/utils/common.py:262 main/utils/common.py:281
+#: awx/main/utils/common.py:250 awx/main/utils/common.py:262
+#: awx/main/utils/common.py:281
 #, python-format
 msgid "Invalid %s URL"
 msgstr "無効な %s URL"
 
-#: main/utils/common.py:252 main/utils/common.py:290
+#: awx/main/utils/common.py:252 awx/main/utils/common.py:290
 #, python-format
 msgid "Unsupported %s URL"
 msgstr "サポートされていない %s URL"
 
-#: main/utils/common.py:292
+#: awx/main/utils/common.py:292
 #, python-format
 msgid "Unsupported host \"%s\" for file:// URL"
 msgstr "ファイル:// URL のサポートされていないホスト \"%s\" "
 
-#: main/utils/common.py:294
+#: awx/main/utils/common.py:294
 #, python-format
 msgid "Host is required for %s URL"
 msgstr "%s URL にはホストが必要です"
 
-#: main/utils/common.py:312
+#: awx/main/utils/common.py:312
 #, python-format
 msgid "Username must be \"git\" for SSH access to %s."
 msgstr "%s への SSH アクセスではユーザー名を \"git\" にする必要があります。"
 
-#: main/utils/common.py:318
+#: awx/main/utils/common.py:318
 #, python-format
 msgid "Username must be \"hg\" for SSH access to %s."
 msgstr "%s への SSH アクセスではユーザー名を \"hg\" にする必要があります。"
 
-#: main/validators.py:60
+#: awx/main/validators.py:60
 #, python-format
 msgid "Invalid certificate or key: %r..."
 msgstr "無効な証明書またはキー: %r..."
 
-#: main/validators.py:74
+#: awx/main/validators.py:74
 #, python-format
 msgid "Invalid private key: unsupported type \"%s\""
 msgstr "無効な秘密鍵: サポートされていないタイプ \"%s\""
 
-#: main/validators.py:78
+#: awx/main/validators.py:78
 #, python-format
 msgid "Unsupported PEM object type: \"%s\""
 msgstr "サポートされていない PEM オブジェクトタイプ: \"%s\""
 
-#: main/validators.py:103
+#: awx/main/validators.py:103
 msgid "Invalid base64-encoded data"
 msgstr "無効な base64 エンコードされたデータ"
 
-#: main/validators.py:122
+#: awx/main/validators.py:122
 msgid "Exactly one private key is required."
 msgstr "秘密鍵が 1 つのみ必要です。"
 
-#: main/validators.py:124
+#: awx/main/validators.py:124
 msgid "At least one private key is required."
 msgstr "1 つ以上の秘密鍵が必要です。"
 
-#: main/validators.py:126
+#: awx/main/validators.py:126
 #, python-format
 msgid ""
 "At least %(min_keys)d private keys are required, only %(key_count)d "
 "provided."
 msgstr "%(min_keys)d 以上の秘密鍵が必要です。提供数: %(key_count)d のみ。"
 
-#: main/validators.py:129
+#: awx/main/validators.py:129
 #, python-format
 msgid "Only one private key is allowed, %(key_count)d provided."
 msgstr "秘密鍵が 1 つのみ許可されます。提供数: %(key_count)d"
 
-#: main/validators.py:131
+#: awx/main/validators.py:131
 #, python-format
 msgid ""
 "No more than %(max_keys)d private keys are allowed, %(key_count)d provided."
 msgstr "%(max_keys)d を超える秘密鍵は許可されません。提供数: %(key_count)d "
 
-#: main/validators.py:136
+#: awx/main/validators.py:136
 msgid "Exactly one certificate is required."
 msgstr "証明書が 1 つのみ必要です。"
 
-#: main/validators.py:138
+#: awx/main/validators.py:138
 msgid "At least one certificate is required."
 msgstr "1 つ以上の証明書が必要です。"
 
-#: main/validators.py:140
+#: awx/main/validators.py:140
 #, python-format
 msgid ""
 "At least %(min_certs)d certificates are required, only %(cert_count)d "
 "provided."
 msgstr "%(min_certs)d 以上の証明書が必要です。提供数: %(cert_count)d のみ。"
 
-#: main/validators.py:143
+#: awx/main/validators.py:143
 #, python-format
 msgid "Only one certificate is allowed, %(cert_count)d provided."
 msgstr "証明書が 1 つのみ許可されます。提供数: %(cert_count)d"
 
-#: main/validators.py:145
+#: awx/main/validators.py:145
 #, python-format
 msgid ""
 "No more than %(max_certs)d certificates are allowed, %(cert_count)d "
 "provided."
 msgstr "%(max_certs)d を超える証明書は許可されません。提供数: %(cert_count)d"
 
-#: main/views.py:20
+#: awx/main/views.py:20
 msgid "API Error"
 msgstr "API エラー"
 
-#: main/views.py:49
+#: awx/main/views.py:49
 msgid "Bad Request"
 msgstr "不正な要求です"
 
-#: main/views.py:50
+#: awx/main/views.py:50
 msgid "The request could not be understood by the server."
 msgstr "要求がサーバーによって認識されませんでした。"
 
-#: main/views.py:57
+#: awx/main/views.py:57
 msgid "Forbidden"
 msgstr "許可されていません"
 
-#: main/views.py:58
+#: awx/main/views.py:58
 msgid "You don't have permission to access the requested resource."
 msgstr "要求されたリソースにアクセスするためのパーミッションがありません。"
 
-#: main/views.py:65
+#: awx/main/views.py:65
 msgid "Not Found"
 msgstr "見つかりません"
 
-#: main/views.py:66
+#: awx/main/views.py:66
 msgid "The requested resource could not be found."
 msgstr "要求されたリソースは見つかりませんでした。"
 
-#: main/views.py:73
+#: awx/main/views.py:73
 msgid "Server Error"
 msgstr "サーバーエラー"
 
-#: main/views.py:74
+#: awx/main/views.py:74
 msgid "A server error has occurred."
 msgstr "サーバーエラーが発生しました。"
 
-#: settings/defaults.py:611
+#: awx/settings/defaults.py:611
 msgid "Chicago"
 msgstr "シカゴ"
 
-#: settings/defaults.py:612
+#: awx/settings/defaults.py:612
 msgid "Dallas/Ft. Worth"
 msgstr "ダラス/フォートワース"
 
-#: settings/defaults.py:613
+#: awx/settings/defaults.py:613
 msgid "Northern Virginia"
 msgstr "北バージニア"
 
-#: settings/defaults.py:614
+#: awx/settings/defaults.py:614
 msgid "London"
 msgstr "ロンドン"
 
-#: settings/defaults.py:615
+#: awx/settings/defaults.py:615
 msgid "Sydney"
 msgstr "シドニー"
 
-#: settings/defaults.py:616
+#: awx/settings/defaults.py:616
 msgid "Hong Kong"
 msgstr "香港"
 
-#: settings/defaults.py:643
+#: awx/settings/defaults.py:643
 msgid "US East (Northern Virginia)"
 msgstr "米国東部 (バージニア北部)"
 
-#: settings/defaults.py:644
+#: awx/settings/defaults.py:644
 msgid "US East (Ohio)"
 msgstr "米国東部 (オハイオ)"
 
-#: settings/defaults.py:645
+#: awx/settings/defaults.py:645
 msgid "US West (Oregon)"
 msgstr "米国西部 (オレゴン)"
 
-#: settings/defaults.py:646
+#: awx/settings/defaults.py:646
 msgid "US West (Northern California)"
 msgstr "米国西部 (北カリフォルニア)"
 
-#: settings/defaults.py:647
+#: awx/settings/defaults.py:647
 msgid "Canada (Central)"
 msgstr ""
 
-#: settings/defaults.py:648
+#: awx/settings/defaults.py:648
 msgid "EU (Frankfurt)"
 msgstr "EU (フランクフルト)"
 
-#: settings/defaults.py:649
+#: awx/settings/defaults.py:649
 msgid "EU (Ireland)"
 msgstr "EU (アイルランド)"
 
-#: settings/defaults.py:650
+#: awx/settings/defaults.py:650
 msgid "EU (London)"
 msgstr ""
 
-#: settings/defaults.py:651
+#: awx/settings/defaults.py:651
 msgid "Asia Pacific (Singapore)"
 msgstr "アジア太平洋 (シンガポール)"
 
-#: settings/defaults.py:652
+#: awx/settings/defaults.py:652
 msgid "Asia Pacific (Sydney)"
 msgstr "アジア太平洋 (シドニー)"
 
-#: settings/defaults.py:653
+#: awx/settings/defaults.py:653
 msgid "Asia Pacific (Tokyo)"
 msgstr "アジア太平洋 (東京)"
 
-#: settings/defaults.py:654
+#: awx/settings/defaults.py:654
 msgid "Asia Pacific (Seoul)"
 msgstr "アジア太平洋 (ソウル)"
 
-#: settings/defaults.py:655
+#: awx/settings/defaults.py:655
 msgid "Asia Pacific (Mumbai)"
 msgstr "アジア太平洋 (ムンバイ)"
 
-#: settings/defaults.py:656
+#: awx/settings/defaults.py:656
 msgid "South America (Sao Paulo)"
 msgstr "南アメリカ (サンパウロ)"
 
-#: settings/defaults.py:657
+#: awx/settings/defaults.py:657
 msgid "US West (GovCloud)"
 msgstr "米国西部 (GovCloud)"
 
-#: settings/defaults.py:658
+#: awx/settings/defaults.py:658
 msgid "China (Beijing)"
 msgstr "中国 (北京)"
 
-#: settings/defaults.py:707
+#: awx/settings/defaults.py:707
 msgid "US East (B)"
 msgstr "米国東部 (B)"
 
-#: settings/defaults.py:708
+#: awx/settings/defaults.py:708
 msgid "US East (C)"
 msgstr "米国東部 (C)"
 
-#: settings/defaults.py:709
+#: awx/settings/defaults.py:709
 msgid "US East (D)"
 msgstr "米国東部 (D)"
 
-#: settings/defaults.py:710
+#: awx/settings/defaults.py:710
 msgid "US Central (A)"
 msgstr "米国中部 (A)"
 
-#: settings/defaults.py:711
+#: awx/settings/defaults.py:711
 msgid "US Central (B)"
 msgstr "米国中部 (B)"
 
-#: settings/defaults.py:712
+#: awx/settings/defaults.py:712
 msgid "US Central (C)"
 msgstr "米国中部 (C)"
 
-#: settings/defaults.py:713
+#: awx/settings/defaults.py:713
 msgid "US Central (F)"
 msgstr "米国中部 (F)"
 
-#: settings/defaults.py:714
+#: awx/settings/defaults.py:714
 msgid "Europe West (B)"
 msgstr "欧州西部 (B)"
 
-#: settings/defaults.py:715
+#: awx/settings/defaults.py:715
 msgid "Europe West (C)"
 msgstr "欧州西部 (C)"
 
-#: settings/defaults.py:716
+#: awx/settings/defaults.py:716
 msgid "Europe West (D)"
 msgstr "欧州西部 (D)"
 
-#: settings/defaults.py:717
+#: awx/settings/defaults.py:717
 msgid "Asia East (A)"
 msgstr "アジア東部 (A)"
 
-#: settings/defaults.py:718
+#: awx/settings/defaults.py:718
 msgid "Asia East (B)"
 msgstr "アジア東部 (B)"
 
-#: settings/defaults.py:719
+#: awx/settings/defaults.py:719
 msgid "Asia East (C)"
 msgstr "アジア東部 (C)"
 
-#: settings/defaults.py:743
+#: awx/settings/defaults.py:743
 msgid "US Central"
 msgstr "米国中部"
 
-#: settings/defaults.py:744
+#: awx/settings/defaults.py:744
 msgid "US East"
 msgstr "米国東部"
 
-#: settings/defaults.py:745
+#: awx/settings/defaults.py:745
 msgid "US East 2"
 msgstr "米国東部 2"
 
-#: settings/defaults.py:746
+#: awx/settings/defaults.py:746
 msgid "US North Central"
 msgstr "米国中北部"
 
-#: settings/defaults.py:747
+#: awx/settings/defaults.py:747
 msgid "US South Central"
 msgstr "米国中南部"
 
-#: settings/defaults.py:748
+#: awx/settings/defaults.py:748
 msgid "US West"
 msgstr "米国西部"
 
-#: settings/defaults.py:749
+#: awx/settings/defaults.py:749
 msgid "Europe North"
 msgstr "欧州北部"
 
-#: settings/defaults.py:750
+#: awx/settings/defaults.py:750
 msgid "Europe West"
 msgstr "欧州西部"
 
-#: settings/defaults.py:751
+#: awx/settings/defaults.py:751
 msgid "Asia Pacific East"
 msgstr "アジア太平洋東部"
 
-#: settings/defaults.py:752
+#: awx/settings/defaults.py:752
 msgid "Asia Pacific Southeast"
 msgstr "アジア太平洋南東部"
 
-#: settings/defaults.py:753
+#: awx/settings/defaults.py:753
 msgid "Japan East"
 msgstr "日本東部"
 
-#: settings/defaults.py:754
+#: awx/settings/defaults.py:754
 msgid "Japan West"
 msgstr "日本西部"
 
-#: settings/defaults.py:755
+#: awx/settings/defaults.py:755
 msgid "Brazil South"
 msgstr "ブラジル南部"
 
-#: sso/apps.py:9
+#: awx/sso/apps.py:9
 msgid "Single Sign-On"
 msgstr "シングルサインオン"
 
-#: sso/conf.py:27
+#: awx/sso/conf.py:27
 msgid ""
 "Mapping to organization admins/users from social auth accounts. This setting\n"
 "controls which users are placed into which Tower organizations based on\n"
@@ -2771,7 +2930,7 @@ msgstr ""
 "- remove_users: True/False。デフォルトで True に設定されます。remove_admins の\n"
 "  場合と同じルールが適用されます。"
 
-#: sso/conf.py:76
+#: awx/sso/conf.py:76
 msgid ""
 "Mapping of team members (users) from social auth accounts. Keys are team\n"
 "names (will be created if not present). Values are dictionaries of options\n"
@@ -2815,29 +2974,29 @@ msgstr ""
 "- remove: True/False。デフォルトで True に設定されます。True の場合、上記のルール\n"
 "  に一致しないユーザーはチームから削除されます。"
 
-#: sso/conf.py:119
+#: awx/sso/conf.py:119
 msgid "Authentication Backends"
 msgstr "認証バックエンド"
 
-#: sso/conf.py:120
+#: awx/sso/conf.py:120
 msgid ""
 "List of authentication backends that are enabled based on license features "
 "and other authentication settings."
 msgstr "ライセンスの特長およびその他の認証設定に基づいて有効にされる認証バックエンドの一覧。"
 
-#: sso/conf.py:133
+#: awx/sso/conf.py:133
 msgid "Social Auth Organization Map"
 msgstr "ソーシャル認証組織マップ"
 
-#: sso/conf.py:145
+#: awx/sso/conf.py:145
 msgid "Social Auth Team Map"
 msgstr "ソーシャル認証チームマップ"
 
-#: sso/conf.py:157
+#: awx/sso/conf.py:157
 msgid "Social Auth User Fields"
 msgstr "ソーシャル認証ユーザーフィールド"
 
-#: sso/conf.py:158
+#: awx/sso/conf.py:158
 msgid ""
 "When set to an empty list `[]`, this setting prevents new user accounts from"
 " being created. Only users who have previously logged in using social auth "
@@ -2846,11 +3005,11 @@ msgstr ""
 "空リスト "
 "`[]`に設定される場合、この設定により新規ユーザーアカウントは作成できなくなります。ソーシャル認証を使ってログインしたことのあるユーザーまたは一致するメールアドレスのユーザーアカウントを持つユーザーのみがログインできます。"
 
-#: sso/conf.py:176
+#: awx/sso/conf.py:176
 msgid "LDAP Server URI"
 msgstr "LDAP サーバー URI"
 
-#: sso/conf.py:177
+#: awx/sso/conf.py:177
 msgid ""
 "URI to connect to LDAP server, such as \"ldap://ldap.example.com:389\" (non-"
 "SSL) or \"ldaps://ldap.example.com:636\" (SSL). Multiple LDAP servers may be"
@@ -2861,18 +3020,19 @@ msgstr ""
 " (SSL) などの LDAP サーバーに接続する URI です。複数の LDAP サーバーをスペースまたはカンマで区切って指定できます。LDAP "
 "認証は、このパラメーターが空の場合は無効になります。"
 
-#: sso/conf.py:181 sso/conf.py:199 sso/conf.py:211 sso/conf.py:223
-#: sso/conf.py:239 sso/conf.py:258 sso/conf.py:280 sso/conf.py:296
-#: sso/conf.py:315 sso/conf.py:332 sso/conf.py:349 sso/conf.py:365
-#: sso/conf.py:382 sso/conf.py:420 sso/conf.py:461
+#: awx/sso/conf.py:181 awx/sso/conf.py:199 awx/sso/conf.py:211
+#: awx/sso/conf.py:223 awx/sso/conf.py:239 awx/sso/conf.py:258
+#: awx/sso/conf.py:280 awx/sso/conf.py:296 awx/sso/conf.py:315
+#: awx/sso/conf.py:332 awx/sso/conf.py:349 awx/sso/conf.py:365
+#: awx/sso/conf.py:382 awx/sso/conf.py:420 awx/sso/conf.py:461
 msgid "LDAP"
 msgstr "LDAP"
 
-#: sso/conf.py:193
+#: awx/sso/conf.py:193
 msgid "LDAP Bind DN"
 msgstr "LDAP バインド DN"
 
-#: sso/conf.py:194
+#: awx/sso/conf.py:194
 msgid ""
 "DN (Distinguished Name) of user to bind for all search queries. Normally in "
 "the format \"CN=Some User,OU=Users,DC=example,DC=com\" but may also be "
@@ -2884,27 +3044,27 @@ msgstr ""
 "\"DOMAIN\\username\" として指定することもできます。これは、他のユーザー情報についての LDAP "
 "クエリー実行時のログインに使用するシステムユーザーアカウントです。"
 
-#: sso/conf.py:209
+#: awx/sso/conf.py:209
 msgid "LDAP Bind Password"
 msgstr "LDAP バインドパスワード"
 
-#: sso/conf.py:210
+#: awx/sso/conf.py:210
 msgid "Password used to bind LDAP user account."
 msgstr "LDAP ユーザーアカウントをバインドするために使用されるパスワード。"
 
-#: sso/conf.py:221
+#: awx/sso/conf.py:221
 msgid "LDAP Start TLS"
 msgstr "LDAP Start TLS"
 
-#: sso/conf.py:222
+#: awx/sso/conf.py:222
 msgid "Whether to enable TLS when the LDAP connection is not using SSL."
 msgstr "LDAP 接続が SSL を使用していない場合に TLS を有効にするかどうか。"
 
-#: sso/conf.py:232
+#: awx/sso/conf.py:232
 msgid "LDAP Connection Options"
 msgstr "LDAP 接続オプション"
 
-#: sso/conf.py:233
+#: awx/sso/conf.py:233
 msgid ""
 "Additional options to set for the LDAP connection.  LDAP referrals are "
 "disabled by default (to prevent certain LDAP queries from hanging with AD). "
@@ -2917,11 +3077,11 @@ msgstr ""
 "\"OPT_REFERRALS\")。可能なオプションおよび設定できる値については、https://www.python-"
 "ldap.org/doc/html/ldap.html#options を参照してください。"
 
-#: sso/conf.py:251
+#: awx/sso/conf.py:251
 msgid "LDAP User Search"
 msgstr "LDAP ユーザー検索"
 
-#: sso/conf.py:252
+#: awx/sso/conf.py:252
 msgid ""
 "LDAP search query to find users.  Any user that matches the given pattern "
 "will be able to login to Tower.  The user should also be mapped into an "
@@ -2935,11 +3095,11 @@ msgstr ""
 "設定で定義)。複数の検索クエリーがサポートされる必要がある場合、\"LDAPUnion\" を使用できます。このセクションの先頭にリンクされている "
 "python-ldap ドキュメントを参照してください。"
 
-#: sso/conf.py:274
+#: awx/sso/conf.py:274
 msgid "LDAP User DN Template"
 msgstr "LDAP ユーザー DN テンプレート"
 
-#: sso/conf.py:275
+#: awx/sso/conf.py:275
 msgid ""
 "Alternative to user search, if user DNs are all of the same format. This "
 "approach will be more efficient for user lookups than searching if it is "
@@ -2950,11 +3110,11 @@ msgstr ""
 "の形式がすべて同じである場合のユーザー検索の代替法になります。この方法は、組織の環境で使用可能であるかどうかを検索する場合よりも効率的なユーザー検索方法になります。この設定に値がある場合、それが"
 " AUTH_LDAP_USER_SEARCH の代わりに使用されます。"
 
-#: sso/conf.py:290
+#: awx/sso/conf.py:290
 msgid "LDAP User Attribute Map"
 msgstr "LDAP ユーザー属性マップ"
 
-#: sso/conf.py:291
+#: awx/sso/conf.py:291
 msgid ""
 "Mapping of LDAP user schema to Tower API user attributes (key is user "
 "attribute name, value is LDAP attribute name).  The default setting is valid"
@@ -2965,11 +3125,11 @@ msgstr ""
 "属性名です)。デフォルト設定は ActiveDirectory で有効ですが、他の LDAP 設定を持つユーザーは、辞書/ハッシュテーブルの値 "
 "(キーではない) を変更する必要ある場合があります。"
 
-#: sso/conf.py:310
+#: awx/sso/conf.py:310
 msgid "LDAP Group Search"
 msgstr "LDAP グループ検索"
 
-#: sso/conf.py:311
+#: awx/sso/conf.py:311
 msgid ""
 "Users in Tower are mapped to organizations based on their membership in LDAP"
 " groups. This setting defines the LDAP search query to find groups. Note "
@@ -2978,11 +3138,11 @@ msgstr ""
 "Tower のユーザーは LDAP グループのメンバーシップに基づいて組織にマップされます。この設定は、グループを検索できるように LDAP "
 "検索クエリーを定義します。上記のユーザー検索とは異なり、これは LDAPSearchUnion をサポートしないことに注意してください。"
 
-#: sso/conf.py:328
+#: awx/sso/conf.py:328
 msgid "LDAP Group Type"
 msgstr "LDAP グループタイプ"
 
-#: sso/conf.py:329
+#: awx/sso/conf.py:329
 msgid ""
 "The group type may need to be changed based on the type of the LDAP server."
 "  Values are listed at: http://pythonhosted.org/django-auth-ldap/groups.html"
@@ -2991,11 +3151,11 @@ msgstr ""
 "グループタイプは LDAP サーバーのタイプに基づいて変更する必要がある場合があります。値は以下に記載されています: "
 "http://pythonhosted.org/django-auth-ldap/groups.html#types-of-groups"
 
-#: sso/conf.py:344
+#: awx/sso/conf.py:344
 msgid "LDAP Require Group"
 msgstr "LDAP 要求グループ"
 
-#: sso/conf.py:345
+#: awx/sso/conf.py:345
 msgid ""
 "Group DN required to login. If specified, user must be a member of this "
 "group to login via LDAP. If not set, everyone in LDAP that matches the user "
@@ -3005,11 +3165,11 @@ msgstr ""
 "経由でログインするにはユーザーはこのグループのメンバーである必要があります。設定されていない場合は、ユーザー検索に一致する LDAP "
 "のすべてのユーザーが Tower 経由でログインできます。１つの要求グループのみがサポートされます。"
 
-#: sso/conf.py:361
+#: awx/sso/conf.py:361
 msgid "LDAP Deny Group"
 msgstr "LDAP 拒否グループ"
 
-#: sso/conf.py:362
+#: awx/sso/conf.py:362
 msgid ""
 "Group DN denied from login. If specified, user will not be allowed to login "
 "if a member of this group.  Only one deny group is supported."
@@ -3017,11 +3177,11 @@ msgstr ""
 "グループ DN がログインで拒否されます。指定されている場合、ユーザーはこのグループのメンバーの場合にログインできません。1 "
 "つの拒否グループのみがサポートされます。"
 
-#: sso/conf.py:375
+#: awx/sso/conf.py:375
 msgid "LDAP User Flags By Group"
 msgstr "LDAP ユーザーフラグ (グループ別)"
 
-#: sso/conf.py:376
+#: awx/sso/conf.py:376
 msgid ""
 "User profile flags updated from group membership (key is user attribute "
 "name, value is group DN).  These are boolean fields that are matched based "
@@ -3033,11 +3193,11 @@ msgstr ""
 "DN)。これらは、ユーザーが指定グループのメンバーであるかに基づいて一致するブール値フィールドです。is_superuser "
 "のみがこのメソッドで設定可能です。このフラグは、現在の LDAP 設定に基づいてログイン時に true および false に設定されます。"
 
-#: sso/conf.py:394
+#: awx/sso/conf.py:394
 msgid "LDAP Organization Map"
 msgstr "LDAP 組織マップ"
 
-#: sso/conf.py:395
+#: awx/sso/conf.py:395
 msgid ""
 "Mapping between organization admins/users and LDAP groups. This controls what users are placed into what Tower organizations relative to their LDAP group memberships. Keys are organization names. Organizations will be created if not present. Values are dictionaries defining the options for each organization's membership.  For each organization it is possible to specify what groups are automatically users of the organization and also what groups can administer the organization.\n"
 "\n"
@@ -3063,11 +3223,11 @@ msgstr ""
 " - users: None、True/False、文字列または文字列の一覧。管理者の場合と同じルールが適用されます。\n"
 " - remove_users: True/False。デフォルトで True に設定されます。remove_admins の場合と同じルールが適用されます。"
 
-#: sso/conf.py:443
+#: awx/sso/conf.py:443
 msgid "LDAP Team Map"
 msgstr "LDAP チームマップ"
 
-#: sso/conf.py:444
+#: awx/sso/conf.py:444
 msgid ""
 "Mapping between team members (users) and LDAP groups. Keys are team names (will be created if not present). Values are dictionaries of options for each team's membership, where each can contain the following parameters:\n"
 "\n"
@@ -3089,41 +3249,41 @@ msgstr ""
 " ユーザーがこれらのグループのいずれかのメンバーである場合、チームメンバーとして追加されます。\n"
 "- remove: True/False。デフォルトで True に設定されます。True の場合、指定グループのメンバーでないユーザーはチームから削除されます。"
 
-#: sso/conf.py:487
+#: awx/sso/conf.py:487
 msgid "RADIUS Server"
 msgstr "RADIUS サーバー"
 
-#: sso/conf.py:488
+#: awx/sso/conf.py:488
 msgid ""
 "Hostname/IP of RADIUS server. RADIUS authentication will be disabled if this"
 " setting is empty."
 msgstr "RADIUS サーバーのホスト名/IP です。この設定が空の場合は RADIUS 認証は無効にされます。"
 
-#: sso/conf.py:490 sso/conf.py:504 sso/conf.py:516
+#: awx/sso/conf.py:490 awx/sso/conf.py:504 awx/sso/conf.py:516
 msgid "RADIUS"
 msgstr "RADIUS"
 
-#: sso/conf.py:502
+#: awx/sso/conf.py:502
 msgid "RADIUS Port"
 msgstr "RADIUS ポート"
 
-#: sso/conf.py:503
+#: awx/sso/conf.py:503
 msgid "Port of RADIUS server."
 msgstr "RADIUS サーバーのポート。"
 
-#: sso/conf.py:514
+#: awx/sso/conf.py:514
 msgid "RADIUS Secret"
 msgstr "RADIUS シークレット"
 
-#: sso/conf.py:515
+#: awx/sso/conf.py:515
 msgid "Shared secret for authenticating to RADIUS server."
 msgstr "RADIUS サーバーに対して認証するための共有シークレット。"
 
-#: sso/conf.py:531
+#: awx/sso/conf.py:531
 msgid "Google OAuth2 Callback URL"
 msgstr "Google OAuth2 コールバック URL"
 
-#: sso/conf.py:532
+#: awx/sso/conf.py:532
 msgid ""
 "Create a project at https://console.developers.google.com/ to obtain an "
 "OAuth2 key and secret for a web application. Ensure that the Google+ API is "
@@ -3133,46 +3293,47 @@ msgstr ""
 "https://console.developers.google.com/ にプロジェクトを作成します。Google+ API "
 "が有効であることを確認します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:536 sso/conf.py:547 sso/conf.py:558 sso/conf.py:571
-#: sso/conf.py:585 sso/conf.py:597 sso/conf.py:609
+#: awx/sso/conf.py:536 awx/sso/conf.py:547 awx/sso/conf.py:558
+#: awx/sso/conf.py:571 awx/sso/conf.py:585 awx/sso/conf.py:597
+#: awx/sso/conf.py:609
 msgid "Google OAuth2"
 msgstr "Google OAuth2"
 
-#: sso/conf.py:545
+#: awx/sso/conf.py:545
 msgid "Google OAuth2 Key"
 msgstr "Google OAuth2 キー"
 
-#: sso/conf.py:546
+#: awx/sso/conf.py:546
 msgid ""
 "The OAuth2 key from your web application at "
 "https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 キー (https://console.developers.google.com/)。"
 
-#: sso/conf.py:556
+#: awx/sso/conf.py:556
 msgid "Google OAuth2 Secret"
 msgstr "Google OAuth2 シークレット"
 
-#: sso/conf.py:557
+#: awx/sso/conf.py:557
 msgid ""
 "The OAuth2 secret from your web application at "
 "https://console.developers.google.com/."
 msgstr "web アプリケーションの OAuth2 シークレット (https://console.developers.google.com/)。"
 
-#: sso/conf.py:568
+#: awx/sso/conf.py:568
 msgid "Google OAuth2 Whitelisted Domains"
 msgstr "Google OAuth2 ホワイトリストドメイン"
 
-#: sso/conf.py:569
+#: awx/sso/conf.py:569
 msgid ""
 "Update this setting to restrict the domains who are allowed to login using "
 "Google OAuth2."
 msgstr "この設定を更新し、Google OAuth2 を使用してログインできるドメインを制限します。"
 
-#: sso/conf.py:580
+#: awx/sso/conf.py:580
 msgid "Google OAuth2 Extra Arguments"
 msgstr "Google OAuth2 追加引数"
 
-#: sso/conf.py:581
+#: awx/sso/conf.py:581
 msgid ""
 "Extra arguments for Google OAuth2 login. When only allowing a single domain "
 "to authenticate, set to `{\"hd\": \"yourdomain.com\"}` and Google will not "
@@ -3182,19 +3343,19 @@ msgstr ""
 "Google OAuth2 ログインの追加引数です。単一ドメインの認証のみを許可する場合、`{\"hd\": \"yourdomain.com\"}` "
 "に設定すると、Google はユーザーが複数の Google アカウントでログインしている場合でもその他のアカウントを表示しません。"
 
-#: sso/conf.py:595
+#: awx/sso/conf.py:595
 msgid "Google OAuth2 Organization Map"
 msgstr "Google OAuth2 組織マップ"
 
-#: sso/conf.py:607
+#: awx/sso/conf.py:607
 msgid "Google OAuth2 Team Map"
 msgstr "Google OAuth2 チームマップ"
 
-#: sso/conf.py:623
+#: awx/sso/conf.py:623
 msgid "GitHub OAuth2 Callback URL"
 msgstr "GitHub OAuth2 コールバック URL"
 
-#: sso/conf.py:624
+#: awx/sso/conf.py:624
 msgid ""
 "Create a developer application at https://github.com/settings/developers to "
 "obtain an OAuth2 key (Client ID) and secret (Client Secret). Provide this "
@@ -3204,41 +3365,41 @@ msgstr ""
 "https://github.com/settings/developers に開発者アプリケーションを作成します。この URL "
 "をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:628 sso/conf.py:639 sso/conf.py:649 sso/conf.py:661
-#: sso/conf.py:673
+#: awx/sso/conf.py:628 awx/sso/conf.py:639 awx/sso/conf.py:649
+#: awx/sso/conf.py:661 awx/sso/conf.py:673
 msgid "GitHub OAuth2"
 msgstr "GitHub OAuth2"
 
-#: sso/conf.py:637
+#: awx/sso/conf.py:637
 msgid "GitHub OAuth2 Key"
 msgstr "GitHub OAuth2 キー"
 
-#: sso/conf.py:638
+#: awx/sso/conf.py:638
 msgid "The OAuth2 key (Client ID) from your GitHub developer application."
 msgstr "GitHub 開発者アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:647
+#: awx/sso/conf.py:647
 msgid "GitHub OAuth2 Secret"
 msgstr "GitHub OAuth2 シークレット"
 
-#: sso/conf.py:648
+#: awx/sso/conf.py:648
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub developer application."
 msgstr "GitHub 開発者アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:659
+#: awx/sso/conf.py:659
 msgid "GitHub OAuth2 Organization Map"
 msgstr "GitHub OAuth2 組織マップ"
 
-#: sso/conf.py:671
+#: awx/sso/conf.py:671
 msgid "GitHub OAuth2 Team Map"
 msgstr "GitHub OAuth2 チームマップ"
 
-#: sso/conf.py:687
+#: awx/sso/conf.py:687
 msgid "GitHub Organization OAuth2 Callback URL"
 msgstr "GitHub 組織 OAuth2 コールバック URL"
 
-#: sso/conf.py:688 sso/conf.py:763
+#: awx/sso/conf.py:688 awx/sso/conf.py:763
 msgid ""
 "Create an organization-owned application at "
 "https://github.com/organizations/<yourorg>/settings/applications and obtain "
@@ -3250,68 +3411,68 @@ msgstr ""
 " キー (クライアント ID) およびシークレット (クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL "
 "として指定します。"
 
-#: sso/conf.py:692 sso/conf.py:703 sso/conf.py:713 sso/conf.py:725
-#: sso/conf.py:736 sso/conf.py:748
+#: awx/sso/conf.py:692 awx/sso/conf.py:703 awx/sso/conf.py:713
+#: awx/sso/conf.py:725 awx/sso/conf.py:736 awx/sso/conf.py:748
 msgid "GitHub Organization OAuth2"
 msgstr "GitHub 組織 OAuth2"
 
-#: sso/conf.py:701
+#: awx/sso/conf.py:701
 msgid "GitHub Organization OAuth2 Key"
 msgstr "GitHub 組織 OAuth2 キー"
 
-#: sso/conf.py:702 sso/conf.py:777
+#: awx/sso/conf.py:702 awx/sso/conf.py:777
 msgid "The OAuth2 key (Client ID) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:711
+#: awx/sso/conf.py:711
 msgid "GitHub Organization OAuth2 Secret"
 msgstr "GitHub 組織 OAuth2 シークレット"
 
-#: sso/conf.py:712 sso/conf.py:787
+#: awx/sso/conf.py:712 awx/sso/conf.py:787
 msgid ""
 "The OAuth2 secret (Client Secret) from your GitHub organization application."
 msgstr "GitHub 組織アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:722
+#: awx/sso/conf.py:722
 msgid "GitHub Organization Name"
 msgstr "GitHub 組織名"
 
-#: sso/conf.py:723
+#: awx/sso/conf.py:723
 msgid ""
 "The name of your GitHub organization, as used in your organization's URL: "
 "https://github.com/<yourorg>/."
 msgstr "GitHub 組織の名前で、組織の URL (https://github.com/<yourorg>/) で使用されます。"
 
-#: sso/conf.py:734
+#: awx/sso/conf.py:734
 msgid "GitHub Organization OAuth2 Organization Map"
 msgstr "GitHub 組織 OAuth2 組織マップ"
 
-#: sso/conf.py:746
+#: awx/sso/conf.py:746
 msgid "GitHub Organization OAuth2 Team Map"
 msgstr "GitHub 組織 OAuth2 チームマップ"
 
-#: sso/conf.py:762
+#: awx/sso/conf.py:762
 msgid "GitHub Team OAuth2 Callback URL"
 msgstr "GitHub チーム OAuth2 コールバック URL"
 
-#: sso/conf.py:767 sso/conf.py:778 sso/conf.py:788 sso/conf.py:800
-#: sso/conf.py:811 sso/conf.py:823
+#: awx/sso/conf.py:767 awx/sso/conf.py:778 awx/sso/conf.py:788
+#: awx/sso/conf.py:800 awx/sso/conf.py:811 awx/sso/conf.py:823
 msgid "GitHub Team OAuth2"
 msgstr "GitHub チーム OAuth2"
 
-#: sso/conf.py:776
+#: awx/sso/conf.py:776
 msgid "GitHub Team OAuth2 Key"
 msgstr "GitHub チーム OAuth2 キー"
 
-#: sso/conf.py:786
+#: awx/sso/conf.py:786
 msgid "GitHub Team OAuth2 Secret"
 msgstr "GitHub チーム OAuth2 シークレット"
 
-#: sso/conf.py:797
+#: awx/sso/conf.py:797
 msgid "GitHub Team ID"
 msgstr "GitHub チーム ID"
 
-#: sso/conf.py:798
+#: awx/sso/conf.py:798
 msgid ""
 "Find the numeric team ID using the Github API: http://fabian-"
 "kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/."
@@ -3319,19 +3480,19 @@ msgstr ""
 "Github API を使用して数値のチーム ID を検索します: http://fabian-"
 "kostadinov.github.io/2015/01/16/how-to-find-a-github-team-id/"
 
-#: sso/conf.py:809
+#: awx/sso/conf.py:809
 msgid "GitHub Team OAuth2 Organization Map"
 msgstr "GitHub チーム OAuth2 組織マップ"
 
-#: sso/conf.py:821
+#: awx/sso/conf.py:821
 msgid "GitHub Team OAuth2 Team Map"
 msgstr "GitHub チーム OAuth2 チームマップ"
 
-#: sso/conf.py:837
+#: awx/sso/conf.py:837
 msgid "Azure AD OAuth2 Callback URL"
 msgstr "Azure AD OAuth2 コールバック URL"
 
-#: sso/conf.py:838
+#: awx/sso/conf.py:838
 msgid ""
 "Register an Azure AD application as described by https://msdn.microsoft.com"
 "/en-us/library/azure/dn132599.aspx and obtain an OAuth2 key (Client ID) and "
@@ -3342,40 +3503,40 @@ msgstr ""
 "us/library/azure/dn132599.aspx の説明に従って登録し、OAuth2 キー (クライアント ID) およびシークレット "
 "(クライアントシークレット) を取得します。この URL をアプリケーションのコールバック URL として指定します。"
 
-#: sso/conf.py:842 sso/conf.py:853 sso/conf.py:863 sso/conf.py:875
-#: sso/conf.py:887
+#: awx/sso/conf.py:842 awx/sso/conf.py:853 awx/sso/conf.py:863
+#: awx/sso/conf.py:875 awx/sso/conf.py:887
 msgid "Azure AD OAuth2"
 msgstr "Azure AD OAuth2"
 
-#: sso/conf.py:851
+#: awx/sso/conf.py:851
 msgid "Azure AD OAuth2 Key"
 msgstr "Azure AD OAuth2 キー"
 
-#: sso/conf.py:852
+#: awx/sso/conf.py:852
 msgid "The OAuth2 key (Client ID) from your Azure AD application."
 msgstr "Azure AD アプリケーションからの OAuth2 キー (クライアント ID)。"
 
-#: sso/conf.py:861
+#: awx/sso/conf.py:861
 msgid "Azure AD OAuth2 Secret"
 msgstr "Azure AD OAuth2 シークレット"
 
-#: sso/conf.py:862
+#: awx/sso/conf.py:862
 msgid "The OAuth2 secret (Client Secret) from your Azure AD application."
 msgstr "Azure AD アプリケーションからの OAuth2 シークレット (クライアントシークレット)。"
 
-#: sso/conf.py:873
+#: awx/sso/conf.py:873
 msgid "Azure AD OAuth2 Organization Map"
 msgstr "Azure AD OAuth2 組織マップ"
 
-#: sso/conf.py:885
+#: awx/sso/conf.py:885
 msgid "Azure AD OAuth2 Team Map"
 msgstr "Azure AD OAuth2 チームマップ"
 
-#: sso/conf.py:906
+#: awx/sso/conf.py:906
 msgid "SAML Service Provider Callback URL"
 msgstr "SAML サービスプロバイダーコールバック URL"
 
-#: sso/conf.py:907
+#: awx/sso/conf.py:907
 msgid ""
 "Register Tower as a service provider (SP) with each identity provider (IdP) "
 "you have configured. Provide your SP Entity ID and this callback URL for "
@@ -3384,78 +3545,79 @@ msgstr ""
 "設定済みの各アイデンティティープロバイダー (IdP) で Tower をサービスプロバイダー (SP) として登録します。SP エンティティー ID "
 "およびアプリケーションのこのコールバック URL を指定します。"
 
-#: sso/conf.py:910 sso/conf.py:924 sso/conf.py:937 sso/conf.py:951
-#: sso/conf.py:965 sso/conf.py:983 sso/conf.py:1005 sso/conf.py:1024
-#: sso/conf.py:1044 sso/conf.py:1078 sso/conf.py:1091
+#: awx/sso/conf.py:910 awx/sso/conf.py:924 awx/sso/conf.py:937
+#: awx/sso/conf.py:951 awx/sso/conf.py:965 awx/sso/conf.py:983
+#: awx/sso/conf.py:1005 awx/sso/conf.py:1024 awx/sso/conf.py:1044
+#: awx/sso/conf.py:1078 awx/sso/conf.py:1091
 msgid "SAML"
 msgstr "SAML"
 
-#: sso/conf.py:921
+#: awx/sso/conf.py:921
 msgid "SAML Service Provider Metadata URL"
 msgstr "SAML サービスプロバイダーメタデータ URL"
 
-#: sso/conf.py:922
+#: awx/sso/conf.py:922
 msgid ""
 "If your identity provider (IdP) allows uploading an XML metadata file, you "
 "can download one from this URL."
 msgstr ""
 "アイデンティティープロバイダー (IdP) が XML メタデータファイルのアップロードを許可する場合、この URL からダウンロードできます。"
 
-#: sso/conf.py:934
+#: awx/sso/conf.py:934
 msgid "SAML Service Provider Entity ID"
 msgstr "SAML サービスプロバイダーエンティティー ID"
 
-#: sso/conf.py:935
+#: awx/sso/conf.py:935
 msgid ""
 "The application-defined unique identifier used as the audience of the SAML "
 "service provider (SP) configuration."
 msgstr "SAML サービスプロバイダー (SP) 設定の対象として使用されるアプリケーションで定義される固有識別子。"
 
-#: sso/conf.py:948
+#: awx/sso/conf.py:948
 msgid "SAML Service Provider Public Certificate"
 msgstr "SAML サービスプロバイダーの公開証明書"
 
-#: sso/conf.py:949
+#: awx/sso/conf.py:949
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " certificate content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに証明書の内容を組み込みます。"
 
-#: sso/conf.py:962
+#: awx/sso/conf.py:962
 msgid "SAML Service Provider Private Key"
 msgstr "SAML サービスプロバイダーの秘密鍵｜"
 
-#: sso/conf.py:963
+#: awx/sso/conf.py:963
 msgid ""
 "Create a keypair for Tower to use as a service provider (SP) and include the"
 " private key content here."
 msgstr "サービスプロバイダー (SP) として使用するための Tower のキーペアを作成し、ここに秘密鍵の内容を組み込みます。"
 
-#: sso/conf.py:981
+#: awx/sso/conf.py:981
 msgid "SAML Service Provider Organization Info"
 msgstr "SAML サービスプロバイダーの組織情報"
 
-#: sso/conf.py:982
+#: awx/sso/conf.py:982
 msgid "Configure this setting with information about your app."
 msgstr "アプリの情報でこの設定を行います。"
 
-#: sso/conf.py:1003
+#: awx/sso/conf.py:1003
 msgid "SAML Service Provider Technical Contact"
 msgstr "SAML サービスプロバイダーテクニカルサポートの問い合わせ先"
 
-#: sso/conf.py:1004 sso/conf.py:1023
+#: awx/sso/conf.py:1004 awx/sso/conf.py:1023
 msgid "Configure this setting with your contact information."
 msgstr "問い合わせ先情報で設定を行います。"
 
-#: sso/conf.py:1022
+#: awx/sso/conf.py:1022
 msgid "SAML Service Provider Support Contact"
 msgstr "SAML サービスプロバイダーサポートの問い合わせ先"
 
-#: sso/conf.py:1037
+#: awx/sso/conf.py:1037
 msgid "SAML Enabled Identity Providers"
 msgstr "SAML で有効にされたアイデンティティープロバイダー"
 
-#: sso/conf.py:1038
+#: awx/sso/conf.py:1038
 msgid ""
 "Configure the Entity ID, SSO URL and certificate for each identity provider "
 "(IdP) in use. Multiple SAML IdPs are supported. Some IdPs may provide user "
@@ -3469,218 +3631,219 @@ msgstr ""
 "(https://github.com/omab/python-social-"
 "auth/blob/master/social/backends/saml.py#L16)。それぞれの IdP の属性名を上書きできます。"
 
-#: sso/conf.py:1076
+#: awx/sso/conf.py:1076
 msgid "SAML Organization Map"
 msgstr "SAML 組織マップ"
 
-#: sso/conf.py:1089
+#: awx/sso/conf.py:1089
 msgid "SAML Team Map"
 msgstr "SAML チームマップ"
 
-#: sso/fields.py:123
+#: awx/sso/fields.py:123
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr "無効な接続オプション: {invalid_options}"
 
-#: sso/fields.py:194
+#: awx/sso/fields.py:194
 msgid "Base"
 msgstr "ベース"
 
-#: sso/fields.py:195
+#: awx/sso/fields.py:195
 msgid "One Level"
 msgstr "1 レベル"
 
-#: sso/fields.py:196
+#: awx/sso/fields.py:196
 msgid "Subtree"
 msgstr "サブツリー"
 
-#: sso/fields.py:214
+#: awx/sso/fields.py:214
 msgid "Expected a list of three items but got {length} instead."
 msgstr "3 つの項目の一覧が予期されましが、{length} が取得されました。"
 
-#: sso/fields.py:215
+#: awx/sso/fields.py:215
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr "LDAPSearch のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:251
+#: awx/sso/fields.py:251
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
 msgstr ""
 "LDAPSearch または LDAPSearchUnion のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:278
+#: awx/sso/fields.py:278
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr "無効なユーザー属性: {invalid_attrs}"
 
-#: sso/fields.py:295
+#: awx/sso/fields.py:295
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr "LDAPGroupType のインスタンスが予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:323
+#: awx/sso/fields.py:323
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr "無効なユーザーフラグ: \"{invalid_flag}\""
 
-#: sso/fields.py:339 sso/fields.py:506
+#: awx/sso/fields.py:339 awx/sso/fields.py:506
 msgid ""
 "Expected None, True, False, a string or list of strings but got {input_type}"
 " instead."
 msgstr "None、True、False、文字列または文字列の一覧が予期されましたが、{input_type} が取得されました。"
 
-#: sso/fields.py:375
+#: awx/sso/fields.py:375
 msgid "Missing key(s): {missing_keys}."
 msgstr "キーがありません: {missing_keys}"
 
-#: sso/fields.py:376
+#: awx/sso/fields.py:376
 msgid "Invalid key(s): {invalid_keys}."
 msgstr "無効なキー: {invalid_keys}"
 
-#: sso/fields.py:425 sso/fields.py:542
+#: awx/sso/fields.py:425 awx/sso/fields.py:542
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr "組織マップの無効なキー: {invalid_keys}"
 
-#: sso/fields.py:443
+#: awx/sso/fields.py:443
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr "チームマップの必要なキーがありません: {invalid_keys}"
 
-#: sso/fields.py:444 sso/fields.py:561
+#: awx/sso/fields.py:444 awx/sso/fields.py:561
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr "チームマップの無効なキー: {invalid_keys}"
 
-#: sso/fields.py:560
+#: awx/sso/fields.py:560
 msgid "Missing required key for team map: {missing_keys}."
 msgstr "チームマップで必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:578
+#: awx/sso/fields.py:578
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr "組織情報レコードで必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:591
+#: awx/sso/fields.py:591
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr "組織情報の無効な言語コード: {invalid_lang_codes}"
 
-#: sso/fields.py:610
+#: awx/sso/fields.py:610
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr "問い合わせ先の必要なキーがありません: {missing_keys}"
 
-#: sso/fields.py:622
+#: awx/sso/fields.py:622
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr "IdP で必要なキーがありません: {missing_keys}"
 
-#: sso/pipeline.py:24
+#: awx/sso/pipeline.py:24
 msgid "An account cannot be found for {0}"
 msgstr "{0} のアカウントが見つかりません"
 
-#: sso/pipeline.py:30
+#: awx/sso/pipeline.py:30
 msgid "Your account is inactive"
 msgstr "アカウントが非アクティブです"
 
-#: sso/validators.py:19 sso/validators.py:44
+#: awx/sso/validators.py:19 awx/sso/validators.py:44
 #, python-format
 msgid "DN must include \"%%(user)s\" placeholder for username: %s"
 msgstr "DN にはユーザー名の \"%%(user)s\" プレースホルダーを含める必要があります: %s"
 
-#: sso/validators.py:26
+#: awx/sso/validators.py:26
 #, python-format
 msgid "Invalid DN: %s"
 msgstr "無効な DN: %s"
 
-#: sso/validators.py:56
+#: awx/sso/validators.py:56
 #, python-format
 msgid "Invalid filter: %s"
 msgstr "無効なフィルター: %s"
 
-#: templates/error.html:4 ui/templates/ui/index.html:8
+#: awx/templates/error.html:4 awx/ui/templates/ui/index.html:8
 msgid "Ansible Tower"
 msgstr "Ansible Tower"
 
-#: templates/rest_framework/api.html:39
+#: awx/templates/rest_framework/api.html:39
 msgid "Ansible Tower API Guide"
 msgstr "Ansible Tower API ガイド"
 
-#: templates/rest_framework/api.html:40
+#: awx/templates/rest_framework/api.html:40
 msgid "Back to Ansible Tower"
 msgstr "Ansible Tower に戻る"
 
-#: templates/rest_framework/api.html:41
+#: awx/templates/rest_framework/api.html:41
 msgid "Resize"
 msgstr "サイズの変更"
 
-#: templates/rest_framework/base.html:78 templates/rest_framework/base.html:92
+#: awx/templates/rest_framework/base.html:78
+#: awx/templates/rest_framework/base.html:92
 #, python-format
 msgid "Make a GET request on the %(name)s resource"
 msgstr "%(name)s リソースでの GET 要求"
 
-#: templates/rest_framework/base.html:80
+#: awx/templates/rest_framework/base.html:80
 msgid "Specify a format for the GET request"
 msgstr "GET 要求の形式を指定"
 
-#: templates/rest_framework/base.html:86
+#: awx/templates/rest_framework/base.html:86
 #, python-format
 msgid ""
 "Make a GET request on the %(name)s resource with the format set to "
 "`%(format)s`"
 msgstr "形式が `%(format)s` に設定された状態での %(name)s リソースでの GET 要求"
 
-#: templates/rest_framework/base.html:100
+#: awx/templates/rest_framework/base.html:100
 #, python-format
 msgid "Make an OPTIONS request on the %(name)s resource"
 msgstr "%(name)s リソースでの OPTIONS 要求"
 
-#: templates/rest_framework/base.html:106
+#: awx/templates/rest_framework/base.html:106
 #, python-format
 msgid "Make a DELETE request on the %(name)s resource"
 msgstr "%(name)s リソースでの DELETE 要求"
 
-#: templates/rest_framework/base.html:113
+#: awx/templates/rest_framework/base.html:113
 msgid "Filters"
 msgstr "フィルター"
 
-#: templates/rest_framework/base.html:172
-#: templates/rest_framework/base.html:186
+#: awx/templates/rest_framework/base.html:172
+#: awx/templates/rest_framework/base.html:186
 #, python-format
 msgid "Make a POST request on the %(name)s resource"
 msgstr "%(name)s リソースでの POST 要求"
 
-#: templates/rest_framework/base.html:216
-#: templates/rest_framework/base.html:230
+#: awx/templates/rest_framework/base.html:216
+#: awx/templates/rest_framework/base.html:230
 #, python-format
 msgid "Make a PUT request on the %(name)s resource"
 msgstr "%(name)s リソースでの PUT 要求"
 
-#: templates/rest_framework/base.html:233
+#: awx/templates/rest_framework/base.html:233
 #, python-format
 msgid "Make a PATCH request on the %(name)s resource"
 msgstr "%(name)s リソースでの PATCH 要求"
 
-#: ui/apps.py:9 ui/conf.py:22 ui/conf.py:38 ui/conf.py:53
+#: awx/ui/apps.py:9 awx/ui/conf.py:22 awx/ui/conf.py:38 awx/ui/conf.py:53
 msgid "UI"
 msgstr "UI"
 
-#: ui/conf.py:16
+#: awx/ui/conf.py:16
 msgid "Off"
 msgstr "オフ"
 
-#: ui/conf.py:17
+#: awx/ui/conf.py:17
 msgid "Anonymous"
 msgstr "匿名"
 
-#: ui/conf.py:18
+#: awx/ui/conf.py:18
 msgid "Detailed"
 msgstr "詳細"
 
-#: ui/conf.py:20
+#: awx/ui/conf.py:20
 msgid "Analytics Tracking State"
 msgstr "アナリティクストラッキングの状態"
 
-#: ui/conf.py:21
+#: awx/ui/conf.py:21
 msgid "Enable or Disable Analytics Tracking."
 msgstr "アナリティクストラッキングの有効化/無効化。"
 
-#: ui/conf.py:31
+#: awx/ui/conf.py:31
 msgid "Custom Login Info"
 msgstr "カスタムログイン情報"
 
-#: ui/conf.py:32
+#: awx/ui/conf.py:32
 msgid ""
 "If needed, you can add specific information (such as a legal notice or a "
 "disclaimer) to a text box in the login modal using this setting. Any content"
@@ -3693,11 +3856,11 @@ msgstr ""
 "や他のマークアップ言語がサポートされないため、プレーンテキストでなければなりません。テキストの複数のパラグラフが必要な場合、改行 (パラグラフ) "
 "をテキストのブロック内の `\\n` としてエスケープする必要があります。"
 
-#: ui/conf.py:48
+#: awx/ui/conf.py:48
 msgid "Custom Logo"
 msgstr "カスタムロゴ"
 
-#: ui/conf.py:49
+#: awx/ui/conf.py:49
 msgid ""
 "To set up a custom logo, provide a file that you create. For the custom logo"
 " to look its best, use a `.png` file with a transparent background. GIF, PNG"
@@ -3706,18 +3869,18 @@ msgstr ""
 "カスタムロゴをセットアップするには、作成するファイルを指定します。カスタムロゴを最適化するには、背景が透明の「.png」ファイルを使用します。GIF、PNG"
 " および JPEG 形式がサポートされます。"
 
-#: ui/fields.py:29
+#: awx/ui/fields.py:29
 msgid ""
 "Invalid format for custom logo. Must be a data URL with a base64-encoded "
 "GIF, PNG or JPEG image."
 msgstr ""
 "カスタムロゴの無効な形式です。base64 エンコードされた GIF、PNG または JPEG イメージと共にデータ URL を指定する必要があります。"
 
-#: ui/fields.py:30
+#: awx/ui/fields.py:30
 msgid "Invalid base64-encoded data in data URL."
 msgstr "データ URL の無効な base64 エンコードされたデータ。"
 
-#: ui/templates/ui/index.html:49
+#: awx/ui/templates/ui/index.html:49
 msgid ""
 "Your session will expire in <span id=\"remaining_seconds\" class"
 "=\"IdleModal-remainingSeconds\">60</span> seconds, would you like to "
@@ -3726,15 +3889,15 @@ msgstr ""
 "セッションは <span id=\"remaining_seconds\" class=\"IdleModal-"
 "remainingSeconds\">60</span> 秒後に期限切れになります。続行しますか?"
 
-#: ui/templates/ui/index.html:64
+#: awx/ui/templates/ui/index.html:64
 msgid "CANCEL"
 msgstr "取り消し"
 
-#: ui/templates/ui/index.html:116
+#: awx/ui/templates/ui/index.html:116
 msgid "Set how many days of data should be retained."
 msgstr "データの保持日数を設定します。"
 
-#: ui/templates/ui/index.html:122
+#: awx/ui/templates/ui/index.html:122
 msgid ""
 "Please enter an integer<span ng-"
 "show=\"prompt_for_days_form.days_to_keep.$dirty && "
@@ -3749,7 +3912,7 @@ msgstr ""
 "prompt_for_days_form.days_to_keep.$error.max\"> 9999 "
 "より値の小さい</span>整数を入力してください。"
 
-#: ui/templates/ui/index.html:127
+#: awx/ui/templates/ui/index.html:127
 msgid ""
 "For facts collected older than the time period specified, save one fact scan (snapshot) per time window (frequency). For example, facts older than 30 days are purged, while one weekly fact scan is kept.\n"
 "                    <br>\n"
@@ -3763,11 +3926,11 @@ msgstr ""
 "                    <br>\n"
 "                    <br>"
 
-#: ui/templates/ui/index.html:136
+#: awx/ui/templates/ui/index.html:136
 msgid "Select a time period after which to remove old facts"
 msgstr "古いファクトを削除するまでの期間を選択"
 
-#: ui/templates/ui/index.html:150
+#: awx/ui/templates/ui/index.html:150
 msgid ""
 "Please enter an integer<span ng-"
 "show=\"prompt_for_days_facts_form.keep_amount.$dirty && "
@@ -3782,11 +3945,11 @@ msgstr ""
 "prompt_for_days_facts_form.keep_amount.$error.max\"> 9999 "
 "より値の小さい</span>整数を入力してください。"
 
-#: ui/templates/ui/index.html:155
+#: awx/ui/templates/ui/index.html:155
 msgid "Select a frequency for snapshot retention"
 msgstr "スナップショットの保持頻度を選択"
 
-#: ui/templates/ui/index.html:169
+#: awx/ui/templates/ui/index.html:169
 msgid ""
 "Please enter an integer<span ng-"
 "show=\"prompt_for_days_facts_form.granularity_keep_amount.$dirty && "
@@ -3803,6 +3966,6 @@ msgstr ""
 "prompt_for_days_facts_form.granularity_keep_amount.$error.max\"> 9999 "
 "よりも値の小さい</span>整数を入力してください。"
 
-#: ui/templates/ui/index.html:175
+#: awx/ui/templates/ui/index.html:175
 msgid "working..."
 msgstr "実行中..."
