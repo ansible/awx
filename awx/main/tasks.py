@@ -53,7 +53,7 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
-                            get_system_task_capacity, OutputEventFilter)
+                            get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -234,7 +234,7 @@ def tower_periodic_scheduler(self):
             logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
             continue
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        can_start = new_unified_job.signal_start(extra_vars=schedule.extra_data)
+        can_start = new_unified_job.signal_start(extra_vars=parse_yaml_or_json(schedule.extra_data))
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
