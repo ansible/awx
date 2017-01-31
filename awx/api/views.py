@@ -3,11 +3,13 @@
 # All Rights Reserved.
 
 # Python
+import os
 import cgi
 import datetime
 import dateutil
 import time
 import socket
+import subprocess
 import sys
 import logging
 from base64 import b64encode
@@ -20,7 +22,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
@@ -3859,6 +3861,17 @@ class UnifiedJobStdout(RetrieveAPIView):
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
         elif request.accepted_renderer.format in {'txt_download', 'ansi_download'}:
+            if not os.path.exists(unified_job.result_stdout_file):
+                write_fd = open(unified_job.result_stdout_file, 'w')
+                with connection.cursor() as cursor:
+                    try:
+                        cursor.copy_expert("copy (select stdout from main_jobevent where job_id={} order by start_line) to stdout".format(unified_job.id),
+                                           write_fd)
+                        write_fd.close()
+                        subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
+                                         shell=True).wait()
+                    except Exception as e:
+                        return Response({"error": _("Error generating stdout download file: {}".format(e))})
             try:
                 content_fd = open(unified_job.result_stdout_file, 'r')
                 if request.accepted_renderer.format == 'txt_download':
