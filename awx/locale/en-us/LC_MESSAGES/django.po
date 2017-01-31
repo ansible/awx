@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-31 18:51+0000\n"
+"POT-Creation-Date: 2017-01-31 20:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -139,7 +139,7 @@ msgstr ""
 msgid "Workflow Template"
 msgstr ""
 
-#: awx/api/serializers.py:658 awx/api/serializers.py:716 awx/api/views.py:3817
+#: awx/api/serializers.py:658 awx/api/serializers.py:716 awx/api/views.py:3819
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -414,309 +414,313 @@ msgstr ""
 msgid "Must include \"username\" and \"password\"."
 msgstr ""
 
-#: awx/api/views.py:99
+#: awx/api/views.py:101
 msgid "Your license does not allow use of the activity stream."
 msgstr ""
 
-#: awx/api/views.py:109
+#: awx/api/views.py:111
 msgid "Your license does not permit use of system tracking."
 msgstr ""
 
-#: awx/api/views.py:119
+#: awx/api/views.py:121
 msgid "Your license does not allow use of workflows."
 msgstr ""
 
-#: awx/api/views.py:127 awx/templates/rest_framework/api.html:28
+#: awx/api/views.py:129 awx/templates/rest_framework/api.html:28
 msgid "REST API"
 msgstr ""
 
-#: awx/api/views.py:134 awx/templates/rest_framework/api.html:4
+#: awx/api/views.py:136 awx/templates/rest_framework/api.html:4
 msgid "Ansible Tower REST API"
 msgstr ""
 
-#: awx/api/views.py:150
+#: awx/api/views.py:152
 msgid "Version 1"
 msgstr ""
 
-#: awx/api/views.py:201
+#: awx/api/views.py:203
 msgid "Ping"
 msgstr ""
 
-#: awx/api/views.py:230 awx/conf/apps.py:12
+#: awx/api/views.py:232 awx/conf/apps.py:12
 msgid "Configuration"
 msgstr ""
 
-#: awx/api/views.py:283
+#: awx/api/views.py:285
 msgid "Invalid license data"
 msgstr ""
 
-#: awx/api/views.py:285
+#: awx/api/views.py:287
 msgid "Missing 'eula_accepted' property"
 msgstr ""
 
-#: awx/api/views.py:289
+#: awx/api/views.py:291
 msgid "'eula_accepted' value is invalid"
 msgstr ""
 
-#: awx/api/views.py:292
+#: awx/api/views.py:294
 msgid "'eula_accepted' must be True"
 msgstr ""
 
-#: awx/api/views.py:299
+#: awx/api/views.py:301
 msgid "Invalid JSON"
 msgstr ""
 
-#: awx/api/views.py:307
+#: awx/api/views.py:309
 msgid "Invalid License"
 msgstr ""
 
-#: awx/api/views.py:317
+#: awx/api/views.py:319
 msgid "Invalid license"
 msgstr ""
 
-#: awx/api/views.py:325
+#: awx/api/views.py:327
 #, python-format
 msgid "Failed to remove license (%s)"
 msgstr ""
 
-#: awx/api/views.py:330
+#: awx/api/views.py:332
 msgid "Dashboard"
 msgstr ""
 
-#: awx/api/views.py:436
+#: awx/api/views.py:438
 msgid "Dashboard Jobs Graphs"
 msgstr ""
 
-#: awx/api/views.py:472
+#: awx/api/views.py:474
 #, python-format
 msgid "Unknown period \"%s\""
 msgstr ""
 
-#: awx/api/views.py:486
+#: awx/api/views.py:488
 msgid "Schedules"
 msgstr ""
 
-#: awx/api/views.py:505
+#: awx/api/views.py:507
 msgid "Schedule Jobs List"
 msgstr ""
 
-#: awx/api/views.py:715
+#: awx/api/views.py:717
 msgid "Your Tower license only permits a single organization to exist."
 msgstr ""
 
-#: awx/api/views.py:940 awx/api/views.py:1299
+#: awx/api/views.py:942 awx/api/views.py:1301
 msgid "Role 'id' field is missing."
 msgstr ""
 
-#: awx/api/views.py:946 awx/api/views.py:4093
+#: awx/api/views.py:948 awx/api/views.py:4106
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr ""
 
-#: awx/api/views.py:950 awx/api/views.py:4107
+#: awx/api/views.py:952 awx/api/views.py:4120
 msgid "You cannot grant system-level permissions to a team."
 msgstr ""
 
-#: awx/api/views.py:957 awx/api/views.py:4099
+#: awx/api/views.py:959 awx/api/views.py:4112
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
 msgstr ""
 
-#: awx/api/views.py:1047
+#: awx/api/views.py:1049
 msgid "Cannot delete project."
 msgstr ""
 
-#: awx/api/views.py:1076
+#: awx/api/views.py:1078
 msgid "Project Schedules"
 msgstr ""
 
-#: awx/api/views.py:1180 awx/api/views.py:2271 awx/api/views.py:3284
+#: awx/api/views.py:1182 awx/api/views.py:2273 awx/api/views.py:3286
 msgid "Cannot delete job resource when associated workflow job is running."
 msgstr ""
 
-#: awx/api/views.py:1257
+#: awx/api/views.py:1259
 msgid "Me"
 msgstr ""
 
-#: awx/api/views.py:1303 awx/api/views.py:4048
+#: awx/api/views.py:1305 awx/api/views.py:4061
 msgid "You may not perform any action with your own admin_role."
 msgstr ""
 
-#: awx/api/views.py:1309 awx/api/views.py:4052
+#: awx/api/views.py:1311 awx/api/views.py:4065
 msgid "You may not change the membership of a users admin_role"
 msgstr ""
 
-#: awx/api/views.py:1314 awx/api/views.py:4057
+#: awx/api/views.py:1316 awx/api/views.py:4070
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr ""
 
-#: awx/api/views.py:1318 awx/api/views.py:4061
+#: awx/api/views.py:1320 awx/api/views.py:4074
 msgid "You cannot grant private credential access to another user"
 msgstr ""
 
-#: awx/api/views.py:1416
+#: awx/api/views.py:1418
 #, python-format
 msgid "Cannot change %s."
 msgstr ""
 
-#: awx/api/views.py:1422
+#: awx/api/views.py:1424
 msgid "Cannot delete user."
 msgstr ""
 
-#: awx/api/views.py:1570
+#: awx/api/views.py:1572
 msgid "Cannot delete inventory script."
 msgstr ""
 
-#: awx/api/views.py:1806
+#: awx/api/views.py:1808
 msgid "Fact not found."
 msgstr ""
 
-#: awx/api/views.py:2126
+#: awx/api/views.py:2128
 msgid "Inventory Source List"
 msgstr ""
 
-#: awx/api/views.py:2154
+#: awx/api/views.py:2156
 msgid "Cannot delete inventory source."
 msgstr ""
 
-#: awx/api/views.py:2162
+#: awx/api/views.py:2164
 msgid "Inventory Source Schedules"
 msgstr ""
 
-#: awx/api/views.py:2192
+#: awx/api/views.py:2194
 msgid "Notification Templates can only be assigned when source is one of {}."
 msgstr ""
 
-#: awx/api/views.py:2403
+#: awx/api/views.py:2405
 msgid "Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:2423 awx/api/views.py:2439
+#: awx/api/views.py:2425 awx/api/views.py:2441
 msgid "Your license does not allow adding surveys."
 msgstr ""
 
-#: awx/api/views.py:2446
+#: awx/api/views.py:2448
 msgid "'name' missing from survey spec."
 msgstr ""
 
-#: awx/api/views.py:2448
+#: awx/api/views.py:2450
 msgid "'description' missing from survey spec."
 msgstr ""
 
-#: awx/api/views.py:2450
+#: awx/api/views.py:2452
 msgid "'spec' missing from survey spec."
 msgstr ""
 
-#: awx/api/views.py:2452
+#: awx/api/views.py:2454
 msgid "'spec' must be a list of items."
 msgstr ""
 
-#: awx/api/views.py:2454
+#: awx/api/views.py:2456
 msgid "'spec' doesn't contain any items."
-msgstr ""
-
-#: awx/api/views.py:2460
-#, python-format
-msgid "Survey question %s is not a json object."
 msgstr ""
 
 #: awx/api/views.py:2462
 #, python-format
-msgid "'type' missing from survey question %s."
+msgid "Survey question %s is not a json object."
 msgstr ""
 
 #: awx/api/views.py:2464
 #, python-format
-msgid "'question_name' missing from survey question %s."
+msgid "'type' missing from survey question %s."
 msgstr ""
 
 #: awx/api/views.py:2466
 #, python-format
-msgid "'variable' missing from survey question %s."
+msgid "'question_name' missing from survey question %s."
 msgstr ""
 
 #: awx/api/views.py:2468
 #, python-format
+msgid "'variable' missing from survey question %s."
+msgstr ""
+
+#: awx/api/views.py:2470
+#, python-format
 msgid "'variable' '%(item)s' duplicated in survey question %(survey)s."
 msgstr ""
 
-#: awx/api/views.py:2473
+#: awx/api/views.py:2475
 #, python-format
 msgid "'required' missing from survey question %s."
 msgstr ""
 
-#: awx/api/views.py:2684
+#: awx/api/views.py:2686
 msgid "No matching host could be found!"
 msgstr ""
 
-#: awx/api/views.py:2687
+#: awx/api/views.py:2689
 msgid "Multiple hosts matched the request!"
 msgstr ""
 
-#: awx/api/views.py:2692
+#: awx/api/views.py:2694
 msgid "Cannot start automatically, user input required!"
 msgstr ""
 
-#: awx/api/views.py:2699
+#: awx/api/views.py:2701
 msgid "Host callback job already pending."
 msgstr ""
 
-#: awx/api/views.py:2712
+#: awx/api/views.py:2714
 msgid "Error starting job!"
 msgstr ""
 
-#: awx/api/views.py:3041
+#: awx/api/views.py:3043
 msgid "Workflow Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:3183 awx/api/views.py:3726
+#: awx/api/views.py:3185 awx/api/views.py:3728
 msgid "Superuser privileges needed."
 msgstr ""
 
-#: awx/api/views.py:3215
+#: awx/api/views.py:3217
 msgid "System Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:3407
+#: awx/api/views.py:3409
 msgid "Job Host Summaries List"
 msgstr ""
 
-#: awx/api/views.py:3449
+#: awx/api/views.py:3451
 msgid "Job Event Children List"
 msgstr ""
 
-#: awx/api/views.py:3458
+#: awx/api/views.py:3460
 msgid "Job Event Hosts List"
 msgstr ""
 
-#: awx/api/views.py:3467
+#: awx/api/views.py:3469
 msgid "Job Events List"
 msgstr ""
 
-#: awx/api/views.py:3680
+#: awx/api/views.py:3682
 msgid "Ad Hoc Command Events List"
 msgstr ""
 
 #: awx/api/views.py:3874
+msgid "Error generating stdout download file: {}"
+msgstr ""
+
+#: awx/api/views.py:3887
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr ""
 
-#: awx/api/views.py:3919
+#: awx/api/views.py:3932
 msgid "Delete not allowed while there are pending notifications"
 msgstr ""
 
-#: awx/api/views.py:3926
+#: awx/api/views.py:3939
 msgid "Notification Template Test"
 msgstr ""
 
-#: awx/api/views.py:4042
+#: awx/api/views.py:4055
 msgid "User 'id' field is missing."
 msgstr ""
 
-#: awx/api/views.py:4085
+#: awx/api/views.py:4098
 msgid "Team 'id' field is missing."
 msgstr ""
 
@@ -1368,43 +1372,43 @@ msgstr ""
 msgid "No argument passed to %s module."
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:222 awx/main/models/jobs.py:763
+#: awx/main/models/ad_hoc_commands.py:222 awx/main/models/jobs.py:766
 msgid "Host Failed"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:223 awx/main/models/jobs.py:764
+#: awx/main/models/ad_hoc_commands.py:223 awx/main/models/jobs.py:767
 msgid "Host OK"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:224 awx/main/models/jobs.py:767
+#: awx/main/models/ad_hoc_commands.py:224 awx/main/models/jobs.py:770
 msgid "Host Unreachable"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:229 awx/main/models/jobs.py:766
+#: awx/main/models/ad_hoc_commands.py:229 awx/main/models/jobs.py:769
 msgid "Host Skipped"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:239 awx/main/models/jobs.py:794
+#: awx/main/models/ad_hoc_commands.py:239 awx/main/models/jobs.py:797
 msgid "Debug"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:240 awx/main/models/jobs.py:795
+#: awx/main/models/ad_hoc_commands.py:240 awx/main/models/jobs.py:798
 msgid "Verbose"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:241 awx/main/models/jobs.py:796
+#: awx/main/models/ad_hoc_commands.py:241 awx/main/models/jobs.py:799
 msgid "Deprecated"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:242 awx/main/models/jobs.py:797
+#: awx/main/models/ad_hoc_commands.py:242 awx/main/models/jobs.py:800
 msgid "Warning"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:243 awx/main/models/jobs.py:798
+#: awx/main/models/ad_hoc_commands.py:243 awx/main/models/jobs.py:801
 msgid "System Warning"
 msgstr ""
 
-#: awx/main/models/ad_hoc_commands.py:244 awx/main/models/jobs.py:799
+#: awx/main/models/ad_hoc_commands.py:244 awx/main/models/jobs.py:802
 #: awx/main/models/unified_jobs.py:64
 msgid "Error"
 msgstr ""
@@ -1975,103 +1979,103 @@ msgid ""
 "job run"
 msgstr ""
 
-#: awx/main/models/jobs.py:662
+#: awx/main/models/jobs.py:665
 msgid "job host summaries"
 msgstr ""
 
-#: awx/main/models/jobs.py:765
+#: awx/main/models/jobs.py:768
 msgid "Host Failure"
 msgstr ""
 
-#: awx/main/models/jobs.py:768 awx/main/models/jobs.py:782
+#: awx/main/models/jobs.py:771 awx/main/models/jobs.py:785
 msgid "No Hosts Remaining"
 msgstr ""
 
-#: awx/main/models/jobs.py:769
+#: awx/main/models/jobs.py:772
 msgid "Host Polling"
 msgstr ""
 
-#: awx/main/models/jobs.py:770
+#: awx/main/models/jobs.py:773
 msgid "Host Async OK"
 msgstr ""
 
-#: awx/main/models/jobs.py:771
+#: awx/main/models/jobs.py:774
 msgid "Host Async Failure"
 msgstr ""
 
-#: awx/main/models/jobs.py:772
+#: awx/main/models/jobs.py:775
 msgid "Item OK"
 msgstr ""
 
-#: awx/main/models/jobs.py:773
+#: awx/main/models/jobs.py:776
 msgid "Item Failed"
 msgstr ""
 
-#: awx/main/models/jobs.py:774
+#: awx/main/models/jobs.py:777
 msgid "Item Skipped"
 msgstr ""
 
-#: awx/main/models/jobs.py:775
+#: awx/main/models/jobs.py:778
 msgid "Host Retry"
 msgstr ""
 
-#: awx/main/models/jobs.py:777
+#: awx/main/models/jobs.py:780
 msgid "File Difference"
 msgstr ""
 
-#: awx/main/models/jobs.py:778
+#: awx/main/models/jobs.py:781
 msgid "Playbook Started"
 msgstr ""
 
-#: awx/main/models/jobs.py:779
+#: awx/main/models/jobs.py:782
 msgid "Running Handlers"
 msgstr ""
 
-#: awx/main/models/jobs.py:780
+#: awx/main/models/jobs.py:783
 msgid "Including File"
 msgstr ""
 
-#: awx/main/models/jobs.py:781
+#: awx/main/models/jobs.py:784
 msgid "No Hosts Matched"
 msgstr ""
 
-#: awx/main/models/jobs.py:783
+#: awx/main/models/jobs.py:786
 msgid "Task Started"
 msgstr ""
 
-#: awx/main/models/jobs.py:785
+#: awx/main/models/jobs.py:788
 msgid "Variables Prompted"
 msgstr ""
 
-#: awx/main/models/jobs.py:786
+#: awx/main/models/jobs.py:789
 msgid "Gathering Facts"
 msgstr ""
 
-#: awx/main/models/jobs.py:787
+#: awx/main/models/jobs.py:790
 msgid "internal: on Import for Host"
 msgstr ""
 
-#: awx/main/models/jobs.py:788
+#: awx/main/models/jobs.py:791
 msgid "internal: on Not Import for Host"
 msgstr ""
 
-#: awx/main/models/jobs.py:789
+#: awx/main/models/jobs.py:792
 msgid "Play Started"
 msgstr ""
 
-#: awx/main/models/jobs.py:790
+#: awx/main/models/jobs.py:793
 msgid "Playbook Complete"
 msgstr ""
 
-#: awx/main/models/jobs.py:1200
+#: awx/main/models/jobs.py:1203
 msgid "Remove jobs older than a certain number of days"
 msgstr ""
 
-#: awx/main/models/jobs.py:1201
+#: awx/main/models/jobs.py:1204
 msgid "Remove activity stream entries older than a certain number of days"
 msgstr ""
 
-#: awx/main/models/jobs.py:1202
+#: awx/main/models/jobs.py:1205
 msgid "Purge and/or reduce the granularity of system tracking data"
 msgstr ""
 
@@ -2492,7 +2496,7 @@ msgstr ""
 msgid "Ansible Tower license will expire soon"
 msgstr ""
 
-#: awx/main/tasks.py:240
+#: awx/main/tasks.py:249
 msgid "status_str must be either succeeded or failed"
 msgstr ""
 
@@ -2643,195 +2647,195 @@ msgstr ""
 msgid "A server error has occurred."
 msgstr ""
 
-#: awx/settings/defaults.py:611
+#: awx/settings/defaults.py:624
 msgid "Chicago"
 msgstr ""
 
-#: awx/settings/defaults.py:612
+#: awx/settings/defaults.py:625
 msgid "Dallas/Ft. Worth"
 msgstr ""
 
-#: awx/settings/defaults.py:613
+#: awx/settings/defaults.py:626
 msgid "Northern Virginia"
 msgstr ""
 
-#: awx/settings/defaults.py:614
+#: awx/settings/defaults.py:627
 msgid "London"
 msgstr ""
 
-#: awx/settings/defaults.py:615
+#: awx/settings/defaults.py:628
 msgid "Sydney"
 msgstr ""
 
-#: awx/settings/defaults.py:616
+#: awx/settings/defaults.py:629
 msgid "Hong Kong"
 msgstr ""
 
-#: awx/settings/defaults.py:643
+#: awx/settings/defaults.py:656
 msgid "US East (Northern Virginia)"
 msgstr ""
 
-#: awx/settings/defaults.py:644
+#: awx/settings/defaults.py:657
 msgid "US East (Ohio)"
 msgstr ""
 
-#: awx/settings/defaults.py:645
+#: awx/settings/defaults.py:658
 msgid "US West (Oregon)"
 msgstr ""
 
-#: awx/settings/defaults.py:646
+#: awx/settings/defaults.py:659
 msgid "US West (Northern California)"
 msgstr ""
 
-#: awx/settings/defaults.py:647
+#: awx/settings/defaults.py:660
 msgid "Canada (Central)"
 msgstr ""
 
-#: awx/settings/defaults.py:648
+#: awx/settings/defaults.py:661
 msgid "EU (Frankfurt)"
 msgstr ""
 
-#: awx/settings/defaults.py:649
+#: awx/settings/defaults.py:662
 msgid "EU (Ireland)"
 msgstr ""
 
-#: awx/settings/defaults.py:650
+#: awx/settings/defaults.py:663
 msgid "EU (London)"
 msgstr ""
 
-#: awx/settings/defaults.py:651
+#: awx/settings/defaults.py:664
 msgid "Asia Pacific (Singapore)"
 msgstr ""
 
-#: awx/settings/defaults.py:652
+#: awx/settings/defaults.py:665
 msgid "Asia Pacific (Sydney)"
 msgstr ""
 
-#: awx/settings/defaults.py:653
+#: awx/settings/defaults.py:666
 msgid "Asia Pacific (Tokyo)"
 msgstr ""
 
-#: awx/settings/defaults.py:654
+#: awx/settings/defaults.py:667
 msgid "Asia Pacific (Seoul)"
 msgstr ""
 
-#: awx/settings/defaults.py:655
+#: awx/settings/defaults.py:668
 msgid "Asia Pacific (Mumbai)"
 msgstr ""
 
-#: awx/settings/defaults.py:656
+#: awx/settings/defaults.py:669
 msgid "South America (Sao Paulo)"
 msgstr ""
 
-#: awx/settings/defaults.py:657
+#: awx/settings/defaults.py:670
 msgid "US West (GovCloud)"
 msgstr ""
 
-#: awx/settings/defaults.py:658
+#: awx/settings/defaults.py:671
 msgid "China (Beijing)"
 msgstr ""
 
-#: awx/settings/defaults.py:707
+#: awx/settings/defaults.py:720
 msgid "US East (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:708
+#: awx/settings/defaults.py:721
 msgid "US East (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:709
+#: awx/settings/defaults.py:722
 msgid "US East (D)"
 msgstr ""
 
-#: awx/settings/defaults.py:710
+#: awx/settings/defaults.py:723
 msgid "US Central (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:711
+#: awx/settings/defaults.py:724
 msgid "US Central (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:712
+#: awx/settings/defaults.py:725
 msgid "US Central (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:713
+#: awx/settings/defaults.py:726
 msgid "US Central (F)"
 msgstr ""
 
-#: awx/settings/defaults.py:714
+#: awx/settings/defaults.py:727
 msgid "Europe West (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:715
+#: awx/settings/defaults.py:728
 msgid "Europe West (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:716
+#: awx/settings/defaults.py:729
 msgid "Europe West (D)"
 msgstr ""
 
-#: awx/settings/defaults.py:717
+#: awx/settings/defaults.py:730
 msgid "Asia East (A)"
 msgstr ""
 
-#: awx/settings/defaults.py:718
+#: awx/settings/defaults.py:731
 msgid "Asia East (B)"
 msgstr ""
 
-#: awx/settings/defaults.py:719
+#: awx/settings/defaults.py:732
 msgid "Asia East (C)"
 msgstr ""
 
-#: awx/settings/defaults.py:743
+#: awx/settings/defaults.py:756
 msgid "US Central"
 msgstr ""
 
-#: awx/settings/defaults.py:744
+#: awx/settings/defaults.py:757
 msgid "US East"
 msgstr ""
 
-#: awx/settings/defaults.py:745
+#: awx/settings/defaults.py:758
 msgid "US East 2"
 msgstr ""
 
-#: awx/settings/defaults.py:746
+#: awx/settings/defaults.py:759
 msgid "US North Central"
 msgstr ""
 
-#: awx/settings/defaults.py:747
+#: awx/settings/defaults.py:760
 msgid "US South Central"
 msgstr ""
 
-#: awx/settings/defaults.py:748
+#: awx/settings/defaults.py:761
 msgid "US West"
 msgstr ""
 
-#: awx/settings/defaults.py:749
+#: awx/settings/defaults.py:762
 msgid "Europe North"
 msgstr ""
 
-#: awx/settings/defaults.py:750
+#: awx/settings/defaults.py:763
 msgid "Europe West"
 msgstr ""
 
-#: awx/settings/defaults.py:751
+#: awx/settings/defaults.py:764
 msgid "Asia Pacific East"
 msgstr ""
 
-#: awx/settings/defaults.py:752
+#: awx/settings/defaults.py:765
 msgid "Asia Pacific Southeast"
 msgstr ""
 
-#: awx/settings/defaults.py:753
+#: awx/settings/defaults.py:766
 msgid "Japan East"
 msgstr ""
 
-#: awx/settings/defaults.py:754
+#: awx/settings/defaults.py:767
 msgid "Japan West"
 msgstr ""
 
-#: awx/settings/defaults.py:755
+#: awx/settings/defaults.py:768
 msgid "Brazil South"
 msgstr ""
 
