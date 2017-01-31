@@ -31,8 +31,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                           // loadingFinishedCount = 0,
                           // base = $location.path().replace(/^\//, '').split('/')[0],
                           master = {},
-                          id = $stateParams.job_template_id,
-                          relatedSets = {};
+                          id = $stateParams.job_template_id;
                           // checkSCMStatus, getPlaybooks, callback,
                           // choicesCount = 0;
 
@@ -144,8 +143,6 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                   scope.ask_credential_on_launch = (data.ask_credential_on_launch) ? true : false;
                                   master.ask_credential_on_launch = scope.ask_credential_on_launch;
 
-                                  relatedSets = form.relatedSets(data.related);
-
                                   if (data.host_config_key) {
                                       scope.example_config_key = data.host_config_key;
                                   }
@@ -163,7 +160,7 @@ angular.module('JobTemplatesHelper', ['Utilities'])
                                       scope.resetProjectToDefault();
                                   }
 
-                                  scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master, relatedSets);
+                                  scope.$emit('jobTemplateLoaded', data.related.cloud_credential, master);
                               })
                               .error(function (data, status) {
                                   ProcessErrors(scope, data, status, form, {

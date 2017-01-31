@@ -339,14 +339,6 @@ export default
                 "notifications": {
                     include: "NotificationsList"
                 }
-            },
-            relatedSets: function() {
-                return {
-                    notifications: {
-                        iterator: 'notification',
-                        url: 'api/v1/notification_templates/'
-                    }
-                };
             }
 
         })

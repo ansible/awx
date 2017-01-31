@@ -88,6 +88,7 @@ angular.module('InventoryFormDefinition', [])
         },
         related: {
             permissions: {
+                name: 'permissions',
                 awToolTip: i18n._('Please save before assigning permissions'),
                 dataPlacement: 'top',
                 basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/access_list/',
@@ -119,66 +120,17 @@ angular.module('InventoryFormDefinition', [])
                     role: {
                         label: i18n._('Role'),
                         type: 'role',
-                        noSort: true,
+                        nosort: true,
                         class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                     },
                     team_roles: {
                         label: i18n._('Team Roles'),
                         type: 'team_roles',
-                        noSort: true,
+                        nosort: true,
                         class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                     }
                 }
             }
-        },
-
-        relatedSets: function() {
-            return {
-                permissions: {
-                    awToolTip: i18n._('Please save before assigning permissions'),
-                    dataPlacement: 'top',
-                    basePath: 'inventories/:id/access_list/',
-                    type: 'collection',
-                    title: i18n._('Permissions'),
-                    iterator: 'permission',
-                    index: false,
-                    open: false,
-                    searchType: 'select',
-                    actions: {
-                        add: {
-                            ngClick: "addPermission",
-                            label: i18n._('Add'),
-                            awToolTip: i18n._('Add a permission'),
-                            actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ' + i18n._('ADD'),
-                            ngShow: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
-                        }
-                    },
-
-                    fields: {
-                        username: {
-                            key: true,
-                            label: i18n._('User'),
-                            linkBase: 'users',
-                            class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
-                        },
-                        role: {
-                            label: i18n._('Role'),
-                            type: 'role',
-                            noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            noSearch: true
-                        },
-                        team_roles: {
-                            label: i18n._('Team Roles'),
-                            type: 'team_roles',
-                            noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            noSearch: true
-                        }
-                    }
-                }
-            };
         }
 
     };}]);

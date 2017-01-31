@@ -424,6 +424,7 @@ export default
 
             related: {
                 permissions: {
+                    name: 'permissions',
                     disabled: '(organization === undefined ? true : false)',
                     // Do not transition the state if organization is undefined
                     ngClick: `(organization === undefined ? true : false)||$state.go('credentials.edit.permissions')`,
@@ -460,25 +461,16 @@ export default
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
                 }
-            },
-
-            relatedSets: function(urls) {
-                return {
-                    permissions: {
-                        iterator: 'permission',
-                        url: urls.access_list,
-                    }
-                };
             }
         };}]);

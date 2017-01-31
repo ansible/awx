@@ -78,6 +78,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
             });
 
             $scope.inventory_obj = data;
+            $scope.name = data.name;
 
             $scope.$emit('inventoryLoaded');
         })
