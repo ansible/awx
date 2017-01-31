@@ -1358,7 +1358,7 @@ class RunInventoryUpdate(BaseTask):
                                   project_name=credential.project)
             if credential.domain not in (None, ''):
                 openstack_auth['domain_name'] = credential.domain
-            private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
+            private_state = inventory_update.source_vars_dict.get('private', True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
             cache = inventory_update.source_vars_dict.get('cache', {})
