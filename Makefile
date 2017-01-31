@@ -45,7 +45,7 @@ ifeq ($(OFFICIAL),yes)
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
@@ -473,7 +473,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS ?= awx/main/tests
+TEST_DIRS ?= awx/main/tests awx/conf/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -485,7 +485,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:

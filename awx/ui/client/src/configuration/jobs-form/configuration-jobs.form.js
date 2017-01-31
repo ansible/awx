@@ -17,10 +17,6 @@
                  reset: 'AD_HOC_COMMANDS',
                  multiSelect: true
              },
-             STDOUT_MAX_BYTES_DISPLAY: {
-                 type: 'number',
-                 reset: 'STDOUT_MAX_BYTES_DISPLAY'
-             },
              AWX_PROOT_BASE_PATH: {
                  type: 'text',
                  reset: 'AWX_PROOT_BASE_PATH',

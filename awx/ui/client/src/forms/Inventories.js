@@ -92,7 +92,7 @@ angular.module('InventoryFormDefinition', [])
                 dataPlacement: 'top',
                 basePath: 'api/v1/inventories/{{$stateParams.inventory_id}}/access_list/',
                 type: 'collection',
-                title: 'Permissions',
+                title: i18n._('Permissions'),
                 iterator: 'permission',
                 index: false,
                 open: false,

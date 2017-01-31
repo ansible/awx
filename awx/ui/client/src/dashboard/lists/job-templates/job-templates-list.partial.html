@@ -1,7 +1,7 @@
 <div class="DashboardList" ng-hide="noJobTemplates">
     <div class="DashboardList-header">
         <h3 class="DashboardList-headerText">
-            <translate>RECENTLY USED JOB TEMPLATES</translate>
+            <translate>RECENTLY USED TEMPLATES</translate>
         </h3>
         <a href="/#/templates" class="DashboardList-viewAll">
             <translate>VIEW ALL</translate>
@@ -34,7 +34,7 @@
               </td>
               <td class="List-actionsContainer">
                   <div class="List-actionButtonCell">
-                      <button class="List-actionButton" ng-click="launchJobTemplate(job_template.id)">
+                      <button class="List-actionButton" ng-click="launchJobTemplate(job_template)">
                           <i class="icon-launch"></i>
                       </button>
                       <button class="List-actionButton" ng-click="editJobTemplate(job_template.id)">
@@ -53,7 +53,8 @@
         </h3>
     </div>
     <div class="DashboardList-container">
-        <p class="DashboardList-noJobs">No job templates were recently used.<br />
-        You can create a job template <a href="#/templates/add_job_template">here</a>.</p>
+        <p class="DashboardList-noJobs"><translate>No job templates were recently used.</translate><br />
+        <!-- TODO: Seems $sce.trustAsHtml() does not work here. -->
+        <translate>You can create a job template <a href="#/templates/add_job_template">here</a>.</translate></p>
     </div>
 </div>

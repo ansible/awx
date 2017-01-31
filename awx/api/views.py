@@ -3108,7 +3108,7 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(workflow_job_template=parent) |
-                         Q(workflow_job_template_node__workflow_job_template=parent))
+                         Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
 class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
@@ -3474,6 +3474,13 @@ class BaseJobEventsList(SubListAPIView):
 class HostJobEventsList(BaseJobEventsList):
 
     parent_model = Host
+
+    def get_queryset(self):
+        parent_obj = self.get_parent_object()
+        self.check_parent_access(parent_obj)
+        qs = self.request.user.get_queryset(self.model).filter(
+            Q(host=parent_obj) | Q(hosts=parent_obj)).distinct()
+        return qs
 
 
 class GroupJobEventsList(BaseJobEventsList):

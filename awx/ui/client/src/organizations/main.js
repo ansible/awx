@@ -10,6 +10,7 @@ import OrganizationsAdd from './add/organizations-add.controller';
 import OrganizationsEdit from './edit/organizations-edit.controller';
 import organizationsLinkout from './linkout/main';
 import OrganizationsLinkoutStates from './linkout/organizations-linkout.route';
+import { N_ } from '../i18n';
 
 
 export default
@@ -48,7 +49,7 @@ angular.module('Organizations', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        label: 'ORGANIZATIONS'
+                        label: N_('ORGANIZATIONS')
                     },
                     // concat manually-defined state definitions with generated defintions
                 }).then((generated) => {

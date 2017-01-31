@@ -678,7 +678,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
-                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">Reset</a>`;
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">` + i18n._("Reset") + `</a>`;
                         }
 
                         html += "\n\t</label>\n";
@@ -1870,9 +1870,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     <div
                         class="row"
                         ng-show="${itm}.length === 0 && !(searchTags | isEmpty)">
-                        <div class="col-lg-12 List-searchNoResults">
-                            No records matched your search.
-                        </div>
+                        <div class="col-lg-12 List-searchNoResults">`;
+                html += i18n._('No records matched your search.');
+                html += `</div>
                     </div>
                 `;
 

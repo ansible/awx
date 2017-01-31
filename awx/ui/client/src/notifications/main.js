@@ -15,6 +15,7 @@ import notificationsList from './notifications.list';
 import toggleNotification from './shared/toggle-notification.factory';
 import notificationsListInit from './shared/notification-list-init.factory';
 import typeChange from './shared/type-change.service';
+import { N_ } from '../i18n';
 
 export default
 angular.module('notifications', [
@@ -39,7 +40,7 @@ angular.module('notifications', [
                 url: '/notification_templates',
                 ncyBreadcrumb: {
                     parent: 'setup',
-                    label: "NOTIFICATIONS"
+                    label: N_("NOTIFICATIONS")
                 },
                 lazyLoad: () => stateDefinitions.generateTree({
                     parent: 'notifications', // top-most node in the generated tree
@@ -84,7 +85,7 @@ angular.module('notifications', [
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
-                        name: 'NOTIFICATIONS'
+                        label: N_('NOTIFICATIONS')
                     }
                 })
             });

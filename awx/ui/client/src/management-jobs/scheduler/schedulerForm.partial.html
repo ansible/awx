@@ -18,7 +18,7 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Name
+                    <span translate>Name</span>
                 </label>
                 <input
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
@@ -31,14 +31,14 @@
                     ng-model="schedulerName" required
                     placeholder="Schedule name">
                 <div class="error"
-                    ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
+                    ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required" translate>
                     A schedule name is required.
                 </div>
             </div>
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Start Date
+                    <span translate>Start Date</span>
                 </label>
                 <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
                     <scheduler-date-picker date="schedulerStartDt"
@@ -53,7 +53,7 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Start Time
+                    <span translate>Start Time</span>
                     <span class="fmt-help"
                         ng-show="schedulerShowTimeZone">
                         (HH24:MM:SS)
@@ -122,7 +122,7 @@
                     </div> -->
                 </div>
                 <div class="error"
-                    ng-show="scheduler_startTime_error">
+                    ng-show="scheduler_startTime_error" translate>
                     The time must be in HH24:MM:SS format.
                 </div>
             </div>
@@ -130,7 +130,7 @@
                 ng-show="schedulerShowTimeZone">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Local Time Zone
+                    <span translate>Local Time Zone</span>
                 </label>
                 <select
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
@@ -146,7 +146,7 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Repeat frequency
+                    <span translate>Repeat frequency</span>
                 </label>
                 <select name="schedulerFrequency"
                     ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
@@ -163,14 +163,13 @@
             </div>
             <div class="form-group SchedulerForm-formGroup" ng-if="cleanupJob  && !isFactCleanup">
                 <label class="Form-inputLabel"><span class="red-text">*</span> Days of data to keep</label>
-                <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep"
-                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
+                <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required" translate>A value is required.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number" translate>This is not a valid number.</div>
             </div>
             <div class="RepeatFrequencyOptions-label"
                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
-                Frequency Details</div>
+                <span translate>Frequency Details</span></div>
             <div class="RepeatFrequencyOptions Form"
                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
                 <div class="form-group

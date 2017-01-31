@@ -9,13 +9,13 @@
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
         'Empty', 'ToJSON', 'CallbackHelpInit', 'Prompt', 'GetChoices', '$state',
-         'CreateSelect2', '$q',
+         'CreateSelect2', '$q', 'i18n',
          function(
              $filter, $scope, $rootScope, $compile,
              $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
              Empty, ToJSON, CallbackHelpInit, Prompt, GetChoices,
-             $state, CreateSelect2, $q
+             $state, CreateSelect2, $q, i18n
          ) {
 
              Rest.setUrl(GetBasePath('job_templates'));
@@ -23,7 +23,7 @@
                  .success(function(data) {
                      if (!data.actions.POST) {
                          $state.go("^");
-                         Alert('Permission Error', 'You do not have permission to add a job template.', 'alert-info');
+                         Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a job template.'), 'alert-info');
                      }
                  });
 

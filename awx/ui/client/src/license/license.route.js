@@ -5,6 +5,7 @@
  *************************************************/
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
+import { N_ } from '../i18n';
 
 export default {
 	name: 'license',
@@ -14,7 +15,7 @@ export default {
 	data: {},
 	ncyBreadcrumb: {
 		parent: 'setup',
-		label: 'LICENSE'
+		label: N_('LICENSE')
 	},
 	resolve: {
 		features: ['CheckLicense', '$rootScope',

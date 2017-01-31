@@ -10,6 +10,7 @@ import OrganizationsJobTemplates from './controllers/organizations-job-templates
 import OrganizationsProjects from './controllers/organizations-projects.controller';
 import OrganizationsTeams from './controllers/organizations-teams.controller';
 import OrganizationsUsers from './controllers/organizations-users.controller';
+import { N_ } from '../../i18n';
 
 export default [{
     name: 'organizations.users',
@@ -55,7 +56,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "USERS"
+        label: N_("USERS")
     },
 
     data: {
@@ -128,7 +129,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "TEAMS"
+        label: N_("TEAMS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -174,7 +175,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "INVENTORIES"
+        label: N_("INVENTORIES")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -225,7 +226,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "PROJECTS"
+        label: N_("PROJECTS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -283,7 +284,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "JOB TEMPLATES"
+        label: N_("JOB TEMPLATES")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -359,7 +360,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "ADMINS"
+        label: N_("ADMINS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

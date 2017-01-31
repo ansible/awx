@@ -18,9 +18,18 @@ __all__ = ['settings_registry']
 class SettingsRegistry(object):
     """Registry of all API-configurable settings and categories."""
 
-    def __init__(self):
+    def __init__(self, settings=None):
+        """
+        :param settings: a ``django.conf.LazySettings`` object used to lookup
+                         file-based field values (e.g., ``local_settings.py``
+                         and ``/etc/tower/conf.d/example.py``).  If unspecified,
+                         defaults to ``django.conf.settings``.
+        """
+        if settings is None:
+            from django.conf import settings
         self._registry = OrderedDict()
         self._dependent_settings = {}
+        self.settings = settings
 
     def register(self, setting, **kwargs):
         if setting in self._registry:
@@ -94,7 +103,6 @@ class SettingsRegistry(object):
         return bool(self._registry.get(setting, {}).get('encrypted', False))
 
     def get_setting_field(self, setting, mixin_class=None, for_user=False, **kwargs):
-        from django.conf import settings
         from rest_framework.fields import empty
         field_kwargs = {}
         field_kwargs.update(self._registry[setting])
@@ -124,12 +132,12 @@ class SettingsRegistry(object):
             original_field_instance = original_field_class(**field_kwargs)
         if category_slug == 'user' and for_user:
             try:
-                field_instance.default = original_field_instance.to_representation(getattr(settings, setting))
+                field_instance.default = original_field_instance.to_representation(getattr(self.settings, setting))
             except:
                 logger.warning('Unable to retrieve default value for user setting "%s".', setting, exc_info=True)
-        elif not field_instance.read_only or field_instance.default is empty:
+        elif not field_instance.read_only or field_instance.default is empty or not field_instance.default:
             try:
-                field_instance.default = original_field_instance.to_representation(settings._awx_conf_settings._get_default(setting))
+                field_instance.default = original_field_instance.to_representation(self.settings._awx_conf_settings._get_default(setting))
             except AttributeError:
                 pass
             except:

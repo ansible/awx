@@ -8,7 +8,8 @@
 export default
     [
         'CreateSelect2',
-        function(CreateSelect2) {
+        'i18n',
+        function(CreateSelect2, i18n) {
             return {
                 restrict: 'E',
                 scope: {
@@ -21,7 +22,7 @@ export default
                     CreateSelect2({
                         element: '.roleSelect2',
                         multiple: true,
-                        placeholder: 'Select roles'
+                        placeholder: i18n._('Select roles')
                     });
                 }
             };

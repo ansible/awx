@@ -9,7 +9,7 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
-export default ['$injector', '$stateExtender', '$log', function($injector, $stateExtender, $log) {
+export default ['$injector', '$stateExtender', '$log', 'i18n', function($injector, $stateExtender, $log, i18n) {
     return {
         /**
         * @ngdoc method
@@ -150,7 +150,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: `CREATE ${form.breadcrumbName || form.name}`
+                            label: i18n.sprintf(i18n._("CREATE %s"), i18n._(`${form.breadcrumbName || form.name}`))
                         },
                         views: {
                             'form': {
@@ -274,7 +274,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-user-team resolve="$resolve" title="Add Permissions"></add-rbac-user-team>`
+                            template: `<add-rbac-user-team resolve="$resolve" title="` + i18n._('Add Permissions') + `"></add-rbac-user-team>`
                         }
                     },
                     resolve: {
@@ -339,7 +339,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="Add Users / Teams"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="` + i18n._('Add Users') + ' / ' + i18n._('Teams') + `"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -492,7 +492,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 // }
                 return state;
             }
-            
+
             function buildRbacUserDirective() {
                 let states = [];
 
@@ -508,7 +508,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="Add Users"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
                         }
                     },
                     resolve: {

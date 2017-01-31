@@ -23,9 +23,9 @@
  */
 export default
     ['$rootScope', '$cookieStore', 'CreateDialog', 'Authorization',
-        'Store', '$interval', '$state', '$q',
+        'Store', '$interval', '$state', '$q', 'i18n',
     function ($rootScope, $cookieStore, CreateDialog, Authorization,
-        Store, $interval, $state, $q) {
+        Store, $interval, $state, $q, i18n) {
         return {
 
             sessionTime: null,
@@ -154,7 +154,7 @@ export default
                             });
                             CreateDialog({
                                 id: 'idle-modal'    ,
-                                title: "Idle Session",
+                                title: i18n._("Idle Session"),
                                 scope: $rootScope,
                                 buttons: buttons,
                                 width: 470,

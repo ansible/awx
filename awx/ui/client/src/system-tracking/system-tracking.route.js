@@ -5,6 +5,7 @@
  *************************************************/
 
 import {templateUrl} from '../shared/template-url/template-url.factory';
+import { N_ } from '../i18n';
 
 export default {
     name: 'systemTracking',
@@ -14,7 +15,7 @@ export default {
     params: {hosts: null, inventory: null},
     reloadOnSearch: false,
     ncyBreadcrumb: {
-        label: "SYSTEM TRACKING"
+        label: N_("SYSTEM TRACKING")
     },
     resolve: {
             moduleOptions:
