@@ -3409,6 +3409,11 @@ class BaseJobHostSummariesList(SubListAPIView):
     relationship = 'job_host_summaries'
     view_name = _('Job Host Summaries List')
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).select_related('job', 'job__job_template', 'host')
+
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
 
