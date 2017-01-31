@@ -20,11 +20,9 @@ def job(mocker):
     return ret
 
 
-@pytest.mark.survey
-def test_job_survey_password_redaction():
-    """Tests the Job model's funciton to redact passwords from
-    extra_vars - used when displaying job information"""
-    job = Job(
+@pytest.fixture
+def job_with_survey():
+    return Job(
         name="test-job-with-passwords",
         extra_vars=json.dumps({
             'submitter_email': 'foobar@redhat.com',
@@ -33,7 +31,13 @@ def test_job_survey_password_redaction():
         survey_passwords={
             'secret_key': '$encrypted$',
             'SSN': '$encrypted$'})
-    assert json.loads(job.display_extra_vars()) == {
+
+
+@pytest.mark.survey
+def test_job_survey_password_redaction(job_with_survey):
+    """Tests the Job model's funciton to redact passwords from
+    extra_vars - used when displaying job information"""
+    assert json.loads(job_with_survey.display_extra_vars()) == {
         'submitter_email': 'foobar@redhat.com',
         'secret_key': '$encrypted$',
         'SSN': '$encrypted$'}
@@ -53,6 +57,33 @@ def test_survey_passwords_not_in_extra_vars():
     assert json.loads(job.display_extra_vars()) == {
         'submitter_email': 'foobar@redhat.com',
     }
+
+
+@pytest.mark.survey
+def test_survey_passwords_not_in_stdout(job_with_survey):
+    job_with_survey.survey_passwords['has_blank_value'] = '$encrypted$'
+    job_with_survey.extra_vars = json.dumps({
+        'has_blank_value': '',
+        'secret_key': '6kQngg3h8lgiSTvIEb21',
+        'SSN': '123-45-6789'})
+    example_stdout = '''
+PLAY [all] *********************************************************************
+ 
+TASK [debug] ******************************************************************* 
+ok: [webserver45] => { 
+    "msg": "Helpful echo of your secret_key: secret_key=6kQngg3h8lgiSTvIEb21 " 
+}
+
+TASK [debug] ******************************************************************* 
+ok: [webserver46] => { 
+   "msg": "Helpful echo of your secret_key: secret_key=123-45-6789 " 
+}
+'''
+    display_stdout = job_with_survey._survey_search_and_replace(example_stdout)
+    assert display_stdout == example_stdout.replace(
+        '6kQngg3h8lgiSTvIEb21', '$encrypted$').replace('123-45-6789', '$encrypted$')
+    assert type(display_stdout) == type(example_stdout)
+
 
 
 def test_job_safe_args_redacted_passwords(job):

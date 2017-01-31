@@ -604,13 +604,16 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def _survey_search_and_replace(self, content):
         # Use job template survey spec to identify password fields.
         # Then lookup password fields in extra_vars and save the values
-        jt = self.job_template
-        if jt and jt.survey_enabled and 'spec' in jt.survey_spec:
-            # Use password vars to find in extra_vars
-            for key in jt.survey_password_variables():
-                if key in self.extra_vars_dict:
-                    content = PlainTextCleaner.remove_sensitive(content, self.extra_vars_dict[key])
-        return content
+        job_extra_vars = self.extra_vars_dict
+        password_list = [job_extra_vars[k] for k in self.survey_passwords.keys()
+                         if k in job_extra_vars]
+        return_content = content
+        for val in password_list:
+            if len(val) == 0:
+                continue  # avoids memory errors
+            return_content = PlainTextCleaner.remove_sensitive(return_content, val)
+        return return_content
+
 
     def _result_stdout_raw_limited(self, *args, **kwargs):
         buff, start, end, abs_end = super(Job, self)._result_stdout_raw_limited(*args, **kwargs)
