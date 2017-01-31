@@ -817,7 +817,11 @@ class CredentialAccess(BaseAccess):
         permitted to see.
         """
         qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by').all()
+        qs = qs.select_related('created_by', 'modified_by')
+        qs = qs.prefetch_related(
+            'admin_role', 'use_role', 'read_role',
+            'admin_role__parents', 'admin_role__members')
+        return qs
 
     @check_superuser
     def can_read(self, obj):
