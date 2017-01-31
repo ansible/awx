@@ -406,6 +406,7 @@ export default
                     include: "CompletedJobsList"
                 },
                 permissions: {
+                    name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
                     basePath: 'api/v1/job_templates/{{$stateParams.job_template_id}}/access_list/',
@@ -439,13 +440,13 @@ export default
                         role: {
                             label: 'Role',
                             type: 'role',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                         }
                     }
@@ -479,23 +480,6 @@ export default
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 }
-            },
-
-            relatedSets: function(urls) {
-                return {
-                    completed_jobs: {
-                        iterator: 'completed_job',
-                        url: urls.jobs + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
-                    },
-                    permissions: {
-                        iterator: 'permission',
-                        url: urls.access_list
-                    },
-                    notifications: {
-                        iterator: 'notification',
-                        url: '/api/v1/notification_templates/'
-                    }
-                };
             }
         };}])
 

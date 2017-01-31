@@ -1271,7 +1271,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (i = 0; i < field.options.length; i++) {
                             html += "<label class=\"radio-inline ";
-                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\""; 
+                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\"";
                             html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
                             html += ">";
                             html += "<input type=\"radio\" ";
@@ -1900,6 +1900,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 for (fld in collection.fields) {
                     html += `<th class="List-tableHeader list-header ${collection.fields[fld].columnClass}"
                         id="${collection.iterator}-${fld}-header"
+                        base-path="${collection.basePath}"
+                        collection="${collection.name}"
+                        dataset="${collection.iterator}_dataset"
                         column-sort
                         column-field="${fld}"
                         column-iterator="${collection.iterator}"

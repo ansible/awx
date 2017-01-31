@@ -54,6 +54,7 @@ export default
 
             related: {
                 permissions: {
+                    name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions'),
                     basePath: 'api/v1/organizations/{{$stateParams.organization_id}}/access_list/',
                     search: {
@@ -87,13 +88,13 @@ export default
                         role: {
                             label: i18n._('Role'),
                             type: 'role',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         },
                         team_roles: {
                             label: i18n._('Team Roles'),
                             type: 'team_roles',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
@@ -103,18 +104,6 @@ export default
 
                 }
 
-            },
-            relatedSets: function(urls) {
-                return {
-                    permissions: {
-                        iterator: 'permission',
-                        url: urls.access_list
-                    },
-                    notifications: {
-                        iterator: 'notification',
-                        url: '/api/v1/notification_templates/'
-                    }
-                };
             }
         };}])
 
