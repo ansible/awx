@@ -202,6 +202,11 @@ export default ['$log', 'moment', function($log, moment){
             let lineNums = _.range(event.start_line + 1,
                 event.end_line + 1);
 
+            // hack around no-carriage return issues
+            if (!lineNums.length) {
+                lineNums = [event.start_line + 1];
+            }
+
             let lines = event.stdout
                 .replace("\t", "        ")
                 .split("\r\n");
@@ -212,6 +217,11 @@ export default ['$log', 'moment', function($log, moment){
                 for (let i = 0; i <= padBy; i++) {
                     lines.push("[1;imLine capped.[0m");
                 }
+            }
+
+            // hack around no-carriage return issues
+            if (lineNums.length === lines.length) {
+                return _.zip(lineNums, lines);
             }
 
             return _.zip(lineNums, lines).slice(0, -1);
