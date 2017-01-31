@@ -77,7 +77,7 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
             // attempts to transition the state and they were squashing each other.
 
             let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-            qs.search(path, $stateParams[`${list.iterator}_search`])
+            qs.search(path, $state.params[`${list.iterator}_search`])
             .then(function(searchResponse) {
                 $scope[`${list.iterator}_dataset`] = searchResponse.data;
                 $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
