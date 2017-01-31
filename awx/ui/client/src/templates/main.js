@@ -89,14 +89,16 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         job_template_search: {
                             value: {
                                 page_size: '5',
-                                type: 'job_template'
+                                type: 'job_template',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
                         },
                         project_search: {
                             value: {
-                                page_size: '5'
+                                page_size: '5',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
@@ -104,7 +106,8 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         inventory_source_search: {
                             value: {
                                 page_size: '5',
-                                not__source: ''
+                                not__source: '',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
