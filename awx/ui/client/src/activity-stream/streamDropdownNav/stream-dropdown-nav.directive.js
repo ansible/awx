@@ -12,7 +12,12 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
         templateUrl: templateUrl('activity-stream/streamDropdownNav/stream-dropdown-nav'),
         controller: ['$scope', '$state', '$stateParams','CreateSelect2', function($scope, $state, $stateParams, CreateSelect2) {
 
-            $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
+            if($state.params && $state.params.target) {
+                $scope.streamTarget = ($state.params.target === 'job_template' || $state.params.target === 'workflow_job_template') ? 'template' : $state.params.target;
+            }
+            else {
+                $scope.streamTarget = 'dashboard';
+            }
 
             $scope.options = [
                 {label: i18n._('All Activity'), value: 'dashboard'},
@@ -40,12 +45,14 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
                     $state.go('activityStream', {target: null, activity_search: {page_size:"20", order_by: '-timestamp'}});
                 }
                 else {
-                    let search =  _.merge($stateParams.activity_search, {
+                    let search =  {
                         or__object1__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
-                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget
-                    });
+                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        page_size: '20',
+                        order_by: '-timestamp'
+                    };
                     // Attach the taget to the query parameters
-                    $state.go('activityStream', {target: $scope.streamTarget, activity_search: search});
+                    $state.go('activityStream', {target: $scope.streamTarget, id: null, activity_search: search});
                 }
 
             };

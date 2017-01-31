@@ -219,8 +219,8 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     };
                     if (params.data && params.data.activityStreamTarget) {
                         formNodeState.data = {};
-                        formNodeState.data.activityStreamId = params.data.activityStreamTarget + '_id';
-
+                        formNodeState.data.activityStreamId = params.data.activityStreamId ? params.data.activityStreamId : params.data.activityStreamTarget + '_id';
+                        formNodeState.data.activityStreamTarget = params.data.activityStreamTarget;
                     }
                     formNode = $stateExtender.buildDefinition(formNodeState);
 
