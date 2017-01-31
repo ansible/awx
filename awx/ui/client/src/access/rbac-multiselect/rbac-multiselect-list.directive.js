@@ -59,6 +59,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 case 'JobTemplates':
                     list.name = 'job_templates';
                     list.iterator = 'job_template';
+                    list.basePath = 'job_templates';
                     list.fields = {
                         name: list.fields.name,
                         description: list.fields.description
