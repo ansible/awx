@@ -26,7 +26,7 @@ msgstr ""
 msgid "+ ADD"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:32
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:33
 msgid "A schedule name is required."
 msgstr ""
 
@@ -34,7 +34,7 @@ msgstr ""
 msgid "A value is required"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:160
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:167
 msgid "A value is required."
 msgstr ""
 
@@ -61,7 +61,7 @@ msgstr ""
 #: client/src/lists/Credentials.js:60
 #: client/src/lists/Inventories.js:68
 #: client/src/lists/Projects.js:77
-#: client/src/lists/Schedules.js:69
+#: client/src/lists/Schedules.js:70
 #: client/src/lists/Teams.js:50
 #: client/src/lists/Templates.js:62
 #: client/src/lists/Users.js:58
@@ -195,7 +195,7 @@ msgstr ""
 msgid "Add Users"
 msgstr ""
 
-#: client/src/lists/Schedules.js:67
+#: client/src/lists/Schedules.js:68
 msgid "Add a new schedule"
 msgstr ""
 
@@ -253,7 +253,7 @@ msgstr ""
 msgid "An SCM update does not appear to be running for project: %s. Click the %sRefresh%s button to view the latest status."
 msgstr ""
 
-#: client/src/controllers/Credentials.js:102
+#: client/src/controllers/Credentials.js:105
 msgid "Are you sure you want to delete the credential below?"
 msgstr ""
 
@@ -277,7 +277,7 @@ msgstr ""
 msgid "Are you sure you want to delete the user below?"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:576
+#: client/src/controllers/Credentials.js:579
 #: client/src/controllers/Projects.js:687
 msgid "Are you sure you want to remove the %s below from %s?"
 msgstr ""
@@ -418,7 +418,7 @@ msgstr ""
 msgid "Cancel Not Allowed"
 msgstr ""
 
-#: client/src/lists/Projects.js:123
+#: client/src/lists/Projects.js:122
 msgid "Cancel the SCM update"
 msgstr ""
 
@@ -541,11 +541,11 @@ msgstr ""
 msgid "Control the level of output ansible will produce as the playbook executes."
 msgstr ""
 
-#: client/src/lists/Templates.js:100
+#: client/src/lists/Templates.js:99
 msgid "Copy"
 msgstr ""
 
-#: client/src/lists/Templates.js:103
+#: client/src/lists/Templates.js:102
 msgid "Copy template"
 msgstr ""
 
@@ -624,7 +624,7 @@ msgstr ""
 msgid "Credentials"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:346
+#: client/src/controllers/Credentials.js:349
 msgid "Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned."
 msgstr ""
 
@@ -637,8 +637,8 @@ msgstr ""
 msgid "DASHBOARD"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:104
-#: client/src/controllers/Credentials.js:578
+#: client/src/controllers/Credentials.js:107
+#: client/src/controllers/Credentials.js:581
 #: client/src/controllers/Projects.js:689
 #: client/src/controllers/Users.js:104
 #: client/src/notifications/notification-templates-list/list.controller.js:189
@@ -651,8 +651,8 @@ msgstr ""
 msgid "DETAILS"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:101
-#: client/src/controllers/Credentials.js:575
+#: client/src/controllers/Credentials.js:104
+#: client/src/controllers/Credentials.js:578
 #: client/src/controllers/Projects.js:201
 #: client/src/controllers/Projects.js:686
 #: client/src/controllers/Users.js:101
@@ -660,9 +660,9 @@ msgstr ""
 #: client/src/inventory-scripts/inventory-scripts.list.js:74
 #: client/src/lists/Credentials.js:91
 #: client/src/lists/Inventories.js:92
-#: client/src/lists/Schedules.js:91
+#: client/src/lists/Schedules.js:92
 #: client/src/lists/Teams.js:77
-#: client/src/lists/Templates.js:125
+#: client/src/lists/Templates.js:124
 #: client/src/lists/Users.js:87
 #: client/src/notifications/notification-templates-list/list.controller.js:186
 #: client/src/notifications/notificationTemplates.list.js:89
@@ -692,7 +692,7 @@ msgstr ""
 msgid "Delete on Update"
 msgstr ""
 
-#: client/src/lists/Schedules.js:94
+#: client/src/lists/Schedules.js:95
 msgid "Delete schedule"
 msgstr ""
 
@@ -700,7 +700,7 @@ msgstr ""
 msgid "Delete team"
 msgstr ""
 
-#: client/src/lists/Templates.js:128
+#: client/src/lists/Templates.js:127
 msgid "Delete template"
 msgstr ""
 
@@ -713,11 +713,11 @@ msgstr ""
 msgid "Delete the local repository in its entirety prior to performing an update."
 msgstr ""
 
-#: client/src/lists/Projects.js:117
+#: client/src/lists/Projects.js:116
 msgid "Delete the project"
 msgstr ""
 
-#: client/src/lists/ScheduledJobs.js:81
+#: client/src/lists/ScheduledJobs.js:82
 msgid "Delete the schedule"
 msgstr ""
 
@@ -830,9 +830,9 @@ msgstr ""
 #: client/src/inventory-scripts/inventory-scripts.list.js:57
 #: client/src/lists/Credentials.js:72
 #: client/src/lists/Inventories.js:78
-#: client/src/lists/Schedules.js:76
+#: client/src/lists/Schedules.js:77
 #: client/src/lists/Teams.js:60
-#: client/src/lists/Templates.js:108
+#: client/src/lists/Templates.js:107
 #: client/src/lists/Users.js:68
 #: client/src/notifications/notificationTemplates.list.js:63
 #: client/src/notifications/notificationTemplates.list.js:72
@@ -873,7 +873,7 @@ msgstr ""
 msgid "Edit notification"
 msgstr ""
 
-#: client/src/lists/Schedules.js:79
+#: client/src/lists/Schedules.js:80
 msgid "Edit schedule"
 msgstr ""
 
@@ -881,7 +881,7 @@ msgstr ""
 msgid "Edit team"
 msgstr ""
 
-#: client/src/lists/Templates.js:110
+#: client/src/lists/Templates.js:109
 msgid "Edit template"
 msgstr ""
 
@@ -889,11 +889,11 @@ msgstr ""
 msgid "Edit the User"
 msgstr ""
 
-#: client/src/lists/Projects.js:104
+#: client/src/lists/Projects.js:103
 msgid "Edit the project"
 msgstr ""
 
-#: client/src/lists/ScheduledJobs.js:67
+#: client/src/lists/ScheduledJobs.js:68
 msgid "Edit the schedule"
 msgstr ""
 
@@ -1139,7 +1139,7 @@ msgstr ""
 msgid "Failure"
 msgstr ""
 
-#: client/src/lists/Schedules.js:49
+#: client/src/lists/Schedules.js:50
 msgid "Final Run"
 msgstr ""
 
@@ -1157,7 +1157,7 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: client/src/lists/Schedules.js:39
+#: client/src/lists/Schedules.js:40
 msgid "First Run"
 msgstr ""
 
@@ -1195,7 +1195,7 @@ msgstr ""
 msgid "Forks"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:165
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:172
 msgid "Frequency Details"
 msgstr ""
 
@@ -1616,7 +1616,7 @@ msgstr ""
 msgid "Loading..."
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:128
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:133
 msgid "Local Time Zone"
 msgstr ""
 
@@ -1747,8 +1747,8 @@ msgstr ""
 #: client/src/lists/PortalJobTemplates.js:24
 #: client/src/lists/PortalJobs.js:32
 #: client/src/lists/Projects.js:38
-#: client/src/lists/ScheduledJobs.js:32
-#: client/src/lists/Schedules.js:34
+#: client/src/lists/ScheduledJobs.js:33
+#: client/src/lists/Schedules.js:35
 #: client/src/lists/Teams.js:25
 #: client/src/lists/Templates.js:26
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:21
@@ -1813,8 +1813,8 @@ msgstr ""
 msgid "New user successfully created!"
 msgstr ""
 
-#: client/src/lists/ScheduledJobs.js:51
-#: client/src/lists/Schedules.js:44
+#: client/src/lists/ScheduledJobs.js:52
+#: client/src/lists/Schedules.js:45
 msgid "Next Run"
 msgstr ""
 
@@ -2206,7 +2206,7 @@ msgstr ""
 msgid "Please save before adding users"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:158
+#: client/src/controllers/Credentials.js:161
 #: client/src/forms/Inventories.js:138
 #: client/src/forms/Inventories.js:91
 #: client/src/forms/JobTemplates.js:409
@@ -2397,14 +2397,17 @@ msgstr ""
 msgid "RECENTLY RUN JOBS"
 msgstr ""
 
-#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:4
 #: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:52
 msgid "RECENTLY USED JOB TEMPLATES"
 msgstr ""
 
+#: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:4
+msgid "RECENTLY USED TEMPLATES"
+msgstr ""
+
 #: client/src/lists/JobEvents.js:89
 #: client/src/lists/Projects.js:70
-#: client/src/lists/Schedules.js:62
+#: client/src/lists/Schedules.js:63
 #: client/src/lists/Streams.js:57
 #: client/src/partials/jobs.html:15
 #: client/src/portal-mode/portal-mode-jobs.partial.html:12
@@ -2455,7 +2458,7 @@ msgstr ""
 
 #: client/src/bread-crumb/bread-crumb.partial.html:6
 #: client/src/lists/Projects.js:66
-#: client/src/lists/Schedules.js:58
+#: client/src/lists/Schedules.js:59
 #: client/src/lists/Streams.js:54
 msgid "Refresh the page"
 msgstr ""
@@ -2477,7 +2480,7 @@ msgstr ""
 msgid "Remove any local modifications prior to performing an update."
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:143
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:149
 msgid "Repeat frequency"
 msgstr ""
 
@@ -2512,7 +2515,7 @@ msgstr ""
 #: client/src/configuration/auth-form/sub-forms/auth-ldap.form.js:88
 #: client/src/configuration/auth-form/sub-forms/auth-radius.form.js:33
 #: client/src/configuration/auth-form/sub-forms/auth-saml.form.js:82
-#: client/src/configuration/jobs-form/configuration-jobs.form.js:67
+#: client/src/configuration/jobs-form/configuration-jobs.form.js:63
 #: client/src/configuration/system-form/sub-forms/system-activity-stream.form.js:25
 #: client/src/configuration/system-form/sub-forms/system-logging.form.js:52
 #: client/src/configuration/system-form/sub-forms/system-misc.form.js:29
@@ -2885,11 +2888,11 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:40
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:41
 msgid "Start Date"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:54
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:56
 msgid "Start Time"
 msgstr ""
 
@@ -3083,7 +3086,7 @@ msgstr ""
 msgid "The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies the default value from the %sansible configuration file%s."
 msgstr ""
 
-#: client/src/job-results/job-results.controller.js:538
+#: client/src/job-results/job-results.controller.js:479
 msgid "The output is too large to display. Please download."
 msgstr ""
 
@@ -3095,7 +3098,7 @@ msgstr ""
 msgid "The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, and then run an update."
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:119
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:124
 msgid "The time must be in HH24:MM:SS format."
 msgstr ""
 
@@ -3127,7 +3130,7 @@ msgstr ""
 msgid "There was an error resetting values. Returned status:"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/schedulerForm.partial.html:161
+#: client/src/management-jobs/scheduler/schedulerForm.partial.html:168
 msgid "This is not a valid number."
 msgstr ""
 
@@ -3207,7 +3210,7 @@ msgstr ""
 #: client/src/lists/CompletedJobs.js:50
 #: client/src/lists/Credentials.js:39
 #: client/src/lists/Projects.js:43
-#: client/src/lists/ScheduledJobs.js:43
+#: client/src/lists/ScheduledJobs.js:44
 #: client/src/lists/Templates.js:31
 #: client/src/notifications/notificationTemplates.form.js:57
 #: client/src/notifications/notificationTemplates.list.js:37
@@ -3361,10 +3364,10 @@ msgstr ""
 #: client/src/lists/Credentials.js:81
 #: client/src/lists/Inventories.js:85
 #: client/src/lists/JobEvents.js:98
-#: client/src/lists/Schedules.js:84
+#: client/src/lists/Schedules.js:85
 #: client/src/lists/Streams.js:66
 #: client/src/lists/Teams.js:69
-#: client/src/lists/Templates.js:117
+#: client/src/lists/Templates.js:116
 #: client/src/lists/Users.js:78
 #: client/src/notifications/notificationTemplates.list.js:80
 msgid "View"
@@ -3425,7 +3428,7 @@ msgstr ""
 msgid "View notification"
 msgstr ""
 
-#: client/src/lists/Schedules.js:86
+#: client/src/lists/Schedules.js:87
 msgid "View schedule"
 msgstr ""
 
@@ -3433,7 +3436,7 @@ msgstr ""
 msgid "View team"
 msgstr ""
 
-#: client/src/lists/Templates.js:119
+#: client/src/lists/Templates.js:118
 msgid "View template"
 msgstr ""
 
@@ -3441,11 +3444,11 @@ msgstr ""
 msgid "View the job"
 msgstr ""
 
-#: client/src/lists/Projects.js:110
+#: client/src/lists/Projects.js:109
 msgid "View the project"
 msgstr ""
 
-#: client/src/lists/ScheduledJobs.js:74
+#: client/src/lists/ScheduledJobs.js:75
 msgid "View the schedule"
 msgstr ""
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-01-30 03:44-0500\n"
+"POT-Creation-Date: 2017-01-31 18:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,9 @@ msgid ""
 "again."
 msgstr ""
 
-#: awx/api/conf.py:14 awx/api/conf.py:24 awx/api/conf.py:33 awx/sso/conf.py:124
-#: awx/sso/conf.py:135 awx/sso/conf.py:147 awx/sso/conf.py:162
+#: awx/api/conf.py:14 awx/api/conf.py:24 awx/api/conf.py:33
+#: awx/sso/conf.py:124 awx/sso/conf.py:135 awx/sso/conf.py:147
+#: awx/sso/conf.py:162
 msgid "Authentication"
 msgstr ""
 
@@ -65,7 +66,7 @@ msgstr ""
 msgid "Enable HTTP Basic Auth for the API Browser."
 msgstr ""
 
-#: awx/api/generics.py:462
+#: awx/api/generics.py:466
 msgid "\"id\" is required to disassociate"
 msgstr ""
 
@@ -138,7 +139,7 @@ msgstr ""
 msgid "Workflow Template"
 msgstr ""
 
-#: awx/api/serializers.py:658 awx/api/serializers.py:716 awx/api/views.py:3810
+#: awx/api/serializers.py:658 awx/api/serializers.py:716 awx/api/views.py:3817
 #, python-format
 msgid ""
 "Standard Output too large to display (%(text_size)d bytes), only download "
@@ -162,246 +163,254 @@ msgstr ""
 msgid "Unable to change %s on user managed by LDAP."
 msgstr ""
 
-#: awx/api/serializers.py:993
+#: awx/api/serializers.py:1002
 msgid "Organization is missing"
 msgstr ""
 
-#: awx/api/serializers.py:999
+#: awx/api/serializers.py:1006
+msgid "Update options must be set to false for manual projects."
+msgstr ""
+
+#: awx/api/serializers.py:1012
 msgid "Array of playbooks available within this project."
 msgstr ""
 
-#: awx/api/serializers.py:1181
+#: awx/api/serializers.py:1194
 #, python-format
 msgid "Invalid port specification: %s"
 msgstr ""
 
-#: awx/api/serializers.py:1209 awx/main/validators.py:193
+#: awx/api/serializers.py:1222 awx/main/validators.py:193
 msgid "Must be valid JSON or YAML."
 msgstr ""
 
-#: awx/api/serializers.py:1266
+#: awx/api/serializers.py:1279
 msgid "Invalid group name."
 msgstr ""
 
-#: awx/api/serializers.py:1341
+#: awx/api/serializers.py:1354
 msgid ""
 "Script must begin with a hashbang sequence: i.e.... #!/usr/bin/env python"
 msgstr ""
 
-#: awx/api/serializers.py:1394
+#: awx/api/serializers.py:1407
 msgid "If 'source' is 'custom', 'source_script' must be provided."
 msgstr ""
 
-#: awx/api/serializers.py:1398
+#: awx/api/serializers.py:1411
 msgid ""
 "The 'source_script' does not belong to the same organization as the "
 "inventory."
 msgstr ""
 
-#: awx/api/serializers.py:1400
+#: awx/api/serializers.py:1413
 msgid "'source_script' doesn't exist."
 msgstr ""
 
-#: awx/api/serializers.py:1759
+#: awx/api/serializers.py:1772
 msgid ""
 "Write-only field used to add user to owner role. If provided, do not give "
 "either team or organization. Only valid for creation."
 msgstr ""
 
-#: awx/api/serializers.py:1764
+#: awx/api/serializers.py:1777
 msgid ""
 "Write-only field used to add team to owner role. If provided, do not give "
 "either user or organization. Only valid for creation."
 msgstr ""
 
-#: awx/api/serializers.py:1769
+#: awx/api/serializers.py:1782
 msgid ""
 "Inherit permissions from organization roles. If provided on creation, do not "
 "give either user or team."
 msgstr ""
 
-#: awx/api/serializers.py:1785
+#: awx/api/serializers.py:1798
 msgid "Missing 'user', 'team', or 'organization'."
 msgstr ""
 
-#: awx/api/serializers.py:1798
+#: awx/api/serializers.py:1811
 msgid ""
 "Credential organization must be set and match before assigning to a team"
 msgstr ""
 
-#: awx/api/serializers.py:1890
+#: awx/api/serializers.py:1903
 msgid "This field is required."
 msgstr ""
 
-#: awx/api/serializers.py:1892 awx/api/serializers.py:1894
+#: awx/api/serializers.py:1905 awx/api/serializers.py:1907
 msgid "Playbook not found for project."
 msgstr ""
 
-#: awx/api/serializers.py:1896
+#: awx/api/serializers.py:1909
 msgid "Must select playbook for project."
 msgstr ""
 
-#: awx/api/serializers.py:1960 awx/main/models/jobs.py:278
+#: awx/api/serializers.py:1975
+msgid "Must either set a default value or ask to prompt on launch."
+msgstr ""
+
+#: awx/api/serializers.py:1978 awx/main/models/jobs.py:278
 msgid "Scan jobs must be assigned a fixed inventory."
 msgstr ""
 
-#: awx/api/serializers.py:1962 awx/main/models/jobs.py:281
+#: awx/api/serializers.py:1980 awx/main/models/jobs.py:281
 msgid "Job types 'run' and 'check' must have assigned a project."
 msgstr ""
 
-#: awx/api/serializers.py:1965
+#: awx/api/serializers.py:1987
 msgid "Survey Enabled cannot be used with scan jobs."
 msgstr ""
 
-#: awx/api/serializers.py:2025
+#: awx/api/serializers.py:2047
 msgid "Invalid job template."
 msgstr ""
 
-#: awx/api/serializers.py:2110
+#: awx/api/serializers.py:2132
 msgid "Credential not found or deleted."
 msgstr ""
 
-#: awx/api/serializers.py:2112
+#: awx/api/serializers.py:2134
 msgid "Job Template Project is missing or undefined."
 msgstr ""
 
-#: awx/api/serializers.py:2114
+#: awx/api/serializers.py:2136
 msgid "Job Template Inventory is missing or undefined."
 msgstr ""
 
-#: awx/api/serializers.py:2399
+#: awx/api/serializers.py:2421
 #, python-format
 msgid "%(job_type)s is not a valid job type. The choices are %(choices)s."
 msgstr ""
 
-#: awx/api/serializers.py:2404
+#: awx/api/serializers.py:2426
 msgid "Workflow job template is missing during creation."
 msgstr ""
 
-#: awx/api/serializers.py:2409
+#: awx/api/serializers.py:2431
 #, python-format
 msgid "Cannot nest a %s inside a WorkflowJobTemplate"
 msgstr ""
 
-#: awx/api/serializers.py:2647
+#: awx/api/serializers.py:2669
 #, python-format
 msgid "Job Template '%s' is missing or undefined."
 msgstr ""
 
-#: awx/api/serializers.py:2673
+#: awx/api/serializers.py:2695
 msgid "Must be a valid JSON or YAML dictionary."
 msgstr ""
 
-#: awx/api/serializers.py:2815
+#: awx/api/serializers.py:2837
 msgid ""
 "Missing required fields for Notification Configuration: notification_type"
 msgstr ""
 
-#: awx/api/serializers.py:2838
+#: awx/api/serializers.py:2860
 msgid "No values specified for field '{}'"
 msgstr ""
 
-#: awx/api/serializers.py:2843
+#: awx/api/serializers.py:2865
 msgid "Missing required fields for Notification Configuration: {}."
 msgstr ""
 
-#: awx/api/serializers.py:2846
+#: awx/api/serializers.py:2868
 msgid "Configuration field '{}' incorrect type, expected {}."
 msgstr ""
 
-#: awx/api/serializers.py:2899
+#: awx/api/serializers.py:2921
 msgid "Inventory Source must be a cloud resource."
 msgstr ""
 
-#: awx/api/serializers.py:2901
+#: awx/api/serializers.py:2923
 msgid "Manual Project can not have a schedule set."
 msgstr ""
 
-#: awx/api/serializers.py:2923
+#: awx/api/serializers.py:2945
 msgid "DTSTART required in rrule. Value should match: DTSTART:YYYYMMDDTHHMMSSZ"
 msgstr ""
 
-#: awx/api/serializers.py:2925
+#: awx/api/serializers.py:2947
 msgid "Multiple DTSTART is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2927
+#: awx/api/serializers.py:2949
 msgid "RRULE require in rrule."
 msgstr ""
 
-#: awx/api/serializers.py:2929
+#: awx/api/serializers.py:2951
 msgid "Multiple RRULE is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2931
+#: awx/api/serializers.py:2953
 msgid "INTERVAL required in rrule."
 msgstr ""
 
-#: awx/api/serializers.py:2933
+#: awx/api/serializers.py:2955
 msgid "TZID is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2935
+#: awx/api/serializers.py:2957
 msgid "SECONDLY is not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2937
+#: awx/api/serializers.py:2959
 msgid "Multiple BYMONTHDAYs not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2939
+#: awx/api/serializers.py:2961
 msgid "Multiple BYMONTHs not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2941
+#: awx/api/serializers.py:2963
 msgid "BYDAY with numeric prefix not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2943
+#: awx/api/serializers.py:2965
 msgid "BYYEARDAY not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2945
+#: awx/api/serializers.py:2967
 msgid "BYWEEKNO not supported."
 msgstr ""
 
-#: awx/api/serializers.py:2949
+#: awx/api/serializers.py:2971
 msgid "COUNT > 999 is unsupported."
 msgstr ""
 
-#: awx/api/serializers.py:2953
+#: awx/api/serializers.py:2975
 msgid "rrule parsing failed validation."
 msgstr ""
 
-#: awx/api/serializers.py:2971
+#: awx/api/serializers.py:2997
 msgid ""
 "A summary of the new and changed values when an object is created, updated, "
 "or deleted"
 msgstr ""
 
-#: awx/api/serializers.py:2973
+#: awx/api/serializers.py:2999
 msgid ""
 "For create, update, and delete events this is the object type that was "
 "affected. For associate and disassociate events this is the object type "
 "associated or disassociated with object2."
 msgstr ""
 
-#: awx/api/serializers.py:2976
+#: awx/api/serializers.py:3002
 msgid ""
 "Unpopulated for create, update, and delete events. For associate and "
 "disassociate events this is the object type that object1 is being associated "
 "with."
 msgstr ""
 
-#: awx/api/serializers.py:2979
+#: awx/api/serializers.py:3005
 msgid "The action taken with respect to the given object(s)."
 msgstr ""
 
-#: awx/api/serializers.py:3086
+#: awx/api/serializers.py:3112
 msgid "Unable to login with provided credentials."
 msgstr ""
 
-#: awx/api/serializers.py:3088
+#: awx/api/serializers.py:3114
 msgid "Must include \"username\" and \"password\"."
 msgstr ""
 
@@ -499,15 +508,15 @@ msgstr ""
 msgid "Role 'id' field is missing."
 msgstr ""
 
-#: awx/api/views.py:946 awx/api/views.py:4086
+#: awx/api/views.py:946 awx/api/views.py:4093
 msgid "You cannot assign an Organization role as a child role for a Team."
 msgstr ""
 
-#: awx/api/views.py:950 awx/api/views.py:4100
+#: awx/api/views.py:950 awx/api/views.py:4107
 msgid "You cannot grant system-level permissions to a team."
 msgstr ""
 
-#: awx/api/views.py:957 awx/api/views.py:4092
+#: awx/api/views.py:957 awx/api/views.py:4099
 msgid ""
 "You cannot grant credential access to a team when the Organization field "
 "isn't set, or belongs to a different organization"
@@ -529,21 +538,21 @@ msgstr ""
 msgid "Me"
 msgstr ""
 
-#: awx/api/views.py:1303 awx/api/views.py:4041
+#: awx/api/views.py:1303 awx/api/views.py:4048
 msgid "You may not perform any action with your own admin_role."
 msgstr ""
 
-#: awx/api/views.py:1309 awx/api/views.py:4045
+#: awx/api/views.py:1309 awx/api/views.py:4052
 msgid "You may not change the membership of a users admin_role"
 msgstr ""
 
-#: awx/api/views.py:1314 awx/api/views.py:4050
+#: awx/api/views.py:1314 awx/api/views.py:4057
 msgid ""
 "You cannot grant credential access to a user not in the credentials' "
 "organization"
 msgstr ""
 
-#: awx/api/views.py:1318 awx/api/views.py:4054
+#: awx/api/views.py:1318 awx/api/views.py:4061
 msgid "You cannot grant private credential access to another user"
 msgstr ""
 
@@ -662,7 +671,7 @@ msgstr ""
 msgid "Workflow Job Template Schedules"
 msgstr ""
 
-#: awx/api/views.py:3183 awx/api/views.py:3719
+#: awx/api/views.py:3183 awx/api/views.py:3726
 msgid "Superuser privileges needed."
 msgstr ""
 
@@ -686,28 +695,28 @@ msgstr ""
 msgid "Job Events List"
 msgstr ""
 
-#: awx/api/views.py:3673
+#: awx/api/views.py:3680
 msgid "Ad Hoc Command Events List"
 msgstr ""
 
-#: awx/api/views.py:3867
+#: awx/api/views.py:3874
 #, python-format
 msgid "Error generating stdout download file: %s"
 msgstr ""
 
-#: awx/api/views.py:3912
+#: awx/api/views.py:3919
 msgid "Delete not allowed while there are pending notifications"
 msgstr ""
 
-#: awx/api/views.py:3919
+#: awx/api/views.py:3926
 msgid "Notification Template Test"
 msgstr ""
 
-#: awx/api/views.py:4035
+#: awx/api/views.py:4042
 msgid "User 'id' field is missing."
 msgstr ""
 
-#: awx/api/views.py:4078
+#: awx/api/views.py:4085
 msgid "Team 'id' field is missing."
 msgstr ""
 
@@ -859,7 +868,7 @@ msgstr ""
 msgid "Example setting which can be different for each user."
 msgstr ""
 
-#: awx/conf/conf.py:95 awx/conf/registry.py:67 awx/conf/views.py:46
+#: awx/conf/conf.py:95 awx/conf/registry.py:76 awx/conf/views.py:46
 msgid "User"
 msgstr ""
 
@@ -887,16 +896,69 @@ msgstr ""
 msgid "Backup existing settings files with this suffix."
 msgstr ""
 
-#: awx/conf/registry.py:55
+#: awx/conf/registry.py:64 awx/conf/tests/unit/test_registry.py:169
+#: awx/conf/tests/unit/test_registry.py:192
+#: awx/conf/tests/unit/test_registry.py:196
+#: awx/conf/tests/unit/test_registry.py:201
+#: awx/conf/tests/unit/test_registry.py:208
 msgid "All"
 msgstr ""
 
-#: awx/conf/registry.py:56
+#: awx/conf/registry.py:65 awx/conf/tests/unit/test_registry.py:170
+#: awx/conf/tests/unit/test_registry.py:193
+#: awx/conf/tests/unit/test_registry.py:197
+#: awx/conf/tests/unit/test_registry.py:202
+#: awx/conf/tests/unit/test_registry.py:209
 msgid "Changed"
 msgstr ""
 
-#: awx/conf/registry.py:68
+#: awx/conf/registry.py:77
 msgid "User-Defaults"
+msgstr ""
+
+#: awx/conf/tests/unit/test_registry.py:46
+#: awx/conf/tests/unit/test_registry.py:56
+#: awx/conf/tests/unit/test_registry.py:72
+#: awx/conf/tests/unit/test_registry.py:87
+#: awx/conf/tests/unit/test_registry.py:100
+#: awx/conf/tests/unit/test_registry.py:106
+#: awx/conf/tests/unit/test_registry.py:126
+#: awx/conf/tests/unit/test_registry.py:140
+#: awx/conf/tests/unit/test_registry.py:146
+#: awx/conf/tests/unit/test_registry.py:159
+#: awx/conf/tests/unit/test_registry.py:171
+#: awx/conf/tests/unit/test_registry.py:180
+#: awx/conf/tests/unit/test_registry.py:198
+#: awx/conf/tests/unit/test_registry.py:210
+#: awx/conf/tests/unit/test_registry.py:219
+#: awx/conf/tests/unit/test_registry.py:225
+#: awx/conf/tests/unit/test_registry.py:237
+#: awx/conf/tests/unit/test_registry.py:245
+#: awx/conf/tests/unit/test_registry.py:288
+#: awx/conf/tests/unit/test_registry.py:306
+#: awx/conf/tests/unit/test_settings.py:67
+#: awx/conf/tests/unit/test_settings.py:81
+#: awx/conf/tests/unit/test_settings.py:97
+#: awx/conf/tests/unit/test_settings.py:110
+#: awx/conf/tests/unit/test_settings.py:127
+#: awx/conf/tests/unit/test_settings.py:143
+#: awx/conf/tests/unit/test_settings.py:162
+#: awx/conf/tests/unit/test_settings.py:183
+#: awx/conf/tests/unit/test_settings.py:197
+#: awx/conf/tests/unit/test_settings.py:221
+#: awx/conf/tests/unit/test_settings.py:241
+#: awx/conf/tests/unit/test_settings.py:258 awx/main/conf.py:19
+#: awx/main/conf.py:29 awx/main/conf.py:39 awx/main/conf.py:48
+#: awx/main/conf.py:60 awx/main/conf.py:78 awx/main/conf.py:103
+msgid "System"
+msgstr ""
+
+#: awx/conf/tests/unit/test_registry.py:165
+#: awx/conf/tests/unit/test_registry.py:172
+#: awx/conf/tests/unit/test_registry.py:187
+#: awx/conf/tests/unit/test_registry.py:203
+#: awx/conf/tests/unit/test_registry.py:211
+msgid "OtherSystem"
 msgstr ""
 
 #: awx/conf/views.py:38
@@ -988,12 +1050,6 @@ msgstr ""
 
 #: awx/main/conf.py:18
 msgid "Enable capturing activity for the Tower activity stream."
-msgstr ""
-
-#: awx/main/conf.py:19 awx/main/conf.py:29 awx/main/conf.py:39
-#: awx/main/conf.py:48 awx/main/conf.py:60 awx/main/conf.py:78
-#: awx/main/conf.py:103
-msgid "System"
 msgstr ""
 
 #: awx/main/conf.py:27
@@ -2183,99 +2239,99 @@ msgstr ""
 msgid "List of playbooks found in the project"
 msgstr ""
 
-#: awx/main/models/rbac.py:37
+#: awx/main/models/rbac.py:36
 msgid "System Administrator"
 msgstr ""
 
-#: awx/main/models/rbac.py:38
+#: awx/main/models/rbac.py:37
 msgid "System Auditor"
 msgstr ""
 
-#: awx/main/models/rbac.py:39
+#: awx/main/models/rbac.py:38
 msgid "Ad Hoc"
 msgstr ""
 
-#: awx/main/models/rbac.py:40
+#: awx/main/models/rbac.py:39
 msgid "Admin"
 msgstr ""
 
-#: awx/main/models/rbac.py:41
+#: awx/main/models/rbac.py:40
 msgid "Auditor"
 msgstr ""
 
-#: awx/main/models/rbac.py:42
+#: awx/main/models/rbac.py:41
 msgid "Execute"
 msgstr ""
 
-#: awx/main/models/rbac.py:43
+#: awx/main/models/rbac.py:42
 msgid "Member"
 msgstr ""
 
-#: awx/main/models/rbac.py:44
+#: awx/main/models/rbac.py:43
 msgid "Read"
 msgstr ""
 
-#: awx/main/models/rbac.py:45
+#: awx/main/models/rbac.py:44
 msgid "Update"
 msgstr ""
 
-#: awx/main/models/rbac.py:46
+#: awx/main/models/rbac.py:45
 msgid "Use"
 msgstr ""
 
-#: awx/main/models/rbac.py:50
+#: awx/main/models/rbac.py:49
 msgid "Can manage all aspects of the system"
 msgstr ""
 
-#: awx/main/models/rbac.py:51
+#: awx/main/models/rbac.py:50
 msgid "Can view all settings on the system"
 msgstr ""
 
-#: awx/main/models/rbac.py:52
+#: awx/main/models/rbac.py:51
 msgid "May run ad hoc commands on an inventory"
 msgstr ""
 
-#: awx/main/models/rbac.py:53
+#: awx/main/models/rbac.py:52
 #, python-format
 msgid "Can manage all aspects of the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:54
+#: awx/main/models/rbac.py:53
 #, python-format
 msgid "Can view all settings for the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:55
+#: awx/main/models/rbac.py:54
 #, python-format
 msgid "May run the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:56
+#: awx/main/models/rbac.py:55
 #, python-format
 msgid "User is a member of the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:57
+#: awx/main/models/rbac.py:56
 #, python-format
 msgid "May view settings for the %s"
 msgstr ""
 
-#: awx/main/models/rbac.py:58
+#: awx/main/models/rbac.py:57
 msgid ""
 "May update project or inventory or group using the configured source update "
 "system"
 msgstr ""
 
-#: awx/main/models/rbac.py:59
+#: awx/main/models/rbac.py:58
 #, python-format
 msgid "Can use the %s in a job template"
 msgstr ""
 
-#: awx/main/models/rbac.py:123
+#: awx/main/models/rbac.py:122
 msgid "roles"
 msgstr ""
 
-#: awx/main/models/rbac.py:439
+#: awx/main/models/rbac.py:438
 msgid "role_ancestors"
 msgstr ""
 
@@ -2384,7 +2440,8 @@ msgid ""
 "capture stdout"
 msgstr ""
 
-#: awx/main/notifications/base.py:17 awx/main/notifications/email_backend.py:28
+#: awx/main/notifications/base.py:17
+#: awx/main/notifications/email_backend.py:28
 msgid ""
 "{} #{} had status {} on Ansible Tower, view details at {}\n"
 "\n"
@@ -3452,7 +3509,6 @@ msgid "SAML Team Map"
 msgstr ""
 
 #: awx/sso/fields.py:123
-#, python-brace-format
 msgid "Invalid connection option(s): {invalid_options}."
 msgstr ""
 
@@ -3469,96 +3525,78 @@ msgid "Subtree"
 msgstr ""
 
 #: awx/sso/fields.py:214
-#, python-brace-format
 msgid "Expected a list of three items but got {length} instead."
 msgstr ""
 
 #: awx/sso/fields.py:215
-#, python-brace-format
 msgid "Expected an instance of LDAPSearch but got {input_type} instead."
 msgstr ""
 
 #: awx/sso/fields.py:251
-#, python-brace-format
 msgid ""
 "Expected an instance of LDAPSearch or LDAPSearchUnion but got {input_type} "
 "instead."
 msgstr ""
 
 #: awx/sso/fields.py:278
-#, python-brace-format
 msgid "Invalid user attribute(s): {invalid_attrs}."
 msgstr ""
 
 #: awx/sso/fields.py:295
-#, python-brace-format
 msgid "Expected an instance of LDAPGroupType but got {input_type} instead."
 msgstr ""
 
 #: awx/sso/fields.py:323
-#, python-brace-format
 msgid "Invalid user flag: \"{invalid_flag}\"."
 msgstr ""
 
 #: awx/sso/fields.py:339 awx/sso/fields.py:506
-#, python-brace-format
 msgid ""
 "Expected None, True, False, a string or list of strings but got {input_type} "
 "instead."
 msgstr ""
 
 #: awx/sso/fields.py:375
-#, python-brace-format
 msgid "Missing key(s): {missing_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:376
-#, python-brace-format
 msgid "Invalid key(s): {invalid_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:425 awx/sso/fields.py:542
-#, python-brace-format
 msgid "Invalid key(s) for organization map: {invalid_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:443
-#, python-brace-format
 msgid "Missing required key for team map: {invalid_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:444 awx/sso/fields.py:561
-#, python-brace-format
 msgid "Invalid key(s) for team map: {invalid_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:560
-#, python-brace-format
 msgid "Missing required key for team map: {missing_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:578
-#, python-brace-format
 msgid "Missing required key(s) for org info record: {missing_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:591
-#, python-brace-format
 msgid "Invalid language code(s) for org info: {invalid_lang_codes}."
 msgstr ""
 
 #: awx/sso/fields.py:610
-#, python-brace-format
 msgid "Missing required key(s) for contact: {missing_keys}."
 msgstr ""
 
 #: awx/sso/fields.py:622
-#, python-brace-format
 msgid "Missing required key(s) for IdP: {missing_keys}."
 msgstr ""
 
 #: awx/sso/pipeline.py:24
-#, python-brace-format
 msgid "An account cannot be found for {0}"
 msgstr ""
 
