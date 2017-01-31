@@ -53,6 +53,11 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     form: 'JobTemplateForm',
                     controllers: {
                         edit: 'JobTemplateEdit'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'job_template',
+                        activityStreamId: 'job_template_id'
                     }
                 });
 
@@ -73,6 +78,11 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     form: 'WorkflowForm',
                     controllers: {
                         edit: 'WorkflowEdit'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'workflow_job_template',
+                        activityStreamId: 'workflow_job_template_id'
                     }
                 });
 

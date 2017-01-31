@@ -258,137 +258,15 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
 .factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
     'ProcessErrors', 'Wait', 'StreamList', 'generateList', 'FormatDate', 'BuildDescription',
-    'ShowDetail', 'i18n',
+    'ShowDetail',
     function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
         Wait, StreamList, GenerateList, FormatDate,
-        BuildDescription, ShowDetail, i18n) {
+        BuildDescription, ShowDetail) {
         return function (params) {
 
-            var list = _.cloneDeep(StreamList),
-                defaultUrl = GetBasePath('activity_stream'),
-                scope = params.scope,
-                url = (params && params.url) ? params.url : null;
+            var scope = params.scope;
 
             $rootScope.flashMessage = null;
-
-            if (url) {
-                defaultUrl = url;
-            } else {
-
-                if($state.params && $state.params.target) {
-                    if($state.params.id) {
-                        // We have a type and an ID
-                        defaultUrl += '?' + $state.params.target + '__id=' + $state.params.id;
-                    }
-                    else {
-                        // We just have a type
-                        if ($state.params.target === 'inventory_script') {
-                            defaultUrl += '?or__object1__in=custom_inventory_script&or__object2__in=custom_inventory_script';
-                        } else if ($state.params.target === 'management_job') {
-                            defaultUrl += '?or__object1__in=job&or__object2__in=job';
-                        } else if ($state.params.target === 'template') {
-                            defaultUrl += '?or__object1__in=job_template,workflow_job_template&or__object2__in=job_template,workflow_job_template';
-                        } else {
-                            defaultUrl += '?or__object1__in=' + $state.params.target + '&or__object2__in=' + $state.params.target;
-                        }
-                    }
-                }
-            }
-
-            if ($state.params.target === 'credential') {
-                list.fields.customSearchField = {
-                    label: i18n._('Credential'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'credential',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'host') {
-                list.fields.customSearchField = {
-                    label: i18n._('Host'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'host',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'inventory') {
-                list.fields.customSearchField = {
-                    label: i18n._('Inventory'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'inventory',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'inventory_script') {
-                list.fields.customSearchField = {
-                    label: i18n._('Inventory Script'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'custom_inventory_script',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'job_template') {
-                list.fields.customSearchField = {
-                    label: i18n._('Job Template'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'job_template',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'job') {
-                list.fields.customSearchField = {
-                    label: i18n._('Job'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'job',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'organization') {
-                list.fields.customSearchField = {
-                    label: i18n._('Organization'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'organization',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'project') {
-                list.fields.customSearchField = {
-                    label: i18n._('Project'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'project',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'schedule') {
-                list.fields.customSearchField = {
-                    label: i18n._('Schedule'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'schedule',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'team') {
-                list.fields.customSearchField = {
-                    label: i18n._('Team'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'team',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'user') {
-                list.fields.customSearchField = {
-                    label: i18n._('User'),
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'user',
-                    sourceField: 'username'
-                };
-            }
-
-            list.basePath = defaultUrl;
-
-            // Generate the list
-            //view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;
