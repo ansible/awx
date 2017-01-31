@@ -59,7 +59,7 @@ from awx.main.consumers import emit_channel_notification
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error',
            'handle_work_success', 'update_inventory_computed_fields',
-           'send_notifications', 'run_administrative_checks']
+           'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -191,6 +191,15 @@ def run_administrative_checks(self):
 def cleanup_authtokens(self):
     logger.warn("Cleaning up expired authtokens.")
     AuthToken.objects.filter(expires__lt=now()).delete()
+
+
+@task(bind=True)
+def purge_old_stdout_files(self):
+    nowtime = time.time()
+    for f in os.listdir(settings.JOBOUTPUT_ROOT):
+        if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
+            os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
+            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
 
 
 @task(bind=True)
