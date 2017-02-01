@@ -214,7 +214,7 @@ export default
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 limit: {
                     label: i18n._('Limit'),

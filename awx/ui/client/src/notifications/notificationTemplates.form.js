@@ -397,6 +397,7 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
                 ngChange: "emailOptionsChange()",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 options: [{
                     value: 'use_tls',
                     label: i18n._('Use TLS'),
