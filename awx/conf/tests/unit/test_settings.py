@@ -146,11 +146,13 @@ def test_empty_setting(settings, mocker):
         category_slug='system'
     )
 
-    settings_to_cache = [
-        mocker.Mock(**{'order_by.return_value': []}),
-        mocker.Mock(**{'order_by.return_value.first.return_value': None})
-    ]
-    with mocker.patch('awx.conf.models.Setting.objects.filter', side_effect=settings_to_cache):
+    mocks = mocker.Mock(**{
+        'order_by.return_value': mocker.Mock(**{
+            '__iter__': lambda self: iter([]),
+            'first.return_value': None
+        }),
+    })
+    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
         with pytest.raises(AttributeError):
             settings.AWX_SOME_SETTING
         assert settings.cache.get('AWX_SOME_SETTING') == SETTING_CACHE_NOTSET
@@ -166,12 +168,14 @@ def test_setting_from_db(settings, mocker):
         default='DEFAULT'
     )
 
-    settings_to_cache = [
-        mocker.Mock(**{'order_by.return_value': [
-            mocker.Mock(key='AWX_SOME_SETTING', value='FROM_DB')
-        ]}),
-    ]
-    with mocker.patch('awx.conf.models.Setting.objects.filter', side_effect=settings_to_cache):
+    setting_from_db = mocker.Mock(key='AWX_SOME_SETTING', value='FROM_DB')
+    mocks = mocker.Mock(**{
+        'order_by.return_value': mocker.Mock(**{
+            '__iter__': lambda self: iter([setting_from_db]),
+            'first.return_value': setting_from_db
+        }),
+    })
+    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
         assert settings.AWX_SOME_SETTING == 'FROM_DB'
         assert settings.cache.get('AWX_SOME_SETTING') == 'FROM_DB'
 
