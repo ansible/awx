@@ -571,10 +571,24 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
+    var buffer = [];
 
+    var processBuffer = function() {
+        buffer.forEach((event, i) => {
+            processEvent(event);
+            buffer.splice(i, 1);
+        });
+    };
+
+    var bufferInterval = undefined;
 
     // Processing of job_events messages from the websocket
     toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+        if (bufferInterval === undefined) {
+            bufferInterval = setInterval(function(){
+                processBuffer();
+            }, 500);
+        }
 
         // use the lowest counter coming over the socket to retrigger pull data
         // to only be for stuff lower than that id
@@ -601,6 +615,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             } else if (data.event_name === "playbook_on_task_start") {
                 $scope.taskCount++;
             }
+            buffer.push(data);
             processEvent(data);
         });
     }));
@@ -616,6 +631,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 data.status === "error" ||
                 data.status === "canceled") {
                     clearInterval(elapsedInterval);
+                    if (bufferInterval !== undefined) {
+                        clearInterval(bufferInterval);
+                    }
                     // When the fob is finished retrieve the job data to
                     // correct anything that was out of sync from the job run
                     jobResultsService.getJobData($scope.job.id).then(function(data){
@@ -647,6 +665,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             });
         $scope.events = {};
         clearInterval(elapsedInterval);
+        if (bufferInterval !== undefined) {
+            clearInterval(bufferInterval);
+        }
         toDestroy.forEach(closureFunc => closureFunc());
     });
 }];
