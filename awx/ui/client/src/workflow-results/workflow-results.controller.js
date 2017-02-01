@@ -26,17 +26,27 @@ export default ['workflowData',
 
         var getTowerLinks = function() {
             var getTowerLink = function(key) {
-                if ($scope.workflow.related[key]) {
-                    return '/#/' + $scope.workflow.related[key]
-                        .split('api/v1/')[1];
+                if(key === 'schedule') {
+                    if($scope.workflow.related.schedule) {
+                        return '/#/templates/workflow_job_template/' + $scope.workflow.workflow_job_template + '/schedules' + $scope.workflow.related.schedule.split('api/v1/schedules')[1];
+                    }
+                    else {
+                        return null;
+                    }
                 }
                 else {
-                    return null;
+                    if ($scope.workflow.related[key]) {
+                        return '/#/' + $scope.workflow.related[key]
+                            .split('api/v1/')[1];
+                    } else {
+                        return null;
+                    }
                 }
             };
 
             $scope.workflow_template_link = '/#/templates/workflow_job_template/'+$scope.workflow.workflow_job_template;
             $scope.created_by_link = getTowerLink('created_by');
+            $scope.scheduled_by_link = getTowerLink('schedule');console.log($scope.scheduled_by_link);
             $scope.cloud_credential_link = getTowerLink('cloud_credential');
             $scope.network_credential_link = getTowerLink('network_credential');
         };
