@@ -1,13 +1,11 @@
 import json
-import urlparse
 import logging
 
 from channels import Group
 from channels.sessions import channel_session
+from channels.auth import channel_session_user, http_session_user, transfer_user
 
-from django.contrib.auth.models import User
 from django.core.serializers.json import DjangoJSONEncoder
-from awx.main.models.organization import AuthToken
 
 
 logger = logging.getLogger('awx.main.consumers')
@@ -19,51 +17,32 @@ def discard_groups(message):
             Group(group).discard(message.reply_channel)
 
 
-def validate_token(token):
-    try:
-        auth_token = AuthToken.objects.get(key=token)
-        if not auth_token.in_valid_tokens:
-            return None
-    except AuthToken.DoesNotExist:
-        return None
-    return auth_token
-
-
-def user_from_token(auth_token):
-    try:
-        return User.objects.get(pk=auth_token.user_id)
-    except User.DoesNotExist:
-        return None
-
-
+@http_session_user
 @channel_session
 def ws_connect(message):
-    token = None
-    qs = urlparse.parse_qs(message['query_string'])
-    if 'token' in qs:
-        if len(qs['token']) > 0:
-            token = qs['token'].pop()
-    message.channel_session['token'] = token
+    if message.http_session:
+        # our backend is not set on the http_session so we need to update the session before
+        # calling transfer_user. This is why we are doing this manually instead of using the
+        # all-in-one helper decorator.
+        message.http_session.update({'_auth_user_backend':'django.contrib.auth.backends.ModelBackend'})
+        transfer_user(message.http_session, message.channel_session)
+        message.reply_channel.send({"text": json.dumps({"accept": True, "user": message.user.id})})
+    else:
+        message.reply_channel.send({"text": json.dumps({"accept": False, "user": None})})
 
 
-@channel_session
+@channel_session_user
 def ws_disconnect(message):
     discard_groups(message)
 
 
-@channel_session
+@channel_session_user
 def ws_receive(message):
-    token = message.channel_session.get('token')
+    from awx.main.access import consumer_access
 
-    auth_token = validate_token(token)
-    if auth_token is None:
-        logger.error("Authentication Failure validating user")
-        message.reply_channel.send({"text": json.dumps({"error": "invalid auth token"})})
-        return None
-
-    user = user_from_token(auth_token)
-    if user is None:
-        logger.error("No valid user corresponding to submitted auth_token")
+    user = message.user
+    if user.id is None:
+        logger.error("No valid user found for websocket.")
         message.reply_channel.send({"text": json.dumps({"error": "no valid user"})})
         return None
 
@@ -78,6 +57,12 @@ def ws_receive(message):
             if type(v) is list:
                 for oid in v:
                     name = '{}-{}'.format(group_name, oid)
+                    access_cls = consumer_access(group_name)
+                    if access_cls is not None:
+                        user_access = access_cls(user)
+                        if not user_access.get_queryset().filter(pk=oid).exists():
+                            message.reply_channel.send({"text": json.dumps({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
+                            continue
                     current_groups.append(name)
                     Group(name).add(message.reply_channel)
             else:
