@@ -128,7 +128,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 // Accepts image and returns base64 information with basic validation
 // Can eventually expand to handle all uploads with different endpoints and handlers
 //
-.directive('imageUpload', ['ConfigurationUtils', function(ConfigurationUtils) {
+.directive('imageUpload', ['ConfigurationUtils', 'i18n',
+function(ConfigurationUtils, i18n) {
+    var browseText = i18n._('BROWSE'),
+    placeholderText = i18n._('Choose file'),
+    uploadedText = i18n._('Custom logo has been uploaded'),
+    removeText = i18n._('REMOVE');
+
     return {
         restrict: 'E',
         scope: {
@@ -136,13 +142,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
         },
         template: `
                 <div class="input-group">
-                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">BROWSE</label>
-                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="Choose file" readonly>
+                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">${browseText}</label>
+                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="${placeholderText}" readonly>
                       <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
                     </div>
                 <!-- Update when API supports file name saving
                 <div ng-if="imagePresent" class="Form-filePicker--selectedFile">
-                    Custom logo has been uploaded.
+                    ${uploadedText}
                 </div>-->
                 <!-- Thumbnail feature
                 <div class="thumbnail">
@@ -161,12 +167,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             scope.$on('loginUpdated', function() {
                 scope.imagePresent = global.$AnsibleConfig.custom_logo;
             });
-
             scope.update = function(e) {
                 if(scope.$parent[fieldKey]) {
                     e.preventDefault();
                     scope.$parent[fieldKey] = '';
-                    filePickerButton.html('BROWSE');
+                    filePickerButton.html(browseText);
                     filePickerText.val('');
                 }
                 else {
@@ -181,7 +186,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     .then(function(result) {
                         scope.$parent[fieldKey] = result;
                         filePickerText.val(file[0].name);
-                        filePickerButton.html('REMOVE');
+                        filePickerButton.html(removeText);
                     }).catch(function(error) {
                         filePickerText.html(file[0].name);
                         filePickerError.text(error);

@@ -678,7 +678,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
-                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">` + i18n._("Reset") + `</a>`;
+                            var resetMessage = i18n._('Reset');
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">${resetMessage}</a>`;
                         }
 
                         html += "\n\t</label>\n";
