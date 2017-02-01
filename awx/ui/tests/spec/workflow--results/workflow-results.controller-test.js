@@ -99,7 +99,7 @@ describe('Controller: workflowResults', () => {
                 });
             });
 
-            describe('job is not running', () => {
+            describe('job waiting', () => {
                 beforeEach(() => {
                     jobWaitingWorkflowResultsControllerFixture(null, 'waiting');
                 });           
@@ -109,21 +109,19 @@ describe('Controller: workflowResults', () => {
                 });
 
             });
+
+            describe('job finished', () => {
+                beforeEach(() => {
+                    jobWaitingWorkflowResultsControllerFixture(moment(), 'successful');
+                });
+
+                it('should start elapsed timer', () => {
+                    expect(workflowResultsService.createOneSecondTimer).not.toHaveBeenCalled();
+                });
+            });
         });
 
         describe('job transitions to running', () => {
-            beforeEach(() => {
-                jobWaitingWorkflowResultsControllerFixture(null, 'waiting');
-                $rootScope.$broadcast('ws-jobs', { unified_job_id: workflow_job_json.id, status: "running" });
-            });
-
-            it('should start elapsed timer', () => {
-                expect(scope.workflow.status).toBe("running");
-                expect(workflowResultsService.createOneSecondTimer).toHaveBeenCalled();
-            });
-        });
-
-        describe('job finished', () => {
             beforeEach(() => {
                 jobWaitingWorkflowResultsControllerFixture(null, 'waiting');
                 $rootScope.$broadcast('ws-jobs', { unified_job_id: workflow_job_json.id, status: "running" });
