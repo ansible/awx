@@ -13,7 +13,6 @@
  import ConfigurationJobsController from './jobs-form/configuration-jobs.controller';
  import ConfigurationSystemController from './system-form/configuration-system.controller';
  import ConfigurationUiController from './ui-form/configuration-ui.controller';
- import { N_ } from '../i18n';
 
  export default {
      name: 'configuration',
