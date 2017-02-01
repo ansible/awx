@@ -25,7 +25,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.conf.license import LicenseForbids
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
-           'user_accessible_objects',
+           'user_accessible_objects', 'consumer_access',
            'user_admin_role', 'StateConflict',]
 
 PERMISSION_TYPES = [
@@ -162,6 +162,17 @@ def check_superuser(func):
             return True
         return func(self, *args, **kwargs)
     return wrapper
+
+
+def consumer_access(group_name):
+    '''
+    consumer_access returns the proper Access class based on group_name
+    for a channels consumer.
+    '''
+    class_map = {'job_events': JobAccess,
+                 'workflow_events': WorkflowJobAccess,
+                 'ad_hoc_command_events': AdHocCommandAccess}
+    return class_map.get(group_name)
 
 
 class BaseAccess(object):
