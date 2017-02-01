@@ -1,11 +1,15 @@
 import json
 import logging
+import urllib
 
 from channels import Group
-from channels.sessions import channel_session
-from channels.auth import channel_session_user, http_session_user, transfer_user
+from channels.sessions import channel_session, http_session
+from channels.handler import AsgiRequest
 
 from django.core.serializers.json import DjangoJSONEncoder
+
+from django.contrib.auth.models import User
+from awx.main.models.organization import AuthToken
 
 
 logger = logging.getLogger('awx.main.consumers')
@@ -17,35 +21,43 @@ def discard_groups(message):
             Group(group).discard(message.reply_channel)
 
 
-@http_session_user
+@http_session
 @channel_session
 def ws_connect(message):
+    connect_text = {'accept':False, 'user':None}
+
     if message.http_session:
-        # our backend is not set on the http_session so we need to update the session before
-        # calling transfer_user. This is why we are doing this manually instead of using the
-        # all-in-one helper decorator.
-        message.http_session.update({'_auth_user_backend':'django.contrib.auth.backends.ModelBackend'})
-        transfer_user(message.http_session, message.channel_session)
-        message.reply_channel.send({"text": json.dumps({"accept": True, "user": message.user.id})})
-    else:
-        message.reply_channel.send({"text": json.dumps({"accept": False, "user": None})})
+        request = AsgiRequest(message)
+        token = request.COOKIES.get('token', None)
+        if token is not None:
+            token = urllib.unquote(token).strip('"')
+            try:
+                auth_token = AuthToken.objects.get(key=token)
+                if auth_token.in_valid_tokens:
+                    message.channel_session['user_id'] = auth_token.user_id
+                    connect_text['accept'] = True
+                    connect_text['user'] = auth_token.user_id
+            except AuthToken.DoesNotExist:
+                logger.error("auth_token provided was invalid.")
+    message.reply_channel.send({"text": json.dumps(connect_text)})
 
 
-@channel_session_user
+@channel_session
 def ws_disconnect(message):
     discard_groups(message)
 
 
-@channel_session_user
+@channel_session
 def ws_receive(message):
     from awx.main.access import consumer_access
 
-    user = message.user
-    if user.id is None:
+    user_id = message.channel_session.get('user_id', None)
+    if user_id is None:
         logger.error("No valid user found for websocket.")
         message.reply_channel.send({"text": json.dumps({"error": "no valid user"})})
         return None
 
+    user = User.objects.get(pk=user_id)
     raw_data = message.content['text']
     data = json.loads(raw_data)
 
