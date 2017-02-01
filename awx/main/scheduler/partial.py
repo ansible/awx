@@ -271,5 +271,5 @@ class WorkflowJobDict(PartialModelDict):
         return 'workflow_job'
 
     def task_impact(self):
-        return 10
+        return 0
 
