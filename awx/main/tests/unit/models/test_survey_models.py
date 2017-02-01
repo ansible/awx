@@ -59,33 +59,6 @@ def test_survey_passwords_not_in_extra_vars():
     }
 
 
-@pytest.mark.survey
-def test_survey_passwords_not_in_stdout(job_with_survey):
-    job_with_survey.survey_passwords['has_blank_value'] = '$encrypted$'
-    job_with_survey.extra_vars = json.dumps({
-        'has_blank_value': '',
-        'secret_key': '6kQngg3h8lgiSTvIEb21',
-        'SSN': '123-45-6789'})
-    example_stdout = '''
-PLAY [all] *********************************************************************
- 
-TASK [debug] ******************************************************************* 
-ok: [webserver45] => { 
-    "msg": "Helpful echo of your secret_key: secret_key=6kQngg3h8lgiSTvIEb21 " 
-}
-
-TASK [debug] ******************************************************************* 
-ok: [webserver46] => { 
-   "msg": "Helpful echo of your secret_key: secret_key=123-45-6789 " 
-}
-'''
-    display_stdout = job_with_survey._survey_search_and_replace(example_stdout)
-    assert display_stdout == example_stdout.replace(
-        '6kQngg3h8lgiSTvIEb21', '$encrypted$').replace('123-45-6789', '$encrypted$')
-    assert type(display_stdout) == type(example_stdout)
-
-
-
 def test_job_safe_args_redacted_passwords(job):
     """Verify that safe_args hides passwords in the job extra_vars"""
     kwargs = {'ansible_version': '2.1'}

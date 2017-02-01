@@ -31,7 +31,6 @@ from awx.main.utils import (
     ignore_inventory_computed_fields,
     parse_yaml_or_json,
 )
-from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
@@ -600,28 +599,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if artifacts.get('_ansible_no_log', False):
             return "$hidden due to Ansible no_log flag$"
         return artifacts
-
-    def _survey_search_and_replace(self, content):
-        # Use job template survey spec to identify password fields.
-        # Then lookup password fields in extra_vars and save the values
-        job_extra_vars = self.extra_vars_dict
-        password_list = [job_extra_vars[k] for k in self.survey_passwords.keys()
-                         if k in job_extra_vars]
-        return_content = content
-        for val in password_list:
-            if len(val) == 0:
-                continue  # avoids memory errors
-            return_content = PlainTextCleaner.remove_sensitive(return_content, val)
-        return return_content
-
-
-    def _result_stdout_raw_limited(self, *args, **kwargs):
-        buff, start, end, abs_end = super(Job, self)._result_stdout_raw_limited(*args, **kwargs)
-        return self._survey_search_and_replace(buff), start, end, abs_end
-
-    def _result_stdout_raw(self, *args, **kwargs):
-        content = super(Job, self)._result_stdout_raw(*args, **kwargs)
-        return self._survey_search_and_replace(content)
 
     # Job Credential required
     @property
