@@ -580,11 +580,11 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         });
     };
 
-    var bufferInterval = undefined;
+    var bufferInterval;
 
     // Processing of job_events messages from the websocket
     toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
-        if (bufferInterval === undefined) {
+        if (!bufferInterval) {
             bufferInterval = setInterval(function(){
                 processBuffer();
             }, 500);
@@ -631,7 +631,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 data.status === "error" ||
                 data.status === "canceled") {
                     clearInterval(elapsedInterval);
-                    if (bufferInterval !== undefined) {
+                    if (bufferInterval) {
                         clearInterval(bufferInterval);
                     }
                     // When the fob is finished retrieve the job data to
@@ -665,7 +665,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             });
         $scope.events = {};
         clearInterval(elapsedInterval);
-        if (bufferInterval !== undefined) {
+        if (bufferInterval) {
             clearInterval(bufferInterval);
         }
         toDestroy.forEach(closureFunc => closureFunc());
