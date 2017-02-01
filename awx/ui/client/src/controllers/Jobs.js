@@ -13,7 +13,7 @@
 
 
 export function JobsListController($state, $rootScope, $log, $scope, $compile, $stateParams,
-    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset) {
+    ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList, GetBasePath, Dataset, qs) {
 
     ClearScope();
 
@@ -93,10 +93,6 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
     };
 
-    $scope.refreshJobs = function() {
-        $state.go('.', null, { reload: true });
-    };
-
     $scope.viewJobDetails = function(job) {
 
         var goToJobDetails = function(state) {
@@ -126,7 +122,12 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
     };
 
     $scope.$on('ws-jobs', function(){
-        $scope.refreshJobs();
+        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+        qs.search(path, $state.params[`${list.iterator}_search`])
+        .then(function(searchResponse) {
+            $scope[`${list.iterator}_dataset`] = searchResponse.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        });
     });
 
     $scope.$on('ws-schedules', function(){
@@ -135,5 +136,5 @@ export function JobsListController($state, $rootScope, $log, $scope, $compile, $
 }
 
 JobsListController.$inject = ['$state', '$rootScope', '$log', '$scope', '$compile', '$stateParams',
-    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset'
+    'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList', 'GetBasePath', 'Dataset','QuerySet'
 ];

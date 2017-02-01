@@ -72,10 +72,6 @@ export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
 
 
         $scope.$on(`ws-jobs`, function () {
-            // @issue - this is no longer quite as ham-fisted but I'd like for someone else to take a peek
-            // calling $state.reload(); here was problematic when launching a job because job launch also
-            // attempts to transition the state and they were squashing each other.
-
             let path = GetBasePath(list.basePath) || GetBasePath(list.name);
             qs.search(path, $state.params[`${list.iterator}_search`])
             .then(function(searchResponse) {

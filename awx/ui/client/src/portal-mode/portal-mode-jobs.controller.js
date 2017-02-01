@@ -9,7 +9,12 @@ export function PortalModeJobsController($scope, $rootScope, $state, $stateParam
     var list = PortalJobsList;
 
     $scope.$on('ws-jobs', function() {
-        $state.go('.', null, { reload: true });
+        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+        qs.search(path, $state.params[`${list.iterator}_search`])
+        .then(function(searchResponse) {
+            $scope[`${list.iterator}_dataset`] = searchResponse.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        });
     });
 
     init();

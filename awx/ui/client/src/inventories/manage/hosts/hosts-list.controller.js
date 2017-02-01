@@ -5,9 +5,9 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
-     'hostsUrl', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'hostsDataset', 'GetBasePath', 'rbacUiControlService',
+     'hostsUrl', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'hostsDataset', 'GetBasePath', 'rbacUiControlService', 'QuerySet',
     function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
-     hostsUrl, SetStatus, Prompt, Wait, inventoryData, $filter, hostsDataset, GetBasePath, rbacUiControlService){
+     hostsUrl, SetStatus, Prompt, Wait, inventoryData, $filter, hostsDataset, GetBasePath, rbacUiControlService, qs){
         var list = InventoryHosts;
 
         init();
@@ -30,6 +30,17 @@
                 $scope.hosts
                     .forEach((host) => SetStatus({scope: $scope,
                         host: host}));
+            });
+
+            $scope.$on(`ws-jobs`, function(e, data){
+                if(data.status === 'failed' || data.status === 'successful'){
+                    let path = hostsUrl;
+                    qs.search(path, $state.params[`${list.iterator}_search`])
+                    .then(function(searchResponse) {
+                        $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                    });
+                }
             });
 
             // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
