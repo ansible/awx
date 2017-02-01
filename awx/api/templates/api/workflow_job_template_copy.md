@@ -1,13 +1,13 @@
 Copy a Workflow Job Template:
 
 Make a GET request to this resource to determine if the current user has
-permission to copy the workflow_job_template and whether any linked
+permission to copy the {{model_verbose_name}} and whether any linked
 templates or prompted fields will be ignored due to permissions problems.
 The response will include the following fields:
 
 * `can_copy`: Flag indicating whether the active user has permission to make
-  a copy of this workflow_job_template, provides same content as the
-  workflow_job_template detail view summary_fields.user_capabilities.copy
+  a copy of this {{model_verbose_name}}, provides same content as the
+  {{model_verbose_name}} detail view summary_fields.user_capabilities.copy
   (boolean, read-only)
 * `can_copy_without_user_input`: Flag indicating if the user should be
   prompted for confirmation before the copy is executed (boolean, read-only)
@@ -22,11 +22,11 @@ The response will include the following fields:
   to use and will be missing in workflow nodes of the copy (array, read-only)
 
 Make a POST request to this endpoint to save a copy of this
-workflow_job_template. No POST data is accepted for this action.
+{{model_verbose_name}}. No POST data is accepted for this action.
 
 If successful, the response status code will be 201. The response body will
-contain serialized data about the new workflow_job_template, which will be
-similar to the original workflow_job_template, but with an additional `@`
+contain serialized data about the new {{model_verbose_name}}, which will be
+similar to the original {{model_verbose_name}}, but with an additional `@`
 and a timestamp in the name.
 
 All workflow nodes and connections in the original will also exist in the
