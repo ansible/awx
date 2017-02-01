@@ -1073,7 +1073,7 @@ class ProjectTeamsList(ListAPIView):
         return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
 
 
-class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
+class ProjectSchedulesList(SubListCreateAPIView):
 
     view_name = _("Project Schedules")
 
@@ -2161,7 +2161,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
 
 
-class InventorySourceSchedulesList(SubListCreateAttachDetachAPIView):
+class InventorySourceSchedulesList(SubListCreateAPIView):
 
     view_name = _("Inventory Source Schedules")
 
@@ -2402,7 +2402,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             return Response(data, status=status.HTTP_201_CREATED)
 
 
-class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+class JobTemplateSchedulesList(SubListCreateAPIView):
 
     view_name = _("Job Template Schedules")
 
@@ -3040,7 +3040,7 @@ class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     view_name = _("Workflow Job Template Schedules")
 
@@ -3214,7 +3214,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateSchedulesList(SubListCreateAPIView):
 
     view_name = _("System Job Template Schedules")
 
