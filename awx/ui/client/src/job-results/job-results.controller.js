@@ -297,6 +297,26 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
 
                 if(change === 'stdout'){
+                    var appendToBottom = function(mungedEvent){
+                        // if we get here then the event type was either a
+                        // header line, recap line, or one of the additional
+                        // event types, so we append it to the bottom.
+                        // These are the event types for captured
+                        // stdout not directly related to playbook or runner
+                        // events:
+                        // (0, 'debug', _('Debug'), False),
+                        // (0, 'verbose', _('Verbose'), False),
+                        // (0, 'deprecated', _('Deprecated'), False),
+                        // (0, 'warning', _('Warning'), False),
+                        // (0, 'system_warning', _('System Warning'), False),
+                        // (0, 'error', _('Error'), True),
+                        angular
+                            .element(".JobResultsStdOut-stdoutContainer")
+                            .append($compile(mungedEvent
+                                .stdout)($scope.events[mungedEvent
+                                    .counter]));
+                    };
+                    
                     if (!$scope.events[mungedEvent.counter]) {
                         // line hasn't been put in the pane yet
 
@@ -314,13 +334,56 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .after($compile(mungedEvent
                                     .stdout)($scope.events[mungedEvent
                                         .counter]));
+                        } else if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
+                            var putIn;
+                            var classList = $("div",
+                                "<div>"+mungedEvent.stdout+"</div>")
+                                .attr("class").split(" ");
+                            if (classList
+                                .filter(v => v.indexOf("task_") > -1)
+                                .length) {
+                                putIn = classList
+                                    .filter(v => v.indexOf("task_") > -1)[0];
+                            } else if(classList
+                                .filter(v => v.indexOf("play_") > -1)
+                                .length) {
+                                putIn = classList
+                                    .filter(v => v.indexOf("play_") > -1)[0];
+                            }
+
+                            var putAfter;
+                            var isDup = false;
+                            $(".header_" + putIn + ",." + putIn)
+                                .each((i, v) => {
+                                    if (angular.element(v).scope()
+                                        .event.start_line < mungedEvent
+                                        .start_line) {
+                                        putAfter = v;
+                                    } else if (angular.element(v).scope()
+                                        .event.start_line === mungedEvent
+                                        .start_line) {
+                                        isDup = true;
+                                        return false;
+                                    } else if (angular.element(v).scope()
+                                        .event.start_line > mungedEvent
+                                        .start_line) {
+                                        return false;
+                                    }  else {
+                                        appendToBottom(mungedEvent);
+                                    }
+                                });
+
+                            if (!isDup) {
+                                $(putAfter).after($compile(mungedEvent
+                                    .stdout)($scope.events[mungedEvent
+                                        .counter]));
+                            }
+
+
+                            classList = null;
+                            putIn = null;
                         } else {
-                            // if not, put it at the bottom
-                            angular
-                            .element(".JobResultsStdOut-stdoutContainer")
-                            .append($compile(mungedEvent
-                                .stdout)($scope.events[mungedEvent
-                                    .counter]));
+                            appendToBottom(mungedEvent);
                         }
 
                         // delete ref to the elem because it might leak scope
