@@ -7,18 +7,22 @@
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait',
-    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset',
+    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
     function($scope, $rootScope, $location, $log,
         $stateParams, Rest, Alert, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
         GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait,
-        $compile, $state, OrgJobTemplateList, Dataset) {
+        $compile, $state, OrgJobTemplateList, Dataset, qs) {
 
         var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');
 
         $scope.$on(`ws-jobs`, function () {
-            // @issue old search
-            //$scope.search(list.iterator);
+            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+            qs.search(path, $state.params[`${list.iterator}_search`])
+            .then(function(searchResponse) {
+                $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            });
         });
 
         init();

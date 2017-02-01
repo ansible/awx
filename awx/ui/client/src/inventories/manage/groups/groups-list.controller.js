@@ -6,10 +6,10 @@
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate',
     'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
-    'InventoryManageService', 'groupsUrl', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'groupsDataset', 'Find',
+    'InventoryManageService', 'groupsUrl', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'groupsDataset', 'Find', 'QuerySet',
     function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate,
         GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
-        InventoryManageService, groupsUrl, GetSyncStatusMsg, GetHostsStatusMsg, groupsDataset, Find){
+        InventoryManageService, groupsUrl, GetSyncStatusMsg, GetHostsStatusMsg, groupsDataset, Find, qs){
 
         let list = InventoryGroups;
 
@@ -160,7 +160,20 @@
             }
 
             if(data.status === 'failed' || data.status === 'successful'){
-                $state.reload();
+                let path;
+                if($stateParams && $stateParams.group && $stateParams.group.length > 0) {
+                    path = GetBasePath('groups') + _.last($stateParams.group) + '/children';
+                }
+                else {
+                    //reaches here if the user is on the root level group
+                    path = GetBasePath('inventory') + $stateParams.inventory_id + '/root_groups';
+                }
+                qs.search(path, $state.params[`${list.iterator}_search`])
+                .then(function(searchResponse) {
+                    $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                    $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                    _.forEach($scope[list.name], buildStatusIndicators);
+                });
             } else {
                 var status = GetSyncStatusMsg({
                     status: data.status,
