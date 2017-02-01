@@ -13,8 +13,10 @@ from rest_framework import fields
 import pytest
 
 from awx.conf import models
-from awx.conf.settings import SettingsWrapper, SETTING_CACHE_NOTSET
+from awx.conf.settings import SettingsWrapper, EncryptedCacheProxy, SETTING_CACHE_NOTSET
 from awx.conf.registry import SettingsRegistry
+
+from awx.main.utils import encrypt_field, decrypt_field
 
 
 @contextmanager
@@ -262,3 +264,79 @@ def test_read_only_setting_deletion(settings):
     with pytest.raises(ImproperlyConfigured):
         del settings.AWX_SOME_SETTING
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
+
+
+def test_settings_use_an_encrypted_cache(settings):
+    settings.registry.register(
+        'AWX_ENCRYPTED',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        encrypted=True
+    )
+    assert isinstance(settings.cache, EncryptedCacheProxy)
+    assert settings.cache.__dict__['encrypter'] == encrypt_field
+    assert settings.cache.__dict__['decrypter'] == decrypt_field
+
+
+def test_sensitive_cache_data_is_encrypted(settings, mocker):
+    "fields marked as `encrypted` are stored in the cache with encryption"
+    settings.registry.register(
+        'AWX_ENCRYPTED',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        encrypted=True
+    )
+
+    def rot13(obj, attribute):
+        assert obj.pk == 123
+        return getattr(obj, attribute).encode('rot13')
+
+    native_cache = LocMemCache(str(uuid4()), {})
+    cache = EncryptedCacheProxy(
+        native_cache,
+        settings.registry,
+        encrypter=rot13,
+        decrypter=rot13
+    )
+    # Insert the setting value into the database; the encryption process will
+    # use its primary key as part of the encryption key
+    setting_from_db = mocker.Mock(pk=123, key='AWX_ENCRYPTED', value='SECRET!')
+    mocks = mocker.Mock(**{
+        'order_by.return_value': mocker.Mock(**{
+            '__iter__': lambda self: iter([setting_from_db]),
+            'first.return_value': setting_from_db
+        }),
+    })
+    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
+        cache.set('AWX_ENCRYPTED', 'SECRET!')
+        assert cache.get('AWX_ENCRYPTED') == 'SECRET!'
+        assert native_cache.get('AWX_ENCRYPTED') == 'FRPERG!'
+
+
+def test_readonly_sensitive_cache_data_is_encrypted(settings):
+    "readonly fields marked as `encrypted` are stored in the cache with encryption"
+    settings.registry.register(
+        'AWX_ENCRYPTED',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        read_only=True,
+        encrypted=True
+    )
+
+    def rot13(obj, attribute):
+        assert obj.pk is None
+        return getattr(obj, attribute).encode('rot13')
+
+    native_cache = LocMemCache(str(uuid4()), {})
+    cache = EncryptedCacheProxy(
+        native_cache,
+        settings.registry,
+        encrypter=rot13,
+        decrypter=rot13
+    )
+    cache.set('AWX_ENCRYPTED', 'SECRET!')
+    assert cache.get('AWX_ENCRYPTED') == 'SECRET!'
+    assert native_cache.get('AWX_ENCRYPTED') == 'FRPERG!'

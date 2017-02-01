@@ -163,20 +163,22 @@ def get_awx_version():
         return __version__
 
 
-def get_encryption_key_for_pk(pk, field_name):
+def get_encryption_key(field_name, pk=None):
     '''
-    Generate key for encrypted password based on instance pk and field name.
+    Generate key for encrypted password based on field name,
+    ``settings.SECRET_KEY``, and instance pk (if available).
+
+    :param pk: (optional) the primary key of the ``awx.conf.model.Setting``;
+               can be omitted in situations where you're encrypting a setting
+               that is not database-persistent (like a read-only setting)
     '''
     from django.conf import settings
     h = hashlib.sha1()
     h.update(settings.SECRET_KEY)
-    h.update(str(pk))
+    if pk is not None:
+        h.update(str(pk))
     h.update(field_name)
     return h.digest()[:16]
-
-
-def get_encryption_key(instance, field_name):
-    return get_encryption_key_for_pk(instance.pk, field_name)
 
 
 def encrypt_field(instance, field_name, ask=False, subfield=None):
@@ -189,7 +191,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
     value = smart_str(value)
-    key = get_encryption_key(instance, field_name)
+    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
     cipher = AES.new(key, AES.MODE_ECB)
     while len(value) % cipher.block_size != 0:
         value += '\x00'
@@ -217,13 +219,13 @@ def decrypt_field(instance, field_name, subfield=None):
         value = value[subfield]
     if not value or not value.startswith('$encrypted$'):
         return value
-    key = get_encryption_key(instance, field_name)
+    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
     return decrypt_value(key, value)
 
 
 def decrypt_field_value(pk, field_name, value):
-    key = get_encryption_key_for_pk(pk, field_name)
+    key = get_encryption_key(field_name, pk)
     return decrypt_value(key, value)
 
 

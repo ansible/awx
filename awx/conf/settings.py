@@ -1,4 +1,5 @@
 # Python
+from collections import namedtuple
 import contextlib
 import logging
 import sys
@@ -15,7 +16,7 @@ from django.db import ProgrammingError, OperationalError
 from rest_framework.fields import empty, SkipField
 
 # Tower
-from awx.main.utils import decrypt_field
+from awx.main.utils import encrypt_field, decrypt_field
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 
@@ -61,6 +62,75 @@ def _log_database_error():
         pass
 
 
+class EncryptedCacheProxy(object):
+
+    def __init__(self, cache, registry, encrypter=None, decrypter=None):
+        """
+        This proxy wraps a Django cache backend and overwrites the
+        `get`/`set`/`set_many` methods to handle field encryption/decryption
+        for sensitive values.
+
+        :param cache: the Django cache backend to proxy to
+        :param registry: the settings registry instance used to determine if
+                         a field is encrypted or not.
+        :param encrypter: a callable used to encrypt field values; defaults to
+                          ``awx.main.utils.encrypt_field``
+        :param decrypter: a callable used to decrypt field values; defaults to
+                          ``awx.main.utils.decrypt_field``
+        """
+
+        # These values have to be stored via self.__dict__ in this way to get
+        # around the magic __setattr__ method on this class.
+        self.__dict__['cache'] = cache
+        self.__dict__['registry'] = registry
+        self.__dict__['encrypter'] = encrypter or encrypt_field
+        self.__dict__['decrypter'] = decrypter or decrypt_field
+
+    def get(self, key, **kwargs):
+        value = self.cache.get(key, **kwargs)
+        return self._handle_encryption(self.decrypter, key, value)
+
+    def set(self, key, value, **kwargs):
+        self.cache.set(
+            key,
+            self._handle_encryption(self.encrypter, key, value),
+            **kwargs
+        )
+
+    def set_many(self, data, **kwargs):
+        for key, value in data.items():
+            self.set(key, value, **kwargs)
+
+    def _handle_encryption(self, method, key, value):
+        TransientSetting = namedtuple('TransientSetting', ['pk', 'value'])
+
+        if value is not empty and self.registry.is_setting_encrypted(key):
+            # If the setting exists in the database, we'll use its primary key
+            # as part of the AES key when encrypting/decrypting
+            return method(
+                TransientSetting(
+                    pk=getattr(self._get_setting_from_db(key), 'pk', None),
+                    value=value
+                ),
+                'value'
+            )
+
+        # If the field in question isn't an "encrypted" field, this function is
+        # a no-op; it just returns the provided value
+        return value
+
+    def _get_setting_from_db(self, key):
+        field = self.registry.get_setting_field(key)
+        if not field.read_only:
+            return Setting.objects.filter(key=key, user__isnull=True).order_by('pk').first()
+
+    def __getattr__(self, name):
+        return getattr(self.cache, name)
+
+    def __setattr__(self, name, value):
+        setattr(self.cache, name, value)
+
+
 class SettingsWrapper(UserSettingsHolder):
 
     @classmethod
@@ -96,7 +166,7 @@ class SettingsWrapper(UserSettingsHolder):
         self.__dict__['_awx_conf_preload_expires'] = None
         self.__dict__['_awx_conf_preload_lock'] = threading.RLock()
         self.__dict__['_awx_conf_init_readonly'] = False
-        self.__dict__['cache'] = cache
+        self.__dict__['cache'] = EncryptedCacheProxy(cache, registry)
         self.__dict__['registry'] = registry
 
     def _get_supported_settings(self):
@@ -138,7 +208,7 @@ class SettingsWrapper(UserSettingsHolder):
                     self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.
-        if self.cache.get('_awx_conf_preload_expires', empty) is not empty:
+        if self.cache.get('_awx_conf_preload_expires', default=empty) is not empty:
             return
         # Initialize all database-configurable settings with a marker value so
         # to indicate from the cache that the setting is not configured without
@@ -167,13 +237,13 @@ class SettingsWrapper(UserSettingsHolder):
         settings_to_cache = dict([(Setting.get_cache_key(k), v) for k, v in settings_to_cache.items()])
         settings_to_cache['_awx_conf_preload_expires'] = self._awx_conf_preload_expires
         logger.debug('cache set_many(%r, %r)', settings_to_cache, SETTING_CACHE_TIMEOUT)
-        self.cache.set_many(settings_to_cache, SETTING_CACHE_TIMEOUT)
+        self.cache.set_many(settings_to_cache, timeout=SETTING_CACHE_TIMEOUT)
 
     def _get_local(self, name):
         self._preload_cache()
         cache_key = Setting.get_cache_key(name)
         try:
-            cache_value = self.cache.get(cache_key, empty)
+            cache_value = self.cache.get(cache_key, default=empty)
         except ValueError:
             cache_value = empty
         logger.debug('cache get(%r, %r) -> %r', cache_key, empty, cache_value)
@@ -211,7 +281,7 @@ class SettingsWrapper(UserSettingsHolder):
                 logger.debug('cache set(%r, %r, %r)', cache_key,
                              self._get_cache_value(value),
                              SETTING_CACHE_TIMEOUT)
-                self.cache.set(cache_key, self._get_cache_value(value), SETTING_CACHE_TIMEOUT)
+                self.cache.set(cache_key, self._get_cache_value(value), timeout=SETTING_CACHE_TIMEOUT)
         if value == SETTING_CACHE_NOTSET and not SETTING_CACHE_DEFAULTS:
             try:
                 value = field.get_default()
