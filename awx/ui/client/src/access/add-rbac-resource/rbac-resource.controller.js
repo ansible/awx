@@ -62,13 +62,13 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
                 user.username;
         }
 
-        if (item.isSelected) {
+        if (value.isSelected) {
             if (item.type === 'user') {
                 item.name = buildName(item);
             }
             scope.allSelected.push(item);
         } else {
-            scope.allSelected = _.remove(scope.allSelected, { id: item.id });
+            _.remove(scope.allSelected, { id: item.id });
         }
     });
 

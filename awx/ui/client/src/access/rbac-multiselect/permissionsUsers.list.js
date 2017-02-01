@@ -9,12 +9,6 @@
     return {
         name: 'users',
         iterator: 'user',
-        defaultSearchParams: function(term){
-            return {or__username__icontains: term,
-                    or__first_name__icontains: term,
-                    or__last_name__icontains: term
-                };
-        },
         title: false,
         listTitleBadge: false,
         multiSelect: true,

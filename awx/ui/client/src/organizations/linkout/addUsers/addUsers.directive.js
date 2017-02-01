@@ -7,7 +7,7 @@
 /* jshint unused: vars */
 import addUsers from './addUsers.controller';
 export default
-    ['Wait', 'templateUrl', '$state', '$view', function(Wait, templateUrl, $state, $view) {
+    ['Wait', 'templateUrl', '$state', '$view', '$compile', function(Wait, templateUrl, $state, $view, $compile) {
             return {
                 restrict: 'E',
                 scope: {
@@ -47,6 +47,10 @@ export default
                     scope.$on('closeUsersModal', function() {
                         scope.closeModal();
                     });
+
+                    scope.compileList = function(html) {
+                        $('#add-users-list').append($compile(html)(scope));
+                    };
 
                     Wait('stop');
 

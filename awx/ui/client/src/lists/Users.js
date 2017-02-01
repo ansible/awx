@@ -15,12 +15,6 @@ export default
         search: {
             order_by: 'username'
         },
-        defaultSearchParams: function(term){
-            return {or__username__icontains: term,
-                    or__first_name__icontains: term,
-                    or__last_name__icontains: term
-                };
-        },
         iterator: 'user',
         selectTitle: i18n._('Add Users'),
         editTitle: i18n._('Users'),

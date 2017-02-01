@@ -11,10 +11,10 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath',
-'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window',
-function($scope, $rootScope, ProcessErrors, GetBasePath,
-    SelectionInit, templateUrl, $state, Rest, $q, Wait, $window) {
+export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
+'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
+function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
+    SelectionInit, templateUrl, $state, Rest, $q, Wait, $window, qs, UserList) {
     $scope.$on("linkLists", function() {
 
         if ($state.current.name.split(".")[1] === "users") {
@@ -26,16 +26,59 @@ function($scope, $rootScope, ProcessErrors, GetBasePath,
         init();
 
         function init(){
-            // search init
-            $scope.list = $scope.$parent.add_user_list;
-            $scope.add_user_dataset =  $scope.$parent.add_user_dataset;
-            $scope.add_users = $scope.$parent.add_user_dataset.results;
+            $scope.add_user_default_params = {
+                order_by: 'username',
+                page_size: 5
+            };
+
+            $scope.add_user_queryset = {
+                order_by: 'username',
+                page_size: 5
+            };
+
+            let list = _.cloneDeep(UserList);
+            list.basePath = 'users';
+            list.iterator = 'add_user';
+            list.name = 'add_users';
+            list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
+            delete list.actions;
+            delete list.fieldActions;
+
+            // Fire off the initial search
+            qs.search(GetBasePath('users'), $scope.add_user_default_params)
+                .then(function(res) {
+                    $scope.add_user_dataset = res.data;
+                    $scope.add_users = $scope.add_user_dataset.results;
+
+                    let html = generateList.build({
+                        list: list,
+                        mode: 'edit',
+                        title: false
+                    });
+
+                    $scope.list = list;
+
+                    $scope.compileList(html);
+
+                    $scope.$watchCollection('add_users', function () {
+                        if($scope.selectedItems) {
+                            // Loop across the users and see if any of them should be "checked"
+                            $scope.add_users.forEach(function(row, i) {
+                                if (_.includes($scope.selectedItems, row.id)) {
+                                    $scope.add_users[i].isSelected = true;
+                                }
+                            });
+                        }
+                    });
+
+                });
 
             $scope.selectedItems = [];
             $scope.$on('selectedOrDeselected', function(e, value) {
                 let item = value.value;
 
-                if (item.isSelected) {
+                if (value.isSelected) {
                     $scope.selectedItems.push(item.id);
                 }
                 else {
