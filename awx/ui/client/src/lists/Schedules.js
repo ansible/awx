@@ -7,7 +7,7 @@
 
 export default
     angular.module('SchedulesListDefinition', [])
-    .factory('StreamList', ['i18n', function(i18n) {
+    .factory('SchedulesList', ['i18n', function(i18n) {
     return {
 
         name: 'schedules',
