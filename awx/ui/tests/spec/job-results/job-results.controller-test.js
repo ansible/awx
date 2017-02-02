@@ -1,10 +1,11 @@
 'use strict';
+import moment from 'moment';
 
 describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService;
 
     jobData = {
         related: {}
@@ -37,7 +38,8 @@ describe('Controller: jobResultsController', () => {
                 'deleteJob',
                 'cancelJob',
                 'relaunchJob',
-                'getEvents'
+                'getEvents',
+                'getJobData',
             ]);
             eventQueue = jasmine.createSpyObj('eventQueue', [
                 'populate',
@@ -64,6 +66,10 @@ describe('Controller: jobResultsController', () => {
                 }
             };
 
+            $provide.service('workflowResultsService', () => {
+                return jasmine.createSpyObj('workflowResultsService', ['createOneSecondTimer', 'destroyTimer']);
+            });
+
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
             $provide.value('jobLabels', jobLabels);
@@ -84,7 +90,7 @@ describe('Controller: jobResultsController', () => {
     };
 
     let injectVals = () => {
-        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_) => {
+        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_, _$interval_, _workflowResultsService_) => {
             // when you call $scope.$apply() (which you need to do to
             // to get inside of .then blocks to test), something is
             // causing a request for all static files.
@@ -119,11 +125,19 @@ describe('Controller: jobResultsController', () => {
             Rest = _Rest_;
             $state = _$state_;
             QuerySet = _QuerySet_;
+            $interval = _$interval_;
+            workflowResultsService = _workflowResultsService_;
 
             jobResultsService.getEvents.and
                 .returnValue(eventResolve);
             eventQueue.populate.and
                 .returnValue(populateResolve);
+
+            jobResultsService.getJobData = function(blah) {
+                var deferred = $q.defer();
+                deferred.resolve({});
+                return deferred.promise;
+            };
 
             $compile = _$compile_;
 
@@ -227,6 +241,57 @@ describe('Controller: jobResultsController', () => {
             expect($scope.status_label).toBe("New");
             expect($scope.type_label).toBe("Playbook Run");
             expect($scope.verbosity_label).toBe("0 (Normal)");
+        });
+    });
+
+    describe('elapsed timer', () => {
+        describe('job running', () => {
+            beforeEach(() => {
+                jobData.started = moment();
+                jobData.status = 'running';
+
+                bootstrapTest();
+            });
+
+            it('should start timer', () => {
+                expect(workflowResultsService.createOneSecondTimer).toHaveBeenCalled();
+            });
+        });
+
+        describe('job waiting', () => {
+            beforeEach(() => {
+                jobData.started = null;
+                jobData.status = 'waiting';
+
+                bootstrapTest();
+            });
+
+            it('should not start timer', () => {
+                expect(workflowResultsService.createOneSecondTimer).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('job transitions to running', () => {
+            beforeEach(() => {
+                jobData.started = null;
+                jobData.status = 'waiting';
+                jobData.id = 13;
+
+                bootstrapTest();
+
+                $rScope.$broadcast('ws-jobs', { unified_job_id: jobData.id, status: 'running' });
+            });
+
+            it('should start timer', () => {
+                expect(workflowResultsService.createOneSecondTimer).toHaveBeenCalled();
+            });
+
+            describe('job transitions from running to finished', () => {
+                it('should cleanup timer', () => {
+                    $rScope.$broadcast('ws-jobs', { unified_job_id: jobData.id, status: 'successful' });
+                    expect(workflowResultsService.destroyTimer).toHaveBeenCalled();
+                });
+            });
         });
     });
 
