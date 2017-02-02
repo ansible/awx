@@ -3086,8 +3086,6 @@ class ActivityStreamSerializer(BaseSerializer):
                                 summary_fields[get_type_for_model(unified_job_template)] = {'id': unified_job_template.id,
                                                                                             'name': unified_job_template.name}
                         thisItemDict = {}
-                        if 'id' not in related_fields:
-                            related_fields = related_fields + ('id',)
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
