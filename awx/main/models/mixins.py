@@ -134,7 +134,8 @@ class SurveyJobTemplateMixin(models.Model):
                         kw_value = kwargs_extra_vars[variable_key]
                         if kw_value.startswith('$encrypted$') and kw_value != default:
                             kwargs_extra_vars[variable_key] = default
-                extra_vars[variable_key] = default
+                if default is not None:
+                    extra_vars[variable_key] = default
 
         # Overwrite job template extra vars with explicit job extra vars
         # and add on job extra vars
