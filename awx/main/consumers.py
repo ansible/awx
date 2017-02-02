@@ -3,7 +3,7 @@ import logging
 import urllib
 
 from channels import Group
-from channels.sessions import channel_session, http_session
+from channels.sessions import channel_session
 from channels.handler import AsgiRequest
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -21,24 +21,23 @@ def discard_groups(message):
             Group(group).discard(message.reply_channel)
 
 
-@http_session
 @channel_session
 def ws_connect(message):
     connect_text = {'accept':False, 'user':None}
 
-    if message.http_session:
-        request = AsgiRequest(message)
-        token = request.COOKIES.get('token', None)
-        if token is not None:
-            token = urllib.unquote(token).strip('"')
-            try:
-                auth_token = AuthToken.objects.get(key=token)
-                if auth_token.in_valid_tokens:
-                    message.channel_session['user_id'] = auth_token.user_id
-                    connect_text['accept'] = True
-                    connect_text['user'] = auth_token.user_id
-            except AuthToken.DoesNotExist:
-                logger.error("auth_token provided was invalid.")
+    message.content['method'] = 'FAKE'
+    request = AsgiRequest(message)
+    token = request.COOKIES.get('token', None)
+    if token is not None:
+        token = urllib.unquote(token).strip('"')
+        try:
+            auth_token = AuthToken.objects.get(key=token)
+            if auth_token.in_valid_tokens:
+                message.channel_session['user_id'] = auth_token.user_id
+                connect_text['accept'] = True
+                connect_text['user'] = auth_token.user_id
+        except AuthToken.DoesNotExist:
+            logger.error("auth_token provided was invalid.")
     message.reply_channel.send({"text": json.dumps(connect_text)})
 
 
