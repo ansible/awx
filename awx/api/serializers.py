@@ -25,6 +25,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -2980,10 +2981,23 @@ class ActivityStreamSerializer(BaseSerializer):
 
     changes = serializers.SerializerMethodField()
     object_association = serializers.SerializerMethodField()
-    # Needed related fields that are not in the default summary fields
-    extra_listing = [
-        ('workflow_job_template_node', ('id', 'unified_job_template_id'))
-    ]
+
+    @cached_property
+    def _local_summarizable_fk_fields(self):
+        summary_dict = copy.copy(SUMMARIZABLE_FK_FIELDS)
+        # Special requests
+        summary_dict['group'] = summary_dict['group'] + ('inventory_id',)
+        for key in summary_dict.keys():
+            if 'id' not in summary_dict[key]:
+                summary_dict[key] = summary_dict[key] + ('id',)
+        field_list = summary_dict.items()
+        # Needed related fields that are not in the default summary fields
+        field_list += [
+            ('workflow_job_template_node', ('id', 'unified_job_template_id')),
+            ('label', ('id', 'name', 'organization_id')),
+            ('notification', ('id', 'status', 'notification_type', 'notification_template_id'))
+        ]
+        return field_list
 
     class Meta:
         model = ActivityStream
@@ -3025,7 +3039,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, __ in SUMMARIZABLE_FK_FIELDS.items() + self.extra_listing:
+        for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).all()
@@ -3047,7 +3061,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items() + self.extra_listing:
+        for fk, related_fields in self._local_summarizable_fk_fields:
             try:
                 if not hasattr(obj, fk):
                     continue
@@ -3078,8 +3092,6 @@ class ActivityStreamSerializer(BaseSerializer):
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
-                        if fk == 'group':
-                            thisItemDict['inventory_id'] = getattr(thisItem, 'inventory_id', None)
                         if thisItemDict.get('id', None):
                             if thisItemDict.get('id', None) in [obj_dict.get('id', None) for obj_dict in summary_fields[fk]]:
                                 continue
