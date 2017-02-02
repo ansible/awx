@@ -638,6 +638,22 @@ function(ConfigurationUtils, i18n) {
                 }
 
                 function setValidity(ctrl, validity){
+                    var isRequired;
+                    if (attrs.required) {
+                        isRequired = true;
+                    } else {
+                        isRequired = false;
+                    }
+                    if (attrs.awRequiredWhen) {
+                      if (attrs.awRequiredWhen.charAt(0) === "!") {
+                        isRequired = !scope[attrs.awRequiredWhen.slice(1, attrs.awRequiredWhen.length)];
+                      } else {
+                        isRequired = scope[attrs.awRequiredWhen];
+                      }
+                    }
+                    if (!isRequired && (viewValue === undefined || viewValue === undefined || viewValue === "")) {
+                        validity = true;
+                    }
                     ctrl.$setValidity('awlookup', validity);
                     return defer.resolve(validity);
                 }
@@ -977,9 +993,9 @@ function(ConfigurationUtils, i18n) {
                     ctrl.$setValidity('max', true);
                     ctrl.$dirty = true;
                     ctrl.$render();
-                    if (scope.job_templates_form) {
+                    if (scope.job_template_form) {
                         // need a way to find the parent form and mark it dirty
-                        scope.job_templates_form.$dirty = true;
+                        scope.job_template_form.$dirty = true;
                     }
                     if (!scope.$$phase) {
                         scope.$digest();
