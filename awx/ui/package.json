@@ -52,7 +52,7 @@
     "grunt-newer": "^1.2.0",
     "grunt-webpack": "^1.0.11",
     "imports-loader": "^0.6.5",
-    "jasmine-core": "https://registry.npmjs.org/jasmine-core/-/jasmine-core-2.5.2.tgz",
+    "jasmine-core": "^2.5.2",
     "jshint": "^2.9.4",
     "jshint-loader": "^0.8.3",
     "jshint-stylish": "^2.2.0",
