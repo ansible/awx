@@ -26,6 +26,7 @@ export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
                 {label: i18n._('Inventories'), value: 'inventory'},
                 {label: i18n._('Inventory Scripts'), value: 'inventory_script'},
                 {label: i18n._('Jobs'), value: 'job'},
+                {label: i18n._('Notification Templates'), value: 'notification_template'},
                 {label: i18n._('Organizations'), value: 'organization'},
                 {label: i18n._('Projects'), value: 'project'},
                 {label: i18n._('Schedules'), value: 'schedule'},

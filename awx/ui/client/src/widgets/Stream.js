@@ -76,7 +76,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         }
                         break;
                     case 'notification_template':
-                        throw {name : 'NotImplementedError', message : 'activity.summary_fields to build this url not implemented yet'};
+                        url += `notification_templates/${obj.id}`;
+                        break;
                     case 'role':
                         throw {name : 'NotImplementedError', message : 'role object management is not consolidated to a single UI view'};
                     default:

@@ -34,6 +34,9 @@ export default
                         case 'team':
                             rtnTitle = i18n._('TEAMS');
                             break;
+                        case 'notification_template':
+                            rtnTitle = i18n._('NOTIFICATION TEMPLATES');
+                            break;
                         case 'organization':
                             rtnTitle = i18n._('ORGANIZATIONS');
                             break;

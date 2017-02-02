@@ -39,6 +39,9 @@ export default
                         case 'team':
                             basePathKey = 'teams';
                             break;
+                        case 'notification_template':
+                            basePathKey = 'notification_templates';
+                            break;
                         case 'organization':
                             basePathKey = 'organizations';
                             break;
