@@ -12,11 +12,11 @@
 
 
 export default [
-    '$scope', '$compile', '$location', '$stateParams', 'SchedulesList', 'Rest',
+    '$scope', '$compile', '$location', '$stateParams', 'ScheduleList', 'Rest',
     'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait', 'rbacUiControlService',
     'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetChoices', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
     function($scope, $compile, $location, $stateParams,
-        SchedulesList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
+        ScheduleList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
         GetBasePath, Wait, rbacUiControlService, Find,
         ToggleSchedule, DeleteSchedule, GetChoices,
         $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
@@ -24,7 +24,7 @@ export default [
         ClearScope();
 
         var base, scheduleEndpoint,
-            list = SchedulesList;
+            list = ScheduleList;
 
         init();
 
