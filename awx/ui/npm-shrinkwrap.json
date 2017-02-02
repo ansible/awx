@@ -3573,12 +3573,6 @@
       "resolved": "https://registry.npmjs.org/jshint-stylish/-/jshint-stylish-2.2.1.tgz",
       "dev": true
     },
-    "json-loader": {
-      "version": "0.5.4",
-      "from": "https://registry.npmjs.org/json-loader/-/json-loader-0.5.4.tgz",
-      "resolved": "https://registry.npmjs.org/json-loader/-/json-loader-0.5.4.tgz",
-      "dev": true
-    },
     "json-schema": {
       "version": "0.2.3",
       "from": "json-schema@0.2.3",

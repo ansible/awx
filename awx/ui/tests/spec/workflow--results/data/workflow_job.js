@@ -1,4 +1,4 @@
-{
+export default {
     "id": 109,
     "type": "workflow_job",
     "url": "/api/v1/workflow_jobs/109/",
@@ -60,4 +60,4 @@
     "result_traceback": "",
     "workflow_job_template": 27,
     "extra_vars": "{}"
-}
+};
