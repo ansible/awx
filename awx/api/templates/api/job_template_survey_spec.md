@@ -1,4 +1,4 @@
-POST requests to this resource should include the full specification for a {{ model_verbose_name_plural|title }} Survey
+POST requests to this resource should include the full specification for a {{ model_verbose_name|title }}'s Survey
 
 Here is an example survey specification:
 
