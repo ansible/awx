@@ -270,7 +270,7 @@ register(
     field_class=fields.LDAPDNWithUserField,
     allow_blank=True,
     allow_null=True,
-    default='',
+    default=None,
     label=_('LDAP User DN Template'),
     help_text=_('Alternative to user search, if user DNs are all of the same '
                 'format. This approach will be more efficient for user lookups than '
@@ -340,7 +340,7 @@ register(
     field_class=fields.LDAPDNField,
     allow_blank=True,
     allow_null=True,
-    default='',
+    default=None,
     label=_('LDAP Require Group'),
     help_text=_('Group DN required to login. If specified, user must be a member '
                 'of this group to login via LDAP. If not set, everyone in LDAP '
@@ -357,7 +357,7 @@ register(
     field_class=fields.LDAPDNField,
     allow_blank=True,
     allow_null=True,
-    default='',
+    default=None,
     label=_('LDAP Deny Group'),
     help_text=_('Group DN denied from login. If specified, user will not be '
                 'allowed to login if a member of this group.  Only one deny group '
