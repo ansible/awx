@@ -40,12 +40,12 @@ def settings(request):
     settings = LazySettings()
     registry = SettingsRegistry(settings)
 
-    # @pytest.mark.readonly can be used to mark specific setting values as
-    # "read-only".  This is analogous to manually specifying a setting on the
-    # filesystem (e.g., in a local_settings.py in development, or in
-    # /etc/tower/conf.d/<something>.py)
-    readonly_marker = request.node.get_marker('readonly')
-    defaults = readonly_marker.kwargs if readonly_marker else {}
+    # @pytest.mark.defined_in_file can be used to mark specific setting values
+    # as "defined in a settings file".  This is analogous to manually
+    # specifying a setting on the filesystem (e.g., in a local_settings.py in
+    # development, or in /etc/tower/conf.d/<something>.py)
+    in_file_marker = request.node.get_marker('defined_in_file')
+    defaults = in_file_marker.kwargs if in_file_marker else {}
     defaults['DEFAULTS_SNAPSHOT'] = {}
     settings.configure(**defaults)
     settings._wrapped = SettingsWrapper(settings._wrapped,
@@ -54,14 +54,14 @@ def settings(request):
     return settings
 
 
-@pytest.mark.readonly(DEBUG=True)
+@pytest.mark.defined_in_file(DEBUG=True)
 def test_unregistered_setting(settings):
     "native Django settings are not stored in DB, and aren't cached"
     assert settings.DEBUG is True
     assert settings.cache.get('DEBUG') is None
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting(settings):
     settings.registry.register(
         'AWX_SOME_SETTING',
@@ -75,7 +75,7 @@ def test_read_only_setting(settings):
     assert settings == ['AWX_SOME_SETTING']
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting_with_empty_default(settings):
     settings.registry.register(
         'AWX_SOME_SETTING',
@@ -90,7 +90,7 @@ def test_read_only_setting_with_empty_default(settings):
     assert settings == ['AWX_SOME_SETTING']
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_defaults_are_cached(settings):
     "read-only settings are stored in the cache"
     settings.registry.register(
@@ -103,7 +103,7 @@ def test_read_only_defaults_are_cached(settings):
     assert settings.cache.get('AWX_SOME_SETTING') == 'DEFAULT'
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_cache_respects_timeout(settings):
     "only preload the cache every SETTING_CACHE_TIMEOUT settings"
     settings.registry.register(
@@ -135,6 +135,33 @@ def test_default_setting(settings, mocker):
     with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache):
         assert settings.AWX_SOME_SETTING == 'DEFAULT'
         assert settings.cache.get('AWX_SOME_SETTING') == 'DEFAULT'
+
+
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
+def test_setting_is_from_setting_file(settings, mocker):
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system'
+    )
+    assert settings.AWX_SOME_SETTING == 'DEFAULT'
+    assert settings.registry.get_setting_field('AWX_SOME_SETTING').defined_in_file is True
+
+
+def test_setting_is_not_from_setting_file(settings, mocker):
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        default='DEFAULT'
+    )
+
+    settings_to_cache = mocker.Mock(**{'order_by.return_value': []})
+    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=settings_to_cache):
+        assert settings.AWX_SOME_SETTING == 'DEFAULT'
+        assert settings.registry.get_setting_field('AWX_SOME_SETTING').defined_in_file is False
 
 
 def test_empty_setting(settings, mocker):
@@ -180,7 +207,7 @@ def test_setting_from_db(settings, mocker):
         assert settings.cache.get('AWX_SOME_SETTING') == 'FROM_DB'
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting_assignment(settings):
     "read-only settings cannot be overwritten"
     settings.registry.register(
@@ -255,7 +282,7 @@ def test_db_setting_deletion(settings, mocker):
     assert existing_setting.delete.call_count == 1
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting_deletion(settings):
     "read-only settings cannot be deleted"
     settings.registry.register(
