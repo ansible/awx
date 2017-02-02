@@ -32,3 +32,6 @@ agent that originally obtained it.
 Each request that uses the token for authentication will refresh its expiration
 timestamp and keep it from expiring.  A token only expires when it is not used
 for the configured timeout interval (default 1800 seconds).
+
+A DELETE request with the token set will cause the token to be invalidated and
+no further requests can be made with it.

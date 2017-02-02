@@ -4,6 +4,7 @@
 
 # Python
 import os
+import re
 import cgi
 import datetime
 import dateutil
@@ -607,6 +608,16 @@ class AuthTokenView(APIView):
             logger.warning(smart_text(u"Login failed for user {}".format(request.data['username'])),
                            extra=dict(actor=request.data['username']))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        print request.META
+        if 'HTTP_AUTHORIZATION' in request.META:
+            token_match = re.match("Token\s(.+)", request.META['HTTP_AUTHORIZATION'])
+            if token_match:
+                filter_tokens = AuthToken.objects.filter(key=token_match.groups()[0])
+                if filter_tokens.exists():
+                    filter_tokens[0].invalidate()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OrganizationCountsMixin(object):
