@@ -50,15 +50,26 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
-            if ($scope.job.related[key]) {
-                return '/#/' + $scope.job.related[key]
-                    .split('api/v1/')[1];
-            } else {
-                return null;
+            if(key === 'schedule') {
+                if($scope.job.related.schedule) {
+                    return '/#/templates/job_template/' + $scope.job.job_template + '/schedules' + $scope.job.related.schedule.split('api/v1/schedules')[1];
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                if ($scope.job.related[key]) {
+                    return '/#/' + $scope.job.related[key]
+                        .split('api/v1/')[1];
+                } else {
+                    return null;
+                }
             }
         };
 
         $scope.created_by_link = getTowerLink('created_by');
+        $scope.scheduled_by_link = getTowerLink('schedule');
         $scope.inventory_link = getTowerLink('inventory');
         $scope.project_link = getTowerLink('project');
         $scope.machine_credential_link = getTowerLink('credential');
@@ -316,7 +327,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                 .stdout)($scope.events[mungedEvent
                                     .counter]));
                     };
-                    
+
                     if (!$scope.events[mungedEvent.counter]) {
                         // line hasn't been put in the pane yet
 

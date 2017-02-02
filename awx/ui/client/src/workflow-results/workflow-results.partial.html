@@ -113,6 +113,21 @@
                         </div>
                     </div>
 
+                    <!-- SCHEDULED BY DETAIL -->
+                    <div class="WorkflowResults-resultRow toggle-show"
+                        ng-show="workflow.summary_fields.schedule.name">
+                        <label
+                            class="WorkflowResults-resultRowLabel">
+                            Launched By
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ scheduled_by_link }}"
+                                aw-tool-tip="Edit the Schedule"
+                                data-placement="top">
+                                {{ workflow.summary_fields.schedule.name }}
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- EXTRA VARIABLES DETAIL -->
                     <div class="WorkflowResults-resultRow
