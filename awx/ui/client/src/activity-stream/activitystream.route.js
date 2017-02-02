@@ -49,6 +49,16 @@ export default {
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                 let stateParams = $stateParams[`${list.iterator}_search`];
+
+                if($stateParams.target === "inventory_script"){
+                    stateParams.or__object1__in = 'custom_inventory_script';
+                    stateParams.or__object2__in = 'custom_inventory_script';
+                    if(stateParams.inventory_script){
+                        stateParams.custom_inventory_script = stateParams.inventory_script;
+                        delete stateParams.inventory_script;
+                    }
+                }
+                
                 // Sending or__object1__in=null will result in an api error response so lets strip
                 // these out.  This should only be null when hitting the All Activity page.
                 if(stateParams.or__object1__in && stateParams.or__object1__in === null) {
