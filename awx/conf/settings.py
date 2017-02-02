@@ -205,6 +205,7 @@ class SettingsWrapper(UserSettingsHolder):
                     if file_default != init_default and file_default is not None:
                         logger.warning('Setting %s has been marked read-only!', key)
                         self.registry._registry[key]['read_only'] = True
+                        self.registry._registry[key]['defined_in_file'] = True
                     self.__dict__['_awx_conf_init_readonly'] = True
         # If local preload timer has expired, check to see if another process
         # has already preloaded the cache and skip preloading if so.

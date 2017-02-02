@@ -32,6 +32,7 @@ class Metadata(metadata.SimpleMetadata):
             'min_length', 'max_length',
             'min_value', 'max_value',
             'category', 'category_slug',
+            'defined_in_file'
         ]
 
         for attr in text_attrs:
@@ -156,6 +157,10 @@ class Metadata(metadata.SimpleMetadata):
 
                 # For PUT/POST methods, remove read-only fields.
                 if method in ('PUT', 'POST'):
+                    # This value should always be False for PUT/POST, so don't
+                    # show it (file-based read-only settings can't be updated)
+                    meta.pop('defined_in_file', False)
+
                     if meta.pop('read_only', False):
                         actions[method].pop(field)
 

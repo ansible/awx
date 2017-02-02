@@ -25,11 +25,11 @@ def reg(request):
     settings = LazySettings()
     registry = SettingsRegistry(settings)
 
-    # @pytest.mark.readonly can be used to mark specific setting values as
-    # "read-only".  This is analogous to manually specifying a setting on the
-    # filesystem (e.g., in a local_settings.py in development, or in
-    # /etc/tower/conf.d/<something>.py)
-    defaults = request.node.get_marker('readonly')
+    # @pytest.mark.defined_in_file can be used to mark specific setting values
+    # as "defined in a settings file".  This is analogous to manually
+    # specifying a setting on the filesystem (e.g., in a local_settings.py in
+    # development, or in /etc/tower/conf.d/<something>.py)
+    defaults = request.node.get_marker('defined_in_file')
     if defaults:
         settings.configure(**defaults.kwargs)
     settings._wrapped = SettingsWrapper(settings._wrapped,
@@ -280,7 +280,7 @@ def test_field_with_custom_mixin(reg):
     assert field.is_great() is True
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_default_value_from_settings(reg):
     reg.register(
         'AWX_SOME_SETTING',
@@ -293,7 +293,7 @@ def test_default_value_from_settings(reg):
     assert field.default == 'DEFAULT'
 
 
-@pytest.mark.readonly(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_default_value_from_settings_with_custom_representation(reg):
     class LowercaseCharField(fields.CharField):
 
