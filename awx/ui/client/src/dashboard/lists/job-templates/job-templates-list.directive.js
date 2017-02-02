@@ -28,13 +28,13 @@ export default
 
                 function createList(list) {
                     // smartStatus?, launchUrl, editUrl, name
-                    scope.job_templates = _.map(list, function(job_template){ return {
-                        recent_jobs: job_template.summary_fields.recent_jobs,
-                        launch_url: job_template.url,
-                        edit_url: job_template.url.replace('api/v1', '#'),
-                        name: job_template.name,
-                        id: job_template.id,
-                        type: job_template.type
+                    scope.templates = _.map(list, function(template){ return {
+                        recent_jobs: template.summary_fields.recent_jobs,
+                        launch_url: template.url,
+                        edit_url: template.url.replace('api/v1', '#'),
+                        name: template.name,
+                        id: template.id,
+                        type: template.type
                     }; });
 
                     scope.snapRows = (list.length < 4);
@@ -44,7 +44,7 @@ export default
                     return (status === "successful");
                 };
 
-                scope.launchJobTemplate = function(template){
+                scope.launchTemplate = function(template){
                     if(template) {
                             if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
                                 InitiatePlaybookRun({ scope: scope, id: template.id, job_type: 'job_template' });
@@ -63,8 +63,15 @@ export default
                         }
                 };
 
-                scope.editJobTemplate = function (jobTemplateId) {
-                    $state.go('templates.editJobTemplate', {job_template_id: jobTemplateId});
+                scope.editTemplate = function (template) {
+                    if(template) {
+                        if(template.type && (template.type === 'Job Template' || template.type === 'job_template')) {
+                            $state.go('templates.editJobTemplate', {job_template_id: template.id});
+                        }
+                        else if(template.type && (template.type === 'Workflow Job Template' || template.type === 'workflow_job_template')) {
+                            $state.go('templates.editWorkflowJobTemplate', {workflow_job_template_id: template.id});
+                        }
+                    }
                 };
             }
 }];
