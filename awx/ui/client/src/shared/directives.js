@@ -128,11 +128,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 // Accepts image and returns base64 information with basic validation
 // Can eventually expand to handle all uploads with different endpoints and handlers
 //
-.directive('imageUpload', ['ConfigurationUtils', 'i18n',
-function(ConfigurationUtils, i18n) {
+.directive('imageUpload', ['ConfigurationUtils', 'i18n', '$rootScope',
+function(ConfigurationUtils, i18n, $rootScope) {
     var browseText = i18n._('BROWSE'),
     placeholderText = i18n._('Choose file'),
-    uploadedText = i18n._('Custom logo has been uploaded'),
+    uploadedText = i18n._('Current Image: '),
     removeText = i18n._('REMOVE');
 
     return {
@@ -146,14 +146,12 @@ function(ConfigurationUtils, i18n) {
                       <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="${placeholderText}" readonly>
                       <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
                     </div>
-                <!-- Update when API supports file name saving
+
                 <div ng-if="imagePresent" class="Form-filePicker--selectedFile">
-                    ${uploadedText}
-                </div>-->
-                <!-- Thumbnail feature
-                <div class="thumbnail">
-                    <img src="{{image}}" alt="Current logo">
-                </div> -->
+                ${uploadedText}
+                    <img data-ng-src="{{imageData}}" alt="Current logo" class="Form-filePicker--thumbnail">
+                </div>
+
                 <div class="error" id="filePickerError"></div>`,
 
         link: function(scope) {
@@ -162,11 +160,14 @@ function(ConfigurationUtils, i18n) {
             var filePickerError = angular.element(document.getElementById('filePickerError'));
             var filePickerButton = angular.element(document.getElementById('filePickerButton'));
 
-            scope.imagePresent = global.$AnsibleConfig.custom_logo;
+            scope.imagePresent = global.$AnsibleConfig.custom_logo || false;
+            scope.imageData = $rootScope.custom_logo;
 
             scope.$on('loginUpdated', function() {
                 scope.imagePresent = global.$AnsibleConfig.custom_logo;
+                scope.imageData = $rootScope.custom_logo;
             });
+
             scope.update = function(e) {
                 if(scope.$parent[fieldKey]) {
                     e.preventDefault();
