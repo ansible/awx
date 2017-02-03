@@ -25,7 +25,7 @@ export default
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9',
-                ngClick: "editJobTemplate(template)"
+                ngHref: '#/templates/{{template.type}}/{{template.id}}'
             },
             type: {
                 label: i18n._('Type'),

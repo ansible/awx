@@ -46,7 +46,7 @@ export default ['workflowData',
 
             $scope.workflow_template_link = '/#/templates/workflow_job_template/'+$scope.workflow.workflow_job_template;
             $scope.created_by_link = getTowerLink('created_by');
-            $scope.scheduled_by_link = getTowerLink('schedule');console.log($scope.scheduled_by_link);
+            $scope.scheduled_by_link = getTowerLink('schedule');
             $scope.cloud_credential_link = getTowerLink('cloud_credential');
             $scope.network_credential_link = getTowerLink('network_credential');
         };
