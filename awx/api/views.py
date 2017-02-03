@@ -610,7 +610,6 @@ class AuthTokenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        print request.META
         if 'HTTP_AUTHORIZATION' in request.META:
             token_match = re.match("Token\s(.+)", request.META['HTTP_AUTHORIZATION'])
             if token_match:
