@@ -1927,6 +1927,15 @@ class RunSystemJob(BaseTask):
             logger.error("Failed to parse system job: " + str(e))
         return args
 
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunSystemJob, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = SystemJob.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
     def build_env(self, instance, **kwargs):
         env = super(RunSystemJob, self).build_env(instance,
                                                   **kwargs)
