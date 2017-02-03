@@ -52,7 +52,10 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     modes: ['edit'],
                     form: 'JobTemplateForm',
                     controllers: {
-                        edit: 'JobTemplateEdit'
+                        edit: 'JobTemplateEdit',
+                        related: {
+                            completed_jobs: 'JobsList'
+                        }
                     },
                     data: {
                         activityStream: true,
