@@ -40,6 +40,11 @@ from django.db import transaction # noqa
 
 # awx
 from awx.main.models import * # noqa
+from awx.main.signals import ( # noqa
+    emit_update_inventory_on_created_or_deleted,
+    emit_update_inventory_computed_fields
+)
+from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
 option_list = [
@@ -182,7 +187,30 @@ def mock_save(self, *args, **kwargs):
     return super(PrimordialModel, self).save(*args, **kwargs)
 
 
+def mock_computed_fields(self, **kwargs):
+    pass
+
+
 PrimordialModel.save = mock_save
+
+
+sigstat = []
+sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
+sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
+sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
+sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
+sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through))
+sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through))
+sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through))
+sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through))
+sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
+sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
+sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
+sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
+
+print ' status of signal disconnects '
+print ' (True means successful disconnect)'
+print str(sigstat)
 
 
 startTime = datetime.now()
@@ -594,6 +622,8 @@ try:
             print('# Adding labels to job templates')
             jt_idx = 0
             for n in spread(n_labels * 7, n_job_templates):
+                if n == 0:
+                    continue
                 jt = job_templates[jt_idx]
                 if not jt._is_new:
                     continue
@@ -676,17 +706,24 @@ try:
                 # Check if job already has events, for idempotence
                 if not job._is_new:
                     continue
-                sys.stdout.write('\r   Creating %d job events for job %d' % (n, job.id))
-                sys.stdout.flush()
-                JobEvent.objects.bulk_create([
-                    JobEvent(
-                        created=now(),
-                        modified=now(),
-                        job=job,
-                        event='runner_on_ok'
-                    )
-                    for i in range(n)
-                ])
+                # Bulk create in chunks with maximum chunk size
+                MAX_BULK_CREATE = 100
+                for j in range((n / MAX_BULK_CREATE) + 1):
+                    n_subgroup = MAX_BULK_CREATE
+                    if j == n / MAX_BULK_CREATE:
+                        # on final pass, create the remainder
+                        n_subgroup = n % MAX_BULK_CREATE
+                    sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j))
+                    sys.stdout.flush()
+                    JobEvent.objects.bulk_create([
+                        JobEvent(
+                            created=now(),
+                            modified=now(),
+                            job=job,
+                            event='runner_on_ok'
+                        )
+                        for i in range(n_subgroup)
+                    ])
                 job_idx += 1
                 if n:
                     print('')
