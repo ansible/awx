@@ -39,13 +39,16 @@ export default
                         case 'team':
                             basePathKey = 'teams';
                             break;
+                        case 'notification_template':
+                            basePathKey = 'notification_templates';
+                            break;
                         case 'organization':
                             basePathKey = 'organizations';
                             break;
                         case 'management_job':
                             basePathKey = 'management_jobs';
                             break;
-                        case 'inventory_script':
+                        case 'custom_inventory_script':
                             basePathKey = 'inventory_scripts';
                             break;
                         case 'workflow_job_template':

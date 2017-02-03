@@ -61,6 +61,10 @@ export default
                                 if(streamConfig.activityStreamId) {
                                     stateGoParams.id = $state.params[streamConfig.activityStreamId];
                                 }
+                                if(stateGoParams.target === "custom_inventory_script"){
+                                    stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params.inventory_script_id;
+                                    stateGoParams.id = $state.params.inventory_script_id;
+                                }
 
                             }
                             originalRoute = $state.current;

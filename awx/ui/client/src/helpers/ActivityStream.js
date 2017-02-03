@@ -34,13 +34,16 @@ export default
                         case 'team':
                             rtnTitle = i18n._('TEAMS');
                             break;
+                        case 'notification_template':
+                            rtnTitle = i18n._('NOTIFICATION TEMPLATES');
+                            break;
                         case 'organization':
                             rtnTitle = i18n._('ORGANIZATIONS');
                             break;
                         case 'job':
                             rtnTitle = i18n._('JOBS');
                             break;
-                        case 'inventory_script':
+                        case 'custom_inventory_script':
                             rtnTitle = i18n._('INVENTORY SCRIPTS');
                             break;
                         case 'schedule':

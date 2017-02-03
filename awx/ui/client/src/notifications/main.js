@@ -81,7 +81,7 @@ angular.module('notifications', [
                     },
                     data: {
                         activityStream: true,
-                        activityStreamTarget: 'notification'
+                        activityStreamTarget: 'notification_template'		
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
