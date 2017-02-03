@@ -1404,12 +1404,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
                                 ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select a value.")) + "</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup && !(" + this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.required)\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
+                        } else {
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
                         }
-                        html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
-                            this.form.name + '_form.' +
-                            field.sourceModel + '_' + field.sourceField + ".$dirty && " +
-                            this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                            ".$error.awlookup\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField +
                             "_api_error\"></div>\n";
                         html += "</div>\n";

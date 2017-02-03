@@ -89,6 +89,7 @@ export default
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_inventory_on_launch',
+                        ngChange: 'job_template_form.inventory_name.$validate()',
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
@@ -158,7 +159,8 @@ export default
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_credential_on_launch',
-                        text: i18n._('Prompt on launch')
+                        text: i18n._('Prompt on launch'),
+                        ngChange: 'job_template_form.credential_name.$validate()',
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
@@ -396,7 +398,7 @@ export default
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "job_template_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 }
             },
