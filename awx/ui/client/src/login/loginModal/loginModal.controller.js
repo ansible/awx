@@ -142,9 +142,10 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
                 });
             })
             .error(function (data, status) {
-                Authorization.logout();
-                Wait('stop');
-                Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
+                Authorization.logout().then( () => {
+                    Wait('stop');
+                    Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
+                });
             });
     });
 
