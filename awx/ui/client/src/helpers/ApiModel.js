@@ -48,7 +48,7 @@ export default
                         case 'management_job':
                             basePathKey = 'management_jobs';
                             break;
-                        case 'inventory_script':
+                        case 'custom_inventory_script':
                             basePathKey = 'inventory_scripts';
                             break;
                         case 'workflow_job_template':

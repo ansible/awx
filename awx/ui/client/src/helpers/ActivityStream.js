@@ -43,7 +43,7 @@ export default
                         case 'job':
                             rtnTitle = i18n._('JOBS');
                             break;
-                        case 'inventory_script':
+                        case 'custom_inventory_script':
                             rtnTitle = i18n._('INVENTORY SCRIPTS');
                             break;
                         case 'schedule':

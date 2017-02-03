@@ -59,7 +59,7 @@ angular.module('inventoryScripts', [
                     },
                     data: {
                         activityStream: true,
-                        activityStreamTarget: 'inventory_script'
+                        activityStreamTarget: 'custom_inventory_script'
                     },
                     ncyBreadcrumb: {
                         parent: 'setup',
