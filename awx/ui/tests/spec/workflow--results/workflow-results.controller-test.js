@@ -1,7 +1,7 @@
 'use strict';
 import moment from 'moment';
-import workflow_job_options_json from 'json!./data/workflow_job_options.json';
-import workflow_job_json from 'json!./data/workflow_job.json';
+import workflow_job_options_json from './data/workflow_job_options.js';
+import workflow_job_json from './data/workflow_job.js';
 
 describe('Controller: workflowResults', () => {
     let $controller;
