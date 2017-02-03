@@ -10,6 +10,7 @@ export default ['workflowData',
     'count',
     '$state',
     'i18n',
+    'moment',
     function(workflowData,
         workflowResultsService,
         workflowDataOptions,
@@ -21,8 +22,10 @@ export default ['workflowData',
         WorkflowService,
         count,
         $state,
-        i18n
+        i18n,
+        moment
     ) {
+        var runTimeElapsedTimer = null;
 
         var getTowerLinks = function() {
             var getTowerLink = function(key) {
@@ -67,6 +70,10 @@ export default ['workflowData',
             $scope.verbosity_label = getTowerLabel('verbosity');
         };
 
+        var updateWorkflowJobElapsedTimer = function(time) {
+            $scope.workflow.elapsed = time;
+        };
+
         function init() {
             // put initially resolved request data on scope
             $scope.workflow = workflowData;
@@ -75,6 +82,11 @@ export default ['workflowData',
             $scope.labels = jobLabels;
             $scope.count = count.val;
             $scope.showManualControls = false;
+
+            // Start elapsed time updater for job known to be running
+            if ($scope.workflow.started !== null && $scope.workflow.status === 'running') {
+                runTimeElapsedTimer = workflowResultsService.createOneSecondTimer($scope.workflow.started, updateWorkflowJobElapsedTimer);
+            }
 
             // stdout full screen toggle tooltip text
             $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
@@ -179,8 +191,12 @@ export default ['workflowData',
             // Update the workflow job's unified job:
             if (parseInt(data.unified_job_id, 10) === parseInt($scope.workflow.id,10)) {
                     $scope.workflow.status = data.status;
+                    // start internval counter for job that transitioned to running
+                    if ($scope.workflow.status === 'running') {
+                        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateWorkflowJobElapsedTimer);
+                    }
 
-                    if(data.status === "successful" || data.status === "failed"){
+                    if(data.status === "successful" || data.status === "failed" || data.status === "error"){
                         $state.go('.', null, { reload: true });
                     }
             }
@@ -207,5 +223,9 @@ export default ['workflowData',
                         .getCounts($scope.workflow_nodes);
                     $scope.$broadcast("refreshWorkflowChart");
             }
+        });
+
+        $scope.$on('$destroy', function() {
+            workflowResultsService.destroyTimer(runTimeElapsedTimer);
         });
 }];
