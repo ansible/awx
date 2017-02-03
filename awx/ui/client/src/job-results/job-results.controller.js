@@ -1,7 +1,8 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService) {
     var toDestroy = [];
     var cancelRequests = false;
+    var runTimeElapsedTimer = null;
 
     // download stdout tooltip text
     $scope.standardOutTooltip = i18n._('Download Output');
@@ -251,15 +252,15 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     $scope.events = {};
 
+    function updateJobElapsedTimer(time) {
+        $scope.job.elapsed = time;
+    }
+
     // For elapsed time while a job is running, compute the differnce in seconds,
     // from the time the job started until now. Moment() returns the current
     // time as a moment object.
-    var start = ($scope.job.started === null) ? moment() : moment($scope.job.started);
-    if(jobFinished === false){
-        var elapsedInterval = setInterval(function(){
-            let now = moment();
-            $scope.job.elapsed = now.diff(start, 'seconds');
-        }, 1000);
+    if ($scope.job.started !== null && $scope.job.status === 'running') {
+        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer($scope.job.started, updateJobElapsedTimer);
     }
 
     // EVENT STUFF BELOW
@@ -637,11 +638,13 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
-            if (data.status === "successful" ||
+            if (data.status === "running") {
+                runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+            } else if (data.status === "successful" ||
                 data.status === "failed" ||
                 data.status === "error" ||
                 data.status === "canceled") {
-                    clearInterval(elapsedInterval);
+                    workflowResultsService.destroyTimer(runTimeElapsedTimer);
                     if (bufferInterval) {
                         clearInterval(bufferInterval);
                     }
@@ -675,7 +678,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $scope.events[v] = null;
             });
         $scope.events = {};
-        clearInterval(elapsedInterval);
+        workflowResultsService.destroyTimer(runTimeElapsedTimer);
         if (bufferInterval) {
             clearInterval(bufferInterval);
         }
