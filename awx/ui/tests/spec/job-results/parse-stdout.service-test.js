@@ -129,7 +129,7 @@ describe('parseStdoutService', () => {
                 end_line: 11,
                 stdout: "a\r\nb\r\nc..."
             };
-            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."], [11, "[1;imLine capped.[0m"]];
+            let expectedReturn = [[8, "a"],[9, "b"], [10,"c..."], [11, ""]];
 
             let returnedEvent = parseStdoutService.getLineArr(mockEvent);
 

@@ -215,7 +215,7 @@ export default ['$log', 'moment', function($log, moment){
                 let padBy = lineNums.length - lines.length;
 
                 for (let i = 0; i <= padBy; i++) {
-                    lines.push("[1;imLine capped.[0m");
+                    lines.push("");
                 }
             }
 
