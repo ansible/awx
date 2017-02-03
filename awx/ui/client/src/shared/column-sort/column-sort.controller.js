@@ -1,5 +1,5 @@
-export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
-    function($scope, $state, qs, GetBasePath) {
+export default ['$scope', '$state', 'QuerySet', 'GetBasePath', '$stateParams', '$interpolate',
+    function($scope, $state, qs, GetBasePath, $stateParams, $interpolate) {
 
         let queryset, path;
 
@@ -52,7 +52,12 @@ export default ['$scope', '$state', 'QuerySet', 'GetBasePath',
             else {
                 queryset = _.merge($state.params[`${$scope.columnIterator}_search`], { order_by: order_by });
             }
-            path = GetBasePath($scope.basePath) || $scope.basePath;
+            if (GetBasePath($scope.basePath) || $scope.basePath) {
+                path = GetBasePath($scope.basePath) || $scope.basePath;
+            } else {
+                let interpolator = $interpolate($scope.basePath);
+                path = interpolator({ $stateParams: $stateParams });
+            }
             if(!$scope.querySet) {
                 $state.go('.', { [$scope.columnIterator + '_search']: queryset }, {notify: false});
             }
