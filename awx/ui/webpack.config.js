@@ -44,115 +44,75 @@ var vendorPkgs = [
     'reconnectingwebsocket'
 ];
 
-var dev = {
-    entry: {
-        app: './client/src/app.js',
-        vendor: vendorPkgs
-    },
-    output: {
-        path: './static/',
-        filename: 'tower.js'
-    },
-    plugins: [
-        // vendor shims:
-        // [{expected_local_var : dependency}, ...]
-        new webpack.ProvidePlugin({
-            '$': 'jquery',
-            'jQuery': 'jquery',
-            'window.jQuery': 'jquery',
-            '_': 'lodash',
-            'CodeMirror': 'codemirror',
-            'jsyaml': 'js-yaml',
-            'jsonlint': 'codemirror.jsonlint',
-        }),
-        // (chunkName, outfileName)
-        new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
-        new webpack.DefinePlugin({ $ENV: JSON.stringify(awx_env) })
-    ],
-    module: {
-        preLoaders: [{
-            test: /\.js?$/,
-            loader: 'jshint-loader',
-            exclude: ['/(node_modules)/'],
-            include: [path.resolve() + '/client/src/'],
-            jshint: {
-                emitErrors: true
+var baseConfig = function() {
+    return {
+        entry: {
+            app: './client/src/app.js',
+            vendor: vendorPkgs
+        },
+        output: {
+            path: './static/',
+            filename: 'tower.js'
+        },
+        plugins: [
+            // vendor shims:
+            // [{expected_local_var : dependency}, ...]
+            new webpack.ProvidePlugin({
+                '$': 'jquery',
+                'jQuery': 'jquery',
+                'window.jQuery': 'jquery',
+                '_': 'lodash',
+                'CodeMirror': 'codemirror',
+                'jsyaml': 'js-yaml',
+                'jsonlint': 'codemirror.jsonlint'
+            }),
+            new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js')
+        ],
+        module: {
+            loaders: [{
+                // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
+                test: /\.angular-tz-extensions.js$/,
+                loader: 'imports?define=>false'
+            }, {
+                // es6 -> es5
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: /(node_modules)/,
+                query: {
+                    presets: ['es2015']
+                }
+            }]
+        },
+        resolve: {
+            alias: {
+                'codemirror.jsonlint': path.resolve() + '/node_modules/codemirror/addon/lint/json-lint.js',
+                'jquery.resize': path.resolve() + '/node_modules/javascript-detect-element-resize/jquery.resize.js',
+                'select2': path.resolve() + '/node_modules/select2/dist/js/select2.full.js'
             }
-        }],
-        loaders: [{
-            // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
-            test: /\.angular-tz-extensions.js$/,
-            loader: 'imports?define=>false'
-        }, {
-            // es6 -> es5
-            test: /\.js$/,
-            loader: 'babel-loader',
-            exclude: /(node_modules)/,
-            query: {
-                presets: ['es2015']
-            }
-        }]
-    },
-    resolve: {
-        alias: {
-            'codemirror.jsonlint': path.resolve() + '/node_modules/codemirror/addon/lint/json-lint.js',
-            'jquery.resize': path.resolve() + '/node_modules/javascript-detect-element-resize/jquery.resize.js',
-            'select2': path.resolve() + '/node_modules/select2/dist/js/select2.full.js'
         }
-    },
-    devtool: 'inline-source-map',
-    watch: true,
+    };
 };
 
-var release = {
-    entry: {
-        app: './client/src/app.js',
-        vendor: vendorPkgs
-    },
-    output: {
-        path: './static/',
-        filename: 'tower.js'
-    },
-    plugins: [
-        // vendor shims:
-        // [{expected_local_var : dependency}, ...]
-        new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery',
-            _: 'lodash',
-            'CodeMirror': 'codemirror',
-            'jsyaml': 'js-yaml',
-            'jsonlint': 'codemirror.jsonlint'
-        }),
-        new webpack.DefinePlugin({ $ENV: {} }),
-        new webpack.optimize.CommonsChunkPlugin('vendor', 'tower.vendor.js'),
-        new webpack.optimize.UglifyJsPlugin({
-            mangle: false
-        })
-    ],
-    module: {
-        loaders: [{
-            // disable AMD loading (broken in this lib) and default to CommonJS (not broken)
-            test: /\.angular-tz-extensions.js$/,
-            loader: 'imports?define=>false!'
-        }, {
-            // es6 -> es5
-            test: /\.js$/,
-            loader: 'babel-loader',
-            exclude: /(node_modules)/,
-            query: {
-                presets: ['es2015']
-            }
-        }, ]
-    },
-    resolve: {
-        alias: {
-            'codemirror.jsonlint': path.resolve() + '/node_modules/codemirror/addon/lint/json-lint.js',
-            'jquery.resize': path.resolve() + '/node_modules/javascript-detect-element-resize/jquery.resize.js',
-            'select2': path.resolve() + '/node_modules/select2/dist/js/select2.full.js'
+var dev = baseConfig();
+
+dev.devtool = 'inline-source-map';
+dev.watch = true;
+dev.plugins.push(new webpack.DefinePlugin({ $ENV: JSON.stringify(awx_env) }));
+dev.module.preLoaders = [
+    {
+        test: /\.js?$/,
+        loader: 'jshint-loader',
+        exclude: ['/(node_modules)/'],
+        include: [path.resolve() + '/client/src/'],
+        jshint: {
+            emitErrors: true
         }
     }
-};
+];
+
+var release = baseConfig();
+
+release.plugins.push(new webpack.DefinePlugin({ $ENV: {} }));
+release.plugins.push(new webpack.optimize.UglifyJsPlugin({ mangle: false }));
 
 module.exports = { dev: dev, release: release };
