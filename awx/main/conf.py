@@ -263,6 +263,7 @@ register(
     help_text=_('Username for external log aggregator (if required).'),
     category=_('Logging'),
     category_slug='logging',
+    required=False,
 )
 register(
     'LOG_AGGREGATOR_PASSWORD',
@@ -273,6 +274,7 @@ register(
     help_text=_('Password or authentication token for external log aggregator (if required).'),
     category=_('Logging'),
     category_slug='logging',
+    required=False,
 )
 register(
     'LOG_AGGREGATOR_LOGGERS',
