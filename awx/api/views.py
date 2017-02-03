@@ -3783,6 +3783,12 @@ class UnifiedJobTemplateList(ListAPIView):
     model = UnifiedJobTemplate
     serializer_class = UnifiedJobTemplateSerializer
     new_in_148 = True
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
+                  'jobtemplate.cloud_credential.use', 'jobtemplate.network_credential.use',
+                  'workflowjobtemplate.organization.admin']}
+    ]
 
 
 class UnifiedJobList(ListAPIView):
