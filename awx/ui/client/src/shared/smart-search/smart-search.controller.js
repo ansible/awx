@@ -177,6 +177,18 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                         delete queryset[key];
                     }
                 }
+                if(queryset.search && queryset.search){
+                    if (Array.isArray(queryset.search)){
+                        _.remove(queryset.search, (item) => item.indexOf(value) > -1);
+                        // If the array is now empty, remove that key
+                        if(queryset.search.length === 0) {
+                            delete queryset.search;
+                        }
+                    }
+                    else if(queryset.search.indexOf(key) > -1){
+                        delete queryset.search;
+                    }
+                }
                 else {
                     delete queryset[key];
                 }
