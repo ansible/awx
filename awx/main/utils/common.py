@@ -519,6 +519,10 @@ def cache_list_capabilities(page, prefetch_list, model, user):
     for obj in page:
         obj.capabilities_cache = {}
 
+    skip_models = []
+    if hasattr(model, 'invalid_user_capabilities_prefetch_models'):
+        skip_models = model.invalid_user_capabilities_prefetch_models()
+
     for prefetch_entry in prefetch_list:
 
         display_method = None
@@ -561,6 +565,8 @@ def cache_list_capabilities(page, prefetch_list, model, user):
 
         # Save data item-by-item
         for obj in page:
+            if skip_models and obj.__class__.__name__.lower() in skip_models:
+                continue
             obj.capabilities_cache[display_method] = False
             if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
