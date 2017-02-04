@@ -175,6 +175,9 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         Does not return inventory sources or system JTs, these should
         be handled inside of get_queryset where it is utilized.
         '''
+        # do not use this if in a subclass
+        if cls != UnifiedJobTemplate:
+            return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
         ujt_names = [c.__name__.lower() for c in cls.__subclasses__()
                      if c.__name__.lower() not in ['inventorysource', 'systemjobtemplate']]
         subclass_content_types = list(ContentType.objects.filter(
