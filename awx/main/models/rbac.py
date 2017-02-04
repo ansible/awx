@@ -25,6 +25,7 @@ __all__ = [
     'get_roles_on_resource',
     'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR',
     'ROLE_SINGLETON_SYSTEM_AUDITOR',
+    'role_summary_fields_generator'
 ]
 
 logger = logging.getLogger('awx.main.models.rbac')
@@ -165,21 +166,17 @@ class Role(models.Model):
         global role_names
         return role_names[self.role_field]
 
-    def get_description(self, reference_content_object=None):
+    @property
+    def description(self):
         global role_descriptions
         description = role_descriptions[self.role_field]
-        if reference_content_object:
-            content_type = ContentType.objects.get_for_model(reference_content_object)
-        else:
-            content_type = self.content_type
+        content_type = self.content_type
         if '%s' in description and content_type:
             model = content_type.model_class()
             model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
             description = description % model_name
 
         return description
-
-    description = property(get_description)
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):
@@ -474,3 +471,20 @@ def get_roles_on_resource(resource, accessor):
             object_id=resource.id
         ).values_list('role_field', flat=True).distinct()
     ]
+
+
+def role_summary_fields_generator(content_object, role_field):
+    global role_descriptions
+    global role_names
+    summary = {}
+    description = role_descriptions[role_field]
+    content_type = ContentType.objects.get_for_model(content_object)
+    if '%s' in description and content_type:
+        model = content_object.__class__
+        model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
+        description = description % model_name
+
+    summary['description'] = description
+    summary['name'] = role_names[role_field]
+    summary['id'] = getattr(content_object, '{}_id'.format(role_field))
+    return summary

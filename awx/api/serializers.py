@@ -331,13 +331,7 @@ class BaseSerializer(serializers.ModelSerializer):
         roles = {}
         for field in obj._meta.get_fields():
             if type(field) is ImplicitRoleField:
-                role = getattr(obj, field.name)
-                #roles[field.name] = RoleSerializer(data=role).to_representation(role)
-                roles[field.name] = {
-                    'id': role.id,
-                    'name': role.name,
-                    'description': role.get_description(reference_content_object=obj),
-                }
+                roles[field.name] = role_summary_fields_generator(obj, field.name)
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
 
