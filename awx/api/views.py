@@ -2702,7 +2702,7 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
-        if not job_template.can_start_without_user_input():
+        if not job_template.can_start_without_user_input(callback_extra_vars=extra_vars):
             data = dict(msg=_('Cannot start automatically, user input required!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = host.name
