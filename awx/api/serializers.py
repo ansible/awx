@@ -1839,11 +1839,15 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
-        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
-        if len(label_list) < 10:
-            label_ct = len(label_list)
+        if hasattr(obj, '_prefetched_objects_cache') and obj.labels.prefetch_cache_name in obj._prefetched_objects_cache:
+            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
+            label_ct = len(obj.labels.all())
         else:
-            label_ct = obj.labels.count()
+            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
+            if len(label_list) < 10:
+                label_ct = len(label_list)
+            else:
+                label_ct = obj.labels.count()
         return {'count': label_ct, 'results': label_list}
 
     def get_summary_fields(self, obj):

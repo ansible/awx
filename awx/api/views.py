@@ -2568,6 +2568,9 @@ class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDeta
                 request.data['id'] = existing.id
                 del request.data['name']
                 del request.data['organization']
+        if Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
+            return Response(dict(msg=_('Maximum labels limit for a job template reached.')),
+                            status=status.HTTP_400_BAD_REQUEST)
         return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
