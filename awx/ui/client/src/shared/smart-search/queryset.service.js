@@ -270,7 +270,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
             error(data, status) {
                 ProcessErrors($rootScope, null, status, null, {
                     hdr: 'Error!',
-                    msg: 'Call to ' + this.url + '. GET returned: ' + status
+                    msg: "Invalid search term entered."
                 });
             }
         };
