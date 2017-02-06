@@ -20,16 +20,14 @@ OPTIONS:
    -c      Host config key (required)
    -t      Job template ID (required)
    -e      Extra variables
-   -s      Number of seconds between retries (default: ${NUM_SECONDS})
 EOF
 }
 
 # Initialize variables
 INSECURE=""
-NUM_SECONDS=60
 
 # Parse arguments
-while getopts “hks:c:t:s:” OPTION
+while getopts “hks:c:t:s:e:” OPTION
 do
      case ${OPTION} in
          h)
@@ -50,9 +48,6 @@ do
              ;;
          e)
              EXTRA_VARS=${OPTARG}
-             ;;
-         2)
-             NUM_SECONDS=${OPTARG}
              ;;
          ?)
              usage
