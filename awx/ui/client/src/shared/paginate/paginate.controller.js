@@ -16,9 +16,21 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         $scope.pageSize = pageSize;
 
         function init() {
-            $scope.pageRange = calcPageRange($scope.current(), $scope.last());
-            $scope.dataRange = calcDataRange();
+
+            let updatePaginationVariables = function() {
+                $scope.current = calcCurrent();
+                $scope.last = calcLast();
+                $scope.pageRange = calcPageRange($scope.current, $scope.last);
+                $scope.dataRange = calcDataRange();
+            };
+
+            updatePaginationVariables();
+
+            $scope.$watch('collection', function(){
+                updatePaginationVariables();
+            });
         }
+
         $scope.dataCount = function() {
             return $filter('number')($scope.dataset.count);
         };
@@ -52,22 +64,22 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
                 $scope.dataset = res.data;
                 $scope.collection = res.data.results;
             });
-            $scope.pageRange = calcPageRange($scope.current(), $scope.last());
+            $scope.pageRange = calcPageRange($scope.current, $scope.last);
             $scope.dataRange = calcDataRange();
         };
 
-        $scope.current = function() {
+        function calcLast() {
+            return Math.ceil($scope.dataset.count / pageSize);
+        }
+
+        function calcCurrent() {
             if($scope.querySet) {
                 return parseInt($scope.querySet.page || '1');
             }
             else {
                 return parseInt($stateParams[`${$scope.iterator}_search`].page || '1');
             }
-        };
-
-        $scope.last = function() {
-            return Math.ceil($scope.dataset.count / pageSize);
-        };
+        }
 
         function calcPageRange(current, last) {
             let result = [];
@@ -84,12 +96,12 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         }
 
         function calcDataRange() {
-            if ($scope.current() === 1 && $scope.dataset.count < parseInt(pageSize)) {
+            if ($scope.current === 1 && $scope.dataset.count < parseInt(pageSize)) {
                 return `1 - ${$scope.dataset.count}`;
-            } else if ($scope.current() === 1) {
+            } else if ($scope.current === 1) {
                 return `1 - ${pageSize}`;
             } else {
-                let floor = (($scope.current() - 1) * parseInt(pageSize)) + 1;
+                let floor = (($scope.current - 1) * parseInt(pageSize)) + 1;
                 let ceil = floor + parseInt(pageSize) < $scope.dataset.count ? floor + parseInt(pageSize) : $scope.dataset.count;
                 return `${floor} - ${ceil}`;
             }

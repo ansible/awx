@@ -148,9 +148,25 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // remove tag, merge new queryset, $state.go
         $scope.remove = function(index) {
-            let tagToRemove = $scope.searchTags.splice(index, 1)[0];
-            let termParts = SmartSearchService.splitTermIntoParts(tagToRemove);
-            let removed;
+            let tagToRemove = $scope.searchTags.splice(index, 1)[0],
+                termParts = SmartSearchService.splitTermIntoParts(tagToRemove),
+                removed;
+
+            let removeFromQuerySet = function(set) {
+                _.each(removed, (value, key) => {
+                    if (Array.isArray(set[key])){
+                        _.remove(set[key], (item) => item === value);
+                        // If the array is now empty, remove that key
+                        if(set[key].length === 0) {
+                            delete set[key];
+                        }
+                    }
+                    else {
+                        delete set[key];
+                    }
+                });
+            };
+
             if (termParts.length === 1) {
                 removed = setDefaults(tagToRemove);
             }
@@ -169,21 +185,16 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 }
                 removed = qs.encodeParam(encodeParams);
             }
-            _.each(removed, (value, key) => {
-                if (Array.isArray(queryset[key])){
-                    _.remove(queryset[key], (item) => item === value);
-                    // If the array is now empty, remove that key
-                    if(queryset[key].length === 0) {
-                        delete queryset[key];
-                    }
-                }
-                else {
-                    delete queryset[key];
-                }
-            });
+            removeFromQuerySet(queryset);
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {notify: false});
+                    [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                        // ISSUE: for some reason deleting a tag from a list in a modal does not
+                        // remove the param from $stateParams.  Here we'll manually check to make sure
+                        // that that happened and remove it if it didn't.
+
+                        removeFromQuerySet($stateParams[`${$scope.iterator}_search`]);
+                    });
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {
@@ -243,7 +254,6 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     }
                 });
 
-                params.page = '1';
                 queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
                     if (object[key] && object[key] !== sourceValue){
                         if(_.isArray(object[key])) {
@@ -262,12 +272,20 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                         return undefined;
                     }
                 });
+
+                // Go back to the first page after a new search
+                delete queryset.page;
+
                 // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
                 if(!$scope.querySet) {
                     $state.go('.', {
-                        [$scope.iterator + '_search']: queryset }, {notify: false});
+                        [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                            // ISSUE: same as above in $scope.remove.  For some reason deleting the page
+                            // from the queryset works for all lists except lists in modals.
+                            delete $stateParams[$scope.iterator + '_search'].page;
+                        });
                 }
                 qs.search(path, queryset).then((res) => {
                     if($scope.querySet) {
