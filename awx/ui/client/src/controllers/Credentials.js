@@ -39,7 +39,6 @@ export function CredentialsList($scope, $rootScope, $location, $log,
 
     $scope.$on(`${list.iterator}_options`, function(event, data){
         $scope.options = data.data.actions.GET;
-        console.log($scope.options);
         optionsRequestDataProcessing();
     });
 
