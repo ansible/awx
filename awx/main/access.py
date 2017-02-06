@@ -8,7 +8,7 @@ import logging
 
 # Django
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
@@ -1868,6 +1868,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         qs = qs.prefetch_related(
             'last_job',
             'current_job',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
         )
 
         # WISH - sure would be nice if the following worked, but it does not.
@@ -1915,6 +1916,7 @@ class UnifiedJobAccess(BaseAccess):
             'modified_by',
             'unified_job_node__workflow_job',
             'unified_job_template',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
         )
 
         # WISH - sure would be nice if the following worked, but it does not.

@@ -2568,6 +2568,9 @@ class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDeta
                 request.data['id'] = existing.id
                 del request.data['name']
                 del request.data['organization']
+        if Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
+            return Response(dict(msg=_('Maximum number of labels for {} reached.'.format(
+                self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST)
         return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
@@ -3783,6 +3786,12 @@ class UnifiedJobTemplateList(ListAPIView):
     model = UnifiedJobTemplate
     serializer_class = UnifiedJobTemplateSerializer
     new_in_148 = True
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
+                  'jobtemplate.cloud_credential.use', 'jobtemplate.network_credential.use',
+                  'workflowjobtemplate.organization.admin']}
+    ]
 
 
 class UnifiedJobList(ListAPIView):

@@ -519,6 +519,10 @@ def cache_list_capabilities(page, prefetch_list, model, user):
     for obj in page:
         obj.capabilities_cache = {}
 
+    skip_models = []
+    if hasattr(model, 'invalid_user_capabilities_prefetch_models'):
+        skip_models = model.invalid_user_capabilities_prefetch_models()
+
     for prefetch_entry in prefetch_list:
 
         display_method = None
@@ -532,19 +536,20 @@ def cache_list_capabilities(page, prefetch_list, model, user):
             paths = [paths]
 
         # Build the query for accessible_objects according the user & role(s)
-        qs_obj = None
+        filter_args = []
         for role_path in paths:
             if '.' in role_path:
                 res_path = '__'.join(role_path.split('.')[:-1])
                 role_type = role_path.split('.')[-1]
-                if qs_obj is None:
-                    qs_obj = model.objects
-                parent_model = model._meta.get_field(res_path).related_model
-                kwargs = {'%s__in' % res_path: parent_model.accessible_objects(user, '%s_role' % role_type)}
-                qs_obj = qs_obj.filter(Q(**kwargs) | Q(**{'%s__isnull' % res_path: True}))
+                parent_model = model
+                for subpath in role_path.split('.')[:-1]:
+                    parent_model = parent_model._meta.get_field(subpath).related_model
+                filter_args.append(Q(
+                    Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) |
+                    Q(**{'%s__isnull' % res_path: True})))
             else:
                 role_type = role_path
-                qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+                filter_args.append(Q(**{'pk__in': model.accessible_pk_qs(user, '%s_role' % role_type)}))
 
         if display_method is None:
             # Role name translation to UI names for methods
@@ -555,10 +560,13 @@ def cache_list_capabilities(page, prefetch_list, model, user):
                 display_method = 'start'
 
         # Union that query with the list of items on page
-        ids_with_role = set(qs_obj.filter(pk__in=page_ids).values_list('pk', flat=True))
+        filter_args.append(Q(pk__in=page_ids))
+        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:
+            if skip_models and obj.__class__.__name__.lower() in skip_models:
+                continue
             obj.capabilities_cache[display_method] = False
             if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
