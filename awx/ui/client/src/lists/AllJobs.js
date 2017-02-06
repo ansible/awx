@@ -48,7 +48,7 @@ export default
                 badgePlacement: 'right',
                 badgeCustom: true,
                 badgeIcon: `<a href="{{ job.workflow_result_link }}"
-                    aw-tool-tip=i18n._("View workflow results")
+                    aw-tool-tip="{{'View workflow results'|translate}}"
                     data-placement="top"
                     data-original-title="" title="">
                     <i class="WorkflowBadge"

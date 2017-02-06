@@ -37,8 +37,8 @@
                                 List-actionButton--delete"
                             data-placement="top"
                             ng-click="deleteJob()"
-                            ng-show="workflow_status.status == 'running' ||
-                                job_status.status=='pending' "
+                            ng-show="workflow.status == 'running' ||
+                                workflow.status=='pending' "
                             aw-tool-tip="{{'Cancel'|translate}}"
                             data-original-title="" title="">
                             <i class="fa fa-minus-circle"></i>
@@ -49,8 +49,8 @@
                                 List-actionButton--delete"
                             data-placement="top"
                             ng-click="deleteJob()"
-                            ng-hide="job_status.status == 'running' ||
-                                job_status.status == 'pending' "
+                            ng-hide="workflow.status == 'running' ||
+                                workflow.status == 'pending' "
                             aw-tool-tip="{{'Delete'|translate}}"
                             data-original-title=""
                             title="">
