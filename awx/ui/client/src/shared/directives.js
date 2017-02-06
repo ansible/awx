@@ -520,7 +520,8 @@ function(ConfigurationUtils, i18n, $rootScope) {
                             query = '?role_level=admin_role';
                             break;
                         case 'inventory_script':
-                            query = '?role_level=admin_role';
+                            console.log("Can we see what organization? ", scope);
+                            query = '?role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
                             break;
                     }
 
