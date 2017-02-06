@@ -2394,11 +2394,8 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             if request.user not in new_inventory.use_role:
                 raise PermissionDenied()
 
-        kv = prompted_fields
-        kv.update(passwords)
-
-        new_job = obj.create_unified_job(**kv)
-        result = new_job.signal_start(**kv)
+        new_job = obj.create_unified_job(**prompted_fields)
+        result = new_job.signal_start(**passwords)
 
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
@@ -2992,7 +2989,7 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
         new_job = obj.create_unified_job(**prompted_fields)
-        new_job.signal_start(**prompted_fields)
+        new_job.signal_start()
 
         data = OrderedDict()
         data['ignored_fields'] = ignored_fields
