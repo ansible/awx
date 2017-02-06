@@ -295,18 +295,27 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def get_absolute_url(self):
         return reverse('api:job_template_detail', args=(self.pk,))
 
-    def can_start_without_user_input(self):
+    def can_start_without_user_input(self, callback_extra_vars=None):
         '''
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
+        variables_needed = False
+        if callback_extra_vars:
+            extra_vars_dict = parse_yaml_or_json(callback_extra_vars)
+            for var in self.variables_needed_to_start:
+                if var not in extra_vars_dict:
+                    variables_needed = True
+                    break
+        elif self.variables_needed_to_start:
+            variables_needed = True
         prompting_needed = False
         for value in self._ask_for_vars_dict().values():
             if value:
                 prompting_needed = True
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
-                not self.variables_needed_to_start)
+                not variables_needed)
 
     def _ask_for_vars_dict(self):
         return dict(
