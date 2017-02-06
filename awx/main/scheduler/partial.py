@@ -230,7 +230,7 @@ class InventorySourceDict(PartialModelDict):
 
 class SystemJobDict(PartialModelDict):
     FIELDS = (
-        'id', 'created', 'status',
+        'id', 'created', 'status', 'celery_task_id',
     )
     model = SystemJob
 
