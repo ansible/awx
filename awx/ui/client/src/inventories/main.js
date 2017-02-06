@@ -55,11 +55,11 @@ angular.module('inventory', [
                     url: '/schedules',
                     searchPrefix: 'schedule',
                     ncyBreadcrumb: {
-                        parent: 'inventoryManage.editGroup({group_id: parentObject.id})',
+                        parent: 'inventoryManage({group_id: parentObject.id})',
                         label: N_('SCHEDULES')
                     },
                     resolve: {
-                        Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath', 'groupData',
+                        Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath', 'groupData',
                             function(list, qs, $stateParams, GetBasePath, groupData) {
                                 let path = `${groupData.related.inventory_source}schedules`;
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -79,7 +79,14 @@ angular.module('inventory', [
                                         val.reject(data);
                                     });
                                 return val.promise;
-                            }]
+                            }],
+                        ScheduleList: ['SchedulesList', 'groupData',
+                            (SchedulesList, groupData) => {
+                                let list = _.cloneDeep(SchedulesList);
+                                list.basePath = `${groupData.related.inventory_source}schedules`;
+                                return list;
+                            }
+                        ]
                     },
                     views: {
                         // clear form template when views render in this substate
@@ -88,11 +95,11 @@ angular.module('inventory', [
                         },
                         // target the un-named ui-view @ root level
                         '@': {
-                            templateProvider: function(SchedulesList, generateList, ParentObject) {
+                            templateProvider: function(ScheduleList, generateList, ParentObject) {
                                 // include name of parent resource in listTitle
-                                SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                                ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                                 let html = generateList.build({
-                                    list: SchedulesList,
+                                    list: ScheduleList,
                                     mode: 'edit'
                                 });
                                 html = generateList.wrapPanel(html);

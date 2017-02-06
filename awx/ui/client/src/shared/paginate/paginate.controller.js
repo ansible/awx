@@ -1,5 +1,5 @@
-export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet',
-    function($scope, $stateParams, $state, $filter, GetBasePath, qs) {
+export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet', '$interpolate',
+    function($scope, $stateParams, $state, $filter, GetBasePath, qs, $interpolate) {
 
         let pageSize,
             queryset, path;
@@ -27,7 +27,12 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             if(page === 0) {
                 return;
             }
-            path = GetBasePath($scope.basePath) || $scope.basePath;
+            if (GetBasePath($scope.basePath) || $scope.basePath) {
+                path = GetBasePath($scope.basePath) || $scope.basePath;
+            } else {
+                let interpolator = $interpolate($scope.basePath);
+                path = interpolator({ $stateParams: $stateParams });
+            }
             if($scope.querySet) {
                 // merging $scope.querySet seems to destroy our initial reference which
                 // kills the two-way binding here.  To fix that, clone the queryset first

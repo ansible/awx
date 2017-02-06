@@ -36,7 +36,7 @@ export default
                     label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('job_templates')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -58,15 +58,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -122,7 +129,7 @@ export default
                     label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -144,15 +151,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('workflow_job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -205,7 +219,7 @@ export default
                     label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('projects')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -227,15 +241,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('projects') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -293,10 +314,10 @@ export default
                     label: N_('SCHEDULED')
                 },
                 resolve: {
-                    SchedulesList: ['ScheduledJobsList', function(list){
+                    ScheduleList: ['ScheduledJobsList', function(list){
                         return list;
                     }],
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = GetBasePath('schedules');
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -318,9 +339,9 @@ export default
                 },
                 views: {
                     'list@jobs': {
-                        templateProvider: function(SchedulesList, generateList){
+                        templateProvider: function(ScheduleList, generateList){
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit',
                                 title: false
                             });
