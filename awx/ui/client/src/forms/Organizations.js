@@ -62,7 +62,7 @@ export default
                     },
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: i18n._('Permissions'),
+                    title: i18n._('Users & Teams'),
                     iterator: 'permission',
                     index: false,
                     open: false,
@@ -71,7 +71,7 @@ export default
                         add: {
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
-                            awToolTip: i18n._('Add a permission'),
+                            awToolTip: i18n._('Add Users and or Teams to this organization.'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
