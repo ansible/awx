@@ -977,7 +977,7 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
 
     def to_representation(self, obj):
         ret = super(ProjectSerializer, self).to_representation(obj)
-        if obj.scm_type == '':
+        if 'scm_revision' in ret and obj.scm_type == '':
             ret['scm_revision'] = ''
         return ret
 
