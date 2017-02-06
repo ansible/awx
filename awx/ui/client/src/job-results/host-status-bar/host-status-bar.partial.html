@@ -21,6 +21,10 @@
         data-tip-watch="skippedCountTip"></div>
     <div class="HostStatusBar-noData"
         aw-tool-tip="The host status bar will update when the job is complete."
-        ng-hide="hostsFinished"
+        ng-show="!hasCount && !jobFinished"
+        data-placement="top"></div>
+    <div class="HostStatusBar-noData"
+        aw-tool-tip="No host status data was given for this job."
+        ng-show="!hasCount && jobFinished"
         data-placement="top"></div>
 </div>

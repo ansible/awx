@@ -652,6 +652,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     // correct anything that was out of sync from the job run
                     jobResultsService.getJobData($scope.job.id).then(function(data){
                         $scope.job = data;
+                        $scope.jobFinished = true;
                     });
             }
         } else if (parseInt(data.project_id, 10) ===
