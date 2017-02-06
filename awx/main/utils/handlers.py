@@ -116,7 +116,7 @@ class BaseHTTPSHandler(logging.Handler):
         if not logger_name.startswith('awx.analytics'):
             # Tower log emission is only turned off by enablement setting
             return False
-        return self.enabled_loggers is None or logger_name.split('.')[-1] not in self.enabled_loggers
+        return self.enabled_loggers is None or logger_name[len('awx.analytics.'):] not in self.enabled_loggers
 
     def emit(self, record):
         """

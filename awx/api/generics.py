@@ -41,6 +41,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
+analytics_logger = logging.getLogger('awx.analytics.performance.api')
 
 
 def get_view_name(cls, suffix=None):
@@ -117,6 +118,37 @@ class APIView(views.APIView):
             q_times = [float(q['time']) for q in connection.queries[queries_before:]]
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
+
+        def copy_items_try_to_numberify(d, keys):
+            new_d = {}
+            for k in keys:
+                val = d[k]
+                if val.endswith('s'):
+                    val = val[:-1]
+                try:
+                    new_d[k] = int(val)
+                except ValueError:
+                    try:
+                        new_d[k] = float(val)
+                    except ValueError:
+                        new_d[k] = val
+
+            return new_d
+
+        log = copy_items_try_to_numberify(response, ['X-API-Time', 'X-API-Query-Count', 'X-API-Query-Time', 'X-API-Node',])
+        req = {
+            'method': request.method,
+            'path': request.path,
+            'path_info': request.path_info,
+            'query_string': request.META['QUERY_STRING'],
+
+        }
+        if request.method == "POST":
+            req['post_data'] = request.POST
+        elif request.method == "GET":
+            req['get_data'] = request.GET
+
+        analytics_logger.info("api response", extra=dict(request=req, x_api=log))
         return response
 
     def get_authenticate_header(self, request):

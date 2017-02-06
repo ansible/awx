@@ -81,12 +81,14 @@ class LogstashFormatter(LogstashFormatterVersion1):
             else:
                 data_for_log['facts'] = data
             data_for_log['module_name'] = module_name
+        elif kind == 'performance.api':
+            return raw_data
         return data_for_log
 
     def get_extra_fields(self, record):
         fields = super(LogstashFormatter, self).get_extra_fields(record)
         if record.name.startswith('awx.analytics'):
-            log_kind = record.name.split('.')[-1]
+            log_kind = record.name[len('awx.analytics.'):]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
         return fields
 
@@ -100,6 +102,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             'message': record.getMessage(),
             'host': self.host,
             'type': self.message_type,
+            'tower_uuid': getattr(settings, 'LOG_TOWER_UUID', None),
 
             # Extra Fields
             'level': record.levelname,

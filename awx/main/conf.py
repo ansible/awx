@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import uuid
 
 # Django
 from django.utils.translation import ugettext_lazy as _
@@ -312,4 +313,14 @@ register(
     help_text=_('Enable sending logs to external log aggregator.'),
     category=_('Logging'),
     category_slug='logging',
+)
+register(
+    'LOG_TOWER_UUID',
+    field_class=fields.CharField,
+    allow_blank=True,
+    label=_('Cluster-wide Tower unique identifier.'),
+    help_text=_('Useful to uniquely identify Tower instances.'),
+    category=_('Logging'),
+    category_slug='logging',
+    default=uuid.uuid4(),
 )
