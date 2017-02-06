@@ -44,7 +44,6 @@ import './filters';
 import { Home } from './controllers/Home';
 import { SocketsController } from './controllers/Sockets';
 import { CredentialsAdd, CredentialsEdit, CredentialsList } from './controllers/Credentials';
-import { JobsListController } from './controllers/Jobs';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -70,6 +69,7 @@ import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import credentials from './credentials/main';
+import jobs from './jobs/main';
 import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
 import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
 import { TeamsList, TeamsAdd, TeamsEdit } from './controllers/Teams';
@@ -134,6 +134,7 @@ var tower = angular.module('Tower', [
     portalMode.name,
     config.name,
     credentials.name,
+    jobs.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -423,53 +424,6 @@ var tower = angular.module('Tower', [
             });
 
             $stateExtender.addState({
-                searchPrefix: 'job',
-                name: 'jobs',
-                url: '/jobs',
-                ncyBreadcrumb: {
-                    label: N_("JOBS")
-                },
-                params: {
-                    job_search: {
-                        value: {
-                            not__launch_type: 'sync',
-                            order_by: '-finished'
-                        },
-                        squash: ''
-                    }
-                },
-                data: {
-                    socket: {
-                        "groups": {
-                            "jobs": ["status_changed"],
-                            "schedules": ["changed"]
-                        }
-                    }
-                },
-                resolve: {
-                    Dataset: ['AllJobsList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                    }]
-                },
-                views: {
-                    '@': {
-                        templateUrl: urlPrefix + 'partials/jobs.html',
-                    },
-                    'list@jobs': {
-                        templateProvider: function(AllJobsList, generateList) {
-                            let html = generateList.build({
-                                list: AllJobsList,
-                                mode: 'edit'
-                            });
-                            return html;
-                        },
-                        controller: JobsListController
-                    }
-                }
-            });
-
-            $stateExtender.addState({
                 name: 'userCredentials',
                 url: '/users/:user_id/credentials',
                 templateUrl: urlPrefix + 'partials/users.html',
@@ -499,70 +453,6 @@ var tower = angular.module('Tower', [
                     label: N_('SOCKETS')
                 }
             });
-
-            $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
-                var action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": userId })
-                        .success(function() {
-                            Wait('stop');
-                            $rootScope.$broadcast("refreshList", "permission");
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                Prompt({
-                    hdr: `Remove role`,
-                    body: `
-                        <div class="Prompt-bodyQuery">
-                            Confirm  the removal of the ${roleType}
-                                <span class="Prompt-emphasis"> ${roleName} </span>
-                            role associated with ${userName}.
-                        </div>
-                    `,
-                    action: action,
-                    actionText: 'REMOVE'
-                });
-            };
-
-            $rootScope.deletePermissionFromTeam = function(teamId, teamName, roleName, roleType, url) {
-                var action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": teamId })
-                        .success(function() {
-                            Wait('stop');
-                            $rootScope.$broadcast("refreshList", "role");
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                Prompt({
-                    hdr: `Remove role`,
-                    body: `
-                        <div class="Prompt-bodyQuery">
-                            Confirm  the removal of the ${roleType}
-                                <span class="Prompt-emphasis"> ${roleName} </span>
-                            role associated with the ${teamName} team.
-                        </div>
-                    `,
-                    action: action,
-                    actionText: 'REMOVE'
-                });
-            };
 
             function activateTab() {
                 // Make the correct tab active

@@ -230,7 +230,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     break;
             }
             states.push(formNode);
-            states = states.concat(this.generateLookupNodes(form, formNode)).concat(this.generateFormListDefinitions(form, formNode));
+            states = states.concat(this.generateLookupNodes(form, formNode)).concat(this.generateFormListDefinitions(form, formNode, params));
             return states;
         },
         /**
@@ -241,7 +241,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
          * @params {object} formStateDefinition - the parent form node
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
-        generateFormListDefinitions: function(form, formStateDefinition) {
+        generateFormListDefinitions: function(form, formStateDefinition, params) {
 
             function buildRbacUserTeamDirective(){
                 let states = [];
@@ -559,14 +559,17 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
 
             function buildListDefinition(field) {
                 let state,
-                    list = field.include ? $injector.get(field.include) : field;
-                state = $stateExtender.buildDefinition({
+                list = field.include ? $injector.get(field.include) : field,
+                // Added this line specifically for Completed Jobs but should be OK
+                // for all the rest of the related tabs
+                breadcrumbLabel = field.iterator.replace('_', ' '),
+                stateConfig = {
                     searchPrefix: `${list.iterator}`,
                     name: `${formStateDefinition.name}.${list.iterator}s`,
                     url: `/${list.iterator}s`,
                     ncyBreadcrumb: {
                         parent: `${formStateDefinition.name}`,
-                        label: `${field.iterator}s`
+                        label: `${breadcrumbLabel}s`
                     },
                     params: {
                         [list.iterator + '_search']: {
@@ -583,14 +586,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                                         FormDefinition() : FormDefinition
                                 });
                                 return html;
-                            },
-                            controller: ['$scope', 'ListDefinition', 'Dataset',
-                                function($scope, list, Dataset) {
-                                    $scope.list = list;
-                                    $scope[`${list.iterator}_dataset`] = Dataset.data;
-                                    $scope[`${list.iterator}s`] = $scope[`${list.iterator}_dataset`].results;
-                                }
-                            ]
+                            }
                         }
                     },
                     resolve: {
@@ -611,7 +607,26 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             }
                         ]
                     }
-                });
+                };
+
+                if(params.controllers && params.controllers.related && params.controllers.related[field.name]) {
+                    stateConfig.views.related.controller = params.controllers.related[field.name];
+                }
+                else if(field.name === 'permissions') {
+                    stateConfig.views.related.controller = 'PermissionsList';
+                }
+                else {
+                    // Generic controller
+                    stateConfig.views.related.controller = ['$scope', 'ListDefinition', 'Dataset',
+                        function($scope, list, Dataset) {
+                            $scope.list = list;
+                            $scope[`${list.iterator}_dataset`] = Dataset.data;
+                            $scope[`${list.iterator}s`] = $scope[`${list.iterator}_dataset`].results;
+                        }
+                    ];
+                }
+
+                state = $stateExtender.buildDefinition(stateConfig);
                 // appy any default search parameters in form definition
                 if (field.search) {
                     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
