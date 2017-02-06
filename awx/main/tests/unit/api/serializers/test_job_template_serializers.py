@@ -110,7 +110,7 @@ class TestJobTemplateSerializerGetSummaryFields():
         view.request = request
         serializer.context['view'] = view
 
-        with mocker.patch("awx.main.models.rbac.Role.get_description", return_value='Can eat pie'):
+        with mocker.patch("awx.api.serializers.role_summary_fields_generator", return_value='Can eat pie'):
             with mocker.patch("awx.main.access.JobTemplateAccess.can_change", return_value='foobar'):
                 with mocker.patch("awx.main.access.JobTemplateAccess.can_add", return_value='foo'):
                     response = serializer.get_summary_fields(jt_obj)
