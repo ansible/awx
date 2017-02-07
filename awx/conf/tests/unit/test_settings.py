@@ -61,13 +61,31 @@ def test_unregistered_setting(settings):
     assert settings.cache.get('DEBUG') is None
 
 
-@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting(settings):
+    settings.registry.register(
+        'AWX_READ_ONLY',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        default='NO-EDITS',
+        read_only=True
+    )
+    assert settings.AWX_READ_ONLY == 'NO-EDITS'
+    assert len(settings.registry.get_registered_settings(read_only=False)) == 0
+    settings = settings.registry.get_registered_settings(read_only=True)
+    assert settings == ['AWX_READ_ONLY']
+
+
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
+@pytest.mark.parametrize('read_only', [True, False])
+def test_setting_defined_in_file(settings, read_only):
+    kwargs = {'read_only': True} if read_only else {}
     settings.registry.register(
         'AWX_SOME_SETTING',
         field_class=fields.CharField,
         category=_('System'),
-        category_slug='system'
+        category_slug='system',
+        **kwargs
     )
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
     assert len(settings.registry.get_registered_settings(read_only=False)) == 0
@@ -76,13 +94,28 @@ def test_read_only_setting(settings):
 
 
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
-def test_read_only_setting_with_empty_default(settings):
+def test_setting_defined_in_file_with_empty_default(settings):
     settings.registry.register(
         'AWX_SOME_SETTING',
         field_class=fields.CharField,
         category=_('System'),
         category_slug='system',
         default='',
+    )
+    assert settings.AWX_SOME_SETTING == 'DEFAULT'
+    assert len(settings.registry.get_registered_settings(read_only=False)) == 0
+    settings = settings.registry.get_registered_settings(read_only=True)
+    assert settings == ['AWX_SOME_SETTING']
+
+
+@pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
+def test_setting_defined_in_file_with_specific_default(settings):
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        default=123
     )
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
     assert len(settings.registry.get_registered_settings(read_only=False)) == 0
