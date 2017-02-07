@@ -304,6 +304,7 @@ AUTH_LDAP_SERVER_URI = None
 # Note: This setting may be overridden by database settings.
 AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_REFERRALS: 0,
+    ldap.OPT_NETWORK_TIMEOUT: 30
 }
 
 # Radius server settings (default to empty string to skip using Radius auth).

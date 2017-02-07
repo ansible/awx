@@ -228,7 +228,7 @@ register(
 register(
     'AUTH_LDAP_CONNECTION_OPTIONS',
     field_class=fields.LDAPConnectionOptionsField,
-    default={'OPT_REFERRALS': 0},
+    default={'OPT_REFERRALS': 0, 'OPT_NETWORK_TIMEOUT': 30},
     label=_('LDAP Connection Options'),
     help_text=_('Additional options to set for the LDAP connection.  LDAP '
                 'referrals are disabled by default (to prevent certain LDAP '
@@ -240,6 +240,7 @@ register(
     category_slug='ldap',
     placeholder=collections.OrderedDict([
         ('OPT_REFERRALS', 0),
+        ('OPT_NETWORK_TIMEOUT', 30)
     ]),
     feature_required='ldap',
 )
