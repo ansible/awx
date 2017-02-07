@@ -191,6 +191,10 @@ class Metadata(metadata.SimpleMetadata):
         if getattr(view, 'related_search_fields', None):
             metadata['related_search_fields'] = view.related_search_fields
 
+        from rest_framework import generics
+        if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
+            metadata['max_page_size'] = view.paginator.max_page_size
+
         return metadata
 
 
