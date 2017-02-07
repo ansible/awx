@@ -295,13 +295,24 @@ export default [{
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
-            list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='jobTemplates.add'>Job Templates</a>&nbsp;section";
+            delete list.fields.type;
+            list.listTitle = N_('Job Templates');
+            list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='templates.addJobTemplate'>Job Templates</a>&nbsp;section";
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.iterator = 'job_template';
             list.name = 'job_templates';
             list.basePath = "job_templates";
-            list.fields.type.ngBind = "job_template.type_label";
             list.fields.smart_status.ngInclude = "'/static/partials/organizations-job-template-smart-status.html'";
+            list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
+            list.fieldActions.submit.ngClick = 'submitJob(job_template.id)';
+            list.fieldActions.submit.ngShow = 'job_template.summary_fields.user_capabilities.start';
+            list.fieldActions.schedule.ngClick = 'scheduleJob(job_template.id)';
+            list.fieldActions.copy.ngClick = 'copyTemplate(job_template.id)';
+            list.fieldActions.copy.ngShow = 'job_template.summary_fields.user_capabilities.copy';
+            list.fieldActions.edit.ngClick = "editJobTemplate(job_template.id)";
+            list.fieldActions.edit.ngShow = 'job_template.summary_fields.user_capabilities.edit';
+            list.fieldActions.view.ngClick = "editJobTemplate(job_template.id)";
+            list.fieldActions.view.ngShow = '!job_template.summary_fields.user_capabilities.edit';
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',

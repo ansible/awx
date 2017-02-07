@@ -6,11 +6,11 @@
 
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait',
+    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
     '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
     function($scope, $rootScope, $location, $log,
         $stateParams, Rest, Alert, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
-        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait,
+        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait, TemplateCopyService,
         $compile, $state, OrgJobTemplateList, Dataset, qs) {
 
         var list = OrgJobTemplateList,
@@ -71,12 +71,8 @@ export default ['$scope', '$rootScope', '$location', '$log',
             });
         }
 
-        $scope.addJobTemplate = function() {
-            $state.go('jobTemplates.add');
-        };
-
         $scope.editJobTemplate = function(id) {
-            $state.go('jobTemplates.edit', { id: id });
+            $state.go('templates.editJobTemplate', { job_template_id: id });
         };
 
         $scope.submitJob = function(id) {
@@ -87,8 +83,23 @@ export default ['$scope', '$rootScope', '$location', '$log',
             $state.go('jobTemplateSchedules', { id: id });
         };
 
-        $scope.formCancel = function() {
-            $state.go('organizations');
+        $scope.copyTemplate = function(id) {
+            Wait('start');
+ 			TemplateCopyService.get(id)
+ 			.success(function(res){
+ 					TemplateCopyService.set(res)
+                    .success(function(res){
+                        Wait('stop');
+                        if(res.type && res.type === 'job_template') {
+                            $state.go('templates.editJobTemplate', {job_template_id: res.id}, {reload: true});
+                        }
+                    });
+ 			})
+  			.error(function(res, status){
+                ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+                msg: 'Call failed. Return status: '+ status});
+            });
+
         };
 
     }
