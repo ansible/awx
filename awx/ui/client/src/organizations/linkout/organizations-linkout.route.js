@@ -267,7 +267,7 @@ export default [{
         },
     },
     params: {
-        job_template_search: {
+        template_search: {
             value: {
                 project__organization: null
             }
@@ -299,27 +299,23 @@ export default [{
             list.listTitle = N_('Job Templates');
             list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='templates.addJobTemplate'>Job Templates</a>&nbsp;section";
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
-            list.iterator = 'job_template';
+            list.iterator = 'template';
             list.name = 'job_templates';
             list.basePath = "job_templates";
             list.fields.smart_status.ngInclude = "'/static/partials/organizations-job-template-smart-status.html'";
-            list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
-            list.fieldActions.submit.ngClick = 'submitJob(job_template.id)';
-            list.fieldActions.submit.ngShow = 'job_template.summary_fields.user_capabilities.start';
-            list.fieldActions.schedule.ngClick = 'scheduleJob(job_template.id)';
-            list.fieldActions.copy.ngClick = 'copyTemplate(job_template.id)';
-            list.fieldActions.copy.ngShow = 'job_template.summary_fields.user_capabilities.copy';
-            list.fieldActions.edit.ngClick = "editJobTemplate(job_template.id)";
-            list.fieldActions.edit.ngShow = 'job_template.summary_fields.user_capabilities.edit';
-            list.fieldActions.view.ngClick = "editJobTemplate(job_template.id)";
-            list.fieldActions.view.ngShow = '!job_template.summary_fields.user_capabilities.edit';
+            list.fields.name.ngHref = '#/templates/job_template/{{template.id}}';
+            list.fieldActions.submit.ngClick = 'submitJob(template.id)';
+            list.fieldActions.schedule.ngClick = 'scheduleJob(template.id)';
+            list.fieldActions.copy.ngClick = 'copyTemplate(template.id)';
+            list.fieldActions.edit.ngClick = "editJobTemplate(template.id)";
+            list.fieldActions.view.ngClick = "editJobTemplate(template.id)";
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.name);
-                $stateParams.job_template_search.project__organization = $stateParams.organization_id;
-                return qs.search(path, $stateParams.job_template_search);
+                $stateParams.template_search.project__organization = $stateParams.organization_id;
+                return qs.search(path, $stateParams.template_search);
             }
         ]
     }
