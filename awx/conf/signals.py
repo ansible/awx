@@ -1,5 +1,6 @@
 # Python
 import logging
+import sys
 
 # Django
 from django.conf import settings
@@ -32,7 +33,8 @@ def handle_setting_change(key, for_delete=False):
     cache_keys = set([Setting.get_cache_key(k) for k in setting_keys])
     logger.debug('sending signals to delete cache keys(%r)', cache_keys)
     cache.delete_many(cache_keys)
-    process_cache_changes.delay(list(cache_keys))
+    if 'migrate_to_database_settings' not in sys.argv:
+        process_cache_changes.delay(list(cache_keys))
 
     # Send setting_changed signal with new value for each setting.
     for setting_key in setting_keys:
