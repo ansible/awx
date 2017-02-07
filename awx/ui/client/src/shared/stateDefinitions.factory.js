@@ -685,8 +685,25 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             list.iterator = field.sourceModel;
                             return list;
                         }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state',
-                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state) => {
+                        OrganizationId: ['ListDefinition', 'InventoryManageService', '$stateParams', '$rootScope',
+                            function(list, InventoryManageService, $stateParams, $rootScope){
+                                if(list.iterator === 'inventory_script'){
+                                    if($rootScope.$$childTail &&
+                                        $rootScope.$$childTail.$resolve &&
+                                        $rootScope.$$childTail.$resolve.hasOwnProperty('inventoryData')){
+                                            return $rootScope.$$childTail.$resolve.inventoryData.summary_fields.organization.id;
+                                    }
+                                    else {
+                                        return InventoryManageService.getInventory($stateParams.inventory_id).then(res => res.data.summary_fields.organization.id);
+                                    }
+
+                                }
+                                else {
+                                    return;
+                                }
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state', 'OrganizationId',
+                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state, OrganizationId) => {
                                 // allow lookup field definitions to use interpolated $stateParams / $rootScope in basePath field
                                 // the basePath on a form's lookup field will take precedence over the general model list's basepath
                                 let path, interpolator;
@@ -703,9 +720,14 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                                 }
                                 // Need to change the role_level here b/c organizations and inventory scripts
                                 // don't have a "use_role", only "admin_role" and "read_role"
-                                if(list.iterator === "organization" || list.iterator === "inventory_script"){
+                                if(list.iterator === "organization"){
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                 }
+                                if(list.iterator === "inventory_script"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
+                                    $stateParams[`${list.iterator}_search`].organization = OrganizationId;
+                                }
+
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ]

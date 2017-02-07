@@ -520,7 +520,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                             query = '?role_level=admin_role';
                             break;
                         case 'inventory_script':
-                            query = '?role_level=admin_role';
+                            query = '?role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
                             break;
                     }
 
@@ -615,7 +615,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                                 query += '&role_level=admin_role';
                                 break;
                             case 'inventory_script':
-                                query += '&role_level=admin_role';
+                                query += '&role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
                                 break;
                             default:
                                 query += '&role_level=use_role';
