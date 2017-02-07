@@ -9,8 +9,16 @@
     <div class="RoleList-tag"
         ng-class="{'RoleList-tag--deletable': entry.explicit && entry.user_capabilities.unattach,
             'RoleList-tag--team': entry.team_id}"
-        aw-tool-tip='<div>Organization: {{ entry.team_organization_name | sanitize }}</div><div>Team: {{entry.team_name | sanitize}}</div>' aw-tip-placement='bottom'>
+        aw-tool-tip='<div>Organization: {{ entry.team_organization_name | sanitize }}</div><div>Team: {{entry.team_name | sanitize}}</div>' aw-tip-placement='bottom'
+        ng-if="entry.team_id">
         <span class="RoleList-name">{{ entry.name }}</span>
         <i ng-show='entry.team_id' class="fa fa-users"></i>
+    </div>
+
+    <div class="RoleList-tag"
+        ng-class="{'RoleList-tag--deletable': entry.explicit && entry.user_capabilities.unattach,
+            'RoleList-tag--team': entry.team_id}"
+        ng-if="!entry.team_id">
+        <span class="RoleList-name">{{ entry.name }}</span>
     </div>
 </div>
