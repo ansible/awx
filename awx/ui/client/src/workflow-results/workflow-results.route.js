@@ -52,7 +52,30 @@ export default {
                 Rest.setUrl(workflowData.related.workflow_nodes);
                 Rest.get()
                     .success(function(data) {
-                        defer.resolve(data.results);
+                        if(data.next) {
+                            let allNodes = data.results;
+                            let getNodes = function(nextUrl){
+                                // Get the workflow nodes
+                                Rest.setUrl(nextUrl);
+                                Rest.get()
+                                    .success(function(nextData) {
+                                        for(var i=0; i<nextData.results.length; i++) {
+                                            allNodes.push(nextData.results[i]);
+                                        }
+                                        if(nextData.next) {
+                                            // Get the next page
+                                            getNodes(nextData.next);
+                                        }
+                                        else {
+                                            defer.resolve(allNodes);
+                                        }
+                                });
+                            };
+                            getNodes(data.next);
+                        }
+                        else {
+                            defer.resolve(data.results);
+                        }
                     })
                     .error(function() {
                         // TODO: handle this
