@@ -5,6 +5,8 @@
 import logging
 import uuid
 
+import ldap
+
 # Django
 from django.dispatch import receiver
 from django.contrib.auth.models import User
@@ -37,6 +39,16 @@ class LDAPSettings(BaseLDAPSettings):
         'ORGANIZATION_MAP': {},
         'TEAM_MAP': {},
     }.items())
+
+    def __init__(self, prefix='AUTH_LDAP_', defaults={}):
+        super(LDAPSettings, self).__init__(prefix, defaults)
+
+        # If a DB-backed setting is specified that wipes out the
+        # OPT_NETWORK_TIMEOUT, fall back to a sane default
+        if ldap.OPT_NETWORK_TIMEOUT not in getattr(self, 'CONNECTION_OPTIONS', {}):
+            options = getattr(self, 'CONNECTION_OPTIONS', {})
+            options[ldap.OPT_NETWORK_TIMEOUT] = 30
+            self.CONNECTION_OPTIONS = options
 
 
 class LDAPBackend(BaseLDAPBackend):
