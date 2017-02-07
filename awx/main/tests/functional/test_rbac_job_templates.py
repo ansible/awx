@@ -227,6 +227,14 @@ def test_job_template_access_org_admin(jt_objects, rando):
 
 
 @pytest.mark.django_db
+def test_orphan_JT_readable_by_system_auditor(job_template, system_auditor):
+    assert system_auditor.is_system_auditor
+    assert job_template.project is None
+    access = JobTemplateAccess(system_auditor)
+    assert access.can_read(job_template)
+
+
+@pytest.mark.django_db
 @pytest.mark.job_permissions
 def test_job_template_creator_access(project, rando, post):
 
