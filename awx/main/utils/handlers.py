@@ -116,8 +116,16 @@ class HTTPSHandler(logging.Handler):
         return self.enabled_loggers is None or logger_name.split('.')[-1] not in self.enabled_loggers
 
     def emit(self, record):
+        """
+            Emit a log record.  When ``self.async`` is True, returns a list of
+            ``concurrent.futures.Future`` objects.
+
+            See:
+            https://docs.python.org/3/library/concurrent.futures.html#future-objects
+            http://pythonhosted.org/futures/
+        """
         if self.skip_log(record.name):
-            return
+            return []
         try:
             payload = self.format(record)
             host = self.get_http_host()
@@ -129,18 +137,21 @@ class HTTPSHandler(logging.Handler):
                     module_name = payload_data['module_name']
                     if module_name in ['services', 'packages', 'files']:
                         facts_dict = payload_data.pop(module_name)
+                        async_futures = []
                         for key in facts_dict:
                             fact_payload = copy(payload_data)
                             fact_payload.update(facts_dict[key])
-                            self.session.post(host, **self.get_post_kwargs(fact_payload))
-                        return
+                            async_futures.append(
+                                self.session.post(host, **self.get_post_kwargs(fact_payload))
+                            )
+                        return async_futures
 
             if self.async:
-                self.session.post(host, **self.get_post_kwargs(payload))
-            else:
-                requests.post(host, auth=requests.auth.HTTPBasicAuth(self.username, self.password), **self.get_post_kwargs(payload))
+                return [self.session.post(host, **self.get_post_kwargs(payload))]
+
+            requests.post(host, auth=requests.auth.HTTPBasicAuth(self.username, self.password), **self.get_post_kwargs(payload))
+            return []
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             self.handleError(record)
-
