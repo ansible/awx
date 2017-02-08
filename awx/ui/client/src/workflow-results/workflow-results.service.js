@@ -106,20 +106,6 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                                 });
                             }
                         });
-                    Rest.destroy()
-                        .success(function() {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                        })
-                        .error(function(obj, status) {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                            ProcessErrors(null, obj, status, null, {
-                                hdr: 'Error!',
-                                msg: `Could not cancel workflow.
-                                    Returned status: ${status}`
-                            });
-                        });
                 },
                 actionText: 'CANCEL'
             });
