@@ -451,8 +451,9 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     collection="${list.name}"
                     dataset="${list.iterator}_dataset"
                     iterator="${list.iterator}"
-                    query-set="${list.iterator}_queryset">
-                    </paginate></div>`;
+                    query-set="${list.iterator}_queryset"`;
+                    html += list.maxVisiblePages ? `max-visible-pages="${list.maxVisiblePages}"` : '';
+                    html += `></paginate></div>`;
                 }
 
                 return html;
