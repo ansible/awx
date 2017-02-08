@@ -53,25 +53,23 @@ export default
             },
 
             related: {
-                permissions: {
-                    name: 'permissions',
-                    awToolTip: i18n._('Please save before assigning permissions'),
+                users: {
+                    dataPlacement: 'top',
+                    awToolTip: i18n._('Please save before adding users'),
                     basePath: 'api/v1/organizations/{{$stateParams.organization_id}}/access_list/',
                     search: {
                         order_by: 'username'
                     },
-                    dataPlacement: 'top',
                     type: 'collection',
-                    title: i18n._('Users & Teams'),
-                    iterator: 'permission',
+                    title: i18n._('Users'),
+                    iterator: 'user',
                     index: false,
                     open: false,
-                    searchType: 'select',
                     actions: {
                         add: {
                             ngClick: "$state.go('.add')",
                             label: i18n._('Add'),
-                            awToolTip: i18n._('Add Users and or Teams to this organization.'),
+                            awToolTip: i18n._('Add Users to this organization.'),
                             actionClass: 'btn List-buttonSubmit',
                             buttonContent: '&#43; ' + i18n._('ADD'),
                             ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
@@ -90,12 +88,6 @@ export default
                             type: 'role',
                             nosort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
-                        },
-                        team_roles: {
-                            label: i18n._('Team Roles'),
-                            type: 'team_roles',
-                            nosort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4'
                         }
                     }
                 },
