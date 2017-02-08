@@ -18,7 +18,7 @@
                     <div class="StandardOut-detailsRow" ng-show="project_name">
                         <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>NAME</div>
                         <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                            <a ui-sref="projects.edit({id: job.project})">
+                            <a ui-sref="projects.edit({project_id: job.project})">
                                 {{ project_name }}
                             </a>
                             <a href="{{ workflow_result_link }}"
@@ -72,7 +72,7 @@
                     <div class="StandardOut-detailsRow" ng-show="project_name">
                         <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>PROJECT</div>
                         <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                            <a ui-sref="projects.edit({id: job.project})">
+                            <a ui-sref="projects.edit({project_id: job.project})">
                                 {{ project_name }}
                             </a>
                         </div>
