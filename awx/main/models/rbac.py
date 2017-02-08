@@ -10,9 +10,9 @@ import re
 # Django
 from django.db import models, transaction, connection
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.utils.translation import ugettext_lazy as _
 
 
 # AWX
@@ -25,6 +25,7 @@ __all__ = [
     'get_roles_on_resource',
     'ROLE_SINGLETON_SYSTEM_ADMINISTRATOR',
     'ROLE_SINGLETON_SYSTEM_AUDITOR',
+    'role_summary_fields_generator'
 ]
 
 logger = logging.getLogger('awx.main.models.rbac')
@@ -33,29 +34,29 @@ ROLE_SINGLETON_SYSTEM_ADMINISTRATOR='system_administrator'
 ROLE_SINGLETON_SYSTEM_AUDITOR='system_auditor'
 
 role_names = {
-    'system_administrator' : 'System Administrator',
-    'system_auditor'       : 'System Auditor',
-    'adhoc_role'           : 'Ad Hoc',
-    'admin_role'           : 'Admin',
-    'auditor_role'         : 'Auditor',
-    'execute_role'         : 'Execute',
-    'member_role'          : 'Member',
-    'read_role'            : 'Read',
-    'update_role'          : 'Update',
-    'use_role'             : 'Use',
+    'system_administrator' : _('System Administrator'),
+    'system_auditor'       : _('System Auditor'),
+    'adhoc_role'           : _('Ad Hoc'),
+    'admin_role'           : _('Admin'),
+    'auditor_role'         : _('Auditor'),
+    'execute_role'         : _('Execute'),
+    'member_role'          : _('Member'),
+    'read_role'            : _('Read'),
+    'update_role'          : _('Update'),
+    'use_role'             : _('Use'),
 }
 
 role_descriptions = {
-    'system_administrator' : 'Can manage all aspects of the system',
-    'system_auditor'       : 'Can view all settings on the system',
-    'adhoc_role'           : 'May run ad hoc commands on an inventory',
-    'admin_role'           : 'Can manage all aspects of the %s',
-    'auditor_role'         : 'Can view all settings for the %s',
-    'execute_role'         : 'May run the %s',
-    'member_role'          : 'User is a member of the %s',
-    'read_role'            : 'May view settings for the %s',
-    'update_role'          : 'May update project or inventory or group using the configured source update system',
-    'use_role'             : 'Can use the %s in a job template',
+    'system_administrator' : _('Can manage all aspects of the system'),
+    'system_auditor'       : _('Can view all settings on the system'),
+    'adhoc_role'           : _('May run ad hoc commands on an inventory'),
+    'admin_role'           : _('Can manage all aspects of the %s'),
+    'auditor_role'         : _('Can view all settings for the %s'),
+    'execute_role'         : _('May run the %s'),
+    'member_role'          : _('User is a member of the %s'),
+    'read_role'            : _('May view settings for the %s'),
+    'update_role'          : _('May update project or inventory or group using the configured source update system'),
+    'use_role'             : _('Can use the %s in a job template'),
 }
 
 
@@ -165,21 +166,17 @@ class Role(models.Model):
         global role_names
         return role_names[self.role_field]
 
-    def get_description(self, reference_content_object=None):
+    @property
+    def description(self):
         global role_descriptions
         description = role_descriptions[self.role_field]
-        if reference_content_object:
-            content_type = ContentType.objects.get_for_model(reference_content_object)
-        else:
-            content_type = self.content_type
+        content_type = self.content_type
         if '%s' in description and content_type:
             model = content_type.model_class()
             model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
             description = description % model_name
 
         return description
-
-    description = property(get_description)
 
     @staticmethod
     def rebuild_role_ancestor_list(additions, removals):
@@ -474,3 +471,20 @@ def get_roles_on_resource(resource, accessor):
             object_id=resource.id
         ).values_list('role_field', flat=True).distinct()
     ]
+
+
+def role_summary_fields_generator(content_object, role_field):
+    global role_descriptions
+    global role_names
+    summary = {}
+    description = role_descriptions[role_field]
+    content_type = ContentType.objects.get_for_model(content_object)
+    if '%s' in description and content_type:
+        model = content_object.__class__
+        model_name = re.sub(r'([a-z])([A-Z])', r'\1 \2', model.__name__).lower()
+        description = description % model_name
+
+    summary['description'] = description
+    summary['name'] = role_names[role_field]
+    summary['id'] = getattr(content_object, '{}_id'.format(role_field))
+    return summary

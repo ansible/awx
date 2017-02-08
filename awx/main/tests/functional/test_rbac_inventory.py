@@ -8,6 +8,7 @@ from awx.main.models import (
 )
 from awx.main.access import (
     InventoryAccess,
+    InventorySourceAccess,
     HostAccess,
     InventoryUpdateAccess,
     CustomInventoryScriptAccess
@@ -271,4 +272,8 @@ def test_host_access(organization, inventory, group, user, group_factory):
     assert inventory_admin_access.can_read(host) is False
 
 
-
+@pytest.mark.django_db
+def test_inventory_source_credential_check(rando, inventory_source, credential):
+    inventory_source.group.inventory.admin_role.members.add(rando)
+    access = InventorySourceAccess(rando)
+    assert not access.can_change(inventory_source, {'credential': credential})

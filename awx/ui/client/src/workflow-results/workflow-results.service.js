@@ -5,7 +5,7 @@
 *************************************************/
 
 
-export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun) {
+export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErrors', 'InitiatePlaybookRun', '$interval', 'moment', function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybookRun, $interval, moment) {
     var val = {
         getCounts: function(workflowNodes){
             var nodeArr = [];
@@ -106,20 +106,6 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                                 });
                             }
                         });
-                    Rest.destroy()
-                        .success(function() {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                        })
-                        .error(function(obj, status) {
-                            Wait('stop');
-                            $('#prompt-modal').modal('hide');
-                            ProcessErrors(null, obj, status, null, {
-                                hdr: 'Error!',
-                                msg: `Could not cancel workflow.
-                                    Returned status: ${status}`
-                            });
-                        });
                 },
                 actionText: 'CANCEL'
             });
@@ -127,7 +113,20 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
         relaunchJob: function(scope) {
             InitiatePlaybookRun({ scope: scope, id: scope.workflow.id,
                 relaunch: true, job_type: 'workflow_job' });
-        }
+        },
+        createOneSecondTimer: function(startTime, fn) {
+            return $interval(function(){
+                fn(moment().diff(moment(startTime), 'seconds'));
+            }, 1000);
+        },
+        destroyTimer: function(timer) {
+            if (timer !== null) {
+                $interval.cancel(timer);
+                timer = null;
+                return true;
+            }
+            return false;
+        },
     };
     return val;
 }];

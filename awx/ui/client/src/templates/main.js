@@ -52,7 +52,15 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     modes: ['edit'],
                     form: 'JobTemplateForm',
                     controllers: {
-                        edit: 'JobTemplateEdit'
+                        edit: 'JobTemplateEdit',
+                        related: {
+                            completed_jobs: 'JobsList'
+                        }
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'job_template',
+                        activityStreamId: 'job_template_id'
                     }
                 });
 
@@ -73,6 +81,11 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                     form: 'WorkflowForm',
                     controllers: {
                         edit: 'WorkflowEdit'
+                    },
+                    data: {
+                        activityStream: true,
+                        activityStreamTarget: 'workflow_job_template',
+                        activityStreamId: 'workflow_job_template_id'
                     }
                 });
 
@@ -89,14 +102,16 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         job_template_search: {
                             value: {
                                 page_size: '5',
-                                type: 'job_template'
+                                type: 'job_template',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
                         },
                         project_search: {
                             value: {
-                                page_size: '5'
+                                page_size: '5',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
@@ -104,7 +119,8 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         inventory_source_search: {
                             value: {
                                 page_size: '5',
-                                not__source: ''
+                                not__source: '',
+                                order_by: 'name'
                             },
                             squash: true,
                             dynamic: true
@@ -194,18 +210,16 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                             ]
                         },
                         'inventorySyncList@templates.editWorkflowJobTemplate.workflowMaker': {
-                            templateProvider: function(InventorySourcesList, generateList) {
-                                let list = _.cloneDeep(InventorySourcesList);
-                                // mutate list definition here!
+                            templateProvider: function(WorkflowInventorySourcesList, generateList) {
                                 let html = generateList.build({
-                                    list: list,
+                                    list: WorkflowInventorySourcesList,
                                     input_type: 'radio',
                                     mode: 'lookup'
                                 });
                                 return html;
                             },
                             // encapsulated $scope in this controller will be a initialized as child of 'modal' $scope, because of element hierarchy
-                            controller: ['$scope', 'InventorySourcesList', 'InventorySourcesDataset',
+                            controller: ['$scope', 'WorkflowInventorySourcesList', 'InventorySourcesDataset',
                                 function($scope, list, Dataset) {
 
                                     init();
@@ -422,7 +436,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ],
-                        ProjectDataset: ['ProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        ProjectDataset: ['WorkflowProjectList', 'QuerySet', '$stateParams', 'GetBasePath',
                             (list, qs, $stateParams, GetBasePath) => {
                                 let path = GetBasePath(list.basePath);
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -452,6 +466,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                     label: '',
                                     nosort: true
                                 };
+                                list.maxVisiblePages = 5;
 
                                 return list;
                             }
@@ -463,6 +478,15 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                 delete list.fields.scm_type;
                                 delete list.fields.last_updated;
                                 list.fields.name.columnClass = "col-md-11";
+                                list.maxVisiblePages = 5;
+
+                                return list;
+                            }
+                        ],
+                        WorkflowInventorySourcesList: ['InventorySourcesList',
+                            (InventorySourcesList) => {
+                                let list = _.cloneDeep(InventorySourcesList);
+                                list.maxVisiblePages = 5;
 
                                 return list;
                             }

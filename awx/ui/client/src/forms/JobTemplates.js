@@ -89,6 +89,7 @@ export default
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_inventory_on_launch',
+                        ngChange: 'job_template_form.inventory_name.$validate()',
                         ngShow: "!job_type.value || job_type.value !== 'scan'",
                         text: i18n._('Prompt on launch')
                     },
@@ -121,7 +122,7 @@ export default
                     label: i18n._('Playbook'),
                     type:'select',
                     ngOptions: 'book for book in playbook_options track by book',
-                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)",
+                    ngDisabled: "(job_type.value === 'scan' && project_name === 'Default') || !(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate) || disablePlaybookBecausePermissionDenied",
                     id: 'playbook-select',
                     awRequiredWhen: {
                         reqExpression: "playbookrequired",
@@ -158,7 +159,8 @@ export default
                     dataContainer: "body",
                     subCheckbox: {
                         variable: 'ask_credential_on_launch',
-                        text: i18n._('Prompt on launch')
+                        text: i18n._('Prompt on launch'),
+                        ngChange: 'job_template_form.credential_name.$validate()',
                     },
                     ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
@@ -214,7 +216,7 @@ export default
                     dataTitle: i18n._('Forks'),
                     dataPlacement: 'right',
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)' // TODO: get working
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 },
                 limit: {
                     label: i18n._('Limit'),
@@ -396,7 +398,7 @@ export default
                 },
                 save: {
                     ngClick: 'formSave()',    //$scope.function to call on click, optional
-                    ngDisabled: "job_templates_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
+                    ngDisabled: "job_template_form.$invalid",//true          //Disable when $pristine or $invalid, optional and when can_edit = false, for permission reasons
                     ngShow: '(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
                 }
             },
@@ -406,6 +408,7 @@ export default
                     include: "CompletedJobsList"
                 },
                 permissions: {
+                    name: 'permissions',
                     awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
                     basePath: 'api/v1/job_templates/{{$stateParams.job_template_id}}/access_list/',
@@ -439,13 +442,13 @@ export default
                         role: {
                             label: 'Role',
                             type: 'role',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
                         },
                         team_roles: {
                             label: 'Team Roles',
                             type: 'team_roles',
-                            noSort: true,
+                            nosort: true,
                             class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
                         }
                     }
@@ -479,23 +482,6 @@ export default
                     label: i18n._('Edit Survey'),
                     class: 'Form-primaryButton'
                 }
-            },
-
-            relatedSets: function(urls) {
-                return {
-                    completed_jobs: {
-                        iterator: 'completed_job',
-                        url: urls.jobs + '?or__status=successful&or__status=failed&or__status=error&or__status=canceled'
-                    },
-                    permissions: {
-                        iterator: 'permission',
-                        url: urls.access_list
-                    },
-                    notifications: {
-                        iterator: 'notification',
-                        url: '/api/v1/notification_templates/'
-                    }
-                };
             }
         };}])
 

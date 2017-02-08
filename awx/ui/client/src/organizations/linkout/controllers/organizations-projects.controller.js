@@ -180,7 +180,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
             });
 
         $scope.editProject = function(id) {
-            $state.transitionTo('projects.edit', { id: id });
+            $state.go('projects.edit', { project_id: id });
         };
 
         if ($scope.removeGoToJobDetails) {

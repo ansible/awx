@@ -678,7 +678,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
-                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">Reset</a>`;
+                            var resetMessage = i18n._('Reset');
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">${resetMessage}</a>`;
                         }
 
                         html += "\n\t</label>\n";
@@ -1271,7 +1272,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         for (i = 0; i < field.options.length; i++) {
                             html += "<label class=\"radio-inline ";
-                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\""; 
+                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\"";
                             html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
                             html += ">";
                             html += "<input type=\"radio\" ";
@@ -1279,6 +1280,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "value=\"" + field.options[i].value + "\" ";
                             html += "ng-model=\"" + fld + "\" ";
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                            html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}"` : "";
                             html += (field.readonly) ? "disabled " : "";
                             html += (field.required) ? "required " : "";
                             html += (field.ngshow) ? "ng-show=\"" + field.ngShow + "\" " : "";
@@ -1402,12 +1404,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
                                 ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select a value.")) + "</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup && !(" + this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.required)\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
+                        } else {
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
                         }
-                        html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
-                            this.form.name + '_form.' +
-                            field.sourceModel + '_' + field.sourceField + ".$dirty && " +
-                            this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                            ".$error.awlookup\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField +
                             "_api_error\"></div>\n";
                         html += "</div>\n";
@@ -1870,9 +1881,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     <div
                         class="row"
                         ng-show="${itm}.length === 0 && !(searchTags | isEmpty)">
-                        <div class="col-lg-12 List-searchNoResults">
-                            No records matched your search.
-                        </div>
+                        <div class="col-lg-12 List-searchNoResults">`;
+                html += i18n._('No records matched your search.');
+                html += `</div>
                     </div>
                 `;
 
@@ -1900,6 +1911,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 for (fld in collection.fields) {
                     html += `<th class="List-tableHeader list-header ${collection.fields[fld].columnClass}"
                         id="${collection.iterator}-${fld}-header"
+                        base-path="${collection.basePath}"
+                        collection="${collection.name}"
+                        dataset="${collection.iterator}_dataset"
                         column-sort
                         column-field="${fld}"
                         column-iterator="${collection.iterator}"
@@ -1983,7 +1997,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //html += "</div>\n"; // close well
                 html += "</div>\n"; // close list-wrapper div
 
-                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" iterator="${collection.iterator}" ng-hide="hidePagination">`;
+                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" collection="${collection.iterator}s" iterator="${collection.iterator}" ng-hide="hidePagination">`;
                 return html;
             }
         };

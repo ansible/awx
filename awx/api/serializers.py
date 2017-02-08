@@ -25,6 +25,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from django.utils.text import capfirst
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 
 # Django REST Framework
 from rest_framework.exceptions import ValidationError
@@ -330,13 +331,7 @@ class BaseSerializer(serializers.ModelSerializer):
         roles = {}
         for field in obj._meta.get_fields():
             if type(field) is ImplicitRoleField:
-                role = getattr(obj, field.name)
-                #roles[field.name] = RoleSerializer(data=role).to_representation(role)
-                roles[field.name] = {
-                    'id': role.id,
-                    'name': role.name,
-                    'description': role.get_description(reference_content_object=obj),
-                }
+                roles[field.name] = role_summary_fields_generator(obj, field.name)
         if len(roles) > 0:
             summary_fields['object_roles'] = roles
 
@@ -980,7 +975,16 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def to_representation(self, obj):
+        ret = super(ProjectSerializer, self).to_representation(obj)
+        if 'scm_revision' in ret and obj.scm_type == '':
+            ret['scm_revision'] = ''
+        return ret
+
     def validate(self, attrs):
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
+
         organization = None
         if 'organization' in attrs:
             organization = attrs['organization']
@@ -991,6 +995,10 @@ class ProjectSerializer(UnifiedJobTemplateSerializer, ProjectOptionsSerializer):
         if not organization and not view.request.user.is_superuser:
             # Only allow super users to create orgless projects
             raise serializers.ValidationError(_('Organization is missing'))
+        elif get_field_from_model_or_attrs('scm_type') == '':
+            for fd in ('scm_update_on_launch', 'scm_delete_on_update', 'scm_clean'):
+                if get_field_from_model_or_attrs(fd):
+                    raise serializers.ValidationError({fd: _('Update options must be set to false for manual projects.')})
         return super(ProjectSerializer, self).validate(attrs)
 
 
@@ -1717,11 +1725,11 @@ class CredentialSerializer(BaseSerializer):
             owner_teams = reverse('api:credential_owner_teams_list', args=(obj.pk,)),
         ))
 
-        parents = obj.admin_role.parents.exclude(object_id__isnull=True)
-        if parents.count() > 0:
+        parents = [role for role in obj.admin_role.parents.all() if role.object_id is not None]
+        if parents:
             res.update({parents[0].content_type.name:parents[0].content_object.get_absolute_url()})
-        elif obj.admin_role.members.count() > 0:
-            user = obj.admin_role.members.first()
+        elif len(obj.admin_role.members.all()) > 0:
+            user = obj.admin_role.members.all()[0]
             res.update({'user': reverse('api:user_detail', args=(user.pk,))})
 
         return res
@@ -1739,7 +1747,7 @@ class CredentialSerializer(BaseSerializer):
                 'url': reverse('api:user_detail', args=(user.pk,)),
             })
 
-        for parent in obj.admin_role.parents.exclude(object_id__isnull=True).all():
+        for parent in [role for role in obj.admin_role.parents.all() if role.object_id is not None]:
             summary_dict['owners'].append({
                 'id': parent.content_object.pk,
                 'type': camelcase_to_underscore(parent.content_object.__class__.__name__),
@@ -1825,11 +1833,15 @@ class OrganizationCredentialSerializerCreate(CredentialSerializerCreate):
 class LabelsListMixin(object):
 
     def _summary_field_labels(self, obj):
-        label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
-        if len(label_list) < 10:
-            label_ct = len(label_list)
+        if hasattr(obj, '_prefetched_objects_cache') and obj.labels.prefetch_cache_name in obj._prefetched_objects_cache:
+            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all()[:10]]
+            label_ct = len(obj.labels.all())
         else:
-            label_ct = obj.labels.count()
+            label_list = [{'id': x.id, 'name': x.name} for x in obj.labels.all().order_by('name')[:10]]
+            if len(label_list) < 10:
+                label_ct = len(label_list)
+            else:
+                label_ct = obj.labels.count()
         return {'count': label_ct, 'results': label_list}
 
     def get_summary_fields(self, obj):
@@ -1950,16 +1962,25 @@ class JobTemplateSerializer(JobTemplateMixin, UnifiedJobTemplateSerializer, JobO
         return res
 
     def validate(self, attrs):
-        survey_enabled = attrs.get('survey_enabled', self.instance and self.instance.survey_enabled or False)
-        job_type = attrs.get('job_type', self.instance and self.instance.job_type or None)
-        inventory = attrs.get('inventory', self.instance and self.instance.inventory or None)
-        project = attrs.get('project', self.instance and self.instance.project or None)
+        def get_field_from_model_or_attrs(fd):
+            return attrs.get(fd, self.instance and getattr(self.instance, fd) or None)
 
+        survey_enabled = get_field_from_model_or_attrs('survey_enabled')
+        job_type = get_field_from_model_or_attrs('job_type')
+        inventory = get_field_from_model_or_attrs('inventory')
+        credential = get_field_from_model_or_attrs('credential')
+        project = get_field_from_model_or_attrs('project')
+
+        prompting_error_message = _("Must either set a default value or ask to prompt on launch.")
         if job_type == "scan":
             if inventory is None or attrs.get('ask_inventory_on_launch', False):
                 raise serializers.ValidationError({'inventory': _('Scan jobs must be assigned a fixed inventory.')})
         elif project is None:
             raise serializers.ValidationError({'project': _("Job types 'run' and 'check' must have assigned a project.")})
+        elif credential is None and not get_field_from_model_or_attrs('ask_credential_on_launch'):
+            raise serializers.ValidationError({'credential': prompting_error_message})
+        elif inventory is None and not get_field_from_model_or_attrs('ask_inventory_on_launch'):
+            raise serializers.ValidationError({'inventory': prompting_error_message})
 
         if survey_enabled and job_type == PERM_INVENTORY_SCAN:
             raise serializers.ValidationError({'survey_enabled': _('Survey Enabled cannot be used with scan jobs.')})
@@ -2959,6 +2980,23 @@ class ActivityStreamSerializer(BaseSerializer):
     changes = serializers.SerializerMethodField()
     object_association = serializers.SerializerMethodField()
 
+    @cached_property
+    def _local_summarizable_fk_fields(self):
+        summary_dict = copy.copy(SUMMARIZABLE_FK_FIELDS)
+        # Special requests
+        summary_dict['group'] = summary_dict['group'] + ('inventory_id',)
+        for key in summary_dict.keys():
+            if 'id' not in summary_dict[key]:
+                summary_dict[key] = summary_dict[key] + ('id',)
+        field_list = summary_dict.items()
+        # Needed related fields that are not in the default summary fields
+        field_list += [
+            ('workflow_job_template_node', ('id', 'unified_job_template_id')),
+            ('label', ('id', 'name', 'organization_id')),
+            ('notification', ('id', 'status', 'notification_type', 'notification_template_id'))
+        ]
+        return field_list
+
     class Meta:
         model = ActivityStream
         fields = ('*', '-name', '-description', '-created', '-modified',
@@ -2999,7 +3037,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel = {}
         if obj.actor is not None:
             rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
-        for fk, __ in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, __ in self._local_summarizable_fk_fields:
             if not hasattr(obj, fk):
                 continue
             allm2m = getattr(obj, fk).all()
@@ -3021,7 +3059,7 @@ class ActivityStreamSerializer(BaseSerializer):
 
     def get_summary_fields(self, obj):
         summary_fields = OrderedDict()
-        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
+        for fk, related_fields in self._local_summarizable_fk_fields:
             try:
                 if not hasattr(obj, fk):
                     continue
@@ -3046,14 +3084,10 @@ class ActivityStreamSerializer(BaseSerializer):
                                 summary_fields[get_type_for_model(unified_job_template)] = {'id': unified_job_template.id,
                                                                                             'name': unified_job_template.name}
                         thisItemDict = {}
-                        if 'id' not in related_fields:
-                            related_fields = related_fields + ('id',)
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
                                 thisItemDict[field] = fval
-                        if fk == 'group':
-                            thisItemDict['inventory_id'] = getattr(thisItem, 'inventory_id', None)
                         if thisItemDict.get('id', None):
                             if thisItemDict.get('id', None) in [obj_dict.get('id', None) for obj_dict in summary_fields[fk]]:
                                 continue

@@ -53,13 +53,13 @@ from awx.main.queue import CallbackQueueDispatcher
 from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
-                            get_system_task_capacity, OutputEventFilter)
+                            get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
            'RunAdHocCommand', 'handle_work_error',
            'handle_work_success', 'update_inventory_computed_fields',
-           'send_notifications', 'run_administrative_checks']
+           'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -194,6 +194,15 @@ def cleanup_authtokens(self):
 
 
 @task(bind=True)
+def purge_old_stdout_files(self):
+    nowtime = time.time()
+    for f in os.listdir(settings.JOBOUTPUT_ROOT):
+        if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
+            os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
+            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
+
+
+@task(bind=True)
 def cluster_node_heartbeat(self):
     logger.debug("Cluster node heartbeat task.")
     inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
@@ -225,7 +234,7 @@ def tower_periodic_scheduler(self):
             logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
             continue
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        can_start = new_unified_job.signal_start(extra_vars=schedule.extra_data)
+        can_start = new_unified_job.signal_start(extra_vars=parse_yaml_or_json(schedule.extra_data))
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
@@ -721,7 +730,7 @@ class BaseTask(Task):
             stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
-                    raise RuntimeError('proot is not installed')
+                    raise RuntimeError('bubblewrap is not installed')
                 kwargs['proot_temp_dir'] = build_proot_temp_dir()
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
@@ -874,7 +883,7 @@ class RunJob(BaseTask):
         cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
+        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, '%%h%%p%%r')
 
         # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].
         env['INVENTORY_HOSTVARS'] = str(True)
@@ -1314,6 +1323,15 @@ class RunProjectUpdate(BaseTask):
         '''
         return kwargs.get('private_data_files', {}).get('scm_credential', '')
 
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = ProjectUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
     def post_run_hook(self, instance, status, **kwargs):
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
@@ -1349,7 +1367,7 @@ class RunInventoryUpdate(BaseTask):
                                   project_name=credential.project)
             if credential.domain not in (None, ''):
                 openstack_auth['domain_name'] = credential.domain
-            private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
+            private_state = inventory_update.source_vars_dict.get('private', True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
             cache = inventory_update.source_vars_dict.get('cache', {})
@@ -1600,7 +1618,6 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
         args.append('--source')
-
         # If this is a cloud-based inventory (e.g. from AWS, Rackspace, etc.)
         # then we need to set some extra flags based on settings in
         # Tower.
@@ -1656,21 +1673,40 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(runpath)
             args.append("--custom")
-            # try:
-            #     shutil.rmtree(runpath, True)
-            # except OSError:
-            #     pass
+            self.custom_dir_path.append(runpath)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:
             args.append('--traceback')
         return args
 
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunInventoryUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = InventoryUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
+    def pre_run_hook(self, instance, **kwargs):
+        self.custom_dir_path = []
+
+    def post_run_hook(self, instance, status, **kwargs):
+        print("In post run hook")
+        if self.custom_dir_path:
+            for p in self.custom_dir_path:
+                try:
+                    shutil.rmtree(p, True)
+                except OSError:
+                    pass
+
 
 
 class RunAdHocCommand(BaseTask):
@@ -1878,6 +1914,8 @@ class RunSystemJob(BaseTask):
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
                 args.extend(['--days', str(json_vars.get('days', 60))])
+            if 'dry_run' in json_vars and json_vars['dry_run'] and system_job.job_type != 'cleanup_facts':
+                args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
                 args.extend(['--jobs', '--project-updates', '--inventory-updates',
                              '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
@@ -1890,6 +1928,15 @@ class RunSystemJob(BaseTask):
         except Exception as e:
             logger.error("Failed to parse system job: " + str(e))
         return args
+
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunSystemJob, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = SystemJob.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_env(self, instance, **kwargs):
         env = super(RunSystemJob, self).build_env(instance,

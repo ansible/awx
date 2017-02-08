@@ -18,19 +18,11 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
             // and their status data
             Object.keys(event_data).forEach(key => {
                 // failed passes boolean not integer
-                if (key === "failed") {
-                    // array of hosts from failed type
-                    hostsArr = Object.keys(event_data[key]);
-                    hostsArr.forEach(host => {
-                        if (!hosts[host]) {
-                            // host has not been added to hosts object
-                            // add now
-                            hosts[host] = {};
-                        }
-
-                        hosts[host][key] = event_data[key][host];
-                    });
-                } else {
+                if (key === "changed" ||
+                    key === "dark" ||
+                    key === "failures" ||
+                    key === "ok" ||
+                    key === "skipped") {
                     // array of hosts from each type ("changed", "dark", etc.)
                     hostsArr = Object.keys(event_data[key]);
                     hostsArr.forEach(host => {
@@ -61,7 +53,7 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                     return o.dark > 0;
                 }),
                 failures : _.filter(hosts, function(o){
-                    return o.failed === true;
+                    return o.failures > 0;
                 }),
                 changed : _.filter(hosts, function(o){
                     return o.changed > 0;

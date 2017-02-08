@@ -762,6 +762,12 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
                     nodeToBeDeleted: $scope.nodeToBeDeleted
                 });
 
+                if($scope.workflowMakerFormConfig.nodeMode === "add") {
+                    if($scope.placeholderNode.isRoot) {
+                        $scope.edgeFlags.showTypeOptions = false;
+                    }
+                }
+
                 if ($scope.nodeToBeDeleted.isNew !== true) {
                     $scope.treeData.data.deletedNodes.push($scope.nodeToBeDeleted.nodeId);
                 }

@@ -30,13 +30,17 @@
                 </a>
             </li>
         </ul>
-        <span class="Paginate-pager--pageof">Page
+        <span class="Paginate-pager--pageof" translate>Page
                 <span id="current-page">{{current()}}</span> of
         <span id="total-pages">{{last()}}</span>
         </span>
     </div>
     <div class="Paginate-total page-label" ng-hide="dataCount === 0">
-        <span>ITEMS&nbsp;
+        <!-- TODO: Move the ITEMS line into paginate.directive.js
+             so that i18n.sprintf("A of B") can be used but
+             it seems $sce.trustAsHtml() does not work with html tag.
+         -->
+        <span translate>ITEMS&nbsp;
             <span>{{dataRange}}</span>
             <span>of {{dataCount()}}</span>
         </span>

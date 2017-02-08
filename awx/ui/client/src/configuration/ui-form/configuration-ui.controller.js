@@ -62,6 +62,7 @@
                  ngDisabled: $rootScope.user_is_system_auditor,
                  disabled: $scope.$parent.configDataResolve[key].disabled || null,
                  readonly: $scope.$parent.configDataResolve[key].readonly || null,
+                 definedInFile: $scope.$parent.configDataResolve[key].defined_in_file || null
              });
          }
 

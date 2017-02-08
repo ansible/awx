@@ -1,6 +1,6 @@
 
 export default
-    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location, $rootScope) {
+    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location, $rootScope, i18n) {
 
             // This factory gathers up all the job launch data and POST's it.
 
@@ -163,8 +163,10 @@ export default
                         }
                     })
                     .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
+                        let template_id = scope.job_template_id;
+                        template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                        ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
+                        msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
                     });
                 };
 
@@ -182,8 +184,8 @@ export default
                         buildData();
                     })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, { hdr: 'Error!',
-                        msg: 'Failed to retrieve job template extra variables.'  });
+                        ProcessErrors(scope, data, status, { hdr: i18n._('Error!'),
+                        msg: i18n._('Failed to retrieve job template extra variables.')  });
                     });
                 };
 
@@ -209,5 +211,6 @@ LaunchJob.$inject =
         'GetBasePath',
         '$state',
         '$location',
-        '$rootScope'
+        '$rootScope',
+        'i18n'
     ];

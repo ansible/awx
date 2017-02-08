@@ -51,24 +51,26 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
     // iterate over the list and add fields like type label, after the
     // OPTIONS request returns, or the list is sorted/paginated/searched
     function optionsRequestDataProcessing(){
-        $scope[list.name].forEach(function(item, item_idx) {
-            var itm = $scope[list.name][item_idx];
+        if ($scope[list.name] !== undefined) {
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
 
-            // Set the item type label
-            if (list.fields.scm_type && $scope.options &&
-                    $scope.options.hasOwnProperty('scm_type')) {
-                        $scope.options.scm_type.choices.every(function(choice) {
-                            if (choice[0] === item.scm_type) {
-                            itm.type_label = choice[1];
-                            return false;
-                        }
-                        return true;
-                    });
-                }
+                // Set the item type label
+                if (list.fields.scm_type && $scope.options &&
+                        $scope.options.hasOwnProperty('scm_type')) {
+                            $scope.options.scm_type.choices.every(function(choice) {
+                                if (choice[0] === item.scm_type) {
+                                itm.type_label = choice[1];
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
 
-                buildTooltips(itm);
+                    buildTooltips(itm);
 
-        });
+            });
+        }
     }
 
     function buildTooltips(project) {

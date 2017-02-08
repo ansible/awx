@@ -305,6 +305,7 @@ export default
                     label: "Cache Timeout <span class=\"small-text\"> (seconds)</span>",
                     id: 'source-cache-timeout',
                     type: 'number',
+                    ngDisabled: '!(group_obj.summary_fields.user_capabilities.edit || canAdd)',
                     integer: true,
                     min: 0,
                     ngShow: "source && source.value !== '' && update_on_launch",
@@ -339,14 +340,6 @@ export default
                 "notifications": {
                     include: "NotificationsList"
                 }
-            },
-            relatedSets: function() {
-                return {
-                    notifications: {
-                        iterator: 'notification',
-                        url: 'api/v1/notification_templates/'
-                    }
-                };
             }
 
         })

@@ -44,7 +44,6 @@ import './filters';
 import { Home } from './controllers/Home';
 import { SocketsController } from './controllers/Sockets';
 import { CredentialsAdd, CredentialsEdit, CredentialsList } from './controllers/Credentials';
-import { JobsListController } from './controllers/Jobs';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -70,6 +69,7 @@ import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import credentials from './credentials/main';
+import jobs from './jobs/main';
 import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
 import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
 import { TeamsList, TeamsAdd, TeamsEdit } from './controllers/Teams';
@@ -99,6 +99,8 @@ var tower = angular.module('Tower', [
     require('angular-tz-extensions'),
     require('lr-infinite-scroll'),
     require('ng-toast'),
+    'gettext',
+    'I18N',
     uiRouter,
     'ui.router.state.events',
 
@@ -132,6 +134,7 @@ var tower = angular.module('Tower', [
     portalMode.name,
     config.name,
     credentials.name,
+    jobs.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -201,8 +204,6 @@ var tower = angular.module('Tower', [
     scheduler.name,
     'ApiModelHelper',
     'ActivityStreamHelper',
-    'gettext',
-    'I18N',
     'WorkflowFormDefinition',
     'InventorySourcesListDefinition',
     'WorkflowMakerFormDefinition'
@@ -290,6 +291,9 @@ var tower = angular.module('Tower', [
                                 "jobs": ["status_changed"]
                             }
                         }
+                    },
+                    ncyBreadcrumb: {
+                        label: N_('PROJECTS')
                     }
                 })
             });
@@ -371,12 +375,12 @@ var tower = angular.module('Tower', [
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
-        'FeaturesService', '$filter', 'SocketService', 'I18NInit',
+        'FeaturesService', '$filter', 'SocketService',
         function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
-            $filter, SocketService, I18NInit) {
+            $filter, SocketService) {
 
             $rootScope.$state = $state;
             $rootScope.$state.matches = function(stateName) {
@@ -388,7 +392,6 @@ var tower = angular.module('Tower', [
                 $log.debug(`$state.defaultErrorHandler: ${error}`);
             });
 
-            I18NInit();
             $stateExtender.addState({
                 name: 'dashboard',
                 url: '/home',
@@ -417,53 +420,6 @@ var tower = angular.module('Tower', [
                             });
                         }
                     ]
-                }
-            });
-
-            $stateExtender.addState({
-                searchPrefix: 'job',
-                name: 'jobs',
-                url: '/jobs',
-                ncyBreadcrumb: {
-                    label: N_("JOBS")
-                },
-                params: {
-                    job_search: {
-                        value: {
-                            not__launch_type: 'sync',
-                            order_by: '-finished'
-                        },
-                        squash: ''
-                    }
-                },
-                data: {
-                    socket: {
-                        "groups": {
-                            "jobs": ["status_changed"],
-                            "schedules": ["changed"]
-                        }
-                    }
-                },
-                resolve: {
-                    Dataset: ['AllJobsList', 'QuerySet', '$stateParams', 'GetBasePath', (list, qs, $stateParams, GetBasePath) => {
-                        let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
-                    }]
-                },
-                views: {
-                    '@': {
-                        templateUrl: urlPrefix + 'partials/jobs.html',
-                    },
-                    'list@jobs': {
-                        templateProvider: function(AllJobsList, generateList) {
-                            let html = generateList.build({
-                                list: AllJobsList,
-                                mode: 'edit'
-                            });
-                            return html;
-                        },
-                        controller: JobsListController
-                    }
                 }
             });
 
@@ -497,70 +453,6 @@ var tower = angular.module('Tower', [
                     label: N_('SOCKETS')
                 }
             });
-
-            $rootScope.deletePermissionFromUser = function(userId, userName, roleName, roleType, url) {
-                var action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": userId })
-                        .success(function() {
-                            Wait('stop');
-                            $rootScope.$broadcast("refreshList", "permission");
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Could not disassociate user from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                Prompt({
-                    hdr: `Remove role`,
-                    body: `
-                        <div class="Prompt-bodyQuery">
-                            Confirm  the removal of the ${roleType}
-                                <span class="Prompt-emphasis"> ${roleName} </span>
-                            role associated with ${userName}.
-                        </div>
-                    `,
-                    action: action,
-                    actionText: 'REMOVE'
-                });
-            };
-
-            $rootScope.deletePermissionFromTeam = function(teamId, teamName, roleName, roleType, url) {
-                var action = function() {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-                    Rest.setUrl(url);
-                    Rest.post({ "disassociate": true, "id": teamId })
-                        .success(function() {
-                            Wait('stop');
-                            $rootScope.$broadcast("refreshList", "role");
-                        })
-                        .error(function(data, status) {
-                            ProcessErrors($rootScope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Could not disassociate team from role.  Call to ' + url + ' failed. DELETE returned status: ' + status
-                            });
-                        });
-                };
-
-                Prompt({
-                    hdr: `Remove role`,
-                    body: `
-                        <div class="Prompt-bodyQuery">
-                            Confirm  the removal of the ${roleType}
-                                <span class="Prompt-emphasis"> ${roleName} </span>
-                            role associated with the ${teamName} team.
-                        </div>
-                    `,
-                    action: action,
-                    actionText: 'REMOVE'
-                });
-            };
 
             function activateTab() {
                 // Make the correct tab active

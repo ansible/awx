@@ -1,5 +1,5 @@
-export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService',
-    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService) {
+export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n',
+    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService, i18n) {
 
         let path, relations,
             defaults,
@@ -35,6 +35,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
             });
+            $scope.searchPlaceholder = $scope.disableSearch ? i18n._('Cannot search running job') : i18n._('Search');
 
             function compareParams(a, b) {
                 for (let key in a) {
@@ -73,6 +74,15 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             });
 
             $scope.$on('$destroy', stateChangeSuccessListener);
+
+            $scope.$watch('disableSearch', function(disableSearch){
+                if(disableSearch) {
+                    $scope.searchPlaceholder = i18n._('Cannot search running job');
+                }
+                else {
+                    $scope.searchPlaceholder = i18n._('Search');
+                }
+            });
         }
 
         // Removes state definition defaults and pagination terms
@@ -191,7 +201,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 origQueryset = _.clone(queryset);
 
             // Remove leading/trailing whitespace if there is any
-            terms = terms.trim();
+            terms = (terms) ? terms.trim() : "";
 
             if(terms && terms !== '') {
                 // Split the terms up

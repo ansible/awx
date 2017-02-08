@@ -182,7 +182,7 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_playbook_on_include(self, included_file):
         event_data = dict(
-            included_file=included_file,
+            included_file=included_file._filename if included_file is not None else None,
         )
         with self.capture_event_data('playbook_on_include', **event_data):
             super(BaseCallbackModule, self).v2_playbook_on_include(included_file)

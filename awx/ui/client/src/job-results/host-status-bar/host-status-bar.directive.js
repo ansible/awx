@@ -33,7 +33,7 @@ export default [ 'templateUrl',
 
                     // if there are any hosts that have finished, don't
                     // show default grey bar
-                    scope.hostsFinished = (Object
+                    scope.hasCount = (Object
                         .keys(val)
                         .filter(key => (val[key] > 0)).length > 0);
                 }

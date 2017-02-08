@@ -8,7 +8,7 @@ import logging
 
 # Django
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
@@ -25,7 +25,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.conf.license import LicenseForbids
 
 __all__ = ['get_user_queryset', 'check_user_access', 'check_user_access_with_errors',
-           'user_accessible_objects',
+           'user_accessible_objects', 'consumer_access',
            'user_admin_role', 'StateConflict',]
 
 PERMISSION_TYPES = [
@@ -162,6 +162,17 @@ def check_superuser(func):
             return True
         return func(self, *args, **kwargs)
     return wrapper
+
+
+def consumer_access(group_name):
+    '''
+    consumer_access returns the proper Access class based on group_name
+    for a channels consumer.
+    '''
+    class_map = {'job_events': JobAccess,
+                 'workflow_events': WorkflowJobAccess,
+                 'ad_hoc_command_events': AdHocCommandAccess}
+    return class_map.get(group_name)
 
 
 class BaseAccess(object):
@@ -625,7 +636,7 @@ class HostAccess(BaseAccess):
             raise PermissionDenied(_('Unable to change inventory on a host.'))
 
         # Prevent renaming a host that might exceed license count
-        if 'name' in data:
+        if data and 'name' in data:
             self.check_license(add_host_name=data['name'])
 
         # Checks for admin or change permission on inventory, controls whether
@@ -744,7 +755,10 @@ class InventorySourceAccess(BaseAccess):
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.group:
-            return self.user.can_access(Group, 'change', obj.group, None)
+            return (
+                self.user.can_access(Group, 'change', obj.group, None) and
+                self.check_related('credential', Credential, data, obj=obj, role_field='use_role')
+            )
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
         else:
@@ -817,7 +831,11 @@ class CredentialAccess(BaseAccess):
         permitted to see.
         """
         qs = self.model.accessible_objects(self.user, 'read_role')
-        return qs.select_related('created_by', 'modified_by').all()
+        qs = qs.select_related('created_by', 'modified_by')
+        qs = qs.prefetch_related(
+            'admin_role', 'use_role', 'read_role',
+            'admin_role__parents', 'admin_role__members')
+        return qs
 
     @check_superuser
     def can_read(self, obj):
@@ -1032,10 +1050,6 @@ class JobTemplateAccess(BaseAccess):
             qs = self.model.accessible_objects(self.user, 'read_role')
         return qs.select_related('created_by', 'modified_by', 'inventory', 'project',
                                  'credential', 'cloud_credential', 'next_schedule').all()
-
-    @check_superuser
-    def can_read(self, obj):
-        return self.user in obj.read_role
 
     def can_add(self, data):
         '''
@@ -1357,7 +1371,7 @@ class SystemJobTemplateAccess(BaseAccess):
     model = SystemJobTemplate
 
     @check_superuser
-    def can_start(self, obj):
+    def can_start(self, obj, validate_license=True):
         '''Only a superuser can start a job from a SystemJobTemplate'''
         return False
 
@@ -1549,7 +1563,7 @@ class WorkflowJobTemplateAccess(BaseAccess):
             missing_credentials = []
             missing_inventories = []
             qs = obj.workflow_job_template_nodes
-            qs.select_related('unified_job_template', 'inventory', 'credential')
+            qs = qs.prefetch_related('unified_job_template', 'inventory__use_role', 'credential__use_role')
             for node in qs.all():
                 node_errors = {}
                 if node.inventory and self.user not in node.inventory.use_role:
@@ -1853,6 +1867,7 @@ class UnifiedJobTemplateAccess(BaseAccess):
         qs = qs.prefetch_related(
             'last_job',
             'current_job',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
         )
 
         # WISH - sure would be nice if the following worked, but it does not.
@@ -1900,6 +1915,7 @@ class UnifiedJobAccess(BaseAccess):
             'modified_by',
             'unified_job_node__workflow_job',
             'unified_job_template',
+            Prefetch('labels', queryset=Label.objects.all().order_by('name'))
         )
 
         # WISH - sure would be nice if the following worked, but it does not.
@@ -2109,7 +2125,7 @@ class ActivityStreamAccess(BaseAccess):
                                  'job_template', 'job', 'ad_hoc_command',
                                  'notification_template', 'notification', 'label', 'role', 'actor',
                                  'schedule', 'custom_inventory_script', 'unified_job_template',
-                                 'workflow_job_template', 'workflow_job')
+                                 'workflow_job_template', 'workflow_job', 'workflow_job_template_node')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
 

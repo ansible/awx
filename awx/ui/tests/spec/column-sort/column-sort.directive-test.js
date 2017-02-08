@@ -38,16 +38,17 @@ describe('Directive: column-sort', () =>{
             go: jasmine.createSpy('go')
         };
 
+        this.$stateParams = {};
 
         angular.mock.module('ColumnSortModule', ($provide) =>{
 
-
-        QuerySet = jasmine.createSpyObj('qs', ['search']);
-        QuerySet.search.and.callFake(() => { return { then: function(){} } });
-        GetBasePath = jasmine.createSpy('GetBasePath');
-        $provide.value('QuerySet', QuerySet);
-        $provide.value('GetBasePath', GetBasePath);
-        $provide.value('$state', this.$state);
+            QuerySet = jasmine.createSpyObj('qs', ['search']);
+            QuerySet.search.and.callFake(() => { return { then: function(){} }; });
+            GetBasePath = jasmine.createSpy('GetBasePath');
+            $provide.value('QuerySet', QuerySet);
+            $provide.value('GetBasePath', GetBasePath);
+            $provide.value('$state', this.$state);
+            $provide.value('$stateParams', this.$stateParams);
 
         });
     });
@@ -55,7 +56,7 @@ describe('Directive: column-sort', () =>{
     beforeEach(angular.mock.inject(($templateCache, _$rootScope_, _$compile_) => {
         template = window.__html__['client/src/shared/column-sort/column-sort.partial.html'];
         $templateCache.put('/static/partials/shared/column-sort/column-sort.partial.html', template);
-                
+
         $compile = _$compile_;
         $scope = _$rootScope_.$new();
     }));
@@ -67,11 +68,11 @@ describe('Directive: column-sort', () =>{
         };
 
         $compile(this.name_field)($scope);
-        $compile(this.idx_field)($scope)
+        $compile(this.idx_field)($scope);
 
         $scope.$digest();
         expect( $(this.name_field).find('.columnSortIcon').hasClass('fa-sort-up') ).toEqual(true);
-        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);                
+        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);
     });
 
     it('should toggle to ascending name order, then ascending idx, then descending idx', function(){
@@ -81,21 +82,21 @@ describe('Directive: column-sort', () =>{
         };
 
         $compile(this.name_field)($scope);
-        $compile(this.idx_field)($scope)
+        $compile(this.idx_field)($scope);
 
         $scope.$digest();
 
         $(this.name_field).click();
         expect( $(this.name_field).find('.columnSortIcon').hasClass('fa-sort-up') ).toEqual(true);
-        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);  
+        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);
 
-        $(this.idx_field).click(); 
+        $(this.idx_field).click();
         expect( $(this.name_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);
         expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort-up') ).toEqual(true);
 
         $(this.idx_field).click();
         expect( $(this.name_field).find('.columnSortIcon').hasClass('fa-sort') ).toEqual(true);
-        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort-down') ).toEqual(true)
+        expect( $(this.idx_field).find('.columnSortIcon').hasClass('fa-sort-down') ).toEqual(true);
     });
 
 });

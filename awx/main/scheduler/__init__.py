@@ -123,12 +123,15 @@ class TaskManager():
                 spawn_node.save()
                 if job._resources_sufficient_for_launch():
                     can_start = job.signal_start(**kv)
+                    if not can_start:
+                        job.job_explanation = _("Job spawned from workflow could not start because it "
+                                                "was not in the right state or required manual credentials")
                 else:
                     can_start = False
+                    job.job_explanation = _("Job spawned from workflow could not start because it "
+                                            "was missing a related resource such as project or inventory")
                 if not can_start:
                     job.status = 'failed'
-                    job.job_explanation = _("Job spawned from workflow could not start because it "
-                                            "was not in the right state or required manual credentials")
                     job.save(update_fields=['status', 'job_explanation'])
                     connection.on_commit(lambda: job.websocket_emit_status('failed'))
 

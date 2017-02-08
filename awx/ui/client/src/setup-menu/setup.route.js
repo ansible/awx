@@ -1,10 +1,11 @@
 import {templateUrl} from '../shared/template-url/template-url.factory';
+import { N_ } from '../i18n';
 
 export default {
     name: 'setup',
     route: '/setup',
     ncyBreadcrumb: {
-        label: "SETTINGS"
+        label: N_("SETTINGS")
     },
     templateUrl: templateUrl('setup-menu/setup-menu'),
     controller: function(orgAdmin, $scope){

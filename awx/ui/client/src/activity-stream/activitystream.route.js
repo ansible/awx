@@ -4,6 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
+ import { N_ } from '../i18n';
+
 export default {
     name: 'activityStream',
     route: '/activity_stream?target&id',
@@ -22,7 +24,7 @@ export default {
         }
     },
     ncyBreadcrumb: {
-        label: "ACTIVITY STREAM"
+        label: N_("ACTIVITY STREAM")
     },
     onExit: function() {
         $('#stream-detail-modal').modal('hide');

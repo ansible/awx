@@ -230,7 +230,7 @@ class InventorySourceDict(PartialModelDict):
 
 class SystemJobDict(PartialModelDict):
     FIELDS = (
-        'id', 'created', 'status',
+        'id', 'created', 'status', 'celery_task_id',
     )
     model = SystemJob
 
@@ -271,5 +271,5 @@ class WorkflowJobDict(PartialModelDict):
         return 'workflow_job'
 
     def task_impact(self):
-        return 10
+        return 0
 

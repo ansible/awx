@@ -12,45 +12,48 @@
 
 export default
     angular.module('ActivityStreamHelper', ['Utilities'])
-        .factory('GetTargetTitle', [
-            function () {
+        .factory('GetTargetTitle', ['i18n',
+            function (i18n) {
                 return function (target) {
 
-                    var rtnTitle = 'ALL ACTIVITY';
+                    var rtnTitle = i18n._('ALL ACTIVITY');
 
                     switch(target) {
                         case 'project':
-                            rtnTitle = 'PROJECTS';
+                            rtnTitle = i18n._('PROJECTS');
                             break;
                         case 'inventory':
-                            rtnTitle = 'INVENTORIES';
+                            rtnTitle = i18n._('INVENTORIES');
                             break;
                         case 'credential':
-                            rtnTitle = 'CREDENTIALS';
+                            rtnTitle = i18n._('CREDENTIALS');
                             break;
                         case 'user':
-                            rtnTitle = 'USERS';
+                            rtnTitle = i18n._('USERS');
                             break;
                         case 'team':
-                            rtnTitle = 'TEAMS';
+                            rtnTitle = i18n._('TEAMS');
+                            break;
+                        case 'notification_template':
+                            rtnTitle = i18n._('NOTIFICATION TEMPLATES');
                             break;
                         case 'organization':
-                            rtnTitle = 'ORGANIZATIONS';
+                            rtnTitle = i18n._('ORGANIZATIONS');
                             break;
                         case 'job':
-                            rtnTitle = 'JOBS';
+                            rtnTitle = i18n._('JOBS');
                             break;
-                        case 'inventory_script':
-                            rtnTitle = 'INVENTORY SCRIPTS';
+                        case 'custom_inventory_script':
+                            rtnTitle = i18n._('INVENTORY SCRIPTS');
                             break;
                         case 'schedule':
-                            rtnTitle = 'SCHEDULES';
+                            rtnTitle = i18n._('SCHEDULES');
                             break;
                         case 'host':
-                            rtnTitle = 'HOSTS';
+                            rtnTitle = i18n._('HOSTS');
                             break;
                         case 'template':
-                            rtnTitle = 'TEMPLATES';
+                            rtnTitle = i18n._('TEMPLATES');
                             break;
                     }
 

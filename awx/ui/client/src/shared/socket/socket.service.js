@@ -5,8 +5,8 @@
  *************************************************/
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 export default
-['$rootScope', '$location', '$log','$state', '$q', 'i18n', 'Authorization',
-    function ($rootScope, $location, $log, $state, $q, i18n, Authorization) {
+['$rootScope', '$location', '$log','$state', '$q', 'i18n',
+    function ($rootScope, $location, $log, $state, $q, i18n) {
         var needsResubscribing = false,
         socketPromise = $q.defer();
         return {
@@ -14,8 +14,7 @@ export default
                 var self = this,
                     host = window.location.host,
                     protocol,
-                    url,
-                    token = Authorization.getToken();
+                    url;
 
                 if($location.protocol() === 'http'){
                     protocol = 'ws';
@@ -26,8 +25,7 @@ export default
                 url = `${protocol}://${host}/websocket/`;
 
                 if (!$rootScope.sessionTimer || ($rootScope.sessionTimer && !$rootScope.sessionTimer.isExpired())) {
-                    // We have a valid session token, so attempt socket connection
-                    url = `${url}?token=${token}`;
+
                     $log.debug('Socket connecting to: ' + url);
 
                     self.socket = new ReconnectingWebSocket(url, null, {

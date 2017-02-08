@@ -163,20 +163,22 @@ def get_awx_version():
         return __version__
 
 
-def get_encryption_key_for_pk(pk, field_name):
+def get_encryption_key(field_name, pk=None):
     '''
-    Generate key for encrypted password based on instance pk and field name.
+    Generate key for encrypted password based on field name,
+    ``settings.SECRET_KEY``, and instance pk (if available).
+
+    :param pk: (optional) the primary key of the ``awx.conf.model.Setting``;
+               can be omitted in situations where you're encrypting a setting
+               that is not database-persistent (like a read-only setting)
     '''
     from django.conf import settings
     h = hashlib.sha1()
     h.update(settings.SECRET_KEY)
-    h.update(str(pk))
+    if pk is not None:
+        h.update(str(pk))
     h.update(field_name)
     return h.digest()[:16]
-
-
-def get_encryption_key(instance, field_name):
-    return get_encryption_key_for_pk(instance.pk, field_name)
 
 
 def encrypt_field(instance, field_name, ask=False, subfield=None):
@@ -189,7 +191,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
     value = smart_str(value)
-    key = get_encryption_key(instance, field_name)
+    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
     cipher = AES.new(key, AES.MODE_ECB)
     while len(value) % cipher.block_size != 0:
         value += '\x00'
@@ -217,13 +219,13 @@ def decrypt_field(instance, field_name, subfield=None):
         value = value[subfield]
     if not value or not value.startswith('$encrypted$'):
         return value
-    key = get_encryption_key(instance, field_name)
+    key = get_encryption_key(field_name, getattr(instance, 'pk', None))
 
     return decrypt_value(key, value)
 
 
 def decrypt_field_value(pk, field_name, value):
-    key = get_encryption_key_for_pk(pk, field_name)
+    key = get_encryption_key(field_name, pk)
     return decrypt_value(key, value)
 
 
@@ -517,6 +519,10 @@ def cache_list_capabilities(page, prefetch_list, model, user):
     for obj in page:
         obj.capabilities_cache = {}
 
+    skip_models = []
+    if hasattr(model, 'invalid_user_capabilities_prefetch_models'):
+        skip_models = model.invalid_user_capabilities_prefetch_models()
+
     for prefetch_entry in prefetch_list:
 
         display_method = None
@@ -530,19 +536,20 @@ def cache_list_capabilities(page, prefetch_list, model, user):
             paths = [paths]
 
         # Build the query for accessible_objects according the user & role(s)
-        qs_obj = None
+        filter_args = []
         for role_path in paths:
             if '.' in role_path:
                 res_path = '__'.join(role_path.split('.')[:-1])
                 role_type = role_path.split('.')[-1]
-                if qs_obj is None:
-                    qs_obj = model.objects
-                parent_model = model._meta.get_field(res_path).related_model
-                kwargs = {'%s__in' % res_path: parent_model.accessible_objects(user, '%s_role' % role_type)}
-                qs_obj = qs_obj.filter(Q(**kwargs) | Q(**{'%s__isnull' % res_path: True}))
+                parent_model = model
+                for subpath in role_path.split('.')[:-1]:
+                    parent_model = parent_model._meta.get_field(subpath).related_model
+                filter_args.append(Q(
+                    Q(**{'%s__pk__in' % res_path: parent_model.accessible_pk_qs(user, '%s_role' % role_type)}) |
+                    Q(**{'%s__isnull' % res_path: True})))
             else:
                 role_type = role_path
-                qs_obj = model.accessible_objects(user, '%s_role' % role_type)
+                filter_args.append(Q(**{'pk__in': model.accessible_pk_qs(user, '%s_role' % role_type)}))
 
         if display_method is None:
             # Role name translation to UI names for methods
@@ -553,10 +560,13 @@ def cache_list_capabilities(page, prefetch_list, model, user):
                 display_method = 'start'
 
         # Union that query with the list of items on page
-        ids_with_role = set(qs_obj.filter(pk__in=page_ids).values_list('pk', flat=True))
+        filter_args.append(Q(pk__in=page_ids))
+        ids_with_role = set(model.objects.filter(*filter_args).values_list('pk', flat=True))
 
         # Save data item-by-item
         for obj in page:
+            if skip_models and obj.__class__.__name__.lower() in skip_models:
+                continue
             obj.capabilities_cache[display_method] = False
             if obj.pk in ids_with_role:
                 obj.capabilities_cache[display_method] = True
@@ -766,9 +776,10 @@ class OutputEventFilter(object):
 
     EVENT_DATA_RE = re.compile(r'\x1b\[K((?:[A-Za-z0-9+/=]+\x1b\[\d+D)+)\x1b\[K')
 
-    def __init__(self, fileobj=None, event_callback=None):
+    def __init__(self, fileobj=None, event_callback=None, raw_callback=None):
         self._fileobj = fileobj
         self._event_callback = event_callback
+        self._raw_callback = raw_callback
         self._counter = 1
         self._start_line = 0
         self._buffer = ''
@@ -781,6 +792,8 @@ class OutputEventFilter(object):
         if self._fileobj:
             self._fileobj.write(data)
         self._buffer += data
+        if self._raw_callback:
+            self._raw_callback(data)
         while True:
             match = self.EVENT_DATA_RE.search(self._buffer)
             if not match:
@@ -813,7 +826,7 @@ class OutputEventFilter(object):
         for stdout_chunk in stdout_chunks:
             event_data['counter'] = self._counter
             self._counter += 1
-            event_data['stdout'] = stdout_chunk
+            event_data['stdout'] = stdout_chunk[:-2] if len(stdout_chunk) > 2 else ""
             n_lines = stdout_chunk.count('\n')
             event_data['start_line'] = self._start_line
             event_data['end_line'] = self._start_line + n_lines

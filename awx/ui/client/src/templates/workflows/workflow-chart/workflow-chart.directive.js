@@ -403,22 +403,22 @@ export default [ '$state','moment',
                                 if(d.job){
                                     switch(d.job.status) {
                                         case "pending":
-                                            statusClass = "workflowChart-nodeStatus--running";
+                                            statusClass += "workflowChart-nodeStatus--running";
                                             break;
                                         case "waiting":
-                                            statusClass = "workflowChart-nodeStatus--running";
+                                            statusClass += "workflowChart-nodeStatus--running";
                                             break;
                                         case "running":
-                                            statusClass = "workflowChart-nodeStatus--running";
+                                            statusClass += "workflowChart-nodeStatus--running";
                                             break;
                                         case "successful":
-                                            statusClass = "workflowChart-nodeStatus--success";
+                                            statusClass += "workflowChart-nodeStatus--success";
                                             break;
                                         case "failed":
-                                            statusClass = "workflowChart-nodeStatus--failed";
+                                            statusClass += "workflowChart-nodeStatus--failed";
                                             break;
                                         case "error":
-                                            statusClass = "workflowChart-nodeStatus--failed";
+                                            statusClass += "workflowChart-nodeStatus--failed";
                                             break;
                                     }
                                 }
@@ -660,7 +660,7 @@ export default [ '$state','moment',
                                     statusClass += "workflowChart-nodeStatus--failed";
                                     break;
                                 case "error":
-                                    statusClass = "workflowChart-nodeStatus--failed";
+                                    statusClass += "workflowChart-nodeStatus--failed";
                                     break;
                             }
                         }

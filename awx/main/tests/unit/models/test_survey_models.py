@@ -20,11 +20,9 @@ def job(mocker):
     return ret
 
 
-@pytest.mark.survey
-def test_job_survey_password_redaction():
-    """Tests the Job model's funciton to redact passwords from
-    extra_vars - used when displaying job information"""
-    job = Job(
+@pytest.fixture
+def job_with_survey():
+    return Job(
         name="test-job-with-passwords",
         extra_vars=json.dumps({
             'submitter_email': 'foobar@redhat.com',
@@ -33,7 +31,13 @@ def test_job_survey_password_redaction():
         survey_passwords={
             'secret_key': '$encrypted$',
             'SSN': '$encrypted$'})
-    assert json.loads(job.display_extra_vars()) == {
+
+
+@pytest.mark.survey
+def test_job_survey_password_redaction(job_with_survey):
+    """Tests the Job model's funciton to redact passwords from
+    extra_vars - used when displaying job information"""
+    assert json.loads(job_with_survey.display_extra_vars()) == {
         'submitter_email': 'foobar@redhat.com',
         'secret_key': '$encrypted$',
         'SSN': '$encrypted$'}

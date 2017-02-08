@@ -9,7 +9,7 @@
  * generateLookupNodes - Attaches to a form node. Builds an abstract '*.lookup' node with field-specific 'lookup.*' children e.g. {name: 'projects.add.lookup.organizations', ...}
  */
 
-export default ['$injector', '$stateExtender', '$log', function($injector, $stateExtender, $log) {
+export default ['$injector', '$stateExtender', '$log', 'i18n', function($injector, $stateExtender, $log, i18n) {
     return {
         /**
         * @ngdoc method
@@ -150,7 +150,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: `CREATE ${form.breadcrumbName || form.name}`
+                            label: i18n.sprintf(i18n._("CREATE %s"), i18n._(`${form.breadcrumbName || form.name}`))
                         },
                         views: {
                             'form': {
@@ -219,8 +219,8 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     };
                     if (params.data && params.data.activityStreamTarget) {
                         formNodeState.data = {};
-                        formNodeState.data.activityStreamId = params.data.activityStreamTarget + '_id';
-
+                        formNodeState.data.activityStreamId = params.data.activityStreamId ? params.data.activityStreamId : params.data.activityStreamTarget + '_id';
+                        formNodeState.data.activityStreamTarget = params.data.activityStreamTarget;
                     }
                     formNode = $stateExtender.buildDefinition(formNodeState);
 
@@ -230,7 +230,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     break;
             }
             states.push(formNode);
-            states = states.concat(this.generateLookupNodes(form, formNode)).concat(this.generateFormListDefinitions(form, formNode));
+            states = states.concat(this.generateLookupNodes(form, formNode)).concat(this.generateFormListDefinitions(form, formNode, params));
             return states;
         },
         /**
@@ -241,7 +241,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
          * @params {object} formStateDefinition - the parent form node
          * @returns {array} Array of state definitions [{...}, {...}, ...]
          */
-        generateFormListDefinitions: function(form, formStateDefinition) {
+        generateFormListDefinitions: function(form, formStateDefinition, params) {
 
             function buildRbacUserTeamDirective(){
                 let states = [];
@@ -274,7 +274,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-user-team resolve="$resolve" title="Add Permissions"></add-rbac-user-team>`
+                            template: `<add-rbac-user-team resolve="$resolve" title="` + i18n._('Add Permissions') + `"></add-rbac-user-team>`
                         }
                     },
                     resolve: {
@@ -339,7 +339,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="Add Users / Teams"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="` + i18n._('Add Users') + ' / ' + i18n._('Teams') + `"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -492,7 +492,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                 // }
                 return state;
             }
-            
+
             function buildRbacUserDirective() {
                 let states = [];
 
@@ -508,7 +508,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                     },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
-                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="Add Users"></add-rbac-resource>`
+                            template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
                         }
                     },
                     resolve: {
@@ -548,7 +548,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                         }
                     }
                     else if (field.iterator === 'user' && field.actions && field.actions.add) {
-                        if(form.name === 'team') {
+                        if(form.name === 'team' || form.name === 'organization') {
                             states.push(buildRbacUserDirective());
                         }
                     }
@@ -559,14 +559,17 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
 
             function buildListDefinition(field) {
                 let state,
-                    list = field.include ? $injector.get(field.include) : field;
-                state = $stateExtender.buildDefinition({
+                list = field.include ? $injector.get(field.include) : field,
+                // Added this line specifically for Completed Jobs but should be OK
+                // for all the rest of the related tabs
+                breadcrumbLabel = field.iterator.replace('_', ' '),
+                stateConfig = {
                     searchPrefix: `${list.iterator}`,
                     name: `${formStateDefinition.name}.${list.iterator}s`,
                     url: `/${list.iterator}s`,
                     ncyBreadcrumb: {
                         parent: `${formStateDefinition.name}`,
-                        label: `${field.iterator}s`
+                        label: `${breadcrumbLabel}s`
                     },
                     params: {
                         [list.iterator + '_search']: {
@@ -583,14 +586,7 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                         FormDefinition() : FormDefinition
                                 });
                                 return html;
-                            },
-                            controller: ['$scope', 'ListDefinition', 'Dataset',
-                                function($scope, list, Dataset) {
-                                    $scope.list = list;
-                                    $scope[`${list.iterator}_dataset`] = Dataset.data;
-                                    $scope[`${list.iterator}s`] = $scope[`${list.iterator}_dataset`].results;
-                                }
-                            ]
+                            }
                         }
                     },
                     resolve: {
@@ -611,7 +607,26 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             }
                         ]
                     }
-                });
+                };
+
+                if(params.controllers && params.controllers.related && params.controllers.related[field.name]) {
+                    stateConfig.views.related.controller = params.controllers.related[field.name];
+                }
+                else if(field.name === 'permissions') {
+                    stateConfig.views.related.controller = 'PermissionsList';
+                }
+                else {
+                    // Generic controller
+                    stateConfig.views.related.controller = ['$scope', 'ListDefinition', 'Dataset',
+                        function($scope, list, Dataset) {
+                            $scope.list = list;
+                            $scope[`${list.iterator}_dataset`] = Dataset.data;
+                            $scope[`${list.iterator}s`] = $scope[`${list.iterator}_dataset`].results;
+                        }
+                    ];
+                }
+
+                state = $stateExtender.buildDefinition(stateConfig);
                 // appy any default search parameters in form definition
                 if (field.search) {
                     state.params[`${field.iterator}_search`].value = _.merge(state.params[`${field.iterator}_search`].value, field.search);
@@ -670,8 +685,25 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                             list.iterator = field.sourceModel;
                             return list;
                         }],
-                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state',
-                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state) => {
+                        OrganizationId: ['ListDefinition', 'InventoryManageService', '$stateParams', '$rootScope',
+                            function(list, InventoryManageService, $stateParams, $rootScope){
+                                if(list.iterator === 'inventory_script'){
+                                    if($rootScope.$$childTail &&
+                                        $rootScope.$$childTail.$resolve &&
+                                        $rootScope.$$childTail.$resolve.hasOwnProperty('inventoryData')){
+                                            return $rootScope.$$childTail.$resolve.inventoryData.summary_fields.organization.id;
+                                    }
+                                    else {
+                                        return InventoryManageService.getInventory($stateParams.inventory_id).then(res => res.data.summary_fields.organization.id);
+                                    }
+
+                                }
+                                else {
+                                    return;
+                                }
+                        }],
+                        Dataset: ['ListDefinition', 'QuerySet', '$stateParams', 'GetBasePath', '$interpolate', '$rootScope', '$state', 'OrganizationId',
+                            (list, qs, $stateParams, GetBasePath, $interpolate, $rootScope, $state, OrganizationId) => {
                                 // allow lookup field definitions to use interpolated $stateParams / $rootScope in basePath field
                                 // the basePath on a form's lookup field will take precedence over the general model list's basepath
                                 let path, interpolator;
@@ -688,9 +720,14 @@ export default ['$injector', '$stateExtender', '$log', function($injector, $stat
                                 }
                                 // Need to change the role_level here b/c organizations and inventory scripts
                                 // don't have a "use_role", only "admin_role" and "read_role"
-                                if(list.iterator === "organization" || list.iterator === "inventory_script"){
+                                if(list.iterator === "organization"){
                                     $stateParams[`${list.iterator}_search`].role_level = "admin_role";
                                 }
+                                if(list.iterator === "inventory_script"){
+                                    $stateParams[`${list.iterator}_search`].role_level = "admin_role";
+                                    $stateParams[`${list.iterator}_search`].organization = OrganizationId;
+                                }
+
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);
                             }
                         ]

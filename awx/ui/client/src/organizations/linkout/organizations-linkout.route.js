@@ -10,6 +10,7 @@ import OrganizationsJobTemplates from './controllers/organizations-job-templates
 import OrganizationsProjects from './controllers/organizations-projects.controller';
 import OrganizationsTeams from './controllers/organizations-teams.controller';
 import OrganizationsUsers from './controllers/organizations-users.controller';
+import { N_ } from '../../i18n';
 
 export default [{
     name: 'organizations.users',
@@ -55,7 +56,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "USERS"
+        label: N_("USERS")
     },
 
     data: {
@@ -128,7 +129,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "TEAMS"
+        label: N_("TEAMS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -174,7 +175,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "INVENTORIES"
+        label: N_("INVENTORIES")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -225,7 +226,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "PROJECTS"
+        label: N_("PROJECTS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -266,7 +267,7 @@ export default [{
         },
     },
     params: {
-        job_template_search: {
+        template_search: {
             value: {
                 project__organization: null
             }
@@ -283,7 +284,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "JOB TEMPLATES"
+        label: N_("JOB TEMPLATES")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {
@@ -294,20 +295,27 @@ export default [{
             delete list.actions;
             // @issue Why is the delete action unavailable in this view?
             delete list.fieldActions.delete;
-            list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='jobTemplates.add'>Job Templates</a>&nbsp;section";
+            delete list.fields.type;
+            list.listTitle = N_('Job Templates');
+            list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='templates.addJobTemplate'>Job Templates</a>&nbsp;section";
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
-            list.iterator = 'job_template';
+            list.iterator = 'template';
             list.name = 'job_templates';
             list.basePath = "job_templates";
-            list.fields.type.ngBind = "job_template.type_label";
             list.fields.smart_status.ngInclude = "'/static/partials/organizations-job-template-smart-status.html'";
+            list.fields.name.ngHref = '#/templates/job_template/{{template.id}}';
+            list.fieldActions.submit.ngClick = 'submitJob(template.id)';
+            list.fieldActions.schedule.ngClick = 'scheduleJob(template.id)';
+            list.fieldActions.copy.ngClick = 'copyTemplate(template.id)';
+            list.fieldActions.edit.ngClick = "editJobTemplate(template.id)";
+            list.fieldActions.view.ngClick = "editJobTemplate(template.id)";
             return list;
         }],
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.name);
-                $stateParams.job_template_search.project__organization = $stateParams.organization_id;
-                return qs.search(path, $stateParams.job_template_search);
+                $stateParams.template_search.project__organization = $stateParams.organization_id;
+                return qs.search(path, $stateParams.template_search);
             }
         ]
     }
@@ -359,7 +367,7 @@ export default [{
     },
     ncyBreadcrumb: {
         parent: "organizations.edit",
-        label: "ADMINS"
+        label: N_("ADMINS")
     },
     resolve: {
         features: ['FeaturesService', function(FeaturesService) {

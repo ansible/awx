@@ -50,7 +50,7 @@ export default
                 label: 'Groups',
                 key: true,
                 ngClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
+                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
                 class: 'InventoryManage-breakWord',
             },
             total_groups: {
@@ -140,7 +140,7 @@ export default
                 awToolTip: "{{ group.group_schedule_tooltip }}",
                 ngClass: "group.scm_type_class",
                 dataPlacement: 'top',
-                ngShow: "!(group.summary_fields.inventory_source.source === '') && group.summary_fields.user_capabilities.schedule"
+                ngShow: "!(group.summary_fields.inventory_source.source === '')"
             },
             edit: {
                 //label: 'Edit',

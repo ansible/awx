@@ -1,6 +1,6 @@
 export default
-    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService',
-    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService) {
+    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n',
+    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService, i18n) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
@@ -41,9 +41,10 @@ export default
                             if(streamConfig && streamConfig.activityStream) {
                                 if(streamConfig.activityStreamTarget) {
                                     stateGoParams.target = streamConfig.activityStreamTarget;
+                                    let isTemplateTarget = _.contains(['template', 'job_template', 'workflow_job_template'], streamConfig.activityStreamTarget);
                                     stateGoParams.activity_search = {
-                                        or__object1__in: streamConfig.activityStreamTarget === 'template' ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
-                                        or__object2__in: streamConfig.activityStreamTarget === 'template' ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
+                                        or__object1__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
+                                        or__object2__in: isTemplateTarget ? 'job_template,workflow_job_template' : streamConfig.activityStreamTarget,
                                         order_by: '-timestamp',
                                         page_size: '20',
                                     };
@@ -59,6 +60,10 @@ export default
                                 }
                                 if(streamConfig.activityStreamId) {
                                     stateGoParams.id = $state.params[streamConfig.activityStreamId];
+                                }
+                                if(stateGoParams.target === "custom_inventory_script"){
+                                    stateGoParams.activity_search[streamConfig.activityStreamTarget] = $state.params.inventory_script_id;
+                                    stateGoParams.id = $state.params.inventory_script_id;
                                 }
 
                             }
@@ -103,7 +108,7 @@ export default
                         if(features){
                             scope.loadingLicense = false;
                             scope.activityStreamActive = (toState.name === 'activityStream') ? true : false;
-                            scope.activityStreamTooltip = (toState.name === 'activityStream') ? 'Hide Activity Stream' : 'View Activity Stream';
+                            scope.activityStreamTooltip = (toState.name === 'activityStream') ? i18n._('Hide Activity Stream') : i18n._('View Activity Stream');
                             scope.showActivityStreamButton = (FeaturesService.featureEnabled('activity_streams') || toState.name ==='activityStream') ? true : false;
                         }
                     }

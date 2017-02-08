@@ -43,6 +43,7 @@ class CallbackQueueDispatcher(object):
                                  compression='bzip2',
                                  exchange=self.exchange,
                                  declare=[self.exchange],
+                                 delivery_mode="persistent" if settings.PERSISTENT_CALLBACK_MESSAGES else "transient",
                                  routing_key=self.connection_queue)
                 return
             except Exception, e:

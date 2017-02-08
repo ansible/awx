@@ -12,49 +12,50 @@
 
 export default
     angular.module('LogViewerStatusDefinition', [])
-        .value('LogViewerStatusForm', {
+        .factory('LogViewerStatusForm', ['i18n', function(i18n) {
+        return {
 
             name: 'status',
             well: false,
 
             fields: {
                 "name": {
-                    label: "Name",
+                    label: i18n._("Name"),
                     type: "text",
                     readonly: true,
                 },
                 "status": {
-                    label: "Status",
+                    label: i18n._("Status"),
                     type: "text",
                     readonly: true
                 },
                 "license_error": {
-                    label: "License Error",
+                    label: i18n._("License Error"),
                     type: "text",
                     readonly: true
                 },
                 "started": {
-                    label: "Started",
+                    label: i18n._("Started"),
                     type: "date",
                     "filter": "longDate",
                     readonly: true
                 },
                 "finished": {
-                    label: "Finished",
+                    label: i18n._("Finished"),
                     type: "date",
                     "filter": "longDate",
                     readonly: true
                 },
                 "elapsed": {
-                    label: "Elapsed",
+                    label: i18n._("Elapsed"),
                     type: "text",
                     readonly: true
                 },
                 "launch_type": {
-                    label: "Launch Type",
+                    label: i18n._("Launch Type"),
                     type: "text",
                     readonly: true
                 }
             }
 
-        });
+        };}]);

@@ -78,6 +78,12 @@ export default ['$log', 'moment', function($log, moment){
         // .JobResultsStdOut-aLineOfStdOut element
         getLineClasses: function(event, line, lineNum) {
             var string = "";
+
+            if (lineNum === event.end_line) {
+                // used to tell you where to put stuff in the pane
+                string += ` next_is_${event.end_line + 1}`;
+            }
+
             if (event.event_name === "playbook_on_play_start") {
                 // play header classes
                 string += " header_play";
@@ -196,6 +202,11 @@ export default ['$log', 'moment', function($log, moment){
             let lineNums = _.range(event.start_line + 1,
                 event.end_line + 1);
 
+            // hack around no-carriage return issues
+            if (!lineNums.length) {
+                lineNums = [event.start_line + 1];
+            }
+
             let lines = event.stdout
                 .replace("\t", "        ")
                 .split("\r\n");
@@ -204,8 +215,13 @@ export default ['$log', 'moment', function($log, moment){
                 let padBy = lineNums.length - lines.length;
 
                 for (let i = 0; i <= padBy; i++) {
-                    lines.push("[1;imLine capped.[0m");
+                    lines.push("");
                 }
+            }
+
+            // hack around no-carriage return issues
+            if (lineNums.length === lines.length) {
+                return _.zip(lineNums, lines);
             }
 
             return _.zip(lineNums, lines).slice(0, -1);

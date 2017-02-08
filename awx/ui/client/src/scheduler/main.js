@@ -9,6 +9,7 @@ import addController from './schedulerAdd.controller';
 import editController from './schedulerEdit.controller';
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import schedulerDatePicker from './schedulerDatePicker.directive';
+import { N_ } from '../i18n';
 
 export default
     angular.module('scheduler', [])
@@ -32,10 +33,10 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('job_templates')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -57,15 +58,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -86,7 +94,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'jobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 }
             });
             $stateExtender.addState({
@@ -118,10 +126,10 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -143,15 +151,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('workflow_job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -172,7 +187,7 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'workflowJobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 }
             });
             $stateExtender.addState({
@@ -201,10 +216,10 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'projects.edit({project_id: parentObject.id})',
-                    label: 'SCHEDULES'
+                    label: N_('SCHEDULES')
                 },
                 resolve: {
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = `${GetBasePath('projects')}${$stateParams.id}/schedules`;
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -226,15 +241,22 @@ export default
                                     val.reject(data);
                                 });
                             return val.promise;
-                        }]
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('projects') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
                 },
                 views: {
                     '@': {
-                        templateProvider: function(SchedulesList, generateList, ParentObject){
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            SchedulesList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>Schedules`;
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit'
                             });
                             html = generateList.wrapPanel(html);
@@ -249,7 +271,7 @@ export default
                 name: 'projectSchedules.add',
                 route: '/add',
                 ncyBreadcrumb: {
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
                 },
                 views: {
                     'form': {
@@ -289,13 +311,13 @@ export default
                 },
                 ncyBreadcrumb: {
                     parent: 'jobs',
-                    label: 'SCHEDULED'
+                    label: N_('SCHEDULED')
                 },
                 resolve: {
-                    SchedulesList: ['ScheduledJobsList', function(list){
+                    ScheduleList: ['ScheduledJobsList', function(list){
                         return list;
                     }],
-                    Dataset: ['SchedulesList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
                         function(list, qs, $stateParams, GetBasePath) {
                             let path = GetBasePath('schedules');
                             return qs.search(path, $stateParams[`${list.iterator}_search`]);
@@ -317,9 +339,9 @@ export default
                 },
                 views: {
                     'list@jobs': {
-                        templateProvider: function(SchedulesList, generateList){
+                        templateProvider: function(ScheduleList, generateList){
                             let html = generateList.build({
-                                list: SchedulesList,
+                                list: ScheduleList,
                                 mode: 'edit',
                                 title: false
                             });

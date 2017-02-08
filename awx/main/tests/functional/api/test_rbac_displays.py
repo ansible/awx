@@ -3,8 +3,7 @@ import pytest
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 
-from awx.main.models.jobs import JobTemplate
-from awx.main.models import Role, Group
+from awx.main.models import Role, Group, UnifiedJobTemplate, JobTemplate
 from awx.main.access import (
     access_registry,
     get_user_capabilities
@@ -281,6 +280,25 @@ def test_prefetch_jt_capabilities(job_template, rando):
     qs = JobTemplate.objects.all()
     cache_list_capabilities(qs, ['admin', 'execute'], JobTemplate, rando)
     assert qs[0].capabilities_cache == {'edit': False, 'start': True}
+
+
+@pytest.mark.django_db
+def test_prefetch_ujt_job_template_capabilities(alice, bob, job_template):
+    job_template.execute_role.members.add(alice)
+    qs = UnifiedJobTemplate.objects.all()
+    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, alice)
+    assert qs[0].capabilities_cache == {'edit': False, 'start': True}
+    qs = UnifiedJobTemplate.objects.all()
+    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, bob)
+    assert qs[0].capabilities_cache == {'edit': False, 'start': False}
+
+
+@pytest.mark.django_db
+def test_prefetch_ujt_project_capabilities(alice, project):
+    project.update_role.members.add(alice)
+    qs = UnifiedJobTemplate.objects.all()
+    cache_list_capabilities(qs, ['admin', 'execute'], UnifiedJobTemplate, alice)
+    assert qs[0].capabilities_cache == {}
 
 
 @pytest.mark.django_db

@@ -45,7 +45,7 @@ ifeq ($(OFFICIAL),yes)
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
@@ -402,7 +402,7 @@ uwsgi: collectstatic
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/var/lib/awx/awxfifo --lazy-apps
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/awxfifo --lazy-apps
 
 daphne:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -473,7 +473,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS ?= awx/main/tests
+TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -485,7 +485,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
@@ -690,6 +690,7 @@ rpm-build:
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/tower.te rpm-build/
+	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
@@ -892,11 +893,5 @@ clean-elk:
 	docker rm tools_elasticsearch_1
 	docker rm tools_kibana_1
 
-mongo-debug-ui:
-	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
-
-mongo-container:
-	docker run -it --link tools_mongo_1:mongo --rm mongo sh -c 'exec mongo "$MONGO_PORT_27017_TCP_ADDR:$MONGO_PORT_27017_TCP_PORT/system_tracking_dev"'
-
 psql-container:
-	docker run -it --link tools_postgres_1:postgres --rm postgres:9.4.1 sh -c 'exec psql -h "$$POSTGRES_PORT_5432_TCP_ADDR" -p "$$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'

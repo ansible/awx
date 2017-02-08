@@ -31,7 +31,6 @@ from awx.main.utils import (
     ignore_inventory_computed_fields,
     parse_yaml_or_json,
 )
-from awx.main.redact import PlainTextCleaner
 from awx.main.fields import ImplicitRoleField
 from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin
 from awx.main.models.base import PERM_INVENTORY_SCAN
@@ -296,18 +295,27 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
     def get_absolute_url(self):
         return reverse('api:job_template_detail', args=(self.pk,))
 
-    def can_start_without_user_input(self):
+    def can_start_without_user_input(self, callback_extra_vars=None):
         '''
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
+        variables_needed = False
+        if callback_extra_vars:
+            extra_vars_dict = parse_yaml_or_json(callback_extra_vars)
+            for var in self.variables_needed_to_start:
+                if var not in extra_vars_dict:
+                    variables_needed = True
+                    break
+        elif self.variables_needed_to_start:
+            variables_needed = True
         prompting_needed = False
         for value in self._ask_for_vars_dict().values():
             if value:
                 prompting_needed = True
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
-                not self.variables_needed_to_start)
+                not variables_needed)
 
     def _ask_for_vars_dict(self):
         return dict(
@@ -600,25 +608,6 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
         if artifacts.get('_ansible_no_log', False):
             return "$hidden due to Ansible no_log flag$"
         return artifacts
-
-    def _survey_search_and_replace(self, content):
-        # Use job template survey spec to identify password fields.
-        # Then lookup password fields in extra_vars and save the values
-        jt = self.job_template
-        if jt and jt.survey_enabled and 'spec' in jt.survey_spec:
-            # Use password vars to find in extra_vars
-            for key in jt.survey_password_variables():
-                if key in self.extra_vars_dict:
-                    content = PlainTextCleaner.remove_sensitive(content, self.extra_vars_dict[key])
-        return content
-
-    def _result_stdout_raw_limited(self, *args, **kwargs):
-        buff, start, end, abs_end = super(Job, self)._result_stdout_raw_limited(*args, **kwargs)
-        return self._survey_search_and_replace(buff), start, end, abs_end
-
-    def _result_stdout_raw(self, *args, **kwargs):
-        content = super(Job, self)._result_stdout_raw(*args, **kwargs)
-        return self._survey_search_and_replace(content)
 
     # Job Credential required
     @property

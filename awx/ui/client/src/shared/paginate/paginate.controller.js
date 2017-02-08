@@ -1,17 +1,8 @@
-export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet',
-    function($scope, $stateParams, $state, $filter, GetBasePath, qs) {
+export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'QuerySet', '$interpolate',
+    function($scope, $stateParams, $state, $filter, GetBasePath, qs, $interpolate) {
 
-        let pageSize,
+        let pageSize = $scope.querySet ? $scope.querySet.page_size || 20 : $stateParams[`${$scope.iterator}_search`].page_size || 20,
             queryset, path;
-
-        // TODO: can we clean this if/else up?
-        if($scope.querySet) {
-            pageSize = $scope.querySet.page_size || 20;
-        }
-        else {
-            // Pull the page size from the url
-            pageSize = $stateParams[`${$scope.iterator}_search`].page_size || 20;
-        }
 
         $scope.pageSize = pageSize;
 
@@ -27,7 +18,12 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
             if(page === 0) {
                 return;
             }
-            path = GetBasePath($scope.basePath) || $scope.basePath;
+            if (GetBasePath($scope.basePath) || $scope.basePath) {
+                path = GetBasePath($scope.basePath) || $scope.basePath;
+            } else {
+                let interpolator = $interpolate($scope.basePath);
+                path = interpolator({ $stateParams: $stateParams });
+            }
             if($scope.querySet) {
                 // merging $scope.querySet seems to destroy our initial reference which
                 // kills the two-way binding here.  To fix that, clone the queryset first
@@ -70,15 +66,30 @@ export default ['$scope', '$stateParams', '$state', '$filter', 'GetBasePath', 'Q
         };
 
         function calcPageRange(current, last) {
-            let result = [];
-            if (last < 10) {
+            let result = [],
+                maxVisiblePages = $scope.maxVisiblePages ? parseInt($scope.maxVisiblePages) : 10,
+                pagesLeft,
+                pagesRight;
+            if(maxVisiblePages % 2) {
+                // It's an odd number
+                pagesLeft = (maxVisiblePages - 1) / 2;
+                pagesRight = ((maxVisiblePages - 1) / 2) + 1;
+            }
+            else {
+                // Its an even number
+                pagesLeft = pagesRight = maxVisiblePages / 2;
+            }
+            if (last < maxVisiblePages) {
+                // Don't have enough pages to exceed the max range - just show all of them
                 result = _.range(1, last + 1);
-            } else if (current - 5 > 0 && current !== last) {
-                result = _.range(current - 5, current + 6);
-            } else if (current === last) {
-                result = _.range(last - 10, last + 1);
-            } else {
-                result = _.range(1, 11);
+            }
+            else if(current === last) {
+                 result = _.range(last + 1 - maxVisiblePages, last + 1);
+            }
+            else {
+                let topOfRange = current + pagesRight > maxVisiblePages + 1 ? (current + pagesRight < last + 1 ? current + pagesRight : last + 1) : maxVisiblePages + 1;
+                let bottomOfRange = (topOfRange === last + 1) ? last + 1 - maxVisiblePages : (current - pagesLeft > 0 ? current - pagesLeft : 1);
+                result = _.range(bottomOfRange, topOfRange);
             }
             return result;
         }

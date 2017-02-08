@@ -56,8 +56,8 @@ class Command(NoArgsCommand):
         #jobs_qs = jobs_qs.filter(created__lte=self.cutoff)
         skipped, deleted = 0, 0
         for job in Job.objects.all():
-            job_display = '"%s" (started %s, %d host summaries, %d events)' % \
-                          (unicode(job), unicode(job.created),
+            job_display = '"%s" (%d host summaries, %d events)' % \
+                          (unicode(job),
                            job.job_host_summaries.count(), job.job_events.count())
             if job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -78,8 +78,8 @@ class Command(NoArgsCommand):
     def cleanup_ad_hoc_commands(self):
         skipped, deleted = 0, 0
         for ad_hoc_command in AdHocCommand.objects.all():
-            ad_hoc_command_display = '"%s" (started %s, %d events)' % \
-                (unicode(ad_hoc_command), unicode(ad_hoc_command.created),
+            ad_hoc_command_display = '"%s" (%d events)' % \
+                (unicode(ad_hoc_command),
                  ad_hoc_command.ad_hoc_command_events.count())
             if ad_hoc_command.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
@@ -100,7 +100,7 @@ class Command(NoArgsCommand):
     def cleanup_project_updates(self):
         skipped, deleted = 0, 0
         for pu in ProjectUpdate.objects.all():
-            pu_display = '"%s" (started %s)' % (unicode(pu), unicode(pu.created))
+            pu_display = '"%s" (type %s)' % (unicode(pu), unicode(pu.launch_type))
             if pu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s project update %s', action_text, pu.status, pu_display)
@@ -124,7 +124,7 @@ class Command(NoArgsCommand):
     def cleanup_inventory_updates(self):
         skipped, deleted = 0, 0
         for iu in InventoryUpdate.objects.all():
-            iu_display = '"%s" (started %s)' % (unicode(iu), unicode(iu.created))
+            iu_display = '"%s" (source %s)' % (unicode(iu), unicode(iu.source))
             if iu.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s inventory update %s', action_text, iu.status, iu_display)
@@ -148,7 +148,7 @@ class Command(NoArgsCommand):
     def cleanup_management_jobs(self):
         skipped, deleted = 0, 0
         for sj in SystemJob.objects.all():
-            sj_display = '"%s" (started %s)' % (unicode(sj), unicode(sj.created))
+            sj_display = '"%s" (type %s)' % (unicode(sj), unicode(sj.job_type))
             if sj.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'
                 self.logger.debug('%s %s system_job %s', action_text, sj.status, sj_display)
@@ -178,8 +178,8 @@ class Command(NoArgsCommand):
     def cleanup_workflow_jobs(self):
         skipped, deleted = 0, 0
         for workflow_job in WorkflowJob.objects.all():
-            workflow_job_display = '"{}" (started {}, {} nodes)'.format(
-                unicode(workflow_job), unicode(workflow_job.created),
+            workflow_job_display = '"{}" ({} nodes)'.format(
+                unicode(workflow_job),
                 workflow_job.workflow_nodes.count())
             if workflow_job.status in ('pending', 'waiting', 'running'):
                 action_text = 'would skip' if self.dry_run else 'skipping'

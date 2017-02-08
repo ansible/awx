@@ -169,12 +169,21 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
             return super(UnifiedJobTemplate, self).unique_error_message(model_class, unique_check)
 
     @classmethod
+    def invalid_user_capabilities_prefetch_models(cls):
+        if cls != UnifiedJobTemplate:
+            return []
+        return ['project', 'inventorysource', 'systemjobtemplate']
+
+    @classmethod
     def accessible_pk_qs(cls, accessor, role_field):
         '''
         A re-implementation of accessible pk queryset for the "normal" unified JTs.
         Does not return inventory sources or system JTs, these should
         be handled inside of get_queryset where it is utilized.
         '''
+        # do not use this if in a subclass
+        if cls != UnifiedJobTemplate:
+            return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
         ujt_names = [c.__name__.lower() for c in cls.__subclasses__()
                      if c.__name__.lower() not in ['inventorysource', 'systemjobtemplate']]
         subclass_content_types = list(ContentType.objects.filter(

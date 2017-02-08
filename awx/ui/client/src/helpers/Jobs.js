@@ -126,9 +126,9 @@ export default
     }])
 
     .factory('DeleteJob', ['$state', 'Find', 'GetBasePath', 'Rest', 'Wait',
-    'ProcessErrors', 'Prompt', 'Alert', '$filter',
+    'ProcessErrors', 'Prompt', 'Alert', '$filter', 'i18n',
     function($state, Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
-        $filter){
+        $filter, i18n){
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -158,11 +158,11 @@ export default
             if (job.status === 'pending' || job.status === 'running' || job.status === 'waiting') {
                 url = job.related.cancel;
                 action_label = 'cancel';
-                hdr = 'Cancel';
+                hdr = i18n._('Cancel');
             } else {
                 url = job.url;
                 action_label = 'delete';
-                hdr = 'Delete';
+                hdr = i18n._('Delete');
             }
 
             action = function () {
@@ -227,8 +227,8 @@ export default
                 scope.removeCancelJob();
             }
             scope.removeCancelJob = scope.$on('CancelJob', function() {
-                var cancelBody = "<div class=\"Prompt-bodyQuery\">Submit the request to cancel?</div>";
-                var deleteBody = "<div class=\"Prompt-bodyQuery\">Are you sure you want to delete the job below?</div><div class=\"Prompt-bodyTarget\">#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
+                var cancelBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Submit the request to cancel?") + "</div>";
+                var deleteBody = "<div class=\"Prompt-bodyQuery\">" + i18n._("Are you sure you want to delete the job below?") + "</div><div class=\"Prompt-bodyTarget\">#" + id + " " + $filter('sanitize')(job.name)  + "</div>";
                 Prompt({
                     hdr: hdr,
                     body: (action_label === 'cancel' || job.status === 'new') ? cancelBody : deleteBody,

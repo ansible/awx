@@ -15,9 +15,9 @@
  */
 
 export default
-    ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
+    ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store', '$q',
     '$injector',
-    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store,
+    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store, $q,
     $injector) {
         return {
             setToken: function (token, expires) {
@@ -58,62 +58,75 @@ export default
                     }
                 });
             },
+            deleteToken: function () {
+                return $http({
+                    method: 'DELETE',
+                    url: GetBasePath('authtoken')
+                });
+            },
 
             logout: function () {
                 // the following puts our primary scope up for garbage collection, which
                 // should prevent content flash from the prior user.
 
                 var x,
+                deferred = $q.defer(),
                 ConfigService = $injector.get('ConfigService'),
                 SocketService = $injector.get('SocketService'),
                 scope = angular.element(document.getElementById('main-view')).scope();
 
-                if(scope){
-                    scope.$destroy();
-                }
+                this.deleteToken().then(() => {
+                    if(scope){
+                        scope.$destroy();
+                    }
 
-                if($cookieStore.get('lastPath')==='/portal'){
-                    $cookieStore.put( 'lastPath', '/portal');
-                    $rootScope.lastPath = '/portal';
-                }
-                else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/' || $cookieStore.get('lastPath') !== '/login' || $cookieStore.get('lastPath') !== '/logout'){
-                    // do nothing
-                    $rootScope.lastPath = $cookieStore.get('lastPath');
-                }
-                else {
-                    // your last path was home
-                    $cookieStore.remove('lastPath');
-                    $rootScope.lastPath = '/home';
-                }
-                x = Store('sessionTime');
-                if ($rootScope.current_user) {
-                    x[$rootScope.current_user.id].loggedIn = false;
-                }
-                Store('sessionTime', x);
+                    if($cookieStore.get('lastPath')==='/portal'){
+                        $cookieStore.put( 'lastPath', '/portal');
+                        $rootScope.lastPath = '/portal';
+                    }
+                    else if ($cookieStore.get('lastPath') !== '/home' || $cookieStore.get('lastPath') !== '/' || $cookieStore.get('lastPath') !== '/login' || $cookieStore.get('lastPath') !== '/logout'){
+                        // do nothing
+                        $rootScope.lastPath = $cookieStore.get('lastPath');
+                    }
+                    else {
+                        // your last path was home
+                        $cookieStore.remove('lastPath');
+                        $rootScope.lastPath = '/home';
+                    }
+                    x = Store('sessionTime');
+                    if ($rootScope.current_user) {
+                        x[$rootScope.current_user.id].loggedIn = false;
+                    }
+                    Store('sessionTime', x);
 
-                if ($cookieStore.get('current_user')) {
-                    $rootScope.lastUser = $cookieStore.get('current_user').id;
-                }
-                ConfigService.delete();
-                SocketService.disconnect();
-                $cookieStore.remove('token_expires');
-                $cookieStore.remove('current_user');
-                $cookieStore.remove('token');
-                $cookieStore.put('userLoggedIn', false);
-                $cookieStore.put('sessionExpired', false);
-                $cookieStore.put('current_user', {});
-                $rootScope.current_user = {};
-                $rootScope.license_tested = undefined;
-                $rootScope.userLoggedIn = false;
-                $rootScope.sessionExpired = false;
-                $rootScope.licenseMissing = true;
-                $rootScope.token = null;
-                $rootScope.token_expires = null;
-                $rootScope.login_username = null;
-                $rootScope.login_password = null;
-                if ($rootScope.sessionTimer) {
-                    $rootScope.sessionTimer.clearTimers();
-                }
+                    if ($cookieStore.get('current_user')) {
+                        $rootScope.lastUser = $cookieStore.get('current_user').id;
+                    }
+                    ConfigService.delete();
+                    SocketService.disconnect();
+                    $cookieStore.remove('token_expires');
+                    $cookieStore.remove('current_user');
+                    $cookieStore.remove('token');
+                    $cookieStore.put('userLoggedIn', false);
+                    $cookieStore.put('sessionExpired', false);
+                    $cookieStore.put('current_user', {});
+                    $rootScope.current_user = {};
+                    $rootScope.license_tested = undefined;
+                    $rootScope.userLoggedIn = false;
+                    $rootScope.sessionExpired = false;
+                    $rootScope.licenseMissing = true;
+                    $rootScope.token = null;
+                    $rootScope.token_expires = null;
+                    $rootScope.login_username = null;
+                    $rootScope.login_password = null;
+                    if ($rootScope.sessionTimer) {
+                        $rootScope.sessionTimer.clearTimers();
+                    }
+                    deferred.resolve();
+                });
+
+                return deferred.promise;
+
             },
 
             licenseTested: function () {

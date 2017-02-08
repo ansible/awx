@@ -128,7 +128,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
 // Accepts image and returns base64 information with basic validation
 // Can eventually expand to handle all uploads with different endpoints and handlers
 //
-.directive('imageUpload', ['ConfigurationUtils', function(ConfigurationUtils) {
+.directive('imageUpload', ['ConfigurationUtils', 'i18n', '$rootScope',
+function(ConfigurationUtils, i18n, $rootScope) {
+    var browseText = i18n._('BROWSE'),
+    placeholderText = i18n._('Choose file'),
+    uploadedText = i18n._('Current Image: '),
+    removeText = i18n._('REMOVE');
+
     return {
         restrict: 'E',
         scope: {
@@ -136,18 +142,16 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
         },
         template: `
                 <div class="input-group">
-                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">BROWSE</label>
-                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="Choose file" readonly>
+                      <label class="input-group-addon Form-filePicker--pickerButton" id="filePickerButton" for="filePicker" ng-click="update($event)">${browseText}</label>
+                      <input type="text" class="form-control Form-filePicker--textBox" id="filePickerText" placeholder="${placeholderText}" readonly>
                       <input type="file" name="file" class="Form-filePicker" id="filePicker"  onchange="angular.element(this).scope().fileChange(this.files)"/>
                     </div>
-                <!-- Update when API supports file name saving
+
                 <div ng-if="imagePresent" class="Form-filePicker--selectedFile">
-                    Custom logo has been uploaded.
-                </div>-->
-                <!-- Thumbnail feature
-                <div class="thumbnail">
-                    <img src="{{image}}" alt="Current logo">
-                </div> -->
+                ${uploadedText}
+                    <img data-ng-src="{{imageData}}" alt="Current logo" class="Form-filePicker--thumbnail">
+                </div>
+
                 <div class="error" id="filePickerError"></div>`,
 
         link: function(scope) {
@@ -156,17 +160,19 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
             var filePickerError = angular.element(document.getElementById('filePickerError'));
             var filePickerButton = angular.element(document.getElementById('filePickerButton'));
 
-            scope.imagePresent = global.$AnsibleConfig.custom_logo;
+            scope.imagePresent = global.$AnsibleConfig.custom_logo || false;
+            scope.imageData = $rootScope.custom_logo;
 
             scope.$on('loginUpdated', function() {
                 scope.imagePresent = global.$AnsibleConfig.custom_logo;
+                scope.imageData = $rootScope.custom_logo;
             });
 
             scope.update = function(e) {
                 if(scope.$parent[fieldKey]) {
                     e.preventDefault();
                     scope.$parent[fieldKey] = '';
-                    filePickerButton.html('BROWSE');
+                    filePickerButton.html(browseText);
                     filePickerText.val('');
                 }
                 else {
@@ -181,7 +187,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     .then(function(result) {
                         scope.$parent[fieldKey] = result;
                         filePickerText.val(file[0].name);
-                        filePickerButton.html('REMOVE');
+                        filePickerButton.html(removeText);
                     }).catch(function(error) {
                         filePickerText.html(file[0].name);
                         filePickerError.text(error);
@@ -514,7 +520,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                             query = '?role_level=admin_role';
                             break;
                         case 'inventory_script':
-                            query = '?role_level=admin_role';
+                            query = '?role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
                             break;
                     }
 
@@ -609,7 +615,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                                 query += '&role_level=admin_role';
                                 break;
                             case 'inventory_script':
-                                query += '&role_level=admin_role';
+                                query += '&role_level=admin_role&organization=' + scope.$resolve.inventoryData.summary_fields.organization.id;
                                 break;
                             default:
                                 query += '&role_level=use_role';
@@ -633,6 +639,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                 }
 
                 function setValidity(ctrl, validity){
+                    var isRequired;
+                    if (attrs.required) {
+                        isRequired = true;
+                    } else {
+                        isRequired = false;
+                    }
+                    if (attrs.awRequiredWhen) {
+                      if (attrs.awRequiredWhen.charAt(0) === "!") {
+                        isRequired = !scope[attrs.awRequiredWhen.slice(1, attrs.awRequiredWhen.length)];
+                      } else {
+                        isRequired = scope[attrs.awRequiredWhen];
+                      }
+                    }
+                    if (!isRequired && (viewValue === undefined || viewValue === undefined || viewValue === "")) {
+                        validity = true;
+                    }
                     ctrl.$setValidity('awlookup', validity);
                     return defer.resolve(validity);
                 }
@@ -972,15 +994,24 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
                     ctrl.$setValidity('max', true);
                     ctrl.$dirty = true;
                     ctrl.$render();
-                    if (scope.job_templates_form) {
+                    if (scope.job_template_form) {
                         // need a way to find the parent form and mark it dirty
-                        scope.job_templates_form.$dirty = true;
+                        scope.job_template_form.$dirty = true;
                     }
                     if (!scope.$$phase) {
                         scope.$digest();
                     }
                 }
             };
+
+            // hack to get ngDisabled to work
+            if (attrs.ngDisabled) {
+                scope.$watch(attrs.ngDisabled, function(val) {
+                    opts.disabled = (val === true) ? true : false;
+                    $(elm).spinner(opts);
+                });
+            }
+
             if (disabled) {
                 opts.disabled = true;
             }

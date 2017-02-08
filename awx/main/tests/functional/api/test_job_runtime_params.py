@@ -83,17 +83,19 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{}},)
 
     # Check that job is serialized correctly
     job_id = response.data['job']
     assert job_id == 968
 
     # If job is created with no arguments, it will inherit JT attributes
-    mock_job.signal_start.assert_called_once_with(extra_vars={})
+    mock_job.signal_start.assert_called_once()
 
     # Check that response tells us what things were ignored
     assert 'job_launch_var' in response.data['ignored_fields']['extra_vars']
@@ -112,15 +114,17 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
 
     job_id = response.data['job']
     assert job_id == 968
 
-    mock_job.signal_start.assert_called_once_with(**runtime_data)
+    mock_job.signal_start.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -130,12 +134,14 @@ def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
 
     mock_job = mocker.MagicMock(spec=Job, id=968)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             post(reverse('api:job_template_launch', args=[job_template.pk]),
                  {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == ({'job_tags':'', 'skip_tags':''},)
 
-    mock_job.signal_start.assert_called_once_with(job_tags='', skip_tags='')
+    mock_job.signal_start.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -154,14 +160,16 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, rando, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
 
     job_id = response.data['job']
     assert job_id == 968
-    mock_job.signal_start.assert_called_once_with(**runtime_data)
+    mock_job.signal_start.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -321,15 +329,18 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
 
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
         mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
-        with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 response = post(
                     reverse('api:job_template_launch', args=[job_template.pk]),
                     dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
                     admin_user, expect=201)
+                assert JobTemplate.create_unified_job.called
+                assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{'survey_var': 4}},)
+
 
     job_id = response.data['job']
     assert job_id == 968
 
     # Check that the survey variable is accepted and the job variable isn't
-    mock_job.signal_start.assert_called_once_with(extra_vars={"survey_var": 4})
+    mock_job.signal_start.assert_called_once()

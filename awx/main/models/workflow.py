@@ -6,6 +6,7 @@
 
 # Django
 from django.db import models
+from django.conf import settings
 from django.core.urlresolvers import reverse
 #from django import settings as tower_settings
 
@@ -27,6 +28,7 @@ from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import JSONField
 
 from copy import copy
+from urlparse import urljoin
 
 __all__ = ['WorkflowJobTemplate', 'WorkflowJob', 'WorkflowJobOptions', 'WorkflowJobNode', 'WorkflowJobTemplateNode',]
 
@@ -467,6 +469,9 @@ class WorkflowJob(UnifiedJob, WorkflowJobOptions, SurveyJobMixin, JobNotificatio
 
     def get_absolute_url(self):
         return reverse('api:workflow_job_detail', args=(self.pk,))
+
+    def get_ui_url(self):
+        return urljoin(settings.TOWER_URL_BASE, '/#/workflows/{}'.format(self.pk))
 
     def notification_data(self):
         result = super(WorkflowJob, self).notification_data()

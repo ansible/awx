@@ -163,8 +163,15 @@ MAX_EVENT_RES_DATA = 700000
 # Note: This setting may be overridden by database settings.
 EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
 
+# The amount of time before a stdout file is expired and removed locally
+# Note that this can be recreated if the stdout is downloaded
+LOCAL_STDOUT_EXPIRE_TIME = 2592000
+
+# The number of processes spawned by the callback receiver to process job
+# events into the database
 JOB_EVENT_WORKERS = 4
 
+# The maximum size of the job event worker queue before requests are blocked
 JOB_EVENT_MAX_QUEUE_SIZE = 10000
 
 # Disallow sending session cookies over insecure connections
@@ -297,6 +304,7 @@ AUTH_LDAP_SERVER_URI = None
 # Note: This setting may be overridden by database settings.
 AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_REFERRALS: 0,
+    ldap.OPT_NETWORK_TIMEOUT: 30
 }
 
 # Radius server settings (default to empty string to skip using Radius auth).
@@ -416,6 +424,8 @@ CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
                  'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
                                                                'routing_key': 'scheduler.job.complete'},
                  'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
+                                                           'routing_key': 'cluster.heartbeat'},
+                 'awx.main.tasks.purge_old_stdout_files': {'queue': 'default',
                                                            'routing_key': 'cluster.heartbeat'}}
 
 CELERYBEAT_SCHEDULE = {
@@ -434,6 +444,10 @@ CELERYBEAT_SCHEDULE = {
     'cluster_heartbeat': {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
         'schedule': timedelta(seconds=60)
+    },
+    'purge_stdout_files': {
+        'task': 'awx.main.tasks.purge_old_stdout_files',
+        'schedule': timedelta(days=7)
     },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
@@ -821,6 +835,7 @@ ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
+PERSISTENT_CALLBACK_MESSAGES = True
 USE_CALLBACK_QUEUE = True
 CALLBACK_QUEUE = "callback_tasks"
 FACT_QUEUE = "facts"

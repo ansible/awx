@@ -52,7 +52,7 @@ class URLField(CharField):
                 if url_parts.hostname and '.' not in url_parts.hostname:
                     netloc = '{}.local'.format(url_parts.hostname)
                     if url_parts.port:
-                        netloc = '{}:{}'.format(netloc, port)
+                        netloc = '{}:{}'.format(netloc, url_parts.port)
                     if url_parts.username:
                         if url_parts.password:
                             netloc = '{}:{}@{}' % (url_parts.username, url_parts.password, netloc)

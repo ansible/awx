@@ -1,9 +1,5 @@
 FROM centos:7
 
-# RUN locale-gen en_US.UTF-8
-# ENV LANG en_US.UTF-8
-# ENV LANGUAGE en_US:en
-# ENV LC_ALL en_US.UTF-8
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 ADD requirements/requirements.txt \
@@ -16,7 +12,7 @@ requirements/requirements_dev_uninstall.txt \
 RUN yum -y update && yum -y install curl epel-release
 RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
-RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap zanata-python-client gettext
+RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap zanata-python-client gettext gcc-c++
 RUN pip install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower
@@ -35,6 +31,10 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/n
 RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
 WORKDIR /tmp
 RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
+RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 WORKDIR /
 EXPOSE 8043 8013 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]

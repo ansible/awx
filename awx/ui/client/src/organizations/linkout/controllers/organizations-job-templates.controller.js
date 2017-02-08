@@ -6,19 +6,23 @@
 
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait',
-    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset',
+    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
+    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
     function($scope, $rootScope, $location, $log,
         $stateParams, Rest, Alert, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
-        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait,
-        $compile, $state, OrgJobTemplateList, Dataset) {
+        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait, TemplateCopyService,
+        $compile, $state, OrgJobTemplateList, Dataset, qs) {
 
         var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');
 
         $scope.$on(`ws-jobs`, function () {
-            // @issue old search
-            //$scope.search(list.iterator);
+            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+            qs.search(path, $state.params[`${list.iterator}_search`])
+            .then(function(searchResponse) {
+                $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            });
         });
 
         init();
@@ -67,12 +71,8 @@ export default ['$scope', '$rootScope', '$location', '$log',
             });
         }
 
-        $scope.addJobTemplate = function() {
-            $state.go('jobTemplates.add');
-        };
-
         $scope.editJobTemplate = function(id) {
-            $state.go('jobTemplates.edit', { id: id });
+            $state.go('templates.editJobTemplate', { job_template_id: id });
         };
 
         $scope.submitJob = function(id) {
@@ -83,8 +83,23 @@ export default ['$scope', '$rootScope', '$location', '$log',
             $state.go('jobTemplateSchedules', { id: id });
         };
 
-        $scope.formCancel = function() {
-            $state.go('organizations');
+        $scope.copyTemplate = function(id) {
+            Wait('start');
+ 			TemplateCopyService.get(id)
+ 			.success(function(res){
+ 					TemplateCopyService.set(res)
+                    .success(function(res){
+                        Wait('stop');
+                        if(res.type && res.type === 'job_template') {
+                            $state.go('templates.editJobTemplate', {job_template_id: res.id}, {reload: true});
+                        }
+                    });
+ 			})
+  			.error(function(res, status){
+                ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+                msg: 'Call failed. Return status: '+ status});
+            });
+
         };
 
     }

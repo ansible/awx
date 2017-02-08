@@ -25,7 +25,7 @@ export default
                 key: true,
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-2 col-sm-4 col-xs-9',
-                ngClick: "editJobTemplate(template)"
+                ngHref: '#/templates/{{template.type}}/{{template.id}}'
             },
             type: {
                 label: i18n._('Type'),
@@ -94,7 +94,6 @@ export default
                 ngClick: 'scheduleJob(template)',
                 awToolTip: i18n._('Schedule future job template runs'),
                 dataPlacement: 'top',
-                ngShow: 'template.summary_fields.user_capabilities.schedule'
             },
             copy: {
                 label: i18n._('Copy'),
@@ -115,7 +114,7 @@ export default
             },
             view: {
                 label: i18n._('View'),
-                ngClick: "editJobTemplate(template.id)",
+                ngClick: "editJobTemplate(template)",
                 awToolTip: i18n._('View template'),
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top',

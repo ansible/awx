@@ -26,7 +26,7 @@
                             data-placement="top"
                             mode="all"
                             ng-click="relaunchJob()"
-                            aw-tool-tip="Relaunch using the same parameters"
+                            aw-tool-tip="{{'Relaunch using the same parameters'|translate}}"
                             data-original-title=""
                             title="">
                             <i class="icon-launch"></i>
@@ -36,10 +36,10 @@
                         <button class="List-actionButton
                                 List-actionButton--delete"
                             data-placement="top"
-                            ng-click="deleteJob()"
-                            ng-show="workflow_status.status == 'running' ||
-                                job_status.status=='pending' "
-                            aw-tool-tip="Cancel"
+                            ng-click="cancelJob()"
+                            ng-show="workflow.status == 'running' ||
+                                workflow.status=='pending' "
+                            aw-tool-tip="{{'Cancel'|translate}}"
                             data-original-title="" title="">
                             <i class="fa fa-minus-circle"></i>
                         </button>
@@ -49,9 +49,9 @@
                                 List-actionButton--delete"
                             data-placement="top"
                             ng-click="deleteJob()"
-                            ng-hide="job_status.status == 'running' ||
-                                job_status.status == 'pending' "
-                            aw-tool-tip="Delete"
+                            ng-hide="workflow.status == 'running' ||
+                                workflow.status == 'pending' "
+                            aw-tool-tip="{{'Delete'|translate}}"
                             data-original-title=""
                             title="">
                             <i class="fa fa-trash-o"></i>
@@ -106,13 +106,28 @@
                         </label>
                         <div class="WorkflowResults-resultRowText">
                             <a href="{{ created_by_link }}"
-                                aw-tool-tip="Edit the User"
+                                aw-tool-tip="{{'Edit the User'|translate}}"
                                 data-placement="top">
                                 {{ workflow.summary_fields.created_by.username }}
                             </a>
                         </div>
                     </div>
 
+                    <!-- SCHEDULED BY DETAIL -->
+                    <div class="WorkflowResults-resultRow toggle-show"
+                        ng-show="workflow.summary_fields.schedule.name">
+                        <label
+                            class="WorkflowResults-resultRowLabel">
+                            Launched By
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ scheduled_by_link }}"
+                                aw-tool-tip="Edit the Schedule"
+                                data-placement="top">
+                                {{ workflow.summary_fields.schedule.name }}
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- EXTRA VARIABLES DETAIL -->
                     <div class="WorkflowResults-resultRow
@@ -122,7 +137,7 @@
                             WorkflowResults-resultRowLabel--fullWidth">
                             Extra Variables
                             <i class="WorkflowResults-extraVarsHelp fa fa-question-circle"
-                                aw-tool-tip="Read only view of extra variables added to the workflow."
+                                aw-tool-tip="{{'Read only view of extra variables added to the workflow.'|translate}}"
                                 data-placement="top">
                             </i>
                         </label>

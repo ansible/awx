@@ -171,6 +171,7 @@ export default
                     //hideOnSuperuser: true // RBAC defunct
                 },
                 permissions: {
+                    name: 'permissions',
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
                     search: {
                         page_size: '10',
@@ -190,17 +191,17 @@ export default
                             label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
                             linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
-                            noSort: true
+                            nosort: true
                         },
                         type: {
                             label: i18n._('Type'),
                             ngBind: 'permission.summary_fields.resource_type_display_name',
-                            noSort: true
+                            nosort: true
                         },
                         role: {
                             label: i18n._('Role'),
                             ngBind: 'permission.name',
-                            noSort: true
+                            nosort: true
                         },
                     },
                     actions: {

@@ -1675,6 +1675,7 @@ tr td button i {
     .alert {
         padding: 10px;
         margin: 0;
+        word-wrap: break-word;
     }
     .alert-danger {
         background-color: @default-bg;
@@ -2238,4 +2239,23 @@ a:hover {
 button[disabled],
 html input[disabled] {
     cursor: not-allowed;
+}
+
+.CodeMirror--disabled .CodeMirror.cm-s-default,
+.CodeMirror--disabled .CodeMirror-line {
+    background-color: #f6f6f6;
+}
+
+.CodeMirror--disabled .CodeMirror-gutter.CodeMirror-lint-markers,
+.CodeMirror--disabled .CodeMirror-gutter.CodeMirror-linenumbers {
+    background-color: #ebebeb;
+    color: @b7grey;
+}
+
+.CodeMirror--disabled .CodeMirror-lines {
+    cursor: default;
+}
+
+.CodeMirror--disabled .CodeMirror-cursors {
+    display: none;
 }

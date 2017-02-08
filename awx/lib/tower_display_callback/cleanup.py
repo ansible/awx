@@ -71,7 +71,10 @@ def terminate_ssh_control_masters():
     # Terminate then kill control master processes.  Workaround older
     # version of psutil that may not have wait_procs implemented.
     for proc in ssh_cm_procs:
-        proc.terminate()
+        try:
+            proc.terminate()
+        except psutil.NoSuchProcess:
+            continue
     procs_gone, procs_alive = psutil.wait_procs(ssh_cm_procs, timeout=5)
     for proc in procs_alive:
         proc.kill()

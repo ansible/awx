@@ -1,7 +1,8 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService) {
     var toDestroy = [];
     var cancelRequests = false;
+    var runTimeElapsedTimer = null;
 
     // download stdout tooltip text
     $scope.standardOutTooltip = i18n._('Download Output');
@@ -50,15 +51,26 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     var getTowerLinks = function() {
         var getTowerLink = function(key) {
-            if ($scope.job.related[key]) {
-                return '/#/' + $scope.job.related[key]
-                    .split('api/v1/')[1];
-            } else {
-                return null;
+            if(key === 'schedule') {
+                if($scope.job.related.schedule) {
+                    return '/#/templates/job_template/' + $scope.job.job_template + '/schedules' + $scope.job.related.schedule.split('api/v1/schedules')[1];
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                if ($scope.job.related[key]) {
+                    return '/#/' + $scope.job.related[key]
+                        .split('api/v1/')[1];
+                } else {
+                    return null;
+                }
             }
         };
 
         $scope.created_by_link = getTowerLink('created_by');
+        $scope.scheduled_by_link = getTowerLink('schedule');
         $scope.inventory_link = getTowerLink('inventory');
         $scope.project_link = getTowerLink('project');
         $scope.machine_credential_link = getTowerLink('credential');
@@ -240,15 +252,15 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     $scope.events = {};
 
+    function updateJobElapsedTimer(time) {
+        $scope.job.elapsed = time;
+    }
+
     // For elapsed time while a job is running, compute the differnce in seconds,
     // from the time the job started until now. Moment() returns the current
     // time as a moment object.
-    var start = ($scope.job.started === null) ? moment() : moment($scope.job.started);
-    if(jobFinished === false){
-        var elapsedInterval = setInterval(function(){
-            let now = moment();
-            $scope.job.elapsed = now.diff(start, 'seconds');
-        }, 1000);
+    if ($scope.job.started !== null && $scope.job.status === 'running') {
+        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer($scope.job.started, updateJobElapsedTimer);
     }
 
     // EVENT STUFF BELOW
@@ -297,9 +309,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
 
                 if(change === 'stdout'){
-                    // put stdout elements in stdout container
-
-
                     var appendToBottom = function(mungedEvent){
                         // if we get here then the event type was either a
                         // header line, recap line, or one of the additional
@@ -320,71 +329,78 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                                     .counter]));
                     };
 
+                    if (!$scope.events[mungedEvent.counter]) {
+                        // line hasn't been put in the pane yet
 
-                    // this scopes the event to that particular
-                    // block of stdout.
-                    // If you need to see the event a particular
-                    // stdout block is from, you can:
-                    // angular.element($0).scope().event
-                    $scope.events[mungedEvent.counter] = $scope.$new();
-                    $scope.events[mungedEvent.counter]
-                        .event = mungedEvent;
+                        // create new child scope
+                        $scope.events[mungedEvent.counter] = $scope.$new();
+                        $scope.events[mungedEvent.counter]
+                            .event = mungedEvent;
 
-                    if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
-                        // put non-duplicate lines into the standard
-                        // out pane where they should go (within the
-                        // right header section, before the next line
-                        // as indicated by start_line)
-                        window.$ = $;
-                        var putIn;
-                        var classList = $("div",
-                            "<div>"+mungedEvent.stdout+"</div>")
-                            .attr("class").split(" ");
-                        if (classList
-                            .filter(v => v.indexOf("task_") > -1)
-                            .length) {
-                            putIn = classList
-                                .filter(v => v.indexOf("task_") > -1)[0];
-                        } else if(classList
-                            .filter(v => v.indexOf("play_") > -1)
-                            .length) {
-                            putIn = classList
-                                .filter(v => v.indexOf("play_") > -1)[0];
+                        // let's see if we have a specific place to put it in
+                        // the pane
+                        let $prevElem = $(`.next_is_${mungedEvent.start_line}`);
+                        if ($prevElem && $prevElem.length) {
+                            // if so, put it there
+                            $(`.next_is_${mungedEvent.start_line}`)
+                                .after($compile(mungedEvent
+                                    .stdout)($scope.events[mungedEvent
+                                        .counter]));
+                        } else if (mungedEvent.stdout.indexOf("not_skeleton") > -1) {
+                            var putIn;
+                            var classList = $("div",
+                                "<div>"+mungedEvent.stdout+"</div>")
+                                .attr("class").split(" ");
+                            if (classList
+                                .filter(v => v.indexOf("task_") > -1)
+                                .length) {
+                                putIn = classList
+                                    .filter(v => v.indexOf("task_") > -1)[0];
+                            } else if(classList
+                                .filter(v => v.indexOf("play_") > -1)
+                                .length) {
+                                putIn = classList
+                                    .filter(v => v.indexOf("play_") > -1)[0];
+                            }
+
+                            var putAfter;
+                            var isDup = false;
+                            $(".header_" + putIn + ",." + putIn)
+                                .each((i, v) => {
+                                    if (angular.element(v).scope()
+                                        .event.start_line < mungedEvent
+                                        .start_line) {
+                                        putAfter = v;
+                                    } else if (angular.element(v).scope()
+                                        .event.start_line === mungedEvent
+                                        .start_line) {
+                                        isDup = true;
+                                        return false;
+                                    } else if (angular.element(v).scope()
+                                        .event.start_line > mungedEvent
+                                        .start_line) {
+                                        return false;
+                                    }  else {
+                                        appendToBottom(mungedEvent);
+                                    }
+                                });
+
+                            if (!isDup) {
+                                $(putAfter).after($compile(mungedEvent
+                                    .stdout)($scope.events[mungedEvent
+                                        .counter]));
+                            }
+
+
+                            classList = null;
+                            putIn = null;
                         } else {
                             appendToBottom(mungedEvent);
                         }
 
-                        var putAfter;
-                        var isDup = false;
-                        $(".header_" + putIn + ",." + putIn)
-                            .each((i, v) => {
-                                if (angular.element(v).scope()
-                                    .event.start_line < mungedEvent
-                                    .start_line) {
-                                    putAfter = v;
-                                } else if (angular.element(v).scope()
-                                    .event.start_line === mungedEvent
-                                    .start_line) {
-                                    isDup = true;
-                                    return false;
-                                } else if (angular.element(v).scope()
-                                    .event.start_line > mungedEvent
-                                    .start_line) {
-                                    return false;
-                                }
-                            });
-
-                        if (!isDup) {
-                            $(putAfter).after($compile(mungedEvent
-                                .stdout)($scope.events[mungedEvent
-                                    .counter]));
-                        }
-
-
-                        classList = null;
-                        putIn = null;
-                    } else {
-                        appendToBottom(mungedEvent);
+                        // delete ref to the elem because it might leak scope
+                        // if you don't
+                        $prevElem = null;
                     }
 
                     // move the followAnchor to the bottom of the
@@ -453,7 +469,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     };
 
     $scope.stdoutContainerAvailable.promise.then(() => {
-        getSkeleton(jobData.related.job_events + "?order_by=id&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
+        getSkeleton(jobData.related.job_events + "?order_by=start_line&or__event__in=playbook_on_start,playbook_on_play_start,playbook_on_task_start,playbook_on_stats");
     });
 
     var getEvents;
@@ -567,10 +583,24 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
+    var buffer = [];
 
+    var processBuffer = function() {
+        buffer.forEach((event, i) => {
+            processEvent(event);
+            buffer.splice(i, 1);
+        });
+    };
+
+    var bufferInterval;
 
     // Processing of job_events messages from the websocket
     toDestroy.push($scope.$on(`ws-job_events-${$scope.job.id}`, function(e, data) {
+        if (!bufferInterval) {
+            bufferInterval = setInterval(function(){
+                processBuffer();
+            }, 500);
+        }
 
         // use the lowest counter coming over the socket to retrigger pull data
         // to only be for stuff lower than that id
@@ -597,6 +627,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             } else if (data.event_name === "playbook_on_task_start") {
                 $scope.taskCount++;
             }
+            buffer.push(data);
             processEvent(data);
         });
     }));
@@ -607,15 +638,21 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             parseInt($scope.job.id,10)) {
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
-            if (data.status === "successful" ||
+            if (data.status === "running") {
+                runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+            } else if (data.status === "successful" ||
                 data.status === "failed" ||
                 data.status === "error" ||
                 data.status === "canceled") {
-                    clearInterval(elapsedInterval);
+                    workflowResultsService.destroyTimer(runTimeElapsedTimer);
+                    if (bufferInterval) {
+                        clearInterval(bufferInterval);
+                    }
                     // When the fob is finished retrieve the job data to
                     // correct anything that was out of sync from the job run
                     jobResultsService.getJobData($scope.job.id).then(function(data){
                         $scope.job = data;
+                        $scope.jobFinished = true;
                     });
             }
         } else if (parseInt(data.project_id, 10) ===
@@ -642,7 +679,10 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $scope.events[v] = null;
             });
         $scope.events = {};
-        clearInterval(elapsedInterval);
+        workflowResultsService.destroyTimer(runTimeElapsedTimer);
+        if (bufferInterval) {
+            clearInterval(bufferInterval);
+        }
         toDestroy.forEach(closureFunc => closureFunc());
     });
 }];

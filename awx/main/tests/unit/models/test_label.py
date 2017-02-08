@@ -46,13 +46,13 @@ class TestLabelFilterMocked:
     def test_is_candidate_for_detach(self, mocker, jt_count, j_count, expected):
         mock_job_qs = mocker.MagicMock()
         mock_job_qs.count = mocker.MagicMock(return_value=j_count)
-        UnifiedJob.objects = mocker.MagicMock()
-        UnifiedJob.objects.filter = mocker.MagicMock(return_value=mock_job_qs)
+        mocker.patch.object(UnifiedJob, 'objects', mocker.MagicMock(
+            filter=mocker.MagicMock(return_value=mock_job_qs)))
 
         mock_jt_qs = mocker.MagicMock()
         mock_jt_qs.count = mocker.MagicMock(return_value=jt_count)
-        UnifiedJobTemplate.objects = mocker.MagicMock()
-        UnifiedJobTemplate.objects.filter = mocker.MagicMock(return_value=mock_jt_qs)
+        mocker.patch.object(UnifiedJobTemplate, 'objects', mocker.MagicMock(
+            filter=mocker.MagicMock(return_value=mock_jt_qs)))
 
         label = Label(id=37)
         ret = label.is_candidate_for_detach()

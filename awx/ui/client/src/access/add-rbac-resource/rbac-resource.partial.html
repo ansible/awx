@@ -23,10 +23,10 @@
                     <span class="AddPermissions-directionNumber">
                         1
                     </span>
-                    <div ng-hide='withoutTeamPermissions'>
+                    <div ng-hide='withoutTeamPermissions' translate>
                         Please select Users / Teams from the lists below.
                     </div>
-                    <div ng-show='withoutTeamPermissions'>
+                    <div ng-show='withoutTeamPermissions' translate>
                         Please select Users from the list below.
                     </div>
                 </div>
@@ -34,12 +34,12 @@
                 <div class="Form-tabHolder" ng-hide='withoutTeamPermissions'>
                     <div id="users_tab" class="Form-tab"
                         ng-click="toggleFormTabs('users')"
-                        ng-class="{'is-selected': usersSelected }">
+                        ng-class="{'is-selected': usersSelected }" translate>
                         Users
                     </div>
                     <div id="teams_tab" class="Form-tab"
                         ng-click="toggleFormTabs('teams')"
-                        ng-class="{'is-selected': teamsSelected }">
+                        ng-class="{'is-selected': teamsSelected }" translate>
                         Teams
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                     <span class="AddPermissions-directionNumber">
                         2
                     </span>
-                    Please assign roles to the selected users/teams
+                    <translate>Please assign roles to the selected users/teams</translate>
                     <div class="AddPermissions-keyToggle btn"
                         ng-class="{'is-active': showKeyPane}"
                         ng-click="toggleKeyPane()">

@@ -20,6 +20,7 @@ module.exports = function(config) {
             './client/src/app.js',
             './node_modules/angular-mocks/angular-mocks.js',
             { pattern: './tests/**/*-test.js' },
+            { pattern: './tests/**/*.json', included: false},
             'client/src/**/*.html'
         ],
         preprocessors: {

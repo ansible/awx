@@ -16,6 +16,9 @@ export default ['i18n', function(i18n) {
         addTitle: i18n._('New Notification Template'),
         editTitle: '{{ name }}',
         name: 'notification_template',
+        // I18N for "CREATE NOTIFICATION_TEMPLATE"
+        // on /#/notification_templates/add
+        breadcrumbName: i18n._('NOTIFICATION TEMPLATE'),
         stateTree: 'notifications',
         basePath: 'notification_templates',
         showActions: true,
@@ -389,19 +392,20 @@ export default ['i18n', function(i18n) {
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             email_options: {
-                label: 'Options',
+                label: i18n._('Options'),
                 type: 'radio_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
                 ngChange: "emailOptionsChange()",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
                 options: [{
                     value: 'use_tls',
-                    label: 'Use TLS',
+                    label: i18n._('Use TLS'),
                     ngShow: "notification_type.value == 'email' ",
                     labelClass: 'NotificationsForm-radioButtons'
                 }, {
                     value: 'use_ssl',
-                    label: 'Use SSL',
+                    label: i18n._('Use SSL'),
                     ngShow: "notification_type.value == 'email'",
                     labelClass: 'NotificationsForm-radioButtons'
                 }]

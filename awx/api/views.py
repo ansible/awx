@@ -3,11 +3,14 @@
 # All Rights Reserved.
 
 # Python
+import os
+import re
 import cgi
 import datetime
 import dateutil
 import time
 import socket
+import subprocess
 import sys
 import logging
 from base64 import b64encode
@@ -20,7 +23,7 @@ from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
 from django.db.models import Q, Count
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text, force_text
 from django.utils.safestring import mark_safe
@@ -606,6 +609,15 @@ class AuthTokenView(APIView):
                            extra=dict(actor=request.data['username']))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request):
+        if 'HTTP_AUTHORIZATION' in request.META:
+            token_match = re.match("Token\s(.+)", request.META['HTTP_AUTHORIZATION'])
+            if token_match:
+                filter_tokens = AuthToken.objects.filter(key=token_match.groups()[0])
+                if filter_tokens.exists():
+                    filter_tokens[0].invalidate()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class OrganizationCountsMixin(object):
 
@@ -1071,7 +1083,7 @@ class ProjectTeamsList(ListAPIView):
         return self.model.accessible_objects(self.request.user, 'read_role').filter(pk__in=[t.content_object.pk for t in all_roles])
 
 
-class ProjectSchedulesList(SubListCreateAttachDetachAPIView):
+class ProjectSchedulesList(SubListCreateAPIView):
 
     view_name = _("Project Schedules")
 
@@ -1434,6 +1446,7 @@ class CredentialList(ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializerCreate
+    capabilities_prefetch = ['admin', 'use']
 
 
 class CredentialOwnerUsersList(SubListAPIView):
@@ -1681,6 +1694,7 @@ class HostList(ListCreateAPIView):
     always_allow_superuser = False
     model = Host
     serializer_class = HostSerializer
+    capabilities_prefetch = ['inventory.admin']
 
 
 class HostDetail(RetrieveUpdateDestroyAPIView):
@@ -2157,7 +2171,7 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
         return super(InventorySourceDetail, self).destroy(request, *args, **kwargs)
 
 
-class InventorySourceSchedulesList(SubListCreateAttachDetachAPIView):
+class InventorySourceSchedulesList(SubListCreateAPIView):
 
     view_name = _("Inventory Source Schedules")
 
@@ -2380,11 +2394,8 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             if request.user not in new_inventory.use_role:
                 raise PermissionDenied()
 
-        kv = prompted_fields
-        kv.update(passwords)
-
-        new_job = obj.create_unified_job(**kv)
-        result = new_job.signal_start(**kv)
+        new_job = obj.create_unified_job(**prompted_fields)
+        result = new_job.signal_start(**passwords)
 
         if not result:
             data = dict(passwords_needed_to_start=new_job.passwords_needed_to_start)
@@ -2398,7 +2409,7 @@ class JobTemplateLaunch(RetrieveAPIView, GenericAPIView):
             return Response(data, status=status.HTTP_201_CREATED)
 
 
-class JobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+class JobTemplateSchedulesList(SubListCreateAPIView):
 
     view_name = _("Job Template Schedules")
 
@@ -2554,6 +2565,9 @@ class JobTemplateLabelList(DeleteLastUnattachLabelMixin, SubListCreateAttachDeta
                 request.data['id'] = existing.id
                 del request.data['name']
                 del request.data['organization']
+        if Label.objects.filter(unifiedjobtemplate_labels=self.kwargs['pk']).count() > 100:
+            return Response(dict(msg=_('Maximum number of labels for {} reached.'.format(
+                self.parent_model._meta.verbose_name_raw))), status=status.HTTP_400_BAD_REQUEST)
         return super(JobTemplateLabelList, self).post(request, *args, **kwargs)
 
 
@@ -2688,7 +2702,7 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
-        if not job_template.can_start_without_user_input():
+        if not job_template.can_start_without_user_input(callback_extra_vars=extra_vars):
             data = dict(msg=_('Cannot start automatically, user input required!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = host.name
@@ -2975,7 +2989,7 @@ class WorkflowJobTemplateLaunch(WorkflowsEnforcementMixin, RetrieveAPIView):
         prompted_fields, ignored_fields = obj._accept_or_ignore_job_kwargs(**request.data)
 
         new_job = obj.create_unified_job(**prompted_fields)
-        new_job.signal_start(**prompted_fields)
+        new_job.signal_start()
 
         data = OrderedDict()
         data['ignored_fields'] = ignored_fields
@@ -3036,7 +3050,7 @@ class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
     new_in_310 = True
 
 
-class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAttachDetachAPIView):
+class WorkflowJobTemplateSchedulesList(WorkflowsEnforcementMixin, SubListCreateAPIView):
 
     view_name = _("Workflow Job Template Schedules")
 
@@ -3108,7 +3122,7 @@ class WorkflowJobTemplateActivityStreamList(WorkflowsEnforcementMixin, ActivityS
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(workflow_job_template=parent) |
-                         Q(workflow_job_template_node__workflow_job_template=parent))
+                         Q(workflow_job_template_node__workflow_job_template=parent)).distinct()
 
 
 class WorkflowJobList(WorkflowsEnforcementMixin, ListCreateAPIView):
@@ -3210,7 +3224,7 @@ class SystemJobTemplateLaunch(GenericAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-class SystemJobTemplateSchedulesList(SubListCreateAttachDetachAPIView):
+class SystemJobTemplateSchedulesList(SubListCreateAPIView):
 
     view_name = _("System Job Template Schedules")
 
@@ -3406,6 +3420,11 @@ class BaseJobHostSummariesList(SubListAPIView):
     relationship = 'job_host_summaries'
     view_name = _('Job Host Summaries List')
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        return getattr(parent, self.relationship).select_related('job', 'job__job_template', 'host')
+
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
 
@@ -3474,6 +3493,13 @@ class BaseJobEventsList(SubListAPIView):
 class HostJobEventsList(BaseJobEventsList):
 
     parent_model = Host
+
+    def get_queryset(self):
+        parent_obj = self.get_parent_object()
+        self.check_parent_access(parent_obj)
+        qs = self.request.user.get_queryset(self.model).filter(
+            Q(host=parent_obj) | Q(hosts=parent_obj)).distinct()
+        return qs
 
 
 class GroupJobEventsList(BaseJobEventsList):
@@ -3757,6 +3783,12 @@ class UnifiedJobTemplateList(ListAPIView):
     model = UnifiedJobTemplate
     serializer_class = UnifiedJobTemplateSerializer
     new_in_148 = True
+    capabilities_prefetch = [
+        'admin', 'execute',
+        {'copy': ['jobtemplate.project.use', 'jobtemplate.inventory.use', 'jobtemplate.credential.use',
+                  'jobtemplate.cloud_credential.use', 'jobtemplate.network_credential.use',
+                  'workflowjobtemplate.organization.admin']}
+    ]
 
 
 class UnifiedJobList(ListAPIView):
@@ -3852,6 +3884,17 @@ class UnifiedJobStdout(RetrieveAPIView):
         elif request.accepted_renderer.format == 'ansi':
             return Response(unified_job.result_stdout_raw)
         elif request.accepted_renderer.format in {'txt_download', 'ansi_download'}:
+            if not os.path.exists(unified_job.result_stdout_file):
+                write_fd = open(unified_job.result_stdout_file, 'w')
+                with connection.cursor() as cursor:
+                    try:
+                        cursor.copy_expert("copy (select stdout from main_jobevent where job_id={} order by start_line) to stdout".format(unified_job.id),
+                                           write_fd)
+                        write_fd.close()
+                        subprocess.Popen("sed -i 's/\\\\r\\\\n/\\n/g' {}".format(unified_job.result_stdout_file),
+                                         shell=True).wait()
+                    except Exception as e:
+                        return Response({"error": _("Error generating stdout download file: {}".format(e))})
             try:
                 content_fd = open(unified_job.result_stdout_file, 'r')
                 if request.accepted_renderer.format == 'txt_download':

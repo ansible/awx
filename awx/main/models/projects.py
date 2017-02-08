@@ -473,7 +473,7 @@ class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
-        if parent_instance:
+        if parent_instance and self.job_type == 'check':
             update_fields = self._update_parent_instance_no_save(parent_instance)
             if self.status in ('successful', 'failed', 'error', 'canceled'):
                 if not self.failed and parent_instance.scm_delete_on_next_update:

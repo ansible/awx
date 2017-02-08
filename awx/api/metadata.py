@@ -32,6 +32,7 @@ class Metadata(metadata.SimpleMetadata):
             'min_length', 'max_length',
             'min_value', 'max_value',
             'category', 'category_slug',
+            'defined_in_file'
         ]
 
         for attr in text_attrs:
@@ -156,6 +157,10 @@ class Metadata(metadata.SimpleMetadata):
 
                 # For PUT/POST methods, remove read-only fields.
                 if method in ('PUT', 'POST'):
+                    # This value should always be False for PUT/POST, so don't
+                    # show it (file-based read-only settings can't be updated)
+                    meta.pop('defined_in_file', False)
+
                     if meta.pop('read_only', False):
                         actions[method].pop(field)
 
@@ -186,6 +191,10 @@ class Metadata(metadata.SimpleMetadata):
         # Add related search fields if available from the view.
         if getattr(view, 'related_search_fields', None):
             metadata['related_search_fields'] = view.related_search_fields
+
+        from rest_framework import generics
+        if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
+            metadata['max_page_size'] = view.paginator.max_page_size
 
         return metadata
 
