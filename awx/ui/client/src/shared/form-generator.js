@@ -740,6 +740,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
 
+                    var definedInFileMessage = i18n._('This setting has been set manually in a settings file and is now disabled.');
+                    html += (field.definedInFile) ?
+                        `<span class="Form-tooltip--disabled">${definedInFileMessage}</span>` : ``;
+
                     // toggle switches
                     if(field.type === 'toggleSwitch') {
                         html += label();
