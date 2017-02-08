@@ -548,7 +548,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         }
                     }
                     else if (field.iterator === 'user' && field.actions && field.actions.add) {
-                        if(form.name === 'team') {
+                        if(form.name === 'team' || form.name === 'organization') {
                             states.push(buildRbacUserDirective());
                         }
                     }
