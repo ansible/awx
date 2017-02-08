@@ -122,7 +122,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
             });
 
             function isSelected(item){
-                if(_.find(scope.allSelected, {id: item.id})){
+                if(_.find(scope.allSelected, {id: item.id, type: item.type})){
                     item.isSelected = true;
                 }
                 return item;

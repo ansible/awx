@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '$state',
-    'generateList', '$compile', 'Wait', 'OrgUsersDataset', 'AddUsersDataset',
+export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
+    'generateList', '$compile', 'Wait', 'OrgUsersDataset',
     'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
-    function($stateParams, $scope, OrgUserList, AddUserList, Rest, $state, GenerateList,
-        $compile, Wait, OrgUsersDataset, AddUsersDataset, Prompt, ProcessErrors,
+    function($stateParams, $scope, OrgUserList, Rest, $state, GenerateList,
+        $compile, Wait, OrgUsersDataset, Prompt, ProcessErrors,
         GetBasePath, $filter) {
 
         var orgBase = GetBasePath('organizations');
@@ -18,12 +18,8 @@ export default ['$stateParams', '$scope', 'OrgUserList', 'AddUserList','Rest', '
         function init() {
             // search init
             $scope.list = OrgUserList;
-            $scope.add_user_list = AddUserList;
             $scope.user_dataset = OrgUsersDataset.data;
             $scope.users = $scope.user_dataset.results;
-            $scope.add_user_dataset = AddUsersDataset.data;
-            $scope.add_users = $scope.add_user_dataset.results;
-
 
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()
