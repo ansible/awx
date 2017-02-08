@@ -264,13 +264,13 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                         this.error(response.data, response.status);
 
-                        return response;
+                        throw response;
                     }.bind(this));
             },
             error(data, status) {
-                ProcessErrors($rootScope, data, status, null, {
+                ProcessErrors($rootScope, null, status, null, {
                     hdr: 'Error!',
-                    msg: 'Call to ' + this.url + '. GET returned: ' + status
+                    msg: "Invalid search term entered."
                 });
             }
         };

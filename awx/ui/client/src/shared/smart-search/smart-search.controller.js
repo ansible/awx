@@ -182,8 +182,11 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     else {
                         encodeParams.searchTerm = true;
                     }
+                    removed = qs.encodeParam(encodeParams);
                 }
-                removed = qs.encodeParam(encodeParams);
+                else {
+                    removed = setDefaults(termParts[termParts.length-1]);
+                }
             }
             removeFromQuerySet(queryset);
             if(!$scope.querySet) {
