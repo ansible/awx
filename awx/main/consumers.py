@@ -83,4 +83,7 @@ def ws_receive(message):
 
 
 def emit_channel_notification(group, payload):
-    Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
+    try:
+        Group(group).send({"text": json.dumps(payload, cls=DjangoJSONEncoder)})
+    except ValueError:
+        logger.error("Invalid payload emitting channel {} on topic: {}".format(group, payload))
