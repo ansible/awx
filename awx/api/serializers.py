@@ -1622,8 +1622,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['user_capabilities'] = {'unattach': False}
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
-        def format_team_role_perm(team_role, permissive_role_ids):
+        def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
+            team_role = naive_team_role
+            if naive_team_role.role_field == 'admin_role':
+                team_role = naive_team_role.content_object.member_role
             for role in team_role.children.filter(id__in=permissive_role_ids).all():
                 role_dict = {
                     'id': role.id,
@@ -1682,11 +1685,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         ret['summary_fields']['direct_access'] \
             = [format_role_perm(r) for r in direct_access_roles.distinct()] \
-            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x]
+            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x] \
+            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
 
         ret['summary_fields']['indirect_access'] \
-            = [format_role_perm(r) for r in indirect_access_roles.distinct()] \
-            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
+            = [format_role_perm(r) for r in indirect_access_roles.distinct()]
 
         return ret
 
