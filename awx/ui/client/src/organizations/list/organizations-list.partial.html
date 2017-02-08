@@ -10,18 +10,21 @@
                     {{ orgCount }}
                 </span>
             </div>
-            <div class="List-actions">
-                <!-- &#43; ADD -->
-                <button class="btn List-buttonSubmit"
-                    aw-tool-tip="{{'Create a new organization'|translate}}"
-                    ng-show="canAdd"
-                    ng-click="addOrganization()" translate>
-                    + ADD
-                </button>
-            </div>
+
         </div>
 
         <div class="List-well">
+            <div class="List-actionHolder">
+                <div class="List-actions">
+                    <!-- &#43; ADD -->
+                    <button class="btn List-buttonSubmit"
+                        aw-tool-tip="{{'Create a new organization'|translate}}"
+                        ng-show="canAdd"
+                        ng-click="addOrganization()" translate>
+                        + ADD
+                    </button>
+                </div>
+            </div>
             <!-- smart-search directive bindings:
                 djangoModel: '@', // one-way, interpolated
                 searchSize: '@',

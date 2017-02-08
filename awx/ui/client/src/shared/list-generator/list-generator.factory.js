@@ -133,21 +133,18 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                     base, action, fld, cnt, field_action, fAction, itm;
 
                 if (options.mode !== 'lookup') {
-                    if (options.title !== false && list.title !== false) {
-                        html += "<div class=\"List-header\">";
+                    // Don't display an empty <div> if there is no listTitle
+                    if ((options.title !== false && list.title !== false) && list.listTitle !== undefined) {
+                        html += "<div class=\"List-header\" >";
                         html += "<div class=\"List-title\">";
-
                         if (list.listTitle && options.listTitle !== false) {
-
                             html += "<div class=\"List-titleText\">" + list.listTitle + "</div>";
                             // We want to show the list title badge by default and only hide it when the list config specifically passes a false flag
                             list.listTitleBadge = (typeof list.listTitleBadge === 'boolean' && list.listTitleBadge === false) ? false : true;
                             if (list.listTitleBadge) {
                                 html += `<span class="badge List-titleBadge">{{ ${list.iterator}_dataset.count }}</span>`;
                             }
-
                         }
-
                         html += "</div>";
                         if (options.cancelButton === true) {
                             html += "<div class=\"Form-exitHolder\">";
@@ -155,26 +152,9 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                             html += "<i class=\"fa fa-times-circle\"></i>";
                             html += "</button></div>\n";
                         }
-                        html += "<div class=\"List-actionHolder\">";
-                        html += "<div class=\"List-actions\">";
-                        html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
-
-                        for (action in list.actions) {
-                            list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
-                        }
-
-                        html += "</div>";
-                        if (list.toolbarAuxAction) {
-                            html += "<div class=\"List-auxAction\">";
-                            html += list.toolbarAuxAction;
-                            html += "</div>";
-                        }
-                        html += "\n</div>";
-                        html += "</div>";
                         html += "</div>";
                     }
                 }
-
 
                 if (options.mode === 'edit' && list.editInstructions) {
                     html += "<div class=\"alert alert-info alert-block\">\n";
@@ -192,6 +172,23 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                 if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
                     html += `<div class="${list.name}List List-well">`;
                 }
+
+                // List actions
+                html += "<div class=\"List-actionHolder\">";
+                html += "<div class=\"List-actions\">";
+                html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
+
+                for (action in list.actions) {
+                    list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                }
+
+                html += "</div>";
+                if (list.toolbarAuxAction) {
+                    html += `<div class="List-auxAction">${list.toolbarAuxAction}</div>`;
+                }
+                html += "\n</div>";
+                html += "</div>";
+                // End list actions
 
                 html += (list.searchRowActions) ? "<div class='row'><div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\">" : "";
                 if (list.searchRowActions && !list.searchSize) {

@@ -153,10 +153,13 @@ table, tbody {
 .List-actionHolder {
     justify-content: flex-end;
     display: flex;
+    // margin-bottom: 20px;
+    // float: right;
 }
 
 .List-actions {
     display: flex;
+    margin-bottom: -32px;
 }
 
 .List-auxAction {
@@ -419,7 +422,13 @@ table, tbody {
         flex: 1 0 auto;
         margin-top: 12px;
     }
+    .List-actions {
+        margin-bottom: 20px;
+    }
     .List-well {
         margin-top: 20px;
+    }
+    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+        margin-left: 0;
     }
 }

@@ -1852,6 +1852,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     width = "col-lg-8 col-md-8 col-sm-8 col-xs-12";
                 }
 
+                if(actionButtons.length>0){
+                    html += `<div class="list-actions">
+                            ${actionButtons}
+                        </div>`;
+                }
+                
                 // smart-search directive
                 html += `
                 <div
@@ -1869,11 +1875,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 </div>
                     `;
 
-                if(actionButtons.length>0){
-                    html += `<div class="list-actions">
-                            ${actionButtons}
-                        </div>`;
-                }
+
                 //html += "</div>";
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
