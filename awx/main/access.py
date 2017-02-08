@@ -755,7 +755,10 @@ class InventorySourceAccess(BaseAccess):
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
         if obj and obj.group:
-            return self.user.can_access(Group, 'change', obj.group, None)
+            return (
+                self.user.can_access(Group, 'change', obj.group, None) and
+                self.check_related('credential', Credential, data, obj=obj, role_field='use_role')
+            )
         # Can't change inventory sources attached to only the inventory, since
         # these are created automatically from the management command.
         else:
