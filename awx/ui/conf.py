@@ -47,7 +47,7 @@ register(
     default='',
     label=_('Custom Logo'),
     help_text=_('To set up a custom logo, provide a file that you create. For '
-                'the custom logo to look its best, use a `.png` file with a '
+                'the custom logo to look its best, use a .png file with a '
                 'transparent background. GIF, PNG and JPEG formats are supported.'),
     placeholder='data:image/gif;base64,R0lGODlhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs=',
     category=_('UI'),
