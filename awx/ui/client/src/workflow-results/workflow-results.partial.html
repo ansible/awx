@@ -98,6 +98,21 @@
                         </div>
                     </div>
 
+                    <!-- TEMPLATE DETAIL -->
+                    <div class="WorkflowResults-resultRow"
+                        ng-show="workflow.summary_fields.workflow_job_template.name">
+                        <label class="WorkflowResults-resultRowLabel">
+                            Template
+                        </label>
+                        <div class="WorkflowResults-resultRowText">
+                            <a href="{{ workflow_job_template_link }}"
+                                aw-tool-tip="Edit the workflow job template"
+                                data-placement="top">
+                                {{ workflow.summary_fields.workflow_job_template.name }}
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- CREATED BY DETAIL -->
                     <div class="WorkflowResults-resultRow"
                         ng-show="workflow.summary_fields.created_by.username">
