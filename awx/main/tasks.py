@@ -112,7 +112,11 @@ def _uwsgi_reload():
     # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
     logger.warn('Initiating uWSGI chain reload of server')
     TRIGGER_CHAIN_RELOAD = 'c'
-    with open('/var/lib/awx/awxfifo', 'w') as awxfifo:
+    if settings.DEBUG:
+        uWSGI_FIFO_LOCATION = '/awxfifo'
+    else:
+        uWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
+    with open(uWSGI_FIFO_LOCATION, 'w') as awxfifo:
         awxfifo.write(TRIGGER_CHAIN_RELOAD)
 
 
