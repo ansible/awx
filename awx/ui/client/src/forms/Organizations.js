@@ -54,6 +54,7 @@ export default
 
             related: {
                 users: {
+                    name: 'users',
                     dataPlacement: 'top',
                     awToolTip: i18n._('Please save before adding users'),
                     basePath: 'api/v1/organizations/{{$stateParams.organization_id}}/access_list/',
