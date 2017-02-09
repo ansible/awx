@@ -118,8 +118,12 @@ class BaseHTTPSHandler(logging.Handler):
 
     def emit(self, record):
         """
-            Emit a log record.  When ``self.async`` is True, returns a list of
+            Emit a log record.  Returns a list of zero or more
             ``concurrent.futures.Future`` objects.
+
+            When ``self.async`` is True, the list will contain one
+            Future object for each HTTP request made.  When ``self.async`` is
+            False, the list will be empty.
 
             See:
             https://docs.python.org/3/library/concurrent.futures.html#future-objects
