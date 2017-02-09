@@ -646,6 +646,32 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
         generateLookupNodes: function(form, formStateDefinition) {
 
             function buildFieldDefinition(field) {
+
+                // Some lookup modals require some additional default params,
+                // namely organization and inventory_script. If these params
+                // aren't set as default params out of the gate, then smart
+                // search will think they need to be set as search tags.
+                var params;
+                if(field.sourceModel === "organization"){
+                    params = {
+                        page_size: '5',
+                        role_level: 'admin_role'
+                    };
+                }
+                else if(field.sourceModel === "inventory_script"){
+                    params = {
+                        page_size: '5',
+                        role_level: 'admin_role',
+                        organization: null
+                    };
+                }
+                else {
+                    params = {
+                        page_size: '5',
+                        role_level: 'use_role'
+                    };
+                }
+
                 let state = $stateExtender.buildDefinition({
                     searchPrefix: field.sourceModel,
                     //squashSearchUrl: true, @issue enable
@@ -658,10 +684,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     },
                     params: {
                         [field.sourceModel + '_search']: {
-                            value: {
-                                page_size: '5',
-                                role_level: 'use_role'
-                            }
+                            value: params
                         }
                     },
                     ncyBreadcrumb: {
