@@ -2,7 +2,7 @@
 from django.apps import AppConfig
 # from django.core import checks
 from django.utils.translation import ugettext_lazy as _
-from django.utils.log import configure_logging
+from awx.main.utils.handlers import configure_external_logger
 from django.conf import settings
 
 
@@ -15,10 +15,4 @@ class ConfConfig(AppConfig):
         self.module.autodiscover()
         from .settings import SettingsWrapper
         SettingsWrapper.initialize()
-        if settings.LOG_AGGREGATOR_ENABLED:
-            LOGGING_DICT = settings.LOGGING
-            LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-            if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
-                if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
-                    LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
-            configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
+        configure_external_logger(settings)

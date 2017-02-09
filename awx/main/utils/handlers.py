@@ -12,8 +12,11 @@ import traceback
 
 from requests_futures.sessions import FuturesSession
 
-# custom
-from django.conf import settings as django_settings
+# AWX
+from awx.main.utils.formatters import LogstashFormatter
+
+
+__all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'HTTPSHandler', 'configure_external_logger']
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -40,7 +43,7 @@ def unused_callback(sess, resp):
 class HTTPSNullHandler(logging.NullHandler):
     "Placeholder null handler to allow loading without database access"
 
-    def __init__(self, host, **kwargs):
+    def __init__(self, *args, **kwargs):
         return super(HTTPSNullHandler, self).__init__()
 
 
@@ -167,5 +170,64 @@ class BaseHTTPSHandler(logging.Handler):
 
 class HTTPSHandler(object):
 
-    def __new__(cls, *args, **kwargs):
-        return BaseHTTPSHandler.from_django_settings(django_settings, *args, **kwargs)
+    def __new__(cls, settings_module, *args, **kwargs):
+        return BaseHTTPSHandler.from_django_settings(settings_module, *args, **kwargs)
+
+
+def add_or_remove_logger(address, instance, adding=True):
+    specific_logger = logging.getLogger(address)
+    i_occurance = None
+    for i in range(len(specific_logger.handlers)):
+        if isinstance(specific_logger.handlers[i], (HTTPSNullHandler, BaseHTTPSHandler)):
+            i_occurance = i
+            break
+    
+    if i_occurance is None and not adding:
+        return
+    elif i_occurance is None:
+        specific_logger.handlers.append(instance)
+    else:
+        specific_logger.handlers[i_occurance] = instance
+
+
+def configure_external_logger(settings_module, async_flag=True, is_startup=True):
+
+    is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
+    if is_startup and (not is_enabled):
+        # Pass-through if external logging not being used
+        return
+
+    if is_enabled:
+        instance = HTTPSHandler(settings_module, async=async_flag)
+        instance.setFormatter(LogstashFormatter())
+    else:
+        instance = HTTPSNullHandler()
+
+    add_or_remove_logger('awx.analytics', instance, adding=is_enabled)
+    add_or_remove_logger('awx', instance, adding=(is_enabled and 'awx' in settings_module.LOG_AGGREGATOR_LOGGERS))
+
+
+def configure_external_logger_old(settings_module, async_flag=True, is_startup=True):
+
+    from django.utils.log import configure_logging
+
+    is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
+    if is_startup and (not is_enabled):
+        # Pass-through if external logging not being used
+        return
+
+    LOGGING_DICT = settings_module.LOGGING
+    if is_enabled:
+        LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.BaseHTTPSHandler'
+        if not async_flag:
+            LOGGING_DICT['handlers']['http_receiver']['async'] = False
+        else:
+            LOGGING_DICT['handlers']['http_receiver']['async'] = True
+        for param, django_setting_name in PARAM_NAMES.items():
+            LOGGING_DICT['handlers']['http_receiver'][param] = getattr(settings_module, django_setting_name, None)
+        if 'awx' in settings_module.LOG_AGGREGATOR_LOGGERS:
+            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
+                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
+    # External logging not enabled, but removal of existing configuration needed
+    configure_logging(settings_module.LOGGING_CONFIG, LOGGING_DICT)
+
