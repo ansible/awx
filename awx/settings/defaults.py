@@ -893,16 +893,16 @@ LOGGING = {
             'formatter': 'simple',
         },
         'null': {
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'file': {
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
             'formatter': 'simple',
         },
         'syslog': {
             'level': 'WARNING',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
             'formatter': 'simple',
         },
         'http_receiver': {
