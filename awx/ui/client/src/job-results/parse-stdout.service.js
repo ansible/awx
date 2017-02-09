@@ -36,6 +36,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/\[0;33m/g, '<span class="ansi33">');
                 line = line.replace(/\[0;34m/g, '<span class="ansi34">');
                 line = line.replace(/\[0;35m/g, '<span class="ansi35">');
+                line = line.replace(/\[1;35m/g, '<span class="ansi35">');
                 line = line.replace(/\[0;36m/g, '<span class="ansi36">');
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
@@ -223,6 +224,8 @@ export default ['$log', 'moment', function($log, moment){
                         colorCode = "[0;34m";
                     } else if (line.indexOf("[0;35m") > -1) {
                         colorCode = "[0;35m";
+                    }  else if (line.indexOf("[1;35m") > -1) {
+                        colorCode = "[1;35m";
                     } else if (line.indexOf("[0;36m") > -1) {
                         colorCode = "[0;36m";
                     }
