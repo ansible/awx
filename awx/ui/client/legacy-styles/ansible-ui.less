@@ -921,7 +921,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
     text-align: right;
-    margin-bottom: 20px;
+    margin-bottom: -34px;
 
     .fa-lg {
         vertical-align: -8%;
@@ -1939,10 +1939,16 @@ tr td button i {
       padding-right: 15px;
   }
 
+
+
+}
+
+// lists.less uses 600px as the breakpoint, doing same for consistency
+@media (max-width: 600px) {
   .list-actions {
       text-align: left;
+      margin-bottom: 20px;
   }
-
 }
 
 .nvtooltip {

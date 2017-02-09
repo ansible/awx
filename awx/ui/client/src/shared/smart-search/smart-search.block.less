@@ -35,7 +35,7 @@
 
 .SmartSearch-searchTermContainer {
     flex: initial;
-    width: ~"calc(100% - 100px)";
+    width: 50%;
     border: 1px solid @d7grey;
     border-radius: 4px;
     display: flex;
@@ -158,7 +158,8 @@
     padding-top: 5px;
 }
 .SmartSearch-keyToggle {
-    margin-left: auto;
+    margin-right: auto;
+    margin-left: 12px;
     text-transform: uppercase;
     background-color: @default-bg;
     border-radius: 5px;
@@ -232,4 +233,12 @@
     border-radius: 5px;
     padding: 0px 5px;
     margin-right: 5px;
+}
+
+
+// Additional modal specific styles
+.modal-body, #add-permissions-modal {
+    .SmartSearch-searchTermContainer {
+        width: 100%;
+    }
 }
