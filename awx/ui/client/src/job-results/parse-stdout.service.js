@@ -198,6 +198,41 @@ export default ['$log', 'moment', function($log, moment){
                 return emptySpan;
             }
         },
+        distributeColors: function(lines) {
+            var colorCode;
+            return lines.map(line => {
+
+                if (colorCode) {
+                    line = colorCode + line;
+                }
+
+                if (line.indexOf("[0m") === -1) {
+                    if (line.indexOf("[1;31m") > -1) {
+                        colorCode = "[1;31m";
+                    } else if (line.indexOf("[0;31m") > -1) {
+                        colorCode = "[0;31m";
+                    } else if (line.indexOf("[0;32m=") > -1) {
+                        colorCode = "[0;32m=";
+                    } else if (line.indexOf("[0;32m1") > -1) {
+                        colorCode = "[0;32m1";
+                    } else if (line.indexOf("[0;32m") > -1) {
+                        colorCode = "[0;32m";
+                    } else if (line.indexOf("[0;33m") > -1) {
+                        colorCode = "[0;33m";
+                    } else if (line.indexOf("[0;34m") > -1) {
+                        colorCode = "[0;34m";
+                    } else if (line.indexOf("[0;35m") > -1) {
+                        colorCode = "[0;35m";
+                    } else if (line.indexOf("[0;36m") > -1) {
+                        colorCode = "[0;36m";
+                    }
+                } else {
+                    colorCode = null;
+                }
+
+                return line;
+            });
+        },
         getLineArr: function(event) {
             let lineNums = _.range(event.start_line + 1,
                 event.end_line + 1);
@@ -218,6 +253,8 @@ export default ['$log', 'moment', function($log, moment){
                     lines.push("");
                 }
             }
+
+            lines = this.distributeColors(lines);
 
             // hack around no-carriage return issues
             if (lineNums.length === lines.length) {
