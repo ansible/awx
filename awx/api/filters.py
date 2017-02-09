@@ -89,7 +89,6 @@ class FieldLookupBackend(BaseFilterBackend):
         # sure user cannot query using objects he could not view.
         new_parts = []
         for n, name in enumerate(parts[:-1]):
-
             # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
             if model._meta.object_name in ('Project', 'InventorySource'):
                 name = {
@@ -99,9 +98,12 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
-            new_parts.append(name)
+            if name == 'type' and 'polymorphic_ctype' in model._meta.get_all_field_names():
+                name = 'polymorphic_ctype'
+                new_parts.append('polymorphic_ctype__model')
+            else:
+                new_parts.append(name)
 
-            
             if name in getattr(model, 'PASSWORD_FIELDS', ()):
                 raise PermissionDenied('Filtering on password fields is not allowed.')
             elif name == 'pk':
@@ -134,6 +136,13 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def value_to_python(self, model, lookup, value):
         field, new_lookup = self.get_field_from_lookup(model, lookup)
+
+        # Type names are stored without underscores internally, but are presented and
+        # and serialized over the API containing underscores so we remove `_`
+        # for polymorphic_ctype__model lookups.
+        if new_lookup.startswith('polymorphic_ctype__model'):
+            value = value.replace('_','')
+
         if new_lookup.endswith('__isnull'):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
