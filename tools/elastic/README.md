@@ -1,8 +1,7 @@
 # Docker ELK / Elastic Stack Development Tools
 
 These are tools to run a containerized version of ELK stack, comprising
-of Logstash, Elastic Search, and Kibana. There are also cases where
-only a subset of these are needed to run.
+of Logstash, Elastic Search, and Kibana.
 
 A copy of the license is in `docs/licenses/docker-elk.txt`
 
@@ -12,12 +11,10 @@ Due to complex requirements from the elastic search container upstream, there
 is a prerequisite to get the containers running. The docker _host_ machine
 must have the `max_map_count` variable increased. For a developer using
 docker-machine with something like VirtualBox of VMWare, this can be
-done by getting bash in the running Docker machine. Example:
+done by getting via bash in the running Docker machine. Example:
 
 ```bash
-$ docker-machine ssh default
-docker@default:~$ sudo sysctl -w vm.max_map_count=262144
-vm.max_map_count = 262144
+docker-machine ssh default sudo sysctl -w vm.max_map_count=262144
 ```
 
 After this, the containers can be started up with commands like:
@@ -31,6 +28,37 @@ make docker-compose-cluster-elk
 ```
 
 These are ran from the root folder of the ansible-tower repository.
+
+Kibana is the visualization service, and it can be accessed in a web browser
+by going to `{server address}:5601`.
+
+
+### Authentication
+
+The default logstash configuration makes use of basic auth, so a username
+and password is needed in the configuration, in addition to the other
+parameters. The following settings are supported:
+
+```
+{
+    "LOG_AGGREGATOR_HOST": "logstash",
+    "LOG_AGGREGATOR_PORT": 8085,
+    "LOG_AGGREGATOR_TYPE": "logstash",
+    "LOG_AGGREGATOR_USERNAME": "awx_logger",
+    "LOG_AGGREGATOR_PASSWORD": "workflows",
+    "LOG_AGGREGATOR_LOGGERS": [
+        "awx",
+        "activity_stream",
+        "job_events",
+        "system_tracking"
+    ],
+    "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
+    "LOG_AGGREGATOR_ENABLED": true
+}
+```
+
+These can be entered via Configure-Tower-in-Tower by making a POST to
+`/api/v1/settings/logging/`.
 
 ### Connecting Logstash to 3rd Party Receivers
 
