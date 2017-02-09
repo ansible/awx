@@ -52,7 +52,10 @@ class BaseHTTPSHandler(logging.Handler):
         self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
             setattr(self, fd, kwargs.get(fd, None))
-        self.session = FuturesSession()
+        if self.async:
+            self.session = FuturesSession()
+        else:
+            self.session = requests.Session()
         self.add_auth_information()
 
     @classmethod
@@ -126,7 +129,6 @@ class BaseHTTPSHandler(logging.Handler):
             return []
         try:
             payload = self.format(record)
-            host = self.get_http_host()
 
             # Special action for System Tracking, queue up multiple log messages
             if self.indv_facts:
@@ -139,20 +141,25 @@ class BaseHTTPSHandler(logging.Handler):
                         for key in facts_dict:
                             fact_payload = copy(payload_data)
                             fact_payload.update(facts_dict[key])
-                            async_futures.append(
-                                self.session.post(host, **self.get_post_kwargs(fact_payload))
-                            )
+                            if self.async:
+                                async_futures.append(self._send(fact_payload))
+                            else:
+                                self._send(fact_payload)
                         return async_futures
 
             if self.async:
-                return [self.session.post(host, **self.get_post_kwargs(payload))]
+                return [self._send(payload)]
 
-            requests.post(host, auth=requests.auth.HTTPBasicAuth(self.username, self.password), **self.get_post_kwargs(payload))
+            self._send(payload)
             return []
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             self.handleError(record)
+
+    def _send(self, payload):
+        return self.session.post(self.get_http_host(),
+                                 **self.get_post_kwargs(payload))
 
 
 class HTTPSHandler(object):
