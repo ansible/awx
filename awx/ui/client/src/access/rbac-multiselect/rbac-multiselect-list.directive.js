@@ -65,6 +65,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         description: list.fields.description
                     };
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
                     list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
@@ -77,6 +78,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         description: list.fields.description
                     };
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.ngHref = '#/templates/workflow_job_template/{{workflow_template.id}}';
                     list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 case 'Users':
