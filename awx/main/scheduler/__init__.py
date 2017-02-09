@@ -346,10 +346,14 @@ class TaskManager():
         for task in all_running_sorted_tasks:
 
             if (task['celery_task_id'] not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR')):
-                # NOTE: Pull status again and make sure it didn't finish in
-                #       the meantime?
                 # TODO: try catch the getting of the job. The job COULD have been deleted
                 task_obj = task.get_full()
+                # Ensure job did not finish running between the time we get the
+                # list of task id's from celery and now.
+                # Note: This is an actual fix, not a reduction in the time 
+                # window that this can happen.
+                if task_obj.status is not 'running':
+                    continue
                 task_obj.status = 'failed'
                 task_obj.job_explanation += ' '.join((
                     'Task was marked as running in Tower but was not present in',
