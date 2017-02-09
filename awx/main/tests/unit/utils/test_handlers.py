@@ -40,13 +40,15 @@ def ok200_adapter():
     return OK200Adapter()
 
 
-@pytest.mark.parametrize('async, implementation', [
-    (True, FuturesSession),
-    (True, requests.Session)
-])
-def test_https_logging_handler_requests_implementation(async, implementation):
-    handler = HTTPSHandler(async=async)
-    assert isinstance(handler.session, implementation)
+def test_https_logging_handler_requests_sync_implementation():
+    handler = HTTPSHandler(async=False)
+    assert not isinstance(handler.session, FuturesSession)
+    assert isinstance(handler.session, requests.Session)
+
+
+def test_https_logging_handler_requests_async_implementation():
+    handler = HTTPSHandler(async=True)
+    assert isinstance(handler.session, FuturesSession)
 
 
 @pytest.mark.parametrize('param', PARAM_NAMES.keys())
