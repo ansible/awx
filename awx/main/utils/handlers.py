@@ -45,23 +45,21 @@ class HTTPSNullHandler(NullHandler):
         return super(HTTPSNullHandler, self).__init__()
 
 
-class HTTPSHandler(logging.Handler):
+class BaseHTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
-        super(HTTPSHandler, self).__init__()
+        super(BaseHTTPSHandler, self).__init__()
         self.fqdn = fqdn
         self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
-            # settings values take precedence over the input params
-            settings_name = PARAM_NAMES[fd]
-            settings_val = getattr(django_settings, settings_name, None)
-            if settings_val:
-                setattr(self, fd, settings_val)
-            elif fd in kwargs:
-                setattr(self, fd, kwargs[fd])
-            else:
-                setattr(self, fd, None)
+            setattr(self, fd, kwargs.get(fd, None))
         self.session = FuturesSession()
         self.add_auth_information()
+
+    @classmethod
+    def from_django_settings(cls, settings, *args, **kwargs):
+        for param, django_setting_name in PARAM_NAMES.items():
+            kwargs[param] = getattr(settings, django_setting_name, None)
+        return cls(*args, **kwargs)
 
     def get_full_message(self, record):
         if record.exc_info:
@@ -155,3 +153,9 @@ class HTTPSHandler(logging.Handler):
             raise
         except:
             self.handleError(record)
+
+
+class HTTPSHandler(object):
+
+    def __new__(cls, *args, **kwargs):
+        return BaseHTTPSHandler.from_django_settings(django_settings, *args, **kwargs)

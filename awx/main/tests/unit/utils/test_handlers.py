@@ -1,10 +1,11 @@
 import json
 import logging
 
+from django.conf import LazySettings
 import pytest
 import requests
 
-from awx.main.utils.handlers import HTTPSHandler
+from awx.main.utils.handlers import BaseHTTPSHandler as HTTPSHandler, PARAM_NAMES
 from awx.main.utils.formatters import LogstashFormatter
 
 
@@ -25,31 +26,28 @@ def ok200_adapter():
 
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize('param, value', [
-    ('host', None),
-    ('port', None),
-    ('message_type', None),
-    ('username', None),
-    ('password', None),
-    ('enabled_loggers', ['awx', 'activity_stream', 'job_events', 'system_tracking']),
-    ('indv_facts', None),
-    ('enabled_flag', None)
-])
-def test_https_logging_handler_defaults(param, value):
+@pytest.mark.parametrize('param', PARAM_NAMES.keys())
+def test_https_logging_handler_defaults(param):
     handler = HTTPSHandler()
-    assert hasattr(handler, param) and getattr(handler, param) == value
+    assert hasattr(handler, param) and getattr(handler, param) is None
 
 
-@pytest.mark.django_db
-@pytest.mark.parametrize('param', ['host', 'port', 'message_type', 'username',
-                                   'password', 'indv_facts', 'enabled_flag'])
+@pytest.mark.parametrize('param', PARAM_NAMES.keys())
 def test_https_logging_handler_kwargs(param):
     handler = HTTPSHandler(**{param: 'EXAMPLE'})
     assert hasattr(handler, param) and getattr(handler, param) == 'EXAMPLE'
 
 
-@pytest.mark.django_db
+@pytest.mark.parametrize('param, django_settings_name', PARAM_NAMES.items())
+def test_https_logging_handler_from_django_settings(param, django_settings_name):
+    settings = LazySettings()
+    settings.configure(**{
+        django_settings_name: 'EXAMPLE'
+    })
+    handler = HTTPSHandler.from_django_settings(settings)
+    assert hasattr(handler, param) and getattr(handler, param) == 'EXAMPLE'
+
+
 def test_https_logging_handler_logstash_auth_info():
     handler = HTTPSHandler(message_type='logstash', username='bob', password='ansible')
     handler.add_auth_information()
@@ -58,7 +56,6 @@ def test_https_logging_handler_logstash_auth_info():
     assert handler.session.auth.password == 'ansible'
 
 
-@pytest.mark.django_db
 def test_https_logging_handler_splunk_auth_info():
     handler = HTTPSHandler(message_type='splunk', password='ansible')
     handler.add_auth_information()
@@ -66,7 +63,6 @@ def test_https_logging_handler_splunk_auth_info():
     assert handler.session.headers['Content-Type'] == 'application/json'
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize('host, port, normalized', [
     ('localhost', None, 'http://localhost'),
     ('localhost', 80, 'http://localhost'),
@@ -81,7 +77,6 @@ def test_https_logging_handler_http_host_format(host, port, normalized):
     assert handler.get_http_host() == normalized
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize('params, logger_name, expected', [
     ({'enabled_flag': False}, 'awx.main', True),  # skip all records if enabled_flag = False
     ({'host': '', 'enabled_flag': True}, 'awx.main', True),  # skip all records if the host is undefined
@@ -91,16 +86,14 @@ def test_https_logging_handler_http_host_format(host, port, normalized):
 ])
 def test_https_logging_handler_skip_log(params, logger_name, expected):
     handler = HTTPSHandler(**params)
-    # override the default loggers set by django_settings
-    handler.enabled_loggers = params.get('enabled_loggers')
     assert handler.skip_log(logger_name) is expected
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
 def test_https_logging_handler_emit(ok200_adapter, message_type):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type=message_type)
+                           message_type=message_type,
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', ok200_adapter)
     record = logging.LogRecord(
@@ -130,10 +123,10 @@ def test_https_logging_handler_emit(ok200_adapter, message_type):
     assert body['message'] == 'User joe logged in'
 
 
-@pytest.mark.django_db
 def test_https_logging_handler_emit_one_record_per_fact(ok200_adapter):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
-                           message_type='logstash', indv_facts=True)
+                           message_type='logstash', indv_facts=True,
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', ok200_adapter)
     record = logging.LogRecord(
