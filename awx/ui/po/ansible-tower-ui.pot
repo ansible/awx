@@ -8,13 +8,13 @@ msgstr ""
 msgid "%s or %s"
 msgstr ""
 
-#: client/src/controllers/Projects.js:437
-#: client/src/controllers/Projects.js:719
+#: client/src/controllers/Projects.js:439
+#: client/src/controllers/Projects.js:721
 msgid "%sNote:%s Mercurial does not support password authentication for SSH. Do not put the username and key in the URL. If using Bitbucket and SSH, do not supply your Bitbucket username."
 msgstr ""
 
-#: client/src/controllers/Projects.js:424
-#: client/src/controllers/Projects.js:706
+#: client/src/controllers/Projects.js:426
+#: client/src/controllers/Projects.js:708
 msgid "%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using SSH. GIT read only protocol (git://) does not use username or password information."
 msgstr ""
 
@@ -52,9 +52,9 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:450
 #: client/src/forms/JobTemplates.js:430
-#: client/src/forms/Organizations.js:76
+#: client/src/forms/Organizations.js:75
 #: client/src/forms/Projects.js:238
-#: client/src/forms/Teams.js:85
+#: client/src/forms/Teams.js:86
 #: client/src/forms/Workflows.js:128
 #: client/src/inventory-scripts/inventory-scripts.list.js:45
 #: client/src/lists/Credentials.js:60
@@ -63,7 +63,7 @@ msgstr ""
 #: client/src/lists/Schedules.js:70
 #: client/src/lists/Teams.js:50
 #: client/src/lists/Templates.js:62
-#: client/src/lists/Users.js:58
+#: client/src/lists/Users.js:52
 #: client/src/notifications/notificationTemplates.list.js:52
 msgid "ADD"
 msgstr ""
@@ -72,8 +72,8 @@ msgstr ""
 msgid "ADD NOTIFICATION TEMPLATE"
 msgstr ""
 
-#: client/src/forms/Teams.js:157
-#: client/src/forms/Users.js:213
+#: client/src/forms/Teams.js:158
+#: client/src/forms/Users.js:215
 msgid "ADD PERMISSIONS"
 msgstr ""
 
@@ -81,7 +81,7 @@ msgstr ""
 msgid "ADDITIONAL INFORMATION:"
 msgstr ""
 
-#: client/src/organizations/linkout/organizations-linkout.route.js:363
+#: client/src/organizations/linkout/organizations-linkout.route.js:325
 msgid "ADMINS"
 msgstr ""
 
@@ -122,7 +122,7 @@ msgid "Action"
 msgstr ""
 
 #: client/src/dashboard/lists/job-templates/job-templates-list.partial.html:20
-#: client/src/shared/list-generator/list-generator.factory.js:546
+#: client/src/shared/list-generator/list-generator.factory.js:547
 msgid "Actions"
 msgstr ""
 
@@ -142,8 +142,8 @@ msgid "Activity Stream"
 msgstr ""
 
 #: client/src/forms/Inventories.js:105
-#: client/src/forms/Organizations.js:73
-#: client/src/forms/Teams.js:82
+#: client/src/forms/Organizations.js:72
+#: client/src/forms/Teams.js:83
 #: client/src/forms/Workflows.js:125
 #: client/src/organizations/linkout/addUsers/addUsers.partial.html:8
 msgid "Add"
@@ -183,14 +183,18 @@ msgstr ""
 msgid "Add Team"
 msgstr ""
 
-#: client/src/forms/Teams.js:83
+#: client/src/forms/Teams.js:84
 msgid "Add User"
 msgstr ""
 
-#: client/src/lists/Users.js:25
+#: client/src/lists/Users.js:19
 #: client/src/shared/stateDefinitions.factory.js:342
 #: client/src/shared/stateDefinitions.factory.js:511
 msgid "Add Users"
+msgstr ""
+
+#: client/src/forms/Organizations.js:73
+msgid "Add Users to this organization."
 msgstr ""
 
 #: client/src/lists/Schedules.js:68
@@ -200,7 +204,6 @@ msgstr ""
 #: client/src/forms/Credentials.js:448
 #: client/src/forms/Inventories.js:107
 #: client/src/forms/JobTemplates.js:428
-#: client/src/forms/Organizations.js:74
 #: client/src/forms/Projects.js:236
 #: client/src/forms/Workflows.js:126
 msgid "Add a permission"
@@ -247,11 +250,11 @@ msgstr ""
 msgid "Always"
 msgstr ""
 
-#: client/src/controllers/Projects.js:260
+#: client/src/controllers/Projects.js:262
 msgid "An SCM update does not appear to be running for project: %s. Click the %sRefresh%s button to view the latest status."
 msgstr ""
 
-#: client/src/controllers/Credentials.js:105
+#: client/src/controllers/Credentials.js:104
 msgid "Are you sure you want to delete the credential below?"
 msgstr ""
 
@@ -267,7 +270,7 @@ msgstr ""
 msgid "Are you sure you want to delete the organization below?"
 msgstr ""
 
-#: client/src/controllers/Projects.js:202
+#: client/src/controllers/Projects.js:204
 msgid "Are you sure you want to delete the project below?"
 msgstr ""
 
@@ -275,8 +278,8 @@ msgstr ""
 msgid "Are you sure you want to delete the user below?"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:579
-#: client/src/controllers/Projects.js:687
+#: client/src/controllers/Credentials.js:578
+#: client/src/controllers/Projects.js:689
 msgid "Are you sure you want to remove the %s below from %s?"
 msgstr ""
 
@@ -352,14 +355,14 @@ msgstr ""
 msgid "CREATE %s"
 msgstr ""
 
-#: client/src/inventories/main.js:110
-#: client/src/scheduler/main.js:176
-#: client/src/scheduler/main.js:253
-#: client/src/scheduler/main.js:90
+#: client/src/inventories/main.js:117
+#: client/src/scheduler/main.js:190
+#: client/src/scheduler/main.js:274
+#: client/src/scheduler/main.js:97
 msgid "CREATE SCHEDULE"
 msgstr ""
 
-#: client/src/management-jobs/scheduler/main.js:74
+#: client/src/management-jobs/scheduler/main.js:81
 msgid "CREATE SCHEDULED JOB"
 msgstr ""
 
@@ -368,7 +371,7 @@ msgstr ""
 msgid "CREDENTIAL"
 msgstr ""
 
-#: client/src/app.js:319
+#: client/src/app.js:320
 #: client/src/helpers/ActivityStream.js:29
 msgid "CREDENTIALS"
 msgstr ""
@@ -381,21 +384,21 @@ msgstr ""
 msgid "Cache Timeout%s (seconds)%s"
 msgstr ""
 
-#: client/src/controllers/Projects.js:193
+#: client/src/controllers/Projects.js:195
 #: client/src/controllers/Users.js:95
 msgid "Call to %s failed. DELETE returned status:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:241
-#: client/src/controllers/Projects.js:257
+#: client/src/controllers/Projects.js:243
+#: client/src/controllers/Projects.js:259
 msgid "Call to %s failed. GET status:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:681
+#: client/src/controllers/Projects.js:683
 msgid "Call to %s failed. POST returned status:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:220
+#: client/src/controllers/Projects.js:222
 msgid "Call to %s failed. POST status:"
 msgstr ""
 
@@ -403,7 +406,7 @@ msgstr ""
 msgid "Call to %s failed. Return status: %d"
 msgstr ""
 
-#: client/src/controllers/Projects.js:266
+#: client/src/controllers/Projects.js:268
 msgid "Call to get project failed. GET status:"
 msgstr ""
 
@@ -416,7 +419,7 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: client/src/controllers/Projects.js:236
+#: client/src/controllers/Projects.js:238
 msgid "Cancel Not Allowed"
 msgstr ""
 
@@ -428,7 +431,7 @@ msgstr ""
 msgid "Cancel the job"
 msgstr ""
 
-#: client/src/controllers/Projects.js:82
+#: client/src/controllers/Projects.js:84
 #: client/src/helpers/Projects.js:79
 msgid "Canceled. Click for details"
 msgstr ""
@@ -503,7 +506,7 @@ msgstr ""
 
 #: client/src/job-results/job-results.controller.js:205
 #: client/src/standard-out/standard-out.controller.js:233
-#: client/src/workflow-results/workflow-results.controller.js:131
+#: client/src/workflow-results/workflow-results.controller.js:136
 msgid "Collapse Output"
 msgstr ""
 
@@ -559,7 +562,7 @@ msgstr ""
 msgid "Create Credential"
 msgstr ""
 
-#: client/src/lists/Users.js:52
+#: client/src/lists/Users.js:46
 msgid "Create New"
 msgstr ""
 
@@ -596,7 +599,7 @@ msgstr ""
 msgid "Create a new template"
 msgstr ""
 
-#: client/src/lists/Users.js:56
+#: client/src/lists/Users.js:50
 msgid "Create a new user"
 msgstr ""
 
@@ -629,8 +632,12 @@ msgstr ""
 msgid "Credentials"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:349
+#: client/src/controllers/Credentials.js:348
 msgid "Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned."
+msgstr ""
+
+#: client/src/shared/directives.js:135
+msgid "Current Image:"
 msgstr ""
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:53
@@ -638,17 +645,13 @@ msgstr ""
 msgid "Custom Script"
 msgstr ""
 
-#: client/src/shared/directives.js:135
-msgid "Custom logo has been uploaded"
-msgstr ""
-
-#: client/src/app.js:410
+#: client/src/app.js:411
 msgid "DASHBOARD"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:107
-#: client/src/controllers/Credentials.js:581
-#: client/src/controllers/Projects.js:689
+#: client/src/controllers/Credentials.js:106
+#: client/src/controllers/Credentials.js:580
+#: client/src/controllers/Projects.js:691
 #: client/src/controllers/Users.js:104
 #: client/src/notifications/notification-templates-list/list.controller.js:189
 #: client/src/organizations/list/organizations-list.controller.js:168
@@ -660,10 +663,10 @@ msgstr ""
 msgid "DETAILS"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:104
-#: client/src/controllers/Credentials.js:578
-#: client/src/controllers/Projects.js:201
-#: client/src/controllers/Projects.js:686
+#: client/src/controllers/Credentials.js:103
+#: client/src/controllers/Credentials.js:577
+#: client/src/controllers/Projects.js:203
+#: client/src/controllers/Projects.js:688
 #: client/src/controllers/Users.js:101
 #: client/src/helpers/Jobs.js:165
 #: client/src/inventory-scripts/inventory-scripts.list.js:74
@@ -672,7 +675,7 @@ msgstr ""
 #: client/src/lists/Schedules.js:92
 #: client/src/lists/Teams.js:77
 #: client/src/lists/Templates.js:124
-#: client/src/lists/Users.js:87
+#: client/src/lists/Users.js:81
 #: client/src/notifications/notification-templates-list/list.controller.js:186
 #: client/src/notifications/notificationTemplates.list.js:89
 #: client/src/organizations/list/organizations-list.controller.js:165
@@ -730,7 +733,7 @@ msgstr ""
 msgid "Delete the schedule"
 msgstr ""
 
-#: client/src/lists/Users.js:91
+#: client/src/lists/Users.js:85
 msgid "Delete user"
 msgstr ""
 
@@ -744,8 +747,8 @@ msgstr ""
 #: client/src/forms/Organizations.js:33
 #: client/src/forms/Projects.js:38
 #: client/src/forms/Teams.js:34
-#: client/src/forms/Users.js:143
-#: client/src/forms/Users.js:168
+#: client/src/forms/Users.js:144
+#: client/src/forms/Users.js:170
 #: client/src/forms/Workflows.js:41
 #: client/src/inventory-scripts/inventory-scripts.form.js:35
 #: client/src/inventory-scripts/inventory-scripts.list.js:25
@@ -786,11 +789,11 @@ msgstr ""
 msgid "Discard changes"
 msgstr ""
 
-#: client/src/forms/Teams.js:146
+#: client/src/forms/Teams.js:147
 msgid "Dissasociate permission from team"
 msgstr ""
 
-#: client/src/forms/Users.js:222
+#: client/src/forms/Users.js:224
 msgid "Dissasociate permission from user"
 msgstr ""
 
@@ -812,7 +815,7 @@ msgstr ""
 msgid "Drag and drop your custom inventory script file here or create one in the field to import your custom inventory."
 msgstr ""
 
-#: client/src/management-jobs/scheduler/main.js:88
+#: client/src/management-jobs/scheduler/main.js:95
 msgid "EDIT SCHEDULED JOB"
 msgstr ""
 
@@ -842,7 +845,7 @@ msgstr ""
 #: client/src/lists/Schedules.js:77
 #: client/src/lists/Teams.js:60
 #: client/src/lists/Templates.js:107
-#: client/src/lists/Users.js:68
+#: client/src/lists/Users.js:62
 #: client/src/notifications/notificationTemplates.list.js:63
 #: client/src/notifications/notificationTemplates.list.js:72
 msgid "Edit"
@@ -894,7 +897,7 @@ msgstr ""
 msgid "Edit template"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.partial.html:109
+#: client/src/workflow-results/workflow-results.partial.html:124
 msgid "Edit the User"
 msgstr ""
 
@@ -906,11 +909,11 @@ msgstr ""
 msgid "Edit the schedule"
 msgstr ""
 
-#: client/src/lists/Users.js:72
+#: client/src/lists/Users.js:66
 msgid "Edit user"
 msgstr ""
 
-#: client/src/controllers/Projects.js:236
+#: client/src/controllers/Projects.js:238
 msgid "Either you do not have access or the SCM update process completed. Click the %sRefresh%s button to view the latest status."
 msgstr ""
 
@@ -975,16 +978,16 @@ msgstr ""
 #: client/src/configuration/configuration.controller.js:385
 #: client/src/configuration/configuration.controller.js:419
 #: client/src/configuration/configuration.controller.js:438
-#: client/src/controllers/Projects.js:171
-#: client/src/controllers/Projects.js:192
-#: client/src/controllers/Projects.js:220
-#: client/src/controllers/Projects.js:241
-#: client/src/controllers/Projects.js:256
-#: client/src/controllers/Projects.js:265
-#: client/src/controllers/Projects.js:403
-#: client/src/controllers/Projects.js:597
-#: client/src/controllers/Projects.js:663
-#: client/src/controllers/Projects.js:681
+#: client/src/controllers/Projects.js:173
+#: client/src/controllers/Projects.js:194
+#: client/src/controllers/Projects.js:222
+#: client/src/controllers/Projects.js:243
+#: client/src/controllers/Projects.js:258
+#: client/src/controllers/Projects.js:267
+#: client/src/controllers/Projects.js:405
+#: client/src/controllers/Projects.js:599
+#: client/src/controllers/Projects.js:665
+#: client/src/controllers/Projects.js:683
 #: client/src/controllers/Users.js:182
 #: client/src/controllers/Users.js:271
 #: client/src/controllers/Users.js:339
@@ -1023,18 +1026,18 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: client/src/controllers/Projects.js:421
-#: client/src/controllers/Projects.js:704
+#: client/src/controllers/Projects.js:423
+#: client/src/controllers/Projects.js:706
 msgid "Example URLs for GIT SCM include:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:434
-#: client/src/controllers/Projects.js:716
+#: client/src/controllers/Projects.js:436
+#: client/src/controllers/Projects.js:718
 msgid "Example URLs for Mercurial SCM include:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:429
-#: client/src/controllers/Projects.js:711
+#: client/src/controllers/Projects.js:431
+#: client/src/controllers/Projects.js:713
 msgid "Example URLs for Subversion SCM include:"
 msgstr ""
 
@@ -1042,8 +1045,8 @@ msgstr ""
 #: client/src/job-results/job-results.controller.js:207
 #: client/src/standard-out/standard-out.controller.js:235
 #: client/src/standard-out/standard-out.controller.js:25
-#: client/src/workflow-results/workflow-results.controller.js:133
-#: client/src/workflow-results/workflow-results.controller.js:92
+#: client/src/workflow-results/workflow-results.controller.js:138
+#: client/src/workflow-results/workflow-results.controller.js:97
 msgid "Expand Output"
 msgstr ""
 
@@ -1097,7 +1100,7 @@ msgstr ""
 msgid "Failed to create new Credential. POST status:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:404
+#: client/src/controllers/Projects.js:406
 msgid "Failed to create new project. POST returned status:"
 msgstr ""
 
@@ -1109,7 +1112,7 @@ msgstr ""
 msgid "Failed to retrieve job template extra variables."
 msgstr ""
 
-#: client/src/controllers/Projects.js:598
+#: client/src/controllers/Projects.js:600
 msgid "Failed to retrieve project: %s. GET status:"
 msgstr ""
 
@@ -1130,7 +1133,7 @@ msgstr ""
 msgid "Failed to update Credential. PUT status:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:663
+#: client/src/controllers/Projects.js:665
 msgid "Failed to update project: %s. PUT status:"
 msgstr ""
 
@@ -1160,9 +1163,9 @@ msgstr ""
 msgid "Finished"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:27
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:21
 #: client/src/forms/Users.js:28
-#: client/src/lists/Users.js:41
+#: client/src/lists/Users.js:35
 msgid "First Name"
 msgstr ""
 
@@ -1228,8 +1231,8 @@ msgstr ""
 msgid "Google OAuth2"
 msgstr ""
 
-#: client/src/forms/Teams.js:155
-#: client/src/forms/Users.js:211
+#: client/src/forms/Teams.js:156
+#: client/src/forms/Users.js:213
 msgid "Grant Permission"
 msgstr ""
 
@@ -1310,10 +1313,10 @@ msgid "INITIATED BY"
 msgstr ""
 
 #: client/src/helpers/ActivityStream.js:26
-#: client/src/inventories/main.js:291
+#: client/src/inventories/main.js:298
 #: client/src/main-menu/main-menu.partial.html:104
 #: client/src/main-menu/main-menu.partial.html:27
-#: client/src/organizations/linkout/organizations-linkout.route.js:178
+#: client/src/organizations/linkout/organizations-linkout.route.js:143
 msgid "INVENTORIES"
 msgstr ""
 
@@ -1445,13 +1448,13 @@ msgstr ""
 msgid "JOB TEMPLATE"
 msgstr ""
 
-#: client/src/organizations/linkout/organizations-linkout.route.js:287
+#: client/src/organizations/linkout/organizations-linkout.route.js:252
 msgid "JOB TEMPLATES"
 msgstr ""
 
-#: client/src/app.js:430
 #: client/src/dashboard/graphs/job-status/job-status-graph.directive.js:113
 #: client/src/helpers/ActivityStream.js:44
+#: client/src/jobs/jobs.route.js:15
 #: client/src/main-menu/main-menu.partial.html:122
 #: client/src/main-menu/main-menu.partial.html:43
 msgid "JOBS"
@@ -1477,6 +1480,7 @@ msgstr ""
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:97
 #: client/src/lists/PortalJobTemplates.js:15
 #: client/src/lists/PortalJobTemplates.js:16
+#: client/src/organizations/linkout/organizations-linkout.route.js:264
 msgid "Job Templates"
 msgstr ""
 
@@ -1491,9 +1495,9 @@ msgstr ""
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:28
 #: client/src/configuration/configuration.partial.html:16
+#: client/src/jobs/jobs.partial.html:7
 #: client/src/lists/PortalJobs.js:15
 #: client/src/lists/PortalJobs.js:19
-#: client/src/partials/jobs.html:7
 msgid "Jobs"
 msgstr ""
 
@@ -1536,9 +1540,9 @@ msgstr ""
 msgid "Labels"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:31
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:25
 #: client/src/forms/Users.js:35
-#: client/src/lists/Users.js:45
+#: client/src/lists/Users.js:39
 msgid "Last Name"
 msgstr ""
 
@@ -1661,12 +1665,12 @@ msgstr ""
 msgid "Management Jobs"
 msgstr ""
 
-#: client/src/controllers/Projects.js:91
+#: client/src/controllers/Projects.js:93
 msgid "Manual projects do not require a schedule"
 msgstr ""
 
-#: client/src/controllers/Projects.js:587
-#: client/src/controllers/Projects.js:90
+#: client/src/controllers/Projects.js:589
+#: client/src/controllers/Projects.js:92
 msgid "Manual projects do not require an SCM update"
 msgstr ""
 
@@ -1739,11 +1743,11 @@ msgstr ""
 #: client/src/forms/LogViewerStatus.js:23
 #: client/src/forms/Organizations.js:26
 #: client/src/forms/Projects.js:31
-#: client/src/forms/Teams.js:124
+#: client/src/forms/Teams.js:125
 #: client/src/forms/Teams.js:27
-#: client/src/forms/Users.js:140
-#: client/src/forms/Users.js:165
-#: client/src/forms/Users.js:191
+#: client/src/forms/Users.js:141
+#: client/src/forms/Users.js:167
+#: client/src/forms/Users.js:193
 #: client/src/forms/Workflows.js:34
 #: client/src/inventory-scripts/inventory-scripts.form.js:28
 #: client/src/inventory-scripts/inventory-scripts.list.js:20
@@ -1829,7 +1833,7 @@ msgstr ""
 msgid "No Credentials Have Been Created"
 msgstr ""
 
-#: client/src/controllers/Projects.js:161
+#: client/src/controllers/Projects.js:163
 msgid "No SCM Configuration"
 msgstr ""
 
@@ -1841,11 +1845,11 @@ msgstr ""
 msgid "No Teams exist"
 msgstr ""
 
-#: client/src/controllers/Projects.js:152
+#: client/src/controllers/Projects.js:154
 msgid "No Updates Available"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:24
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:18
 msgid "No Users exist"
 msgstr ""
 
@@ -1881,8 +1885,8 @@ msgstr ""
 msgid "No matching tasks"
 msgstr ""
 
-#: client/src/forms/Teams.js:121
-#: client/src/forms/Users.js:188
+#: client/src/forms/Teams.js:122
+#: client/src/forms/Users.js:190
 msgid "No permissions have been granted"
 msgstr ""
 
@@ -1902,7 +1906,7 @@ msgstr ""
 msgid "Normal User"
 msgstr ""
 
-#: client/src/controllers/Projects.js:93
+#: client/src/controllers/Projects.js:95
 msgid "Not configured for SCM"
 msgstr ""
 
@@ -1996,7 +2000,7 @@ msgid "Organization"
 msgstr ""
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:30
-#: client/src/forms/Users.js:130
+#: client/src/forms/Users.js:131
 #: client/src/setup-menu/setup-menu.partial.html:4
 msgid "Organizations"
 msgstr ""
@@ -2027,19 +2031,19 @@ msgstr ""
 msgid "PROJECT"
 msgstr ""
 
-#: client/src/app.js:295
+#: client/src/app.js:296
 #: client/src/helpers/ActivityStream.js:23
 #: client/src/main-menu/main-menu.partial.html:19
 #: client/src/main-menu/main-menu.partial.html:95
-#: client/src/organizations/linkout/organizations-linkout.route.js:229
+#: client/src/organizations/linkout/organizations-linkout.route.js:194
 msgid "PROJECTS"
 msgstr ""
 
 #: client/src/shared/paginate/paginate.partial.html:33
 msgid ""
 "Page\n"
-"                <span id=\"current-page\">{{current()}}</span> of\n"
-"        <span id=\"total-pages\">{{last()}}</span>"
+"                <span id=\"current-page\">{{current}}</span> of\n"
+"        <span id=\"total-pages\">{{last}}</span>"
 msgstr ""
 
 #: client/src/notifications/notificationTemplates.form.js:240
@@ -2109,7 +2113,7 @@ msgstr ""
 msgid "Period"
 msgstr ""
 
-#: client/src/controllers/Projects.js:324
+#: client/src/controllers/Projects.js:326
 #: client/src/controllers/Users.js:141
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:26
 msgid "Permission Error"
@@ -2118,10 +2122,9 @@ msgstr ""
 #: client/src/forms/Credentials.js:440
 #: client/src/forms/Inventories.js:96
 #: client/src/forms/JobTemplates.js:419
-#: client/src/forms/Organizations.js:65
 #: client/src/forms/Projects.js:228
-#: client/src/forms/Teams.js:117
-#: client/src/forms/Users.js:184
+#: client/src/forms/Teams.js:118
+#: client/src/forms/Users.js:186
 #: client/src/forms/Workflows.js:117
 msgid "Permissions"
 msgstr ""
@@ -2148,7 +2151,7 @@ msgstr ""
 msgid "Plays"
 msgstr ""
 
-#: client/src/forms/Users.js:124
+#: client/src/forms/Users.js:125
 msgid "Please add user to an Organization."
 msgstr ""
 
@@ -2208,26 +2211,26 @@ msgstr ""
 msgid "Please save before adding notifications"
 msgstr ""
 
-#: client/src/forms/Teams.js:69
+#: client/src/forms/Organizations.js:59
+#: client/src/forms/Teams.js:70
 msgid "Please save before adding users"
 msgstr ""
 
-#: client/src/controllers/Credentials.js:161
+#: client/src/controllers/Credentials.js:160
 #: client/src/forms/Inventories.js:92
 #: client/src/forms/JobTemplates.js:412
-#: client/src/forms/Organizations.js:58
 #: client/src/forms/Projects.js:220
-#: client/src/forms/Teams.js:113
+#: client/src/forms/Teams.js:114
 #: client/src/forms/Workflows.js:110
 msgid "Please save before assigning permissions"
 msgstr ""
 
-#: client/src/forms/Users.js:122
-#: client/src/forms/Users.js:180
+#: client/src/forms/Users.js:123
+#: client/src/forms/Users.js:182
 msgid "Please save before assigning to organizations"
 msgstr ""
 
-#: client/src/forms/Users.js:149
+#: client/src/forms/Users.js:151
 msgid "Please save before assigning to teams"
 msgstr ""
 
@@ -2345,7 +2348,7 @@ msgstr ""
 msgid "Project Sync Failures"
 msgstr ""
 
-#: client/src/controllers/Projects.js:172
+#: client/src/controllers/Projects.js:174
 msgid "Project lookup failed. GET returned:"
 msgstr ""
 
@@ -2409,11 +2412,11 @@ msgstr ""
 msgid "RECENTLY USED TEMPLATES"
 msgstr ""
 
+#: client/src/jobs/jobs.partial.html:15
 #: client/src/lists/JobEvents.js:89
 #: client/src/lists/Projects.js:70
 #: client/src/lists/Schedules.js:63
 #: client/src/lists/Streams.js:57
-#: client/src/partials/jobs.html:15
 #: client/src/portal-mode/portal-mode-jobs.partial.html:12
 msgid "REFRESH"
 msgstr ""
@@ -2451,7 +2454,7 @@ msgstr ""
 msgid "RUN COMMAND"
 msgstr ""
 
-#: client/src/workflow-results/workflow-results.partial.html:140
+#: client/src/workflow-results/workflow-results.partial.html:155
 msgid "Read only view of extra variables added to the workflow."
 msgstr ""
 
@@ -2479,8 +2482,8 @@ msgid "Relaunch using the same parameters"
 msgstr ""
 
 #: client/src/access/add-rbac-user-team/rbac-selected-list.directive.js:37
-#: client/src/forms/Teams.js:142
-#: client/src/forms/Users.js:219
+#: client/src/forms/Teams.js:143
+#: client/src/forms/Users.js:221
 msgid "Remove"
 msgstr ""
 
@@ -2535,18 +2538,18 @@ msgstr ""
 msgid "Revision"
 msgstr ""
 
-#: client/src/controllers/Projects.js:697
+#: client/src/controllers/Projects.js:699
 msgid "Revision #"
 msgstr ""
 
 #: client/src/forms/Credentials.js:462
 #: client/src/forms/EventsViewer.js:36
 #: client/src/forms/Inventories.js:121
-#: client/src/forms/Organizations.js:89
+#: client/src/forms/Organizations.js:88
 #: client/src/forms/Projects.js:250
-#: client/src/forms/Teams.js:135
-#: client/src/forms/Teams.js:98
-#: client/src/forms/Users.js:202
+#: client/src/forms/Teams.js:136
+#: client/src/forms/Teams.js:99
+#: client/src/forms/Users.js:204
 #: client/src/forms/Workflows.js:141
 msgid "Role"
 msgstr ""
@@ -2559,20 +2562,20 @@ msgstr ""
 msgid "SAML"
 msgstr ""
 
-#: client/src/scheduler/main.js:293
+#: client/src/scheduler/main.js:314
 msgid "SCHEDULED"
 msgstr ""
 
 #: client/src/helpers/ActivityStream.js:50
 #: client/src/inventories/main.js:59
 #: client/src/management-jobs/scheduler/main.js:26
-#: client/src/scheduler/main.js:122
-#: client/src/scheduler/main.js:205
+#: client/src/scheduler/main.js:129
+#: client/src/scheduler/main.js:219
 #: client/src/scheduler/main.js:36
 msgid "SCHEDULES"
 msgstr ""
 
-#: client/src/controllers/Projects.js:697
+#: client/src/controllers/Projects.js:699
 msgid "SCM Branch"
 msgstr ""
 
@@ -2602,7 +2605,7 @@ msgstr ""
 msgid "SCM Update"
 msgstr ""
 
-#: client/src/controllers/Projects.js:216
+#: client/src/controllers/Projects.js:218
 msgid "SCM Update Cancel"
 msgstr ""
 
@@ -2610,8 +2613,8 @@ msgstr ""
 msgid "SCM Update Options"
 msgstr ""
 
-#: client/src/controllers/Projects.js:583
-#: client/src/controllers/Projects.js:86
+#: client/src/controllers/Projects.js:585
+#: client/src/controllers/Projects.js:88
 msgid "SCM update currently running"
 msgstr ""
 
@@ -2628,7 +2631,7 @@ msgstr ""
 msgid "SIGN IN WITH"
 msgstr ""
 
-#: client/src/app.js:499
+#: client/src/app.js:453
 msgid "SOCKETS"
 msgstr ""
 
@@ -2710,7 +2713,7 @@ msgstr ""
 msgid "Schedule Management Job"
 msgstr ""
 
-#: client/src/controllers/Projects.js:78
+#: client/src/controllers/Projects.js:80
 msgid "Schedule future SCM updates"
 msgstr ""
 
@@ -2723,12 +2726,12 @@ msgid "Scheduled Jobs"
 msgstr ""
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:32
-#: client/src/inventories/main.js:93
+#: client/src/inventories/main.js:100
+#: client/src/jobs/jobs.partial.html:10
 #: client/src/management-jobs/scheduler/main.js:32
-#: client/src/partials/jobs.html:10
-#: client/src/scheduler/main.js:153
-#: client/src/scheduler/main.js:236
-#: client/src/scheduler/main.js:67
+#: client/src/scheduler/main.js:167
+#: client/src/scheduler/main.js:257
+#: client/src/scheduler/main.js:74
 msgid "Schedules"
 msgstr ""
 
@@ -2907,8 +2910,8 @@ msgstr ""
 msgid "Start a job using this template"
 msgstr ""
 
-#: client/src/controllers/Projects.js:580
-#: client/src/controllers/Projects.js:77
+#: client/src/controllers/Projects.js:582
+#: client/src/controllers/Projects.js:79
 msgid "Start an SCM update"
 msgstr ""
 
@@ -2982,9 +2985,9 @@ msgstr ""
 msgid "System auditors have read-only permissions in this section."
 msgstr ""
 
-#: client/src/app.js:343
+#: client/src/app.js:344
 #: client/src/helpers/ActivityStream.js:35
-#: client/src/organizations/linkout/organizations-linkout.route.js:132
+#: client/src/organizations/linkout/organizations-linkout.route.js:97
 msgid "TEAMS"
 msgstr ""
 
@@ -3018,7 +3021,6 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:468
 #: client/src/forms/Inventories.js:127
-#: client/src/forms/Organizations.js:95
 #: client/src/forms/Projects.js:256
 #: client/src/forms/Workflows.js:147
 msgid "Team Roles"
@@ -3026,7 +3028,7 @@ msgstr ""
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:40
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:33
-#: client/src/forms/Users.js:156
+#: client/src/forms/Users.js:158
 #: client/src/lists/Teams.js:16
 #: client/src/lists/Teams.js:17
 #: client/src/setup-menu/setup-menu.partial.html:16
@@ -3063,7 +3065,7 @@ msgstr ""
 msgid "The Project ID is the GCE assigned identification. It is constructed as two words followed by a three digit number.  Such as:"
 msgstr ""
 
-#: client/src/controllers/Projects.js:733
+#: client/src/controllers/Projects.js:735
 msgid "The SCM update process is running."
 msgstr ""
 
@@ -3100,7 +3102,7 @@ msgstr ""
 msgid "The project value"
 msgstr ""
 
-#: client/src/controllers/Projects.js:161
+#: client/src/controllers/Projects.js:163
 msgid "The selected project is not configured for SCM. To configure for SCM, edit the project and provide SCM settings, and then run an update."
 msgstr ""
 
@@ -3124,7 +3126,7 @@ msgstr ""
 msgid "There are no jobs to display at this time"
 msgstr ""
 
-#: client/src/controllers/Projects.js:152
+#: client/src/controllers/Projects.js:154
 msgid "There is no SCM update information available for this project. An update has not yet been  completed.  If you have not already done so, start an update for this project."
 msgstr ""
 
@@ -3153,7 +3155,7 @@ msgstr ""
 msgid "This must be of the form %s."
 msgstr ""
 
-#: client/src/forms/Users.js:161
+#: client/src/forms/Users.js:163
 msgid "This user is not a member of any teams"
 msgstr ""
 
@@ -3209,8 +3211,8 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:61
 #: client/src/forms/Credentials.js:85
-#: client/src/forms/Teams.js:130
-#: client/src/forms/Users.js:197
+#: client/src/forms/Teams.js:131
+#: client/src/forms/Users.js:199
 #: client/src/forms/WorkflowMaker.js:34
 #: client/src/lists/AllJobs.js:61
 #: client/src/lists/CompletedJobs.js:50
@@ -3240,8 +3242,8 @@ msgstr ""
 msgid "Type an option on each line. The pound symbol (#) is not required."
 msgstr ""
 
-#: client/src/controllers/Projects.js:442
-#: client/src/controllers/Projects.js:724
+#: client/src/controllers/Projects.js:444
+#: client/src/controllers/Projects.js:726
 msgid "URL popover text"
 msgstr ""
 
@@ -3249,17 +3251,17 @@ msgstr ""
 msgid "USERNAME"
 msgstr ""
 
-#: client/src/app.js:367
+#: client/src/app.js:368
 #: client/src/helpers/ActivityStream.js:32
-#: client/src/organizations/linkout/organizations-linkout.route.js:59
+#: client/src/organizations/linkout/organizations-linkout.route.js:41
 msgid "USERS"
 msgstr ""
 
-#: client/src/controllers/Projects.js:260
+#: client/src/controllers/Projects.js:262
 msgid "Update Not Found"
 msgstr ""
 
-#: client/src/controllers/Projects.js:733
+#: client/src/controllers/Projects.js:735
 msgid "Update in Progress"
 msgstr ""
 
@@ -3285,9 +3287,9 @@ msgstr ""
 
 #: client/src/forms/Credentials.js:457
 #: client/src/forms/Inventories.js:116
-#: client/src/forms/Organizations.js:84
+#: client/src/forms/Organizations.js:83
 #: client/src/forms/Projects.js:245
-#: client/src/forms/Teams.js:93
+#: client/src/forms/Teams.js:94
 #: client/src/forms/Workflows.js:136
 msgid "User"
 msgstr ""
@@ -3300,7 +3302,7 @@ msgstr ""
 msgid "User Type"
 msgstr ""
 
-#: client/src/access/rbac-multiselect/permissionsUsers.list.js:36
+#: client/src/access/rbac-multiselect/permissionsUsers.list.js:30
 #: client/src/forms/Users.js:49
 #: client/src/helpers/Credentials.js:118
 #: client/src/helpers/Credentials.js:225
@@ -3308,7 +3310,7 @@ msgstr ""
 #: client/src/helpers/Credentials.js:32
 #: client/src/helpers/Credentials.js:56
 #: client/src/helpers/Credentials.js:89
-#: client/src/lists/Users.js:37
+#: client/src/lists/Users.js:31
 #: client/src/notifications/notificationTemplates.form.js:67
 msgid "Username"
 msgstr ""
@@ -3319,9 +3321,10 @@ msgstr ""
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:35
-#: client/src/forms/Teams.js:75
-#: client/src/lists/Users.js:26
-#: client/src/lists/Users.js:27
+#: client/src/forms/Organizations.js:65
+#: client/src/forms/Teams.js:76
+#: client/src/lists/Users.js:20
+#: client/src/lists/Users.js:21
 #: client/src/setup-menu/setup-menu.partial.html:10
 msgid "Users"
 msgstr ""
@@ -3372,7 +3375,7 @@ msgstr ""
 #: client/src/lists/Streams.js:66
 #: client/src/lists/Teams.js:69
 #: client/src/lists/Templates.js:116
-#: client/src/lists/Users.js:78
+#: client/src/lists/Users.js:72
 #: client/src/notifications/notificationTemplates.list.js:80
 msgid "View"
 msgstr ""
@@ -3456,10 +3459,11 @@ msgstr ""
 msgid "View the schedule"
 msgstr ""
 
-#: client/src/lists/Users.js:81
+#: client/src/lists/Users.js:75
 msgid "View user"
 msgstr ""
 
+#: client/src/lists/AllJobs.js:51
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:25
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:25
 msgid "View workflow results"
@@ -3512,7 +3516,7 @@ msgstr ""
 msgid "You can create a job template <a href=\"#/templates/add_job_template\">here</a>."
 msgstr ""
 
-#: client/src/controllers/Projects.js:508
+#: client/src/controllers/Projects.js:510
 msgid "You do not have access to view this property"
 msgstr ""
 
@@ -3520,7 +3524,7 @@ msgstr ""
 msgid "You do not have permission to add a job template."
 msgstr ""
 
-#: client/src/controllers/Projects.js:324
+#: client/src/controllers/Projects.js:326
 msgid "You do not have permission to add a project."
 msgstr ""
 
@@ -3555,7 +3559,7 @@ msgstr ""
 msgid "Your password must contain one of the following characters: %s"
 msgstr ""
 
-#: client/src/controllers/Projects.js:216
+#: client/src/controllers/Projects.js:218
 msgid "Your request to cancel the update was submitted to the task manager."
 msgstr ""
 
