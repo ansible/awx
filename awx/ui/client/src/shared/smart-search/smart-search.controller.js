@@ -249,6 +249,13 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                                 params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                             }
                         }
+                        // The related fields need to also be checked for related searches.
+                        // The related fields for the search are retrieved from the API
+                        // options endpoint, and are stored in the $scope.model. FYI, the
+                        // Django search model is what sets the related fields on the model. 
+                        else if(_.contains($scope.models[$scope.list.name].related, root)) {
+                            params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
+                        }
                         // Its not a search term or a related search term - treat it as a string
                         else {
                             params = _.merge(params, setDefaults(term), combineSameSearches);
