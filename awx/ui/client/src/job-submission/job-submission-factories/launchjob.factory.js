@@ -129,7 +129,16 @@ export default
                             };
 
                             if(_.has(data, 'job')) {
-                                goToJobDetails('jobDetail');
+                                if(base === 'jobs'){
+                                    if(scope.clearDialog) {
+                                        scope.clearDialog();
+                                    }
+                                    return;
+                                }
+                                else{
+                                    goToJobDetails('jobDetail');
+                                }
+
                             }
                             else if(data.type && data.type === 'workflow_job') {
                                 job = data.id;
