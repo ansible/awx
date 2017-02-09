@@ -32,6 +32,8 @@ services:
     image: postgres:9.4.1
   memcached:
     image: memcached:alpine
+    ports:
+      - "11211:11211"
   rabbitmq:
     image: rabbitmq:3-management
     ports:
