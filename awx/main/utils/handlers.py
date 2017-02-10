@@ -174,7 +174,7 @@ class HTTPSHandler(object):
         return BaseHTTPSHandler.from_django_settings(settings_module, *args, **kwargs)
 
 
-def add_or_remove_logger(address, instance, adding=True):
+def add_or_remove_logger(address, instance):
     specific_logger = logging.getLogger(address)
     i_occurance = None
     for i in range(len(specific_logger.handlers)):
@@ -182,12 +182,14 @@ def add_or_remove_logger(address, instance, adding=True):
             i_occurance = i
             break
 
-    if i_occurance is None and not adding:
-        return
-    elif i_occurance is None:
-        specific_logger.handlers.append(instance)
+    if i_occurance is None:
+        if instance is not None:
+            specific_logger.handlers.append(instance)
     else:
-        specific_logger.handlers[i_occurance] = instance
+        if instance is None:
+            specific_logger.handlers[i_occurance] = HTTPSNullHandler()
+        else:
+            specific_logger.handlers[i_occurance] = instance
 
 
 def configure_external_logger(settings_module, async_flag=True, is_startup=True):
@@ -197,11 +199,13 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
         # Pass-through if external logging not being used
         return
 
+    instance = None
     if is_enabled:
         instance = HTTPSHandler(settings_module, async=async_flag)
         instance.setFormatter(LogstashFormatter())
-    else:
-        instance = HTTPSNullHandler()
+    awx_logger_instance = instance
+    if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
+        awx_logger_instance = None
 
-    add_or_remove_logger('awx.analytics', instance, adding=is_enabled)
-    add_or_remove_logger('awx', instance, adding=(is_enabled and 'awx' in settings_module.LOG_AGGREGATOR_LOGGERS))
+    add_or_remove_logger('awx.analytics', instance)
+    add_or_remove_logger('awx', awx_logger_instance)
