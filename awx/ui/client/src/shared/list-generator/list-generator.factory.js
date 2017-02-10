@@ -494,7 +494,7 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
                                 collection="${list.name}"
                                 dataset="${list.iterator}_dataset"
                                 column-sort
-                                column-field="${fld}"
+                                column-field="${list.fields[fld].searchField || fld}"
                                 column-iterator="${list.iterator}"
                                 column-no-sort="${list.fields[fld].nosort}"
                                 column-label="${list.fields[fld].label}"
