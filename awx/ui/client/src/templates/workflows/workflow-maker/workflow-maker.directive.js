@@ -21,7 +21,7 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                 let availableHeight = $(window).height(),
                     availableWidth = $(window).width(),
                     minimumWidth = 1300,
-                    minimumHeight = 550;console.log(availableHeight, availableWidth);
+                    minimumHeight = 550;
 
                 CreateDialog({
                     id: 'workflow-modal-dialog',
@@ -69,7 +69,6 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
                 function onResize(){
                     availableHeight = $(window).height();
                     availableWidth = $(window).width();
-                    console.log(availableHeight, availableWidth);
                     $('#workflow-modal-dialog').parent('.ui-dialog').height(availableHeight > minimumHeight ? availableHeight : minimumHeight);
                     $('#workflow-modal-dialog').parent('.ui-dialog').width(availableWidth > minimumWidth ? availableWidth : minimumWidth);
                     $('#workflow-modal-dialog').outerHeight(availableHeight > minimumHeight ? availableHeight : minimumHeight);

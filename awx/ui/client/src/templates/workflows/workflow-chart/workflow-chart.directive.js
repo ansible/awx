@@ -83,8 +83,6 @@ export default [ '$state','moment', '$timeout', '$window',
                     // This is the workflow editor
                     dimensions.height = $('.WorkflowMaker-contentLeft').outerHeight() - $('.WorkflowLegend-maker').outerHeight();
                     dimensions.width = $('#workflow-modal-dialog').width() - $('.WorkflowMaker-contentRight').outerWidth();
-
-                    console.log(dimensions);
                 }
                 else {
                     // This is the workflow details view
