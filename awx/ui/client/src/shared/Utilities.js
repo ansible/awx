@@ -192,7 +192,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             }
             if (status === 403) {
                 msg = 'The API responded with a 403 Access Denied error. ';
-                if (data.detail) {
+                if (data && data.detail) {
                     msg += 'Detail: ' + data.detail;
                 } else {
                     msg += 'Please contact your system administrator.';
