@@ -744,9 +744,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if(field.type === 'toggleSwitch') {
                         html += label();
                             html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
-                            data-placement="undefined" data-tip-watch="undefined" data-original-title="" title="">
-                            <div ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</div>
-                            <div ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</div>
+                            data-placement="top">
+                            <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</button>
+                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</button>
                         </div>`;
                     }
 
@@ -1857,7 +1857,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             ${actionButtons}
                         </div>`;
                 }
-                
+
                 // smart-search directive
                 html += `
                 <div
