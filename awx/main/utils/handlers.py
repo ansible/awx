@@ -181,7 +181,7 @@ def add_or_remove_logger(address, instance, adding=True):
         if isinstance(specific_logger.handlers[i], (HTTPSNullHandler, BaseHTTPSHandler)):
             i_occurance = i
             break
-    
+
     if i_occurance is None and not adding:
         return
     elif i_occurance is None:
@@ -205,29 +205,3 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
 
     add_or_remove_logger('awx.analytics', instance, adding=is_enabled)
     add_or_remove_logger('awx', instance, adding=(is_enabled and 'awx' in settings_module.LOG_AGGREGATOR_LOGGERS))
-
-
-def configure_external_logger_old(settings_module, async_flag=True, is_startup=True):
-
-    from django.utils.log import configure_logging
-
-    is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
-    if is_startup and (not is_enabled):
-        # Pass-through if external logging not being used
-        return
-
-    LOGGING_DICT = settings_module.LOGGING
-    if is_enabled:
-        LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.BaseHTTPSHandler'
-        if not async_flag:
-            LOGGING_DICT['handlers']['http_receiver']['async'] = False
-        else:
-            LOGGING_DICT['handlers']['http_receiver']['async'] = True
-        for param, django_setting_name in PARAM_NAMES.items():
-            LOGGING_DICT['handlers']['http_receiver'][param] = getattr(settings_module, django_setting_name, None)
-        if 'awx' in settings_module.LOG_AGGREGATOR_LOGGERS:
-            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
-                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
-    # External logging not enabled, but removal of existing configuration needed
-    configure_logging(settings_module.LOGGING_CONFIG, LOGGING_DICT)
-
