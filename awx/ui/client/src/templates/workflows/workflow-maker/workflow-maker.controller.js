@@ -888,6 +888,10 @@ export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'Pr
             });
         };
 
+        $scope.$on('WorkflowDialogReady', function(){
+            $scope.modalOpen = true;
+        });
+
         init();
 
     }
