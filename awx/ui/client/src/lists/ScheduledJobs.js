@@ -46,7 +46,8 @@ export default
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
-                ngBind: 'schedule.type_label'
+                ngBind: 'schedule.type_label',
+                searchField: 'unified_job_template__polymorphic_ctype__model'
             },
             next_run: {
                 label: i18n._('Next Run'),
