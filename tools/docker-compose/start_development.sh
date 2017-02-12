@@ -25,6 +25,7 @@ fi
 
 cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
 cp /tmp/ansible-tower.egg-link /venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+yes | cp -rf /tower_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 
 # Tower bootstrapping
 make version_file
@@ -35,4 +36,9 @@ mkdir -p /tower_devel/awx/public/static
 mkdir -p /tower_devel/awx/ui/static
 
 # Start the service
-make honcho
+
+if [ -f "/tower_devel/tools/docker-compose/use_dev_supervisor.txt" ]; then
+    make supervisor
+else
+    make honcho
+fi
