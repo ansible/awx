@@ -285,7 +285,11 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             if name.endswith('_set'):
                 continue
             fields.append('{}__search'.format(name))
-        for relationship in self.model._meta.local_many_to_many:
+        m2m_rel = []
+        m2m_rel += self.model._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJobTemplate):
+            m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+        for relationship in m2m_rel:
             if relationship.related_model._meta.app_label != 'main':
                 continue
             fields.append('{}__search'.format(relationship.name))
