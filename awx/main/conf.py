@@ -258,7 +258,8 @@ register(
 register(
     'LOG_AGGREGATOR_USERNAME',
     field_class=fields.CharField,
-    allow_null=True,
+    allow_blank=True,
+    default='',
     label=_('Logging Aggregator Username'),
     help_text=_('Username for external log aggregator (if required).'),
     category=_('Logging'),
@@ -268,7 +269,8 @@ register(
 register(
     'LOG_AGGREGATOR_PASSWORD',
     field_class=fields.CharField,
-    allow_null=True,
+    allow_blank=True,
+    default='',
     encrypted=True,
     label=_('Logging Aggregator Password/Token'),
     help_text=_('Password or authentication token for external log aggregator (if required).'),
