@@ -163,7 +163,8 @@ export default [
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: $scope.$parent.configDataResolve[key].help_text,
+                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
+                    null: $scope.$parent.configDataResolve[key].help_text,
                 label: $scope.$parent.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
