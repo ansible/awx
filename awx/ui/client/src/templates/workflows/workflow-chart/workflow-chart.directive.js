@@ -886,6 +886,14 @@ export default [ '$state','moment', '$timeout', '$window',
             if(scope.mode === 'details') {
                 angular.element($window).on('resize', onResize);
                 scope.$on('$destroy', cleanUpResize);
+
+                scope.$on('workflowDetailsResized', function(){
+                    $('.WorkflowMaker-chart').hide();
+                    $timeout(function(){
+                        onResize();
+                        $('.WorkflowMaker-chart').show();
+                    });
+                });
             }
             else {
                 scope.$on('workflowMakerModalResized', function(){

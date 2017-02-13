@@ -130,6 +130,9 @@ export default ['workflowData',
         }
 
         $scope.toggleStdoutFullscreen = function() {
+
+            $scope.$broadcast('workflowDetailsResized');
+
             $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
 
             if ($scope.stdoutFullScreen === true) {
