@@ -1,7 +1,7 @@
 export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n',
     function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService, i18n) {
 
-        let path, relations,
+        let path,
             defaults,
             queryset,
             stateChangeSuccessListener;
@@ -28,9 +28,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         function init() {
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            relations = getRelationshipFields($scope.dataset.results);
             $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
-            qs.initFieldset(path, $scope.djangoModel, relations).then((data) => {
+            qs.initFieldset(path, $scope.djangoModel).then((data) => {
                 $scope.models = data.models;
                 $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
@@ -107,14 +106,6 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             return _(strippedCopy).map(qs.decodeParam).flatten().value();
         }
 
-        // searchable relationships
-        function getRelationshipFields(dataset) {
-            let flat = _(dataset).map((value) => {
-                return _.keys(value.related);
-            }).flatten().uniq().value();
-            return flat;
-        }
-
         function setDefaults(term) {
             if ($scope.list.defaultSearchParams) {
                 return $scope.list.defaultSearchParams(term);
@@ -175,13 +166,17 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 let encodeParams = {
                     term: tagToRemove
                 };
-                if(_.has($scope.options.actions.GET, root)) {
-                    if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                if(_.has($scope.models[$scope.list.name].base, root)) {
+                    if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
                         encodeParams.relatedSearchTerm = true;
                     }
                     else {
                         encodeParams.searchTerm = true;
                     }
+                    removed = qs.encodeParam(encodeParams);
+                }
+                else if(_.contains($scope.models[$scope.list.name].related, root)) {
+                    encodeParams.relatedSearchTerm = true;
                     removed = qs.encodeParam(encodeParams);
                 }
                 else {
@@ -241,8 +236,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     } else {
                         // Figure out if this is a search term
                         let root = termParts[0].split(".")[0].replace(/^-/, '');
-                        if(_.has($scope.options.actions.GET, root)) {
-                            if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                        if(_.has($scope.models[$scope.list.name].base, root)) {
+                            if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
                                 params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
                             }
                             else {
@@ -252,7 +247,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                         // The related fields need to also be checked for related searches.
                         // The related fields for the search are retrieved from the API
                         // options endpoint, and are stored in the $scope.model. FYI, the
-                        // Django search model is what sets the related fields on the model. 
+                        // Django search model is what sets the related fields on the model.
                         else if(_.contains($scope.models[$scope.list.name].related, root)) {
                             params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
                         }

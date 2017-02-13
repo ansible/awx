@@ -1,28 +1,3 @@
-// Ignored fields are not surfaced in the UI's search key
-let isIgnored = function(key, value) {
-    let ignored = [
-        'type',
-        'url',
-        'related',
-        'summary_fields',
-        'object_roles',
-        'activity_stream',
-        'update',
-        'teams',
-        'users',
-        'owner_teams',
-        'owner_users',
-        'access_list',
-        'notification_templates_error',
-        'notification_templates_success',
-        'ad_hoc_command_events',
-        'fact_versions',
-        'variable_data',
-        'playbooks'
-    ];
-    return ignored.indexOf(key) > -1 || value.type === 'field';
-};
-
 export default
 class DjangoSearchModel {
     /*
@@ -36,21 +11,21 @@ class DjangoSearchModel {
         }
         @@property related ['field' ...]
     */
-    constructor(name, endpoint, baseFields, relations) {
-        let base = {};
+    constructor(name, baseFields, relatedSearchFields) {
+        function trimRelated(relatedSearchField){
+            return relatedSearchField.replace(/\__search$/, "");
+        }
         this.name = name;
-        this.related = _.reject(relations, isIgnored);
-        _.forEach(baseFields, (value, key) => {
-            if (!isIgnored(key, value)) {
-                base[key] = value;
+        this.related = _.map(relatedSearchFields, trimRelated);
+        // Remove "object" type fields from this list
+        for (var key in baseFields) {
+            if (baseFields.hasOwnProperty(key)) {
+                if (baseFields[key].type === 'object'){
+                    delete baseFields[key];
+                }
             }
-        });
-        this.base = base;
-    }
-
-    fields() {
-        let result = this.base;
-        result.related = this.related;
-        return result;
+        }
+        delete baseFields.url;
+        this.base = baseFields;
     }
 }
