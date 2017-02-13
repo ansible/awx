@@ -52,10 +52,14 @@ export default ['jobResultsService', 'parseStdoutService', function(jobResultsSe
         },
         // populates the event queue
         populate: function(event) {
-            val.queue[event.counter] = val.munge(event);
+            if (event) {
+                val.queue[event.counter] = val.munge(event);
 
-            if (!val.queue[event.counter].processed) {
-                return val.munge(event);
+                if (!val.queue[event.counter].processed) {
+                    return val.munge(event);
+                } else {
+                    return {};
+                }
             } else {
                 return {};
             }

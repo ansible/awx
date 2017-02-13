@@ -586,10 +586,10 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var buffer = [];
 
     var processBuffer = function() {
-        buffer.forEach((event, i) => {
-            processEvent(event);
+        for (let i = 0; i < 20; i++) {
+            processEvent(buffer[i]);
             buffer.splice(i, 1);
-        });
+        }
     };
 
     var bufferInterval;
