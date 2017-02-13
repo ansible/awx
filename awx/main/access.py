@@ -343,6 +343,9 @@ class BaseAccess(object):
                 if validation_errors:
                     user_capabilities[display_method] = False
                     continue
+            elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
+                user_capabilities[display_method] = self.user.is_superuser
+                continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):
                 if obj.inventory_source and not obj.inventory_source._can_update():
                     user_capabilities[display_method] = False
