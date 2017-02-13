@@ -53,6 +53,10 @@ export default
                 $scope.parseType = 'yaml';
                 $scope.showJobType = false;
 
+                if($scope.job_type && $scope.job_type.value === 'scan' && !$scope.project) {
+                    $scope.project_name = 'Default';
+                }
+
                 SurveyControllerInit({
                     scope: $scope,
                     parent_scope: $scope,
