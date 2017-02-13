@@ -283,18 +283,29 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 });
             };
 
-            scope.activities.forEach(function(activity, i) {
-                // build activity.user
-                if (scope.activities[i].summary_fields.actor) {
-                    scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
-                        scope.activities[i].summary_fields.actor.username + "</a>";
-                } else {
-                    scope.activities[i].user = 'system';
-                }
-                // build description column / action text
-                BuildDescription(scope.activities[i]);
+            if(scope.activities && scope.activities.length > 0) {
+                buildUserAndDescription();
+            }
 
+            scope.$watch('activities', function(){
+                // Watch for future update to scope.activities (like page change, column sort, search, etc)
+                buildUserAndDescription();
             });
+
+            function buildUserAndDescription(){
+                scope.activities.forEach(function(activity, i) {
+                    // build activity.user
+                    if (scope.activities[i].summary_fields.actor) {
+                        scope.activities[i].user = "<a href=\"/#/users/" + scope.activities[i].summary_fields.actor.id  + "\">" +
+                            scope.activities[i].summary_fields.actor.username + "</a>";
+                    } else {
+                        scope.activities[i].user = 'system';
+                    }
+                    // build description column / action text
+                    BuildDescription(scope.activities[i]);
+
+                });
+            }
         };
     }
 ]);
