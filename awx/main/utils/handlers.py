@@ -16,7 +16,7 @@ from requests_futures.sessions import FuturesSession
 from awx.main.utils.formatters import LogstashFormatter
 
 
-__all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'HTTPSHandler', 'configure_external_logger']
+__all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'configure_external_logger']
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -168,16 +168,10 @@ class BaseHTTPSHandler(logging.Handler):
                                  **self.get_post_kwargs(payload))
 
 
-class HTTPSHandler(object):
-
-    def __new__(cls, settings_module, *args, **kwargs):
-        return BaseHTTPSHandler.from_django_settings(settings_module, *args, **kwargs)
-
-
 def add_or_remove_logger(address, instance):
     specific_logger = logging.getLogger(address)
     i_occurance = None
-    for i in range(len(specific_logger.handlers)):
+    for i, _ in enumerate(specific_logger.handlers):
         if isinstance(specific_logger.handlers[i], (HTTPSNullHandler, BaseHTTPSHandler)):
             i_occurance = i
             break
@@ -201,7 +195,7 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
 
     instance = None
     if is_enabled:
-        instance = HTTPSHandler(settings_module, async=async_flag)
+        instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
         instance.setFormatter(LogstashFormatter())
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
