@@ -1952,13 +1952,9 @@ class ScheduleAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
-        job_template_qs = self.user.get_queryset(JobTemplate)
-        inventory_source_qs = self.user.get_queryset(InventorySource)
-        project_qs = self.user.get_queryset(Project)
-        unified_qs = UnifiedJobTemplate.objects.filter(jobtemplate__in=job_template_qs) | \
-            UnifiedJobTemplate.objects.filter(Q(project__in=project_qs)) | \
-            UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
-        return qs.filter(unified_job_template__in=unified_qs)
+
+        unified_qs = UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')
+        return qs.filter(unified_job_template__id__in=unified_qs)
 
     @check_superuser
     def can_read(self, obj):
