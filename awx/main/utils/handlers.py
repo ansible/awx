@@ -12,8 +12,11 @@ import traceback
 
 from requests_futures.sessions import FuturesSession
 
-# custom
-from django.conf import settings as django_settings
+# AWX
+from awx.main.utils.formatters import LogstashFormatter
+
+
+__all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'configure_external_logger']
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -40,7 +43,7 @@ def unused_callback(sess, resp):
 class HTTPSNullHandler(logging.NullHandler):
     "Placeholder null handler to allow loading without database access"
 
-    def __init__(self, host, **kwargs):
+    def __init__(self, *args, **kwargs):
         return super(HTTPSNullHandler, self).__init__()
 
 
@@ -165,7 +168,31 @@ class BaseHTTPSHandler(logging.Handler):
                                  **self.get_post_kwargs(payload))
 
 
-class HTTPSHandler(object):
+def add_or_remove_logger(address, instance):
+    specific_logger = logging.getLogger(address)
+    for i, handler in enumerate(specific_logger.handlers):
+        if isinstance(handler, (HTTPSNullHandler, BaseHTTPSHandler)):
+            specific_logger.handlers[i] = instance or HTTPSNullHandler()
+            break
+    else:
+        if instance is not None:
+            specific_logger.handlers.append(instance)
 
-    def __new__(cls, *args, **kwargs):
-        return BaseHTTPSHandler.from_django_settings(django_settings, *args, **kwargs)
+
+def configure_external_logger(settings_module, async_flag=True, is_startup=True):
+
+    is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
+    if is_startup and (not is_enabled):
+        # Pass-through if external logging not being used
+        return
+
+    instance = None
+    if is_enabled:
+        instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
+        instance.setFormatter(LogstashFormatter())
+    awx_logger_instance = instance
+    if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
+        awx_logger_instance = None
+
+    add_or_remove_logger('awx.analytics', instance)
+    add_or_remove_logger('awx', awx_logger_instance)

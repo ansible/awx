@@ -32,7 +32,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_ready
+from celery.signals import celeryd_init, worker_process_init
 from celery import current_app
 
 # Django
@@ -54,6 +54,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
+from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -86,26 +87,10 @@ def celery_startup(conf=None, **kwargs):
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 
-def _setup_tower_logger():
-    global logger
-    from django.utils.log import configure_logging
-    LOGGING_DICT = settings.LOGGING
-    if settings.LOG_AGGREGATOR_ENABLED:
-        LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-        LOGGING_DICT['handlers']['http_receiver']['async'] = False
-        if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
-            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
-                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
-    configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
-    logger = logging.getLogger('awx.main.tasks')
-
-
-@worker_ready.connect
+@worker_process_init.connect
 def task_set_logger_pre_run(*args, **kwargs):
     cache.close()
-    if settings.LOG_AGGREGATOR_ENABLED:
-        _setup_tower_logger()
-        logger.debug('Custom Tower logger configured for worker process.')
+    configure_external_logger(settings, async_flag=False, is_startup=False)
 
 
 def _uwsgi_reload():
@@ -121,7 +106,7 @@ def _uwsgi_reload():
 
 
 def _reset_celery_logging():
-    # Worker logger reloaded, now send signal to restart pool
+    # Send signal to restart thread pool
     app = current_app._get_current_object()
     app.control.broadcast('pool_restart', arguments={'reload': True},
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
