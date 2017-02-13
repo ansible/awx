@@ -170,20 +170,13 @@ class BaseHTTPSHandler(logging.Handler):
 
 def add_or_remove_logger(address, instance):
     specific_logger = logging.getLogger(address)
-    i_occurance = None
-    for i, _ in enumerate(specific_logger.handlers):
-        if isinstance(specific_logger.handlers[i], (HTTPSNullHandler, BaseHTTPSHandler)):
-            i_occurance = i
+    for i, handler in enumerate(specific_logger.handlers):
+        if isinstance(handler, (HTTPSNullHandler, BaseHTTPSHandler)):
+            specific_logger.handlers[i] = instance or HTTPSNullHandler()
             break
-
-    if i_occurance is None:
+    else:
         if instance is not None:
             specific_logger.handlers.append(instance)
-    else:
-        if instance is None:
-            specific_logger.handlers[i_occurance] = HTTPSNullHandler()
-        else:
-            specific_logger.handlers[i_occurance] = instance
 
 
 def configure_external_logger(settings_module, async_flag=True, is_startup=True):
