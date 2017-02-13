@@ -9,10 +9,9 @@ from django.conf import LazySettings
 from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import fields
 import pytest
 
-from awx.conf import models
+from awx.conf import models, fields
 from awx.conf.settings import SettingsWrapper, EncryptedCacheProxy, SETTING_CACHE_NOTSET
 from awx.conf.registry import SettingsRegistry
 
@@ -328,6 +327,31 @@ def test_read_only_setting_deletion(settings):
     with pytest.raises(ImproperlyConfigured):
         del settings.AWX_SOME_SETTING
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
+
+
+def test_charfield_properly_sets_none(settings, mocker):
+    "see: https://github.com/ansible/ansible-tower/issues/5322"
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        allow_null=True
+    )
+
+    setting_list = mocker.Mock(**{'order_by.return_value.first.return_value': None})
+    with apply_patches([
+        mocker.patch('awx.conf.models.Setting.objects.filter',
+                     return_value=setting_list),
+        mocker.patch('awx.conf.models.Setting.objects.create', mocker.Mock())
+    ]):
+        settings.AWX_SOME_SETTING = None
+
+    models.Setting.objects.create.assert_called_with(
+        key='AWX_SOME_SETTING',
+        user=None,
+        value=None
+    )
 
 
 def test_settings_use_an_encrypted_cache(settings):
