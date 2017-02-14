@@ -213,8 +213,9 @@ def test_https_logging_handler_emit_one_record_per_fact(ok200_adapter):
     [future.result() for future in async_futures]
 
     assert len(ok200_adapter.requests) == 2
+    requests = sorted(ok200_adapter.requests, key=lambda request: json.loads(request.body)['version'])
 
-    request = ok200_adapter.requests[0]
+    request = requests[0]
     assert request.url == 'http://127.0.0.1/'
     assert request.method == 'POST'
     body = json.loads(request.body)
@@ -223,7 +224,7 @@ def test_https_logging_handler_emit_one_record_per_fact(ok200_adapter):
     assert body['name'] == 'ansible'
     assert body['version'] == '2.2.1.0'
 
-    request = ok200_adapter.requests[1]
+    request = requests[1]
     assert request.url == 'http://127.0.0.1/'
     assert request.method == 'POST'
     body = json.loads(request.body)
