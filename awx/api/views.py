@@ -518,7 +518,7 @@ class AuthView(APIView):
     def get(self, request):
         data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
+        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items()
         # Return auth backends in consistent order: Google, GitHub, SAML.
         auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
         for name, backend in auth_backends:
