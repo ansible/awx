@@ -123,6 +123,36 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 _.forEach(scope[`${list.name}`], isSelected);
             });
 
+            scope.$on(`${list.iterator}_options`, function(event, data){
+                scope.options = data.data.actions.GET;
+                optionsRequestDataProcessing();
+            });
+
+            // iterate over the list and add fields like type label, after the
+            // OPTIONS request returns, or the list is sorted/paginated/searched
+            function optionsRequestDataProcessing(){
+                if(scope.list.name === 'projects'){
+                    if (scope[list.name] !== undefined) {
+                        scope[list.name].forEach(function(item, item_idx) {
+                            var itm = scope[list.name][item_idx];
+
+                            // Set the item type label
+                            if (list.fields.scm_type && scope.options &&
+                                    scope.options.hasOwnProperty('scm_type')) {
+                                        scope.options.scm_type.choices.every(function(choice) {
+                                            if (choice[0] === item.scm_type) {
+                                            itm.type_label = choice[1];
+                                            return false;
+                                        }
+                                        return true;
+                                    });
+                                }
+
+                        });
+                    }
+                }
+            }
+
             function isSelected(item){
                 if(_.find(scope.allSelected, {id: item.id, type: item.type})){
                     item.isSelected = true;
