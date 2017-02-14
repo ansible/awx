@@ -6,6 +6,8 @@ import sys
 import threading
 import time
 
+import six
+
 # Django
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
@@ -88,7 +90,17 @@ class EncryptedCacheProxy(object):
 
     def get(self, key, **kwargs):
         value = self.cache.get(key, **kwargs)
-        return self._handle_encryption(self.decrypter, key, value)
+        value = self._handle_encryption(self.decrypter, key, value)
+
+        # python-memcached auto-encodes unicode on cache set in python2
+        # https://github.com/linsomniac/python-memcached/issues/79
+        # https://github.com/linsomniac/python-memcached/blob/288c159720eebcdf667727a859ef341f1e908308/memcache.py#L961
+        if six.PY2 and isinstance(value, six.binary_type):
+            try:
+                six.text_type(value)
+            except UnicodeDecodeError:
+                value = value.decode('utf-8')
+        return value
 
     def set(self, key, value, **kwargs):
         self.cache.set(

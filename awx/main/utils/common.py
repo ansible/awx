@@ -21,6 +21,8 @@ import tempfile
 # Decorator
 from decorator import decorator
 
+import six
+
 # Django
 from django.utils.translation import ugettext_lazy as _
 from django.db.models import ManyToManyField
@@ -190,6 +192,7 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
         value = value[subfield]
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
+    utf8 = type(value) == six.text_type
     value = smart_str(value)
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
     cipher = AES.new(key, AES.MODE_ECB)
@@ -197,17 +200,31 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
         value += '\x00'
     encrypted = cipher.encrypt(value)
     b64data = base64.b64encode(encrypted)
-    return '$encrypted$%s$%s' % ('AES', b64data)
+    tokens = ['$encrypted', 'AES', b64data]
+    if utf8:
+        # If the value to encrypt is utf-8, we need to add a marker so we
+        # know to decode the data when it's decrypted later
+        tokens.insert(1, 'UTF8')
+    return '$'.join(tokens)
 
 
 def decrypt_value(encryption_key, value):
-    algo, b64data = value[len('$encrypted$'):].split('$', 1)
+    raw_data = value[len('$encrypted$'):]
+    # If the encrypted string contains a UTF8 marker, discard it
+    utf8 = raw_data.startswith('UTF8$')
+    if utf8:
+        raw_data = raw_data[len('UTF8$'):]
+    algo, b64data = raw_data.split('$', 1)
     if algo != 'AES':
         raise ValueError('unsupported algorithm: %s' % algo)
     encrypted = base64.b64decode(b64data)
     cipher = AES.new(encryption_key, AES.MODE_ECB)
     value = cipher.decrypt(encrypted)
-    return value.rstrip('\x00')
+    value = value.rstrip('\x00')
+    # If the encrypted string contained a UTF8 marker, decode the data
+    if utf8:
+        value = value.decode('utf-8')
+    return value
 
 
 def decrypt_field(instance, field_name, subfield=None):
