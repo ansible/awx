@@ -167,7 +167,7 @@ export default [
                 dropdownRendered = true;
                 CreateSelect2({
                     element: '#configuration_logging_template_LOG_AGGREGATOR_TYPE',
-                    multiple: true,
+                    multiple: false,
                     placeholder: i18n._('Select types'),
                     opts: opts
                 });

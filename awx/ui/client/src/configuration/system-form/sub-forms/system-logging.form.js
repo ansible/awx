@@ -23,7 +23,6 @@
                  type: 'select',
                  reset: 'LOG_AGGREGATOR_TYPE',
                  ngOptions: 'type.label for type in LOG_AGGREGATOR_TYPE_options track by type.value',
-                 multiSelect: true
              },
              LOG_AGGREGATOR_USERNAME: {
                  type: 'text',
