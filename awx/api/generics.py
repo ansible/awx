@@ -282,13 +282,17 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 fields.append('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
             name = rel.get_accessor_name()
+            if name is None:
+                continue
             if name.endswith('_set'):
                 continue
             fields.append('{}__search'.format(name))
         m2m_rel = []
         m2m_rel += self.model._meta.local_many_to_many
-        if issubclass(self.model, UnifiedJobTemplate):
+        if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
             m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
+            m2m_rel += UnifiedJob._meta.local_many_to_many
         for relationship in m2m_rel:
             if relationship.related_model._meta.app_label != 'main':
                 continue
