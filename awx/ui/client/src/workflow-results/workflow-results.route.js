@@ -49,7 +49,7 @@ export default {
         // flashing as rest data comes in. Provides the list of workflow nodes
         workflowNodes: ['workflowData', 'Rest', '$q', function(workflowData, Rest, $q) {
             var defer = $q.defer();
-                Rest.setUrl(workflowData.related.workflow_nodes);
+                Rest.setUrl(workflowData.related.workflow_nodes + '?order_by=id');
                 Rest.get()
                     .success(function(data) {
                         if(data.next) {
