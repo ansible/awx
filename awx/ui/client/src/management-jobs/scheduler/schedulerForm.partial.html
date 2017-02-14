@@ -529,7 +529,7 @@
             <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
                 <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a time period after which to remove old facts</label>
                 <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" aw-min=0 aw-max=9999 integer ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></input>
+                    <input id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" min=0 max=9999 ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></input>
                     <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
                 </div>
 
@@ -545,8 +545,8 @@
             <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
                 <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a frequency for snapshot retention</label>
                 <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
-                    ng-required="true" aw-min=0 aw-max=9999  ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                    <input sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
+                    ng-required="true" min=0 max=9999  ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                     <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
                 </div>
 
