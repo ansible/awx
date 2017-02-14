@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import signal
+import subprocess
 import pipes
 import re
 import shutil
@@ -105,11 +106,36 @@ def _uwsgi_reload():
         awxfifo.write(TRIGGER_CHAIN_RELOAD)
 
 
-def _reset_celery_logging():
+def _reset_celery_thread_pool():
     # Send signal to restart thread pool
     app = current_app._get_current_object()
     app.control.broadcast('pool_restart', arguments={'reload': True},
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
+
+
+def _supervisor_service_restart():
+    '''
+    example use pattern of supervisorctl:
+    # supervisorctl restart tower-processes:receiver tower-processes:factcacher
+    '''
+    group_name = 'tower-processes'
+    args = ['supervisorctl']
+    if settings.DEBUG is True:
+        args.extend(['-c', '/supervisor.conf'])
+        programs = "receiver,factcacher".split(",")
+    else:
+        programs = "awx-celeryd-beat,awx-callback-receiver,awx-fact-cache-receiver".split(",")
+    args.extend(['restart'])
+    args.extend(['{}:{}'.format(group_name, p) for p in programs])
+    logger.debug('Issuing command to restart services, args={}'.format(args))
+    subprocess.Popen(args)
+
+
+def restart_local_services():
+    logger.warn('Restarting services on this node in response to user action')
+    _uwsgi_reload()
+    _supervisor_service_restart()
+    _reset_celery_thread_pool()
 
 
 def _clear_cache_keys(set_of_keys):
@@ -125,8 +151,7 @@ def process_cache_changes(cache_keys):
     _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            _uwsgi_reload()
-            _reset_celery_logging()
+            restart_local_services()
             break
 
 
