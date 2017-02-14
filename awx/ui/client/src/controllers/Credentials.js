@@ -56,12 +56,10 @@ export function CredentialsList($scope, $rootScope, $location, $log,
                 // Set the item type label
                 if (list.fields.kind && $scope.options &&
                     $scope.options.hasOwnProperty('kind')) {
-                        $scope.options.kind.choices.every(function(choice) {
+                        $scope.options.kind.choices.forEach(function(choice) {
                             if (choice[0] === item.kind) {
                                 itm.kind_label = choice[1];
-                                return false;
                             }
-                            return true;
                         });
                 }
             });
@@ -462,7 +460,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                     form: form,
                     reset: false
                 });
-                
+
                 master.kind = $scope.kind;
 
                 CreateSelect2({

@@ -50,14 +50,12 @@
                      // Set the item type label
                      if (list.fields.notification_type && $scope.options &&
                          $scope.options.hasOwnProperty('notification_type')) {
-                             $scope.options.notification_type.choices.every(function(choice) {
+                             $scope.options.notification_type.choices.forEach(function(choice) {
                                  if (choice[0] === item.notification_type) {
                                      itm.type_label = choice[1];
                                      var recent_notifications = itm.summary_fields.recent_notifications;
                                      itm.status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
-                                     return false;
                                  }
-                                 return true;
                              });
                      }
                      setStatus(itm);
