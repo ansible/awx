@@ -234,7 +234,8 @@ export default [{
     params: {
         template_search: {
             value: {
-                project__organization: null
+                or__project__organization: null,
+                or__inventory__organization: null
             }
         }
     },
@@ -279,7 +280,8 @@ export default [{
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.name);
-                $stateParams.template_search.project__organization = $stateParams.organization_id;
+                $stateParams.template_search.or__project__organization = $stateParams.organization_id;
+                $stateParams.template_search.or__inventory__organization = $stateParams.organization_id;
                 return qs.search(path, $stateParams.template_search);
             }
         ]
