@@ -58,12 +58,10 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 // Set the item type label
                 if (list.fields.scm_type && $scope.options &&
                         $scope.options.hasOwnProperty('scm_type')) {
-                            $scope.options.scm_type.choices.every(function(choice) {
+                            $scope.options.scm_type.choices.forEach(function(choice) {
                                 if (choice[0] === item.scm_type) {
                                 itm.type_label = choice[1];
-                                return false;
                             }
-                            return true;
                         });
                     }
 
@@ -275,7 +273,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
         } catch (e) {
             // ignore
         }
-        $scope.projects.every(function(project) {
+        $scope.projects.forEach(function(project) {
             if (project.id === project_id) {
                 if (project.scm_type === "Manual" || Empty(project.scm_type)) {
                     // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
@@ -286,9 +284,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
                 } else {
                     ProjectUpdate({ scope: $scope, project_id: project.id });
                 }
-                return false;
             }
-            return true;
         });
     };
 

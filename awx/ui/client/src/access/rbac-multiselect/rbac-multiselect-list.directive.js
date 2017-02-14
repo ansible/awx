@@ -138,15 +138,13 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
                             // Set the item type label
                             if (list.fields.scm_type && scope.options &&
-                                    scope.options.hasOwnProperty('scm_type')) {
-                                        scope.options.scm_type.choices.every(function(choice) {
-                                            if (choice[0] === item.scm_type) {
+                                scope.options.hasOwnProperty('scm_type')) {
+                                    scope.options.scm_type.choices.forEach(function(choice) {
+                                        if (choice[0] === item.scm_type) {
                                             itm.type_label = choice[1];
-                                            return false;
                                         }
-                                        return true;
                                     });
-                                }
+                            }
 
                         });
                     }
