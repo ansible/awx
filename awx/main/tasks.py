@@ -1189,6 +1189,9 @@ class RunProjectUpdate(BaseTask):
                     scm_username = False
             elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
+            elif scm_type == 'insights':
+                extra_vars['scm_username'] = scm_username
+                extra_vars['scm_password'] = scm_password
             scm_url = update_scm_url(scm_type, scm_url, scm_username,
                                      scm_password, scp_format=True)
         else:
@@ -1218,6 +1221,7 @@ class RunProjectUpdate(BaseTask):
             scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
+            'insights_url': settings.INSIGHTS_URL_BASE,
             'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,

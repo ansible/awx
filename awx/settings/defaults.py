@@ -862,6 +862,8 @@ TOWER_ADMIN_ALERTS = True
 # Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
+INSIGHTS_URL_BASE = "https://access.redhat.com"
+
 TOWER_SETTINGS_MANIFEST = {}
 
 LOG_AGGREGATOR_ENABLED = False

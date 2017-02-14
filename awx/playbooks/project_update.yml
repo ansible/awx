@@ -105,6 +105,32 @@
         scm_version: "{{ scm_result['after'] }}"
       when: "'after' in scm_result"
 
+    - name: update project using insights
+      uri:
+        url: "{{insights_url}}/r/insights/v1/maintenance"
+        user: "{{scm_username|quote}}"
+        password: "{{scm_password|quote}}"
+        force_basic_auth: yes
+      when: scm_type == 'insights'
+      register: insights_output
+
+    - name: Ensure the project directory is present
+      file:
+        dest: "{{project_path|quote}}"
+        state: directory
+      when: scm_type == 'insights'
+
+    - name: Fetch Insights Playbook
+      get_url:
+        url: "{{insights_url}}/r/insights/v3/maintenance/{{item.maintenance_id}}/playbook"
+        dest: "{{project_path|quote}}/{{item.maintenance_id}}.yml"
+        url_username: "{{scm_username|quote}}"
+        url_password: "{{scm_password|quote}}"
+        force_basic_auth: yes
+      when: scm_type == 'insights'
+      with_items: "{{insights_output.json}}"
+      failed_when: false
+
     - name: detect requirements.yml
       stat: path={{project_path|quote}}/roles/requirements.yml
       register: doesRequirementsExist
