@@ -117,7 +117,9 @@ setup(
     },
     data_files = proc_data_files([
         ("%s" % homedir,        ["config/wsgi.py",
-                                 "awx/static/favicon.ico"]),
+                                 "awx/static/favicon.ico",
+                                 "awx/locale/**/*.po",
+                                 "awx/locale/**/*.mo"]),
         ("%s" % siteconfig,      ["config/awx-nginx.conf"]),
         #        ("%s" % webconfig,      ["config/uwsgi_params"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
