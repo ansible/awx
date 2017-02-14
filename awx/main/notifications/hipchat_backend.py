@@ -37,6 +37,7 @@ class HipChatBackend(TowerBaseEmailBackend):
             for rcp in m.recipients():
                 r = requests.post("{}/v2/room/{}/notification".format(self.api_url, rcp),
                                   params={"auth_token": self.token},
+                                  verify=False,
                                   json={"color": self.color,
                                         "message": m.subject,
                                         "notify": self.notify,
