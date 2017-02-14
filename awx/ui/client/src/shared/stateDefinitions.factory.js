@@ -272,6 +272,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             dynamic: true
                         }
                     },
+                    ncyBreadcrumb:{
+                        skip:true
+                    },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
                             template: `<add-rbac-user-team resolve="$resolve" title="` + i18n._('Add Permissions') + `"></add-rbac-user-team>`
@@ -341,6 +344,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         [`modal@${formStateDefinition.name}`]: {
                             template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="` + i18n._('Add Users') + ' / ' + i18n._('Teams') + `"></add-rbac-resource>`
                         }
+                    },
+                    ncyBreadcrumb:{
+                        skip:true
                     },
                     resolve: {
                         usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -510,6 +516,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         [`modal@${formStateDefinition.name}`]: {
                             template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
                         }
+                    },
+                    ncyBreadcrumb:{
+                        skip:true
                     },
                     resolve: {
                         usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
