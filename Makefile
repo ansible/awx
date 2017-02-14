@@ -378,6 +378,12 @@ server: server_noattach
 servercc: server_noattach
 	tmux -2 -CC attach-session -t tower
 
+supervisor:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
+
 # Alternate approach to tmux to run all development tasks specified in
 # Procfile.  https://youtu.be/OPMgaibszjk
 honcho:
