@@ -235,7 +235,8 @@ export default [{
         template_search: {
             value: {
                 or__project__organization: null,
-                or__inventory__organization: null
+                or__inventory__organization: null,
+                page_size: 20
             }
         }
     },
