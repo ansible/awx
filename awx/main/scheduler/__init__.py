@@ -251,6 +251,18 @@ class TaskManager():
         dep.save()
 
         inventory_task = InventoryUpdateDict.get_partial(dep.id)
+        
+        '''
+        Update internal datastructures with the newly created inventory update
+        '''
+        # Should be only 1 inventory update. The one for the job (task)
+        latest_inventory_updates = self.get_latest_inventory_update_tasks([task])
+        self.process_latest_inventory_updates(latest_inventory_updates)
+
+        inventory_sources = self.get_inventory_source_tasks([task])
+        self.process_inventory_sources(inventory_sources)
+
+        self.graph.add_job(inventory_task)
 
         return inventory_task
 
@@ -271,9 +283,15 @@ class TaskManager():
 
     def capture_chain_failure_dependencies(self, task, dependencies):
         for dep in dependencies:
-            dep_obj = task.get_full()
+            dep_obj = dep.get_full()
             dep_obj.dependent_jobs.add(task['id'])
             dep_obj.save()
+            '''
+            if not 'dependent_jobs__id' in task.data:
+                task.data['dependent_jobs__id'] = [dep_obj.data['id']]
+            else:
+                task.data['dependent_jobs__id'].append(dep_obj.data['id'])
+            '''
 
     def generate_dependencies(self, task):
         dependencies = []
@@ -291,6 +309,9 @@ class TaskManager():
             '''
             inventory_sources_already_updated = task.get_inventory_sources_already_updated()
 
+            '''
+            get_inventory_sources() only return update on launch sources
+            '''
             for inventory_source_task in self.graph.get_inventory_sources(task['inventory_id']):
                 if inventory_source_task['id'] in inventory_sources_already_updated:
                     continue
