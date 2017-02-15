@@ -57,6 +57,18 @@ LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
 LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
 
+# Supervisor service name dictionary used for programatic restart
+SERVICE_NAME_DICT = {
+    "beat": "awx-celeryd-beat",
+    "celery": "awx-celeryd",
+    "callback": "awx-callback-receiver",
+    "channels": "awx-channels-worker",
+    "uwsgi": "awx-uwsgi",
+    "daphne": "awx-daphne",
+    "fact": "awx-fact-cache-receiver"}
+# Used for sending commands in automatic restart
+UWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
+
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.
 DEFAULTS_SNAPSHOT = {}

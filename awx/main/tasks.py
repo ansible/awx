@@ -33,7 +33,6 @@ import pexpect
 # Celery
 from celery import Task, task
 from celery.signals import celeryd_init, worker_process_init
-from celery import current_app
 
 # Django
 from django.conf import settings
@@ -54,6 +53,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
+from awx.main.utils.reload import restart_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
@@ -93,25 +93,6 @@ def task_set_logger_pre_run(*args, **kwargs):
     configure_external_logger(settings, async_flag=False, is_startup=False)
 
 
-def _uwsgi_reload():
-    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
-    logger.warn('Initiating uWSGI chain reload of server')
-    TRIGGER_CHAIN_RELOAD = 'c'
-    if settings.DEBUG:
-        uWSGI_FIFO_LOCATION = '/awxfifo'
-    else:
-        uWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
-    with open(uWSGI_FIFO_LOCATION, 'w') as awxfifo:
-        awxfifo.write(TRIGGER_CHAIN_RELOAD)
-
-
-def _reset_celery_logging():
-    # Send signal to restart thread pool
-    app = current_app._get_current_object()
-    app.control.broadcast('pool_restart', arguments={'reload': True},
-                          destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
-
-
 def _clear_cache_keys(set_of_keys):
     logger.debug('cache delete_many(%r)', set_of_keys)
     cache.delete_many(set_of_keys)
@@ -125,8 +106,7 @@ def process_cache_changes(cache_keys):
     _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            _uwsgi_reload()
-            _reset_celery_logging()
+            restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
             break
 
 
