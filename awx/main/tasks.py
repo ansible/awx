@@ -10,7 +10,6 @@ import json
 import logging
 import os
 import signal
-import subprocess
 import pipes
 import re
 import shutil
@@ -34,7 +33,6 @@ import pexpect
 # Celery
 from celery import Task, task
 from celery.signals import celeryd_init, worker_process_init
-from celery import current_app
 
 # Django
 from django.conf import settings
@@ -55,6 +53,7 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
+from awx.main.utils.reload import restart_local_services
 from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
@@ -92,59 +91,6 @@ def celery_startup(conf=None, **kwargs):
 def task_set_logger_pre_run(*args, **kwargs):
     cache.close()
     configure_external_logger(settings, async_flag=False, is_startup=False)
-
-
-def _uwsgi_reload():
-    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
-    logger.warn('Initiating uWSGI chain reload of server')
-    TRIGGER_CHAIN_RELOAD = 'c'
-    with open(settings.uWSGI_FIFO_LOCATION, 'w') as awxfifo:
-        awxfifo.write(TRIGGER_CHAIN_RELOAD)
-
-
-def _reset_celery_thread_pool():
-    # Send signal to restart thread pool
-    app = current_app._get_current_object()
-    app.control.broadcast('pool_restart', arguments={'reload': True},
-                          destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
-
-
-def _supervisor_service_restart(service_internal_names):
-    '''
-    Service internal name options:
-     - beat - celery - callback - channels - uwsgi - daphne
-     - fact - nginx
-    example use pattern of supervisorctl:
-    # supervisorctl restart tower-processes:receiver tower-processes:factcacher
-    '''
-    group_name = 'tower-processes'
-    args = ['supervisorctl']
-    if settings.DEBUG:
-        args.extend(['-c', '/supervisor.conf'])
-    programs = []
-    name_translation_dict = settings.SERVICE_NAME_DICT
-    for n in service_internal_names:
-        if n in name_translation_dict:
-            programs.append('{}:{}'.format(group_name, name_translation_dict[n]))
-    args.extend(['restart'])
-    args.extend(programs)
-    logger.debug('Issuing command to restart services, args={}'.format(args))
-    subprocess.Popen(args)
-
-
-def restart_local_services(service_internal_names):
-    logger.warn('Restarting services {} on this node in response to user action'.format(service_internal_names))
-    if 'uwsgi' in service_internal_names:
-        _uwsgi_reload()
-        service_internal_names.pop('uwsgi')
-    restart_celery = False
-    if 'celery' in service_internal_names:
-        restart_celery = True
-        service_internal_names.pop('celery')
-    _supervisor_service_restart(service_internal_names)
-    if restart_celery:
-        # Celery restarted last because this probably includes current process
-        _reset_celery_thread_pool()
 
 
 def _clear_cache_keys(set_of_keys):

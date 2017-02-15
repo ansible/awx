@@ -67,7 +67,7 @@ SERVICE_NAME_DICT = {
     "daphne": "awx-daphne",
     "fact": "awx-fact-cache-receiver"}
 # Used for sending commands in automatic restart
-uWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
+UWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
 
 # Store a snapshot of default settings at this point before loading any
 # customizable config files.

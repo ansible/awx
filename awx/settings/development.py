@@ -122,5 +122,5 @@ SERVICE_NAME_DICT = {
     "fact": "factcacher",
     "nginx": "nginx"}
 # Used for sending commands in automatic restart
-uWSGI_FIFO_LOCATION = '/awxfifo'
+UWSGI_FIFO_LOCATION = '/awxfifo'
 
