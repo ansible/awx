@@ -75,7 +75,7 @@ class NotificationTemplate(CommonModel):
                 setattr(self, '_saved_{}_{}'.format("config", field), value)
                 self.notification_configuration[field] = ''
             else:
-                encrypted = encrypt_field(self, 'notification_configuration', subfield=field)
+                encrypted = encrypt_field(self, 'notification_configuration', subfield=field, skip_utf8=True)
                 self.notification_configuration[field] = encrypted
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')

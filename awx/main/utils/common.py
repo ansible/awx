@@ -183,7 +183,7 @@ def get_encryption_key(field_name, pk=None):
     return h.digest()[:16]
 
 
-def encrypt_field(instance, field_name, ask=False, subfield=None):
+def encrypt_field(instance, field_name, ask=False, subfield=None, skip_utf8=False):
     '''
     Return content of the given instance and field name encrypted.
     '''
@@ -192,7 +192,10 @@ def encrypt_field(instance, field_name, ask=False, subfield=None):
         value = value[subfield]
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
-    utf8 = type(value) == six.text_type
+    if skip_utf8:
+        utf8 = False
+    else:
+        utf8 = type(value) == six.text_type
     value = smart_str(value)
     key = get_encryption_key(field_name, getattr(instance, 'pk', None))
     cipher = AES.new(key, AES.MODE_ECB)

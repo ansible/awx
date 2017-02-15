@@ -29,6 +29,14 @@ def test_encrypt_field_with_unicode_string():
     assert common.decrypt_field(field, 'value') == value
 
 
+def test_encrypt_field_force_disable_unicode():
+    value = u"NothingSpecial"
+    field = Setting(value=value)
+    encrypted = field.value = common.encrypt_field(field, 'value', skip_utf8=True)
+    assert "UTF8" not in encrypted
+    assert common.decrypt_field(field, 'value') == value
+
+
 def test_encrypt_subfield():
     field = Setting(value={'name': 'ANSIBLE'})
     encrypted = field.value = common.encrypt_field(field, 'value', subfield='name')
