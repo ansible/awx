@@ -1,42 +1,31 @@
-export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory', 'SmartSearchService',
-    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory, SmartSearchService) {
+export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', 'SmartSearchService',
+    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, SmartSearchService) {
         return {
             // kick off building a model for a specific endpoint
             // this is usually a list's basePath
             // unified_jobs is the exception, where we need to fetch many subclass OPTIONS and summary_fields
-            initFieldset(path, name, relations) {
-                // get or set $cachFactory.Cache object with id '$http'
-                let defer = $q.defer(),
-                    cache = $cacheFactory.get('$http') || $cacheFactory('$http');
-                defer.resolve(this.getCommonModelOptions(path, name, relations, cache));
+            initFieldset(path, name) {
+                let defer = $q.defer();
+                defer.resolve(this.getCommonModelOptions(path, name));
                 return defer.promise;
             },
 
-            getCommonModelOptions(path, name, relations, cache) {
+            getCommonModelOptions(path, name) {
                 let resolve, base,
                     defer = $q.defer();
 
-                // grab a single model from the cache, if present
-                if (cache.get(path)) {
-                    defer.resolve({
-                        models: {
-                            [name] : new DjangoSearchModel(name, path, cache.get(path), relations)
-                        },
-                        options: cache.get(path)
-                    });
-                } else {
-                    this.url = path;
-                    resolve = this.options(path)
-                        .then((res) => {
-                            base = res.data.actions.GET;
-                            defer.resolve({
-                                models: {
-                                    [name]: new DjangoSearchModel(name, path, base, relations)
-                                },
-                                options: res
-                            });
+                this.url = path;
+                resolve = this.options(path)
+                    .then((res) => {
+                        base = res.data.actions.GET;
+                        let relatedSearchFields = res.data.related_search_fields;
+                        defer.resolve({
+                            models: {
+                                [name]: new DjangoSearchModel(name, base, relatedSearchFields)
+                            },
+                            options: res
                         });
-                }
+                    });
                 return defer.promise;
             },
 
