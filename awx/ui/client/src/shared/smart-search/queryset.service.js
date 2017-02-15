@@ -65,7 +65,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         let concated = '';
                         angular.forEach(value, function(item){
                             if(item && typeof item === 'string') {
-                                item = item.replace(/"|'/g, "");
+                                item = decodeURIComponent(item).replace(/"|'/g, "");
                             }
                             concated += `${key}=${item}&`;
                         });
@@ -73,7 +73,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                     else {
                         if(value && typeof value === 'string') {
-                            value = value.replace(/"|'/g, "");
+                            value = decodeURIComponent(value).replace(/"|'/g, "");
                         }
                         return `${key}=${value}&`;
                     }
@@ -128,7 +128,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                 }
 
-                return {[paramString] : valueString};
+                return {[paramString] : encodeURIComponent(valueString)};
             },
             // decodes a django queryset param into a ui smart-search tag or set of tags
             decodeParam(value, key){
@@ -164,7 +164,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                             decodedParam = '<=' + decodedParam;
                             split = split.splice(0, split.length-1);
                         }
-                        return exclude ? `-${split.join('.')}:${decodedParam}` : `${split.join('.')}:${decodedParam}`;
+
+                        let uriDecodedParam = decodeURIComponent(decodedParam);
+
+                        return exclude ? `-${split.join('.')}:${uriDecodedParam}` : `${split.join('.')}:${uriDecodedParam}`;
                     }
                 };
 

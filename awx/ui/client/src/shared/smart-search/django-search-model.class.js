@@ -16,6 +16,7 @@ class DjangoSearchModel {
             return relatedSearchField.replace(/\__search$/, "");
         }
         this.name = name;
+		this.searchExamples = [];
         this.related = _.map(relatedSearchFields, trimRelated);
         // Remove "object" type fields from this list
         for (var key in baseFields) {
@@ -27,5 +28,23 @@ class DjangoSearchModel {
         }
         delete baseFields.url;
         this.base = baseFields;
+        if(baseFields.id) {
+            this.searchExamples.push("id:>10");
+        }
+        // Loop across the base fields and try find one of type = string and one of type = datetime
+        let stringFound = false,
+            dateTimeFound = false;
+
+        _.forEach(baseFields, (value, key) => {
+            if(!stringFound && value.type === 'string') {
+                this.searchExamples.push(key + ":foobar");
+                stringFound = true;
+            }
+            if(!dateTimeFound && value.type === 'datetime') {
+                this.searchExamples.push(key + ":>=\"2000-01-01T00:00:00Z\"");
+                this.searchExamples.push(key + ":<2000-01-01");
+                dateTimeFound = true;
+            }
+        });
     }
 }

@@ -39,9 +39,7 @@
                 <div class="SmartSearch-examples--title">
                     <b translate>EXAMPLES:</b>
                 </div>
-                <div class="SmartSearch-examples--search">name:foo</div>
-                <div class="SmartSearch-examples--search">organization.name:Default</div>
-                <div class="SmartSearch-examples--search">id:>10</div>
+                <div class="SmartSearch-examples--search" ng-repeat="searchExample in model.searchExamples">{{searchExample}}</div>
             </div>
         </div>
         <div class="SmartSearch-keyRow">
