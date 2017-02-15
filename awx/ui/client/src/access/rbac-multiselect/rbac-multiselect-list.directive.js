@@ -121,6 +121,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
             scope.$watch(list.name, function(){
                 _.forEach(scope[`${list.name}`], isSelected);
+                optionsRequestDataProcessing();
             });
 
             scope.$on(`${list.iterator}_options`, function(event, data){
