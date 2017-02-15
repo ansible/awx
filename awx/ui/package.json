@@ -94,7 +94,7 @@
     "bootstrap-datepicker": "^1.4.0",
     "codemirror": "^5.17.0",
     "components-font-awesome": "^4.6.1",
-    "d3": "^3.3.13",
+    "d3": "3.3.13",
     "javascript-detect-element-resize": "^0.5.3",
     "jquery": "2.2.4",
     "jquery-ui": "1.10.5",
