@@ -98,11 +98,7 @@ def _uwsgi_reload():
     # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
     logger.warn('Initiating uWSGI chain reload of server')
     TRIGGER_CHAIN_RELOAD = 'c'
-    if settings.DEBUG:
-        uWSGI_FIFO_LOCATION = '/awxfifo'
-    else:
-        uWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
-    with open(uWSGI_FIFO_LOCATION, 'w') as awxfifo:
+    with open(settings.uWSGI_FIFO_LOCATION, 'w') as awxfifo:
         awxfifo.write(TRIGGER_CHAIN_RELOAD)
 
 
@@ -113,29 +109,42 @@ def _reset_celery_thread_pool():
                           destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
 
 
-def _supervisor_service_restart():
+def _supervisor_service_restart(service_internal_names):
     '''
+    Service internal name options:
+     - beat - celery - callback - channels - uwsgi - daphne
+     - fact - nginx
     example use pattern of supervisorctl:
     # supervisorctl restart tower-processes:receiver tower-processes:factcacher
     '''
     group_name = 'tower-processes'
     args = ['supervisorctl']
-    if settings.DEBUG is True:
+    if settings.DEBUG:
         args.extend(['-c', '/supervisor.conf'])
-        programs = "receiver,factcacher".split(",")
-    else:
-        programs = "awx-celeryd-beat,awx-callback-receiver,awx-fact-cache-receiver".split(",")
+    programs = []
+    name_translation_dict = settings.SERVICE_NAME_DICT
+    for n in service_internal_names:
+        if n in name_translation_dict:
+            programs.append('{}:{}'.format(group_name, name_translation_dict[n]))
     args.extend(['restart'])
-    args.extend(['{}:{}'.format(group_name, p) for p in programs])
+    args.extend(programs)
     logger.debug('Issuing command to restart services, args={}'.format(args))
     subprocess.Popen(args)
 
 
-def restart_local_services():
-    logger.warn('Restarting services on this node in response to user action')
-    _uwsgi_reload()
-    _supervisor_service_restart()
-    _reset_celery_thread_pool()
+def restart_local_services(service_internal_names):
+    logger.warn('Restarting services {} on this node in response to user action'.format(service_internal_names))
+    if 'uwsgi' in service_internal_names:
+        _uwsgi_reload()
+        service_internal_names.pop('uwsgi')
+    restart_celery = False
+    if 'celery' in service_internal_names:
+        restart_celery = True
+        service_internal_names.pop('celery')
+    _supervisor_service_restart(service_internal_names)
+    if restart_celery:
+        # Celery restarted last because this probably includes current process
+        _reset_celery_thread_pool()
 
 
 def _clear_cache_keys(set_of_keys):
@@ -151,7 +160,7 @@ def process_cache_changes(cache_keys):
     _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            restart_local_services()
+            restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
             break
 
 
