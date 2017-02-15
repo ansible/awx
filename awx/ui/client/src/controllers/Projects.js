@@ -415,6 +415,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type.value) {
             switch ($scope.scm_type.value) {
                 case 'git':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' +
                         i18n._('Example URLs for GIT SCM include:') +
                         '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
@@ -424,11 +425,13 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                         'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
                     break;
                 case 'svn':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
                         '<li>svn+ssh://servername.example.com/path</li></ul>';
                     break;
                 case 'hg':
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
                         '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
                         '<li>ssh://server.example.com/path</li></ul>' +
@@ -436,7 +439,13 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                         'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
                     break;
+                    case 'insights':
+                        $scope.pathRequired = false;
+                        $scope.scmRequired = false;
+                        $scope.credentialLabel = "Red Hat Insights";
+                        break;
                 default:
+                    $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p> ' + i18n._('URL popover text');
             }
         }
