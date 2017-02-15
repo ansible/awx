@@ -7,7 +7,7 @@
 export default [
     '$scope', '$rootScope', '$state', '$stateParams', '$timeout', '$q', 'Alert', 'ClearScope',
     'ConfigurationService', 'ConfigurationUtils', 'CreateDialog', 'CreateSelect2', 'i18n', 'ParseTypeChange', 'ProcessErrors', 'Store',
-    'Wait', 'configDataResolve',
+    'Wait', 'configDataResolve', 'ToJSON',
     //Form definitions
     'configurationAzureForm',
     'configurationGithubForm',
@@ -25,7 +25,7 @@ export default [
     function(
         $scope, $rootScope, $state, $stateParams, $timeout, $q, Alert, ClearScope,
         ConfigurationService, ConfigurationUtils, CreateDialog, CreateSelect2, i18n, ParseTypeChange, ProcessErrors, Store,
-        Wait, configDataResolve,
+        Wait, configDataResolve, ToJSON,
         //Form definitions
         configurationAzureForm,
         configurationGithubForm,
@@ -363,7 +363,9 @@ export default [
                     if($scope[key] === '') {
                         payload[key] = {};
                     } else {
-                        payload[key] = JSON.parse($scope[key]);
+                        // payload[key] = JSON.parse($scope[key]);
+                        payload[key] = ToJSON($scope.parseType,
+                            $scope[key]);
                     }
                 }
                 else {

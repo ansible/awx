@@ -60,9 +60,11 @@ export default [
         }
 
         var activeForm = function() {
+
             if(!$scope.$parent[formTracker.currentFormName()].$dirty) {
                 authVm.activeAuthForm = authVm.dropdownValue;
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
+                startCodeMirrors();
             } else {
                 var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
                 var title = i18n._('Warning: Unsaved Changes');
@@ -115,28 +117,36 @@ export default [
 
         var authForms = [{
                 formDef: configurationAzureForm,
-                id: 'auth-azure-form'
+                id: 'auth-azure-form',
+                name: 'azure'
             }, {
                 formDef: configurationGithubForm,
-                id: 'auth-github-form'
+                id: 'auth-github-form',
+                name: 'github'
             }, {
                 formDef: configurationGithubOrgForm,
-                id: 'auth-github-org-form'
+                id: 'auth-github-org-form',
+                name: 'github_org'
             }, {
                 formDef: configurationGithubTeamForm,
-                id: 'auth-github-team-form'
+                id: 'auth-github-team-form',
+                name: 'github_team'
             }, {
                 formDef: configurationGoogleForm,
-                id: 'auth-google-form'
+                id: 'auth-google-form',
+                name: 'google_oauth'
             }, {
                 formDef: configurationLdapForm,
-                id: 'auth-ldap-form'
+                id: 'auth-ldap-form',
+                name: 'ldap'
             }, {
                 formDef: configurationRadiusForm,
-                id: 'auth-radius-form'
+                id: 'auth-radius-form',
+                name: 'radius'
             }, {
                 formDef: configurationSamlForm,
-                id: 'auth-saml-form'
+                id: 'auth-saml-form',
+                name: 'saml'
             }, ];
 
         var forms = _.pluck(authForms, 'formDef');
@@ -160,6 +170,27 @@ export default [
             // Disable the save button for system auditors
             form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
+
+        function startCodeMirrors(){
+            // Attach codemirror to fields that need it
+            let form = _.find(authForms, function(form){
+               return form.name === $scope.authVm.activeAuthForm;
+            });
+            _.each(form.formDef.fields, function(field) {
+                // Codemirror balks at empty values so give it one
+                if($scope.$parent[field.name] === null && field.codeMirror) {
+                  $scope.$parent[field.name] = '{}';
+                }
+                if(field.codeMirror) {
+                    ParseTypeChange({
+                       scope: $scope.$parent,
+                       variable: field.name,
+                       parse_variable: 'parseType',
+                       field_id: form.formDef.name + '_' + field.name
+                     });
+                }
+            });
+        }
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
@@ -195,24 +226,7 @@ export default [
         var dropdownRendered = false;
 
         $scope.$on('populated', function() {
-            // Attach codemirror to fields that need it
-            _.each(authForms, function(form) {
-                    _.each(form.formDef.fields, function(field) {
-                        // Codemirror balks at empty values so give it one
-                        if($scope.$parent[field.name] === null && field.codeMirror) {
-                          $scope.$parent[field.name] = '{}';
-                        }
-                        if(field.codeMirror) {
-                            ParseTypeChange({
-                               scope: $scope.$parent,
-                               variable: field.name,
-                               parse_variable: 'parseType',
-                               field_id: form.formDef.name + '_' + field.name,
-                               readonly: true,
-                             });
-                        }
-                    });
-            });
+            startCodeMirrors();
 
             // Create Select2 fields
             var opts = [];
