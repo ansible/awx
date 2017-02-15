@@ -80,6 +80,12 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         break;
                     case 'role':
                         throw {name : 'NotImplementedError', message : 'role object management is not consolidated to a single UI view'};
+                    case 'job_template':
+                        url += `templates/job_template/${obj.id}`;
+                        break;
+                    case 'workflow_job_template':
+                        url += `templates/workflow_job_template/${obj.id}`;
+                        break;
                     default:
                         url += resource + 's/' + obj.id + '/';
                 }
