@@ -16,7 +16,7 @@ class DjangoSearchModel {
             return relatedSearchField.replace(/\__search$/, "");
         }
         this.name = name;
-		this.searchExamples = [];
+        this.searchExamples = [];
         this.related = _.map(relatedSearchFields, trimRelated);
         // Remove "object" type fields from this list
         for (var key in baseFields) {
