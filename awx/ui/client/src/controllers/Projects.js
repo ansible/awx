@@ -443,7 +443,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                         $scope.pathRequired = false;
                         $scope.scmRequired = false;
                         $scope.credentialLabel = "Red Hat Insights";
-                        break;
+                    break;
                 default:
                     $scope.credentialLabel = "SCM Credential";
                     $scope.urlPopover = '<p> ' + i18n._('URL popover text');
@@ -726,6 +726,11 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                         '<p>' + i18n.sprintf(i18n._('%sNote:%s Mercurial does not support password authentication for SSH. ' +
                         'Do not put the username and key in the URL. ' +
                         'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
+                    break;
+                    case 'insights':
+                        $scope.pathRequired = false;
+                        $scope.scmRequired = false;
+                        $scope.credentialLabel = "Red Hat Insights";
                     break;
                 default:
                     $scope.urlPopover = '<p> ' + i18n._('URL popover text');

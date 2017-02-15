@@ -127,7 +127,6 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 subForm: 'sourceSubForm',
             },
             credential: {
-                // label: i18n._('SCM Credential'),
                 labelBind: 'credentialLabel',
                 type: 'lookup',
                 basePath: 'credentials',
