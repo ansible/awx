@@ -298,6 +298,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     $scope.job.finished = mungedEvent.finishedTime;
                     $scope.jobFinished = true;
                     $scope.followTooltip = "Jump to last line of standard out.";
+                    if ($scope.followEngaged) {
+                        if (!$scope.followScroll) {
+                            $scope.followScroll = function() {
+                                $log.error("follow scroll undefined, standard out directive not loaded yet?");
+                            };
+                        }
+                        $scope.followScroll();
+                    }
                 }
 
                 if (change === 'countFinished') {
@@ -412,17 +420,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     // container
                     $(".JobResultsStdOut-followAnchor")
                         .appendTo(".JobResultsStdOut-stdoutContainer");
-
-                    // if follow is engaged,
-                    // scroll down to the followAnchor
-                    if ($scope.followEngaged) {
-                        if (!$scope.followScroll) {
-                            $scope.followScroll = function() {
-                                $log.error("follow scroll undefined, standard out directive not loaded yet?");
-                            };
-                        }
-                        $scope.followScroll();
-                    }
                 }
             });
 
@@ -591,10 +588,25 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var buffer = [];
 
     var processBuffer = function() {
-        for (let i = 0; i < 20; i++) {
+        var follow = function() {
+            // if follow is engaged,
+            // scroll down to the followAnchor
+            if ($scope.followEngaged) {
+                if (!$scope.followScroll) {
+                    $scope.followScroll = function() {
+                        $log.error("follow scroll undefined, standard out directive not loaded yet?");
+                    };
+                }
+                $scope.followScroll();
+            }
+        }
+
+        for (let i = 0; i < 4; i++) {
             processEvent(buffer[i]);
             buffer.splice(i, 1);
         }
+
+        follow();
     };
 
     var bufferInterval;
