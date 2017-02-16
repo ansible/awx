@@ -365,25 +365,30 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
                             var putAfter;
                             var isDup = false;
-                            $(".header_" + putIn + ",." + putIn)
-                                .each((i, v) => {
-                                    if (angular.element(v).scope()
-                                        .event.start_line < mungedEvent
-                                        .start_line) {
-                                        putAfter = v;
-                                    } else if (angular.element(v).scope()
-                                        .event.start_line === mungedEvent
-                                        .start_line) {
-                                        isDup = true;
-                                        return false;
-                                    } else if (angular.element(v).scope()
-                                        .event.start_line > mungedEvent
-                                        .start_line) {
-                                        return false;
-                                    }  else {
-                                        appendToBottom(mungedEvent);
-                                    }
-                                });
+
+                            if ($(".header_" + putIn + ",." + putIn).length === 0) {
+                                appendToBottom(mungedEvent);
+                            } else {
+                                $(".header_" + putIn + ",." + putIn)
+                                    .each((i, v) => {
+                                        if (angular.element(v).scope()
+                                            .event.start_line < mungedEvent
+                                            .start_line) {
+                                            putAfter = v;
+                                        } else if (angular.element(v).scope()
+                                            .event.start_line === mungedEvent
+                                            .start_line) {
+                                            isDup = true;
+                                            return false;
+                                        } else if (angular.element(v).scope()
+                                            .event.start_line > mungedEvent
+                                            .start_line) {
+                                            return false;
+                                        }  else {
+                                            appendToBottom(mungedEvent);
+                                        }
+                                    });
+                            }
 
                             if (!isDup) {
                                 $(putAfter).after($compile(mungedEvent
