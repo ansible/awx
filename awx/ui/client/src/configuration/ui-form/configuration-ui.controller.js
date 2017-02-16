@@ -71,7 +71,8 @@
              id: 'configure-ui-form',
              mode: 'edit',
              scope: $scope.$parent,
-             related: true
+             related: true,
+             noPanel: true
          });
 
          // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching

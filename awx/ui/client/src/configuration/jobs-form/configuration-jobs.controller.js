@@ -68,7 +68,8 @@ export default [
             id: 'configure-jobs-form',
             mode: 'edit',
             scope: $scope.$parent,
-            related: false
+            related: false,
+            noPanel: true
         });
 
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
