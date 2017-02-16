@@ -358,6 +358,9 @@ class BaseAccess(object):
             # Grab the answer from the cache, if available
             if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
                 user_capabilities[display_method] = obj.capabilities_cache[display_method]
+                if self.user.is_superuser and not user_capabilities[display_method]:
+                    # Cache override for models with bad orphaned state
+                    user_capabilities[display_method] = True
                 continue
 
             # Aliases for going form UI language to API language

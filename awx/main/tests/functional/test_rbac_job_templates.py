@@ -227,11 +227,19 @@ def test_job_template_access_org_admin(jt_objects, rando):
 
 
 @pytest.mark.django_db
-def test_orphan_JT_readable_by_system_auditor(job_template, system_auditor):
-    assert system_auditor.is_system_auditor
-    assert job_template.project is None
-    access = JobTemplateAccess(system_auditor)
-    assert access.can_read(job_template)
+class TestOrphanJobTemplate:
+
+    def test_orphan_JT_readable_by_system_auditor(self, job_template, system_auditor):
+        assert system_auditor.is_system_auditor
+        assert job_template.project is None
+        access = JobTemplateAccess(system_auditor)
+        assert access.can_read(job_template)
+
+    def test_system_admin_orphan_capabilities(self, job_template, admin_user):
+        job_template.capabilities_cache = {'edit': False}
+        access = JobTemplateAccess(admin_user)
+        capabilities = access.get_user_capabilities(job_template, method_list=['edit'])
+        assert capabilities['edit']
 
 
 @pytest.mark.django_db
