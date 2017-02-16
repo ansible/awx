@@ -39,8 +39,8 @@ describe('Service: QuerySet', () => {
         it('should encode parameters properly', () =>{
             expect(QuerySet.encodeParam({term: "name:foo", searchTerm: true})).toEqual({"name__icontains_DEFAULT" : "foo"});
             expect(QuerySet.encodeParam({term: "-name:foo", searchTerm: true})).toEqual({"not__name__icontains_DEFAULT" : "foo"});
-            expect(QuerySet.encodeParam({term: "name:'foo bar'", searchTerm: true})).toEqual({"name__icontains_DEFAULT" : "'foo bar'"});
-            expect(QuerySet.encodeParam({term: "-name:'foo bar'", searchTerm: true})).toEqual({"not__name__icontains_DEFAULT" : "'foo bar'"});
+            expect(QuerySet.encodeParam({term: "name:'foo bar'", searchTerm: true})).toEqual({"name__icontains_DEFAULT" : "'foo%20bar'"});
+            expect(QuerySet.encodeParam({term: "-name:'foo bar'", searchTerm: true})).toEqual({"not__name__icontains_DEFAULT" : "'foo%20bar'"});
             expect(QuerySet.encodeParam({term: "organization:foo", relatedSearchTerm: true})).toEqual({"organization__search_DEFAULT" : "foo"});
             expect(QuerySet.encodeParam({term: "-organization:foo", relatedSearchTerm: true})).toEqual({"not__organization__search_DEFAULT" : "foo"});
             expect(QuerySet.encodeParam({term: "organization.name:foo", relatedSearchTerm: true})).toEqual({"organization__name" : "foo"});
