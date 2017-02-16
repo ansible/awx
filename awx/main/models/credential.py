@@ -345,6 +345,9 @@ class Credential(PasswordFieldsModel, CommonModelNameNotUnique, ResourceMixin):
         if self.has_encrypted_ssh_key_data and not self.ssh_key_unlock:
             raise ValidationError(_('SSH key unlock must be set when SSH key '
                                     'is encrypted.'))
+        if not self.has_encrypted_ssh_key_data and self.ssh_key_unlock:
+            raise ValidationError(_('SSH key unlock should not be set when '
+                                    'SSH key is not encrypted.'))
         return self.ssh_key_unlock
 
     def clean(self):
