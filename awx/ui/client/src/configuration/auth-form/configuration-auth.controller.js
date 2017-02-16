@@ -219,7 +219,8 @@ export default [
                 id: form.id,
                 mode: 'edit',
                 scope: $scope.$parent,
-                related: true
+                related: true,
+                noPanel: true
             });
         });
 
