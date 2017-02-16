@@ -188,6 +188,7 @@ export default [
                        parse_variable: 'parseType',
                        field_id: form.formDef.name + '_' + field.name
                      });
+                     $scope.parseTypeChange('parseType', field.name);
                 }
             });
         }
