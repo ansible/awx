@@ -4,11 +4,11 @@
     <div id="group-modal-dialog" style="display: none;">
         <ul id="group_tabs" class="nav nav-tabs">
             <li class="active"><a id="properties_link" ng-click="toggleTab($event, 'properties_link', 'group_tabs')"
-                    href="#properties-tab" data-toggle="tab">Properties</a></li>
+                    href="#properties-tab" data-toggle="tab" translate>Properties</a></li>
             <li ng-show="showSourceTab"><a id="source_link" ng-click="toggleTab($event, 'source_link', 'group_tabs')"
-                    href="#sources-tab" data-toggle="tab">Source</a></li>
+                    href="#sources-tab" data-toggle="tab" translate>Source</a></li>
             <li ng-show="showSchedulesTab"><a id="schedules_link" ng-click="toggleTab($event, 'schedules_link', 'group_tabs')"
-                    href="#schedules-tab" data-toggle="tab">Schedule</a></li>
+                    href="#schedules-tab" data-toggle="tab" translate>Schedule</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" id="properties-tab"></div>
@@ -26,10 +26,10 @@
                         <div id="schedules-detail"></div>
                     </div>
                     <div id="schedules-buttons">
-                        <a id="schedules-flip-link" ng-show="formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-search-plus"></i> View Details</a>
-                        <a id="schedules-flip-link" ng-show="!formShowing" ng-click="showScheduleDetail()" href=""><i class="fa fa-arrow-circle-left"></i> Back to options</a>
-                        <button type="button" class="btn btn-default btn-sm" id="reset-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
-                        <button type="button" class="btn btn-primary btn-sm" id="save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button>
+                        <a id="schedules-flip-link" ng-show="formShowing" ng-click="showScheduleDetail()" href="" translate><i class="fa fa-search-plus"></i> View Details</a>
+                        <a id="schedules-flip-link" ng-show="!formShowing" ng-click="showScheduleDetail()" href="" translate><i class="fa fa-arrow-circle-left"></i> Back to options</a>
+                        <button type="button" class="btn btn-default btn-sm" id="reset-button" ng-click="cancelScheduleForm()" translate><i class="fa fa-times"></i> Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="save-button" ng-click="saveScheduleForm()" translate><i class="fa fa-check"></i> Save</button>
                     </div>
                 </div>
             </div>
