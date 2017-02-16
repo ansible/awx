@@ -128,16 +128,14 @@ export default
                                 $state.go(state, {id: job}, {reload:true});
                             };
 
-                            if(base === 'jobs'){
+                            if(_.has(data, 'job')) {
+                                goToJobDetails('jobDetail');
+                            } else if(base === 'jobs'){
                                 if(scope.clearDialog) {
                                     scope.clearDialog();
                                 }
                                 return;
-                            }
-                            else if(_.has(data, 'job')) {
-                                goToJobDetails('jobDetail');
-                            }
-                            else if(data.type && data.type === 'workflow_job') {
+                            } else if(data.type && data.type === 'workflow_job') {
                                 job = data.id;
                                 goToJobDetails('workflowResults');
                             }
