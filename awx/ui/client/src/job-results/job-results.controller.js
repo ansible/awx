@@ -599,7 +599,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 }
                 $scope.followScroll();
             }
-        }
+        };
 
         for (let i = 0; i < 4; i++) {
             processEvent(buffer[i]);
