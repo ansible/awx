@@ -662,9 +662,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 data.status === "error" ||
                 data.status === "canceled") {
                     workflowResultsService.destroyTimer(runTimeElapsedTimer);
-                    if (bufferInterval) {
-                        clearInterval(bufferInterval);
-                    }
+
                     // When the fob is finished retrieve the job data to
                     // correct anything that was out of sync from the job run
                     jobResultsService.getJobData($scope.job.id).then(function(data){
