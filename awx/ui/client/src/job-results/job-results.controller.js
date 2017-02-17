@@ -443,11 +443,11 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     $scope.isOld = 0;
     $scope.showLegacyJobErrorMessage = false;
 
-    $scope.$watch('isOld', function (val) {
+    toDestroy.push($scope.$watch('isOld', function (val) {
         if (val >= 2) {
             $scope.showLegacyJobErrorMessage = true;
         }
-    });
+    }));
 
     // get header and recap lines
     var skeletonPlayCount = 0;
