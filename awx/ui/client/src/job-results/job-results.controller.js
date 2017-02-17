@@ -437,6 +437,18 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     $scope.playCount = 0;
     $scope.taskCount = 0;
 
+
+    // used to show a message to just download for old jobs
+    // remove in 3.2.0
+    $scope.isOld = 0;
+    $scope.showLegacyJobErrorMessage = false;
+
+    toDestroy.push($scope.$watch('isOld', function (val) {
+        if (val >= 2) {
+            $scope.showLegacyJobErrorMessage = true;
+        }
+    }));
+
     // get header and recap lines
     var skeletonPlayCount = 0;
     var skeletonTaskCount = 0;
@@ -444,6 +456,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         jobResultsService.getEvents(url)
             .then(events => {
                 events.results.forEach(event => {
+                    if (event.start_line === 0 && event.end_line === 0) {
+                        $scope.isOld++;
+                    }
                     // get the name in the same format as the data
                     // coming over the websocket
                     event.event_name = event.event;
