@@ -1,5 +1,5 @@
 <div class="Paginate page-row" ng-hide="dataset.count < 1">
-    <div class="Paginate-wrapper" ng-hide="dataset.count < pageSize">
+    <div class="Paginate-wrapper" ng-hide="dataset.count <= pageSize">
         <ul class="Paginate-controls pagination">
             <!-- first -->
             <li class="Paginate-controls--first Paginate-controls--item" ng-hide="pageRange.length < 10 || {{current}} === 1">

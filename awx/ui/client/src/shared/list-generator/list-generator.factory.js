@@ -171,24 +171,23 @@ export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
 
                 if (options.mode !== 'lookup' && (list.well === undefined || list.well)) {
                     html += `<div class="${list.name}List List-well">`;
-                }
+                    // List actions
+                    html += "<div class=\"List-actionHolder\">";
+                    html += "<div class=\"List-actions\">";
+                    html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
 
-                // List actions
-                html += "<div class=\"List-actionHolder\">";
-                html += "<div class=\"List-actions\">";
-                html += `<div ng-include="'${templateUrl('shared/list-generator/list-actions')}'">`;
+                    for (action in list.actions) {
+                        list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                    }
 
-                for (action in list.actions) {
-                    list.actions[action] = _.defaults(list.actions[action], { dataPlacement: "top" });
+                    html += "</div>";
+                    if (list.toolbarAuxAction) {
+                        html += `<div class="List-auxAction">${list.toolbarAuxAction}</div>`;
+                    }
+                    html += "\n</div>";
+                    html += "</div>";
+                    // End list actions
                 }
-
-                html += "</div>";
-                if (list.toolbarAuxAction) {
-                    html += `<div class="List-auxAction">${list.toolbarAuxAction}</div>`;
-                }
-                html += "\n</div>";
-                html += "</div>";
-                // End list actions
 
                 html += (list.searchRowActions) ? "<div class='row'><div class=\"col-lg-8 col-md-8 col-sm-8 col-xs-12\">" : "";
                 if (list.searchRowActions && !list.searchSize) {
