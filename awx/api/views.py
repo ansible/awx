@@ -44,7 +44,6 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
 from rest_framework import status
-from rest_framework import filters
 
 # Django REST Framework YAML
 from rest_framework_yaml.parsers import YAMLParser
@@ -3152,8 +3151,6 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     new_in_310 = True
-    filter_backends = (filters.OrderingFilter,)
-    order_fields = ('id', 'job', 'workflow_job', 'unified_job_template', 'created', 'modified')
     ordering = ('id',)
 
 
