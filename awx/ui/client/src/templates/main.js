@@ -452,6 +452,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         WorkflowMakerJobTemplateList: ['TemplateList',
                             (TemplateList) => {
                                 let list = _.cloneDeep(TemplateList);
+                                delete list.actions;
                                 delete list.fields.type;
                                 delete list.fields.description;
                                 delete list.fields.smart_status;
