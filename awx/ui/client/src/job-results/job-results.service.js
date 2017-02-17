@@ -41,32 +41,31 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                 }
             });
 
-            // use the hosts data populate above to get the count
-            var count = {
-                ok : _.filter(hosts, function(o){
-                    return !o.failures && !o.changed && o.ok > 0;
-                }),
-                skipped : _.filter(hosts, function(o){
-                    return o.skipped > 0;
-                }),
-                unreachable : _.filter(hosts, function(o){
-                    return o.dark > 0;
-                }),
-                failures : _.filter(hosts, function(o){
-                    return o.failures > 0;
-                }),
-                changed : _.filter(hosts, function(o){
-                    return o.changed > 0;
-                })
+            var total_hosts_by_state = {
+                ok: 0,
+                skipped: 0,
+                unreachable: 0,
+                failures: 0,
+                changed: 0
             };
 
-            // turn the count into an actual count, rather than a list of host
-            // names
-            Object.keys(count).forEach(key => {
-                count[key] = count[key].length;
+            // each host belongs in at most *one* of these states depending on
+            // the state of its tasks
+            _.each(hosts, function(host) {
+                if (host.dark > 0){
+                    total_hosts_by_state.unreachable++;
+                } else if (host.failures > 0){
+                    total_hosts_by_state.failures++;
+                } else if (host.changed > 0){
+                    total_hosts_by_state.changed++;
+                } else if (host.ok > 0){
+                    total_hosts_by_state.ok++;
+                } else if (host.skipped > 0){
+                    total_hosts_by_state.skipped++;
+                }
             });
 
-            return count;
+            return total_hosts_by_state;
         },
         // rest call to grab previously complete job_events
         getEvents: function(url) {
