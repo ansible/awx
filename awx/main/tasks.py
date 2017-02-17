@@ -833,6 +833,7 @@ class RunJob(BaseTask):
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
