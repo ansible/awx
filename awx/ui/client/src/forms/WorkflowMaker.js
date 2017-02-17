@@ -34,7 +34,7 @@ export default
                     label: i18n._('Type'),
                     type: 'radio_group',
                     ngShow: 'selectedTemplate && edgeFlags.showTypeOptions',
-                    ngDisabled: '!canAddWorkflowJobTemplate',
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     options: [
                         {
                             label: i18n._('On&nbsp;Success'),
@@ -70,7 +70,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_credential_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate',
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_credential_on_launch'
                     }
@@ -90,7 +90,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_inventory_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate',
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_inventory_on_launch'
                     }
@@ -111,7 +111,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_job_type_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate',
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)',
                     awRequiredWhen: {
                         reqExpression: 'selectedTemplate && selectedTemplate.ask_job_type_on_launch'
                     }
@@ -128,7 +128,7 @@ export default
                     dataPlacement: 'right',
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_limit_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate'
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 job_tags: {
                     label: i18n._('Job Tags'),
@@ -143,7 +143,7 @@ export default
                     dataPlacement: "right",
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_tags_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate'
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 skip_tags: {
                     label: i18n._('Skip Tags'),
@@ -158,22 +158,22 @@ export default
                     dataPlacement: "right",
                     dataContainer: "body",
                     ngShow: "selectedTemplate.ask_skip_tags_on_launch",
-                    ngDisabled: '!canAddWorkflowJobTemplate'
+                    ngDisabled: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 }
             },
             buttons: {
                 cancel: {
                     ngClick: 'cancelNodeForm()',
-                    ngShow: 'canAddWorkflowJobTemplate'
+                    ngShow: '($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 close: {
                     ngClick: 'cancelNodeForm()',
-                    ngShow: '!canAddWorkflowJobTemplate'
+                    ngShow: '!($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 },
                 select: {
                     ngClick: 'saveNodeForm()',
                     ngDisabled: "workflow_maker_form.$invalid || !selectedTemplate",
-                    ngShow: 'canAddWorkflowJobTemplate'
+                    ngShow: '($parent.workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 }
             }
         };}])
