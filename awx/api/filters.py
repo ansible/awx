@@ -9,7 +9,7 @@ from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ForeignObjectRel
+from django.db.models.fields.related import ForeignObjectRel, ManyToManyField
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_text
 
@@ -129,7 +129,7 @@ class FieldLookupBackend(BaseFilterBackend):
             return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
-        elif isinstance(field, ForeignObjectRel):
+        elif isinstance(field, (ForeignObjectRel, ManyToManyField)):
             return self.to_python_related(value)
         else:
             return field.to_python(value)
