@@ -11,6 +11,7 @@ export default [ '$state','moment', '$timeout', '$window',
         scope: {
             treeData: '=',
             canAddWorkflowJobTemplate: '=',
+            workflowJobTemplateObj: '=',
             addNode: '&',
             editNode: '&',
             deleteNode: '&',
@@ -370,7 +371,7 @@ export default [ '$state','moment', '$timeout', '$window',
                                 .attr("cx", nodeW)
                                 .attr("r", 10)
                                 .attr("class", "addCircle nodeCircle")
-                                .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
+                                .style("display", function(d) { return d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) ? "none" : null; })
                                 .call(add_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -392,7 +393,7 @@ export default [ '$state','moment', '$timeout', '$window',
                                     .size(60)
                                     .type("cross")
                                 )
-                                .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; })
+                                .style("display", function(d) { return d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) ? "none" : null; })
                                 .call(add_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -412,7 +413,7 @@ export default [ '$state','moment', '$timeout', '$window',
                                 .attr("cy", nodeH)
                                 .attr("r", 10)
                                 .attr("class", "removeCircle")
-                                .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                                .style("display", function(d) { return (d.canDelete === false || d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -434,7 +435,7 @@ export default [ '$state','moment', '$timeout', '$window',
                                     .size(60)
                                     .type("cross")
                                 )
-                                .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                                .style("display", function(d) { return (d.canDelete === false || d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                                 .call(remove_node)
                                 .on("mouseover", function(d) {
                                     d3.select("#node-" + d.id)
@@ -549,7 +550,7 @@ export default [ '$state','moment', '$timeout', '$window',
                          })
                          .attr("r", 10)
                          .attr("class", "addCircle linkCircle")
-                         .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                         .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                          .call(add_node_between)
                          .on("mouseover", function(d) {
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
@@ -581,7 +582,7 @@ export default [ '$state','moment', '$timeout', '$window',
                              .size(60)
                              .type("cross")
                          )
-                         .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                         .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                          .call(add_node_between)
                          .on("mouseover", function(d) {
                              d3.select("#link-" + d.source.id + "-" + d.target.id)
@@ -602,16 +603,16 @@ export default [ '$state','moment', '$timeout', '$window',
                     let t = baseSvg.transition();
 
                     t.selectAll(".nodeCircle")
-                        .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; });
+                        .style("display", function(d) { return d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) ? "none" : null; });
 
                     t.selectAll(".nodeAddCross")
-                        .style("display", function(d) { return d.placeholder || scope.canAddWorkflowJobTemplate === false ? "none" : null; });
+                        .style("display", function(d) { return d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) ? "none" : null; });
 
                     t.selectAll(".removeCircle")
-                        .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; });
+                        .style("display", function(d) { return (d.canDelete === false || d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; });
 
                     t.selectAll(".nodeRemoveCross")
-                        .style("display", function(d) { return (d.canDelete === false || d.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; });
+                        .style("display", function(d) { return (d.canDelete === false || d.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; });
 
                     t.selectAll(".linkPath")
                             .attr("class", function(d) {
@@ -636,7 +637,7 @@ export default [ '$state','moment', '$timeout', '$window',
                             });
 
                     t.selectAll(".linkCircle")
-                        .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                        .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                         .attr("cx", function(d) {
                             return (d.source.isStartNode) ? (d.target.y + d.source.y + rootW) / 2 : (d.target.y + d.source.y + nodeW) / 2;
                         })
@@ -645,7 +646,7 @@ export default [ '$state','moment', '$timeout', '$window',
                         });
 
                     t.selectAll(".linkCross")
-                        .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || scope.canAddWorkflowJobTemplate === false) ? "none" : null; })
+                        .style("display", function(d) { return (d.source.placeholder || d.target.placeholder || !(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate)) ? "none" : null; })
                         .attr("transform", function(d) {
                             let translate;
                             if(d.source.isStartNode) {
@@ -778,7 +779,7 @@ export default [ '$state','moment', '$timeout', '$window',
 
             function add_node() {
                 this.on("click", function(d) {
-                    if(scope.canAddWorkflowJobTemplate !== false) {
+                    if(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) {
                         scope.addNode({
                             parent: d,
                             betweenTwoNodes: false
@@ -789,7 +790,7 @@ export default [ '$state','moment', '$timeout', '$window',
 
             function add_node_between() {
                 this.on("click", function(d) {
-                    if(scope.canAddWorkflowJobTemplate !== false) {
+                    if(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) {
                         scope.addNode({
                             parent: d,
                             betweenTwoNodes: true
@@ -800,7 +801,7 @@ export default [ '$state','moment', '$timeout', '$window',
 
             function remove_node() {
                 this.on("click", function(d) {
-                    if(scope.canAddWorkflowJobTemplate !== false) {
+                    if(scope.workflowJobTemplateObj.summary_fields.user_capabilities.edit || scope.canAddWorkflowJobTemplate) {
                         scope.deleteNode({
                             nodeToDelete: d
                         });
