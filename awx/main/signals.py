@@ -199,10 +199,21 @@ def rbac_activity_stream(instance, sender, **kwargs):
                     # Ignore any singleton parents we find. If the parent for the role
                     # matches any of the implicit parents we find, skip recording the activity stream.
                     for ip in implicit_parents:
-                        if '.' not in ip and 'singleton:' not in ip:
-                            ip = instance.content_type.name + "." + ip
-                        if parent == ip:
-                            return
+                        if '.' in ip:
+                            obj = instance.content_object
+                            for next_field in ip.split('.')[:-1]:
+                                obj = getattr(obj, next_field)
+                                if obj is None:
+                                    return
+                            if role == getattr(obj, ip.split('.')[-1]):
+                                return
+                        elif 'singleton:' in ip:
+                            if parent == ip:
+                                return
+                        else:
+                            # Direct field on the content object
+                            if role == getattr(instance.content_object, ip):
+                                return
             else:
                 role = instance
             instance = instance.content_object
