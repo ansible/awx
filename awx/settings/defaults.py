@@ -267,6 +267,7 @@ REST_FRAMEWORK = {
         'awx.api.filters.TypeFilterBackend',
         'awx.api.filters.FieldLookupBackend',
         'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
         'awx.api.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
