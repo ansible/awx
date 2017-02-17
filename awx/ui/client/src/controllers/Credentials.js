@@ -349,7 +349,6 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
             }
         });
 
-        setAskCheckboxes();
         OwnerChange({ scope: $scope });
         $scope.$watch("ssh_key_data", function(val) {
             if (val === "" || val === null || val === undefined) {
@@ -497,6 +496,8 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
                         break;
                 }
                 $scope.credential_obj = data;
+
+                setAskCheckboxes();
 
                 $scope.$emit('credentialLoaded');
                 Wait('stop');
