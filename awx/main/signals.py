@@ -180,8 +180,16 @@ def rbac_activity_stream(instance, sender, **kwargs):
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents
-                if role is not None and role.content_type is not None:
-                    parent = role.content_type.name + "." + role.role_field
+                if role is not None:
+                    if role.content_type is None:
+                        if role.is_singleton():
+                            parent = 'singleton:' + role.singleton_name
+                        else:
+                            # Ill-defined role, may need additional logic in the
+                            # case of future expansions of the RBAC system
+                            parent = str(role.role_field)
+                    else:
+                        parent = role.content_type.name + "." + role.role_field
                     # Get the list of implicit parents that were defined at the class level.
                     # We have to take this list from the class property to avoid including parents
                     # that may have been added since the creation of the ImplicitRoleField
