@@ -1014,6 +1014,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (field.required) ? "required " : "";
                         html += (field.ngRequired) ? "ng-required=\"" + field.ngRequired +"\"" : "";
+                        html += (field.ngTrim !== undefined) ? "ng-trim=\"" + field.ngTrim +"\"" : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
                         html += (field.awDropFile) ? "aw-drop-file " : "";
                         if(field.awRequiredWhen) {
