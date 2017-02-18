@@ -41,7 +41,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
-analytics_logger = logging.getLogger('awx.analytics.performance.api')
+analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 def get_view_name(cls, suffix=None):

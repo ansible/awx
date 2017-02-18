@@ -81,7 +81,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
             else:
                 data_for_log['facts'] = data
             data_for_log['module_name'] = module_name
-        elif kind == 'performance.api':
+        elif kind == 'performance':
             return raw_data
         return data_for_log
 
