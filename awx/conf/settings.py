@@ -19,6 +19,7 @@ from rest_framework.fields import empty, SkipField
 
 # Tower
 from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.utils.db import get_tower_migration_version
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 
@@ -59,7 +60,10 @@ def _log_database_error():
     try:
         yield
     except (ProgrammingError, OperationalError) as e:
-        logger.warning('Database settings are not available, using defaults (%s)', e, exc_info=True)
+        if get_tower_migration_version() < '310':
+            logger.info('Using default settings until version 3.1 migration.')
+        else:
+            logger.warning('Database settings are not available, using defaults (%s)', e, exc_info=True)
     finally:
         pass
 
