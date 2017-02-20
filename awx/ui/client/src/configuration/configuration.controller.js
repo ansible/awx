@@ -295,9 +295,11 @@ export default [
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
-                    if(key === "AD_HOC_COMMANDS"){
-                        $scope.AD_HOC_COMMANDS = $scope.AD_HOC_COMMANDS.toString();
-                        $scope.$broadcast('adhoc_populated', null, false);
+                    if($scope[key + '_field'].type === "select"){
+                        // We need to re-instantiate the Select2 element
+                        // after resetting the value. Example: 
+                        // `$scope.$broadcast(AD_HOC_COMMANDS_populated)`
+                        $scope.$broadcast(key+'_populated', null, false);
                     }
                     loginUpdate();
                 })

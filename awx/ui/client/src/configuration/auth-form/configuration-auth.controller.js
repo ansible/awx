@@ -227,16 +227,15 @@ export default [
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
 
-        $scope.$on('populated', function() {
-            startCodeMirrors();
 
-            // Create Select2 fields
-            var opts = [];
+
+        function populateLDAPGroupType(flag){
             if($scope.$parent.AUTH_LDAP_GROUP_TYPE !== null) {
-                opts.push({
-                    id: $scope.$parent.AUTH_LDAP_GROUP_TYPE,
-                    text: $scope.$parent.AUTH_LDAP_GROUP_TYPE
-                });
+                $scope.$parent.AUTH_LDAP_GROUP_TYPE = _.find($scope.$parent.AUTH_LDAP_GROUP_TYPE_options, { value: $scope.$parent.AUTH_LDAP_GROUP_TYPE });
+            }
+
+            if(flag !== undefined){
+                dropdownRendered = flag;
             }
 
             if(!dropdownRendered) {
@@ -245,15 +244,17 @@ export default [
                     element: '#configuration_ldap_template_AUTH_LDAP_GROUP_TYPE',
                     multiple: false,
                     placeholder: i18n._('Select group types'),
-                    opts: opts
                 });
-                // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-                // TODO Find better solution for this bug
-                $timeout(function(){
-                    $scope.$parent.configuration_ldap_template_form.$setPristine();
-                }, 1000);
             }
+        }
 
+        $scope.$on('AUTH_LDAP_GROUP_TYPE_populated', function(e, data, flag) {
+            populateLDAPGroupType(flag);
+        });
+
+        $scope.$on('populated', function() {
+            startCodeMirrors();
+            populateLDAPGroupType();
         });
 
         angular.extend(authVm, {
