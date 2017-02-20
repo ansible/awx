@@ -4,7 +4,7 @@
 * All Rights Reserved
 *************************************************/
 
-export default function(){
+export default ['i18n', function(i18n){
     return {
         editTitle: '{{host.name}}',
         name: 'host',
@@ -20,41 +20,50 @@ export default function(){
                 ngClick: 'toggleHostEnabled()',
                 type: 'toggle',
 
-                awToolTip: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
-                "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
-                dataTitle: 'Host Enabled'
+                awToolTip: "<p>" +
+                i18n._("Indicates if a host is available and should be included in running jobs.") +
+                "</p><p>" +
+                i18n._("For hosts that are part of an external inventory, this" +
+                       " flag cannot be changed. It will be set by the inventory" +
+                       " sync process.") +
+                "</p>",
+                dataTitle: i18n._('Host Enabled'),
             }
         },
         fields: {
             name: {
-                label: 'Host Name',
+                label: i18n._('Host Name'),
                 type: 'text',
 
                 value: '{{name}}',
-                awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
+                awPopOver: "<p>" +
+                i18n._("Provide a host name, ip address, or ip address:port. Examples include:") +
+                "</p>" +
                 "<blockquote>myserver.domain.com<br/>" +
                 "127.0.0.1<br />" +
                 "10.1.0.140:25<br />" +
                 "server.example.com:25" +
                 "</blockquote>",
-                dataTitle: 'Host Name',
+                dataTitle: i18n._('Host Name'),
                 dataPlacement: 'right',
                 dataContainer: 'body'
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 type: 'text',
             },
             variables: {
-                label: 'Variables',
+                label: i18n._('Variables'),
                 type: 'textarea',
                 rows: 6,
                 class: 'modal-input-xlarge Form-textArea Form-formGroup--fullWidth',
-                dataTitle: 'Host Variables',
+                dataTitle: i18n._('Host Variables'),
                 dataPlacement: 'right',
                 dataContainer: 'body',
                 default: '---',
-                 awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                 awPopOver: "<p>" +
+                    i18n._("Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.") +
+                    "</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />&emsp;\"somevar\": \"somevalue\",<br />&emsp;\"password\": \"magic\"<br /> }</blockquote>\n" +
                     "YAML:<br />\n" +
@@ -73,4 +82,4 @@ export default function(){
             }
         }
     };
-}
+}];
