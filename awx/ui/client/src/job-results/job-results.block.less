@@ -184,6 +184,11 @@ job-results-standard-out {
     height: ~"calc(100% - 800px)";
     display: flex
 }
+@media screen and (max-width: @breakpoint-md) {
+  job-results-standard-out {
+      height: auto;
+  }
+}
 
 .JobResults-extraVarsHelp {
     margin-left: 10px;
