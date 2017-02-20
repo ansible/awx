@@ -56,6 +56,21 @@ class LogstashFormatter(LogstashFormatterVersion1):
                     adict[name] = subdict
             return adict
 
+        def convert_to_type(t, val):
+            if t is float:
+                val = val[:-1] if val.endswith('s') else val
+                try:
+                    return float(val)
+                except ValueError:
+                    return val
+            elif t is int:
+                try:
+                    return int(val)
+                except ValueError:
+                    return val
+            elif t is str:
+                return val
+
         if kind == 'job_events':
             data.update(data.get('event_data', {}))
             for fd in data:
@@ -82,7 +97,25 @@ class LogstashFormatter(LogstashFormatterVersion1):
                 data_for_log['facts'] = data
             data_for_log['module_name'] = module_name
         elif kind == 'performance':
-            return raw_data
+            request = raw_data['python_objects']['request']
+            response = raw_data['python_objects']['response']
+
+            headers = [
+                (float, 'X-API-Time'),  # may end with an 's' "0.33s"
+                (int, 'X-API-Query-Count'),
+                (float, 'X-API-Query-Time'), # may also end with an 's'
+                (str, 'X-API-Node'),
+            ]
+            data_for_log['x_api'] = { k: convert_to_type(t, response[k]) for (t, k) in headers }
+
+            data_for_log['request'] = {
+                'method': request.method,
+                'path': request.path,
+                'path_info': request.path_info,
+                'query_string': request.META['QUERY_STRING'],
+                'data': request.data,
+            }
+
         return data_for_log
 
     def get_extra_fields(self, record):
