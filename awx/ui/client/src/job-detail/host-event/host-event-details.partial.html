@@ -20,7 +20,7 @@
     </div>
     <div class="HostEvent-field">
         <span class="HostEvent-field--label">CREATED</span>
-        <span class="HostEvent-field--content">{{event.created || "No result found"}}</span>
+        <span class="HostEvent-field--content">{{(event.created | longDate) || "No result found"}}</span>
     </div>
     <div class="HostEvent-field">
         <span class="HostEvent-field--label">PLAY</span>
@@ -43,4 +43,3 @@
         <span class="HostEvent-field--content">{{value}}</span>
     </div>
 </div>
-
