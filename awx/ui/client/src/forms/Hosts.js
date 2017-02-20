@@ -36,6 +36,7 @@ export default
                                " set by the inventory sync process.") +
                         "</p>",
                     dataTitle: i18n._('Host Enabled'),
+                    ngDisabled: 'host.has_inventory_sources'
                 }
             },
             fields: {

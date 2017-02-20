@@ -12,6 +12,9 @@
  			$state.go('^', null, {reload: true});
  		};
  		$scope.toggleHostEnabled = function(){
+			if ($scope.host.has_inventory_sources){
+				return;
+			}
  			$scope.host.enabled = !$scope.host.enabled;
  		};
  		$scope.toggleEnabled = function(){
