@@ -1229,6 +1229,13 @@ class JobTemplateAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, NotificationTemplate):
+            return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
+        return super(JobTemplateAccess, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
 
 class JobAccess(BaseAccess):
     '''
