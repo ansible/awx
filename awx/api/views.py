@@ -2487,7 +2487,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
 
             if survey_item["type"] == "password":
-                if "default" in survey_item and survey_item["default"].startswith('$encrypted$'):
+                if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
                     old_spec = obj.survey_spec
                     for old_item in old_spec['spec']:
                         if old_item['variable'] == survey_item['variable']:
