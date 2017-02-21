@@ -175,6 +175,13 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         return ['project', 'inventorysource', 'systemjobtemplate']
 
     @classmethod
+    def _submodels_with_roles(cls):
+        ujt_classes = [c for c in cls.__subclasses__()
+                       if c._meta.model_name not in ['inventorysource', 'systemjobtemplate']]
+        ct_dict = ContentType.objects.get_for_models(*ujt_classes)
+        return [ct.id for ct in ct_dict.values()]
+
+    @classmethod
     def accessible_pk_qs(cls, accessor, role_field):
         '''
         A re-implementation of accessible pk queryset for the "normal" unified JTs.
@@ -184,12 +191,8 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique, Notificatio
         # do not use this if in a subclass
         if cls != UnifiedJobTemplate:
             return super(UnifiedJobTemplate, cls).accessible_pk_qs(accessor, role_field)
-        ujt_names = [c.__name__.lower() for c in cls.__subclasses__()
-                     if c.__name__.lower() not in ['inventorysource', 'systemjobtemplate']]
-        subclass_content_types = list(ContentType.objects.filter(
-            model__in=ujt_names).values_list('id', flat=True))
-
-        return ResourceMixin._accessible_pk_qs(cls, accessor, role_field, content_types=subclass_content_types)
+        return ResourceMixin._accessible_pk_qs(
+            cls, accessor, role_field, content_types=cls._submodels_with_roles())
 
     def _perform_unique_checks(self, unique_checks):
         # Handle the list of unique fields returned above. Replace with an
