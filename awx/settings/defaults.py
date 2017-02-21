@@ -432,7 +432,8 @@ CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
-        'schedule': timedelta(seconds=30)
+        'schedule': timedelta(seconds=30),
+        'options': {'expires': 20,}
     },
     'admin_checks': {
         'task': 'awx.main.tasks.run_administrative_checks',
@@ -444,7 +445,8 @@ CELERYBEAT_SCHEDULE = {
     },
     'cluster_heartbeat': {
         'task': 'awx.main.tasks.cluster_node_heartbeat',
-        'schedule': timedelta(seconds=60)
+        'schedule': timedelta(seconds=60),
+        'options': {'expires': 50,}
     },
     'purge_stdout_files': {
         'task': 'awx.main.tasks.purge_old_stdout_files',
@@ -452,11 +454,13 @@ CELERYBEAT_SCHEDULE = {
     },
     'task_manager': {
         'task': 'awx.main.scheduler.tasks.run_task_manager',
-        'schedule': timedelta(seconds=20)
+        'schedule': timedelta(seconds=20),
+        'options': {'expires': 20,}
     },
     'task_fail_inconsistent_running_jobs': {
         'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
-        'schedule': timedelta(seconds=30)
+        'schedule': timedelta(seconds=30),
+        'options': {'expires': 20,}
     },
 }
 
