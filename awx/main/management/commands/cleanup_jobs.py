@@ -13,12 +13,14 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import (
-    Job, AdHocCommand, ProjectUpdate, InventorySource, InventoryUpdate,
-    SystemJob, WorkflowJob, Notification, Group, Host
+    Job, AdHocCommand, ProjectUpdate, InventoryUpdate,
+    SystemJob, WorkflowJob, Notification
 )
 from awx.main.signals import ( # noqa
     emit_update_inventory_on_created_or_deleted,
-    emit_update_inventory_computed_fields
+    emit_update_inventory_computed_fields,
+    disable_activity_stream,
+    disable_computed_fields
 )
 from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
@@ -227,28 +229,12 @@ class Command(NoArgsCommand):
                 deleted += 1
         return skipped, deleted
 
-    def disable_job_signals(self):
-        sigstat = []
-        sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
-        sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
-        sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
-        sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
-        sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through))
-        sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through))
-        sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through))
-        sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through))
-        sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
-        sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
-        sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
-        sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
-
     @transaction.atomic
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
         self.days = int(options.get('days', 90))
         self.dry_run = bool(options.get('dry_run', False))
-        self.disable_job_signals()
         try:
             self.cutoff = now() - datetime.timedelta(days=self.days)
         except OverflowError:
@@ -261,10 +247,11 @@ class Command(NoArgsCommand):
                 models_to_cleanup.add(m)
         if not models_to_cleanup:
             models_to_cleanup.update(model_names)
-        for m in model_names:
-            if m in models_to_cleanup:
-                skipped, deleted = getattr(self, 'cleanup_%s' % m)()
-                if self.dry_run:
-                    self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
-                else:
-                    self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)
+        with disable_activity_stream(), disable_computed_fields():
+            for m in model_names:
+                if m in models_to_cleanup:
+                    skipped, deleted = getattr(self, 'cleanup_%s' % m)()
+                    if self.dry_run:
+                        self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
+                    else:
+                        self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)

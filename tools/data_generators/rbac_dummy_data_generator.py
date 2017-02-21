@@ -35,16 +35,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # no
 django.setup() # noqa
 
 
-from django.contrib.auth.models import User # noqa
 from django.db import transaction # noqa
 
 # awx
 from awx.main.models import * # noqa
 from awx.main.signals import ( # noqa
-    emit_update_inventory_on_created_or_deleted,
-    emit_update_inventory_computed_fields
+    disable_activity_stream,
+    disable_computed_fields
 )
-from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
 option_list = [
@@ -194,32 +192,13 @@ def mock_computed_fields(self, **kwargs):
 PrimordialModel.save = mock_save
 
 
-sigstat = []
-sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
-sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host))
-sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
-sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group))
-sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through))
-sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through))
-sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through))
-sigstat.append(m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through))
-sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
-sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource))
-sigstat.append(post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
-sigstat.append(post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job))
-
-print ' status of signal disconnects '
-print ' (True means successful disconnect)'
-print str(sigstat)
-
-
 startTime = datetime.now()
 
 
 try:
 
     with transaction.atomic():
-        with batch_role_ancestor_rebuilding():
+        with batch_role_ancestor_rebuilding(), disable_computed_fields():
             admin, created      = User.objects.get_or_create(username = 'admin', is_superuser=True)
             if created:
                 admin.is_superuser = True
@@ -713,7 +692,7 @@ try:
                     if j == n / MAX_BULK_CREATE:
                         # on final pass, create the remainder
                         n_subgroup = n % MAX_BULK_CREATE
-                    sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j))
+                    sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j + 1))
                     sys.stdout.flush()
                     JobEvent.objects.bulk_create([
                         JobEvent(
