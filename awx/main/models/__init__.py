@@ -42,7 +42,7 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 
 
 # Add custom methods to User model for permissions checks.
-from django.contrib.auth.models import User # noqa
+from django.contrib.auth.models import User  # noqa
 from awx.main.access import * # noqa
 
 
@@ -128,3 +128,6 @@ activity_stream_registrar.connect(User)
 activity_stream_registrar.connect(WorkflowJobTemplate)
 activity_stream_registrar.connect(WorkflowJobTemplateNode)
 activity_stream_registrar.connect(WorkflowJob)
+
+# prevent API filtering on certain Django-supplied sensitive fields
+prevent_search(User._meta.get_field('password'))

@@ -220,12 +220,13 @@ class AuthToken(BaseModel):
         app_label = 'main'
 
     key = models.CharField(max_length=40, primary_key=True)
-    user = models.ForeignKey('auth.User', related_name='auth_tokens',
-                             on_delete=models.CASCADE)
+    user = prevent_search(models.ForeignKey('auth.User',
+                          related_name='auth_tokens', on_delete=models.CASCADE))
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     expires = models.DateTimeField(default=tz_now)
-    request_hash = models.CharField(max_length=40, blank=True, default='')
+    request_hash = prevent_search(models.CharField(max_length=40, blank=True,
+                                                   default=''))
     reason = models.CharField(
         max_length=1024,
         blank=True,

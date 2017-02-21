@@ -89,7 +89,8 @@ class FieldLookupBackend(BaseFilterBackend):
         # those lookups combined with request.user.get_queryset(Model) to make
         # sure user cannot query using objects he could not view.
         new_parts = []
-        for n, name in enumerate(parts[:-1]):
+
+        for name in parts[:-1]:
             # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
             if model._meta.object_name in ('Project', 'InventorySource'):
                 name = {
@@ -111,6 +112,10 @@ class FieldLookupBackend(BaseFilterBackend):
                 field = model._meta.pk
             else:
                 field = model._meta.get_field_by_name(name)[0]
+                if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
+                    raise PermissionDenied('Filtering on %s is not allowed.' % name)
+                elif getattr(field, '__prevent_search__', False):
+                    raise PermissionDenied('Filtering on %s is not allowed.' % name)
             model = getattr(field, 'related_model', None) or field.model
 
         if parts:

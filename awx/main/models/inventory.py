@@ -1284,11 +1284,11 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         unique_together = [('name', 'organization')]
         ordering = ('name',)
 
-    script = models.TextField(
+    script = prevent_search(models.TextField(
         blank=True,
         default='',
         help_text=_('Inventory script contents'),
-    )
+    ))
     organization = models.ForeignKey(
         'Organization',
         related_name='custom_inventory_scripts',
