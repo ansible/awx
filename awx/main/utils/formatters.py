@@ -107,7 +107,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
                 (float, 'X-API-Query-Time'), # may also end with an 's'
                 (str, 'X-API-Node'),
             ]
-            data_for_log['x_api'] = { k: convert_to_type(t, response[k]) for (t, k) in headers }
+            data_for_log['x_api'] = {k: convert_to_type(t, response[k]) for (t, k) in headers}
 
             data_for_log['request'] = {
                 'method': request.method,

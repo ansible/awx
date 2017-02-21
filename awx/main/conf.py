@@ -2,7 +2,6 @@
 import json
 import logging
 import os
-import uuid
 
 # Django
 from django.utils.translation import ugettext_lazy as _
