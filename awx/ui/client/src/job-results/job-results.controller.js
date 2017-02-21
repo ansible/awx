@@ -668,7 +668,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     if (statusSocket[0].job_status) {
         $scope.job_status = statusSocket[0].job_status;
     }
-    if ($scope.job_status === "running") {
+    if ($scope.job_status === "running" && !$scope.job.elapsed) {
         runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
     }
 
