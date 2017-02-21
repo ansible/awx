@@ -13,6 +13,7 @@ from django.db.models.fields.related import ForeignObjectRel, ManyToManyField, F
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import force_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -107,15 +108,15 @@ class FieldLookupBackend(BaseFilterBackend):
                 new_parts.append(name)
 
             if name in getattr(model, 'PASSWORD_FIELDS', ()):
-                raise PermissionDenied('Filtering on password fields is not allowed.')
+                raise PermissionDenied(_('Filtering on password fields is not allowed.'))
             elif name == 'pk':
                 field = model._meta.pk
             else:
                 field = model._meta.get_field_by_name(name)[0]
                 if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
-                    raise PermissionDenied('Filtering on %s is not allowed.' % name)
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 elif getattr(field, '__prevent_search__', False):
-                    raise PermissionDenied('Filtering on %s is not allowed.' % name)
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
             model = getattr(field, 'related_model', None) or field.model
 
         if parts:
