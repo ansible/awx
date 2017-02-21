@@ -35,18 +35,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "awx.settings.development") # no
 django.setup() # noqa
 
 
-from django.contrib.auth.models import User # noqa
 from django.db import transaction # noqa
 
 # awx
 from awx.main.models import * # noqa
 from awx.main.signals import ( # noqa
-    emit_update_inventory_on_created_or_deleted,
-    emit_update_inventory_computed_fields,
     disable_activity_stream,
     disable_computed_fields
 )
-from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
 option_list = [
@@ -696,7 +692,7 @@ try:
                     if j == n / MAX_BULK_CREATE:
                         # on final pass, create the remainder
                         n_subgroup = n % MAX_BULK_CREATE
-                    sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j))
+                    sys.stdout.write('\r   Creating %d job events for job %d, subgroup: %d' % (n, job.id, j + 1))
                     sys.stdout.flush()
                     JobEvent.objects.bulk_create([
                         JobEvent(
