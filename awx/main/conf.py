@@ -315,12 +315,12 @@ register(
     category_slug='logging',
 )
 register(
-    'LOG_TOWER_UUID',
+    'LOG_AGGREGATOR_TOWER_UUID',
     field_class=fields.CharField,
     allow_blank=True,
     label=_('Cluster-wide Tower unique identifier.'),
     help_text=_('Useful to uniquely identify Tower instances.'),
     category=_('Logging'),
     category_slug='logging',
-    default=uuid.uuid4(),
+    default=None,
 )

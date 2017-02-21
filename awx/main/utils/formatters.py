@@ -12,6 +12,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
     def __init__(self, **kwargs):
         ret = super(LogstashFormatter, self).__init__(**kwargs)
         self.host_id = settings.CLUSTER_HOST_ID
+        self.tower_uuid = getattr(settings, "LOG_AGGREGATOR_TOWER_UUID", None)
         return ret
 
     def reformat_data_for_log(self, raw_data, kind=None):
@@ -135,13 +136,15 @@ class LogstashFormatter(LogstashFormatterVersion1):
             'message': record.getMessage(),
             'host': self.host,
             'type': self.message_type,
-            'tower_uuid': getattr(settings, 'LOG_TOWER_UUID', None),
 
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,
             'cluster_host_id': self.host_id
         }
+
+        if self.tower_uuid:
+            message['tower_uuid'] = self.tower_uuid
 
         # Add extra fields
         message.update(self.get_extra_fields(record))
