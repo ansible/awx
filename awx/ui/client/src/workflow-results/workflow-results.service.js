@@ -107,7 +107,7 @@ export default ['$q', 'Prompt', '$filter', 'Wait', 'Rest', '$state', 'ProcessErr
                             }
                         });
                 },
-                actionText: 'CANCEL'
+                actionText: 'PROCEED'
             });
         },
         relaunchJob: function(scope) {
