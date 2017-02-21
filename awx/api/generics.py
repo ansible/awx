@@ -41,6 +41,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
+analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 def get_view_name(cls, suffix=None):
@@ -117,6 +118,8 @@ class APIView(views.APIView):
             q_times = [float(q['time']) for q in connection.queries[queries_before:]]
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
+
+        analytics_logger.info("api response", extra=dict(python_objects=dict(request=request, response=response)))
         return response
 
     def get_authenticate_header(self, request):

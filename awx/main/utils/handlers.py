@@ -116,7 +116,7 @@ class BaseHTTPSHandler(logging.Handler):
         if not logger_name.startswith('awx.analytics'):
             # Tower log emission is only turned off by enablement setting
             return False
-        return self.enabled_loggers is None or logger_name.split('.')[-1] not in self.enabled_loggers
+        return self.enabled_loggers is None or logger_name[len('awx.analytics.'):] not in self.enabled_loggers
 
     def emit(self, record):
         """
@@ -189,7 +189,7 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
     instance = None
     if is_enabled:
         instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
-        instance.setFormatter(LogstashFormatter())
+        instance.setFormatter(LogstashFormatter(settings_module=settings_module))
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
         awx_logger_instance = None
