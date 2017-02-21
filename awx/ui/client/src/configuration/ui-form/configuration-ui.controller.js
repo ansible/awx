@@ -103,23 +103,6 @@
 
          $scope.$on('populated', function(e, data, flag){
              populatePendoTrackingState(flag);
-            //  if(!dropdownRendered) {
-            //      dropdownRendered = true;
-            //      CreateSelect2({
-            //          element: '#configuration_ui_template_PENDO_TRACKING_STATE',
-            //          multiple: false,
-            //          placeholder: i18n._('Select commands'),
-            //          opts: [{
-            //              id: $scope.$parent.PENDO_TRACKING_STATE,
-            //              text: $scope.$parent.PENDO_TRACKING_STATE
-            //          }]
-            //      });
-            //      // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-            //      // TODO Find better solution for this bug
-            //      $timeout(function(){
-            //          $scope.$parent.configuration_ui_template_form.$setPristine();
-            //      }, 1000);
-            //  }
          });
 
          angular.extend(uiVm, {
