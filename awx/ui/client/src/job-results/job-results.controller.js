@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket) {
     var toDestroy = [];
     var cancelRequests = false;
     var runTimeElapsedTimer = null;
@@ -664,6 +664,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         });
     }));
 
+    // get previously set up socket messages from resolve
+    if (statusSocket[0].job_status) {
+        $scope.job_status = statusSocket[0].job_status;
+    }
+    if ($scope.job_status === "running") {
+        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+    }
+
     // Processing of job-status messages from the websocket
     toDestroy.push($scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) ===
@@ -671,7 +679,9 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
             if (data.status === "running") {
-                runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+                if (!runTimeElapsedTimer) {
+                    runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+                }
             } else if (data.status === "successful" ||
                 data.status === "failed" ||
                 data.status === "error" ||
@@ -699,7 +709,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
+    statusSocket[1]();
+
     $scope.$on('$destroy', function(){
+        if (statusSocket[1]) {
+            statusSocket[1]();
+        }
         $( ".JobResultsStdOut-aLineOfStdOut" ).remove();
         cancelRequests = true;
         eventQueue.initialize();
