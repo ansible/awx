@@ -11,12 +11,21 @@
     cursor: pointer;
     display: flex;
     height: 18px;
+
+    &.ScheduleToggle--disabled  {
+        cursor: not-allowed;
+        border-color: @b7grey !important;
+        .ScheduleToggle-switch  {
+            background-color: @b7grey !important;
+            cursor: not-allowed;
+        }
+    }
 }
 
 .ScheduleToggle-switch {
     color: @default-interface-txt;
     background-color: @default-bg;
-    margin-left: 4px;
+    margin-left: 7px;
     border-left: 1px solid @default-icon;
     margin-right: 0px;
     text-align: center;
@@ -28,6 +37,7 @@
     margin-top: 0px;
     border-top: 0px;
     border-bottom: 0px;
+    border-right: 0px;
 }
 
 .ScheduleToggle.is-on {

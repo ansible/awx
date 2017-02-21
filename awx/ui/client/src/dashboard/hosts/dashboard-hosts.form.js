@@ -19,7 +19,6 @@ export default ['i18n', function(i18n){
                 class: 'Form-header-field',
                 ngClick: 'toggleHostEnabled()',
                 type: 'toggle',
-
                 awToolTip: "<p>" +
                 i18n._("Indicates if a host is available and should be included in running jobs.") +
                 "</p><p>" +
@@ -28,6 +27,7 @@ export default ['i18n', function(i18n){
                        " sync process.") +
                 "</p>",
                 dataTitle: i18n._('Host Enabled'),
+                ngDisabled: 'host.has_inventory_sources'
             }
         },
         fields: {
