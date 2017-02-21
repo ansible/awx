@@ -189,7 +189,7 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
     instance = None
     if is_enabled:
         instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
-        instance.setFormatter(LogstashFormatter())
+        instance.setFormatter(LogstashFormatter(settings_module=settings_module))
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
         awx_logger_instance = None

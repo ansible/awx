@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from logstash.formatter import LogstashFormatterVersion1
-from django.conf import settings
 from copy import copy
 import json
 import time
@@ -10,9 +9,11 @@ import time
 
 class LogstashFormatter(LogstashFormatterVersion1):
     def __init__(self, **kwargs):
+        settings_module = kwargs.pop('settings_module', None)
         ret = super(LogstashFormatter, self).__init__(**kwargs)
-        self.host_id = settings.CLUSTER_HOST_ID
-        self.tower_uuid = getattr(settings, "LOG_AGGREGATOR_TOWER_UUID", None)
+        if settings_module:
+            self.host_id = settings_module.CLUSTER_HOST_ID
+            self.tower_uuid = settings_module.LOG_AGGREGATOR_TOWER_UUID
         return ret
 
     def reformat_data_for_log(self, raw_data, kind=None):
@@ -140,11 +141,12 @@ class LogstashFormatter(LogstashFormatterVersion1):
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,
-            'cluster_host_id': self.host_id
         }
 
-        if self.tower_uuid:
+        if getattr(self, 'tower_uuid', None):
             message['tower_uuid'] = self.tower_uuid
+        if getattr(self, 'host_id', None):
+            message['cluster_host_id'] = self.host_id
 
         # Add extra fields
         message.update(self.get_extra_fields(record))
