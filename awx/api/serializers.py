@@ -42,7 +42,9 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
+from awx.main.utils import (
+    get_type_for_model, get_model_for_type, build_url, timestamp_apiformat,
+    camelcase_to_underscore, getattrd, parse_yaml_or_json)
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
@@ -1307,10 +1309,7 @@ class BaseVariableDataSerializer(BaseSerializer):
         if obj is None:
             return {}
         ret = super(BaseVariableDataSerializer, self).to_representation(obj)
-        try:
-            return json.loads(ret.get('variables', '') or '{}')
-        except ValueError:
-            return yaml.safe_load(ret.get('variables', ''))
+        return parse_yaml_or_json(ret.get('variables', '') or '{}')
 
     def to_internal_value(self, data):
         data = {'variables': json.dumps(data)}
