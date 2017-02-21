@@ -455,6 +455,13 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var getSkeleton = function(url) {
         jobResultsService.getEvents(url)
             .then(events => {
+                // old job check: if the job is complete, there is result stdout, and
+                // there are no job events, it's an old job
+                if ($scope.jobFinished) {
+                    $scope.showLegacyJobErrorMessage = $scope.job.result_stdout.length &&
+                        !events.results.length;
+                }
+
                 events.results.forEach(event => {
                     if (event.start_line === 0 && event.end_line === 0) {
                         $scope.isOld++;
