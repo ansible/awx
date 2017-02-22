@@ -278,17 +278,21 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
 
     @property
     def related_search_fields(self):
+        def skip_related_name(name):
+            return (
+                name is None or name.endswith('_role') or name.startswith('_') or
+                name.startswith('deprecated_') or name.endswith('_set') or
+                name == 'polymorphic_ctype')
+
         fields = []
         for field in self.model._meta.fields:
-            if field.name.endswith('_role'):
+            if skip_related_name(field.name):
                 continue
             if getattr(field, 'related_model', None):
                 fields.append('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
             name = rel.get_accessor_name()
-            if name is None:
-                continue
-            if name.endswith('_set'):
+            if skip_related_name(name):
                 continue
             fields.append('{}__search'.format(name))
         m2m_rel = []
@@ -298,6 +302,8 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
         if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
             m2m_rel += UnifiedJob._meta.local_many_to_many
         for relationship in m2m_rel:
+            if skip_related_name(relationship.name):
+                continue
             if relationship.related_model._meta.app_label != 'main':
                 continue
             fields.append('{}__search'.format(relationship.name))
