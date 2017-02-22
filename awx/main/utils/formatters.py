@@ -102,13 +102,16 @@ class LogstashFormatter(LogstashFormatterVersion1):
             request = raw_data['python_objects']['request']
             response = raw_data['python_objects']['response']
 
+            # Note: All of the below keys may not be in the response "dict"
+            # For example, X-API-Query-Time and X-API-Query-Count will only
+            # exist if SQL_DEBUG is turned on in settings.
             headers = [
                 (float, 'X-API-Time'),  # may end with an 's' "0.33s"
                 (int, 'X-API-Query-Count'),
                 (float, 'X-API-Query-Time'), # may also end with an 's'
                 (str, 'X-API-Node'),
             ]
-            data_for_log['x_api'] = {k: convert_to_type(t, response[k]) for (t, k) in headers}
+            data_for_log['x_api'] = {k: convert_to_type(t, response[k]) for (t, k) in headers if k in response}
 
             data_for_log['request'] = {
                 'method': request.method,
