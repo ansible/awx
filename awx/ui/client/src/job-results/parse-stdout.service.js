@@ -28,6 +28,10 @@ export default ['$log', 'moment', function($log, moment){
 
                 // ansi classes
                 line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
+                line = line.replace(/\[0;30m/g, '<span class="ansi30">');
+                line = line.replace(/\[1;30m/g, '<span class="ansi1 ansi30">');
+                line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
+                line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;32m/g, '<span class="ansi32">');
@@ -48,6 +52,8 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
+                line = line.replace(/\[0;30m/g, '');
+                line = line.replace(/\[1;30m/g, '');
                 line = line.replace(/\[1;31m/g, '');
                 line = line.replace(/\[0;31m/g, '');
                 line = line.replace(/\[0;32m/g, '');
@@ -210,6 +216,8 @@ export default ['$log', 'moment', function($log, moment){
                 if (line.indexOf("[0m") === -1) {
                     if (line.indexOf("[1;31m") > -1) {
                         colorCode = "[1;31m";
+                    } else if (line.indexOf("[1;30m") > -1) {
+                        colorCode = "[1;30m";
                     } else if (line.indexOf("[0;31m") > -1) {
                         colorCode = "[0;31m";
                     } else if (line.indexOf("[0;32m=") > -1) {
