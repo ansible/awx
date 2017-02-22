@@ -143,8 +143,7 @@ class FieldLookupBackend(BaseFilterBackend):
         # for polymorphic_ctype__model lookups.
         if new_lookup.startswith('polymorphic_ctype__model'):
             value = value.replace('_','')
-
-        if new_lookup.endswith('__isnull'):
+        elif new_lookup.endswith('__isnull'):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
