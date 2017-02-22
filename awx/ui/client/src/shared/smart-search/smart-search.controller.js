@@ -12,7 +12,9 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
         else {
             // steps through the current tree of $state configurations, grabs default search params
             defaults = _.find($state.$current.path, (step) => {
-                return step.params.hasOwnProperty(`${$scope.iterator}_search`);
+                if(step && step.params && step.params.hasOwnProperty(`${$scope.iterator}_search`)){
+                    return step.params.hasOwnProperty(`${$scope.iterator}_search`);
+                }
             }).params[`${$scope.iterator}_search`].config.value;
         }
 
