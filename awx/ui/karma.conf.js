@@ -15,7 +15,7 @@ module.exports = function(config) {
         frameworks: [
             'jasmine',
         ],
-        reporters: ['progress', 'coverage'],
+        reporters: ['progress', 'coverage', 'junit'],
         files: [
             './client/src/app.js',
             './node_modules/angular-mocks/angular-mocks.js',
