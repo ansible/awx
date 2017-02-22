@@ -300,11 +300,15 @@ export default [
                         // after resetting the value. Example:
                         $scope.$broadcast(key+'_populated', null, false);
                     }
-                    if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
+                    else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                         $scope.$broadcast(key+'_reverted');
                     }
-                    if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
+                    else if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
                         $scope[key] = ConfigurationUtils.arrayToList($scope[key], key);
+                    }
+                    else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
+                        $scope[key] = '{}';
+                        $scope.$broadcast('codeMirror_populated', key);
                     }
                     loginUpdate();
                 })

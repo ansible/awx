@@ -171,26 +171,37 @@ export default [
             form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
 
-        function startCodeMirrors(){
-            // Attach codemirror to fields that need it
+        function startCodeMirrors(key){
+
+            function createIt(name){
+                ParseTypeChange({
+                   scope: $scope.$parent,
+                   variable: name,
+                   parse_variable: 'parseType',
+                   field_id: form.formDef.name + '_' + name
+                 });
+                 $scope.parseTypeChange('parseType', name);
+            }
+
             let form = _.find(authForms, function(form){
                return form.name === $scope.authVm.activeAuthForm;
             });
-            _.each(form.formDef.fields, function(field) {
-                // Codemirror balks at empty values so give it one
-                if($scope.$parent[field.name] === null && field.codeMirror) {
-                  $scope.$parent[field.name] = '{}';
-                }
-                if(field.codeMirror) {
-                    ParseTypeChange({
-                       scope: $scope.$parent,
-                       variable: field.name,
-                       parse_variable: 'parseType',
-                       field_id: form.formDef.name + '_' + field.name
-                     });
-                     $scope.parseTypeChange('parseType', field.name);
-                }
-            });
+
+            if(!key){
+                // Attach codemirror to fields that need it
+                _.each(form.formDef.fields, function(field) {
+                    // Codemirror balks at empty values so give it one
+                    if($scope.$parent[field.name] === null && field.codeMirror) {
+                      $scope.$parent[field.name] = '{}';
+                    }
+                    if(field.codeMirror) {
+                        createIt(field.name)
+                    }
+                });
+            }
+            else if(key){
+                createIt(key);
+            }
         }
 
         function addFieldInfo(form, key) {
@@ -250,6 +261,10 @@ export default [
 
         $scope.$on('AUTH_LDAP_GROUP_TYPE_populated', function(e, data, flag) {
             populateLDAPGroupType(flag);
+        });
+
+        $scope.$on('codeMirror_populated', function(e, key) {
+            startCodeMirrors(key);
         });
 
         $scope.$on('populated', function() {
