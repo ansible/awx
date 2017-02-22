@@ -26,6 +26,7 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
+from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
@@ -300,7 +301,16 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             if relationship.related_model._meta.app_label != 'main':
                 continue
             fields.append('{}__search'.format(relationship.name))
-        return fields
+
+        allowed_fields = []
+        for field in fields:
+            try:
+                FieldLookupBackend().get_field_from_lookup(self.model, field)
+            except PermissionDenied:
+                pass
+            else:
+                allowed_fields.append(field)
+        return allowed_fields
 
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):

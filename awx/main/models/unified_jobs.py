@@ -503,33 +503,33 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         editable=False,
         help_text=_("Elapsed time in seconds that the job ran."),
     )
-    job_args = models.TextField(
+    job_args = prevent_search(models.TextField(
         blank=True,
         default='',
         editable=False,
-    )
+    ))
     job_cwd = models.CharField(
         max_length=1024,
         blank=True,
         default='',
         editable=False,
     )
-    job_env = JSONField(
+    job_env = prevent_search(JSONField(
         blank=True,
         default={},
         editable=False,
-    )
+    ))
     job_explanation = models.TextField(
         blank=True,
         default='',
         editable=False,
         help_text=_("A status field to indicate the state of the job if it wasn't able to run and capture stdout"),
     )
-    start_args = models.TextField(
+    start_args = prevent_search(models.TextField(
         blank=True,
         default='',
         editable=False,
-    )
+    ))
     result_stdout_text = models.TextField(
         blank=True,
         default='',
