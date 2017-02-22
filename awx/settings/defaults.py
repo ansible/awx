@@ -861,7 +861,7 @@ ORG_ADMINS_CAN_SEE_ALL_USERS = True
 TOWER_ADMIN_ALERTS = True
 
 # Note: This setting may be overridden by database settings.
-TOWER_URL_BASE = "https://towerhost"
+TOWER_URL_BASE = ""
 
 TOWER_SETTINGS_MANIFEST = {}
 

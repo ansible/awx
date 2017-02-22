@@ -30,6 +30,7 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
     url = reverse('api:setting_singleton_detail', args=('system',))
     response = get(url, user=admin, expect=200)
     assert not response.data['LICENSE']
+    Setting.objects.create(key='TOWER_URL_BASE', value='https://towerhost')
     Setting.objects.create(key='LICENSE', value=enterprise_license)
     response = get(url, user=admin, expect=200)
     assert response.data['LICENSE']
@@ -42,6 +43,13 @@ def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get
     delete(url, user=admin, expect=204)
     response = get(url, user=admin, expect=200)
     assert response.data['LICENSE']
+
+
+@pytest.mark.django_db
+def test_url_base_defaults_to_request(options, admin):
+    # If TOWER_URL_BASE is not set, default to the Tower request hostname
+    resp = options(reverse('api:setting_singleton_detail', args=('system',)), user=admin, expect=200)
+    assert resp.data['actions']['PUT']['TOWER_URL_BASE']['default'] == 'http://testserver'
 
 
 @pytest.mark.django_db

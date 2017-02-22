@@ -67,7 +67,10 @@ class Metadata(metadata.SimpleMetadata):
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
         try:
-            field_info['default'] = field.get_default()
+            default = field.get_default()
+            if not default and field.field_name == 'TOWER_URL_BASE':
+                default = '{}://{}'.format(self.request.scheme, self.request.get_host())
+            field_info['default'] = default
         except serializers.SkipField:
             pass
 
@@ -167,6 +170,10 @@ class Metadata(metadata.SimpleMetadata):
         return actions
 
     def determine_metadata(self, request, view):
+        # store request on self so we can use it to generate field defaults
+        # (such as TOWER_URL_BASE)
+        self.request = request
+
         metadata = super(Metadata, self).determine_metadata(request, view)
 
         # Add version number in which view was added to Tower.
