@@ -112,7 +112,13 @@ class FieldLookupBackend(BaseFilterBackend):
             elif name == 'pk':
                 field = model._meta.pk
             else:
-                field = model._meta.get_field_by_name(name)[0]
+                name_alt = name.replace("_", "")
+                if name_alt in model._meta.fields_map.keys():
+                    field = model._meta.fields_map[name_alt]
+                    new_parts.pop()
+                    new_parts.append(name_alt)
+                else:
+                    field = model._meta.get_field_by_name(name)[0]
                 if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
                     raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 elif getattr(field, '__prevent_search__', False):

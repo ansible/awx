@@ -9,6 +9,7 @@ import time
 # Django
 from django.conf import settings
 from django.db import connection
+from django.db.models.fields import FieldDoesNotExist
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -285,7 +286,7 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             if getattr(field, 'related_model', None):
                 fields.append('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
-            name = rel.get_accessor_name()
+            name = rel.related_model._meta.verbose_name.replace(" ", "_")
             if name is None:
                 continue
             if name.endswith('_set'):
@@ -308,6 +309,8 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 FieldLookupBackend().get_field_from_lookup(self.model, field)
             except PermissionDenied:
                 pass
+            except FieldDoesNotExist:
+                allowed_fields.append(field)
             else:
                 allowed_fields.append(field)
         return allowed_fields
