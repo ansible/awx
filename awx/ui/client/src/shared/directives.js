@@ -168,12 +168,18 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 scope.imageData = $rootScope.custom_logo;
             });
 
-            scope.update = function(e) {
-                if(scope.$parent[fieldKey]) {
+            scope.$on(fieldKey+'_reverted', function(e) {
+                scope.update(e, true);
+            });
+
+            scope.update = function(e, flag) {
+                if(scope.$parent[fieldKey] || flag ) {
                     e.preventDefault();
                     scope.$parent[fieldKey] = '';
                     filePickerButton.html(browseText);
                     filePickerText.val('');
+                    filePicker.value = "";
+                    scope.imagePresent = false;
                 }
                 else {
                     // Nothing exists so open file picker
