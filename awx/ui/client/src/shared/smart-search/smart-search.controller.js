@@ -166,18 +166,23 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 let encodeParams = {
                     term: tagToRemove
                 };
-                if(_.has($scope.models[$scope.list.name].base, root)) {
-                    if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
+                if($scope.models[$scope.list.name]) {
+                    if(_.has($scope.models[$scope.list.name].base, root)) {
+                        if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
+                            encodeParams.relatedSearchTerm = true;
+                        }
+                        else {
+                            encodeParams.searchTerm = true;
+                        }
+                        removed = qs.encodeParam(encodeParams);
+                    }
+                    else if(_.contains($scope.models[$scope.list.name].related, root)) {
                         encodeParams.relatedSearchTerm = true;
+                        removed = qs.encodeParam(encodeParams);
                     }
                     else {
-                        encodeParams.searchTerm = true;
+                        removed = setDefaults(termParts[termParts.length-1]);
                     }
-                    removed = qs.encodeParam(encodeParams);
-                }
-                else if(_.contains($scope.models[$scope.list.name].related, root)) {
-                    encodeParams.relatedSearchTerm = true;
-                    removed = qs.encodeParam(encodeParams);
                 }
                 else {
                     removed = setDefaults(termParts[termParts.length-1]);
