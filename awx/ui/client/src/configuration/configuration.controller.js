@@ -303,6 +303,9 @@ export default [
                     if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
                         $scope.$broadcast(key+'_reverted');
                     }
+                    if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
+                        $scope[key] = ConfigurationUtils.arrayToList($scope[key], key);
+                    }
                     loginUpdate();
                 })
                 .catch(function(error) {
