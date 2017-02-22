@@ -172,19 +172,8 @@ export default [
         });
 
         function startCodeMirrors(key){
-
-            function createIt(name){
-                ParseTypeChange({
-                   scope: $scope.$parent,
-                   variable: name,
-                   parse_variable: 'parseType',
-                   field_id: form.formDef.name + '_' + name
-                 });
-                 $scope.parseTypeChange('parseType', name);
-            }
-
-            let form = _.find(authForms, function(form){
-               return form.name === $scope.authVm.activeAuthForm;
+            var form = _.find(authForms, function(f){
+               return f.name === $scope.authVm.activeAuthForm;
             });
 
             if(!key){
@@ -195,12 +184,22 @@ export default [
                       $scope.$parent[field.name] = '{}';
                     }
                     if(field.codeMirror) {
-                        createIt(field.name)
+                        createIt(field.name);
                     }
                 });
             }
             else if(key){
                 createIt(key);
+            }
+
+            function createIt(name){
+                ParseTypeChange({
+                   scope: $scope.$parent,
+                   variable: name,
+                   parse_variable: 'parseType',
+                   field_id: form.formDef.name + '_' + name
+                 });
+                 $scope.parseTypeChange('parseType', name);
             }
         }
 
