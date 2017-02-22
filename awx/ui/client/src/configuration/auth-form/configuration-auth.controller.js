@@ -171,26 +171,36 @@ export default [
             form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
 
-        function startCodeMirrors(){
-            // Attach codemirror to fields that need it
-            let form = _.find(authForms, function(form){
-               return form.name === $scope.authVm.activeAuthForm;
+        function startCodeMirrors(key){
+            var form = _.find(authForms, function(f){
+               return f.name === $scope.authVm.activeAuthForm;
             });
-            _.each(form.formDef.fields, function(field) {
-                // Codemirror balks at empty values so give it one
-                if($scope.$parent[field.name] === null && field.codeMirror) {
-                  $scope.$parent[field.name] = '{}';
-                }
-                if(field.codeMirror) {
-                    ParseTypeChange({
-                       scope: $scope.$parent,
-                       variable: field.name,
-                       parse_variable: 'parseType',
-                       field_id: form.formDef.name + '_' + field.name
-                     });
-                     $scope.parseTypeChange('parseType', field.name);
-                }
-            });
+
+            if(!key){
+                // Attach codemirror to fields that need it
+                _.each(form.formDef.fields, function(field) {
+                    // Codemirror balks at empty values so give it one
+                    if($scope.$parent[field.name] === null && field.codeMirror) {
+                      $scope.$parent[field.name] = '{}';
+                    }
+                    if(field.codeMirror) {
+                        createIt(field.name);
+                    }
+                });
+            }
+            else if(key){
+                createIt(key);
+            }
+
+            function createIt(name){
+                ParseTypeChange({
+                   scope: $scope.$parent,
+                   variable: name,
+                   parse_variable: 'parseType',
+                   field_id: form.formDef.name + '_' + name
+                 });
+                 $scope.parseTypeChange('parseType', name);
+            }
         }
 
         function addFieldInfo(form, key) {
@@ -227,16 +237,15 @@ export default [
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
 
-        $scope.$on('populated', function() {
-            startCodeMirrors();
 
-            // Create Select2 fields
-            var opts = [];
+
+        function populateLDAPGroupType(flag){
             if($scope.$parent.AUTH_LDAP_GROUP_TYPE !== null) {
-                opts.push({
-                    id: $scope.$parent.AUTH_LDAP_GROUP_TYPE,
-                    text: $scope.$parent.AUTH_LDAP_GROUP_TYPE
-                });
+                $scope.$parent.AUTH_LDAP_GROUP_TYPE = _.find($scope.$parent.AUTH_LDAP_GROUP_TYPE_options, { value: $scope.$parent.AUTH_LDAP_GROUP_TYPE });
+            }
+
+            if(flag !== undefined){
+                dropdownRendered = flag;
             }
 
             if(!dropdownRendered) {
@@ -245,15 +254,21 @@ export default [
                     element: '#configuration_ldap_template_AUTH_LDAP_GROUP_TYPE',
                     multiple: false,
                     placeholder: i18n._('Select group types'),
-                    opts: opts
                 });
-                // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-                // TODO Find better solution for this bug
-                $timeout(function(){
-                    $scope.$parent.configuration_ldap_template_form.$setPristine();
-                }, 1000);
             }
+        }
 
+        $scope.$on('AUTH_LDAP_GROUP_TYPE_populated', function(e, data, flag) {
+            populateLDAPGroupType(flag);
+        });
+
+        $scope.$on('codeMirror_populated', function(e, key) {
+            startCodeMirrors(key);
+        });
+
+        $scope.$on('populated', function() {
+            startCodeMirrors();
+            populateLDAPGroupType();
         });
 
         angular.extend(authVm, {

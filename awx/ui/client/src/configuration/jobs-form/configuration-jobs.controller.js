@@ -77,6 +77,7 @@ export default [
 
 
         function populateAdhocCommand(flag){
+            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.toString();
             var ad_hoc_commands = $scope.$parent.AD_HOC_COMMANDS.split(',');
             $scope.$parent.AD_HOC_COMMANDS = _.map(ad_hoc_commands, (item) => _.find($scope.$parent.AD_HOC_COMMANDS_options, { value: item }));
 
@@ -94,7 +95,7 @@ export default [
             }
         }
 
-        $scope.$on('adhoc_populated', function(e, data, flag) {
+        $scope.$on('AD_HOC_COMMANDS_populated', function(e, data, flag) {
             populateAdhocCommand(flag);
         });
 

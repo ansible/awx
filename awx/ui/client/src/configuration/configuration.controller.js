@@ -71,7 +71,7 @@ export default [
                                 // we want the options w/o a space, and
                                 // the ConfigurationUtils.arrayToList()
                                 // does a string.split(', ') w/ an extra space
-                                // behind the comma. 
+                                // behind the comma.
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key].toString();
                                 }
@@ -295,9 +295,20 @@ export default [
             ConfigurationService.patchConfiguration(payload)
                 .then(function() {
                     $scope[key] = $scope.configDataResolve[key].default;
-                    if(key === "AD_HOC_COMMANDS"){
-                        $scope.AD_HOC_COMMANDS = $scope.AD_HOC_COMMANDS.toString();
-                        $scope.$broadcast('adhoc_populated', null, false);
+                    if($scope[key + '_field'].type === "select"){
+                        // We need to re-instantiate the Select2 element
+                        // after resetting the value. Example:
+                        $scope.$broadcast(key+'_populated', null, false);
+                    }
+                    else if($scope[key + '_field'].reset === "CUSTOM_LOGO"){
+                        $scope.$broadcast(key+'_reverted');
+                    }
+                    else if($scope[key + '_field'].type === "textarea" && _.isArray($scope.configDataResolve[key].default)){
+                        $scope[key] = ConfigurationUtils.arrayToList($scope[key], key);
+                    }
+                    else if($scope[key + '_field'].hasOwnProperty('codeMirror')){
+                        $scope[key] = '{}';
+                        $scope.$broadcast('codeMirror_populated', key);
                     }
                     loginUpdate();
                 })
