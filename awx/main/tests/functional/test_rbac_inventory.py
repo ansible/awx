@@ -5,13 +5,15 @@ from awx.main.models import (
     Permission,
     Host,
     CustomInventoryScript,
+    Schedule
 )
 from awx.main.access import (
     InventoryAccess,
     InventorySourceAccess,
     HostAccess,
     InventoryUpdateAccess,
-    CustomInventoryScriptAccess
+    CustomInventoryScriptAccess,
+    ScheduleAccess
 )
 from django.apps import apps
 
@@ -277,3 +279,14 @@ def test_inventory_source_credential_check(rando, inventory_source, credential):
     inventory_source.group.inventory.admin_role.members.add(rando)
     access = InventorySourceAccess(rando)
     assert not access.can_change(inventory_source, {'credential': credential})
+
+
+@pytest.mark.django_db
+def test_inventory_source_org_admin_schedule_access(org_admin, inventory_source):
+    schedule = Schedule.objects.create(
+        unified_job_template=inventory_source,
+        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
+    access = ScheduleAccess(org_admin)
+    assert access.get_queryset()
+    assert access.can_read(schedule)
+    assert access.can_change(schedule, {'rrule': 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2'})
