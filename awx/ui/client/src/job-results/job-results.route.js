@@ -36,6 +36,16 @@ export default {
         }
     },
     resolve: {
+        statusSocket: ['$rootScope', '$stateParams', function($rootScope, $stateParams) {
+            var preScope = {};
+            var eventOn = $rootScope.$on(`ws-jobs`, function(e, data) {
+                if (parseInt(data.unified_job_id, 10) ===
+                    parseInt($stateParams.id,10)) {
+                    preScope.job_status = data.status;
+                }
+            });
+            return [preScope, eventOn];
+        }],
         // the GET for the particular job
         jobData: ['Rest', 'GetBasePath', '$stateParams', '$q', '$state', 'Alert', 'jobResultsService', function(Rest, GetBasePath, $stateParams, $q, $state, Alert, jobResultsService) {
             return jobResultsService.getJobData($stateParams.id);
