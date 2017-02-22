@@ -665,7 +665,7 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     }));
 
     // get previously set up socket messages from resolve
-    if (statusSocket[0].job_status) {
+    if (statusSocket && statusSocket[0] && statusSocket[0].job_status) {
         $scope.job_status = statusSocket[0].job_status;
     }
     if ($scope.job_status === "running" && !$scope.job.elapsed) {
@@ -709,10 +709,12 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
-    statusSocket[1]();
+    if (statusSocket && statusSocket[1]) {
+        statusSocket[1]();
+    }
 
     $scope.$on('$destroy', function(){
-        if (statusSocket[1]) {
+        if (statusSocket && statusSocket[1]) {
             statusSocket[1]();
         }
         $( ".JobResultsStdOut-aLineOfStdOut" ).remove();

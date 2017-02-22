@@ -7,6 +7,10 @@ describe('Controller: jobResultsController', () => {
 
     let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService, statusSocket;
 
+    statusSocket = function() {
+        var fn = function() {};
+        return fn;
+    }
     jobData = {
         related: {}
     };
@@ -69,6 +73,8 @@ describe('Controller: jobResultsController', () => {
             $provide.service('workflowResultsService', () => {
                 return jasmine.createSpyObj('workflowResultsService', ['createOneSecondTimer', 'destroyTimer']);
             });
+
+            $provide.value('statusSocket', statusSocket);
 
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
