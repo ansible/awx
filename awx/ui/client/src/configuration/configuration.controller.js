@@ -71,7 +71,7 @@ export default [
                                 // we want the options w/o a space, and
                                 // the ConfigurationUtils.arrayToList()
                                 // does a string.split(', ') w/ an extra space
-                                // behind the comma. 
+                                // behind the comma.
                                 if(key === "AD_HOC_COMMANDS"){
                                     $scope[key] = data[key].toString();
                                 }

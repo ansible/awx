@@ -159,6 +159,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
             var filePickerText = angular.element(document.getElementById('filePickerText'));
             var filePickerError = angular.element(document.getElementById('filePickerError'));
             var filePickerButton = angular.element(document.getElementById('filePickerButton'));
+            var filePicker = angular.element(document.getElementById('filePicker'));
 
             scope.imagePresent = global.$AnsibleConfig.custom_logo || false;
             scope.imageData = $rootScope.custom_logo;
