@@ -51,7 +51,7 @@ var hostEventStderr = {
     name: 'jobDetail.host-event.stderr',
     url: '/stderr',
     controller: 'HostEventController',
-    templateUrl: templateUrl('job-results/host-event/host-event-stdout')
+    templateUrl: templateUrl('job-results/host-event/host-event-stderr')
 };
 
 
