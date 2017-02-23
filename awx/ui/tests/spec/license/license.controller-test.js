@@ -44,6 +44,7 @@ describe('Controller: LicenseController', () => {
 
     // Suites
     it('should GET a config object on initialization', ()=>{
+        expect(ConfigService.delete).toHaveBeenCalled();
         expect(ConfigService.getConfig).toHaveBeenCalled();
     });
 
