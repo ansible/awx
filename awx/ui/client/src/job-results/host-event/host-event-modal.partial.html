@@ -36,6 +36,11 @@
 
 			<div class="HostEvent-nav">
 				<!-- view navigation buttons -->
+				<button ui-sref="jobDetail.host-event.json" type="button"
+					class="btn btn-sm btn-default HostEvent-tab"
+					ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.json')}">
+					JSON
+				</button>
 				<button ng-if="stdout" ui-sref="jobDetail.host-event.stdout"
 					type="button" class="btn btn-sm btn-default HostEvent-tab"
 					ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.stdout')}">
@@ -46,11 +51,7 @@
 					ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.stderr')}">
 					Standard Error
 				</button>
-				<button ui-sref="jobDetail.host-event.json" type="button"
-					class="btn btn-sm btn-default HostEvent-tab"
-					ng-class="{'HostEvent-tab--selected' : isActiveState('jobDetail.host-event.json')}">
-					JSON
-				</button>
+
 			</div>
 			<div class="HostEvent-body">
 			<!-- views -->
