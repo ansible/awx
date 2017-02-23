@@ -343,7 +343,7 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 
         $scope.$watch('organization', function(val) {
             if (val === undefined) {
-                $scope.permissionsTooltip = i18n._('Credentials are only shared within an organization. Assign credentials to an organization to delegate credential permissions. The organization cannot be edited after credentials are assigned.');
+                $scope.permissionsTooltip = i18n._('Populate the organization field in the form below in order to set permissions.');
             } else {
                 $scope.permissionsTooltip = '';
             }
