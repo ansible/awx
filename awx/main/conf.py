@@ -317,10 +317,12 @@ register(
     category_slug='logging',
 )
 
+
 def init_LOG_AGGREGATOR_TOWER_UUID():
     unique_id = uuid.uuid4()
     settings.LOG_AGGREGATOR_TOWER_UUID = unique_id
     return unique_id
+
 
 register(
     'LOG_AGGREGATOR_TOWER_UUID',
