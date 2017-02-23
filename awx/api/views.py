@@ -1868,6 +1868,14 @@ class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetac
     relationship = 'children'
     enforce_parent_relationship = 'inventory'
 
+    def unattach(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if sub_id is not None:
+            return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
+        parent = self.get_parent_object()
+        parent.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class GroupPotentialChildrenList(SubListAPIView):
 
