@@ -179,7 +179,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                     scope.$parent[fieldKey] = '';
                     filePickerButton.html(browseText);
                     filePickerText.val('');
-                    filePicker.value = "";
+                    filePicker.context.value = "";
                     scope.imagePresent = false;
                 }
                 else {

@@ -449,6 +449,7 @@ export default [
                 .then(function() {
                     populateFromApi();
                     $scope[formTracker.currentFormName()].$setPristine();
+                    $scope.$broadcast('CUSTOM_LOGO_reverted');
                 })
                 .catch(function(error) {
                     ProcessErrors($scope, error, status, formDefs[formTracker.getCurrent()],

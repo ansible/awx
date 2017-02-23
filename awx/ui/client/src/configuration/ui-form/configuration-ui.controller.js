@@ -101,8 +101,8 @@
              populatePendoTrackingState(flag);
          });
 
-         $scope.$on('populated', function(e, data, flag){
-             populatePendoTrackingState(flag);
+         $scope.$on('populated', function(){
+             populatePendoTrackingState(false);
          });
 
          angular.extend(uiVm, {
