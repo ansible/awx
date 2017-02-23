@@ -78,7 +78,7 @@ export default ['i18n', function(i18n) {
             },
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
-                ngDisabled: 'inventory_script_form.$pristine || inventory_script_form.$invalid', //Disable when $pristine or $invalid, optional
+                ngDisabled: 'inventory_script_form.$invalid', //Disable when $invalid, optional
                 ngShow: '(inventory_script_obj.summary_fields.user_capabilities.edit || canAdd)'
             }
         }
