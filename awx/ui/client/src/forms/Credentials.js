@@ -431,7 +431,7 @@ export default
                     awToolTip: '{{permissionsTooltip}}',
                     dataTipWatch: 'permissionsTooltip',
                     awToolTipTabEnabledInEditMode: true,
-                    dataPlacement: 'top',
+                    dataPlacement: 'right',
                     basePath: 'api/v1/credentials/{{$stateParams.credential_id}}/access_list/',
                     search: {
                         order_by: 'username'
