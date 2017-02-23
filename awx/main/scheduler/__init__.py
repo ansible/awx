@@ -373,7 +373,7 @@ class TaskManager():
                 # list of task id's from celery and now.
                 # Note: This is an actual fix, not a reduction in the time 
                 # window that this can happen.
-                if task_obj.status is not 'running':
+                if task_obj.status != 'running':
                     continue
                 task_obj.status = 'failed'
                 task_obj.job_explanation += ' '.join((
