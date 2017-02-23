@@ -311,6 +311,8 @@ class OrderByBackend(BaseFilterBackend):
                     else:
                         order_by = (value,)
             if order_by:
+                order_by = self._strip_sensitive_model_fields(queryset.model, order_by)
+
                 # Special handling of the type field for ordering. In this
                 # case, we're not sorting exactly on the type field, but
                 # given the limited number of views with multiple types,
@@ -333,3 +335,16 @@ class OrderByBackend(BaseFilterBackend):
         except FieldError as e:
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
+
+    def _strip_sensitive_model_fields(self, model, order_by):
+        for field_name in order_by:
+            # strip off the negation prefix `-` if it exists
+            field_name = field_name.split('-')[-1]
+            try:
+                # if the field name is encrypted/sensitive, don't sort on it
+                if field_name in getattr(model, 'PASSWORD_FIELDS', ()) or \
+                        getattr(model._meta.get_field(field_name), '__prevent_search__', False):
+                    raise ParseError(_('cannot order by field %s') % field_name)
+            except FieldDoesNotExist:
+                pass
+            yield field_name
