@@ -364,7 +364,12 @@ export default [
                             payload[key] = _.map($scope[key], 'value').join(',');
                         }
                     } else {
-                        payload[key] = $scope[key].value;
+                        if(multiselectDropdowns.indexOf(key) !== -1) {
+                            // Default AD_HOC_COMMANDS to an empty list
+                            payload[key] = $scope[key].value || [];
+                        } else {
+                            payload[key] = $scope[key].value;
+                        }
                     }
                 } else if($scope.configDataResolve[key].type === 'list' && $scope[key] !== null) {
                     // Parse lists
