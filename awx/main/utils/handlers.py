@@ -88,7 +88,7 @@ class BaseHTTPSHandler(logging.Handler):
             self.session.headers.update(headers)
 
     def get_http_host(self):
-        host = self.host
+        host = self.host or ''
         if not host.startswith('http'):
             host = 'http://%s' % self.host
         if self.port != 80 and self.port is not None:
