@@ -1129,6 +1129,7 @@ class RunProjectUpdate(BaseTask):
         '''
         Return SSH private key data needed for this project update.
         '''
+        handle, self.revision_path = tempfile.mkstemp()
         private_data = {}
         if project_update.credential:
             credential = project_update.credential
@@ -1219,7 +1220,7 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project_update.scm_clean,
             'scm_delete_on_update': project_update.scm_delete_on_update,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'scm_revision_output': '/tmp/_{}_syncrev'.format(project_update.id) # TODO: TempFile
+            'scm_revision_output': self.revision_path
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
@@ -1305,7 +1306,7 @@ class RunProjectUpdate(BaseTask):
     def post_run_hook(self, instance, status, **kwargs):
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
-            fd = open('/tmp/_{}_syncrev'.format(instance.id), 'r')
+            fd = open(self.revision_path, 'r')
             lines = fd.readlines()
             if lines:
                 p.scm_revision = lines[0].strip()
@@ -1313,6 +1314,10 @@ class RunProjectUpdate(BaseTask):
                 p.save()
             else:
                 logger.error("Could not find scm revision in check")
+        try:
+            os.remove(self.revision_path)
+        except Exception, e:
+            logger.error("Failed removing revision tmp file: {}".format(e))
 
 
 class RunInventoryUpdate(BaseTask):
