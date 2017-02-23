@@ -68,7 +68,7 @@ class Metadata(metadata.SimpleMetadata):
         # FIXME: Still isn't showing all default values?
         try:
             default = field.get_default()
-            if not default and field.field_name == 'TOWER_URL_BASE':
+            if field.field_name == 'TOWER_URL_BASE' and default == 'https://towerhost':
                 default = '{}://{}'.format(self.request.scheme, self.request.get_host())
             field_info['default'] = default
         except serializers.SkipField:
