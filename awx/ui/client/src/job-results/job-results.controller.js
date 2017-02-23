@@ -667,7 +667,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $scope.taskCount++;
             }
             buffer.push(data);
-            processEvent(data);
         });
     }));
 
