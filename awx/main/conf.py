@@ -2,9 +2,11 @@
 import json
 import logging
 import os
+import uuid
 
 # Django
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 # Tower
 from awx.conf import fields, register
@@ -314,13 +316,18 @@ register(
     category=_('Logging'),
     category_slug='logging',
 )
+
+def init_LOG_AGGREGATOR_TOWER_UUID():
+    unique_id = uuid.uuid4()
+    settings.LOG_AGGREGATOR_TOWER_UUID = unique_id
+    return unique_id
+
 register(
     'LOG_AGGREGATOR_TOWER_UUID',
     field_class=fields.CharField,
-    allow_blank=True,
     label=_('Cluster-wide Tower unique identifier.'),
     help_text=_('Useful to uniquely identify Tower instances.'),
     category=_('Logging'),
     category_slug='logging',
-    default=None,
+    default=init_LOG_AGGREGATOR_TOWER_UUID,
 )
