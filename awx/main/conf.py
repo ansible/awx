@@ -111,6 +111,7 @@ register(
     help_text=_('List of modules allowed to be used by ad-hoc jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
+    required=False,
 )
 
 register(
