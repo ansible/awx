@@ -15,6 +15,7 @@ services:
       - "5555:5555"
       - "15672:15672"
   tower_1:
+    privileged: true
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
     hostname: tower_1
     environment:
@@ -26,6 +27,7 @@ services:
       - "../:/tower_devel"
 
   tower_2:
+    privileged: true
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
     hostname: tower_2
     environment:
@@ -36,6 +38,7 @@ services:
     volumes:
       - "../:/tower_devel"
   tower_3:
+    privileged: true
     image: gcr.io/ansible-tower-engineering/tower_devel:${TAG}
     hostname: tower_3
     environment:
