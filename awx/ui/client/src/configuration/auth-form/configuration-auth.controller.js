@@ -268,7 +268,7 @@ export default [
 
         $scope.$on('populated', function() {
             startCodeMirrors();
-            populateLDAPGroupType();
+            populateLDAPGroupType(false);
         });
 
         angular.extend(authVm, {

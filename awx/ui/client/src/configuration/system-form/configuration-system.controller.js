@@ -152,8 +152,8 @@ export default [
 
         var dropdownRendered = false;
 
-        $scope.$on('populated', function(e, data, flag) {
-            populateLogAggregator(flag);
+        $scope.$on('populated', function() {
+            populateLogAggregator(false);
         });
 
         $scope.$on('LOG_AGGREGATOR_TYPE_populated', function(e, data, flag) {

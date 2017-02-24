@@ -99,8 +99,8 @@ export default [
             populateAdhocCommand(flag);
         });
 
-        $scope.$on('populated', function(e, data, flag) {
-            populateAdhocCommand(flag);
+        $scope.$on('populated', function() {
+            populateAdhocCommand(false);
         });
 
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
