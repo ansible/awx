@@ -285,17 +285,17 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 name.startswith('deprecated_') or name.endswith('_set') or
                 name == 'polymorphic_ctype')
 
-        fields = []
+        fields = set([])
         for field in self.model._meta.fields:
             if skip_related_name(field.name):
                 continue
             if getattr(field, 'related_model', None):
-                fields.append('{}__search'.format(field.name))
+                fields.add('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
             name = rel.related_model._meta.verbose_name.replace(" ", "_")
             if skip_related_name(name):
                 continue
-            fields.append('{}__search'.format(name))
+            fields.add('{}__search'.format(name))
         m2m_rel = []
         m2m_rel += self.model._meta.local_many_to_many
         if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
@@ -307,7 +307,8 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
                 continue
             if relationship.related_model._meta.app_label != 'main':
                 continue
-            fields.append('{}__search'.format(relationship.name))
+            fields.add('{}__search'.format(relationship.name))
+        fields = list(fields)
 
         allowed_fields = []
         for field in fields:
