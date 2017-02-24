@@ -1218,7 +1218,7 @@ class RunProjectUpdate(BaseTask):
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'scm_delete_on_update': project_update.scm_delete_on_update,
+            'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'sync' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
             'scm_revision_output': self.revision_path
         })
