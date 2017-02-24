@@ -1873,6 +1873,8 @@ class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetac
         if sub_id is not None:
             return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
         parent = self.get_parent_object()
+        if not request.user.can_access(self.model, 'delete', parent):
+            raise PermissionDenied()
         parent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
