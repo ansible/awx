@@ -19,6 +19,10 @@
 			        <span class="HostEvent-field--label">CREATED</span>
 			        <span class="HostEvent-field--content">{{(event.created | longDate) || "No result found"}}</span>
 			    </div>
+				<div class="HostEvent-field">
+			        <span class="HostEvent-field--label">ID</span>
+			        <span class="HostEvent-field--content">{{event.id || "No result found"}}</span>
+			    </div>
 			    <div class="HostEvent-field">
 			        <span class="HostEvent-field--label">PLAY</span>
 			        <span class="HostEvent-field--content">{{event.play || "No result found"}}</span>
@@ -29,7 +33,7 @@
 			    </div>
 			    <div class="HostEvent-field">
 			        <span class="HostEvent-field--label">MODULE</span>
-			        <span class="HostEvent-field--content">{{event.event_data.res.invocation.module_name || "No result found"}}</span>
+			        <span class="HostEvent-field--content">{{module_name}}</span>
 			    </div>
 			</div>
 
