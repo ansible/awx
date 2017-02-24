@@ -358,7 +358,7 @@ export default [ '$state','moment', '$timeout', '$window',
                                     }
                                 });
                             thisNode.append("text")
-                                .attr("x", nodeW - 50)
+                                .attr("x", nodeW - 45)
                                 .attr("y", nodeH - 10)
                                 .attr("dy", ".35em")
                                 .attr("class", "WorkflowChart-detailsLink")
