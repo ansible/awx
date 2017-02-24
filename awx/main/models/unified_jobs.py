@@ -930,7 +930,8 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
     def start_celery_task(self, opts, error_callback, success_callback):
         task_class = self._get_task_class()
-        task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+        async_result = task_class().apply_async((self.pk,), opts, link_error=error_callback, link=success_callback)
+        return async_result.id
 
     def start(self, error_callback, success_callback, **kwargs):
         '''

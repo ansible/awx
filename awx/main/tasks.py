@@ -665,7 +665,7 @@ class BaseTask(Task):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='running', celery_task_id='' if self.request.id is None else self.request.id)
+        instance = self.update_model(pk, status='running')
 
         instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
