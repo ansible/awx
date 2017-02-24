@@ -52,7 +52,7 @@ def run_fail_inconsistent_running_jobs():
                 # TODO: Failed to contact celery. We should surface this.
                 return None
 
-            all_running_sorted_tasks = scheduler.get_running_tasks()
+            all_running_sorted_tasks = scheduler.get_running_tasks(status_list=('running', 'waiting',))
             scheduler.process_celery_tasks(active_tasks, all_running_sorted_tasks)
         except DatabaseError:
             return

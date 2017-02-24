@@ -60,8 +60,7 @@ class TaskManager():
     '''
     Tasks that are running and SHOULD have a celery task.
     '''
-    def get_running_tasks(self):
-        status_list = ('running',)
+    def get_running_tasks(self, status_list=('running',)):
 
         jobs = JobDict.filter_partial(status=status_list)
         inventory_updates = InventoryUpdateDict.filter_partial(status=status_list)
@@ -216,15 +215,15 @@ class TaskManager():
         else:
             if type(job_obj) is WorkflowJob:
                 job_obj.status = 'running'
-
-            job_obj.save()
+            else:
+                celery_task_id = job_obj.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler)
+                job_obj.celery_task_id = celery_task_id
 
             self.consume_capacity(task)
+            job_obj.save()
 
         def post_commit():
             job_obj.websocket_emit_status(job_obj.status)
-            if job_obj.status != 'failed':
-                job_obj.start_celery_task(opts, error_callback=error_handler, success_callback=success_handler)
 
         connection.on_commit(post_commit)
 
