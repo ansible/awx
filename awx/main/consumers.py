@@ -63,7 +63,7 @@ def ws_receive(message):
     if 'groups' in data:
         discard_groups(message)
         groups = data['groups']
-        current_groups = message.channel_session.pop('groups') if 'groups' in message.channel_session else []
+        current_groups = set(message.channel_session.pop('groups') if 'groups' in message.channel_session else [])
         for group_name,v in groups.items():
             if type(v) is list:
                 for oid in v:
@@ -74,12 +74,12 @@ def ws_receive(message):
                         if not user_access.get_queryset().filter(pk=oid).exists():
                             message.reply_channel.send({"text": json.dumps({"error": "access denied to channel {0} for resource id {1}".format(group_name, oid)})})
                             continue
-                    current_groups.append(name)
+                    current_groups.add(name)
                     Group(name).add(message.reply_channel)
             else:
-                current_groups.append(group_name)
+                current_groups.add(group_name)
                 Group(group_name).add(message.reply_channel)
-        message.channel_session['groups'] = current_groups
+        message.channel_session['groups'] = list(current_groups)
 
 
 def emit_channel_notification(group, payload):
