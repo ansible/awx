@@ -1279,7 +1279,8 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def cancel(self):
         res = super(InventoryUpdate, self).cancel()
-        map(lambda x: x.cancel(), Job.objects.filter(dependent_jobs__in=[self.id]))
+        if res:
+            map(lambda x: x.cancel(), Job.objects.filter(dependent_jobs__in=[self.id]))
         return res
 
 
