@@ -18,11 +18,17 @@
 .WorkflowResults-leftSide {
     .OnePlusTwo-left--panel(100%, @breakpoint-md);
     height: ~"calc(100vh - 177px)";
+    min-height: 350px;
+
+    .Panel {
+        overflow: scroll;
+    }
 }
 
 .WorkflowResults-rightSide {
     .OnePlusTwo-right--panel(100%, @breakpoint-md);
     height: ~"calc(100vh - 177px)";
+    min-height: 350px;
 
     @media (max-width: @breakpoint-md - 1px) {
         padding-right: 15px;
