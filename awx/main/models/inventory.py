@@ -23,6 +23,7 @@ from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.jobs import Job
 from awx.main.models.mixins import ResourceMixin
 from awx.main.models.notifications import (
     NotificationTemplate,
@@ -1275,6 +1276,11 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
 
     def get_notification_friendly_name(self):
         return "Inventory Update"
+
+    def cancel(self):
+        res = super(InventoryUpdate, self).cancel()
+        map(lambda x: x.cancel(), Job.objects.filter(dependent_jobs__in=[self.id]))
+        return res
 
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
