@@ -41,9 +41,6 @@ import './helpers';
 import './lists';
 import './widgets';
 import './filters';
-import { Home } from './controllers/Home';
-import { SocketsController } from './controllers/Sockets';
-import { CredentialsAdd, CredentialsEdit, CredentialsList } from './controllers/Credentials';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -62,7 +59,7 @@ import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import configuration from './configuration/main';
-import dashboard from './dashboard/main';
+import home from './home/main';
 import moment from './shared/moment/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
@@ -70,9 +67,9 @@ import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import credentials from './credentials/main';
 import jobs from './jobs/main';
-import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
-import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
-import { TeamsList, TeamsAdd, TeamsEdit } from './controllers/Teams';
+import teams from './teams/main';
+import users from './users/main';
+import projects from './projects/main';
 
 import RestServices from './rest/main';
 import access from './access/main';
@@ -85,7 +82,6 @@ import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
-import { N_ } from './i18n';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -119,7 +115,7 @@ var tower = angular.module('Tower', [
     setupMenu.name,
     mainMenu.name,
     breadCrumb.name,
-    dashboard.name,
+    home.name,
     moment.name,
     login.name,
     activityStream.name,
@@ -135,6 +131,9 @@ var tower = angular.module('Tower', [
     config.name,
     credentials.name,
     jobs.name,
+    teams.name,
+    users.name,
+    projects.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -227,10 +226,9 @@ var tower = angular.module('Tower', [
         });
     }])
     .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
-        '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider',
+        '$urlMatcherFactoryProvider',
         function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider) {
-            let stateDefinitions = stateDefinitionsProvider.$get();
+            $urlMatcherFactoryProvider) {
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -266,109 +264,6 @@ var tower = angular.module('Tower', [
             // $stateProvider.stateRegistry.onStatesChanged((event, states) =>{
             //     console.log(event, states)
             // })
-
-
-            // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
-            // see: stateDefinition.factory for usage documentation
-            $stateProvider.state({
-                name: 'projects',
-                url: '/projects',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'projects', // top-most node in the generated tree (will replace this state definition)
-                    modes: ['add', 'edit'],
-                    list: 'ProjectList',
-                    form: 'ProjectsForm',
-                    controllers: {
-                        list: ProjectsList, // DI strings or objects
-                        add: ProjectsAdd,
-                        edit: ProjectsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'project',
-                        socket: {
-                            "groups": {
-                                "jobs": ["status_changed"]
-                            }
-                        }
-                    },
-                    ncyBreadcrumb: {
-                        label: N_('PROJECTS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'credentials',
-                url: '/credentials',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'credentials',
-                    modes: ['add', 'edit'],
-                    list: 'CredentialList',
-                    form: 'CredentialForm',
-                    controllers: {
-                        list: CredentialsList,
-                        add: CredentialsAdd,
-                        edit: CredentialsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'credential'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('CREDENTIALS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'teams',
-                url: '/teams',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'teams',
-                    modes: ['add', 'edit'],
-                    list: 'TeamList',
-                    form: 'TeamForm',
-                    controllers: {
-                        list: TeamsList,
-                        add: TeamsAdd,
-                        edit: TeamsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'team'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('TEAMS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'users',
-                url: '/users',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'users',
-                    modes: ['add', 'edit'],
-                    list: 'UserList',
-                    form: 'UserForm',
-                    controllers: {
-                        list: UsersList,
-                        add: UsersAdd,
-                        edit: UsersEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'user'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('USERS')
-                    }
-                })
-            });
         }
     ])
     .run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
@@ -390,68 +285,6 @@ var tower = angular.module('Tower', [
 
             $state.defaultErrorHandler(function(error) {
                 $log.debug(`$state.defaultErrorHandler: ${error}`);
-            });
-
-            $stateExtender.addState({
-                name: 'dashboard',
-                url: '/home',
-                templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home,
-                params: { licenseMissing: null },
-                data: {
-                    activityStream: true,
-                    refreshButton: true,
-                    socket: {
-                        "groups": {
-                            "jobs": ["status_changed"]
-                        }
-                    },
-                },
-                ncyBreadcrumb: {
-                    label: N_("DASHBOARD")
-                },
-                resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-                        function($q, jobStatusGraphData, $rootScope) {
-                            return $rootScope.featuresConfigured.promise.then(function() {
-                                return $q.all({
-                                    jobStatus: jobStatusGraphData.get("month", "all"),
-                                });
-                            });
-                        }
-                    ]
-                }
-            });
-
-            $stateExtender.addState({
-                name: 'userCredentials',
-                url: '/users/:user_id/credentials',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList
-            });
-
-            $stateExtender.addState({
-                name: 'userCredentialAdd',
-                url: '/users/:user_id/credentials/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
-            });
-
-            $stateExtender.addState({
-                name: 'teamUserCredentialEdit',
-                url: '/teams/:user_id/credentials/:credential_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
-            });
-
-            $stateExtender.addState({
-                name: 'sockets',
-                url: '/sockets',
-                templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController,
-                ncyBreadcrumb: {
-                    label: N_('SOCKETS')
-                }
             });
 
             function activateTab() {

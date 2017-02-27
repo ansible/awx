@@ -1,0 +1,154 @@
+/*************************************************
+ * Copyright (c) 2016 Ansible, Inc.
+ *
+ * All Rights Reserved
+ *************************************************/
+
+export default ['$scope', '$rootScope', '$compile', '$location', '$log',
+    '$stateParams', 'GenerateForm', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
+    'GetProjectPath', 'GetChoices', 'Wait', '$state', 'CreateSelect2', 'i18n',
+    function($scope, $rootScope, $compile, $location, $log,
+    $stateParams, GenerateForm, ProjectsForm, Rest, Alert, ProcessErrors,
+    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2, i18n) {
+
+        var form = ProjectsForm(),
+            base = $location.path().replace(/^\//, '').split('/')[0],
+            defaultUrl = GetBasePath('projects'),
+            master = {};
+
+        init();
+
+        function init() {
+            Rest.setUrl(GetBasePath('projects'));
+            Rest.options()
+                .success(function(data) {
+                    if (!data.actions.POST) {
+                        $state.go("^");
+                        Alert(i18n._('Permission Error'), i18n._('You do not have permission to add a project.'), 'alert-info');
+                    }
+            });
+
+            // apply form definition's default field values
+            GenerateForm.applyDefaults(form, $scope);
+        }
+
+        GetProjectPath({ scope: $scope, master: master });
+
+        if ($scope.removeChoicesReady) {
+            $scope.removeChoicesReady();
+        }
+        $scope.removeChoicesReady = $scope.$on('choicesReady', function() {
+            var i;
+            for (i = 0; i < $scope.scm_type_options.length; i++) {
+                if ($scope.scm_type_options[i].value === '') {
+                    $scope.scm_type_options[i].value = "manual";
+                    //$scope.scm_type = $scope.scm_type_options[i];
+                    break;
+                }
+            }
+
+            CreateSelect2({
+                element: '#project_scm_type',
+                multiple: false
+            });
+
+            $scope.scmRequired = false;
+            master.scm_type = $scope.scm_type;
+        });
+
+        // Load the list of options for Kind
+        GetChoices({
+            scope: $scope,
+            url: defaultUrl,
+            field: 'scm_type',
+            variable: 'scm_type_options',
+            callback: 'choicesReady'
+        });
+        CreateSelect2({
+            element: '#local-path-select',
+            multiple: false
+        });
+
+        // Save
+        $scope.formSave = function() {
+            var i, fld, url, data = {};
+            data = {};
+            for (fld in form.fields) {
+                if (form.fields[fld].type === 'checkbox_group') {
+                    for (i = 0; i < form.fields[fld].fields.length; i++) {
+                        data[form.fields[fld].fields[i].name] = $scope[form.fields[fld].fields[i].name];
+                    }
+                } else {
+                    if (form.fields[fld].type !== 'alertblock') {
+                        data[fld] = $scope[fld];
+                    }
+                }
+            }
+
+            if ($scope.scm_type.value === "manual") {
+                data.scm_type = "";
+                data.local_path = $scope.local_path.value;
+            } else {
+                data.scm_type = $scope.scm_type.value;
+                delete data.local_path;
+            }
+
+            url = (base === 'teams') ? GetBasePath('teams') + $stateParams.team_id + '/projects/' : defaultUrl;
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.post(data)
+                .success(function(data) {
+                    $scope.addedItem = data.id;
+                    $state.go('projects.edit', { project_id: data.id }, { reload: true });
+                })
+                .error(function(data, status) {
+                    Wait('stop');
+                    ProcessErrors($scope, data, status, form, { hdr: i18n._('Error!'),
+                        msg: i18n._('Failed to create new project. POST returned status: ') + status });
+                });
+        };
+
+        $scope.scmChange = function() {
+            // When an scm_type is set, path is not required
+            if ($scope.scm_type) {
+                $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
+                $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+                $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
+            }
+
+            // Dynamically update popover values
+            if ($scope.scm_type.value) {
+                switch ($scope.scm_type.value) {
+                    case 'git':
+                        $scope.urlPopover = '<p>' +
+                            i18n._('Example URLs for GIT SCM include:') +
+                            '</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                            '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
+                            '<p>' + i18n.sprintf(i18n._('%sNote:%s When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
+                            'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
+                            'SSH. GIT read only protocol (git://) does not use username or password information.'), '<strong>', '</strong>');
+                        break;
+                    case 'svn':
+                        $scope.urlPopover = '<p>' + i18n._('Example URLs for Subversion SCM include:') + '</p>' +
+                            '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
+                            '<li>svn+ssh://servername.example.com/path</li></ul>';
+                        break;
+                    case 'hg':
+                        $scope.urlPopover = '<p>' + i18n._('Example URLs for Mercurial SCM include:') + '</p>' +
+                            '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
+                            '<li>ssh://server.example.com/path</li></ul>' +
+                            '<p>' + i18n.sprintf(i18n._('%sNote:%s Mercurial does not support password authentication for SSH. ' +
+                            'Do not put the username and key in the URL. ' +
+                            'If using Bitbucket and SSH, do not supply your Bitbucket username.'), '<strong>', '</strong>');
+                        break;
+                    default:
+                        $scope.urlPopover = '<p> ' + i18n._('URL popover text');
+                }
+            }
+
+        };
+        $scope.formCancel = function() {
+            $state.go('projects');
+        };
+    }
+];
