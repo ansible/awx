@@ -8,8 +8,15 @@ import ldap
 import djcelery
 from datetime import timedelta
 
-# Update this module's local settings from the global settings module.
+from kombu import Queue, Exchange
+from kombu.common import Broadcast
+
+# global settings
 from django.conf import global_settings
+# ugettext lazy
+from django.utils.translation import ugettext_lazy as _
+
+# Update this module's local settings from the global settings module.
 this_module = sys.modules[__name__]
 for setting in dir(global_settings):
     if setting == setting.upper():
@@ -18,7 +25,9 @@ for setting in dir(global_settings):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+
 def is_testing(argv=None):
+    import sys
     '''Return True if running django or py.test unit tests.'''
     argv = sys.argv if argv is None else argv
     if len(argv) >= 1 and ('py.test' in argv[0] or 'py/test.py' in argv[0]):
@@ -26,6 +35,11 @@ def is_testing(argv=None):
     elif len(argv) >= 2 and argv[1] == 'test':
         return True
     return False
+
+
+def IS_TESTING(argv=None):
+    return is_testing(argv)
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -59,7 +73,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -112,7 +126,13 @@ LOG_ROOT = os.path.join(BASE_DIR)
 # The heartbeat file for the tower scheduler
 SCHEDULE_METADATA_LOCATION = os.path.join(BASE_DIR, '.tower_cycle')
 
+# Django gettext files path: locale/<lang-code>/LC_MESSAGES/django.po, django.mo
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 # Maximum number of the same job that can be waiting to run when launching from scheduler
+# Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
 
 SITE_ID = 1
@@ -129,7 +149,39 @@ ALLOWED_HOSTS = []
 # reverse proxy.
 REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 
+# Note: This setting may be overridden by database settings.
 STDOUT_MAX_BYTES_DISPLAY = 1048576
+
+# Returned in the header on event api lists as a recommendation to the UI
+# on how many events to display before truncating/hiding
+RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER = 4000
+
+# The maximum size of the ansible callback event's res data structure
+# beyond this limit and the value will be removed
+MAX_EVENT_RES_DATA = 700000
+
+# Note: This setting may be overridden by database settings.
+EVENT_STDOUT_MAX_BYTES_DISPLAY = 1024
+
+# The amount of time before a stdout file is expired and removed locally
+# Note that this can be recreated if the stdout is downloaded
+LOCAL_STDOUT_EXPIRE_TIME = 2592000
+
+# The number of processes spawned by the callback receiver to process job
+# events into the database
+JOB_EVENT_WORKERS = 4
+
+# The maximum size of the job event worker queue before requests are blocked
+JOB_EVENT_MAX_QUEUE_SIZE = 10000
+
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = True
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = True
+
+# Limit CSRF cookies to browser sessions
+CSRF_COOKIE_AGE = None
 
 TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
     'django.contrib.auth.context_processors.auth',
@@ -147,12 +199,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (  # NOQA
 )
 
 MIDDLEWARE_CLASSES = (  # NOQA
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'awx.main.middleware.HAMiddleware',
     'awx.main.middleware.ActivityStreamMiddleware',
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
@@ -185,18 +237,21 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'channels',
     'polymorphic',
     'taggit',
     'social.apps.django_app.default',
+    'awx.conf',
     'awx.main',
     'awx.api',
     'awx.ui',
-    'awx.fact',
     'awx.sso',
+    'solo',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
 
+MAX_PAGE_SIZE = 200
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'awx.api.pagination.Pagination',
     'PAGE_SIZE': 25,
@@ -235,33 +290,41 @@ AUTHENTICATION_BACKENDS = (
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',
     'social.backends.github.GithubTeamOAuth2',
+    'social.backends.azuread.AzureADOAuth2',
     'awx.sso.backends.SAMLAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 # LDAP server (default to None to skip using LDAP authentication).
+# Note: This setting may be overridden by database settings.
 AUTH_LDAP_SERVER_URI = None
 
 # Disable LDAP referrals by default (to prevent certain LDAP queries from
 # hanging with AD).
+# Note: This setting may be overridden by database settings.
 AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_REFERRALS: 0,
+    ldap.OPT_NETWORK_TIMEOUT: 30
 }
 
 # Radius server settings (default to empty string to skip using Radius auth).
+# Note: These settings may be overridden by database settings.
 RADIUS_SERVER = ''
 RADIUS_PORT = 1812
 RADIUS_SECRET = ''
 
 # Seconds before auth tokens expire.
+# Note: This setting may be overridden by database settings.
 AUTH_TOKEN_EXPIRATION = 1800
 
 # Maximum number of per-user valid, concurrent tokens.
 # -1 is unlimited
+# Note: This setting may be overridden by database settings.
 AUTH_TOKEN_PER_USER = -1
 
 # Enable / Disable HTTP Basic Authentication used in the API browser
 # Note: Session limits are not enforced when using HTTP Basic Authentication.
+# Note: This setting may be overridden by database settings.
 AUTH_BASIC_ENABLED = True
 
 # If set, serve only minified JS for UI.
@@ -326,20 +389,50 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 # Initialize Django-Celery.
 djcelery.setup_loader()
 
-BROKER_URL = 'redis://localhost/'
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_DEFAULT_QUEUE = 'default'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TRACK_STARTED = True
 CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
+CELERYD_POOL_RESTARTS = True
 CELERYBEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_IMPORTS = ('awx.main.scheduler.tasks',)
+CELERY_QUEUES = (
+    Queue('default', Exchange('default'), routing_key='default'),
+    Queue('jobs', Exchange('jobs'), routing_key='jobs'),
+    Queue('scheduler', Exchange('scheduler', type='topic'), routing_key='scheduler.job.#', durable=False),
+    Broadcast('broadcast_all')
+    # Projects use a fanout queue, this isn't super well supported
+)
+CELERY_ROUTES = {'awx.main.tasks.run_job': {'queue': 'jobs',
+                                            'routing_key': 'jobs'},
+                 'awx.main.tasks.run_project_update': {'queue': 'jobs',
+                                                       'routing_key': 'jobs'},
+                 'awx.main.tasks.run_inventory_update': {'queue': 'jobs',
+                                                         'routing_key': 'jobs'},
+                 'awx.main.tasks.run_ad_hoc_command': {'queue': 'jobs',
+                                                       'routing_key': 'jobs'},
+                 'awx.main.tasks.run_system_job': {'queue': 'jobs',
+                                                   'routing_key': 'jobs'},
+                 'awx.main.scheduler.tasks.run_job_launch': {'queue': 'scheduler',
+                                                             'routing_key': 'scheduler.job.launch'},
+                 'awx.main.scheduler.tasks.run_job_complete': {'queue': 'scheduler',
+                                                               'routing_key': 'scheduler.job.complete'},
+                 'awx.main.tasks.cluster_node_heartbeat': {'queue': 'default',
+                                                           'routing_key': 'cluster.heartbeat'},
+                 'awx.main.tasks.purge_old_stdout_files': {'queue': 'default',
+                                                           'routing_key': 'cluster.heartbeat'}}
+
 CELERYBEAT_SCHEDULE = {
     'tower_scheduler': {
         'task': 'awx.main.tasks.tower_periodic_scheduler',
-        'schedule': timedelta(seconds=30)
+        'schedule': timedelta(seconds=30),
+        'options': {'expires': 20,}
     },
     'admin_checks': {
         'task': 'awx.main.tasks.run_administrative_checks',
@@ -349,7 +442,41 @@ CELERYBEAT_SCHEDULE = {
         'task': 'awx.main.tasks.cleanup_authtokens',
         'schedule': timedelta(days=30)
     },
+    'cluster_heartbeat': {
+        'task': 'awx.main.tasks.cluster_node_heartbeat',
+        'schedule': timedelta(seconds=60),
+        'options': {'expires': 50,}
+    },
+    'purge_stdout_files': {
+        'task': 'awx.main.tasks.purge_old_stdout_files',
+        'schedule': timedelta(days=7)
+    },
+    'task_manager': {
+        'task': 'awx.main.scheduler.tasks.run_task_manager',
+        'schedule': timedelta(seconds=20),
+        'options': {'expires': 20,}
+    },
+    'task_fail_inconsistent_running_jobs': {
+        'task': 'awx.main.scheduler.tasks.run_fail_inconsistent_running_jobs',
+        'schedule': timedelta(seconds=30),
+        'options': {'expires': 20,}
+    },
 }
+
+# Django Caching Configuration
+if is_testing():
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'memcached:11211',
+        },
+    }
 
 # Social Auth configuration.
 SOCIAL_AUTH_STRATEGY = 'social.strategies.django_strategy.DjangoStrategy'
@@ -373,6 +500,20 @@ SOCIAL_AUTH_PIPELINE = (
     'awx.sso.pipeline.update_user_teams',
 )
 
+SOCIAL_AUTH_LOGIN_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
+SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
+
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
+SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
+SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+SOCIAL_AUTH_CLEAN_USERNAMES = True
+
+SOCIAL_AUTH_SANITIZE_REDIRECTS = True
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+
+# Note: These settings may be overridden by database settings.
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile']
@@ -391,6 +532,9 @@ SOCIAL_AUTH_GITHUB_TEAM_SECRET = ''
 SOCIAL_AUTH_GITHUB_TEAM_ID = ''
 SOCIAL_AUTH_GITHUB_TEAM_SCOPE = ['user:email', 'read:org']
 
+SOCIAL_AUTH_AZUREAD_OAUTH2_KEY = ''
+SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET = ''
+
 SOCIAL_AUTH_SAML_SP_ENTITY_ID = ''
 SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = ''
 SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = ''
@@ -398,22 +542,6 @@ SOCIAL_AUTH_SAML_ORG_INFO = {}
 SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {}
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {}
 SOCIAL_AUTH_SAML_ENABLED_IDPS = {}
-
-SOCIAL_AUTH_LOGIN_URL = '/'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/sso/complete/'
-SOCIAL_AUTH_LOGIN_ERROR_URL = '/sso/error/'
-SOCIAL_AUTH_INACTIVE_USER_URL = '/sso/inactive/'
-
-SOCIAL_AUTH_RAISE_EXCEPTIONS = False
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = False
-SOCIAL_AUTH_SLUGIFY_USERNAMES = True
-SOCIAL_AUTH_CLEAN_USERNAMES = True
-
-SOCIAL_AUTH_SANITIZE_REDIRECTS = True
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-
-SOCIAL_AUTH_ORGANIZATION_MAP = {}
-SOCIAL_AUTH_TEAM_MAP = {}
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.
@@ -434,45 +562,44 @@ ANSIBLE_FORCE_COLOR = True
 # the celery task.
 AWX_TASK_ENV = {}
 
-# Maximum number of job events processed by the callback receiver worker process
-# before it recycles
-JOB_EVENT_RECYCLE_THRESHOLD = 3000
-
-# Number of workers used to proecess job events in parallel
-JOB_EVENT_WORKERS = 4
-
-# Maximum number of job events that can be waiting on a single worker queue before
-# it can be skipped as too busy
-JOB_EVENT_MAX_QUEUE_SIZE = 100
-
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
 
-# Enable proot support for running jobs (playbook runs only).
-AWX_PROOT_ENABLED = False
+# Enable bubblewrap support for running jobs (playbook runs only).
+# Note: This setting may be overridden by database settings.
+AWX_PROOT_ENABLED = True
 
-# Command/path to proot.
-AWX_PROOT_CMD = 'proot'
+# Command/path to bubblewrap.
+AWX_PROOT_CMD = 'bwrap'
 
-# Additional paths to hide from jobs using proot.
+# Additional paths to hide from jobs using bubblewrap.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_HIDE_PATHS = []
 
-# Additional paths to show for jobs using proot.
+# Additional paths to show for jobs using bubbelwrap.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_SHOW_PATHS = []
 
 # Number of jobs to show as part of the job template history
 AWX_JOB_TEMPLATE_HISTORY = 10
 
-# The directory in which proot will create new temporary directories for its root
+# The directory in which bubblewrap will create new temporary directories for its root
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_BASE_PATH = "/tmp"
 
 # User definable ansible callback plugins
+# Note: This setting may be overridden by database settings.
 AWX_ANSIBLE_CALLBACK_PLUGINS = ""
 
+# Time at which an HA node is considered active
+AWX_ACTIVE_NODE_TIME = 7200
+
 # Enable Pendo on the UI, possible values are 'off', 'anonymous', and 'detailed'
+# Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
 # Default list of modules allowed for ad hoc commands.
+# Note: This setting may be overridden by database settings.
 AD_HOC_COMMANDS = [
     'command',
     'shell',
@@ -499,12 +626,12 @@ AD_HOC_COMMANDS = [
 # instead (based on docs from:
 # http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)
 RAX_REGION_CHOICES = [
-    ('ORD', 'Chicago'),
-    ('DFW', 'Dallas/Ft. Worth'),
-    ('IAD', 'Northern Virginia'),
-    ('LON', 'London'),
-    ('SYD', 'Sydney'),
-    ('HKG', 'Hong Kong'),
+    ('ORD', _('Chicago')),
+    ('DFW', _('Dallas/Ft. Worth')),
+    ('IAD', _('Northern Virginia')),
+    ('LON', _('London')),
+    ('SYD', _('Sydney')),
+    ('HKG', _('Hong Kong')),
 ]
 
 # Inventory variable name/values for determining if host is active/enabled.
@@ -531,20 +658,22 @@ INV_ENV_VARIABLE_BLACKLIST = ("HOME", "USER", "_", "TERM")
 # list of names here.  The available region IDs will be pulled from boto.
 # http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
 EC2_REGION_NAMES = {
-    'us-east-1': 'US East (Northern Virginia)',
-    'us-east-2': 'US East (Ohio)',
-    'us-west-2': 'US West (Oregon)',
-    'us-west-1': 'US West (Northern California)',
-    'eu-central-1': 'EU (Frankfurt)',
-    'eu-west-1': 'EU (Ireland)',
-    'ap-southeast-1': 'Asia Pacific (Singapore)',
-    'ap-southeast-2': 'Asia Pacific (Sydney)',
-    'ap-northeast-1': 'Asia Pacific (Tokyo)',
-    'ap-northeast-2': 'Asia Pacific (Seoul)',
-    'ap-south-1': 'Asia Pacific (Mumbai)',
-    'sa-east-1': 'South America (Sao Paulo)',
-    'us-gov-west-1': 'US West (GovCloud)',
-    'cn-north-1': 'China (Beijing)',
+    'us-east-1': _('US East (Northern Virginia)'),
+    'us-east-2': _('US East (Ohio)'),
+    'us-west-2': _('US West (Oregon)'),
+    'us-west-1': _('US West (Northern California)'),
+    'ca-central-1': _('Canada (Central)'),
+    'eu-central-1': _('EU (Frankfurt)'),
+    'eu-west-1': _('EU (Ireland)'),
+    'eu-west-2': _('EU (London)'),
+    'ap-southeast-1': _('Asia Pacific (Singapore)'),
+    'ap-southeast-2': _('Asia Pacific (Sydney)'),
+    'ap-northeast-1': _('Asia Pacific (Tokyo)'),
+    'ap-northeast-2': _('Asia Pacific (Seoul)'),
+    'ap-south-1': _('Asia Pacific (Mumbai)'),
+    'sa-east-1': _('South America (Sao Paulo)'),
+    'us-gov-west-1': _('US West (GovCloud)'),
+    'cn-north-1': _('China (Beijing)'),
 }
 
 EC2_REGIONS_BLACKLIST = [
@@ -572,11 +701,11 @@ VMWARE_REGIONS_BLACKLIST = []
 
 # Inventory variable name/values for determining whether a host is
 # active in vSphere.
-VMWARE_ENABLED_VAR = 'vmware_powerState'
-VMWARE_ENABLED_VALUE = 'poweredOn'
+VMWARE_ENABLED_VAR = 'guest.gueststate'
+VMWARE_ENABLED_VALUE = 'running'
 
 # Inventory variable name containing the unique instance ID.
-VMWARE_INSTANCE_ID_VAR = 'vmware_uuid'
+VMWARE_INSTANCE_ID_VAR = 'config.instanceuuid'
 
 # Filter for allowed group and host names when importing inventory
 # from VMware.
@@ -593,19 +722,19 @@ VMWARE_EXCLUDE_EMPTY_GROUPS = True
 # provide a list here.
 # Source: https://developers.google.com/compute/docs/zones
 GCE_REGION_CHOICES = [
-    ('us-east1-b', 'US East (B)'),
-    ('us-east1-c', 'US East (C)'),
-    ('us-east1-d', 'US East (D)'),
-    ('us-central1-a', 'US Central (A)'),
-    ('us-central1-b', 'US Central (B)'),
-    ('us-central1-c', 'US Central (C)'),
-    ('us-central1-f', 'US Central (F)'),
-    ('europe-west1-b', 'Europe West (B)'),
-    ('europe-west1-c', 'Europe West (C)'),
-    ('europe-west1-d', 'Europe West (D)'),
-    ('asia-east1-a', 'Asia East (A)'),
-    ('asia-east1-b', 'Asia East (B)'),
-    ('asia-east1-c', 'Asia East (C)'),
+    ('us-east1-b', _('US East (B)')),
+    ('us-east1-c', _('US East (C)')),
+    ('us-east1-d', _('US East (D)')),
+    ('us-central1-a', _('US Central (A)')),
+    ('us-central1-b', _('US Central (B)')),
+    ('us-central1-c', _('US Central (C)')),
+    ('us-central1-f', _('US Central (F)')),
+    ('europe-west1-b', _('Europe West (B)')),
+    ('europe-west1-c', _('Europe West (C)')),
+    ('europe-west1-d', _('Europe West (D)')),
+    ('asia-east1-a', _('Asia East (A)')),
+    ('asia-east1-b', _('Asia East (B)')),
+    ('asia-east1-c', _('Asia East (C)')),
 ]
 GCE_REGIONS_BLACKLIST = []
 
@@ -629,19 +758,19 @@ GCE_INSTANCE_ID_VAR = None
 # It's not possible to get zones in Azure without authenticating, so we
 # provide a list here.
 AZURE_REGION_CHOICES = [
-    ('Central_US', 'US Central'),
-    ('East_US_1', 'US East'),
-    ('East_US_2', 'US East 2'),
-    ('North_Central_US', 'US North Central'),
-    ('South_Central_US', 'US South Central'),
-    ('West_US', 'US West'),
-    ('North_Europe', 'Europe North'),
-    ('West_Europe', 'Europe West'),
-    ('East_Asia_Pacific', 'Asia Pacific East'),
-    ('Southest_Asia_Pacific', 'Asia Pacific Southeast'),
-    ('East_Japan', 'Japan East'),
-    ('West_Japan', 'Japan West'),
-    ('South_Brazil', 'Brazil South'),
+    ('Central_US', _('US Central')),
+    ('East_US_1', _('US East')),
+    ('East_US_2', _('US East 2')),
+    ('North_Central_US', _('US North Central')),
+    ('South_Central_US', _('US South Central')),
+    ('West_US', _('US West')),
+    ('North_Europe', _('Europe North')),
+    ('West_Europe', _('Europe West')),
+    ('East_Asia_Pacific', _('Asia Pacific East')),
+    ('Southest_Asia_Pacific', _('Asia Pacific Southeast')),
+    ('East_Japan', _('Japan East')),
+    ('West_Japan', _('Japan West')),
+    ('South_Brazil', _('Brazil South')),
 ]
 AZURE_REGIONS_BLACKLIST = []
 
@@ -686,6 +815,8 @@ SATELLITE6_GROUP_FILTER = r'^.+$'
 SATELLITE6_HOST_FILTER = r'^.+$'
 SATELLITE6_EXCLUDE_EMPTY_GROUPS = True
 SATELLITE6_INSTANCE_ID_VAR = 'foreman.id'
+SATELLITE6_GROUP_PREFIX = 'foreman_'
+SATELLITE6_GROUP_PATTERNS = ["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]
 
 # ---------------------
 # ----- CloudForms -----
@@ -701,15 +832,19 @@ CLOUDFORMS_INSTANCE_ID_VAR = 'id'
 # -- Activity Stream --
 # ---------------------
 # Defaults for enabling/disabling activity stream.
+# Note: These settings may be overridden by database settings.
 ACTIVITY_STREAM_ENABLED = True
 ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = False
 
 # Internal API URL for use by inventory scripts and callback plugin.
 INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 
-# ZeroMQ callback settings.
-CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
-CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
+PERSISTENT_CALLBACK_MESSAGES = True
+USE_CALLBACK_QUEUE = True
+CALLBACK_QUEUE = "callback_tasks"
+FACT_QUEUE = "facts"
+
+SCHEDULER_QUEUE = "scheduler"
 
 TASK_COMMAND_PORT = 6559
 
@@ -718,161 +853,19 @@ SOCKETIO_LISTEN_PORT = 8080
 
 FACT_CACHE_PORT = 6564
 
+# Note: This setting may be overridden by database settings.
 ORG_ADMINS_CAN_SEE_ALL_USERS = True
 
+# Note: This setting may be overridden by database settings.
 TOWER_ADMIN_ALERTS = True
 
+# Note: This setting may be overridden by database settings.
 TOWER_URL_BASE = "https://towerhost"
 
-TOWER_SETTINGS_MANIFEST = {
-    "SCHEDULE_MAX_JOBS": {
-        "name": "Maximum Scheduled Jobs",
-        "description": "Maximum number of the same job template that can be waiting to run when launching from a schedule before no more are created",
-        "default": SCHEDULE_MAX_JOBS,
-        "type": "int",
-        "category": "jobs",
-    },
-    "STDOUT_MAX_BYTES_DISPLAY": {
-        "name": "Standard Output Maximum Display Size",
-        "description": "Maximum Size of Standard Output in bytes to display before requiring the output be downloaded",
-        "default": STDOUT_MAX_BYTES_DISPLAY,
-        "type": "int",
-        "category": "jobs",
-    },
-    "AUTH_TOKEN_EXPIRATION": {
-        "name": "Idle Time Force Log Out",
-        "description": "Number of seconds that a user is inactive before they will need to login again",
-        "type": "int",
-        "default": AUTH_TOKEN_EXPIRATION,
-        "category": "authentication",
-    },
-    "AUTH_TOKEN_PER_USER": {
-        "name": "Maximum number of simultaneous logins",
-        "description": "Maximum number of simultaneous logins a user may have. To disable enter -1",
-        "type": "int",
-        "default": AUTH_TOKEN_PER_USER,
-        "category": "authentication",
-    },
-    # "AUTH_BASIC_ENABLED": {
-    #     "name": "Enable HTTP Basic Auth",
-    #     "description": "Enable HTTP Basic Auth for the API Browser",
-    #     "default": AUTH_BASIC_ENABLED,
-    #     "type": "bool",
-    #     "category": "authentication",
-    # },
-    # "AUTH_LDAP_SERVER_URI": {
-    #     "name": "LDAP Server URI",
-    #     "description": "URI Location of the LDAP Server",
-    #     "default": AUTH_LDAP_SERVER_URI,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_SERVER": {
-    #     "name": "Radius Server Host",
-    #     "description": "Host to communicate with for Radius Authentication",
-    #     "default": RADIUS_SERVER,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_PORT": {
-    #     "name": "Radius Server Port",
-    #     "description": "Port on the Radius host for Radius Authentication",
-    #     "default": RADIUS_PORT,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    # "RADIUS_SECRET": {
-    #     "name": "Radius Server Secret",
-    #     "description": "Secret used when negotiating with the Radius server",
-    #     "default": RADIUS_SECRET,
-    #     "type": "string",
-    #     "category": "authentication",
-    # },
-    "AWX_PROOT_ENABLED": {
-        "name": "Enable PRoot for Job Execution",
-        "description": "Isolates an Ansible job from protected parts of the Tower system to prevent exposing sensitive information",
-        "default": AWX_PROOT_ENABLED,
-        "type": "bool",
-        "category": "jobs",
-    },
-    "AWX_PROOT_HIDE_PATHS": {
-        "name": "Paths to hide from PRoot jobs",
-        "description": "Extra paths to hide from PRoot isolated processes",
-        "default": AWX_PROOT_HIDE_PATHS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "AWX_PROOT_SHOW_PATHS": {
-        "name": "Paths to expose to PRoot jobs",
-        "description": "Explicit whitelist of paths to expose to PRoot jobs",
-        "default": AWX_PROOT_SHOW_PATHS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "AWX_PROOT_BASE_PATH": {
-        "name": "Base PRoot execution path",
-        "description": "The location that PRoot will create its temporary working directory",
-        "default": AWX_PROOT_BASE_PATH,
-        "type": "string",
-        "category": "jobs",
-    },
-    "AWX_ANSIBLE_CALLBACK_PLUGINS": {
-        "name": "Ansible Callback Plugins",
-        "description": "Colon Seperated Paths for extra callback plugins to be used when running jobs",
-        "default": AWX_ANSIBLE_CALLBACK_PLUGINS,
-        "type": "string",
-        "category": "jobs",
-    },
-    "PENDO_TRACKING_STATE": {
-        "name": "Analytics Tracking State",
-        "description": "Enable or Disable Analytics Tracking",
-        "default": PENDO_TRACKING_STATE,
-        "type": "string",
-        "category": "ui",
-    },
-    "AD_HOC_COMMANDS": {
-        "name": "Ansible Modules Allowed for Ad Hoc Jobs",
-        "description": "A colon-seperated whitelist of modules allowed to be used by ad-hoc jobs",
-        "default": AD_HOC_COMMANDS,
-        "type": "list",
-        "category": "jobs",
-    },
-    "ACTIVITY_STREAM_ENABLED": {
-        "name": "Enable Activity Stream",
-        "description": "Enable capturing activity for the Tower activity stream",
-        "default": ACTIVITY_STREAM_ENABLED,
-        "type": "bool",
-        "category": "system",
-    },
-    "ORG_ADMINS_CAN_SEE_ALL_USERS": {
-        "name": "All Users Visible to Organization Admins",
-        "description": "Controls whether any Organization Admin can view all users, even those not associated with their Organization",
-        "default": ORG_ADMINS_CAN_SEE_ALL_USERS,
-        "type": "bool",
-        "category": "system",
-    },
-    "TOWER_ADMIN_ALERTS": {
-        "name": "Enable Tower Administrator Alerts",
-        "description": "Allow Tower to email Admin users for system events that may require attention",
-        "default": TOWER_ADMIN_ALERTS,
-        "type": "bool",
-        "category": "system",
-    },
-    "TOWER_URL_BASE": {
-        "name": "Base URL of the Tower host",
-        "description": "This is used by services like Notifications to render a valid url to the Tower host",
-        "default": TOWER_URL_BASE,
-        "type": "string",
-        "category": "system",
-    },
-    "LICENSE": {
-        "name": "Tower License",
-        "description": "Controls what features and functionality is enabled in Tower.",
-        "default": "{}",
-        "type": "string",
-        "category": "system",
-    },
-}
+TOWER_SETTINGS_MANIFEST = {}
+
+LOG_AGGREGATOR_ENABLED = False
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
@@ -882,7 +875,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'awx.lib.compat.RequireDebugTrue',
+            '()': 'django.utils.log.RequireDebugTrue',
         },
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',
@@ -892,6 +885,9 @@ LOGGING = {
         'simple': {
             'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
         },
+        'json': {
+            '()': 'awx.main.utils.formatters.LogstashFormatter'
+        }
     },
     'handlers': {
         'console': {
@@ -901,17 +897,23 @@ LOGGING = {
             'formatter': 'simple',
         },
         'null': {
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'file': {
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
             'formatter': 'simple',
         },
         'syslog': {
             'level': 'WARNING',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
             'formatter': 'simple',
+        },
+        'http_receiver': {
+            'class': 'awx.main.utils.handlers.HTTPSNullHandler',
+            'level': 'DEBUG',
+            'formatter': 'json',
+            'host': '',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -936,29 +938,11 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'simple',
         },
-        'socketio_service': {
-            'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'socketio_service.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
-            'formatter':'simple',
-        },
         'task_system': {
             'level': 'INFO',
             'class':'logging.handlers.RotatingFileHandler',
             'filters': ['require_debug_false'],
             'filename': os.path.join(LOG_ROOT, 'task_system.log'),
-            'maxBytes': 1024 * 1024 * 5, # 5 MB
-            'backupCount': 5,
-            'formatter':'simple',
-        },
-        'fact_receiver': {
-            'level': 'WARNING',
-            'class':'logging.handlers.RotatingFileHandler',
-            'filters': ['require_debug_false'],
-            'filename': os.path.join(LOG_ROOT, 'fact_receiver.log'),
             'maxBytes': 1024 * 1024 * 5, # 5 MB
             'backupCount': 5,
             'formatter':'simple',
@@ -998,7 +982,6 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
             'level': 'WARNING',
-            'propagate': False,
         },
         'rest_framework.request': {
             'handlers': ['mail_admins', 'console', 'file', 'tower_warnings'],
@@ -1012,21 +995,31 @@ LOGGING = {
             'handlers': ['console', 'file', 'tower_warnings'],
             'level': 'DEBUG',
         },
+        'awx.conf': {
+            'handlers': ['null'],
+            'level': 'WARNING',
+        },
+        'awx.conf.settings': {
+            'handlers': ['null'],
+            'level': 'WARNING',
+        },
+        'awx.main': {
+            'handlers': ['null']
+        },
         'awx.main.commands.run_callback_receiver': {
-            'handlers': ['console', 'file', 'callback_receiver'],
-            'propagate': False
+            'handlers': ['callback_receiver'],
         },
-        'awx.main.commands.run_socketio_service': {
-            'handlers': ['console', 'file', 'socketio_service'],
-            'propagate': False
+        'awx.main.tasks': {
+            'handlers': ['task_system'],
         },
-        'awx.main.commands.run_task_system': {
-            'handlers': ['console', 'file', 'task_system'],
-            'propagate': False
+        'awx.main.scheduler': {
+            'handlers': ['task_system'],
+        },
+        'awx.main.consumers': {
+            'handlers': ['null']
         },
         'awx.main.commands.run_fact_cache_receiver': {
-            'handlers': ['console', 'file', 'fact_receiver'],
-            'propagate': False
+            'handlers': ['fact_receiver'],
         },
         'awx.main.access': {
             'handlers': ['null'],
@@ -1039,6 +1032,11 @@ LOGGING = {
         'awx.api.permissions': {
             'handlers': ['null'],
             'propagate': False,
+        },
+        'awx.analytics': {
+            'handlers': ['http_receiver'],
+            'level': 'INFO',
+            'propagate': False
         },
         'django_auth_ldap': {
             'handlers': ['console', 'file', 'tower_warnings'],
@@ -1058,4 +1056,3 @@ LOGGING = {
         },
     }
 }
-

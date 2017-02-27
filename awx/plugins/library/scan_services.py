@@ -43,11 +43,13 @@ EXAMPLES = '''
 #            }, .... ] } }
 '''
 
+
 class BaseService(object):
 
     def __init__(self, module):
         self.module = module
         self.incomplete_warning = False
+
 
 class ServiceScanService(BaseService):
 
@@ -135,6 +137,7 @@ class ServiceScanService(BaseService):
                     services.append(service_data)
         return services
 
+
 class SystemctlScanService(BaseService):
 
     def systemd_enabled(self):
@@ -170,6 +173,7 @@ class SystemctlScanService(BaseService):
                              "source": "systemd"})
         return services
 
+
 def main():
     module = AnsibleModule(argument_spec = dict())
     service_modules = (ServiceScanService, SystemctlScanService)
@@ -189,5 +193,6 @@ def main():
         if incomplete_warning:
             results['msg'] = "WARNING: Could not find status for all services. Sometimes this is due to insufficient privileges."
     module.exit_json(**results)
+
 
 main()

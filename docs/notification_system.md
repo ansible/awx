@@ -1,5 +1,3 @@
-Completion pending unit tests and acceptance info and instructions.  The following documentation will likely be moved to the feature epic card and reproduced in our development documentation.
-
 # Notification System Overview
 
 A Notifier is an instance of a notification type (Email, Slack, Webhook, etc) with a name, description, and a defined configuration (A few examples: Username, password, server, recipients for the Email type.  Token and list of channels for Slack.  Url and Headers for webhooks)

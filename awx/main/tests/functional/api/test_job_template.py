@@ -1,23 +1,16 @@
 import pytest
-import mock
 
 # AWX
 from awx.api.serializers import JobTemplateSerializer, JobLaunchSerializer
-from awx.main.models.jobs import JobTemplate, Job
-from awx.main.models.projects import ProjectOptions
+from awx.main.models.jobs import Job
 from awx.main.migrations import _save_password_keys as save_password_keys
 
 # Django
-from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
 from django.apps import apps
 
-@property
-def project_playbooks(self):
-    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
 
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 201),
@@ -39,11 +32,11 @@ def test_create(post, project, machine_credential, inventory, alice, grant_proje
         'project': project.id,
         'credential': machine_credential.id,
         'inventory': inventory.id,
-        'playbook': 'mocked.yml',
+        'playbook': 'helloworld.yml',
     }, alice, expect=expect)
 
+
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 @pytest.mark.parametrize(
     "grant_project, grant_credential, grant_inventory, expect", [
         (True, True, True, 200),
@@ -68,11 +61,22 @@ def test_edit_sensitive_fields(patch, job_template_factory, alice, grant_project
         'project': objs.project.id,
         'credential': objs.credential.id,
         'inventory': objs.inventory.id,
-        'playbook': 'alt-mocked.yml',
+        'playbook': 'alt-helloworld.yml',
     }, alice, expect=expect)
 
+
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
+def test_reject_dict_extra_vars_patch(patch, job_template_factory, admin_user):
+    # Expect a string for extra_vars, raise 400 in this case that would
+    # otherwise have been saved incorrectly
+    jt = job_template_factory(
+        'jt', organization='org1', project='prj', inventory='inv', credential='cred'
+    ).job_template
+    patch(reverse('api:job_template_detail', args=(jt.id,)),
+          {'extra_vars': {'foo': 5}}, admin_user, expect=400)
+
+
+@pytest.mark.django_db
 def test_edit_playbook(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     objs.job_template.admin_role.members.add(alice)
@@ -81,16 +85,16 @@ def test_edit_playbook(patch, job_template_factory, alice):
     objs.inventory.use_role.members.add(alice)
 
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'alt-mocked.yml',
+        'playbook': 'alt-helloworld.yml',
     }, alice, expect=200)
 
     objs.inventory.use_role.members.remove(alice)
     patch(reverse('api:job_template_detail', args=(objs.job_template.id,)), {
-        'playbook': 'mocked.yml',
+        'playbook': 'helloworld.yml',
     }, alice, expect=403)
 
+
 @pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_edit_nonsenstive(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     jt = objs.job_template
@@ -115,6 +119,8 @@ def test_edit_nonsenstive(patch, job_template_factory, alice):
     }, alice, expect=200)
     print(res.data)
     assert res.data['name'] == 'updated'
+
+
 @pytest.fixture
 def jt_copy_edit(job_template_factory, project):
     objects = job_template_factory(
@@ -122,9 +128,6 @@ def jt_copy_edit(job_template_factory, project):
         project=project)
     return objects.job_template
 
-@property
-def project_playbooks(self):
-    return ['mocked', 'mocked.yml', 'alt-mocked.yml']
 
 @pytest.mark.django_db
 def test_job_template_role_user(post, organization_factory, job_template_factory):
@@ -141,148 +144,21 @@ def test_job_template_role_user(post, organization_factory, job_template_factory
     response = post(url, dict(id=jt_objects.job_template.execute_role.pk), objects.superusers.admin)
     assert response.status_code == 204
 
-# Test protection against limited set of validation problems
 
 @pytest.mark.django_db
-def test_bad_data_copy_edit(admin_user, project):
-    """
-    If a required resource (inventory here) was deleted, copying not allowed
-    because doing so would caues a validation error
-    """
-
-    jt_res = JobTemplate.objects.create(
-        job_type='run',
-        project=project,
-        inventory=None,  ask_inventory_on_launch=False, # not allowed
-        credential=None, ask_credential_on_launch=True,
-        name='deploy-job-template'
-    )
-    serializer = JobTemplateSerializer(jt_res)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = admin_user
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_res)
-    assert not response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-# Tests for correspondence between view info and actual access
-
-@pytest.mark.django_db
-def test_admin_copy_edit(jt_copy_edit, admin_user):
-    "Absent a validation error, system admins can do everything"
-
-    # Serializer can_copy/can_edit fields
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = admin_user
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-@pytest.mark.django_db
-def test_org_admin_copy_edit(jt_copy_edit, org_admin):
-    "Organization admins SHOULD be able to copy a JT firmly in their org"
-
-    # Serializer can_copy/can_edit fields
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = org_admin
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-@pytest.mark.django_db
-def test_org_admin_foreign_cred_no_copy_edit(jt_copy_edit, org_admin, machine_credential):
-    """
-    Organization admins without access to the 3 related resources:
-    SHOULD NOT be able to copy JT
-    SHOULD be able to edit that job template, for nonsensitive changes
-    """
-
-    # Attach credential to JT that org admin can not use
-    jt_copy_edit.credential = machine_credential
-    jt_copy_edit.save()
-
-    # Serializer can_copy/can_edit fields
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = org_admin
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_copy_edit)
-    assert not response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-@pytest.mark.django_db
-def test_jt_admin_copy_edit(jt_copy_edit, rando):
-    """
-    JT admins wihout access to associated resources SHOULD NOT be able to copy
-    SHOULD be able to make nonsensitive changes"""
-
-    # random user given JT admin access only
-    jt_copy_edit.admin_role.members.add(rando)
-    jt_copy_edit.save()
-
-    # Serializer can_copy/can_edit fields
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = rando
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_copy_edit)
-    assert not response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-@pytest.mark.django_db
-def test_proj_jt_admin_copy_edit(jt_copy_edit, rando):
-    "JT admins with access to associated resources SHOULD be able to copy"
-
-    # random user given JT and project admin abilities
-    jt_copy_edit.admin_role.members.add(rando)
-    jt_copy_edit.save()
-    jt_copy_edit.project.admin_role.members.add(rando)
-    jt_copy_edit.project.save()
-
-    # Serializer can_copy/can_edit fields
-    serializer = JobTemplateSerializer(jt_copy_edit)
-    request = RequestFactory().get('/api/v1/job_templates/12/')
-    request.user = rando
-    serializer.context['request'] = request
-    response = serializer.to_representation(jt_copy_edit)
-    assert response['summary_fields']['can_copy']
-    assert response['summary_fields']['can_edit']
-
-# Functional tests - create new JT with all returned fields, as the UI does
-
-@pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
-def test_org_admin_copy_edit_functional(jt_copy_edit, org_admin, get, post):
-    get_response = get(reverse('api:job_template_detail', args=[jt_copy_edit.pk]), user=org_admin)
-    assert get_response.status_code == 200
-    assert get_response.data['summary_fields']['can_copy']
-
-    post_data = get_response.data
-    post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
-    post_response = post(reverse('api:job_template_list', args=[]), user=org_admin, data=post_data)
-    assert post_response.status_code == 201
-    assert post_response.data['name'] == 'copy-edit-job-template @ 12:19:47 pm'
-
-@pytest.mark.django_db
-@mock.patch.object(ProjectOptions, "playbooks", project_playbooks)
 def test_jt_admin_copy_edit_functional(jt_copy_edit, rando, get, post):
-
     # Grant random user JT admin access only
     jt_copy_edit.admin_role.members.add(rando)
     jt_copy_edit.save()
 
     get_response = get(reverse('api:job_template_detail', args=[jt_copy_edit.pk]), user=rando)
     assert get_response.status_code == 200
-    assert not get_response.data['summary_fields']['can_copy']
 
     post_data = get_response.data
     post_data['name'] = '%s @ 12:19:47 pm' % post_data['name']
     post_response = post(reverse('api:job_template_list', args=[]), user=rando, data=post_data)
     assert post_response.status_code == 403
+
 
 @pytest.mark.django_db
 def test_scan_jt_no_inventory(job_template_factory):
@@ -316,6 +192,7 @@ def test_scan_jt_no_inventory(job_template_factory):
     assert not serializer.is_valid()
     assert 'inventory' in serializer.errors
 
+
 @pytest.mark.django_db
 def test_scan_jt_surveys(inventory):
     serializer = JobTemplateSerializer(data={"name": "Test", "job_type": "scan",
@@ -323,6 +200,7 @@ def test_scan_jt_surveys(inventory):
                                              "survey_enabled": True})
     assert not serializer.is_valid()
     assert "survey_enabled" in serializer.errors
+
 
 @pytest.mark.django_db
 def test_jt_without_project(inventory):
@@ -339,6 +217,7 @@ def test_jt_without_project(inventory):
     serializer = JobTemplateSerializer(data=data)
     assert serializer.is_valid()
 
+
 @pytest.mark.django_db
 def test_disallow_template_delete_on_running_job(job_template_factory, delete, admin_user):
     objects = job_template_factory('jt',
@@ -351,12 +230,14 @@ def test_disallow_template_delete_on_running_job(job_template_factory, delete, a
     delete_response = delete(reverse('api:job_template_detail', args=[objects.job_template.pk]), user=admin_user)
     assert delete_response.status_code == 409
 
+
 @pytest.mark.django_db
 def test_save_survey_passwords_to_job(job_template_with_survey_passwords):
     """Test that when a new job is created, the survey_passwords field is
     given all of the passwords that exist in the JT survey"""
     job = job_template_with_survey_passwords.create_unified_job()
     assert job.survey_passwords == {'SSN': '$encrypted$', 'secret_key': '$encrypted$'}
+
 
 @pytest.mark.django_db
 def test_save_survey_passwords_on_migration(job_template_with_survey_passwords):

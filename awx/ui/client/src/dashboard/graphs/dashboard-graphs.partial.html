@@ -1,68 +1,68 @@
 <div class="DashboardGraphs">
     <div class="DashboardGraphs-headerSection">
         <h3 class="DashboardGraphs-headerText">
-            JOB STATUS
+            <translate>JOB STATUS</translate>
         </h3>
         <div class="DashboardGraphs-graphToolbar" ng-show="!hostStatusSelected">
             <div class="DashboardGraphs-filteringDropdowns">
-                <div class="DashboardGraphs-filterLabel">Period</div>
+                <div class="DashboardGraphs-filterLabel" translate>Period</div>
                 <div class="DashboardGraphs-periodDropdown">
                     <a id="period-dropdown" role="button"
                     data-toggle="dropdown"
                     data-target="#"
                     href="/page.html"
                     class="DashboardGraphs-filterDropdownText">
-                        Past Month <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
+                        <translate>Past Month</translate> <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
                     </a>
                     <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
                         DashboardGraphs-filterDropdownItems--period" role="menu" aria-labelledby="period-dropdown">
                         <li>
-                            <a class="n" id="day" >Past 24 Hours </a>
+                            <a class="n" id="day" translate>Past 24 Hours </a>
                         </li>
                         <li>
-                            <a class="n" id="week">Past Week</a>
+                            <a class="n" id="week" translate>Past Week</a>
                         </li>
                         <li>
-                            <a class="n" id="month">Past Month</a>
+                            <a class="n" id="month" translate>Past Month</a>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="DashboardGraphs-filteringDropdowns">
-                <div class="DashboardGraphs-filterLabel">Job Type</div>
+                <div class="DashboardGraphs-filterLabel" translate>Job Type</div>
                 <div class="DashboardGraphs-jobTypeDropdown">
 
                         <a id="type-dropdown" role="button" data-toggle="dropdown" data-target="#" class="DashboardGraphs-filterDropdownText"
                         href="/page.html">
-                            All <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
+                            <translate>All</translate> <i class="fa fa-chevron-down DashboardGraphs-filterIcon"></i>
                         </a>
 
                     <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
                         DashboardGraphs-filterDropdownItems--jobType" role="menu" aria-labelledby="type-dropdown">
                         <li>
-                            <a class="m" id="all">All</a>
+                            <a class="m" id="all" translate>All</a>
                         </li>
                         <li>
-                            <a class="m" id="inv_sync">Inventory Sync</a>
+                            <a class="m" id="inv_sync" translate>Inventory Sync</a>
                         </li>
                         <li>
-                            <a class="m" id="scm_update">SCM Update</a>
+                            <a class="m" id="scm_update" translate>SCM Update</a>
                         </li>
                         <li>
-                            <a class="m" id="playbook_run">Playbook Run</a>
+                            <a class="m" id="playbook_run" translate>Playbook Run</a>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="DashboardGraphs-filteringDropdowns">
-                <div class="DashboardGraphs-filterLabel">View</div>
+                <div class="DashboardGraphs-filterLabel" translate>View</div>
                 <div class="DashboardGraphs-statusDropdown">
                     <a id="status-dropdown" role="button"
                     data-toggle="dropdown"
                     data-target="#"
                     href="/page.html"
                     class="DashboardGraphs-filterDropdownText">
-                        All
+                        <translate>All</translate>
                         <i class="fa fa-chevron-down
                             DashboardGraphs-filterIcon">
                         </i>
@@ -71,13 +71,13 @@
                     <ul class="dropdown-menu DashboardGraphs-filterDropdownItems
                         DashboardGraphs-filterDropdownItems--status" role="menu" aria-labelledby="status-dropdown">
                         <li>
-                            <a class="o" id="both" >All</a>
+                            <a class="o" id="both" translate>All</a>
                         </li>
                         <li>
-                            <a class="o" id="failed">Successful</a>
+                            <a class="o" id="failed" translate>Successful</a>
                         </li>
                         <li>
-                            <a class="o" id="successful">Failed</a>
+                            <a class="o" id="successful" translate>Failed</a>
                         </li>
                     </ul>
                 </div>

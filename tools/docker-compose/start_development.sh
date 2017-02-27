@@ -3,10 +3,14 @@ set +x
 
 # Wait for the databases to come up
 ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=postgres port=5432" all
-ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=redis port=6379" all
+ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=memcached port=11211" all
+ansible -i "127.0.0.1," -c local -v -m wait_for -a "host=${RABBITMQ_HOST} port=5672" all
 
 # In case Tower in the container wants to connect to itself, use "docker exec" to attach to the container otherwise
-/etc/init.d/ssh start
+# TODO: FIX
+#/etc/init.d/ssh start
+
+
 ansible -i "127.0.0.1," -c local -v -m postgresql_user -U postgres -a "name=awx-dev password=AWXsome1 login_user=postgres login_host=postgres" all
 ansible -i "127.0.0.1," -c local -v -m postgresql_db -U postgres -a "name=awx-dev owner=awx-dev login_user=postgres login_host=postgres" all
 
@@ -20,21 +24,21 @@ else
 fi
 
 cp -nR /tmp/ansible_tower.egg-info /tower_devel/ || true
-
-# Check if we need to build dependencies
-#if [ -f "awx/lib/.deps_built" ]; then
-#    echo "Skipping dependency build - remove awx/lib/.deps_built to force a rebuild"
-#else
-make requirements_dev
-#    touch awx/lib/.deps_built
-#fi
-
-cp /tmp/ansible-tower.egg-link /tower_devel/venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+cp /tmp/ansible-tower.egg-link /venv/tower/lib/python2.7/site-packages/ansible-tower.egg-link
+yes | cp -rf /tower_devel/tools/docker-compose/supervisor.conf /supervisor.conf
 
 # Tower bootstrapping
 make version_file
 make migrate
 make init
 
+mkdir -p /tower_devel/awx/public/static
+mkdir -p /tower_devel/awx/ui/static
+
 # Start the service
-make honcho
+
+if [ -f "/tower_devel/tools/docker-compose/use_dev_supervisor.txt" ]; then
+    make supervisor
+else
+    make honcho
+fi

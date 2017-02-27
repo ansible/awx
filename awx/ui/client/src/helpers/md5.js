@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
     /**
  * @ngdoc function
  * @name helpers.function:md5
@@ -15,7 +15,7 @@
 
 
 export default
-    angular.module('md5Helper', ['RestServices', 'Utilities', 'angular-md5'])
+    angular.module('md5Helper', ['RestServices', 'Utilities', require('angular-md5')])
         .factory('md5Setup', ['md5', function (md5) {
             return function (params) {
 

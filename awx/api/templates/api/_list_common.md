@@ -56,6 +56,10 @@ within all designated text fields of a model.
 
 _Added in AWX 1.4_
 
+(_Added in Ansible Tower 3.1.0_) Search across related fields:
+
+    ?related__search=findme
+
 ## Filtering
 
 Any additional query string parameters may be used to filter the list of
@@ -132,3 +136,8 @@ values.
 
 Lists (for the `in` lookup) may be specified as a comma-separated list of
 values.
+
+(_Added in Ansible Tower 3.1.0_) Filtering based on the requesting user's
+level of access by query string parameter.
+
+* `role_level`: Level of role to filter on, such as `admin_role`

@@ -48,23 +48,19 @@
                 $scope.status = res.results[0].status;
             });
         };
-        if ($rootScope.removeJobStatusChange) {
-            $rootScope.removeJobStatusChange();
+        if ($rootScope.removeJobSummaryComplete) {
+            $rootScope.removeJobSummaryComplete();
         }
         // emitted by the API in the same function used to persist host summary data
         // JobEvent.update_host_summary_from_stats() from /awx/main.models.jobs.py
-        $rootScope.removeJobStatusChange = $rootScope.$on('JobSummaryComplete', function(e, data) {
+        $scope.$on('ws-jobs-summary', function(e, data) {
             // discard socket msgs we don't care about in this context
             if (parseInt($stateParams.id) === data.unified_job_id){
                 init();
             }
         });
 
-        // UnifiedJob.def socketio_emit_status() from /awx/main.models.unified_jobs.py
-        if ($rootScope.removeJobSummaryComplete) {
-            $rootScope.removeJobSummaryComplete();
-        }
-        $rootScope.removeJobSummaryComplete = $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+        $scope.$on('ws-jobs', function(e, data) {
             if (parseInt($stateParams.id) === data.unified_job_id){
                 $scope.status = data.status;
             }
@@ -98,25 +94,30 @@
                 });
             }
         };
-        $scope.search = function(){
-            if($scope.searchTerm && $scope.searchTerm !== '') {
-                $scope.searchActive = true;
-                Wait('start');
-                JobDetailService.getJobHostSummaries($stateParams.id, {
-                    page_size: page_size,
-                    host_name__icontains: encodeURIComponent($scope.searchTerm),
-                }).success(function(res){
-                    $scope.hosts = res.results;
-                    $scope.next = res.next;
-                    Wait('stop');
-                });
-            }
-        };
-        $scope.clearSearch = function(){
-            $scope.searchActive = false;
-            $scope.searchTerm = null;
-            init();
-        };
+
+        // @issue: OLD SEARCH
+        // $scope.search = function(){
+        //     if($scope.searchTerm && $scope.searchTerm !== '') {
+        //         $scope.searchActive = true;
+        //         Wait('start');
+        //         JobDetailService.getJobHostSummaries($stateParams.id, {
+        //             page_size: page_size,
+        //             host_name__icontains: encodeURIComponent($scope.searchTerm),
+        //         }).success(function(res){
+        //             $scope.hosts = res.results;
+        //             $scope.next = res.next;
+        //             Wait('stop');
+        //         });
+        //     }
+        // };
+
+        // @issue: OLD SEARCH
+        // $scope.clearSearch = function(){
+        //     $scope.searchActive = false;
+        //     $scope.searchTerm = null;
+        //     init();
+        // };
+        
         $scope.setFilter = function(filter){
             $scope.filter = filter;
             var getAll = function(){

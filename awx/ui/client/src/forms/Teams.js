@@ -12,130 +12,153 @@
 
 export default
     angular.module('TeamFormDefinition', [])
-        .value('TeamForm', {
+        .factory('TeamForm', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New Team', //Legend in add mode
+            addTitle: i18n._('New Team'), //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
+            // the top-most node of generated state tree
+            stateTree: 'teams',
             tabs: true,
 
             fields: {
                 name: {
-                    label: 'Name',
+                    label: i18n._('Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                     capitalize: false
                 },
                 description: {
-                    label: 'Description',
+                    label: i18n._('Description'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
-                    label: 'Organization',
+                    label: i18n._('Organization'),
                     type: 'lookup',
+                    list: 'OrganizationList',
                     sourceModel: 'organization',
+                    basePath: 'organizations',
                     sourceField: 'name',
-                    addRequired: true,
-                    editRequire: false,
-                    ngClick: 'lookUpOrganization()',
-                    awRequiredWhen: {
-                        reqExpression: "orgrequired",
-                        init: true
-                    }
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                 }
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             related: {
-                access_list: {
+                users: {
+                    name: 'users',
                     dataPlacement: 'top',
-                    awToolTip: 'Please save before adding users',
-                    basePath: 'teams/:id/access_list/',
+                    awToolTip: i18n._('Please save before adding users'),
+                    basePath: 'api/v1/teams/{{$stateParams.team_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
                     type: 'collection',
-                    title: 'Users',
-                    iterator: 'permission',
+                    title: i18n._('Users'),
+                    iterator: 'user',
                     index: false,
                     open: false,
-                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addPermissionWithoutTeamTab",
-                            label: 'Add',
-                            awToolTip: 'Add user to team',
+                            ngClick: "$state.go('.add')",
+                            label: i18n._('Add'),
+                            awToolTip: i18n._('Add User'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ' + i18n._('ADD'),
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 
                     fields: {
                         username: {
                             key: true,
-                            label: 'User',
+                            label: i18n._('User'),
                             linkBase: 'users',
                             class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             type: 'role',
-                            noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
+                            nosort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         }
                     }
                 },
-                roles: {
-                    hideSearchAndActions: true,
+                permissions: {
+                    name: 'permissions',
+                    basePath: 'api/v1/teams/{{$stateParams.team_id}}/roles/',
+                    search: {
+                        page_size: '10',
+                        // @todo ask about name field / serializer on this endpoint
+                        order_by: 'id'
+                    },
+                    awToolTip: i18n._('Please save before assigning permissions'),
                     dataPlacement: 'top',
-                    awToolTip: 'Please save before assigning permissions',
-                    basePath: 'teams/:id/roles/',
+                    hideSearchAndActions: true,
                     type: 'collection',
-                    title: 'Granted Permissions',
-                    iterator: 'role',
+                    title: i18n._('Permissions'),
+                    iterator: 'permission',
                     open: false,
                     index: false,
-                    actions: {},
-                    emptyListText: 'No permissions have been granted',
+                    emptyListText: i18n._('No permissions have been granted'),
                     fields: {
                         name: {
-                            label: 'Name',
-                            ngBind: 'role.summary_fields.resource_name',
-                            linkTo: '{{convertApiUrl(role.related[role.summary_fields.resource_type])}}',
-                            noSort: true
+                            label: i18n._('Name'),
+                            ngBind: 'permission.summary_fields.resource_name',
+                            linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
+                            nosort: true
                         },
                         type: {
-                            label: 'Type',
-                            ngBind: 'role.summary_fields.resource_type_display_name',
-                            noSort: true
+                            label: i18n._('Type'),
+                            ngBind: 'permission.summary_fields.resource_type_display_name',
+                            nosort: true
                         },
                         role: {
-                            label: 'Role',
-                            ngBind: 'role.name',
-                            noSort: true
+                            label: i18n._('Role'),
+                            ngBind: 'permission.name',
+                            nosort: true
                         }
                     },
                     fieldActions: {
                         "delete": {
-                            label: 'Remove',
-                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, role.name, role.summary_fields.resource_name, role.related.teams)',
+                            label: i18n._('Remove'),
+                            ngClick: 'deletePermissionFromTeam(team_id, team_obj.name, permission.name, permission.summary_fields.resource_name, permission.related.teams)',
                             'class': "List-actionButton--delete",
                             iconClass: 'fa fa-times',
-                            awToolTip: 'Dissasociate permission from team',
-                            dataPlacement: 'top'
+                            awToolTip: i18n._('Dissasociate permission from team'),
+                            dataPlacement: 'top',
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
-                    hideOnSuperuser: true
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Grant Permission'),
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            ngShow: '(team_obj.summary_fields.user_capabilities.edit || canAdd)'
+                        }
+                    }
                 }
             },
-        }); //InventoryForm
+        };}]); //InventoryForm

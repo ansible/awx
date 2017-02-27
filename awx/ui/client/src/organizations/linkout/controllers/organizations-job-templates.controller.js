@@ -5,87 +5,99 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'JobTemplateList', 'generateList',
-    'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'JobTemplateForm', 'CredentialList',
-    'LookUpInit', 'InitiatePlaybookRun', 'Wait', '$compile',
-    '$state',
+    '$stateParams', 'Rest', 'Alert', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
+    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
     function($scope, $rootScope, $location, $log,
-    $stateParams, Rest, Alert, JobTemplateList, GenerateList, Prompt,
-    SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
-    GetBasePath, JobTemplateForm, CredentialList, LookUpInit, InitiatePlaybookRun,
-    Wait, $compile, $state) {
+        $stateParams, Rest, Alert, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
+        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait, TemplateCopyService,
+        $compile, $state, OrgJobTemplateList, Dataset, qs) {
 
-        var list,
-            jobTemplateUrl,
-            generator = GenerateList,
+        var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');
 
-        Rest.setUrl(orgBase + $stateParams.organization_id);
-        Rest.get()
-            .success(function (data) {
-                // include name of item in listTitle
-                var listTitle = data.name + "<div class='List-titleLockup'></div>JOB TEMPLATES";
+        $scope.$on(`ws-jobs`, function () {
+            let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+            qs.search(path, $state.params[`${list.iterator}_search`])
+            .then(function(searchResponse) {
+                $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            });
+        });
 
-                $scope.$parent.activeCard = parseInt($stateParams.organization_id);
-                $scope.$parent.activeMode = 'job_templates';
-                $scope.organization_name = data.name;
-                $scope.org_id = data.id;
+        init();
 
-                list = _.cloneDeep(JobTemplateList);
-                list.emptyListText = "This list is populated by job templates added from the&nbsp;<a ui-sref='jobTemplates.add'>Job Templates</a>&nbsp;section";
-                delete list.actions.add;
-                delete list.fieldActions.delete;
-                jobTemplateUrl = "/api/v1/job_templates/?project__organization=" + data.id;
-                list.listTitle = listTitle;
-                list.basePath = jobTemplateUrl;
+        function init() {
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+            Rest.setUrl(orgBase + $stateParams.organization_id);
+            Rest.get()
+                .success(function(data) {
+                    $scope.organization_name = data.name;
+                    $scope.name = data.name;
+                    $scope.org_id = data.id;
 
-                $scope.orgRelatedUrls = data.related;
+                    $scope.orgRelatedUrls = data.related;
+                });
+        }
 
-                generator.inject(list, { mode: 'edit', scope: $scope, cancelButton: true });
+        $scope.$on(`${list.iterator}_options`, function(event, data){
+            $scope.options = data.data.actions.GET;
+            optionsRequestDataProcessing();
+        });
 
-                if ($scope.removePostRefresh) {
-                    $scope.removePostRefresh();
+        $scope.$watchCollection(`${$scope.list.name}`, function() {
+                optionsRequestDataProcessing();
+            }
+        );
+        // iterate over the list and add fields like type label, after the
+        // OPTIONS request returns, or the list is sorted/paginated/searched
+        function optionsRequestDataProcessing(){
+            $scope[list.name].forEach(function(item, item_idx) {
+                var itm = $scope[list.name][item_idx];
+
+                // Set the item type label
+                if (list.fields.type && $scope.options && $scope.options.hasOwnProperty('type')) {
+                    $scope.options.type.choices.forEach(function(choice) {
+                        if (choice[0] === item.type) {
+                            itm.type_label = choice[1];
+                        }
+                    });
                 }
-                $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-                    // Cleanup after a delete
-                    Wait('stop');
-                    $('#prompt-modal').modal('hide');
-                });
+            });
+        }
 
-                SearchInit({
-                    scope: $scope,
-                    set: 'job_templates',
-                    list: list,
-                    url: jobTemplateUrl
-                });
-                PaginateInit({
-                    scope: $scope,
-                    list: list,
-                    url: jobTemplateUrl
-                });
-                $scope.search(list.iterator);
+        $scope.editJobTemplate = function(id) {
+            $state.go('templates.editJobTemplate', { job_template_id: id });
+        };
+
+        $scope.submitJob = function(id) {
+            InitiatePlaybookRun({ scope: $scope, id: id, job_type: 'job_template' });
+        };
+
+        $scope.scheduleJob = function(id) {
+            $state.go('jobTemplateSchedules', { id: id });
+        };
+
+        $scope.copyTemplate = function(id) {
+            Wait('start');
+ 			TemplateCopyService.get(id)
+ 			.success(function(res){
+ 					TemplateCopyService.set(res)
+                    .success(function(res){
+                        Wait('stop');
+                        if(res.type && res.type === 'job_template') {
+                            $state.go('templates.editJobTemplate', {job_template_id: res.id}, {reload: true});
+                        }
+                    });
+ 			})
+  			.error(function(res, status){
+                ProcessErrors($rootScope, res, status, null, {hdr: 'Error!',
+                msg: 'Call failed. Return status: '+ status});
             });
 
-        $scope.addJobTemplate = function () {
-            $state.transitionTo('jobTemplates.add');
-        };
-
-        $scope.editJobTemplate = function (id) {
-            $state.transitionTo('jobTemplates.edit', {id: id});
-        };
-
-        $scope.submitJob = function (id) {
-            InitiatePlaybookRun({ scope: $scope, id: id });
-        };
-
-        $scope.scheduleJob = function (id) {
-            $state.go('jobTemplateSchedules', {id: id});
-        };
-
-        $scope.formCancel = function(){
-            $scope.$parent.activeCard = null;
-            $state.go('organizations');
         };
 
     }

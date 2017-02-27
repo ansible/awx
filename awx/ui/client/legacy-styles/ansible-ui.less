@@ -21,7 +21,7 @@
     src: url(/static/assets/OpenSans-Bold.ttf);
 }
 
-@import "src/shared/branding/colors.less";
+@import "./client/src/shared/branding/colors.less";
 @import "fonts.less";
 @import "main-layout.less";
 @import "animations.less";
@@ -42,9 +42,9 @@
 @import "survey-maker.less";
 @import "text-label.less";
 @import "./bootstrap-datepicker.less";
-@import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "./client/src/shared/branding/colors.default.less";
 // Bootstrap default overrides
-@import "awx/ui/client/src/shared/bootstrap-settings.less";
+@import "./client/src/shared/bootstrap-settings.less";
 /* Bootstrap fix that's causing a right margin to appear
    whenver a modal is opened */
 body.modal-open {
@@ -730,75 +730,6 @@ legend {
   margin: 15px 0 15px 0;
 }
 
-.page-number {
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-}
-
-.page-number-small {
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 11px;
-}
-
-/* Pagination */
-  .page-label {
-    font-size: 12px;
-    margin-top: 0;
-    text-align: right;
-  }
-
-  .pagination {
-    margin-top: 0;
-    margin-bottom: 7px;
-  }
-
-  .pagination>li>a,
-  .pagination>li>span {
-    border: 1px solid @grey-border;
-    padding: 3px 6px;
-    font-size: 10px;
-  }
-
-  .pagination li {
-    a#next-page {
-      border-radius: 0 4px 4px 0;
-    }
-
-    a#previous-page {
-      border-radius: 4px 0 0 4px;
-    }
-  }
-
-  .modal-body {
-      .pagination {
-          margin-top: 15px;
-          margin-bottom: 0;
-      }
-      .pagination > li > a {
-          border: none;
-          padding-top: 0;
-          padding-bottom: 0;
-      }
-      .pagination > .active > a {
-          background-color: @default-bg;
-          color: #428bca;
-          border-color: none;
-          border: 1px solid @default-link;
-      }
-      .alert {
-          padding: 0;
-          border: none;
-          margin: 0;
-      }
-      .alert-danger {
-          background-color: @default-bg;
-          border: none;
-          color: @default-interface-txt;
-      }
-  }
-
 .footer-navigation {
   margin: 10px 0 10px 0;
 }
@@ -962,6 +893,12 @@ input[type="checkbox"].checkbox-no-label {
   margin-top: 10px;
 }
 
+.radio-group {
+  .radio-inline + .radio-inline {
+    margin-left: 0;
+  }
+}
+
 .checkbox-group {
   .radio-inline + .radio-inline,
   .checkbox-inline + .checkbox-inline {
@@ -984,7 +921,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
     text-align: right;
-    margin-bottom: 20px;
+    margin-bottom: -34px;
 
     .fa-lg {
         vertical-align: -8%;
@@ -1155,6 +1092,7 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-stopped:before,
   .icon-job-error:before,
   .icon-job-canceled:before,
+  .icon-job-stdout-download-tooltip:before,
   .icon-job-unreachable:before {
       content: "\f06a";
   }
@@ -1192,6 +1130,7 @@ input[type="checkbox"].checkbox-no-label {
   .icon-job-stopped,
   .icon-job-error,
   .icon-job-failed,
+  .icon-job-stdout-download-tooltip,
   .icon-job-canceled {
       color: @red;
   }
@@ -1623,6 +1562,10 @@ a.btn-disabled:hover {
 
 /* Sort link styles */
 
+.list-header-noSort:hover.list-header:hover{
+  cursor: default;
+}
+
 .list-header:hover {
   cursor: pointer;
 }
@@ -1685,17 +1628,19 @@ tr td button i {
 }
 
 /* overrides to TB modal */
+.modal-content {
+    padding: 20px;
+}
 
 .modal-header {
     color: @default-interface-txt;
-    margin: .1em 0;
     white-space: nowrap;
     width: 90%;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
     border: none;
-    padding: 12px 14px 0 12px;
+    padding: 0;
 }
 
 .modal {
@@ -1724,8 +1669,19 @@ tr td button i {
 }
 
 .modal-body {
-    padding: 20px 14px 7px 14px;
     min-height: 120px;
+    padding: 20px 0;
+    
+    .alert {
+        padding: 10px;
+        margin: 0;
+        word-wrap: break-word;
+    }
+    .alert-danger {
+        background-color: @default-bg;
+        border: none;
+        color: @default-interface-txt;
+      }
 }
 
 #prompt-modal .modal-body {
@@ -1737,15 +1693,15 @@ tr td button i {
 }
 
 .modal-footer {
-    padding: .3em 1em .5em .4em;
+    padding: 0;
     border: none;
+    margin-top: 0;
 
     .btn.btn-primary {
       text-transform: uppercase;
       background-color: @default-succ;
       border-color: @default-succ;
       padding: 5px 15px;
-      margin: .5em .4em .5em 0;
       cursor: pointer;
 
       &:hover {
@@ -1767,8 +1723,7 @@ tr td button i {
 
 
 /* PW progress bar */
-.pw-progress {
-  margin-top: 10px;
+.pw-progress {  margin-top: 10px;
 
   li {
     line-height: normal;
@@ -1984,10 +1939,16 @@ tr td button i {
       padding-right: 15px;
   }
 
+
+
+}
+
+// lists.less uses 600px as the breakpoint, doing same for consistency
+@media (max-width: 600px) {
   .list-actions {
       text-align: left;
+      margin-bottom: 20px;
   }
-
 }
 
 .nvtooltip {
@@ -2266,6 +2227,45 @@ a:hover {
     font-family: 'Open Sans';
 }
 
-.modal-body .alert {
-    padding: 10px;
+.WorkflowBadge{
+    background-color: @b7grey;
+    border-radius: 10px;
+    color: @default-bg;
+    display: inline-block;
+    font-family: 'Open Sans';
+    font-weight: bold;
+    font-style: normal;
+    font-size: x-small;
+    height: 14px;
+    margin-left: 5px;
+    padding-left: 2px;
+    width: 14px;
+}
+
+button[disabled],
+html input[disabled] {
+    cursor: not-allowed;
+}
+
+.CodeMirror {
+    font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+}
+
+.CodeMirror--disabled .CodeMirror.cm-s-default,
+.CodeMirror--disabled .CodeMirror-line {
+    background-color: #f6f6f6;
+}
+
+.CodeMirror--disabled .CodeMirror-gutter.CodeMirror-lint-markers,
+.CodeMirror--disabled .CodeMirror-gutter.CodeMirror-linenumbers {
+    background-color: #ebebeb;
+    color: @b7grey;
+}
+
+.CodeMirror--disabled .CodeMirror-lines {
+    cursor: default;
+}
+
+.CodeMirror--disabled .CodeMirror-cursors {
+    display: none;
 }

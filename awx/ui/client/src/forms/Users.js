@@ -12,108 +12,123 @@
 
 export default
     angular.module('UserFormDefinition', [])
-        .value('UserForm', {
+        .factory('UserForm', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New User',
+            addTitle: i18n._('New User'),
             editTitle: '{{ username }}',
             name: 'user',
+            // the top-most node of generated state tree
+            stateTree: 'users',
             forceListeners: true,
             tabs: true,
 
             fields: {
                 first_name: {
-                    label: 'First Name',
+                    label: i18n._('First Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                     capitalize: true
                 },
                 last_name: {
-                    label: 'Last Name',
+                    label: i18n._('Last Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                     capitalize: true
                 },
                 email: {
-                    label: 'Email',
+                    label: i18n._('Email'),
                     type: 'email',
-                    addRequired: true,
-                    editRequired: true,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                     autocomplete: false
                 },
                 username: {
-                    label: 'Username',
+                    label: i18n._('Username'),
                     type: 'text',
                     awRequiredWhen: {
                         reqExpression: "not_ldap_user && external_account === null",
                         init: true
                     },
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 organization: {
-                    label: 'Organization',
+                    label: i18n._('Organization'),
                     type: 'lookup',
+                    list: 'OrganizationList',
+                    basePath: 'organizations',
                     sourceModel: 'organization',
                     sourceField: 'name',
-                    addRequired: true,
-                    editRequired: false,
+                    required: true,
                     excludeMode: 'edit',
-                    ngClick: 'lookUpOrganization()',
-                    awRequiredWhen: {
-                        reqExpression: "orgrequired",
-                        init: true
-                    }
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password: {
-                    label: 'Password',
+                    label: i18n._('Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    addRequired: true,
-                    editRequired: false,
+                    ngRequired: "$state.match('add')",
+                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
                     ngChange: "clearPWConfirm('password_confirm')",
                     autocomplete: false,
-                    chkPass: true
+                    chkPass: true,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password_confirm: {
-                    label: 'Confirm Password',
+                    label: i18n._('Confirm Password'),
                     type: 'sensitive',
                     hasShowInputButton: true,
                     ngShow: 'ldap_user == false && socialAuthUser === false && external_account === null',
-                    addRequired: true,
-                    editRequired: false,
+                    ngRequired: "$state.match('add')",
+                    labelNGClass: "{'prepend-asterisk' : $state.matches('add')}",
                     awPassMatch: true,
                     associated: 'password',
-                    autocomplete: false
+                    autocomplete: false,
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 user_type: {
-                    label: 'User Type',
+                    label: i18n._('User Type'),
                     type: 'select',
                     ngOptions: 'item as item.label for item in user_type_options track by item.type',
                     disableChooseOption: true,
                     ngModel: 'user_type',
                     ngShow: 'current_user["is_superuser"]',
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
             },
 
             buttons: {
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()',
-                    ngDisabled: true
+                    ngDisabled: true,
+                    ngShow: '(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             related: {
                 organizations: {
-                    basePath: 'users/:id/organizations',
-                    awToolTip: 'Please save before assigning to organizations',
+                    name: 'organizations',
+                    awToolTip: i18n._('Please save before assigning to organizations'),
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
+                    emptyListText: i18n._('Please add user to an Organization.'),
+                    search: {
+                        page_size: '10'
+                    },
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Organizations',
+                    title: i18n._('Organizations'),
                     iterator: 'organization',
                     index: false,
                     open: false,
@@ -123,74 +138,95 @@ export default
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 },
                 teams: {
-                    basePath: 'users/:id/teams',
-                    awToolTip: 'Please save before assigning to teams',
+                    name: 'teams',
+                    awToolTip: i18n._('Please save before assigning to teams'),
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/teams',
+                    search: {
+                        page_size: '10'
+                    },
                     dataPlacement: 'top',
                     type: 'collection',
-                    title: 'Teams',
+                    title: i18n._('Teams'),
                     iterator: 'team',
                     open: false,
                     index: false,
                     actions: {},
-                    emptyListText: 'This user is not a member of any teams',
+                    emptyListText: i18n._('This user is not a member of any teams'),
                     fields: {
                         name: {
                             key: true,
-                            label: 'Name'
+                            label: i18n._('Name')
                         },
                         description: {
-                            label: 'Description'
+                            label: i18n._('Description')
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 },
-                roles: {
-                    awToolTip: 'Please save before assigning to organizations',
+                permissions: {
+                    name: 'permissions',
+                    basePath: 'api/v1/users/{{$stateParams.user_id}}/roles/',
+                    search: {
+                        page_size: '10',
+                        order_by: 'id'
+                    },
+                    awToolTip: i18n._('Please save before assigning to organizations'),
                     dataPlacement: 'top',
                     hideSearchAndActions: true,
                     type: 'collection',
-                    title: 'Granted permissions',
+                    title: i18n._('Permissions'),
                     iterator: 'permission',
                     open: false,
                     index: false,
-                    emptyListText: 'No permissions have been granted',
+                    emptyListText: i18n._('No permissions have been granted'),
                     fields: {
                         name: {
-                            label: 'Name',
+                            label: i18n._('Name'),
                             ngBind: 'permission.summary_fields.resource_name',
                             linkTo: '{{convertApiUrl(permission.related[permission.summary_fields.resource_type])}}',
-                            noSort: true
+                            nosort: true
                         },
                         type: {
-                            label: 'Type',
+                            label: i18n._('Type'),
                             ngBind: 'permission.summary_fields.resource_type_display_name',
-                            noSort: true
+                            nosort: true
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             ngBind: 'permission.name',
-                            noSort: true
+                            nosort: true
                         },
+                    },
+                    actions: {
+                        add: {
+                            ngClick: "$state.go('.add')",
+                            label: 'Add',
+                            awToolTip: i18n._('Grant Permission'),
+                            actionClass: 'btn List-buttonSubmit',
+                            buttonContent: '&#43; ' + i18n._('ADD PERMISSIONS'),
+                            ngShow: '(!is_superuser && (user_obj.summary_fields.user_capabilities.edit || canAdd))'
+                        }
                     },
                     fieldActions: {
                         "delete": {
-                            label: 'Remove',
+                            label: i18n._('Remove'),
                             ngClick: 'deletePermissionFromUser(user_id, username, permission.name, permission.summary_fields.resource_name, permission.related.users)',
                             iconClass: 'fa fa-times',
-                            awToolTip: 'Dissasociate permission from user'
+                            awToolTip: i18n._('Dissasociate permission from user'),
+                            ngShow: 'permission.summary_fields.user_capabilities.unattach'
                         }
                     },
-                    hideOnSuperuser: true
+                    //hideOnSuperuser: true // RBAC defunct
                 }
             }
 
-        });
+        };}]);

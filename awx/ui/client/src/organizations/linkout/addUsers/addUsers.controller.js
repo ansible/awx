@@ -11,14 +11,11 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateList', 'GetBasePath', 'SelectionInit', 'SearchInit', 'templateUrl', 'PaginateInit', '$state', 'Rest', '$q', 'Wait', function($scope, $rootScope, ProcessErrors, UserList, generateList, GetBasePath, SelectionInit, SearchInit, templateUrl, PaginateInit, $state, Rest, $q, Wait) {
+export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
+'SelectionInit', 'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
+function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
+    SelectionInit, templateUrl, $state, Rest, $q, Wait, $window, qs, UserList) {
     $scope.$on("linkLists", function() {
-        var generator = generateList,
-            list = _.cloneDeep(UserList),
-            url = GetBasePath("users"),
-            set = "users",
-            id = "addUsersList",
-            mode = "add";
 
         if ($state.current.name.split(".")[1] === "users") {
             $scope.addType = "Users";
@@ -26,33 +23,84 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
             $scope.addType = "Administrators";
         }
 
+        init();
 
+        function init(){
+            $scope.add_user_default_params = {
+                order_by: 'username',
+                page_size: 5
+            };
 
-        list.multiSelect = true;
+            $scope.add_user_queryset = {
+                order_by: 'username',
+                page_size: 5
+            };
 
-        generator.inject(list, { id: id,
-            title: false, mode: mode, scope: $scope });
+            let list = _.cloneDeep(UserList);
+            list.basePath = 'users';
+            list.iterator = 'add_user';
+            list.name = 'add_users';
+            list.multiSelect = true;
+            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
+            delete list.actions;
+            delete list.fieldActions;
 
-        SearchInit({ scope: $scope, set: set,
-            list: list, url: url });
+            // Fire off the initial search
+            qs.search(GetBasePath('users'), $scope.add_user_default_params)
+                .then(function(res) {
+                    $scope.add_user_dataset = res.data;
+                    $scope.add_users = $scope.add_user_dataset.results;
 
-        PaginateInit({ scope: $scope,
-            list: list, url: url, pageSize: 5 });
+                    let html = generateList.build({
+                        list: list,
+                        mode: 'edit',
+                        title: false
+                    });
 
-        $scope.search(list.iterator);
+                    $scope.list = list;
+
+                    $scope.compileList(html);
+
+                    $scope.$watchCollection('add_users', function () {
+                        if($scope.selectedItems) {
+                            // Loop across the users and see if any of them should be "checked"
+                            $scope.add_users.forEach(function(row, i) {
+                                if (_.includes($scope.selectedItems, row.id)) {
+                                    $scope.add_users[i].isSelected = true;
+                                }
+                            });
+                        }
+                    });
+
+                });
+
+            $scope.selectedItems = [];
+            $scope.$on('selectedOrDeselected', function(e, value) {
+                let item = value.value;
+
+                if (value.isSelected) {
+                    $scope.selectedItems.push(item.id);
+                }
+                else {
+                    // _.remove() Returns the new array of removed elements.
+                    // This will pull all the values out of the array that don't
+                    // match the deselected item effectively removing it
+                    $scope.selectedItems = _.remove($scope.selectedItems, function(selectedItem) {
+                        return selectedItem !== item.id;
+                    });
+                }
+            });
+        }
 
         $scope.updateUsers = function() {
+
             var url, listToClose,
+
             payloads = $scope.selectedItems.map(function(val) {
-                return {id: val.id};
+                return {id: val};
             });
-            if ($scope.addType === 'Users') {
-                url = $scope.$parent.orgRelatedUrls.users;
-                listToClose = 'user';
-            } else {
-                url = $scope.$parent.orgRelatedUrls.admins;
-                listToClose = 'admin';
-            }
+
+            url = $scope.$parent.orgRelatedUrls[$scope.addUsersType];
 
             Wait('start');
 
@@ -64,10 +112,8 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
 
             $q.all(requests)
                 .then(function () {
-                    Wait('stop');
-                    $scope.$parent.search('user');
                     $scope.closeModal();
-                    $scope.$parent.$emit('ReloadOrgListView');
+                    $state.reload();
                 }, function (error) {
                     Wait('stop');
                     $rootScope.$broadcast("refreshList", listToClose);
@@ -77,6 +123,12 @@ export default ['$scope', '$rootScope', 'ProcessErrors', 'UserList', 'generateLi
                         ': POST returned status' + error.status
                     });
                 });
+        };
+
+        $scope.linkoutUser = function(userId) {
+            // Open the edit user form in a new tab so as not to navigate the user
+            // away from the modal
+            $window.open('/#/users/' + userId,'_blank');
         };
     });
 }];

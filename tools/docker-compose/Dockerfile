@@ -1,31 +1,42 @@
-FROM ubuntu:14.04
+FROM centos:7
 
-RUN locale-gen en_US.UTF-8  
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8  
-RUN apt-get update && apt-get install -y software-properties-common python-software-properties curl
-RUN add-apt-repository -y ppa:chris-lea/redis-server; add-apt-repository -y ppa:chris-lea/zeromq; add-apt-repository -y ppa:chris-lea/node.js; add-apt-repository -y ppa:ansible/ansible; add-apt-repository -y ppa:jal233/proot;
-RUN curl -sL https://deb.nodesource.com/setup_0.12 | bash -
-RUN curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-RUN echo "deb http://download.postgresql.org/pub/repos/apt/ trusty-pgdg main" | tee /etc/apt/sources.list.d/postgres-9.4.list
-RUN apt-get update && apt-get install -y openssh-server ansible mg vim tmux git mercurial subversion python-dev python-psycopg2 make postgresql-client libpq-dev nodejs python-psutil libxml2-dev libxslt-dev lib32z1-dev libsasl2-dev libldap2-dev libffi-dev libzmq-dev proot python-pip libxmlsec1-dev swig redis-server libgss-dev libkrb5-dev && apt-get autoremove --purge -y && rm -rf /var/lib/apt/lists/*
-RUN pip install flake8 pytest pytest-pythonpath pytest-django pytest-cov pytest-mock dateutils django-debug-toolbar==1.4 pyflakes==1.0.0 virtualenv
+ADD Makefile /tmp/Makefile
+RUN mkdir /tmp/requirements
+ADD requirements/requirements.txt \
+requirements/requirements_ansible.txt \
+requirements/requirements_dev.txt \
+requirements/requirements_ansible_uninstall.txt \
+requirements/requirements_tower_uninstall.txt \
+requirements/requirements_dev_uninstall.txt \
+/tmp/requirements/
+RUN yum -y update && yum -y install curl epel-release
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+RUN yum -y localinstall http://download.postgresql.org/pub/repos/yum/9.4/redhat/rhel-6-x86_64/pgdg-centos94-9.4-3.noarch.rpm
+RUN yum -y update && yum -y install openssh-server ansible mg vim tmux git mercurial subversion python-devel python-psycopg2 make postgresql postgresql-devel nginx nodejs python-psutil libxml2-devel libxslt-devel libstdc++.so.6 gcc cyrus-sasl-devel cyrus-sasl openldap-devel libffi-devel zeromq-devel python-pip xmlsec1-devel swig krb5-devel xmlsec1-openssl xmlsec1 xmlsec1-openssl-devel libtool-ltdl-devel rabbitmq-server bubblewrap zanata-python-client gettext gcc-c++
+RUN pip install virtualenv
 RUN /usr/bin/ssh-keygen -q -t rsa -N "" -f /root/.ssh/id_rsa
 RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db
-ADD license /etc/awx/license
-ADD license /etc/tower/license
+ADD tools/docker-compose/license /etc/tower/license
 RUN pip2 install honcho
-RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.0.1/dumb-init_1.0.1_amd64.deb
-RUN dpkg -i dumb-init_*.deb
-RUN rm -rf /dumb-init_*.deb
-ADD ansible-tower.egg-link /tmp/ansible-tower.egg-link
-ADD tower-manage /usr/local/bin/tower-manage
-ADD awx-manage /usr/local/bin/awx-manage
-ADD ansible_tower.egg-info /tmp/ansible_tower.egg-info
+RUN pip2 install supervisor
+RUN curl -LO https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 && chmod +x ./dumb-init_1.1.3_amd64 && mv ./dumb-init_1.1.3_amd64 /usr/bin/dumb-init
+ADD tools/docker-compose/ansible-tower.egg-link /tmp/ansible-tower.egg-link
+ADD tools/docker-compose/tower-manage /usr/local/bin/tower-manage
+ADD tools/docker-compose/awx-manage /usr/local/bin/awx-manage
+ADD tools/docker-compose/ansible_tower.egg-info /tmp/ansible_tower.egg-info
+RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.conf /etc/nginx/nginx.conf
+RUN ln -Ffs /tower_devel/tools/docker-compose/nginx.vh.default.conf /etc/nginx/conf.d/nginx.vh.default.conf
 RUN ln -s /tower_devel/tools/docker-compose/start_development.sh /start_development.sh
-
-EXPOSE 8013 8080 22
+RUN openssl req -nodes -newkey rsa:2048 -keyout /etc/nginx/nginx.key -out /etc/nginx/nginx.csr -subj "/C=US/ST=North Carolina/L=Durham/O=Ansible/OU=Tower Development/CN=tower.localhost"
+RUN openssl x509 -req -days 365 -in /etc/nginx/nginx.csr -signkey /etc/nginx/nginx.key -out /etc/nginx/nginx.crt
+WORKDIR /tmp
+RUN SWIG_FEATURES="-cpperraswarn -includeall -D__`uname -m`__ -I/usr/include/openssl" VENV_BASE="/venv" make requirements_dev
+RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+WORKDIR /
+EXPOSE 8043 8013 8080 22
 ENTRYPOINT ["/usr/bin/dumb-init"]
 CMD /start_development.sh

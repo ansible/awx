@@ -7,16 +7,17 @@
 
 export default
     angular.module('PortalJobsListDefinition', [])
-    .value( 'PortalJobsList', {
+    .factory('PortalJobsList', ['i18n', function(i18n) {
+    return {
 
         name: 'jobs',
         iterator: 'job',
-        editTitle: 'Jobs',
+        editTitle: i18n._('Jobs'),
         index: false,
         hover: true,
         well: true,
-        listTitle: 'Jobs',
-        emptyListText: 'There are no jobs to display at this time',
+        listTitle: i18n._('Jobs'),
+        emptyListText: i18n._('There are no jobs to display at this time'),
 
         fields: {
             status: {
@@ -25,23 +26,16 @@ export default
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                searchable: true,
-                nosort: true,
-                searchType: 'select',
-                searchOptions: [],
-                searchLabel: 'Status'
+                nosort: true
             },
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6 List-staticColumnAdjacent',
-                defaultSearchField: true,
                 linkTo: '/#/jobs/{{job.id}}',
-                searchDefault: true
             },
             finished: {
-                label: 'Finished',
+                label: i18n._('Finished'),
                 noLink: true,
-                searchable: false,
                 filter: "longDate",
                 key: true,
                 desc: true,
@@ -50,4 +44,4 @@ export default
         },
 
         actions: { }
-    });
+    };}]);

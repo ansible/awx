@@ -4,6 +4,7 @@
 # Production settings for AWX project.
 
 # Python
+import copy
 import errno
 import sys
 import traceback
@@ -51,11 +52,30 @@ TOWER_VENV_PATH = "/var/lib/awx/venv/tower"
 
 LOGGING['handlers']['tower_warnings']['filename'] = '/var/log/tower/tower.log'
 LOGGING['handlers']['callback_receiver']['filename'] = '/var/log/tower/callback_receiver.log'
-LOGGING['handlers']['socketio_service']['filename'] = '/var/log/tower/socketio_service.log'
 LOGGING['handlers']['task_system']['filename'] = '/var/log/tower/task_system.log'
 LOGGING['handlers']['fact_receiver']['filename'] = '/var/log/tower/fact_receiver.log'
 LOGGING['handlers']['system_tracking_migrations']['filename'] = '/var/log/tower/tower_system_tracking_migrations.log'
 LOGGING['handlers']['rbac_migrations']['filename'] = '/var/log/tower/tower_rbac_migrations.log'
+
+# Supervisor service name dictionary used for programatic restart
+SERVICE_NAME_DICT = {
+    "beat": "awx-celeryd-beat",
+    "celery": "awx-celeryd",
+    "callback": "awx-callback-receiver",
+    "channels": "awx-channels-worker",
+    "uwsgi": "awx-uwsgi",
+    "daphne": "awx-daphne",
+    "fact": "awx-fact-cache-receiver"}
+# Used for sending commands in automatic restart
+UWSGI_FIFO_LOCATION = '/var/lib/awx/awxfifo'
+
+# Store a snapshot of default settings at this point before loading any
+# customizable config files.
+DEFAULTS_SNAPSHOT = {}
+this_module = sys.modules[__name__]
+for setting in dir(this_module):
+    if setting == setting.upper():
+        DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
 
 # Load settings from any .py files in the global conf.d directory specified in
 # the environment, defaulting to /etc/tower/conf.d/.
@@ -71,7 +91,6 @@ settings_file = os.environ.get('AWX_SETTINGS_FILE',
 # /etc/tower/conf.d/*.py.
 try:
     include(settings_file, optional(settings_files), scope=locals())
-    include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)

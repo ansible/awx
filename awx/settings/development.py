@@ -4,8 +4,14 @@
 # Development settings for AWX project.
 
 # Python
+import socket
+import copy
 import sys
 import traceback
+
+# Centos-7 doesn't include the svg mime type
+# /usr/lib64/python/mimetypes.py
+import mimetypes
 
 # Django Split Settings
 from split_settings.tools import optional, include
@@ -13,31 +19,42 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *  # NOQA
 
-MONGO_HOST = '127.0.0.1'
-MONGO_PORT = 27017
-MONGO_USERNAME = None
-MONGO_PASSWORD = None
-MONGO_DB = 'system_tracking_dev'
+ALLOWED_HOSTS = ['*']
+
+mimetypes.add_type("image/svg+xml", ".svg", True)
+mimetypes.add_type("image/svg+xml", ".svgz", True)
+
+# Disallow sending session cookies over insecure connections
+SESSION_COOKIE_SECURE = False
+
+# Disallow sending csrf cookies over insecure connections
+CSRF_COOKIE_SECURE = False
+
+# Override django.template.loaders.cached.Loader in defaults.py
+TEMPLATE_LOADERS = (
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+)
 
 # Disable capturing all SQL queries when running celeryd in development.
 if 'celeryd' in sys.argv:
     SQL_DEBUG = False
 
-# Use a different callback consumer/queue for development, to avoid a conflict
-# if there is also a nightly install running on the development machine.
-CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5557"
-CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver_dev.ipc"
+CALLBACK_QUEUE = "callback_tasks"
 
-# Enable PROOT for tower-qa integration tests
+# Enable PROOT for tower-qa integration tests.
+# Note: This setting may be overridden by database settings.
 AWX_PROOT_ENABLED = True
 
+# Disable Pendo on the UI for development/test.
+# Note: This setting may be overridden by database settings.
 PENDO_TRACKING_STATE = "off"
 
 # Use Django-Jenkins if installed. Only run tests for awx.main app.
 try:
     import django_jenkins
     INSTALLED_APPS += (django_jenkins.__name__,)
-    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests', 'awx.fact.tests',)
+    PROJECT_APPS = ('awx.main.tests', 'awx.api.tests',)
 except ImportError:
     pass
 
@@ -65,23 +82,45 @@ PASSWORD_HASHERS = (
 # Configure a default UUID for development only.
 SYSTEM_UUID = '00000000-0000-0000-0000-000000000000'
 
+# Store a snapshot of default settings at this point before loading any
+# customizable config files.
+DEFAULTS_SNAPSHOT = {}
+this_module = sys.modules[__name__]
+for setting in dir(this_module):
+    if setting == setting.upper():
+        DEFAULTS_SNAPSHOT[setting] = copy.deepcopy(getattr(this_module, setting))
+
 # If there is an `/etc/tower/settings.py`, include it.
 # If there is a `/etc/tower/conf.d/*.py`, include them.
 include(optional('/etc/tower/settings.py'), scope=locals())
 include(optional('/etc/tower/conf.d/*.py'), scope=locals())
 
 ANSIBLE_USE_VENV = True
-ANSIBLE_VENV_PATH = "/tower_devel/venv/ansible"
+ANSIBLE_VENV_PATH = "/venv/ansible"
 TOWER_USE_VENV = True
-TOWER_VENV_PATH = "/tower_devel/venv/tower"
+TOWER_VENV_PATH = "/venv/tower"
 
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
 # only the defaults.
 try:
     include(optional('local_*.py'), scope=locals())
-    if not is_testing(sys.argv):
-        include('postprocess.py', scope=locals())
 except ImportError:
     traceback.print_exc()
     sys.exit(1)
+
+CLUSTER_HOST_ID = socket.gethostname()
+CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
+
+# Supervisor service name dictionary used for programatic restart
+SERVICE_NAME_DICT = {
+    "celery": "celeryd",
+    "callback": "receiver",
+    "runworker": "channels",
+    "uwsgi": "uwsgi",
+    "daphne": "daphne",
+    "fact": "factcacher",
+    "nginx": "nginx"}
+# Used for sending commands in automatic restart
+UWSGI_FIFO_LOCATION = '/awxfifo'
+

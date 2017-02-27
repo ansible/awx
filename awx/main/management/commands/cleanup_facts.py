@@ -13,10 +13,11 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models.fact import Fact
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 OLDER_THAN = 'older_than'
 GRANULARITY = 'granularity'
+
 
 class CleanupFacts(object):
     def __init__(self):
@@ -27,7 +28,7 @@ class CleanupFacts(object):
     #   Find all factVersion < pivot && > (pivot - granularity) grouped by host sorted by time descending (because it's indexed this way)
     #   foreach group
     #       Delete all except LAST entry (or Delete all except the FIRST entry, it's an arbitrary decision)
-    #   
+    #
     #   pivot -= granularity
     # group by host 
     def cleanup(self, older_than_abs, granularity, module=None):
@@ -89,17 +90,18 @@ class CleanupFacts(object):
         deleted_count = self.cleanup(t - older_than, granularity, module=module)
         print("Deleted %d facts." % deleted_count)
 
+
 class Command(BaseCommand):
     help = 'Cleanup facts. For each host older than the value specified, keep one fact scan for each time window (granularity).'
     option_list = BaseCommand.option_list + (
         make_option('--older_than',
                     dest='older_than',
-                    default=None,
-                    help='Specify the relative time to consider facts older than (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y).'),
+                    default='30d',
+                    help='Specify the relative time to consider facts older than (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 30d.'),
         make_option('--granularity',
                     dest='granularity',
-                    default=None,
-                    help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y).'),
+                    default='1w',
+                    help='Window duration to group same hosts by for deletion (w)eek (d)ay or (y)ear (i.e. 5d, 2w, 1y). Defaults to 1w.'),
         make_option('--module',
                     dest='module',
                     default=None,
@@ -142,4 +144,3 @@ class Command(BaseCommand):
             raise CommandError('--granularity invalid value "%s"' % options[GRANULARITY])
 
         cleanup_facts.run(older_than, granularity, module=options['module'])
-

@@ -14,10 +14,12 @@ function longDateFilter(moment, input) {
     }
 }
 
-angular.module('longDateFilter', [])
-    .filter('longDate',
-            [   'moment',
-                function(moment) {
-                    return _.partial(longDateFilter, moment);
-                }
-            ]);
+export default
+    angular.module('longDateFilter', [])
+        .filter('longDate',
+                [   'moment',
+                    function(moment) {
+                        return _.partial(longDateFilter, moment);
+                    }
+                ]);
+

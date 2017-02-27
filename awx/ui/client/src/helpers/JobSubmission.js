@@ -8,7 +8,7 @@
 
 export default
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-'LookUpHelper', 'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
+'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog', 'FormGenerator', 'JobVarsPromptFormDefinition'])
 
 .factory('CreateLaunchDialog', ['$compile', 'CreateDialog', 'Wait', 'ParseTypeChange',
 function($compile, CreateDialog, Wait, ParseTypeChange) {
@@ -46,6 +46,7 @@ function($compile, CreateDialog, Wait, ParseTypeChange) {
         label: "Launch",
         onClick: function() {
           scope.$emit(callback);
+          $('#password-modal').dialog('close');
         },
         icon: "fa-check",
         "class": "btn btn-primary",

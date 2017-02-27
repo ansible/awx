@@ -1,4 +1,4 @@
-#!/tower_devel/venv/tower/bin/python
+#!/venv/tower/bin/python
 # EASY-INSTALL-ENTRY-SCRIPT: 'ansible-tower==3.0.0-0.devel','console_scripts','awx-manage'
 __requires__ = 'ansible-tower==3.0.0-0.devel'
 import sys

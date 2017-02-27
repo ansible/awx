@@ -12,7 +12,7 @@
 
 export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     ClearScope, GetBasePath, Rest, ProcessErrors, Empty, GetChoices, LookUpName,
-    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait) {
+    ParseTypeChange, ParseVariableString, RelaunchJob, DeleteJob, Wait, i18n) {
 
     ClearScope();
 
@@ -22,13 +22,11 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // This scope variable controls whether or not the left panel is shown and the right panel
     // is expanded to take up the full screen
     $scope.stdoutFullScreen = false;
+    $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
     // Listen for job status updates that may come across via sockets.  We need to check the payload
     // to see whethere the updated job is the one that we're currently looking at.
-    if ($scope.removeJobStatusChange) {
-        $scope.removeJobStatusChange();
-    }
-    $scope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobStdout', function(e, data) {
+    $scope.$on(`ws-jobs`, function(e, data) {
         if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10) && $scope.job) {
             $scope.job.status = data.status;
         }
@@ -37,12 +35,6 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
             // Go out and refresh the job details
             getJobDetails();
         }
-    });
-
-    // Unbind $rootScope socket event binding(s) so that they don't get triggered
-    // in another instance of this controller
-    $scope.$on('$destroy', function() {
-        $scope.removeJobStatusChange();
     });
 
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
@@ -61,12 +53,16 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 $scope.created_by = data.summary_fields.created_by;
                 $scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
                 $scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
-                $scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
+                $scope.job_template_url = '/#/templates/' + data.unified_job_template;
                 $scope.inventory_url = ($scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
                 $scope.project_url = ($scope.project_name && data.project) ? '/#/projects/' + data.project : '';
                 $scope.credential_name = (data.summary_fields.credential) ? data.summary_fields.credential.name : '';
                 $scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
                 $scope.cloud_credential_url = (data.cloud_credential) ? '/#/credentials/' + data.cloud_credential : '';
+                if(data.summary_fields && data.summary_fields.source_workflow_job &&
+                    data.summary_fields.source_workflow_job.id){
+                        $scope.workflow_result_link = `/#/workflows/${data.summary_fields.source_workflow_job.id}`;
+                }
                 $scope.playbook = data.playbook;
                 $scope.credential = data.credential;
                 $scope.cloud_credential = data.cloud_credential;
@@ -232,6 +228,13 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
     // Click binding for the expand/collapse button on the standard out log
     $scope.toggleStdoutFullscreen = function() {
         $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
+
+        if ($scope.stdoutFullScreen === true) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Collapse Output");
+        } else if ($scope.stdoutFullScreen === false) {
+            $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
+
+        }
     };
 
     $scope.deleteJob = function() {
@@ -264,4 +267,4 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 JobStdoutController.$inject = [ '$rootScope', '$scope', '$state',
     '$stateParams', 'ClearScope', 'GetBasePath', 'Rest', 'ProcessErrors',
     'Empty', 'GetChoices',  'LookUpName', 'ParseTypeChange',
-    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait'];
+    'ParseVariableString', 'RelaunchJob', 'DeleteJob', 'Wait', 'i18n'];

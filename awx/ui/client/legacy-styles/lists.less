@@ -7,7 +7,7 @@
  *
  */
 
- @import "awx/ui/client/src/shared/branding/colors.default.less";
+ @import "./client/src/shared/branding/colors.default.less";
 
 
 table, tbody {
@@ -43,7 +43,7 @@ table, tbody {
     border-top-right-radius: 5px;
 }
 
-.List-tableHeader--actions {
+.List-tableHeader--info, .List-tableHeader--actions {
     text-align: right;
 }
 
@@ -116,44 +116,6 @@ table, tbody {
     margin-left: 15px;
 }
 
-/* -- Pagination -- */
-.List-pagination {
-    margin-top: 20px;
-    font-size: 12px;
-    color: @list-pagin-text;
-    text-transform: uppercase;
-    height: 22px;
-    display: flex;
-}
-
-.List-paginationPagerHolder {
-    display: flex;
-    flex: 1 0 auto;
-}
-
-.List-paginationPager {
-    display: flex;
-}
-
-.List-paginationPager--pageof {
-    line-height: 22px;
-    margin-left: 10px;
-}
-
-.List-paginationPager--item {
-    border-color: @list-pagin-bord;
-}
-
-.List-paginationPager--active {
-    border-color: @list-pagin-bord-act!important;
-    background-color: @list-pagin-bg-act!important;
-}
-
-.List-paginationItemsOf {
-    display: flex;
-    justify-content: flex-end;
-}
-
 .List-header {
     display: flex;
     min-height: 34px;
@@ -191,10 +153,13 @@ table, tbody {
 .List-actionHolder {
     justify-content: flex-end;
     display: flex;
+    // margin-bottom: 20px;
+    // float: right;
 }
 
 .List-actions {
     display: flex;
+    margin-bottom: -32px;
 }
 
 .List-auxAction {
@@ -205,7 +170,7 @@ table, tbody {
 }
 
 .List-auxActionStream {
-    width: 175px;
+    width: 200px;
 }
 
 .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
@@ -313,6 +278,7 @@ table, tbody {
 }
 
 .List-noItems {
+    margin-top: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -325,6 +291,9 @@ table, tbody {
     text-transform: uppercase;
 }
 
+.modal-body > .List-noItems {
+    margin-top: 0px;
+}
 .List-editButton--selected {
     background-color: @list-actn-bg-hov !important;
     color: @list-actn-icn-hov;
@@ -366,6 +335,10 @@ table, tbody {
     padding-left: 10px!important;
 }
 
+.List-staticColumnAdjacent--monospace {
+    font-family: monospace;
+}
+
 .List-titleLockup {
     margin-left: 4px;
     margin-right: 6px;
@@ -395,6 +368,47 @@ table, tbody {
     cursor: not-allowed;
 }
 
+.List-dropdownButton {
+    border: none;
+}
+
+.List-dropdownSuccess {
+    background-color: @submit-button-bg;
+    color: @submit-button-text;
+    border-color: @submit-button-bg-hov;
+}
+
+.List-dropdownSuccess:hover,
+.List-dropdownSuccess:focus {
+    color: @submit-button-text;
+    background-color: @submit-button-bg-hov;
+}
+
+.List-dropdownCarat {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    border-top: 4px dashed;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
+.List-infoCell {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+.List-infoCell a {
+    color: @default-icon;
+}
+
+.List-infoCell a:hover, .List-infoCell a:focus {
+    color: @default-interface-txt;
+}
+
 @media (max-width: 991px) {
     .List-searchWidget + .List-searchWidget {
         margin-top: 20px;
@@ -412,7 +426,51 @@ table, tbody {
         flex: 1 0 auto;
         margin-top: 12px;
     }
+    .List-actions {
+        margin-bottom: 20px;
+    }
     .List-well {
         margin-top: 20px;
     }
+    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+        margin-left: 0;
+    }
 }
+
+.InventoryManage-container, .modal-body {
+    .List-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .List-actionHolder {
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1 0 auto;
+        margin-top: 12px;
+    }
+    .List-actions {
+        margin-bottom: 20px;
+    }
+    .List-well {
+        margin-top: 20px;
+    }
+    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+        margin-left: 0;
+    }
+}
+
+// Inventory Manage exceptions
+.InventoryManage-container {
+    .List-actionHolder {
+        justify-content: flex-end;
+        margin-top: -52px;
+    }
+    .List-action button {
+        margin-left: 12px;
+    }
+    .SmartSearch-searchTermContainer {
+        width: 100%;
+    }
+}
+
+

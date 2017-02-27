@@ -1,6 +1,6 @@
 /** @define RepeatFrequencyOptions */
 
-@import "awx/ui/client/src/shared/branding/colors.default.less";
+@import "./client/src/shared/branding/colors.default.less";
 
 .RepeatFrequencyOptions {
     width: ~"calc(100% + 21px)";
@@ -86,6 +86,11 @@
     padding-right: 4px;
     padding-left: 4px;
     flex: 1;
+}
+
+.RepeatFrequencyOptions-weekButton.active {
+    background-color: @default-list-header-bg !important;
+    border-color: @d7grey !important;
 }
 
 .RepeatFrequencyOptions-everyGroup {

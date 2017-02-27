@@ -141,6 +141,7 @@ TESTS = {
     }
 }
 
+
 class SurveyPasswordBaseTest(BaseTest, QueueStartStopTestMixin):
     def setUp(self):
         super(SurveyPasswordBaseTest, self).setUp()
@@ -175,6 +176,7 @@ class SurveyPasswordBaseTest(BaseTest, QueueStartStopTestMixin):
     def _get_url_job_details(self, job):
         url = reverse('api:job_detail', args=(job.pk,))
         return self.get(url, expect=200, auth=self.get_super_credentials(), accept='application/json')
+
 
 class SurveyPasswordRedactedTest(SurveyPasswordBaseTest):
     '''

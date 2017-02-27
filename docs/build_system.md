@@ -239,7 +239,7 @@ Repositories
 The nightly repositories are hosted on the AnsibleWorks Jenkins server, and can
 be found at the following location:
 
-    http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/devel
+    http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/devel
 
 There are several sub-folders, including `deb/`, `rpm/`, `docs/` and `setup/`
 
@@ -260,7 +260,7 @@ The `setup/` folder contains the Ansible Tower setup playbook tar.gz file.
 These nightly repositories can be used by the Ansible Tower setup playbook by
 running the `setup.sh` shell script with the following option:
 
-    ./setup.sh -e "aw_repo_url=http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/devel gpgcheck=0"
+    ./setup.sh -e "aw_repo_url=http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/devel gpgcheck=0"
 
 ### Official Releases ###
 

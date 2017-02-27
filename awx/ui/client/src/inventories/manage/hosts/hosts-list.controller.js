@@ -5,21 +5,55 @@
  *************************************************/
  export default
     ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
-     'hostsUrl', 'SearchInit', 'PaginateInit', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter',
+     'hostsUrl', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'hostsDataset', 'GetBasePath', 'rbacUiControlService', 'QuerySet',
     function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
-     hostsUrl, SearchInit, PaginateInit, SetStatus, Prompt, Wait, inventoryData, $filter){
-        var list = InventoryHosts,
-            view = generateList,
-            pageSize = 20;
-        // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
-        // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
-        // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
-        // problem that this solves.
-        $scope.ncyBreadcrumbIgnore = true;
-        if($state.current.name === "inventoryManage.editHost") {
-            $scope.rowBeingEdited = $state.params.host_id;
-            $scope.listBeingEdited = "hosts";
+     hostsUrl, SetStatus, Prompt, Wait, inventoryData, $filter, hostsDataset, GetBasePath, rbacUiControlService, qs){
+        var list = InventoryHosts;
+
+        init();
+        function init(){
+            $scope.inventory_id = $stateParams.inventory_id;
+
+            $scope.canAdd = false;
+
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $scope.inventory_id + "/hosts")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
+
+            // Search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = hostsDataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+            $scope.$watch(`${list.iterator}_dataset`, () => {
+                $scope.hosts
+                    .forEach((host) => SetStatus({scope: $scope,
+                        host: host}));
+            });
+
+            $scope.$on(`ws-jobs`, function(e, data){
+                if(data.status === 'failed' || data.status === 'successful'){
+                    let path = hostsUrl;
+                    qs.search(path, $state.params[`${list.iterator}_search`])
+                    .then(function(searchResponse) {
+                        $scope[`${list.iterator}_dataset`] = searchResponse.data;
+                        $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+                    });
+                }
+            });
+
+            // The ncy breadcrumb directive will look at this attribute when attempting to bind to the correct scope.
+            // In this case, we don't want to incidentally bind to this scope when editing a host or a group.  See:
+            // https://github.com/ncuillery/angular-breadcrumb/issues/42 for a little more information on the
+            // problem that this solves.
+            $scope.ncyBreadcrumbIgnore = true;
+            if($state.current.name === "inventoryManage.editHost") {
+                $scope.rowBeingEdited = $state.params.host_id;
+                $scope.listBeingEdited = "hosts";
+            }
         }
+
         $scope.createHost = function(){
             $state.go('inventoryManage.addHost');
         };
@@ -69,9 +103,6 @@
             $scope.$parent.systemTrackingDisabled = selection.length > 0 && selection.length < 3 ? false : true;
             $scope.$parent.systemTrackingTooltip = selection.length > 0 && selection.length < 3 ? "Compare host facts over time" : "Select one or two hosts by clicking the checkbox beside the host. System tracking offers the ability to compare the results of two scan runs from different dates on one host or the same date on two hosts.";
         });
-        $scope.$on('PostRefresh', ()=>{
-            _.forEach($scope.hosts, (host) => SetStatus({scope: $scope, host: host}));
-        });
         var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
              if (toState.name === "inventoryManage.editHost") {
                  $scope.rowBeingEdited = toParams.host_id;
@@ -86,26 +117,4 @@
         $scope.$on('$destroy', function() {
             cleanUpStateChangeListener();
         });
-        var init = function(){
-            list.basePath = hostsUrl;
-            view.inject(list,{
-                id: 'hosts-list',
-                scope: $scope,
-                mode: 'edit'
-            });
-            SearchInit({
-                scope: $scope,
-                list: list,
-                url: hostsUrl,
-                set: 'hosts'
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url: hostsUrl,
-                pageSize: pageSize
-            });
-            $scope.search(list.iterator);
-        };
-        init();
     }];

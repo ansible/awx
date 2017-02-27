@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
+import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'managementJobStdout',
@@ -16,12 +16,11 @@ export default {
         label: "{{ job.name }}"
     },
     data: {
-        jobType: 'system_jobs'
-    },
-    resolve: {
-        managementJobSocket: [function() {
-            // TODO: determine whether or not we have socket support for management job standard out
-            return true;
-        }]
+        jobType: 'system_jobs',
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"]
+            }
+        }
     }
 };

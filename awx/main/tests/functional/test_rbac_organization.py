@@ -22,6 +22,7 @@ def test_organization_migration_admin(organization, permissions, user):
 
     assert u in organization.admin_role
 
+
 @pytest.mark.django_db
 def test_organization_migration_user(organization, permissions, user):
     u = user('user', False)

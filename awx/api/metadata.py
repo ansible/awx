@@ -7,12 +7,13 @@ from collections import OrderedDict
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.utils.encoding import force_text, smart_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import exceptions
 from rest_framework import metadata
 from rest_framework import serializers
-from rest_framework.relations import RelatedField
+from rest_framework.relations import RelatedField, ManyRelatedField
 from rest_framework.request import clone_request
 
 # Ansible Tower
@@ -29,7 +30,9 @@ class Metadata(metadata.SimpleMetadata):
         text_attrs = [
             'read_only', 'label', 'help_text',
             'min_length', 'max_length',
-            'min_value', 'max_value'
+            'min_value', 'max_value',
+            'category', 'category_slug',
+            'defined_in_file'
         ]
 
         for attr in text_attrs:
@@ -37,29 +40,37 @@ class Metadata(metadata.SimpleMetadata):
             if value is not None and value != '':
                 field_info[attr] = force_text(value, strings_only=True)
 
+        placeholder = getattr(field, 'placeholder', serializers.empty)
+        if placeholder is not serializers.empty:
+            field_info['placeholder'] = placeholder
+
         # Update help text for common fields.
         serializer = getattr(field, 'parent', None)
         if serializer:
             field_help_text = {
-                'id': 'Database ID for this {}.',
-                'name': 'Name of this {}.',
-                'description': 'Optional description of this {}.',
-                'type': 'Data type for this {}.',
-                'url': 'URL for this {}.',
-                'related': 'Data structure with URLs of related resources.',
-                'summary_fields': 'Data structure with name/description for related resources.',
-                'created': 'Timestamp when this {} was created.',
-                'modified': 'Timestamp when this {} was last modified.',
+                'id': _('Database ID for this {}.'),
+                'name': _('Name of this {}.'),
+                'description': _('Optional description of this {}.'),
+                'type': _('Data type for this {}.'),
+                'url': _('URL for this {}.'),
+                'related': _('Data structure with URLs of related resources.'),
+                'summary_fields': _('Data structure with name/description for related resources.'),
+                'created': _('Timestamp when this {} was created.'),
+                'modified': _('Timestamp when this {} was last modified.'),
             }
             if field.field_name in field_help_text:
-                opts = serializer.Meta.model._meta.concrete_model._meta
-                verbose_name = smart_text(opts.verbose_name)
-                field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
+                if hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
+                    opts = serializer.Meta.model._meta.concrete_model._meta
+                    verbose_name = smart_text(opts.verbose_name)
+                    field_info['help_text'] = field_help_text[field.field_name].format(verbose_name)
 
         # Indicate if a field has a default value.
         # FIXME: Still isn't showing all default values?
         try:
-            field_info['default'] = field.get_default()
+            default = field.get_default()
+            if field.field_name == 'TOWER_URL_BASE' and default == 'https://towerhost':
+                default = '{}://{}'.format(self.request.scheme, self.request.get_host())
+            field_info['default'] = default
         except serializers.SkipField:
             pass
 
@@ -68,7 +79,7 @@ class Metadata(metadata.SimpleMetadata):
         elif getattr(field, 'fields', None):
             field_info['children'] = self.get_serializer_info(field)
 
-        if hasattr(field, 'choices') and not isinstance(field, RelatedField):
+        if not isinstance(field, (RelatedField, ManyRelatedField)) and hasattr(field, 'choices'):
             field_info['choices'] = [(choice_value, choice_name) for choice_value, choice_name in field.choices.items()]
 
         # Indicate if a field is write-only.
@@ -112,19 +123,20 @@ class Metadata(metadata.SimpleMetadata):
         actions = {}
         for method in {'GET', 'PUT', 'POST'} & set(view.allowed_methods):
             view.request = clone_request(request, method)
+            obj = None
             try:
                 # Test global permissions
                 if hasattr(view, 'check_permissions'):
                     view.check_permissions(view.request)
                 # Test object permissions
                 if method == 'PUT' and hasattr(view, 'get_object'):
-                    view.get_object()
+                    obj = view.get_object()
             except (exceptions.APIException, PermissionDenied, Http404):
                 continue
             else:
                 # If user has appropriate permissions for the view, include
                 # appropriate metadata about the fields that should be supplied.
-                serializer = view.get_serializer()
+                serializer = view.get_serializer(instance=obj)
                 actions[method] = self.get_serializer_info(serializer)
             finally:
                 view.request = request
@@ -140,27 +152,34 @@ class Metadata(metadata.SimpleMetadata):
                 # For GET method, remove meta attributes that aren't relevant
                 # when reading a field and remove write-only fields.
                 if method == 'GET':
-                    meta.pop('required', None)
-                    meta.pop('read_only', None)
-                    meta.pop('default', None)
-                    meta.pop('min_length', None)
-                    meta.pop('max_length', None)
+                    attrs_to_remove = ('required', 'read_only', 'default', 'min_length', 'max_length', 'placeholder')
+                    for attr in attrs_to_remove:
+                        meta.pop(attr, None)
+                        meta.get('child', {}).pop(attr, None)
                     if meta.pop('write_only', False):
                         actions['GET'].pop(field)
 
                 # For PUT/POST methods, remove read-only fields.
                 if method in ('PUT', 'POST'):
+                    # This value should always be False for PUT/POST, so don't
+                    # show it (file-based read-only settings can't be updated)
+                    meta.pop('defined_in_file', False)
+
                     if meta.pop('read_only', False):
                         actions[method].pop(field)
 
         return actions
 
     def determine_metadata(self, request, view):
+        # store request on self so we can use it to generate field defaults
+        # (such as TOWER_URL_BASE)
+        self.request = request
+
         metadata = super(Metadata, self).determine_metadata(request, view)
 
         # Add version number in which view was added to Tower.
         added_in_version = '1.2'
-        for version in ('3.0.0', '2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
+        for version in ('3.1.0', '3.0.0', '2.4.0', '2.3.0', '2.2.0', '2.1.0', '2.0.0', '1.4.8', '1.4.5', '1.4', '1.3'):
             if getattr(view, 'new_in_%s' % version.replace('.', ''), False):
                 added_in_version = version
                 break
@@ -176,7 +195,16 @@ class Metadata(metadata.SimpleMetadata):
         if getattr(view, 'search_fields', None):
             metadata['search_fields'] = view.search_fields
 
+        # Add related search fields if available from the view.
+        if getattr(view, 'related_search_fields', None):
+            metadata['related_search_fields'] = view.related_search_fields
+
+        from rest_framework import generics
+        if isinstance(view, generics.ListAPIView) and hasattr(view, 'paginator'):
+            metadata['max_page_size'] = view.paginator.max_page_size
+
         return metadata
+
 
 class RoleMetadata(Metadata):
     def determine_metadata(self, request, view):

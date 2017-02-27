@@ -8,6 +8,7 @@ import threading
 import json
 
 # Django
+from django.conf import settings
 from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
@@ -18,10 +19,11 @@ from crum.signals import current_user_getter
 # AWX
 from awx.main.models import * # noqa
 from awx.api.serializers import * # noqa
-from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore, emit_websocket_notification
+from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
-from awx.main.conf import tower_settings
+
+from awx.main.consumers import emit_channel_notification
 
 __all__ = []
 
@@ -29,6 +31,7 @@ logger = logging.getLogger('awx.main.signals')
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted,
 # when a Host-Group or Group-Group relationship is updated, or when a Job is deleted
+
 
 def emit_job_event_detail(sender, **kwargs):
     instance = kwargs['instance']
@@ -39,7 +42,9 @@ def emit_job_event_detail(sender, **kwargs):
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
-        emit_websocket_notification('/socket.io/job_events', 'job_events-' + str(instance.job.id), event_serialized)
+        event_serialized["group_name"] = "job_events"
+        emit_channel_notification('job_events-' + str(instance.job.id), event_serialized)
+
 
 def emit_ad_hoc_command_event_detail(sender, **kwargs):
     instance = kwargs['instance']
@@ -50,7 +55,9 @@ def emit_ad_hoc_command_event_detail(sender, **kwargs):
         event_serialized["created"] = event_serialized["created"].isoformat()
         event_serialized["modified"] = event_serialized["modified"].isoformat()
         event_serialized["event_name"] = instance.event
-        emit_websocket_notification('/socket.io/ad_hoc_command_events', 'ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+        event_serialized["group_name"] = "ad_hoc_command_events"
+        emit_channel_notification('ad_hoc_command_events-' + str(instance.ad_hoc_command_id), event_serialized)
+
 
 def emit_update_inventory_computed_fields(sender, **kwargs):
     logger.debug("In update inventory computed fields")
@@ -86,6 +93,7 @@ def emit_update_inventory_computed_fields(sender, **kwargs):
     else:
         update_inventory_computed_fields.delay(inventory.id, True)
 
+
 def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
     if getattr(_inventory_updates, 'is_updating', False):
         return
@@ -106,6 +114,7 @@ def emit_update_inventory_on_created_or_deleted(sender, **kwargs):
         if inventory is not None:
             update_inventory_computed_fields.delay(inventory.id, True)
 
+
 def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwargs):
     'When a role parent is added or removed, update our role hierarchy list'
     if action == 'post_add':
@@ -120,12 +129,14 @@ def rebuild_role_ancestor_list(reverse, model, instance, pk_set, action, **kwarg
         else:
             model.rebuild_role_ancestor_list([], [instance.id])
 
+
 def sync_superuser_status_to_rbac(instance, **kwargs):
     'When the is_superuser flag is changed on a user, reflect that in the membership of the System Admnistrator role'
     if instance.is_superuser:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.add(instance)
     else:
         Role.singleton(ROLE_SINGLETON_SYSTEM_ADMINISTRATOR).members.remove(instance)
+
 
 def create_user_role(instance, **kwargs):
     try:
@@ -140,6 +151,7 @@ def create_user_role(instance, **kwargs):
             content_object = instance,
         )
         role.members.add(instance)
+
 
 def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
     content_type = ContentType.objects.get_for_model(Organization)
@@ -156,6 +168,7 @@ def org_admin_edit_members(instance, action, model, reverse, pk_set, **kwargs):
                 if action == 'pre_remove':
                     instance.content_object.admin_role.children.remove(user.admin_role)
 
+
 def rbac_activity_stream(instance, sender, **kwargs):
     user_type = ContentType.objects.get_for_model(User)
     # Only if we are associating/disassociating
@@ -167,8 +180,16 @@ def rbac_activity_stream(instance, sender, **kwargs):
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents
-                if role is not None and role.content_type is not None:
-                    parent = role.content_type.name + "." + role.role_field
+                if role is not None:
+                    if role.content_type is None:
+                        if role.is_singleton():
+                            parent = 'singleton:' + role.singleton_name
+                        else:
+                            # Ill-defined role, may need additional logic in the
+                            # case of future expansions of the RBAC system
+                            parent = str(role.role_field)
+                    else:
+                        parent = role.content_type.name + "." + role.role_field
                     # Get the list of implicit parents that were defined at the class level.
                     # We have to take this list from the class property to avoid including parents
                     # that may have been added since the creation of the ImplicitRoleField
@@ -190,23 +211,31 @@ def rbac_activity_stream(instance, sender, **kwargs):
 
         activity_stream_associate(sender, instance, role=role, **kwargs)
 
+
 def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
     for l in instance.labels.all():
         if l.is_candidate_for_detach():
             l.delete()
 
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+
+def connect_computed_field_signals():
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+
+
+connect_computed_field_signals()
+
+
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
@@ -220,6 +249,7 @@ pre_delete.connect(cleanup_detached_labels_on_deleted_parent, sender=UnifiedJobT
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted
 
+
 @receiver(pre_delete, sender=Group)
 def save_related_pks_before_group_delete(sender, **kwargs):
     if getattr(_inventory_updates, 'is_removing', False):
@@ -229,6 +259,7 @@ def save_related_pks_before_group_delete(sender, **kwargs):
     instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
     instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
     instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
+
 
 @receiver(post_delete, sender=Group)
 def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
@@ -263,6 +294,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
 
 # Update host pointers to last_job and last_job_host_summary when a job is deleted
 
+
 def _update_host_last_jhs(host):
     jhs_qs = JobHostSummary.objects.filter(host__pk=host.pk)
     try:
@@ -280,11 +312,13 @@ def _update_host_last_jhs(host):
     if update_fields:
         host.save(update_fields=update_fields)
 
+
 @receiver(pre_delete, sender=Job)
 def save_host_pks_before_job_delete(sender, **kwargs):
     instance = kwargs['instance']
     hosts_qs = Host.objects.filter( last_job__pk=instance.pk)
     instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
+
 
 @receiver(post_delete, sender=Job)
 def update_host_last_job_after_job_deleted(sender, **kwargs):
@@ -295,14 +329,17 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 # Set via ActivityStreamRegistrar to record activity stream events
 
+
 class ActivityStreamEnabled(threading.local):
     def __init__(self):
-        self.enabled = getattr(tower_settings, 'ACTIVITY_STREAM_ENABLED', True)
+        self.enabled = True
 
     def __nonzero__(self):
-        return bool(self.enabled)
+        return bool(self.enabled and getattr(settings, 'ACTIVITY_STREAM_ENABLED', True))
+
 
 activity_stream_enabled = ActivityStreamEnabled()
+
 
 @contextlib.contextmanager
 def disable_activity_stream():
@@ -315,6 +352,24 @@ def disable_activity_stream():
         yield
     finally:
         activity_stream_enabled.enabled = previous_value
+
+
+@contextlib.contextmanager
+def disable_computed_fields():
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    yield
+    connect_computed_field_signals()
 
 
 model_serializer_mapping = {
@@ -330,10 +385,10 @@ model_serializer_mapping = {
     JobTemplate: JobTemplateSerializer,
     Job: JobSerializer,
     AdHocCommand: AdHocCommandSerializer,
-    TowerSettings: TowerSettingsSerializer,
     NotificationTemplate: NotificationTemplateSerializer,
     Notification: NotificationSerializer,
 }
+
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created and activity_stream_enabled:
@@ -354,8 +409,9 @@ def activity_stream_create(sender, instance, created, **kwargs):
         #TODO: Weird situation where cascade SETNULL doesn't work
         #      it might actually be a good idea to remove all of these FK references since
         #      we don't really use them anyway.
-        if type(instance) is not TowerSettings:
+        if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
             getattr(activity_entry, object1).add(instance)
+
 
 def activity_stream_update(sender, instance, **kwargs):
     if instance.id is None:
@@ -377,8 +433,9 @@ def activity_stream_update(sender, instance, **kwargs):
         object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-    if type(instance) is not TowerSettings:
+    if instance._meta.model_name != 'setting':  # Is not conf.Setting instance
         getattr(activity_entry, object1).add(instance)
+
 
 def activity_stream_delete(sender, instance, **kwargs):
     if not activity_stream_enabled:
@@ -393,6 +450,7 @@ def activity_stream_delete(sender, instance, **kwargs):
         changes=json.dumps(changes),
         object1=object1)
     activity_entry.save()
+
 
 def activity_stream_associate(sender, instance, **kwargs):
     if not activity_stream_enabled:

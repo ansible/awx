@@ -18,9 +18,10 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Name
+                    <span translate>Name</span>
                 </label>
                 <input
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                     type="text"
                     class="form-control input-sm
                         Form-textInput"
@@ -30,17 +31,18 @@
                     ng-model="schedulerName" required
                     placeholder="Schedule name">
                 <div class="error"
-                    ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required">
+                    ng-show="scheduler_form.$dirty && scheduler_form.schedulerName.$error.required" translate>
                     A schedule name is required.
                 </div>
             </div>
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Start Date
+                    <span translate>Start Date</span>
                 </label>
                 <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                    <scheduler-date-picker date="schedulerStartDt">
+                    <scheduler-date-picker date="schedulerStartDt"
+                        disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                     </scheduler-date-picker>
                 </div>
                 <div class="error"
@@ -51,7 +53,7 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Start Time
+                    <span translate>Start Time</span>
                     <span class="fmt-help"
                         ng-show="schedulerShowTimeZone">
                         (HH24:MM:SS)
@@ -63,6 +65,7 @@
                 </label>
                 <div class="input-group SchedulerTime">
                     <input name="schedulerStartHour"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                         id="schedulerStartHour"
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
@@ -78,6 +81,7 @@
                         :
                     </span>
                     <input name="schedulerStartMinute"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                         id="schedulerStartMinute"
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
@@ -93,6 +97,7 @@
                         :
                     </span>
                     <input name="schedulerStartSecond"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                         id="schedulerStartSecond"
                         sch-spinner="scheduler_form"
                         class="scheduler-time-spinner
@@ -117,7 +122,7 @@
                     </div> -->
                 </div>
                 <div class="error"
-                    ng-show="scheduler_startTime_error">
+                    ng-show="scheduler_startTime_error" translate>
                     The time must be in HH24:MM:SS format.
                 </div>
             </div>
@@ -125,9 +130,10 @@
                 ng-show="schedulerShowTimeZone">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Local Time Zone
+                    <span translate>Local Time Zone</span>
                 </label>
                 <select
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                     class="MakeSelect2"
                     name="schedulerTimeZone"
                     id="schedulerTimeZone"
@@ -140,9 +146,10 @@
             <div class="form-group SchedulerForm-formGroup">
                 <label class="Form-inputLabel">
                     <span class="red-text">*</span>
-                    Repeat frequency
+                    <span translate>Repeat frequency</span>
                 </label>
                 <select name="schedulerFrequency"
+                    ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                     id="schedulerFrequency"
                     class="MakeSelect2"
                     ng-model="schedulerFrequency"
@@ -156,13 +163,13 @@
             </div>
             <div class="form-group SchedulerForm-formGroup" ng-if="cleanupJob  && !isFactCleanup">
                 <label class="Form-inputLabel"><span class="red-text">*</span> Days of data to keep</label>
-                <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep">
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required">A value is required.</div>
-                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number">This is not a valid number.</div>
+                <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" name="schedulerPurgeDays" id="schedulerPurgeDays" min="1" aw-spinner="schedulerPurgeDays" ng-model="schedulerPurgeDays" required placeholder="Days of data to keep" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$dirty && scheduler_form.schedulerPurgeDays.$error.required" translate>A value is required.</div>
+                <div class="error" ng-show="scheduler_form.schedulerPurgeDays.$error.number" translate>This is not a valid number.</div>
             </div>
             <div class="RepeatFrequencyOptions-label"
                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
-                Frequency Details</div>
+                <span translate>Frequency Details</span></div>
             <div class="RepeatFrequencyOptions Form"
                 ng-show="schedulerFrequency.value && schedulerFrequency.value !== 'none'">
                 <div class="form-group
@@ -175,6 +182,7 @@
                         Every
                     </label>
                     <input name="schedulerInterval"
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                         id="schedulerInterval"
                         sch-spinner="scheduler_form"
                         class="scheduler-spinner
@@ -211,6 +219,7 @@
                         </label>
                     </div>
                     <input
+                        ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                         name="monthDay"
                         id="monthDay"
                         sch-spinner="scheduler_form"
@@ -232,6 +241,7 @@
                         <label class="Form-inputLabel">
                             <span class="red-text">*</span>
                             <input type="radio"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 value="other"
                                 ng-model="$parent.monthlyRepeatOption"
                                 ng-change="monthlyRepeatChange()"
@@ -246,7 +256,7 @@
                             id="monthlyOccurrence"
                             ng-model="$parent.monthlyOccurrence"
                             ng-options="o.name for o in occurrences"
-                            ng-disabled="monthlyRepeatOption != 'other'"
+                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class=" MakeSelect2 form-control
                                 input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -257,7 +267,7 @@
                             id="monthlyWeekDay"
                             ng-model="$parent.monthlyWeekDay"
                             ng-options="w.name for w in weekdays"
-                            ng-disabled="monthlyRepeatOption != 'other'"
+                            ng-disabled="monthlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class="MakeSelect2 form-control input-sm" >
                         </select>
                     </div>
@@ -270,6 +280,7 @@
                         <span class="red-text">*</span>
                         <label class="Form-inputLabel">
                             <input type="radio"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 value="month"
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
@@ -284,12 +295,13 @@
                             id="yearlyMonth"
                             ng-model="$parent.yearlyMonth"
                             ng-options="m.name for m in months"
-                            ng-disabled="yearlyRepeatOption != 'month'"
+                            ng-disabled="yearlyRepeatOption != 'month' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class="MakeSelect2 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect"
                         >
                         </select>
                         <input name="yearlyMonthDay"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             id="yearlyMonthDay"
                             sch-spinner="scheduler_form"
                             class="scheduler-spinner
@@ -313,6 +325,7 @@
                         <label class="Form-inputLabel">
                             <span class="red-text">*</span>
                             <input type="radio"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 value="other"
                                 ng-model="$parent.yearlyRepeatOption"
                                 ng-change="yearlyRepeatChange()"
@@ -329,7 +342,7 @@
                             id="yearlyOccurrence"
                             ng-model="$parent.yearlyOccurrence"
                             ng-options="o.name for o in occurrences"
-                            ng-disabled="yearlyRepeatOption != 'other'"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -341,7 +354,7 @@
                             id="yearlyWeekDay"
                             ng-model="$parent.yearlyWeekDay"
                             ng-options="w.name for w in weekdays"
-                            ng-disabled="yearlyRepeatOption != 'other'"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-spacedSelect
@@ -352,7 +365,7 @@
                             id="yearlyOtherMonth"
                             ng-model="$parent.yearlyOtherMonth"
                             ng-options="m.name for m in months"
-                            ng-disabled="yearlyRepeatOption != 'other'"
+                            ng-disabled="yearlyRepeatOption != 'other' || !(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             class="MakeSelect2
                                 form-control input-sm
                                 RepeatFrequencyOptions-thirdSelect">
@@ -374,6 +387,7 @@
                             data-toggle="buttons-checkbox"
                             id="weekdaySelect">
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDaySUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -382,6 +396,7 @@
                                 Sun
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayMOClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -390,6 +405,7 @@
                                 Mon
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayTUClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -398,6 +414,7 @@
                                 Tue
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayWEClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -406,6 +423,7 @@
                                 Wed
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayTHClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -414,6 +432,7 @@
                                 Thu
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDayFRClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -422,6 +441,7 @@
                                 Fri
                             </button>
                             <button type="button"
+                                ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                                 ng-class="weekDaySAClass"
                                 class="btn btn-default
                                     RepeatFrequencyOptions-weekButton"
@@ -445,6 +465,7 @@
                     </label>
                     <div>
                         <select id="schedulerEnd"
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             name="schedulerEnd"
                             ng-model="$parent.schedulerEnd"
                             ng-options="e.name for e in endOptions"
@@ -463,6 +484,7 @@
                         Occurrence(s)
                     </label>
                         <input
+                            ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                             ng-name="schedulerOccurrenceCount"
                             ng-id="schedulerOccurrenceCount"
                             sch-spinner="scheduler_form"
@@ -486,7 +508,8 @@
                         End Date
                     </label>
                     <div class="input-group Form-inputGroup SchedulerForm-inputGroup--date">
-                        <scheduler-date-picker date="$parent.schedulerEndDt">
+                        <scheduler-date-picker date="$parent.schedulerEndDt"
+                            disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)">
                         </scheduler-date-picker>
                     </div>
                     <div class="error"
@@ -506,38 +529,46 @@
             <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
                 <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a time period after which to remove old facts</label>
                 <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input type="number" id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" aw-min=0 aw-max=9999 integer></input>
+                    <input id="keep_amount" name="keep_amount" ng-model="keep_amount" aw-spinner="keep_amount" ng-required="true" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" min="0" aw-min="0" max="9999" aw-max="9999" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)" integer required></input>
+                    <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
+                </div>
+
+                <!-- The below errors are ONLY for id="keep_amount", not for id="keep_unit" -->
+                <div>
                     <div class="error" ng-show="scheduler_form.keep_amount.$dirty && scheduler_form.keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
                     <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.number || scheduler_form.keep_amount.$error.integer" >Please enter a valid number.</div>
                     <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMin">Please enter a non-negative number.</div>
                     <div class="error survey_error" ng-show="scheduler_form.keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
-                    <select id="keep_unit" name="keep_unit" ng-model="keep_unit" ng-options="type.label for type in keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2"></select>
                 </div>
             </div>
 
             <div class="form-group SchedulerForm-formGroup" ng-if="isFactCleanup">
                 <label class="Form-inputLabel RepeatFrequencyOptions-everyLabel"><span class="red-text">*</span> Select a frequency for snapshot retention</label>
                 <div class="RepeatFrequencyOptions-inputGroup RepeatFrequencyOptions-inputGroup--halvesWithSelect">
-                    <input type="number" sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
-                    ng-required="true" aw-min=0 aw-max=9999 >
+                    <input sch-spinner="scheduler_form" class="scheduler-time-spinner SchedulerTime-input SpinnerInput RepeatFrequencyOptions-number" id="granularity_keep_amount" name="granularity_keep_amount" ng-model="granularity_keep_amount" aw-spinner="granularity_keep_amount"
+                    ng-required="true" min="0" max="9999"  integer ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)" aw-min="0" aw-max="9999" required>
+                    <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2" ng-disabled="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"></select>
+                </div>
+
+                <!-- The below errors are ONLY for id="granularity_keep_amount", not for id="granularity_keep_unit" -->
+                <div>
                     <div class="error" ng-show="scheduler_form.granularity_keep_amount.$dirty && scheduler_form.granularity_keep_amount.$error.required">Please enter the number of days you would like to keep this data.</div>
                     <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.number || scheduler_form.granularity_keep_amount.$error.integer" >Please enter a valid number.</div>
                     <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMin">Please enter a non-negative number.</div>
                     <div class="error survey_error" ng-show="scheduler_form.granularity_keep_amount.$error.awMax">Please enter a number smaller than 9999.</div>
-                    <select id="granularity_keep_unit" name="granularity_keep_unit" ng-model="granularity_keep_unit" ng-options="type.label for type in granularity_keep_unit_choices track by type.value" ng-required="true" class="form-control input-sm MakeSelect2"></select>
                 </div>
             </div>
         <!-- end management job fields     -->
         </form>
         <div class="SchedulerFormDetail-container
             SchedulerFormDetail-container--error"
-            ng-show="!schedulerIsValid && scheduler_form.$dirty">
+            ng-show="(scheduler_form.$invalid || !schedulerIsValid) && scheduler_form.$dirty">
             <p class="SchedulerFormDetail-errorText">
                 The scheduler options are invalid or incomplete.
             </p>
         </div>
         <div class="SchedulerFormDetail-container"
-            ng-show="schedulerIsValid">
+            ng-show="!scheduler_form.$invalid && schedulerIsValid">
             <label class="SchedulerFormDetail-label">
                 Schedule Description
             </label>
@@ -599,12 +630,19 @@
             <button type="button"
                 class="btn btn-sm Form-cancelButton"
                 id="project_cancel_btn"
+                ng-show="!(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                ng-click="formCancel()">Close</button>
+            <button type="button"
+                class="btn btn-sm Form-cancelButton"
+                id="project_cancel_btn"
+                ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
                 ng-click="formCancel()">Cancel</button>
             <button type="button"
                 class="btn btn-sm Form-saveButton"
                 id="project_save_btn"
                 ng-click="saveSchedule()"
-                ng-disabled="!schedulerIsValid"> Save</button>
+                ng-show="(schedule_obj.summary_fields.user_capabilities.edit || canAdd)"
+                ng-disabled="scheduler_form.$invalid || !schedulerIsValid"> Save</button>
         </div>
     </div>
 </div>

@@ -5,7 +5,7 @@ import os
 import sys
 import warnings
 
-__version__ = '3.0.3'
+__version__ = '3.1.0'
 
 __all__ = ['__version__']
 
@@ -16,6 +16,7 @@ try:
     MODE = 'development'
 except ImportError: # pragma: no cover
     MODE = 'production'
+
 
 def find_commands(management_dir):
     # Modified version of function from django/core/management/__init__.py.
@@ -32,6 +33,7 @@ def find_commands(management_dir):
     except OSError:
         pass
     return commands
+
 
 def prepare_env():
     # Update the default settings environment variable based on current mode.

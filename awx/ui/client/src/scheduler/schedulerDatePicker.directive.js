@@ -10,13 +10,15 @@ export default
     [   'moment',
         'templateUrl',
         function(moment, templateUrl) {
+            require('bootstrap-datepicker');
             return {
                 restrict: 'E',
                 scope: {
                     date: '=',
                     minDate: '=',
                     autoUpdate: '=?',
-                    inputClass: '&'
+                    inputClass: '&',
+                    disabled: '=?'
                 },
                 templateUrl: templateUrl('system-tracking/date-picker/date-picker'),
                 link: function(scope, element, attrs) {
@@ -36,7 +38,7 @@ export default
                             mustUpdateValue = false;
                             scope.dateValueMoment = moment(newValue, ['MM/DD/YYYY'], moment.locale());
                             scope.dateValue = scope.dateValueMoment.format('L');
-                            element.find(".DatePicker").systemTrackingDP('update', scope.dateValue);
+                            element.find(".DatePicker").datepicker('update', scope.dateValue);
                         }
                     }, true);
 
@@ -55,7 +57,7 @@ export default
 
                     element.find(".DatePicker").addClass("input-prepend date");
                     element.find(".DatePicker").find(".DatePicker-icon").addClass("add-on");
-                    element.find(".DatePicker").systemTrackingDP({
+                    element.find(".DatePicker").datepicker({
                         autoclose: true,
                         language: localeKey,
                         format: dateFormat

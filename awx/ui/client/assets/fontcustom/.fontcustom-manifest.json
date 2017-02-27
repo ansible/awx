@@ -1,18 +1,38 @@
 {
   "checksum": {
-    "previous": "e4442d278bfc4c1a673bdd29512213a18cfaf74decd9bb21ecd698b4860e7453",
-    "current": "e4442d278bfc4c1a673bdd29512213a18cfaf74decd9bb21ecd698b4860e7453"
+    "previous": "3dfbafd778b214fc5df2a64fe14fbfb30ba40e33282eedf0d98b5a613786db88",
+    "current": "3dfbafd778b214fc5df2a64fe14fbfb30ba40e33282eedf0d98b5a613786db88"
   },
   "fonts": [
-    "..//fontcustom_e4442d278bfc4c1a673bdd29512213a1.ttf",
-    "..//fontcustom_e4442d278bfc4c1a673bdd29512213a1.svg",
-    "..//fontcustom_e4442d278bfc4c1a673bdd29512213a1.woff",
-    "..//fontcustom_e4442d278bfc4c1a673bdd29512213a1.eot"
+    "./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.ttf",
+    "./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.svg",
+    "./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.woff",
+    "./fontcustom_3dfbafd778b214fc5df2a64fe14fbfb3.eot"
   ],
   "glyphs": {
-    "fontcustom_fbf6cfce71d2c35351b84596defbfd01": {
-      "codepoint": 61696,
-      "source": "./fontcustom_fbf6cfce71d2c35351b84596defbfd01.svg"
+    "activity-stream": {
+      "codepoint": 61697,
+      "source": "new_icons/activity-stream.svg"
+    },
+    "google": {
+      "codepoint": 61698,
+      "source": "new_icons/google.svg"
+    },
+    "launch": {
+      "codepoint": 61699,
+      "source": "new_icons/launch.svg"
+    },
+    "microsoft": {
+      "codepoint": 61700,
+      "source": "new_icons/microsoft.svg"
+    },
+    "saml-02": {
+      "codepoint": 61701,
+      "source": "new_icons/saml-02.svg"
+    },
+    "user": {
+      "codepoint": 61702,
+      "source": "new_icons/user.svg"
     }
   },
   "options": {
@@ -25,16 +45,16 @@
     "font_design_size": 16,
     "font_em": 512,
     "font_name": "fontcustom",
-    "force": true,
+    "force": false,
     "input": {
-      "templates": ".",
-      "vectors": "."
+      "templates": "new_icons/",
+      "vectors": "new_icons/"
     },
     "no_hash": false,
     "output": {
-      "css": "../",
-      "fonts": "../",
-      "preview": "../"
+      "css": ".",
+      "fonts": ".",
+      "preview": "."
     },
     "preprocessor_path": null,
     "quiet": false,
@@ -44,7 +64,7 @@
     ]
   },
   "templates": [
-    "../fontcustom.css",
-    "../fontcustom-preview.html"
+    "./fontcustom.css",
+    "./fontcustom-preview.html"
   ]
 }

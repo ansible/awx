@@ -10,15 +10,16 @@
 					</button>
 				</div>
 				<div class="HostEvents-form--container">
-				<form ng-submit="search()" class="form-inline HostEvents-search--form">
-					<!-- Search -->
+
+				<!-- @issue: OLD SEARCH -->
+				<!-- <form ng-submit="search()" class="form-inline HostEvents-search--form">
 					<div class="form-group" >
 						<div class="input-group">
 							<input type="text" ng-model="searchStr" class="form-control" placeholder="SEARCH">
 							<span ng-click="search()" type="submit" class="input-group-addon btn btn-default"><i class="fa fa-search"></i></span>
 						</div>
 					</div>
-				</form>
+				</form> -->
 
 				<select class="HostEvents-select">
 					    <option ng-selected="filter == activeFilter" class="HostEvents-select--option" value="{{filter}}" ng-repeat="filter in filters">{{filter}}</option>

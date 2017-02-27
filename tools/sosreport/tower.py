@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Ansible, Inc.
+# Copyright (c) 2016 Ansible, Inc.
 # All Rights Reserved.
 
 import sos
@@ -8,7 +8,8 @@ SOSREPORT_TOWER_COMMANDS = [
     "ansible --version",      # ansible core version
     "tower-manage --version", # tower version
     "supervisorctl status",   # tower process status
-    "pip freeze",             # pip package list
+    "/var/lib/awx/venv/tower/bin/pip freeze",             # pip package list
+    "/var/lib/awx/venv/ansible/bin/pip freeze",             # pip package list
     "tree -d /var/lib/awx",   # show me the dirs
     "ls -ll /var/lib/awx",    # check permissions
     "ls -ll /etc/tower",
@@ -19,9 +20,8 @@ SOSREPORT_TOWER_DIRS = [
     "/etc/tower/",
     "/etc/ansible/",
     "/var/log/tower",
-    "/var/log/httpd",
-    "/var/log/apache2",
-    "/var/log/redis",
+    "/var/log/nginx",
+    "/var/log/rabbitmq",
     "/var/log/supervisor",
     "/var/log/syslog",
     "/var/log/udev",

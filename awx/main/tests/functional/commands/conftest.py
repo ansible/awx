@@ -3,6 +3,7 @@ import time
 
 from datetime import datetime
 
+
 @pytest.fixture
 def fact_msg_base(inventory, hosts):
     host_objs = hosts(1)
@@ -12,6 +13,7 @@ def fact_msg_base(inventory, hosts):
         'facts' : { },
         'inventory_id': inventory.id
     }
+
 
 @pytest.fixture
 def fact_msg_small(fact_msg_base):
@@ -77,7 +79,7 @@ def fact_msg_small(fact_msg_base):
         }
     }
     return fact_msg_base
- 
+
 
 '''
 Facts sent from ansible to our fact cache reciever.
@@ -92,18 +94,20 @@ key of 'ansible'
 }
 '''
 
+
 @pytest.fixture
 def fact_msg_ansible(fact_msg_base, fact_ansible_json):
     fact_msg_base['facts'] = fact_ansible_json
     return fact_msg_base
+
 
 @pytest.fixture
 def fact_msg_packages(fact_msg_base, fact_packages_json):
     fact_msg_base['facts']['packages'] = fact_packages_json
     return fact_msg_base
 
+
 @pytest.fixture
 def fact_msg_services(fact_msg_base, fact_services_json):
     fact_msg_base['facts']['services'] = fact_services_json
     return fact_msg_base
-

@@ -4,22 +4,119 @@
  * All Rights Reserved
  *************************************************/
 
-import controller from './scheduler.controller';
+import listController from './schedulerList.controller';
 import addController from './schedulerAdd.controller';
 import editController from './schedulerEdit.controller';
 import {templateUrl} from '../shared/template-url/template-url.factory';
 import schedulerDatePicker from './schedulerDatePicker.directive';
+import { N_ } from '../i18n';
 
 export default
     angular.module('scheduler', [])
-        .controller('schedulerController', controller)
+        .controller('schedulerListController', listController)
         .controller('schedulerAddController', addController)
         .controller('schedulerEditController', editController)
         .directive('schedulerDatePicker', schedulerDatePicker)
         .run(['$stateExtender', function($stateExtender) {
+            // Inventory sync schedule states registered in: awx/ui/client/src/inventories/manage/groups/main.js
+            // Scheduled jobs states registered in awx/uiclient/src/job-detail/main.js
+
+            // job templates
             $stateExtender.addState({
+                searchPrefix: 'schedule',
                 name: 'jobTemplateSchedules',
-                route: '/job_templates/:id/schedules',
+                route: '/templates/job_template/:id/schedules',
+                data: {
+                    activityStream: true,
+                    activityStreamTarget: 'job_template',
+                    activityStreamId: 'id'
+                },
+                ncyBreadcrumb: {
+                    parent: 'templates.editJobTemplate({job_template_id: parentObject.id})',
+                    label: N_('SCHEDULES')
+                },
+                resolve: {
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = `${GetBasePath('job_templates')}${$stateParams.id}/schedules`;
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+                        let path = `${GetBasePath('job_templates')}${$stateParams.id}`;
+                        Rest.setUrl(path);
+                        return Rest.get(path).then((res) => res.data);
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
+                },
+                views: {
+                    '@': {
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                            // include name of parent resource in listTitle
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            let html = generateList.build({
+                                list: ScheduleList,
+                                mode: 'edit'
+                            });
+                            html = generateList.wrapPanel(html);
+                            return generateList.insertFormView() + html;
+                        },
+                        controller: 'schedulerListController'
+                    }
+                }
+            });
+            $stateExtender.addState({
+                name: 'jobTemplateSchedules.add',
+                route: '/add',
+                views: {
+                    'form': {
+                        controller: 'schedulerAddController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
+                ncyBreadcrumb: {
+                    parent: 'jobTemplateSchedules',
+                    label: N_('CREATE SCHEDULE')
+                }
+            });
+            $stateExtender.addState({
+                name: 'jobTemplateSchedules.edit',
+                route: '/:schedule_id',
+                views: {
+                    'form': {
+                        controller: 'schedulerEditController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
+                ncyBreadcrumb: {
+                    parent: 'jobTemplateSchedules',
+                    label: '{{schedule_obj.name}}'
+                }
+            });
+
+            // workflows
+            $stateExtender.addState({
+                searchPrefix: 'schedule',
+                name: 'workflowJobTemplateSchedules',
+                route: '/templates/workflow_job_template/:id/schedules',
                 templateUrl: templateUrl("scheduler/scheduler"),
                 controller: 'schedulerController',
                 data: {
@@ -28,102 +125,230 @@ export default
                     activityStreamId: 'id'
                 },
                 ncyBreadcrumb: {
-                    parent: 'jobTemplates.edit',
-                    label: 'SCHEDULES'
+                    parent: 'templates.editWorkflowJobTemplate({workflow_job_template_id: parentObject.id})',
+                    label: N_('SCHEDULES')
+                },
+                resolve: {
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}/schedules`;
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+                        let path = `${GetBasePath('workflow_job_templates')}${$stateParams.id}`;
+                        Rest.setUrl(path);
+                        return Rest.get(path).then((res) => res.data);
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('workflow_job_templates') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
+                },
+                views: {
+                    '@': {
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                            // include name of parent resource in listTitle
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            let html = generateList.build({
+                                list: ScheduleList,
+                                mode: 'edit'
+                            });
+                            html = generateList.wrapPanel(html);
+                            return generateList.insertFormView() + html;
+                        },
+                        controller: 'schedulerListController'
+                    }
                 }
             });
             $stateExtender.addState({
-                name: 'jobTemplateSchedules.add',
+                name: 'workflowJobTemplateSchedules.add',
                 route: '/add',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
+                views: {
+                    'form': {
+                        controller: 'schedulerAddController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
-                    parent: 'jobTemplateSchedules',
-                    label: 'CREATE SCHEDULE'
+                    parent: 'workflowJobTemplateSchedules',
+                    label: N_('CREATE SCHEDULE')
                 }
             });
             $stateExtender.addState({
-                name: 'jobTemplateSchedules.edit',
+                name: 'workflowJobTemplateSchedules.edit',
                 route: '/:schedule_id',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
+                views: {
+                    'form': {
+                        controller: 'schedulerEditController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
+                },
                 ncyBreadcrumb: {
-                    parent: 'jobTemplateSchedules',
+                    parent: 'workflowJobTemplateSchedules',
                     label: '{{schedule_obj.name}}'
                 }
             });
+            // projects
             $stateExtender.addState({
+                searchPrefix: 'schedule',
                 name: 'projectSchedules',
                 route: '/projects/:id/schedules',
-                templateUrl: templateUrl("scheduler/scheduler"),
-                controller: 'schedulerController',
                 data: {
                     activityStream: true,
                     activityStreamTarget: 'project',
                     activityStreamId: 'id'
                 },
                 ncyBreadcrumb: {
-                    parent: 'projects.edit',
-                    label: 'SCHEDULES'
+                    parent: 'projects.edit({project_id: parentObject.id})',
+                    label: N_('SCHEDULES')
+                },
+                resolve: {
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = `${GetBasePath('projects')}${$stateParams.id}/schedules`;
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath){
+                        let path = `${GetBasePath('projects')}${$stateParams.id}`;
+                        Rest.setUrl(path);
+                        return Rest.get(path).then((res) => res.data);
+                    }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }],
+                    ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                        (SchedulesList, GetBasePath, $stateParams) => {
+                            let list = _.cloneDeep(SchedulesList);
+                            list.basePath = GetBasePath('projects') + $stateParams.id + '/schedules/';
+                            return list;
+                        }
+                    ]
+                },
+                views: {
+                    '@': {
+                        templateProvider: function(ScheduleList, generateList, ParentObject){
+                            // include name of parent resource in listTitle
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            let html = generateList.build({
+                                list: ScheduleList,
+                                mode: 'edit'
+                            });
+                            html = generateList.wrapPanel(html);
+                            return generateList.insertFormView() + html;
+                        },
+                        controller: 'schedulerListController'
+                    }
                 }
             });
+
             $stateExtender.addState({
                 name: 'projectSchedules.add',
                 route: '/add',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
                 ncyBreadcrumb: {
-                    parent: 'projectSchedules',
-                    label: 'CREATE SCHEDULE'
+                    label: N_('CREATE SCHEDULE')
+                },
+                views: {
+                    'form': {
+                        controller: 'schedulerAddController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
                 }
             });
             $stateExtender.addState({
                 name: 'projectSchedules.edit',
                 route: '/:schedule_id',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
                 ncyBreadcrumb: {
-                    parent: 'projectSchedules',
                     label: '{{schedule_obj.name}}'
+                },
+                views: {
+                    'form': {
+                        controller: 'schedulerEditController',
+                        templateUrl: templateUrl("scheduler/schedulerForm"),
+                    }
                 }
             });
+            // upcoming scheduled jobs
             $stateExtender.addState({
-                name: 'inventoryManage.schedules',
-                route: '/:id/schedules',
-                views: {
-                    'form@inventoryManage': {
-                        templateUrl: templateUrl("scheduler/scheduler"),
-                        controller: 'schedulerController'
-                    },
-                    // don't display groups and hosts lists to be
-                    // consistent with other scheduler views
-                    'groupsList@inventoryManage': {
-                        template: ''
-                    },
-                    'hostsList@inventoryManage': {
-                        template: '',
+                searchPrefix: 'schedule',
+                name: 'jobs.schedules',
+                route: '/schedules',
+                params: {
+                    schedule_search: {
+                        value: {
+                            next_run__isnull: 'false',
+                            order_by: 'unified_job_template__polymorphic_ctype__model'
+                        }
                     }
                 },
+                data: {
+                    activityStream: false,
+                },
                 ncyBreadcrumb: {
-                    label: "SCHEDULES"
-                }
-            });
-            $stateExtender.addState({
-                name: 'inventoryManage.schedules.add',
-                route: '/add',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerAddController',
-                ncyBreadcrumb: {
-                    label: "CREATE SCHEDULE"
-                }
-            });
-            $stateExtender.addState({
-                name: 'inventoryManage.schedules.edit',
-                route: '/:schedule_id',
-                templateUrl: templateUrl("scheduler/schedulerForm"),
-                controller: 'schedulerEditController',
-                ncyBreadcrumb: {
-                    label: "{{schedule_obj.name}}"
+                    parent: 'jobs',
+                    label: N_('SCHEDULED')
+                },
+                resolve: {
+                    ScheduleList: ['ScheduledJobsList', function(list){
+                        return list;
+                    }],
+                    Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+                        function(list, qs, $stateParams, GetBasePath) {
+                            let path = GetBasePath('schedules');
+                            return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                        }
+                    ],
+                    ParentObject: [() =>{return {endpoint:'/api/v1/schedules'}; }],
+                    UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                        function(Rest, GetBasePath, $stateParams, $q) {
+                            Rest.setUrl(GetBasePath('unified_jobs'));
+                            var val = $q.defer();
+                            Rest.options()
+                                .then(function(data) {
+                                    val.resolve(data.data);
+                                }, function(data) {
+                                    val.reject(data);
+                                });
+                            return val.promise;
+                        }]
+                },
+                views: {
+                    'list@jobs': {
+                        templateProvider: function(ScheduleList, generateList){
+                            let html = generateList.build({
+                                list: ScheduleList,
+                                mode: 'edit',
+                                title: false
+                            });
+                            return html;
+                        },
+                        controller: 'schedulerListController'
+                    }
                 }
             });
         }]);

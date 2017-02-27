@@ -9,12 +9,14 @@ import time
 # Django
 from django.conf import settings
 from django.db import connection
+from django.db.models.fields import FieldDoesNotExist
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.authentication import get_authorization_header
@@ -25,6 +27,7 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
+from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
@@ -40,6 +43,8 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
+analytics_logger = logging.getLogger('awx.analytics.performance')
+
 
 def get_view_name(cls, suffix=None):
     '''
@@ -57,6 +62,7 @@ def get_view_name(cls, suffix=None):
     if name:
         return ('%s %s' % (name, suffix)) if suffix else name
     return views.get_view_name(cls, suffix=None)
+
 
 def get_view_description(cls, html=False):
     '''
@@ -76,6 +82,7 @@ def get_view_description(cls, html=False):
     if html:
         desc = '<div class="description">%s</div>' % desc
     return mark_safe(desc)
+
 
 class APIView(views.APIView):
 
@@ -104,6 +111,7 @@ class APIView(views.APIView):
                 logger.warn(status_msg)
         response = super(APIView, self).finalize_response(request, response, *args, **kwargs)
         time_started = getattr(self, 'time_started', None)
+        response['X-API-Node'] = settings.CLUSTER_HOST_ID
         if time_started:
             time_elapsed = time.time() - self.time_started
             response['X-API-Time'] = '%0.3fs' % time_elapsed
@@ -112,6 +120,8 @@ class APIView(views.APIView):
             q_times = [float(q['time']) for q in connection.queries[queries_before:]]
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
+
+        analytics_logger.info("api response", extra=dict(python_objects=dict(request=request, response=response)))
         return response
 
     def get_authenticate_header(self, request):
@@ -150,6 +160,8 @@ class APIView(views.APIView):
             'new_in_230': getattr(self, 'new_in_230', False),
             'new_in_240': getattr(self, 'new_in_240', False),
             'new_in_300': getattr(self, 'new_in_300', False),
+            'new_in_310': getattr(self, 'new_in_310', False),
+            'deprecated': getattr(self, 'deprecated', False),
         }
 
     def get_description(self, html=False):
@@ -224,16 +236,25 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         d['settings'] = settings
         return d
 
+
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
 
     def get_queryset(self):
         return self.request.user.get_queryset(self.model)
+
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
 
     def get_queryset(self):
         return self.request.user.get_queryset(self.model)
+
+    def paginate_queryset(self, queryset):
+        page = super(ListAPIView, self).paginate_queryset(queryset)
+        # Queries RBAC info & stores into list objects
+        if hasattr(self, 'capabilities_prefetch') and page is not None:
+            cache_list_capabilities(page, self.capabilities_prefetch, self.model, self.request.user)
+        return page
 
     def get_description_context(self):
         opts = self.model._meta
@@ -252,13 +273,60 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
         fields = []
         for field in self.model._meta.fields:
             if field.name in ('username', 'first_name', 'last_name', 'email',
-                              'name', 'description', 'email'):
+                              'name', 'description'):
                 fields.append(field.name)
         return fields
+
+    @property
+    def related_search_fields(self):
+        def skip_related_name(name):
+            return (
+                name is None or name.endswith('_role') or name.startswith('_') or
+                name.startswith('deprecated_') or name.endswith('_set') or
+                name == 'polymorphic_ctype')
+
+        fields = set([])
+        for field in self.model._meta.fields:
+            if skip_related_name(field.name):
+                continue
+            if getattr(field, 'related_model', None):
+                fields.add('{}__search'.format(field.name))
+        for rel in self.model._meta.related_objects:
+            name = rel.related_model._meta.verbose_name.replace(" ", "_")
+            if skip_related_name(name):
+                continue
+            fields.add('{}__search'.format(name))
+        m2m_rel = []
+        m2m_rel += self.model._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
+            m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
+            m2m_rel += UnifiedJob._meta.local_many_to_many
+        for relationship in m2m_rel:
+            if skip_related_name(relationship.name):
+                continue
+            if relationship.related_model._meta.app_label != 'main':
+                continue
+            fields.add('{}__search'.format(relationship.name))
+        fields = list(fields)
+
+        allowed_fields = []
+        for field in fields:
+            try:
+                FieldLookupBackend().get_field_from_lookup(self.model, field)
+            except PermissionDenied:
+                pass
+            except FieldDoesNotExist:
+                allowed_fields.append(field)
+            else:
+                allowed_fields.append(field)
+        return allowed_fields
+
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
     pass
+
 
 class ParentMixin(object):
 
@@ -278,7 +346,8 @@ class ParentMixin(object):
         if not self.request.user.can_access(*args):
             raise PermissionDenied()
 
-class SubListAPIView(ListAPIView, ParentMixin):
+
+class SubListAPIView(ParentMixin, ListAPIView):
     # Base class for a read-only sublist view.
 
     # Subclasses should define at least:
@@ -304,6 +373,7 @@ class SubListAPIView(ListAPIView, ParentMixin):
         qs = self.request.user.get_queryset(self.model).distinct()
         sublist_qs = getattrd(parent, self.relationship).distinct()
         return qs & sublist_qs
+
 
 class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects
@@ -357,9 +427,13 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         headers = {'Location': obj.get_absolute_url()}
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
 class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
+
+    def is_valid_relation(self, parent, sub, created=False):
+        return None
 
     def get_description_context(self):
         d = super(SubListCreateAttachDetachAPIView, self).get_description_context()
@@ -397,6 +471,13 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
                                        skip_sub_obj_read_check=created):
             raise PermissionDenied()
 
+        # Verify that the relationship to be added is valid.
+        attach_errors = self.is_valid_relation(parent, sub, created=created)
+        if attach_errors is not None:
+            if created:
+                sub.delete()
+            return Response(attach_errors, status=status.HTTP_400_BAD_REQUEST)
+
         # Attach the object to the collection.
         if sub not in relationship.all():
             relationship.add(sub)
@@ -413,7 +494,7 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         sub_id = request.data.get('id', None)
         res = None
         if not sub_id:
-            data = dict(msg='"id" is required to disassociate')
+            data = dict(msg=_('"id" is required to disassociate'))
             res = Response(data, status=status.HTTP_400_BAD_REQUEST)
         return (sub_id, res)
 
@@ -449,12 +530,13 @@ class SubListCreateAttachDetachAPIView(SubListCreateAPIView):
         else:
             return self.attach(request, *args, **kwargs)
 
-'''
-Models for which you want the last instance to be deleted from the database
-when the last disassociate is called should inherit from this class. Further, 
-the model should implement is_detached()
-'''
+
 class DeleteLastUnattachLabelMixin(object):
+    '''
+    Models for which you want the last instance to be deleted from the database
+    when the last disassociate is called should inherit from this class. Further,
+    the model should implement is_detached()
+    '''
     def unattach(self, request, *args, **kwargs):
         (sub_id, res) = super(DeleteLastUnattachLabelMixin, self).unattach_validate(request)
         if res:
@@ -469,11 +551,14 @@ class DeleteLastUnattachLabelMixin(object):
 
         return res
 
-class SubDetailAPIView(generics.RetrieveAPIView, GenericAPIView, ParentMixin):
+
+class SubDetailAPIView(ParentMixin, generics.RetrieveAPIView, GenericAPIView):
     pass
+
 
 class RetrieveAPIView(generics.RetrieveAPIView, GenericAPIView):
     pass
+
 
 class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
 
@@ -489,6 +574,7 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
         ''' scrub any fields the user cannot/should not put/patch, based on user context.  This runs after read-only serialization filtering '''
         pass
 
+
 class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
@@ -499,21 +585,21 @@ class RetrieveDestroyAPIView(RetrieveAPIView, generics.RetrieveDestroyAPIView):
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, RetrieveDestroyAPIView):
     pass
+
 
 class DestroyAPIView(GenericAPIView, generics.DestroyAPIView):
     pass
 
 
-class ResourceAccessList(ListAPIView):
+class ResourceAccessList(ParentMixin, ListAPIView):
 
     serializer_class = ResourceAccessListElementSerializer
 
     def get_queryset(self):
-        self.object_id = self.kwargs['pk']
-        resource_model = getattr(self, 'resource_model')
-        obj = get_object_or_404(resource_model, pk=self.object_id)
+        obj = self.get_parent_object()
 
         content_type = ContentType.objects.get_for_model(obj)
         roles = set(Role.objects.filter(content_type=content_type, object_id=obj.id))

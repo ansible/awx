@@ -17,7 +17,7 @@
 import listGenerator from '../shared/list-generator/main';
 
 export default
-    angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', 'SearchHelper', 'PaginationHelpers', listGenerator.name, 'ModalDialog',
+    angular.module('SchedulesHelper', [ 'Utilities', 'RestServices', 'SchedulesHelper', listGenerator.name, 'ModalDialog',
         'GeneratorHelpers'])
 
         .factory('EditSchedule', ['SchedulerInit', '$rootScope', 'Wait', 'Rest',
@@ -146,6 +146,11 @@ export default
                 Rest.get()
                     .success(function(data) {
                         schedule = data;
+                        try {
+                            schedule.extra_data = JSON.parse(schedule.extra_data);
+                        } catch(e) {
+                            // do nothing
+                        }
                         scope.extraVars = data.extra_data === '' ? '---' : '---\n' + jsyaml.safeDump(data.extra_data);
 
                         if(schedule.extra_data.hasOwnProperty('granularity')){
@@ -176,9 +181,11 @@ export default
                     callback= params.callback,
                     base = params.base || $location.path().replace(/^\//, '').split('/')[0],
                     url = params.url || null,
-                    scheduler;
+                    scheduler,
+                    job_type;
 
-                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories') {
+                job_type = scope.parentObject.job_type;
+                if (!Empty($stateParams.id) && base !== 'system_job_templates' && base !== 'inventories' && !url) {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
                 }
                 else if(base === "inventories"){
@@ -202,7 +209,7 @@ export default
                 }
                 else if (base === 'system_job_templates') {
                     url = GetBasePath(base) + $stateParams.id + '/schedules/';
-                    if($stateParams.id  === 4){
+                    if(job_type === "cleanup_facts"){
                         scope.isFactCleanup = true;
                         scope.keep_unit_choices = [{
                             "label" : "Days",
@@ -272,7 +279,7 @@ export default
                     if (callback) {
                         scope.$emit(callback, data);
                     }
-                    $state.go("^");
+                    $state.go("^", null, {reload: true});
                 });
                 scope.saveSchedule = function() {
                     SchedulePost({
@@ -376,11 +383,11 @@ export default
          * });
          *
          */
-        .factory('ToggleSchedule', ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', function(Wait, GetBasePath, ProcessErrors, Rest) {
+        .factory('ToggleSchedule', ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', '$state',
+            function(Wait, GetBasePath, ProcessErrors, Rest, $state) {
             return function(params) {
                 var scope = params.scope,
                     id = params.id,
-                    callback = params.callback,
                     url = GetBasePath('schedules') + id +'/';
 
                 // Perform the update
@@ -391,12 +398,8 @@ export default
                     data.enabled = (data.enabled) ? false : true;
                     Rest.put(data)
                         .success( function() {
-                            if (callback) {
-                                scope.$emit(callback, id);
-                            }
-                            else {
-                                Wait('stop');
-                            }
+                            Wait('stop');
+                            $state.go('.', null, {reload: true});
                         })
                         .error( function(data, status) {
                             ProcessErrors(scope, data, status, null, { hdr: 'Error!',
@@ -429,9 +432,9 @@ export default
          * })
          *
          */
-        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait',
+        .factory('DeleteSchedule', ['GetBasePath','Rest', 'Wait', '$state',
         'ProcessErrors', 'Prompt', 'Find', '$location', '$filter',
-        function(GetBasePath, Rest, Wait, ProcessErrors, Prompt, Find,
+        function(GetBasePath, Rest, Wait, $state, ProcessErrors, Prompt, Find,
             $location, $filter) {
             return function(params) {
 
@@ -460,6 +463,9 @@ export default
                             scope.$emit(callback, id);
                             if (new RegExp('/' + id + '$').test($location.$$url)) {
                                 $location.url($location.url().replace(/[/][0-9]+$/, "")); // go to list view
+                            }
+                            else{
+                                $state.go('.', null, {reload: true});
                             }
                         })
                         .error(function (data, status) {
@@ -496,215 +502,5 @@ export default
                     return p2.replace(/\;/,'').replace(/=/,':') + ' ' + 'RRULE:' + p1 + p3;
                 });
                 return response;
-            };
-        }])
-
-        .factory('SchedulesControllerInit', ['$state', '$location',
-        'ToggleSchedule', 'DeleteSchedule', 'ParamPass',
-            function($state, $location, ToggleSchedule, DeleteSchedule,
-                ParamPass) {
-            return function(params) {
-                var scope = params.scope,
-                    parent_scope = params.parent_scope,
-                    iterator = (params.iterator) ? params.iterator : scope.iterator,
-                    base = params.base || $location.path().replace(/^\//, '').split('/')[0];
-
-                scope.toggleSchedule = function(event, id) {
-                    try {
-                        $(event.target).tooltip('hide');
-                    }
-                    catch(e) {
-                        // ignore
-                    }
-                    ToggleSchedule({
-                        scope: scope,
-                        id: id,
-                        callback: 'SchedulesRefresh'
-                    });
-                };
-
-                scope.deleteSchedule = function(id) {
-                    DeleteSchedule({
-                        scope: scope,
-                        id: id,
-                        callback: 'SchedulesRefresh'
-                    });
-                };
-
-                scope.editSchedule = function(id) {
-                    if ($state.includes('inventoryManage')){
-                        $state.go('inventoryManage.schedules.edit', {schedule_id: id});
-                    }
-                    else if ($state.current.name === 'jobs'){
-                        // id === schedule object in this case
-                        var stateDictionary = {
-                            // type: stateName
-                            job: 'jobTemplateSchedules.edit',
-                            system_job: 'managementJobSchedules.edit',
-                            project_update: 'projectSchedules.edit',
-                        };
-                        $state.go(stateDictionary[id.type], {schedule_id: id.id, id: id.summary_fields.unified_job_template.id});
-                    }
-                    else{
-                        var base = $state.current.name.split(".")[0];
-                        $state.go(base + ".edit", {schedule_id: id});
-                    }
-                };
-
-                scope.addSchedule = function() {
-                    if ($state.includes('inventoryManage')){
-                        scope.schedule_url = parent_scope.current_url.split('?')[0];
-                        ParamPass.set(scope.schedule_url);
-                        $state.go('inventoryManage.schedules.add');
-                    }
-                    else{
-                        var base = $state.current.name.split(".")[0];
-                        ParamPass.set(scope.schedule_url);
-                        $state.go(base + ".add");
-                    }
-                };
-
-                scope.refreshSchedules = function() {
-                    if (base === 'jobs') {
-                        parent_scope.refreshJobs();
-                    }
-                    else {
-                        scope.search(iterator);
-                    }
-                };
-
-                if (scope.removeSchedulesRefresh) {
-                    scope.removeSchedulesRefresh();
-                }
-                scope.removeSchedulesRefresh = scope.$on('SchedulesRefresh', function() {
-                    scope.search(iterator);
-                });
-            };
-        }])
-
-        .factory('SchedulesListInit', [ function() {
-            return function(params) {
-                var scope = params.scope,
-                    list = params.list,
-                    choices = params.choices;
-                scope[list.name].forEach(function(item, item_idx) {
-                    var fld,
-                        field,
-                        itm = scope[list.name][item_idx],
-                        job = item.summary_fields.unified_job_template;
-
-                    itm.enabled = (itm.enabled) ? true : false;
-                    if (itm.enabled) {
-                        itm.play_tip = 'Schedule is active. Click to stop.';
-                        itm.status = 'active';
-                        itm.status_tip = 'Schedule is active. Click to stop.';
-                    }
-                    else {
-                        itm.play_tip = 'Schedule is stopped. Click to activate.';
-                        itm.status = 'stopped';
-                        itm.status_tip = 'Schedule is stopped. Click to activate.';
-                    }
-                    itm.nameTip = item.name;
-                    // include the word schedule if the schedule name does not include the word schedule
-                    if (item.name.indexOf("schedule") === -1 && item.name.indexOf("Schedule") === -1) {
-                        itm.nameTip += " schedule";
-                    }
-                    itm.nameTip += " for ";
-                    if (job.name.indexOf("job") === -1 && job.name.indexOf("Job") === -1) {
-                        itm.nameTip += "job ";
-                    }
-                    itm.nameTip += job.name;
-                    itm.nameTip += ". Click to edit schedule.";
-                    // Copy summary_field values
-                    for (field in list.fields) {
-                        fld = list.fields[field];
-                        if (fld.sourceModel) {
-                            if (itm.summary_fields[fld.sourceModel]) {
-                                itm[field] = itm.summary_fields[fld.sourceModel][fld.sourceField];
-                            }
-                        }
-                    }
-                    // Set the item type label
-                    if (list.fields.type) {
-                        choices.every(function(choice) {
-                            if (choice.value === item.type) {
-                                itm.type_label = choice.label;
-                                return false;
-                            }
-                            return true;
-                        });
-                    }
-                });
-            };
-        }])
-
-        /**
-         *
-         *  Called from a controller to setup the scope for a schedules list
-         *
-         */
-        .factory('LoadSchedulesScope', ['$compile', '$location', '$stateParams','SearchInit', 'PaginateInit', 'generateList', 'SchedulesControllerInit',
-            'SchedulesListInit',
-            function($compile, $location, $stateParams, SearchInit, PaginateInit, GenerateList, SchedulesControllerInit, SchedulesListInit) {
-            return function(params) {
-                var parent_scope = params.parent_scope,
-                    scope = params.scope,
-                    list = params.list,
-                    id = params.id,
-                    url = params.url,
-                    searchSize = params.searchSize,
-                    pageSize = params.pageSize || 10,
-                    spinner = (params.spinner === undefined) ? true : params.spinner;
-
-
-                GenerateList.inject(list, {
-                    mode: 'edit',
-                    id: id,
-                    scope: scope,
-                    searchSize: (searchSize) ? searchSize : 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
-                    showSearch: true,
-                    title: true,
-                });
-
-                SearchInit({
-                    scope: scope,
-                    set: list.name,
-                    list: list,
-                    url: url
-                });
-
-                PaginateInit({
-                    scope: scope,
-                    list: list,
-                    url: url,
-                    pageSize: pageSize
-                });
-
-                scope.iterator = list.iterator;
-
-                if (scope.removePostRefresh) {
-                    scope.removePostRefresh();
-                }
-                scope.$on('PostRefresh', function(){
-                    SchedulesControllerInit({
-                        scope: scope,
-                        parent_scope: parent_scope,
-                        list: list
-                    });
-                    SchedulesListInit({
-                        scope: scope,
-                        list: list,
-                        choices: parent_scope.type_choices
-                    });
-                    parent_scope.$emit('listLoaded');
-                });
-
-                if ($stateParams.id__int) {
-                    scope[list.iterator + 'SearchField'] = 'id';
-                    scope[list.iterator + 'SearchValue'] = $stateParams.id__int;
-                    scope[list.iterator + 'SearchFieldLabel'] = 'ID';
-                }
-
-                scope.search(list.iterator, null, null, null, null, spinner);
             };
         }]);

@@ -23,6 +23,10 @@ from awx.main.models import AuthToken
 
 class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        if request.path.startswith('/sso/login/'):
+            request.session['social_auth_last_backend'] = callback_kwargs['backend']
+
     def process_request(self, request):
         token_key = request.COOKIES.get('token', '')
         token_key = urllib.quote(urllib.unquote(token_key).strip('"'))
@@ -57,6 +61,7 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
 
                 if auth_token and request.user and request.user.is_authenticated():
                     request.session.pop('social_auth_error', None)
+                    request.session.pop('social_auth_last_backend', None)
 
     def process_exception(self, request, exception):
         strategy = getattr(request, 'social_strategy', None)
@@ -66,6 +71,12 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
         if isinstance(exception, SocialAuthBaseException) or request.path.startswith('/sso/'):
             backend = getattr(request, 'backend', None)
             backend_name = getattr(backend, 'name', 'unknown-backend')
+
+            message = self.get_message(request, exception)
+            if request.session.get('social_auth_last_backend') != backend_name:
+                backend_name = request.session.get('social_auth_last_backend')
+                message = request.GET.get('error_description', message)
+
             full_backend_name = backend_name
             try:
                 idp_name = strategy.request_data()['RelayState']
@@ -73,7 +84,6 @@ class SocialAuthMiddleware(SocialAuthExceptionMiddleware):
             except KeyError:
                 pass
 
-            message = self.get_message(request, exception)
             social_logger.error(message)
 
             url = self.get_redirect_uri(request, exception)

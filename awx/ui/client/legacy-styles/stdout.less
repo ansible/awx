@@ -5,7 +5,8 @@
  *
  */
 
- @import "awx/ui/client/src/shared/branding/colors.default.less";
+ @import "./client/src/shared/branding/colors.default.less";
+ @import "./client/src/shared/branding/colors.less";
 
  #jobs-stdout {
     margin-bottom: 20px;
@@ -45,7 +46,7 @@
 .ansi3 { font-weight: italic; }
 .ansi4 { text-decoration: underline; }
 .ansi9 { text-decoration: line-through; }
-.ansi30 { color: @default-stdout-txt; }
+.ansi30 { color: @default-data-txt; }
 .ansi31 { color: @default-err; }
 .ansi1.ansi31 {
     color: @default-unreachable;

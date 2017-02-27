@@ -1,4 +1,4 @@
-POST requests to this resource should include the full specification for a Job Template Survey
+POST requests to this resource should include the full specification for a {{ model_verbose_name|title }}'s Survey
 
 Here is an example survey specification:
 
@@ -30,7 +30,7 @@ Within each survey item `type` must be one of:
 * multiselect: For survey questions where multiple items from a presented list can be selected
 
 Each item must contain a `question_name` and `question_description` field that describes the survey question itself.
-The `variable` elements of each survey items represents the key that will be given to the playbook when the job template
+The `variable` elements of each survey items represents the key that will be given to the playbook when the {{model_verbose_name}}
 is launched.  It will contain the value as a result of the survey.
 
 Here is a more comprehensive example showing the various question types and their acceptable parameters:

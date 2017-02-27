@@ -1,0 +1,35 @@
+<div class="tab-pane Configuration-container">
+        <div class="Form-nav--dropdownContainer">
+            <div class="Form-nav--dropdownLabel">Sub Category</div>
+            <div class="Form-nav--dropdown">
+                <select
+                    id="system-configure-dropdown-nav"
+                    class="form-control"
+                    ng-model="systemVm.dropdownValue"
+                    ng-options="opt.value as opt.label for opt in systemVm.dropdownOptions"
+                    ng-change="systemVm.activeForm()">
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- <div id="configure-system-form"></div> -->
+                <div ng-show="systemVm.activeSystemForm === 'misc'">
+                    <div id="system-misc-form">
+
+                    </div>
+                </div>
+                <div ng-show="systemVm.activeSystemForm === 'activity_stream'">
+                    <div id="system-activity-stream-form">
+
+                    </div>
+                </div>
+                <div ng-show="systemVm.activeSystemForm === 'logging'">
+                    <div id="system-logging-form">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

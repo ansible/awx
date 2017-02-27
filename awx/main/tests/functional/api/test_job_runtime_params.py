@@ -8,6 +8,7 @@ from awx.main.models.jobs import Job, JobTemplate
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.fixture
 def runtime_data(organization):
     cred_obj = Credential.objects.create(name='runtime-cred', kind='ssh', username='test_user2', password='pas4word2')
@@ -22,9 +23,11 @@ def runtime_data(organization):
         credential=cred_obj.pk,
     )
 
+
 @pytest.fixture
 def job_with_links(machine_credential, inventory):
     return Job.objects.create(name='existing-job', credential=machine_credential, inventory=inventory)
+
 
 @pytest.fixture
 def job_template_prompts(project, inventory, machine_credential):
@@ -45,6 +48,7 @@ def job_template_prompts(project, inventory, machine_credential):
         )
     return rf
 
+
 @pytest.fixture
 def job_template_prompts_null(project):
     return JobTemplate.objects.create(
@@ -62,12 +66,14 @@ def job_template_prompts_null(project):
         ask_credential_on_launch=True,
     )
 
+
 @pytest.fixture
 def bad_scan_JT(job_template_prompts):
     job_template = job_template_prompts(True)
     job_template.job_type = 'scan'
     job_template.save()
     return job_template
+
 
 # End of setup, tests start here
 @pytest.mark.django_db
@@ -77,17 +83,19 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{}},)
 
     # Check that job is serialized correctly
     job_id = response.data['job']
     assert job_id == 968
 
     # If job is created with no arguments, it will inherit JT attributes
-    mock_job.signal_start.assert_called_once_with(extra_vars={})
+    mock_job.signal_start.assert_called_once()
 
     # Check that response tells us what things were ignored
     assert 'job_launch_var' in response.data['ignored_fields']['extra_vars']
@@ -98,6 +106,7 @@ def test_job_ignore_unprompted_vars(runtime_data, job_template_prompts, post, ad
     assert 'job_tags' in response.data['ignored_fields']
     assert 'skip_tags' in response.data['ignored_fields']
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admin_user, mocker):
@@ -105,15 +114,18 @@ def test_job_accept_prompted_vars(runtime_data, job_template_prompts, post, admi
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
 
     job_id = response.data['job']
     assert job_id == 968
 
-    mock_job.signal_start.assert_called_once_with(**runtime_data)
+    mock_job.signal_start.assert_called_once()
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -122,12 +134,15 @@ def test_job_accept_null_tags(job_template_prompts, post, admin_user, mocker):
 
     mock_job = mocker.MagicMock(spec=Job, id=968)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             post(reverse('api:job_template_launch', args=[job_template.pk]),
                  {'job_tags': '', 'skip_tags': ''}, admin_user, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == ({'job_tags':'', 'skip_tags':''},)
 
-    mock_job.signal_start.assert_called_once_with(job_tags='', skip_tags='')
+    mock_job.signal_start.assert_called_once()
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -145,14 +160,17 @@ def test_job_accept_prompted_vars_null(runtime_data, job_template_prompts_null, 
 
     mock_job = mocker.MagicMock(spec=Job, id=968, **runtime_data)
 
-    with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+    with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
         with mocker.patch('awx.api.serializers.JobSerializer.to_representation'):
             response = post(reverse('api:job_template_launch', args=[job_template.pk]),
                             runtime_data, rando, expect=201)
+            assert JobTemplate.create_unified_job.called
+            assert JobTemplate.create_unified_job.call_args == (runtime_data,)
 
     job_id = response.data['job']
     assert job_id == 968
-    mock_job.signal_start.assert_called_once_with(**runtime_data)
+    mock_job.signal_start.assert_called_once()
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -168,6 +186,7 @@ def test_job_reject_invalid_prompted_vars(runtime_data, job_template_prompts, po
     assert response.data['inventory'] == [u'Invalid pk "87865" - object does not exist.']
     assert response.data['credential'] == [u'Invalid pk "48474" - object does not exist.']
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_prompts, post, admin_user):
@@ -179,6 +198,7 @@ def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_promp
 
     assert response.data['extra_vars'] == ['Must be a valid JSON or YAML dictionary.']
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, admin_user):
@@ -189,6 +209,7 @@ def test_job_launch_fails_without_inventory(deploy_jobtemplate, post, admin_user
                     args=[deploy_jobtemplate.pk]), {}, admin_user, expect=400)
 
     assert response.data['inventory'] == ["Job Template 'inventory' is missing or undefined."]
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -202,6 +223,7 @@ def test_job_launch_fails_without_inventory_access(job_template_prompts, runtime
 
     assert response.data['detail'] == u'You do not have permission to perform this action.'
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_fails_without_credential_access(job_template_prompts, runtime_data, post, rando):
@@ -214,6 +236,7 @@ def test_job_launch_fails_without_credential_access(job_template_prompts, runtim
 
     assert response.data['detail'] == u'You do not have permission to perform this action.'
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
@@ -224,6 +247,7 @@ def test_job_block_scan_job_type_change(job_template_prompts, post, admin_user):
                     dict(job_type='scan'), admin_user, expect=400)
 
     assert 'job_type' in response.data
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -236,6 +260,7 @@ def test_job_block_scan_job_inv_change(mocker, bad_scan_JT, runtime_data, post, 
 
     assert 'inventory' in response.data
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_relaunch_copy_vars(job_with_links, machine_credential, inventory,
@@ -244,12 +269,13 @@ def test_job_relaunch_copy_vars(job_with_links, machine_credential, inventory,
     job_with_links.limit = "my_server"
     with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate._get_unified_job_field_names',
                       return_value=['inventory', 'credential', 'limit']):
-        second_job = job_with_links.copy()
+        second_job = job_with_links.copy_unified_job()
 
     # Check that job data matches the original variables
     assert second_job.credential == job_with_links.credential
     assert second_job.inventory == job_with_links.inventory
     assert second_job.limit == 'my_server'
+
 
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
@@ -263,13 +289,14 @@ def test_job_relaunch_resource_access(job_with_links, user):
     job_with_links.inventory.use_role.members.add(both_user)
     assert both_user.can_access(Job, 'start', job_with_links)
 
-    # Confirm that a user with credential access alone can not launch
+    # Confirm that a user with credential access alone cannot launch
     job_with_links.credential.use_role.members.add(credential_user)
     assert not credential_user.can_access(Job, 'start', job_with_links)
 
-    # Confirm that a user with inventory access alone can not launch
+    # Confirm that a user with inventory access alone cannot launch
     job_with_links.inventory.use_role.members.add(inventory_user)
     assert not inventory_user.can_access(Job, 'start', job_with_links)
+
 
 @pytest.mark.django_db
 def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
@@ -291,6 +318,7 @@ def test_job_launch_JT_with_validation(machine_credential, deploy_jobtemplate):
     assert 'job_launch_var' in final_job_extra_vars
     assert job_obj.credential.id == machine_credential.id
 
+
 @pytest.mark.django_db
 @pytest.mark.job_runtime_vars
 def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job_template_prompts, post, admin_user):
@@ -301,15 +329,18 @@ def test_job_launch_unprompted_vars_with_survey(mocker, survey_spec_factory, job
 
     with mocker.patch('awx.main.access.BaseAccess.check_license'):
         mock_job = mocker.MagicMock(spec=Job, id=968, extra_vars={"job_launch_var": 3, "survey_var": 4})
-        with mocker.patch('awx.main.models.unified_jobs.UnifiedJobTemplate.create_unified_job', return_value=mock_job):
+        with mocker.patch.object(JobTemplate, 'create_unified_job', return_value=mock_job):
             with mocker.patch('awx.api.serializers.JobSerializer.to_representation', return_value={}):
                 response = post(
                     reverse('api:job_template_launch', args=[job_template.pk]),
                     dict(extra_vars={"job_launch_var": 3, "survey_var": 4}),
                     admin_user, expect=201)
+                assert JobTemplate.create_unified_job.called
+                assert JobTemplate.create_unified_job.call_args == ({'extra_vars':{'survey_var': 4}},)
+
 
     job_id = response.data['job']
     assert job_id == 968
 
     # Check that the survey variable is accepted and the job variable isn't
-    mock_job.signal_start.assert_called_once_with(extra_vars={"survey_var": 4})
+    mock_job.signal_start.assert_called_once()

@@ -1,8 +1,8 @@
+<!DOCTYPE html>
 {# Copy of base.html from rest_framework with minor Ansible Tower change. #}
 {% load staticfiles %}
 {% load rest_framework %}
 {% load i18n %}
-<!DOCTYPE html>
 <html>
 <head>
   {% block head %}
@@ -75,21 +75,21 @@
             <fieldset>
               {% if api_settings.URL_FORMAT_OVERRIDE %}
                 <div class="btn-group format-selection">
-                  <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">GET</a>
+                  <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="{% blocktrans %}Make a GET request on the {{ name }} resource{% endblocktrans %}">GET</a>
 
-                  <button class="btn btn-primary dropdown-toggle js-tooltip" data-toggle="dropdown" title="Specify a format for the GET request">
+                  <button class="btn btn-primary dropdown-toggle js-tooltip" data-toggle="dropdown" title="{% trans 'Specify a format for the GET request' %}">
                     <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
                     {% for format in available_formats %}
                       <li>
-                        <a class="js-tooltip format-option" href="{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}" rel="nofollow" title="Make a GET request on the {{ name }} resource with the format set to `{{ format }}`">{{ format }}</a>
+                        <a class="js-tooltip format-option" href="{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}" rel="nofollow" title="{% blocktrans %}Make a GET request on the {{ name }} resource with the format set to `{{ format }}`{% endblocktrans %}">{{ format }}</a>
                       </li>
                     {% endfor %}
                   </ul>
                 </div>
               {% else %}
-                <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">GET</a>
+                <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="{% blocktrans %}Make a GET request on the {{ name }} resource{% endblocktrans %}">GET</a>
               {% endif %}
             </fieldset>
           </form>
@@ -97,13 +97,13 @@
 
         {% if options_form %}
           <form class="button-form" action="{{ request.get_full_path }}" data-method="OPTIONS">
-            <button class="btn btn-primary js-tooltip" title="Make an OPTIONS request on the {{ name }} resource">OPTIONS</button>
+            <button class="btn btn-primary js-tooltip" title="{% blocktrans %}Make an OPTIONS request on the {{ name }} resource{% endblocktrans %}">OPTIONS</button>
           </form>
         {% endif %}
 
         {% if delete_form %}
           <form class="button-form" action="{{ request.get_full_path }}" data-method="DELETE">
-            <button class="btn btn-danger js-tooltip" title="Make a DELETE request on the {{ name }} resource">DELETE</button>
+            <button class="btn btn-danger js-tooltip" title="{% blocktrans %}Make a DELETE request on the {{ name }} resource{% endblocktrans %}">DELETE</button>
           </form>
         {% endif %}
 
@@ -169,7 +169,7 @@
                             {% csrf_token %}
                             {{ post_form }}
                             <div class="form-actions">
-                              <button class="btn btn-primary" title="Make a POST request on the {{ name }} resource">POST</button>
+                              <button class="btn btn-primary" title="{% blocktrans %}Make a POST request on the {{ name }} resource{% endblocktrans %}">POST</button>
                             </div>
                           </fieldset>
                         </form>
@@ -183,7 +183,7 @@
                         <fieldset>
                           {% include "rest_framework/raw_data_form.html" %}
                           <div class="form-actions">
-                            <button class="btn btn-primary" title="Make a POST request on the {{ name }} resource">POST</button>
+                            <button class="btn btn-primary" title="{% blocktrans %}Make a POST request on the {{ name }} resource{% endblocktrans %}">POST</button>
                           </div>
                         </fieldset>
                       </form>
@@ -213,7 +213,7 @@
                         <fieldset>
                           {{ put_form }}
                           <div class="form-actions">
-                            <button class="btn btn-primary js-tooltip" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                            <button class="btn btn-primary js-tooltip" title="{% blocktrans %}Make a PUT request on the {{ name }} resource{% endblocktrans %}">PUT</button>
                           </div>
                         </fieldset>
                       </form>
@@ -227,10 +227,10 @@
                           {% include "rest_framework/raw_data_form.html" %}
                           <div class="form-actions">
                             {% if raw_data_put_form %}
-                              <button class="btn btn-primary js-tooltip" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                              <button class="btn btn-primary js-tooltip" title="{% blocktrans %}Make a PUT request on the {{ name }} resource{% endblocktrans %}">PUT</button>
                             {% endif %}
                             {% if raw_data_patch_form %}
-                            <button data-method="PATCH" class="btn btn-primary js-tooltip" title="Make a PATCH request on the {{ name }} resource">PATCH</button>
+                            <button data-method="PATCH" class="btn btn-primary js-tooltip" title="{% blocktrans %}Make a PATCH request on the {{ name }} resource{% endblocktrans %}">PATCH</button>
                               {% endif %}
                           </div>
                         </fieldset>

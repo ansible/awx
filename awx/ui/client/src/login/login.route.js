@@ -9,6 +9,7 @@ import {templateUrl} from '../shared/template-url/template-url.factory';
 export default {
     name: 'signIn',
     route: '/login',
+    socket: null,
     templateUrl: templateUrl('login/loginBackDrop'),
     resolve: {
         obj: ['$rootScope', 'Authorization',

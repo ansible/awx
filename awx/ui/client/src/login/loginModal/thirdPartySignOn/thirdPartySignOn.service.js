@@ -13,7 +13,7 @@
  */
 
  export default
-    ['$http', 'ProcessErrors', function($http, ProcessErrors) {
+    ['$http', 'ProcessErrors', 'i18n', function($http, ProcessErrors, i18n) {
         return function (params) {
             var scope = params.scope,
                 url = params.url;
@@ -25,13 +25,24 @@
                     var options = [],
                         error = "";
 
+                    function parseAzure(option) {
+                        var newOption = {};
+
+                        newOption.type = "azure";
+                        newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-microsoft";
+                        newOption.link = option.login_url;
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "Azure AD");
+
+                        return newOption;
+                    }
+
                     function parseGoogle(option) {
                         var newOption = {};
 
                         newOption.type = "google";
                         newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-google";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with Google";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "Google");
 
                         return newOption;
                     }
@@ -42,15 +53,15 @@
                         newOption.type = "github";
                         newOption.icon = "fa-github ThirdPartySignOn-icon--gitHub";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with GitHub";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "GitHub");
 
                         // if this is a GitHub team or org, add that to
                         // the tooltip
                         if (key.split("-")[1]){
                             if (key.split("-")[1] === "team") {
-                                newOption.tooltip += " Teams";
+                                newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s Teams"), "GitHub");
                             } else if (key.split("-")[1] === "org") {
-                                newOption.tooltip += " Organizations";
+                                newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s Organizations"), "GitHub");
                             }
                         }
 
@@ -63,7 +74,7 @@
                         newOption.type = "saml";
                         newOption.icon = "ThirdPartySignOn-icon--fontCustom icon-saml-02";
                         newOption.link = option.login_url;
-                        newOption.tooltip = "Sign in with SAML";
+                        newOption.tooltip = i18n.sprintf(i18n._("Sign in with %s"), "SAML");
 
                         // add the idp of the saml type to the tooltip
                         if (key.split(":")[1]){
@@ -78,7 +89,9 @@
 
                         // set up the particular tooltip, icon, etc.
                         // needed by the login type
-                        if (key.split("-")[0] === "google") {
+                        if (key.split("-")[0] === "azuread") {
+                            finalOption = parseAzure(option, key);
+                        } else if (key.split("-")[0] === "google") {
                             finalOption = parseGoogle(option, key);
                         } else if (key.split("-")[0] === "github") {
                             finalOption = parseGithub(option, key);
@@ -103,8 +116,8 @@
                     return {"options": options, "error": error};
                 })
                 .catch(function (data) {
-                    ProcessErrors(scope, data.data, data.status, null, { hdr: 'Error!',
-                            msg: 'Failed to get third-party login types.  Returned status: ' + data.status });
+                    ProcessErrors(scope, data.data, data.status, null, { hdr: i18n._('Error!'),
+                            msg: i18n._('Failed to get third-party login types.  Returned status: ') + data.status });
                 });
         };
     }];

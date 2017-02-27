@@ -7,14 +7,15 @@
 
 export default
     angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
-    .value( 'ScheduledJobsList', {
+    .factory('ScheduledJobsList', ['i18n', function(i18n) {
+    return {
 
         name: 'schedules',
         iterator: 'schedule',
-        editTitle: 'Scheduled Jobs',
+        editTitle: i18n._('Scheduled Jobs'),
         hover: true,
         well: false,
-        emptyListText: 'No schedules exist',
+        emptyListText: i18n._('No schedules exist'),
 
         fields: {
             enabled: {
@@ -22,47 +23,35 @@ export default
                 columnClass: 'List-staticColumn--toggle',
                 type: 'toggle',
                 ngClick: "toggleSchedule($event, schedule.id)",
-                searchable: false,
                 nosort: true,
                 awToolTip: "{{ schedule.play_tip }}",
+                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: 'top'
             },
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-5 col-sm-5 col-xs-7 List-staticColumnAdjacent',
                 sourceModel: 'unified_job_template',
                 sourceField: 'name',
+                // ngBind: 'schedule.summary_fields.unified_job_template.name',
                 ngClick: "editSchedule(schedule)",
                 awToolTip: "{{ schedule.nameTip | sanitize}}",
                 dataTipWatch: 'schedule.nameTip',
                 dataPlacement: "top",
-                defaultSearchField: true
             },
             type: {
-                label: 'Type',
+                label: i18n._('Type'),
                 noLink: true,
                 columnClass: "col-lg-2 col-md-2 hidden-sm hidden-xs",
                 sourceModel: 'unified_job_template',
                 sourceField: 'unified_job_type',
                 ngBind: 'schedule.type_label',
-                searchField: 'unified_job_template__polymorphic_ctype__model',
-                filterBySearchField: true,
-                searchLabel: 'Type',
-                searchable: true,
-                searchType: 'select',
-                searchOptions: [
-                    { value: 'inventorysource', label: 'Inventory Sync' },
-                    { value: 'jobtemplate', label: 'Playbook Run' },
-                    { value: 'project', label: 'SCM Update' },
-                    { value: 'systemjobtemplate', label: 'Management Job'}
-
-                ]
+                searchField: 'unified_job_template__polymorphic_ctype__model'
             },
             next_run: {
-                label: 'Next Run',
+                label: i18n._('Next Run'),
                 noLink: true,
-                searchable: false,
                 columnClass: "col-lg-3 col-md-2 col-sm-3 hidden-xs",
                 filter: "longDate",
                 key: true
@@ -77,14 +66,23 @@ export default
             "edit": {
                 mode: "all",
                 ngClick: "editSchedule(schedule)",
-                awToolTip: "Edit the schedule",
-                dataPlacement: "top"
+                awToolTip: i18n._("Edit the schedule"),
+                dataPlacement: "top",
+                ngShow: 'schedule.summary_fields.user_capabilities.edit'
+            },
+            "view": {
+                mode: "all",
+                ngClick: "editSchedule(schedule)",
+                awToolTip: i18n._("View the schedule"),
+                dataPlacement: "top",
+                ngShow: '!schedule.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 mode: 'all',
                 ngClick: 'deleteSchedule(schedule.id)',
-                awToolTip: 'Delete the schedule',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Delete the schedule'),
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

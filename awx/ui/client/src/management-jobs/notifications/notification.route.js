@@ -4,46 +4,45 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
+ import { N_ } from '../../i18n';
 
 export default {
     name: 'managementJobsList.notifications',
     route: '/:management_id/notifications',
-    templateUrl: templateUrl('management-jobs/notifications/notifications'),
-    controller: 'managementJobsNotificationsController',
-    params: {card: null},
-    resolve: {
-        management_job:
-        [   '$stateParams',
-            '$q',
-            'Rest',
-            'GetBasePath',
-            'ProcessErrors',
-            function($stateParams, $q, rest, getBasePath, ProcessErrors) {
-
-                if ($stateParams.card) {
-                    return $q.when($stateParams.card);
-                }
-
-                var managementJobId = $stateParams.management_id;
-
-                var url = getBasePath('system_job_templates') + managementJobId + '/';
-                rest.setUrl(url);
-                return rest.get()
-                        .then(function(data) {
-                            return data.data;
-                        }).catch(function (response) {
-            ProcessErrors(null, response.data, response.status, null, {
-                hdr: 'Error!',
-                msg: 'Failed to get management job info. GET returned status: ' +
-                response.status
-            });
-        });
+    params: {
+        notification_search: {}
+    },
+    searchPrefix: 'notification',
+    views: {
+        '@managementJobsList': {
+            controller: 'managementJobsNotificationsController',
+            templateProvider: function(NotificationsList, generateList, ParentObject) {
+                // include name of parent resource in listTitle
+                NotificationsList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Notifications');
+                let html = generateList.build({
+                    list: NotificationsList,
+                    mode: 'edit'
+                });
+                html = generateList.wrapPanel(html);
+                return generateList.insertFormView() + html;
             }
-        ]
+        }
+    },
+    resolve: {
+        Dataset: ['NotificationsList', 'QuerySet', '$stateParams', 'GetBasePath',
+            function(list, qs, $stateParams, GetBasePath) {
+                let path = `${GetBasePath('notification_templates')}`;
+                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+            }
+        ],
+        ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath) {
+            let path = `${GetBasePath('system_job_templates')}${$stateParams.management_id}`;
+            Rest.setUrl(path);
+            return Rest.get(path).then((res) => res.data);
+        }]
     },
     ncyBreadcrumb: {
         parent: 'managementJobsList',
-        label: 'NOTIFICATIONS'
+        label: N_('NOTIFICATIONS')
     }
 };

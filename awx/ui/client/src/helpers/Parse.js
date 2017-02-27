@@ -13,6 +13,15 @@
  *
  */
 
+import 'codemirror/lib/codemirror.js';
+import 'codemirror/mode/javascript/javascript.js';
+import 'codemirror/mode/yaml/yaml.js';
+import 'codemirror/addon/lint/lint.js';
+import 'angular-codemirror/lib/yaml-lint.js';
+import 'codemirror/addon/edit/closebrackets.js';
+import 'codemirror/addon/edit/matchbrackets.js';
+import 'codemirror/addon/selection/active-line.js';
+
 
 export default
     angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
@@ -36,8 +45,9 @@ export default
 
                 function createField(onChange, onReady, fld) {
                     //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
+
                     scope[fld + 'codeMirror'] = AngularCodeMirror(readOnly);
-                    scope[fld + 'codeMirror'].addModes($AnsibleConfig.variable_edit_modes);
+                    scope[fld + 'codeMirror'].addModes(global.$AnsibleConfig.variable_edit_modes);
                     scope[fld + 'codeMirror'].showTextArea({
                         scope: scope,
                         model: fld,

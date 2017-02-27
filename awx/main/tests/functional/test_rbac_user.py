@@ -1,11 +1,50 @@
 import pytest
 
 from django.apps import apps
-from django.contrib.auth.models import User
+from django.test import TransactionTestCase
 
 from awx.main.migrations import _rbac as rbac
 from awx.main.access import UserAccess
-from awx.main.models import Role
+from awx.main.models import Role, User, Organization, Inventory
+
+
+@pytest.mark.django_db
+class TestSysAuditorTransactional(TransactionTestCase):
+    def rando(self):
+        return User.objects.create(username='rando', password='rando', email='rando@com.com')
+
+    def inventory(self):
+        org = Organization.objects.create(name='org')
+        inv = Inventory.objects.create(name='inv', organization=org)
+        return inv
+
+    def test_auditor_caching(self):
+        rando = self.rando()
+        with self.assertNumQueries(1):
+            v = rando.is_system_auditor
+        assert not v
+        with self.assertNumQueries(0):
+            v = rando.is_system_auditor
+        assert not v
+
+    def test_auditor_setter(self):
+        rando = self.rando()
+        inventory = self.inventory()
+        rando.is_system_auditor = True
+        assert rando in inventory.read_role
+
+    def test_refresh_with_set(self):
+        rando = self.rando()
+        rando.is_system_auditor = True
+        assert rando.is_system_auditor
+        rando.is_system_auditor = False
+        assert not rando.is_system_auditor
+
+
+@pytest.mark.django_db
+def test_system_auditor_is_system_auditor(system_auditor):
+    assert system_auditor.is_system_auditor
+
 
 @pytest.mark.django_db
 def test_user_admin(user_project, project, user):
@@ -28,6 +67,7 @@ def test_user_admin(user_project, project, user):
     assert sa.members.filter(id=joe.id).exists() is False
     assert sa.members.filter(id=admin.id).exists() is True
 
+
 @pytest.mark.django_db
 def test_user_queryset(user):
     u = user('pete', False)
@@ -35,6 +75,7 @@ def test_user_queryset(user):
     access = UserAccess(u)
     qs = access.get_queryset()
     assert qs.count() == 1
+
 
 @pytest.mark.django_db
 def test_user_accessible_objects(user, organization):
@@ -48,6 +89,7 @@ def test_user_accessible_objects(user, organization):
 
     organization.member_role.members.remove(u)
     assert User.accessible_objects(admin, 'admin_role').count() == 1
+
 
 @pytest.mark.django_db
 def test_org_user_admin(user, organization):
@@ -63,6 +105,7 @@ def test_org_user_admin(user, organization):
     organization.admin_role.members.remove(admin)
     assert admin not in member.admin_role
 
+
 @pytest.mark.django_db
 def test_org_user_removed(user, organization):
     admin = user('orgadmin')
@@ -76,12 +119,14 @@ def test_org_user_removed(user, organization):
     organization.member_role.members.remove(member)
     assert admin not in member.admin_role
 
+
 @pytest.mark.django_db
 def test_org_admin_create_sys_auditor(org_admin):
     access = UserAccess(org_admin)
     assert not access.can_add(data=dict(
         username='new_user', password="pa$$sowrd", email="asdf@redhat.com",
         is_system_auditor='true'))
+
 
 @pytest.mark.django_db
 def test_org_admin_edit_sys_auditor(org_admin, alice, organization):

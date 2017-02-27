@@ -6,7 +6,7 @@ export function templateUrl(path) {
 
 function _templateUrl($sce, path, isTrusted) {
     isTrusted = isTrusted !== false; // defaults to true, can be passed in as false
-    var parts = ['', 'static'];
+    var parts = ['', 'static/partials'];
     parts.push(path);
 
     var url = parts.join('/') + '.partial.html';

@@ -6,8 +6,10 @@ import urllib
 import logging
 
 # Django
+from django.conf import settings
 from django.utils.timezone import now as tz_now
 from django.utils.encoding import smart_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework import authentication
@@ -16,9 +18,9 @@ from rest_framework import HTTP_HEADER_ENCODING
 
 # AWX
 from awx.main.models import UnifiedJob, AuthToken
-from awx.main.conf import tower_settings
 
 logger = logging.getLogger('awx.api.authentication')
+
 
 class TokenAuthentication(authentication.TokenAuthentication):
     '''
@@ -62,10 +64,10 @@ class TokenAuthentication(authentication.TokenAuthentication):
                     return None
 
         if len(auth) == 1:
-            msg = 'Invalid token header. No credentials provided.'
+            msg = _('Invalid token header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)
         elif len(auth) > 2:
-            msg = 'Invalid token header. Token string should not contain spaces.'
+            msg = _('Invalid token header. Token string should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
 
         return self.authenticate_credentials(auth[1])
@@ -93,14 +95,14 @@ class TokenAuthentication(authentication.TokenAuthentication):
 
         # Token invalidated due to session limit config being reduced
         # Session limit reached invalidation will also take place on authentication
-        if tower_settings.AUTH_TOKEN_PER_USER != -1:
+        if settings.AUTH_TOKEN_PER_USER != -1:
             if not token.in_valid_tokens(now=now):
                 token.invalidate(reason='limit_reached')
                 raise exceptions.AuthenticationFailed(AuthToken.reason_long('limit_reached'))
 
         # If the user is inactive, then return an error.
         if not token.user.is_active:
-            raise exceptions.AuthenticationFailed('User inactive or deleted')
+            raise exceptions.AuthenticationFailed(_('User inactive or deleted'))
 
         # Refresh the token.
         # The token is extended from "right now" + configurable setting amount.
@@ -123,11 +125,18 @@ class TokenGetAuthentication(TokenAuthentication):
 class LoggedBasicAuthentication(authentication.BasicAuthentication):
 
     def authenticate(self, request):
+        if not settings.AUTH_BASIC_ENABLED:
+            return
         ret = super(LoggedBasicAuthentication, self).authenticate(request)
         if ret:
             username = ret[0].username if ret[0] else '<none>'
             logger.debug(smart_text(u"User {} performed a {} to {} through the API".format(username, request.method, request.path)))
         return ret
+
+    def authenticate_header(self, request):
+        if not settings.AUTH_BASIC_ENABLED:
+            return
+        return super(LoggedBasicAuthentication, self).authenticate_header(request)
 
 
 class TaskAuthentication(authentication.BaseAuthentication):
@@ -149,7 +158,7 @@ class TaskAuthentication(authentication.BaseAuthentication):
             return None
         token = unified_job.task_auth_token
         if auth[1] != token:
-            raise exceptions.AuthenticationFailed('Invalid task token')
+            raise exceptions.AuthenticationFailed(_('Invalid task token'))
         return (None, token)
 
     def authenticate_header(self, request):

@@ -1,0 +1,23 @@
+<div class="tab-pane" id="jobs-page">
+    <div ng-cloak id="htmlTemplate" class="Panel">
+        <div>
+            <div id="jobs_tabs" class="Form-tabHolder">
+                <div class="Form-tabs">
+                    <div class="Form-tab" id="active_jobs_link" ng-class="{'is-selected': $state.is('jobs')}" ng-click="$state.go('jobs')">
+                        <translate>Jobs</translate>
+                    </div>
+                    <div id="scheduled_jobs_link" class="Form-tab" ng-class="{'is-selected': $state.is('jobs.schedules')}" ng-click="$state.go('.schedules')">
+                        <translate>Schedules</translate>
+                    </div>
+                </div>
+                <div class="Form-tabActions">
+                    <button id="refresh_btn" ng-show="socketStatus === 'error'" aw-tool-tip="Refresh the page" data-placement="top" class="btn List-buttonDefault" ng-click="refreshJobs()" toolbar="true">
+                        <span><translate>REFRESH</translate></span>
+                    </button>
+                </div>
+            </div>
+            <div ui-view="list"></div>
+        </div>
+    </div>
+    <div ng-include="'/static/partials/logviewer.html'"></div>
+</div>

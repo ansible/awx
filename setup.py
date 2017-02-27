@@ -25,19 +25,22 @@ docdir = "/usr/share/doc/ansible-tower"
 
 if os.path.exists("/etc/debian_version"):
     sysinit = "/etc/init.d"
-    webconfig  = "/etc/apache2/conf.d"
+    webconfig  = "/etc/nginx"
+    siteconfig = "/etc/nginx/sites-enabled"
     # sosreport-3.1 (and newer) look in '/usr/share/sosreport/sos/plugins'
     # sosreport-3.0 looks in '/usr/lib/python2.7/dist-packages/sos/plugins'
     # debian/<package>.links will create symlinks to support both versions
     sosconfig = "/usr/share/sosreport/sos/plugins"
 else:
     sysinit = "/etc/rc.d/init.d"
-    webconfig  = "/etc/httpd/conf.d"
+    webconfig  = "/etc/nginx"
+    siteconfig = "/etc/nginx/sites-enabled"
     # The .spec will create symlinks to support multiple versions of sosreport
     sosconfig = "/usr/share/sosreport/sos/plugins"
 
 #####################################################################
 # Helper Functions
+
 
 def explode_glob_path(path):
     """Take a glob and hand back the full recursive expansion,
@@ -74,6 +77,7 @@ def proc_data_files(data_files):
     return result
 
 #####################################################################
+
 
 setup(
     name='ansible-tower',
@@ -113,12 +117,15 @@ setup(
     },
     data_files = proc_data_files([
         ("%s" % homedir,        ["config/wsgi.py",
-                                 "awx/static/favicon.ico"]),
-        ("%s" % webconfig,      ["config/awx-httpd-80.conf",
-                                 "config/awx-httpd-443.conf"]),
+                                 "awx/static/favicon.ico",
+                                 "awx/locale/*/LC_MESSAGES/*.po",
+                                 "awx/locale/*/LC_MESSAGES/*.mo"]),
+        ("%s" % siteconfig,      ["config/awx-nginx.conf"]),
+        #        ("%s" % webconfig,      ["config/uwsgi_params"]),
         ("%s" % sharedir,       ["tools/scripts/request_tower_configuration.sh","tools/scripts/request_tower_configuration.ps1"]),
         ("%s" % docdir,         ["docs/licenses/*",]),
         ("%s" % bindir, ["tools/scripts/ansible-tower-service",
+                         "tools/scripts/failure-event-handler",
                          "tools/scripts/tower-python"]),
         ("%s" % sosconfig, ["tools/sosreport/tower.py"])]),
     options = {

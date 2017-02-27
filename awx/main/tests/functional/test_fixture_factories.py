@@ -2,6 +2,7 @@ import pytest
 
 from awx.main.tests.factories import NotUnique
 
+
 def test_roles_exc_not_persisted(organization_factory):
     with pytest.raises(RuntimeError) as exc:
         organization_factory('test-org', roles=['test-org.admin_role:user1'], persisted=False)
@@ -92,6 +93,7 @@ def test_job_template_factory(job_template_factory):
     assert jt_objects.job_template.survey_spec is not None
     assert 'test-survey' in jt_objects.jobs[1].extra_vars
 
+
 def test_survey_spec_generator_simple(survey_spec_factory):
     survey_spec = survey_spec_factory('survey_variable')
     assert 'name' in survey_spec
@@ -99,6 +101,7 @@ def test_survey_spec_generator_simple(survey_spec_factory):
     assert type(survey_spec['spec']) is list
     assert type(survey_spec['spec'][0]) is dict
     assert survey_spec['spec'][0]['type'] == 'integer'
+
 
 def test_survey_spec_generator_mixed(survey_spec_factory):
     survey_spec = survey_spec_factory(

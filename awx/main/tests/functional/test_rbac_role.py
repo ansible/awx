@@ -18,12 +18,14 @@ def test_team_access_attach(rando, team, inventory):
     data = {'id': inventory.admin_role.pk}
     assert not access.can_attach(team, inventory.admin_role, 'member_role.children', data, False)
 
+
 @pytest.mark.django_db
 def test_user_access_attach(rando, inventory):
     inventory.read_role.members.add(rando)
     access = UserAccess(rando)
     data = {'id': inventory.admin_role.pk}
     assert not access.can_attach(rando, inventory.admin_role, 'roles', data, False)
+
 
 @pytest.mark.django_db
 def test_role_access_attach(rando, inventory):

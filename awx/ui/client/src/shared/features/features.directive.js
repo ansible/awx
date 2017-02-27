@@ -23,15 +23,17 @@
 */
 import featureController from './features.controller';
 
-export default [  function() {
+export default [ '$rootScope', function($rootScope) {
     return {
         restrict: 'A',
         controller: featureController,
         link: function (scope, element, attrs, controller){
             if(attrs.awFeature.length > 0){
-                if(!controller.isFeatureEnabled(attrs.awFeature)){
-                    element.remove();
-                }
+                $rootScope.featuresConfigured.promise.then(function() {
+                    if(!controller.isFeatureEnabled(attrs.awFeature)){
+                        element.remove();
+                    }
+                });
             }
         }
 

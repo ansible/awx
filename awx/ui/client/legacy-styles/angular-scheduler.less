@@ -5,12 +5,14 @@
  *
  */
 
- /* 
+ /*
     #schedules-form-container -inventory group add/edit dialog
  */
 
+ @import './client/src/shared/branding/colors.less';
+
 #schedules-tab {
-    position: relative; 
+    position: relative;
     top: 0;
     left: 0;
 }
@@ -20,22 +22,22 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 100; 
+    z-index: 100;
     background-color: @black;
-    opacity: 0;  
+    opacity: 0;
 }
 
 #schedules-list {
     overflow-x: hidden;
-    overflow-y: auto;    
+    overflow-y: auto;
 }
 
 #schedules-form-container {
-    position: absolute; 
+    position: absolute;
     top: 0;
     left: 0;
     display: none;
-    border: 1px solid #e5e5e5; 
+    border: 1px solid #e5e5e5;
     border-radius: 4px;
     box-shadow: 3px 3px 6px 0 #666;
     padding: 0 10px 15px 8px;
@@ -83,15 +85,15 @@
 }
 
 #scheduler-modal-dialog, #schedules-form-container {
-    display: none; 
-    overflow-x: hidden; 
+    display: none;
+    overflow-x: hidden;
     overflow-y: auto;
     padding-top: 25px;
-    
+
     form {
         width: 100%;
     }
-    
+
     .sublabel {
         font-weight: normal;
     }
@@ -101,7 +103,7 @@
     }
 
     .occurrence-list {
-        border: 1px solid @well-border; 
+        border: 1px solid @well-border;
         padding: 8px 10px;
         border-radius: 4px;
         background-color: @well;
@@ -113,7 +115,7 @@
         display: inline-block;
         margin-left: 15px;
         font-size: 12px;
-    
+
         .label-inline {
             display: inline-block;
             vertical-align: middle;
@@ -131,7 +133,7 @@
             margin-right: 10px;
         }
     }
-    
+
     .ui-widget input {
         font-size: 12px;
         font-weight: normal;
@@ -162,7 +164,7 @@
         color: #999;
         padding-left: 10px;
     }
-    .error { 
+    .error {
         color: #dd1b16;
         font-size: 12px;
         margin-bottom: 0;
@@ -214,14 +216,14 @@
         width: 100%;
     }
     .occurrence-list {
-        border: 1px solid @well-border; 
+        border: 1px solid @well-border;
         padding: 8px 10px;
         border-radius: 4px;
         background-color: @well;
         list-style: none;
         margin-bottom: 5px;
     }
-    
+
     #weekdaySelect .btn-default:hover,
     #weekdaySelect .btn-default:focus {
         background-color: #fff;

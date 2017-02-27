@@ -4,29 +4,35 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['templateUrl', function(templateUrl) {
+export default ['templateUrl', 'i18n', function(templateUrl, i18n) {
     return {
         restrict: 'E',
         scope: true,
         replace: true,
         templateUrl: templateUrl('activity-stream/streamDropdownNav/stream-dropdown-nav'),
-        controller: ['$scope', '$state', 'CreateSelect2', function($scope, $state, CreateSelect2) {
+        controller: ['$scope', '$state', '$stateParams','CreateSelect2', function($scope, $state, $stateParams, CreateSelect2) {
 
-            $scope.streamTarget = ($state.params && $state.params.target) ? $state.params.target : 'dashboard';
+            if($state.params && $state.params.target) {
+                $scope.streamTarget = ($state.params.target === 'job_template' || $state.params.target === 'workflow_job_template') ? 'template' : $state.params.target;
+            }
+            else {
+                $scope.streamTarget = 'dashboard';
+            }
 
             $scope.options = [
-                {label: 'All Activity', value: 'dashboard'},
-                {label: 'Credentials', value: 'credential'},
-                {label: 'Hosts', value: 'host'},
-                {label: 'Inventories', value: 'inventory'},
-                {label: 'Inventory Scripts', value: 'inventory_script'},
-                {label: 'Job Templates', value: 'job_template'},
-                {label: 'Jobs', value: 'job'},
-                {label: 'Organizations', value: 'organization'},
-                {label: 'Projects', value: 'project'},
-                {label: 'Schedules', value: 'schedule'},
-                {label: 'Teams', value: 'team'},
-                {label: 'Users', value: 'user'}
+                {label: i18n._('All Activity'), value: 'dashboard'},
+                {label: i18n._('Credentials'), value: 'credential'},
+                {label: i18n._('Hosts'), value: 'host'},
+                {label: i18n._('Inventories'), value: 'inventory'},
+                {label: i18n._('Inventory Scripts'), value: 'custom_inventory_script'},
+                {label: i18n._('Jobs'), value: 'job'},
+                {label: i18n._('Notification Templates'), value: 'notification_template'},
+                {label: i18n._('Organizations'), value: 'organization'},
+                {label: i18n._('Projects'), value: 'project'},
+                {label: i18n._('Schedules'), value: 'schedule'},
+                {label: i18n._('Teams'), value: 'team'},
+                {label: i18n._('Templates'), value: 'template'},
+                {label: i18n._('Users'), value: 'user'}
             ];
 
             CreateSelect2({
@@ -35,14 +41,19 @@ export default ['templateUrl', function(templateUrl) {
             });
 
             $scope.changeStreamTarget = function(){
-
                 if($scope.streamTarget && $scope.streamTarget === 'dashboard') {
                     // Just navigate to the base activity stream
-                    $state.go('activityStream', {}, {inherit: false});
+                    $state.go('activityStream', {target: null, activity_search: {page_size:"20", order_by: '-timestamp'}});
                 }
                 else {
+                    let search =  {
+                        or__object1__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        or__object2__in: $scope.streamTarget && $scope.streamTarget === 'template' ? 'job_template,workflow_job_template' : $scope.streamTarget,
+                        page_size: '20',
+                        order_by: '-timestamp'
+                    };
                     // Attach the taget to the query parameters
-                    $state.go('activityStream', {target: $scope.streamTarget}, {inherit: false});
+                    $state.go('activityStream', {target: $scope.streamTarget, id: null, activity_search: search});
                 }
 
             };

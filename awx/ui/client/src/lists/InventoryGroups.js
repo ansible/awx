@@ -25,7 +25,6 @@ export default
             sync_status: {
                 label: '',
                 nosort: true,
-                searchable: false,
                 mode: 'all',
                 iconOnly: true,
                 ngClick: 'viewUpdateStatus(group.id)',
@@ -39,7 +38,6 @@ export default
             failed_hosts: {
                 label: '',
                 nosort: true,
-                searchable: false,
                 mode: 'all',
                 iconOnly: true,
                 awToolTip: "{{ group.hosts_status_tip }}",
@@ -52,9 +50,8 @@ export default
                 label: 'Groups',
                 key: true,
                 ngClick: "groupSelect(group.id)",
-                columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3',
+                columnClass: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
                 class: 'InventoryManage-breakWord',
-                searchLabel: 'name'
             },
             total_groups: {
                 nosort: true,
@@ -62,65 +59,7 @@ export default
                 type: 'badgeCount',
                 ngHide: 'group.total_groups == 0',
                 noLink: true,
-                awToolTip: "{{group.name | sanitize}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}",
-                searchable: false,
-            },
-            source: {
-                label: 'Source',
-                searchType: 'select',
-                searchOptions: [{
-                    label: "Amazon Web Services",
-                    value: "ec2"
-                }, {
-                    label: "none",
-                    value: ""
-                }, {
-                    label: "Rackspace",
-                    value: "rax"
-                },{
-                    label: "VMware",
-                    value: "vmware"
-                },{
-                    label: "Google Compute Engine",
-                    value: "gce"
-                },{
-                    label: "Microsoft Azure",
-                    value: "azure"
-                },{
-                    label: "OpenStack",
-                    value: "openstack"
-                }],
-                sourceModel: 'inventory_source',
-                sourceField: 'source',
-                searchOnly: true
-            },
-            has_external_source: {
-                label: 'Has external source?',
-                searchType: 'select',
-                searchOptions: [{
-                    label: 'Yes',
-                    value: 'inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
-                }, {
-                    label: 'No',
-                    value: 'not__inventory_source__source__in=ec2,rax,vmware,azure,gce,openstack'
-                }],
-                searchOnly: true
-            },
-            has_active_failures: {
-                label: 'Has failed hosts?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-            },
-            last_update_failed: {
-                label: 'Update failed?',
-                searchType: 'boolean',
-                searchSingleValue: true,
-                searchValue: 'failed',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'status'
+                awToolTip: "{{group.name | sanitize}} contains {{group.total_groups}} {{group.total_groups === 1 ? 'child' : 'children'}}"
             }
         },
 
@@ -143,7 +82,8 @@ export default
                 actionClass: 'btn List-buttonDefault',
                 buttonContent: 'RUN COMMANDS',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: 'canAdhoc'
                 // TODO: set up a tip watcher and change text based on when
                 // things are selected/not selected.  This is started and
                 // commented out in the inventory controller within the watchers.
@@ -155,7 +95,9 @@ export default
                 ngClick: "createGroup()",
                 awToolTip: "Create a new group",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD GROUP'
+                buttonContent: '&#43; ADD GROUP',
+                ngShow: 'canAdd',
+                dataPlacement: "top",
             }
         },
 
@@ -169,8 +111,8 @@ export default
                 ngClick: 'updateGroup(group)',
                 awToolTip: "{{ group.launch_tooltip }}",
                 dataTipWatch: "group.launch_tooltip",
-                ngShow: "group.status !== 'running' && group.status " +
-                    "!== 'pending' && group.status !== 'updating'",
+                ngShow: "(group.status !== 'running' && group.status " +
+                    "!== 'pending' && group.status !== 'updating') && group.summary_fields.user_capabilities.start",
                 ngClass: "group.launch_class",
                 dataPlacement: "top",
             },
@@ -180,8 +122,8 @@ export default
                 ngClick: "cancelUpdate(group.id)",
                 awToolTip: "Cancel sync process",
                 'class': 'red-txt',
-                ngShow: "group.status == 'running' || group.status == 'pending' " +
-                    "|| group.status == 'updating'",
+                ngShow: "(group.status == 'running' || group.status == 'pending' " +
+                    "|| group.status == 'updating') && group.summary_fields.user_capabilities.start",
                 dataPlacement: "top",
                 iconClass: "fa fa-minus-circle"
             },
@@ -189,7 +131,7 @@ export default
                 mode: 'all',
                 ngClick: "copyMoveGroup(group.id)",
                 awToolTip: 'Copy or move group',
-                ngShow: "group.id > 0",
+                ngShow: "group.id > 0 && group.summary_fields.user_capabilities.copy",
                 dataPlacement: "top"
             },
             schedule: {
@@ -198,21 +140,31 @@ export default
                 awToolTip: "{{ group.group_schedule_tooltip }}",
                 ngClass: "group.scm_type_class",
                 dataPlacement: 'top',
-                ngHide: "group.summary_fields.inventory_source.source === ''"
+                ngShow: "!(group.summary_fields.inventory_source.source === '')"
             },
             edit: {
                 //label: 'Edit',
                 mode: 'all',
                 ngClick: "editGroup(group.id)",
                 awToolTip: 'Edit group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: "group.summary_fields.user_capabilities.edit"
+            },
+            view: {
+                //label: 'Edit',
+                mode: 'all',
+                ngClick: "editGroup(group.id)",
+                awToolTip: 'View group',
+                dataPlacement: "top",
+                ngShow: "!group.summary_fields.user_capabilities.edit"
             },
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
                 ngClick: "deleteGroup(group)",
                 awToolTip: 'Delete group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: "group.summary_fields.user_capabilities.delete"
             }
         }
     });

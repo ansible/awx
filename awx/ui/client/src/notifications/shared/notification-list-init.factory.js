@@ -15,12 +15,20 @@
  */
 
 export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest', 'GetChoices',
-    '$state',
-    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state) {
+    '$state', '$rootScope',
+    function(Wait, GetBasePath, ProcessErrors, Rest, GetChoices, $state, $rootScope) {
     return function(params) {
         var scope = params.scope,
             url = params.url,
             id = params.id;
+
+        scope.current_user_admin_orgs = [];
+
+        Rest.setUrl($rootScope.current_user.related.admin_of_organizations);
+        Rest.get()
+            .success(function(data) {
+                scope.current_user_admin_orgs = data.results.map(i => i.name);
+            });
 
         scope.addNotificationTemplate = function(){
             $state.go('notifications.add');

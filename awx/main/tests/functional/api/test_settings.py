@@ -1,0 +1,185 @@
+# Copyright (c) 2016 Ansible, Inc.
+# All Rights Reserved.
+
+# Python
+import pytest
+import os
+
+# Django
+from django.core.urlresolvers import reverse
+
+# AWX
+from awx.conf.models import Setting
+
+TEST_GIF_LOGO = 'data:image/gif;base64,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'
+TEST_PNG_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACEAAAAjCAYAAAAaLGNkAAAAAXNSR0IB2cksfwAAAdVpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpDb21wcmVzc2lvbj4xPC90aWZmOkNvbXByZXNzaW9uPgogICAgICAgICA8dGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPjI8L3RpZmY6UGhvdG9tZXRyaWNJbnRlcnByZXRhdGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjl0tmoAAAHVSURBVFgJ7VZRsoMgDNTOu5E9U+/Ud6Z6JssGNg2oNKD90xkHCNnNkgTbYbieKwNXBn6bgSXQ4+16xi5UDiqDN3Pecr6+1fM5DHh7n1NEIPjjoRLKzOjG3qQ5dRtEy2LCjh/Gz2wDZE2nZYKkrxdn/kY9XQQkGCGqqDY5IgJFkEKgBCzDNGXhTKEye7boFRH6IPJj5EshiNCSjV4R4eSx7zhmR2tcdIuwmWiMeao7e0JHViZEWUI5aP8a9O+rx74D6sGEiJftiX3YeueIiFXg2KrhpqzjVC3dPZFYJZ7NOwwtNwM8R0UkLfH0sT5qck+OlkMq0BucKr0iWG7gpAQksD9esM1z3Lnf6SHjLh67nnKEGxC/iomWhByTeXOQJGHHcKxwHhHKnt1HIdYtmexkIb/HOURWTSJqn2gKMDG0bDUc/D0iAseovxUBoylmQCug6IVhSv+4DIeKI94jAr4AjiSEgQ25JYB+YWT9BZ94AM8erwgFkRifaArA6U0G5KT0m//z26REZuK9okgrT6VwE1jTHjbVzyNAyRwTEPOtuiex9FVBNZCkruaA4PZqFp1u8Rpww9/6rcK5y0EkAxRiZJt79PWOVYWGRE9pbJhavMengMflGyumk0akMsQnAAAAAElFTkSuQmCC'
+TEST_JPEG_LOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBkRXhpZgAATU0AKgAAAAgAAwEGAAMAAAABAAIAAAESAAMAAAABAAEAAIdpAAQAAAABAAAAMgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIaADAAQAAAABAAAAIwAAAAD/4QkhaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLwA8P3hwYWNrZXQgYmVnaW49Iu+7vyIgaWQ9Ilc1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCI/PiA8eDp4bXBtZXRhIHhtbG5zOng9ImFkb2JlOm5zOm1ldGEvIiB4OnhtcHRrPSJYTVAgQ29yZSA1LjQuMCI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiLz4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8P3hwYWNrZXQgZW5kPSJ3Ij8+AP/tADhQaG90b3Nob3AgMy4wADhCSU0EBAAAAAAAADhCSU0EJQAAAAAAENQdjNmPALIE6YAJmOz4Qn7/wAARCAAjACEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9sAQwAGBgYGBgYKBgYKDgoKCg4SDg4ODhIXEhISEhIXHBcXFxcXFxwcHBwcHBwcIiIiIiIiJycnJycsLCwsLCwsLCws/9sAQwEHBwcLCgsTCgoTLh8aHy4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4u/90ABAAD/9oADAMBAAIRAxEAPwD6poormvFfivSvB2lHVtWLGMtsRE2hnYKzlVLsi52oxALDdjauWKqQCXQfFXh7xP8Aaf7AvYrz7HL5U3lk/K3YjIGVODtcZVsHBODXQV806bcT+E9L03XbCOS2udMsLQanbB4po72xYMfOQpKYyV2zPEwcNwVK7WAr6WriwWMWIUvdcZRdmnuu33rVFSjYKKKK7ST/0PqmuF8Vv4X8S+HNZ0+e/gIsYJvtEsL+bJZsI3UuyxNvBA3gpxvXchyCRXdV8ta3bW667DoloW1y10tLLTJxZWP2hoLSGYzNHclGZpJC0ESk8IAZcRB8is61T2cHK1/1DrY526h8YXHh691vxCz6dafY5Q0U7yGSeQxSxohNzJLcbUeQ4VnVNxBRCWL19b2eraVqE9xa2F3BcS2jbJ0ikV2ibJG1wpJU5UjBx0PpXzrrniy4k17TrrWrGex022ufMijvd9m11PGH8naXKqsUcgR3MhB5U7MA16x4L8F3vhq2sY9Ru4rg6day2tusEAhCrcOkknmEMRI2Y1AcLGT8xYMzZHjZFGu6cquKjaUnt2XS76vv/SN8RVjOdoKyXY9Cooor3TA//9H6pr4gfxRrMvxJ0/whLJE+maVrcVnZRtBCzwQQ3SIipMU80fKignflgPmJr7fr4A/5rf8A9zJ/7eUAdX8SfGviPwl8TtaPh6eK1eTyN0n2eCSUg28OV8ySNn2/KDtztzzjNfZVhY2umWMGm2KeXb2sSQxJknakYCqMkknAHUnNfBXxt/5Kdq//AG7/APpPFX3/AEAFFFFAH//Z'
+
+
+@pytest.fixture
+def mock_no_license_file(mocker):
+    '''
+    Ensures that tests don't pick up dev container license file
+    '''
+    os.environ['AWX_LICENSE_FILE'] = '/does_not_exist'
+    return None
+
+
+@pytest.mark.django_db
+def test_license_cannot_be_removed_via_system_settings(mock_no_license_file, get, put, patch, delete, admin, enterprise_license):
+    url = reverse('api:setting_singleton_detail', args=('system',))
+    response = get(url, user=admin, expect=200)
+    assert not response.data['LICENSE']
+    Setting.objects.create(key='TOWER_URL_BASE', value='https://towerhost')
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    response = get(url, user=admin, expect=200)
+    assert response.data['LICENSE']
+    put(url, user=admin, data=response.data, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['LICENSE']
+    patch(url, user=admin, data={}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['LICENSE']
+    delete(url, user=admin, expect=204)
+    response = get(url, user=admin, expect=200)
+    assert response.data['LICENSE']
+
+
+@pytest.mark.django_db
+def test_url_base_defaults_to_request(options, admin):
+    # If TOWER_URL_BASE is not set, default to the Tower request hostname
+    resp = options(reverse('api:setting_singleton_detail', args=('system',)), user=admin, expect=200)
+    assert resp.data['actions']['PUT']['TOWER_URL_BASE']['default'] == 'http://testserver'
+
+
+@pytest.mark.django_db
+def test_jobs_settings(get, put, patch, delete, admin):
+    url = reverse('api:setting_singleton_detail', args=('jobs',))
+    get(url, user=admin, expect=200)
+    delete(url, user=admin, expect=204)
+    response = get(url, user=admin, expect=200)
+    data = dict(response.data.items())
+    put(url, user=admin, data=data, expect=200)
+    patch(url, user=admin, data={'AWX_PROOT_HIDE_PATHS': ['/home']}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == ['/home']
+    data.pop('AWX_PROOT_HIDE_PATHS')
+    data.pop('AWX_PROOT_SHOW_PATHS')
+    data.pop('AWX_ANSIBLE_CALLBACK_PLUGINS')
+    put(url, user=admin, data=data, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['AWX_PROOT_HIDE_PATHS'] == []
+    assert response.data['AWX_PROOT_SHOW_PATHS'] == []
+    assert response.data['AWX_ANSIBLE_CALLBACK_PLUGINS'] == []
+
+
+@pytest.mark.django_db
+def test_ldap_settings(get, put, patch, delete, admin, enterprise_license):
+    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    get(url, user=admin, expect=404)
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    get(url, user=admin, expect=200)
+    # The PUT below will fail at the moment because AUTH_LDAP_GROUP_TYPE
+    # defaults to None but cannot be set to None.
+    # put(url, user=admin, data=response.data, expect=200)
+    delete(url, user=admin, expect=204)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': ''}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap.example.com'}, expect=400)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com:389'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldaps://ldap.example.com:636'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com ldap://ldap2.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com,ldap://ldap2.example.com'}, expect=200)
+    patch(url, user=admin, data={'AUTH_LDAP_SERVER_URI': 'ldap://ldap.example.com, ldap://ldap2.example.com'}, expect=200)
+
+
+@pytest.mark.parametrize('setting', [
+    'AUTH_LDAP_USER_DN_TEMPLATE',
+    'AUTH_LDAP_REQUIRE_GROUP',
+    'AUTH_LDAP_DENY_GROUP',
+])
+@pytest.mark.django_db
+def test_empty_ldap_dn(get, put, patch, delete, admin, enterprise_license,
+                       setting):
+    url = reverse('api:setting_singleton_detail', args=('ldap',))
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+
+    patch(url, user=admin, data={setting: ''}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
+
+    patch(url, user=admin, data={setting: None}, expect=200)
+    resp = get(url, user=admin, expect=200)
+    assert resp.data[setting] is None
+
+
+@pytest.mark.django_db
+def test_radius_settings(get, put, patch, delete, admin, enterprise_license, settings):
+    url = reverse('api:setting_singleton_detail', args=('radius',))
+    get(url, user=admin, expect=404)
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    response = get(url, user=admin, expect=200)
+    put(url, user=admin, data=response.data, expect=200)
+    # Set secret via the API.
+    patch(url, user=admin, data={'RADIUS_SECRET': 'mysecret'}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret'
+    # Set secret via settings wrapper.
+    settings_wrapper = settings._awx_conf_settings
+    settings_wrapper.RADIUS_SECRET = 'mysecret2'
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret2'
+    # If we send back $encrypted$, the setting is not updated.
+    patch(url, user=admin, data={'RADIUS_SECRET': '$encrypted$'}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == '$encrypted$'
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value.startswith('$encrypted$')
+    assert settings.RADIUS_SECRET == 'mysecret2'
+    # If we send an empty string, the setting is also set to an empty string.
+    patch(url, user=admin, data={'RADIUS_SECRET': ''}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['RADIUS_SECRET'] == ''
+    assert Setting.objects.filter(key='RADIUS_SECRET').first().value == ''
+    assert settings.RADIUS_SECRET == ''
+
+
+@pytest.mark.django_db
+def test_ui_settings(get, put, patch, delete, admin, enterprise_license):
+    url = reverse('api:setting_singleton_detail', args=('ui',))
+    response = get(url, user=admin, expect=200)
+    assert 'CUSTOM_LOGO' not in response.data
+    assert 'CUSTOM_LOGIN_INFO' not in response.data
+    Setting.objects.create(key='LICENSE', value=enterprise_license)
+    response = get(url, user=admin, expect=200)
+    assert not response.data['CUSTOM_LOGO']
+    assert not response.data['CUSTOM_LOGIN_INFO']
+    put(url, user=admin, data=response.data, expect=200)
+    patch(url, user=admin, data={'CUSTOM_LOGO': 'data:text/plain;base64,'}, expect=400)
+    patch(url, user=admin, data={'CUSTOM_LOGO': 'data:image/png;base64,00'}, expect=400)
+    patch(url, user=admin, data={'CUSTOM_LOGO': TEST_GIF_LOGO}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['CUSTOM_LOGO'] == TEST_GIF_LOGO
+    patch(url, user=admin, data={'CUSTOM_LOGO': TEST_PNG_LOGO}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['CUSTOM_LOGO'] == TEST_PNG_LOGO
+    patch(url, user=admin, data={'CUSTOM_LOGO': TEST_JPEG_LOGO}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['CUSTOM_LOGO'] == TEST_JPEG_LOGO
+    patch(url, user=admin, data={'CUSTOM_LOGO': ''}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert not response.data['CUSTOM_LOGO']
+    patch(url, user=admin, data={'CUSTOM_LOGIN_INFO': 'Customize Me!'}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert response.data['CUSTOM_LOGIN_INFO']
+    patch(url, user=admin, data={'CUSTOM_LOGIN_INFO': ''}, expect=200)
+    response = get(url, user=admin, expect=200)
+    assert not response.data['CUSTOM_LOGIN_INFO']
+    delete(url, user=admin, expect=204)
+    response = get(url, user=admin, expect=200)
+    assert not response.data['CUSTOM_LOGO']
+    assert not response.data['CUSTOM_LOGIN_INFO']

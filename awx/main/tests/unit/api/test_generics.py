@@ -6,24 +6,40 @@ import mock
 # DRF
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 # AWX
-from awx.api.generics import ParentMixin, SubListCreateAttachDetachAPIView, DeleteLastUnattachLabelMixin
+from awx.api.generics import (
+    ParentMixin,
+    SubListCreateAttachDetachAPIView,
+    DeleteLastUnattachLabelMixin,
+    ResourceAccessList
+)
+from awx.main.models import Organization
+
 
 @pytest.fixture
 def get_object_or_404(mocker):
     # pytest patch without return_value generates a random value, we are counting on this
     return mocker.patch('awx.api.generics.get_object_or_404')
 
+
 @pytest.fixture
 def get_object_or_400(mocker):
     return mocker.patch('awx.api.generics.get_object_or_400')
+
 
 @pytest.fixture
 def mock_response_new(mocker):
     m = mocker.patch('awx.api.generics.Response.__new__')
     m.return_value = m
     return m
+
+
+@pytest.fixture
+def mock_organization():
+    return Organization(pk=4, name="Unsaved Org")
+
 
 @pytest.fixture
 def parent_relationship_factory(mocker):
@@ -37,6 +53,7 @@ def parent_relationship_factory(mocker):
 
         return (serializer, mock_parent_relationship)
     return rf
+
 
 # TODO: Test create and associate failure (i.e. id doesn't exist, record already exists, permission denied)
 # TODO: Mock and check return (Response)
@@ -122,6 +139,7 @@ class TestSubListCreateAttachDetachAPIView:
         view.unattach_validate.assert_called_with(mock_request)
         view.unattach_by_id.assert_not_called()
 
+
 class TestDeleteLastUnattachLabelMixin:
     @mock.patch('__builtin__.super')
     def test_unattach_ok(self, super, mocker):
@@ -159,6 +177,7 @@ class TestDeleteLastUnattachLabelMixin:
         super.unattach_validate.assert_called_with(mock_request)
         assert mock_response == res
 
+
 class TestParentMixin:
     def test_get_parent_object(self, mocker, get_object_or_404):
         parent_mixin = ParentMixin()
@@ -168,7 +187,40 @@ class TestParentMixin:
         mock_parent_mixin = mocker.MagicMock(wraps=parent_mixin)
 
         return_value = mock_parent_mixin.get_parent_object()
-        
+
         get_object_or_404.assert_called_with(parent_mixin.parent_model, **parent_mixin.kwargs)
         assert get_object_or_404.return_value == return_value
-       
+
+
+class TestResourceAccessList:
+
+    def mock_request(self):
+        return mock.MagicMock(
+            user=mock.MagicMock(
+                is_anonymous=mock.MagicMock(return_value=False),
+                is_superuser=False
+            ), method='GET')
+
+
+    def mock_view(self):
+        view = ResourceAccessList()
+        view.parent_model = Organization
+        view.kwargs = {'pk': 4}
+        return view
+
+
+    def test_parent_access_check_failed(self, mocker, mock_organization):
+        with mocker.patch('awx.api.permissions.get_object_or_400', return_value=mock_organization):
+            mock_access = mocker.MagicMock(__name__='for logger', return_value=False)
+            with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
+                with pytest.raises(PermissionDenied):
+                    self.mock_view().check_permissions(self.mock_request())
+                mock_access.assert_called_once_with(mock_organization)
+
+
+    def test_parent_access_check_worked(self, mocker, mock_organization):
+        with mocker.patch('awx.api.permissions.get_object_or_400', return_value=mock_organization):
+            mock_access = mocker.MagicMock(__name__='for logger', return_value=True)
+            with mocker.patch('awx.main.access.BaseAccess.can_read', mock_access):
+                self.mock_view().check_permissions(self.mock_request())
+                mock_access.assert_called_once_with(mock_organization)

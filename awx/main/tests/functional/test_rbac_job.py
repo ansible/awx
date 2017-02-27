@@ -23,21 +23,25 @@ def normal_job(deploy_jobtemplate):
         inventory=deploy_jobtemplate.inventory
     )
 
+
 @pytest.fixture
 def jt_user(deploy_jobtemplate, rando):
     deploy_jobtemplate.execute_role.members.add(rando)
     return rando
+
 
 @pytest.fixture
 def inv_updater(inventory, rando):
     inventory.update_role.members.add(rando)
     return rando
 
+
 @pytest.fixture
 def host_adhoc(host, machine_credential, rando):
     host.inventory.adhoc_role.members.add(rando)
     machine_credential.use_role.members.add(rando)
     return rando
+
 
 @pytest.fixture
 def proj_updater(project, rando):
@@ -52,6 +56,7 @@ def test_superuser_sees_orphans(normal_job, admin_user):
     access = JobAccess(admin_user)
     assert access.can_read(normal_job)
 
+
 @pytest.mark.django_db
 def test_org_member_does_not_see_orphans(normal_job, org_member, project):
     normal_job.job_template = None
@@ -60,17 +65,20 @@ def test_org_member_does_not_see_orphans(normal_job, org_member, project):
     access = JobAccess(org_member)
     assert not access.can_read(normal_job)
 
+
 @pytest.mark.django_db
 def test_org_admin_sees_orphans(normal_job, org_admin):
     normal_job.job_template = None
     access = JobAccess(org_admin)
     assert access.can_read(normal_job)
 
+
 @pytest.mark.django_db
 def test_org_auditor_sees_orphans(normal_job, org_auditor):
     normal_job.job_template = None
     access = JobAccess(org_auditor)
     assert access.can_read(normal_job)
+
 
 # Delete permissions testing
 @pytest.mark.django_db
@@ -79,11 +87,13 @@ def test_JT_admin_delete_denied(normal_job, rando):
     access = JobAccess(rando)
     assert not access.can_delete(normal_job)
 
+
 @pytest.mark.django_db
 def test_inventory_admin_delete_denied(normal_job, rando):
     normal_job.job_template.inventory.admin_role.members.add(rando)
     access = JobAccess(rando)
     assert not access.can_delete(normal_job)
+
 
 @pytest.mark.django_db
 def test_null_related_delete_denied(normal_job, rando):
@@ -92,11 +102,13 @@ def test_null_related_delete_denied(normal_job, rando):
     access = JobAccess(rando)
     assert not access.can_delete(normal_job)
 
+
 @pytest.mark.django_db
 def test_delete_job_with_orphan_proj(normal_job, rando):
     normal_job.project.organization = None
     access = JobAccess(rando)
     assert not access.can_delete(normal_job)
+
 
 @pytest.mark.django_db
 def test_inventory_org_admin_delete_allowed(normal_job, org_admin):
@@ -104,11 +116,13 @@ def test_inventory_org_admin_delete_allowed(normal_job, org_admin):
     access = JobAccess(org_admin)
     assert access.can_delete(normal_job)
 
+
 @pytest.mark.django_db
 def test_project_org_admin_delete_allowed(normal_job, org_admin):
     normal_job.inventory = None # do this so we test job->project->org->admin connection
     access = JobAccess(org_admin)
     assert access.can_delete(normal_job)
+
 
 @pytest.mark.django_db
 class TestJobAndUpdateCancels:

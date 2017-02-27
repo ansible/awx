@@ -3,7 +3,7 @@
 .tags1
 
 # Tower
-awx/settings/local_settings.py*
+awx/settings/local_*.py*
 awx/*.sqlite3
 awx/*.sqlite3_*
 awx/job_status
@@ -22,6 +22,7 @@ tower/tower_warnings.log
 celerybeat-schedule
 awx/ui/static
 awx/ui/build_test
+awx/ui/client/languages
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
@@ -31,6 +32,7 @@ setup/test/roles/postgresql
 __pycache__
 /build
 /deb-build
+/reprepro
 /rpm-build
 /tar-build
 /setup-bundle-build
@@ -44,14 +46,15 @@ __pycache__
 /bower.json
 /package.json
 /testem.yml
-/coverage
+**/coverage
 /.istanbul.yml
-node_modules/**
+**/node_modules/**
 /tmp
 npm-debug.log
 
-# UI build debugging
-/DEBUG
+# UI build flag files
+awx/ui/.deps_built
+awx/ui/.release_built
 
 # Testing
 .cache
@@ -104,8 +107,10 @@ reports
 *.log.[0-9]
 *.results
 local/
+*.mo
 
 # AWX python libs populated by requirements.txt
 awx/lib/.deps_built
 awx/lib/site-packages
 venv/*
+use_dev_supervisor.txt

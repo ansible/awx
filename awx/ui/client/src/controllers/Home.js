@@ -28,7 +28,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
 
     var dataCount = 0;
 
-    $rootScope.$on('JobStatusChange-home', function () {
+    $scope.$on('ws-jobs', function () {
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
         .success(function (data) {
@@ -38,7 +38,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
         });
 
-        Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
+        Rest.setUrl("api/v1/unified_jobs?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
         Rest.get()
         .success(function (data) {
             $scope.dashboardJobsListData = data.results;
@@ -47,7 +47,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
         });
 
-        Rest.setUrl(GetBasePath("job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false");
+        Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
         Rest.get()
         .success(function (data) {
             $scope.dashboardJobTemplatesListData = data.results;
@@ -114,7 +114,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
         });
-        Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
+        Rest.setUrl("api/v1/unified_jobs?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
         Rest.get()
         .success(function (data) {
             data = data.results;
@@ -123,7 +123,7 @@ export function Home($scope, $compile, $stateParams, $rootScope, $location, $log
         .error(function (data, status) {
             ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard jobs list: ' + status });
         });
-        Rest.setUrl(GetBasePath("job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false");
+        Rest.setUrl(GetBasePath("unified_job_templates") + "?order_by=-last_job_run&page_size=5&last_job_run__isnull=false&type=workflow_job_template,job_template");
         Rest.get()
         .success(function (data) {
             data = data.results;

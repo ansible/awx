@@ -4,22 +4,20 @@ SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; pr
 OFFICIAL ?= no
 PACKER ?= packer
 PACKER_BUILD_OPTS ?= -var 'official=$(OFFICIAL)' -var 'aw_repo_url=$(AW_REPO_URL)'
-GRUNT ?= $(shell [ -t 0 ] && echo "grunt" || echo "grunt --no-color")
-TESTEM ?= ./node_modules/.bin/testem
-BROCCOLI_BIN ?= ./node_modules/.bin/broccoli
-MOCHA_BIN ?= ./node_modules/.bin/_mocha
-ISTANBUL_BIN ?= ./node_modules/.bin/istanbul
-BROWSER_SYNC_BIN ?= ./node_modules/.bin/browser-sync
 NODE ?= node
 NPM_BIN ?= npm
 DEPS_SCRIPT ?= packaging/bundle/deps.py
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
-VENV_BASE ?= /tower_devel/venv
+GCLOUD_AUTH ?= $(shell gcloud auth print-access-token)
+# NOTE: This defaults the container image version to the branch that's active
+COMPOSE_TAG ?= $(GIT_BRANCH)
+
+COMPOSE_HOST ?= $(shell hostname)
+
+VENV_BASE ?= /venv
 SCL_PREFIX ?=
 CELERY_SCHEDULE_FILE ?= /celerybeat-schedule
-
-CLIENT_TEST_DIR ?= build_test
 
 # Python packages to install only from source (not from binary wheels)
 # Comma separated list
@@ -47,7 +45,7 @@ ifeq ($(OFFICIAL),yes)
     AW_REPO_URL ?= http://releases.ansible.com/ansible-tower
 else
     RELEASE ?= $(BUILD)
-    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_RTYUIOPOIUYTYU/$(GIT_BRANCH)
+    AW_REPO_URL ?= http://jenkins.testing.ansible.com/ansible-tower_nightlies_f8b8c5588b2505970227a7b0900ef69040ad5a00/$(GIT_BRANCH)
 endif
 
 # Allow AMI license customization
@@ -81,7 +79,7 @@ SETUP_TAR_CHECKSUM=$(NAME)-setup-CHECKSUM
 
 # DEB build parameters
 DEBUILD_BIN ?= debuild
-DEBUILD_OPTS = --source-option="-I"
+DEBUILD_OPTS =
 DPUT_BIN ?= dput
 DPUT_OPTS ?= -c .dput.cf -u
 REPREPRO_BIN ?= reprepro
@@ -170,20 +168,22 @@ ifeq ($(DISTRO),ubuntu)
     SETUP_INSTALL_ARGS += --install-layout=deb
 endif
 
+# UI flag files
+UI_DEPS_FLAG_FILE = awx/ui/.deps_built
+UI_RELEASE_FLAG_FILE = awx/ui/.release_built
+
 .DEFAULT_GOAL := build
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
-	requirements_jenkins \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
 	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
 	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	build-ui sync-ui test-ui build-ui-for-coverage test-ui-for-coverage \
-	build-ui-for-browser-tests test-ui-debug jshint ngdocs \
-	websocket-proxy browser-sync browser-sync-reload brocolli-watcher \
-	devjs minjs testjs_ci \
 	deb deb-src debian debsign pbuilder reprepro setup_tarball \
-	vagrant-virtualbox virtualbox-centos-7 virtualbox-centos-6 \
-	vagrant-vmware clean-bundle setup_bundle_tarball
+	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
+	clean-bundle setup_bundle_tarball \
+	ui-docker-machine ui-docker ui-release ui-devel \
+	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
+
 
 # Remove setup build files
 clean-tar:
@@ -196,11 +196,6 @@ clean-rpm:
 # Remove debian build files
 clean-deb:
 	rm -rf deb-build reprepro
-
-# Remove grunt build files
-clean-grunt:
-	rm -f package.json Gruntfile.js Brocfile.js bower.json
-	rm -rf node_modules
 
 # Remove packer artifacts
 clean-packer:
@@ -218,13 +213,10 @@ clean-bundle:
 
 # remove ui build artifacts
 clean-ui:
-	rm -rf DEBUG
-
-clean-static:
 	rm -rf awx/ui/static/
-
-clean-build-test:
-	rm -rf awx/ui/build_test/
+	rm -rf awx/ui/node_modules/
+	rm -f $(UI_DEPS_FLAG_FILE)
+	rm -f $(UI_RELEASE_FLAG_FILE)
 
 clean-tmp:
 	rm -rf tmp/
@@ -233,18 +225,23 @@ clean-venv:
 	rm -rf venv/
 
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-grunt clean-ui clean-static clean-build-test clean-tar clean-packer clean-bundle clean-venv
+clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+	rm -rf awx/public
 	rm -rf awx/lib/site-packages
-	rm -rf awx/lib/.deps_built
 	rm -rf dist/*
+	rm -rf awx/job_status
+	rm -rf awx/job_output
+	rm -rf reports
+	rm -f awx/awx_test.sqlite3
 	rm -rf tmp
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
+	find . -type d -name "__pycache__" -delete
 
 # convenience target to assert environment variables are defined
 guard-%:
-	@if [ "${${*}}" == "" ]; then \
+	@if [ "$${$*}" = "" ]; then \
 	    echo "The required environment variable '$*' is not set"; \
 	    exit 1; \
 	fi
@@ -267,7 +264,7 @@ virtualenv_ansible:
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
 			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 
@@ -279,48 +276,43 @@ virtualenv_tower:
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
 			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.1; \
+			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
 		fi; \
 	fi
 
 requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	else \
-	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
+	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
+	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
 	else \
-	pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
+	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
+	pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
 	fi
 
 requirements_tower_dev:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
+		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
 	fi
-
-# Install third-party requirements needed for running unittests in jenkins
-requirements_jenkins:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -Ir requirements/requirements_jenkins.txt; \
-	else \
-		pip install -Ir requirements/requirements_jenkins..txt; \
-	fi && \
-	$(NPM_BIN) install csslint jshint
 
 requirements: requirements_ansible requirements_tower
 
 requirements_dev: requirements requirements_tower_dev
 
-requirements_test: requirements requirements_jenkins
+requirements_test: requirements
 
 # "Install" ansible-tower package in development mode.
 develop:
@@ -328,8 +320,8 @@ develop:
 	    pip uninstall -y awx; \
 	    $(PYTHON) setup.py develop; \
 	else \
-	    sudo pip uninstall -y awx; \
-	    sudo $(PYTHON) setup.py develop; \
+	    pip uninstall -y awx; \
+	    $(PYTHON) setup.py develop; \
 	fi
 
 version_file:
@@ -341,7 +333,7 @@ init:
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	tower-manage register_instance --primary --hostname=127.0.0.1; \
+	tower-manage register_instance --hostname=$(COMPOSE_HOST); \
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements_dev version_file develop migrate
@@ -366,15 +358,17 @@ dbshell:
 	sudo -u postgres psql -d awx-dev
 
 server_noattach:
-	tmux new-session -d -s tower 'exec make runserver'
+	tmux new-session -d -s tower 'exec make uwsgi'
 	tmux rename-window 'Tower'
 	tmux select-window -t tower:0
 	tmux split-window -v 'exec make celeryd'
-	tmux split-window -h 'exec make taskmanager'
-	tmux new-window 'exec make receiver'
+	tmux new-window 'exec make daphne'
 	tmux select-window -t tower:1
+	tmux rename-window 'WebSockets'
+	tmux split-window -h 'exec make runworker'
+	tmux new-window 'exec make receiver'
+	tmux select-window -t tower:2
 	tmux rename-window 'Extra Services'
-	tmux split-window -v 'exec make socketservice'
 	tmux split-window -h 'exec make factcacher'
 
 server: server_noattach
@@ -384,6 +378,12 @@ server: server_noattach
 servercc: server_noattach
 	tmux -2 -CC attach-session -t tower
 
+supervisor:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	supervisord --configuration /supervisor.conf --pidfile=/tmp/supervisor_pid
+
 # Alternate approach to tmux to run all development tasks specified in
 # Procfile.  https://youtu.be/OPMgaibszjk
 honcho:
@@ -391,6 +391,36 @@ honcho:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	honcho start
+
+flower:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py celery flower --address=0.0.0.0 --port=5555 --broker=amqp://guest:guest@$(RABBITMQ_HOST):5672//
+
+collectstatic:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	mkdir -p awx/public/static && $(PYTHON) manage.py collectstatic --clear --noinput > /dev/null 2>&1
+
+uwsgi: collectstatic
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+    uwsgi -b 32768 --socket :8050 --module=awx.wsgi:application --home=/venv/tower --chdir=/tower_devel/ --vacuum --processes=5 --harakiri=120 --master --no-orphans --py-autoreload 1 --max-requests=1000 --stats /tmp/stats.socket --master-fifo=/awxfifo --lazy-apps
+
+daphne:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	daphne -b 0.0.0.0 -p 8051 awx.asgi:channel_layer
+
+runworker:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py runworker --only-channels websocket.*
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
@@ -404,7 +434,8 @@ celeryd:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair --schedule=$(CELERY_SCHEDULE_FILE)
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload --autoscale=20,3 --schedule=$(CELERY_SCHEDULE_FILE) -Q projects,jobs,default,scheduler,broadcast_all,$(COMPOSE_HOST) -n celery@$(COMPOSE_HOST)
+	#$(PYTHON) manage.py celery multi show projects jobs default -l DEBUG -Q:projects projects -Q:jobs jobs -Q:default default -c:projects 1 -c:jobs 3 -c:default 3 -Ofair -B --schedule=$(CELERY_SCHEDULE_FILE)
 
 # Run to start the zeromq callback receiver
 receiver:
@@ -412,12 +443,6 @@ receiver:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	$(PYTHON) manage.py run_callback_receiver
-
-taskmanager:
-	@if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-	fi; \
-	$(PYTHON) manage.py run_task_system
 
 socketservice:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -431,6 +456,9 @@ factcacher:
 	fi; \
 	$(PYTHON) manage.py run_fact_cache_receiver
 
+nginx:
+	nginx -g "daemon off;"
+
 reports:
 	mkdir -p $@
 
@@ -438,7 +466,10 @@ pep8: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
 
 flake8: reports
-	@$@ --output-file=reports/$@.report
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	(set -o pipefail && $@ | tee reports/$@.report)
 
 pyflakes: reports
 	@(set -o pipefail && $@ | tee reports/$@.report)
@@ -448,7 +479,7 @@ pylint: reports
 
 check: flake8 pep8 # pyflakes pylint
 
-TEST_DIRS=awx/main/tests
+TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
 test:
 	@if [ "$(VENV_BASE)" ]; then \
@@ -460,7 +491,7 @@ test_unit:
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
-	py.test awx/main/tests/unit
+	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
@@ -481,173 +512,107 @@ test_tox:
 # Alias existing make target so old versions run against Jekins the same way
 test_jenkins : test_coverage
 
+# Make fake data
+DATA_GEN_PRESET = ""
+bulk_data:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) tools/data_generators/rbac_dummy_data_generator.py --preset=$(DATA_GEN_PRESET)
+
+# l10n TASKS
+# --------------------------------------
+
+# check for UI po files
+HAVE_PO := $(shell ls awx/ui/po/*.po 2>/dev/null)
+check-po:
+ifdef HAVE_PO
+	# Should be 'Language: zh-CN' but not 'Language: zh_CN' in zh_CN.po
+	for po in awx/ui/po/*.po ; do \
+	    echo $$po; \
+	    mo="awx/ui/po/`basename $$po .po`.mo"; \
+	    msgfmt --check --verbose $$po -o $$mo; \
+	    if test "$$?" -ne 0 ; then \
+	        exit -1; \
+	    fi; \
+	    rm $$mo; \
+	    name=`echo "$$po" | grep '-'`; \
+	    if test "x$$name" != x ; then \
+	        right_name=`echo $$language | sed -e 's/-/_/'`; \
+	        echo "ERROR: WRONG $$name CORRECTION: $$right_name"; \
+	        exit -1; \
+	    fi; \
+	    language=`grep '^"Language:' "$$po" | grep '_'`; \
+	    if test "x$$language" != x ; then \
+	        right_language=`echo $$language | sed -e 's/_/-/'`; \
+	        echo "ERROR: WRONG $$language CORRECTION: $$right_language in $$po"; \
+	        exit -1; \
+	    fi; \
+	done;
+else
+	@echo No PO files
+endif
+
+# generate UI .pot
+pot: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run pot
+
+# generate django .pot .po
+LANG = "en-us"
+messages:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/tower/bin/activate; \
+	fi; \
+	$(PYTHON) manage.py makemessages -l $(LANG) --keep-pot
+
+# generate l10n .json .mo
+languages: $(UI_DEPS_FLAG_FILE) check-po
+	$(NPM_BIN) --prefix awx/ui run languages
+	$(PYTHON) tools/scripts/compilemessages.py
+
+# End l10n TASKS
+# --------------------------------------
+
 # UI TASKS
 # --------------------------------------
 
-# begin targets that pull ui files from packaging to the root of the app
-Gruntfile.js: packaging/node/Gruntfile.js
-	cp $< $@
+ui-deps: $(UI_DEPS_FLAG_FILE)
 
-Brocfile.js: packaging/node/Brocfile.js
-	cp $< $@
+$(UI_DEPS_FLAG_FILE):
+	$(NPM_BIN) --unsafe-perm --prefix awx/ui install awx/ui
+	touch $(UI_DEPS_FLAG_FILE)
 
-bower.json: packaging/node/bower.json
-	cp $< $@
+ui-docker-machine: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run ui-docker-machine -- $(MAKEFLAGS)
 
-package.json: packaging/node/package.template
-	sed -e 's#%NAME%#$(NAME)#;s#%VERSION%#$(VERSION)#;s#%GIT_REMOTE_URL%#$(GIT_REMOTE_URL)#;' $< > $@
+# Native docker. Builds UI and raises BrowserSync & filesystem polling.
+ui-docker: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run ui-docker -- $(MAKEFLAGS)
 
-testem.yml: packaging/node/testem.yml
-	cp $< $@
+# Builds UI with development UI without raising browser-sync or filesystem polling.
+ui-devel: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-devel -- $(MAKEFLAGS)
 
-.istanbul.yml: packaging/node/.istanbul.yml
-	cp $< $@
-# end targets that pull ui files from packaging to the root of the app
+ui-release: $(UI_RELEASE_FLAG_FILE)
 
-# update package.json and install npm dependencies
-node_modules: package.json
-	$(NPM_BIN) install
-	touch $@
+$(UI_RELEASE_FLAG_FILE): languages $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run build-release
+	touch $(UI_RELEASE_FLAG_FILE)
 
-# helper tasks to run broccoli build process at awx/ui/<destination_dir>,
-# to build the ui, use the build-ui target instead:
-#	UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-awx/ui/static: node_modules clean-ui clean-static Brocfile.js bower.json
-	$(BROCCOLI_BIN) build awx/ui/static -- $(UI_FLAGS)
+ui-test: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run test
 
-awx/ui/build_test: node_modules clean-ui clean-build-test Brocfile.js bower.json
-	$(BROCCOLI_BIN) build awx/ui/build_test -- $(UI_FLAGS)
+ui-test-ci: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run test:ci
 
-# build the ui to awx/ui/static:
-#	defaults to standard dev build (concatenated, non-minified, sourcemaps, no
-#		tests)
-#	PROD=true: standard prod build (concatenated, minified, no sourcemaps,
-#		compressed, no tests)
-#	EXTRA_UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-PROD ?= false
+testjs_ci:
+	echo "Update UI unittests later" #ui-test-ci
 
-# TODO: Remove after 2.4 (alias for devjs/minjs)
-devjs: build-ui
-minjs: build-ui
-ifeq ($(MAKECMDGOALS),minjs)
-   PROD = true
-endif
+jshint:
+	$(NPM_BIN) run --prefix awx/ui jshint
 
-ifeq ($(PROD),true)
-    UI_FLAGS=--silent --compress --no-docs --no-debug --no-sourcemaps \
-    $(EXTRA_UI_FLAGS)
-else
-    UI_FLAGS=$(EXTRA_UI_FLAGS)
-endif
-
-build-ui: awx/ui/static
-
-# launch watcher to continuously build the ui to awx/ui/static and run tests
-#	after changes are made:
-#	WATCHER_FLAGS: options to be utilized by broccoli timepiece
-#	UI_FLAGS=<flags as seen in Brocfile.js and
-#		packaging/node/tower-app.js>: additional parameters to pass broccoli
-#		for building
-# 	DOCKER_MACHINE_NAME=<name of docker-machine tower is running on>: when
-#		passed, not only will brocolli rebuild, but browser-sync will proxy
-#		proxy tower and refresh the ui when a change is made.
-DOCKER_MACHINE_NAME ?= none
-ifeq ($(DOCKER_MACHINE_NAME),none)
-   sync-ui: node_modules clean-tmp brocolli-watcher
-else
-   sync-ui: node_modules clean-tmp
-	   tmux new-session -d -s ui_sync 'exec make brocolli-watcher'
-	   tmux rename-window 'UI Sync'
-	   tmux select-window -t ui_sync:0
-	   tmux split-window -v 'exec make browser-sync'
-	   tmux split-window -h 'exec make websocket-proxy'
-	   tmux select-layout main-vertical
-	   tmux attach-session -t ui_sync
-endif
-
-websocket-proxy:
-	docker-machine ssh $(DOCKER_MACHINE_NAME) -L 8080:localhost:8080
-
-browser-sync:
-	$(BROWSER_SYNC_BIN) start --proxy $(shell docker-machine ip $(DOCKER_MACHINE_NAME)):8013 --ws
-
-browser-sync-reload:
-	$(BROWSER_SYNC_BIN) reload
-
-brocolli-watcher: Brocfile.js testem.yml
-	$(NODE) tools/ui/timepiece.js awx/ui/static $(WATCHER_FLAGS) -- $(UI_FLAGS)
-
-# run ui unit-tests:
-#	defaults to a useful dev testing run.  Builds the ui to awx/ui/build_test
-#		and runs mocha (node.js) tests with istanbul coverage (and an html
-#		coverage report)
-#	UI_TESTS_TO_RUN=<file>-test.js: Set this to only run a specific test file
-#	CI=true: Builds the ui to awx/ui/build_test
-#		and runs mocha (node.js) tests with istanbul coverage (and a cobertura
-#		coverage report).  Also builds the ui to awx/ui/static and runs the
-#		testem (phantomjs) tests.  Outputs these to XUNIT format to be consumed
-#		and displayed in jenkins
-#	DEBUG=true: Builds the ui to awx/ui/static and runs testem tests in Chrome
-#		so you can breakpoint the tests and underlying code to figure out why
-#		tests are failing.
-#		TESTEM_DEBUG_BROWSER: the browser to run tests in, default to Chrome
-
-# TODO: deprecated past 2.4
-testjs_ci: test-ui # w var UI_TEST_MODE=CI
-
-UI_TEST_MODE ?= DEV
-ifeq ($(UI_TEST_MODE),CI)
-    # ci testing run
-    # this used to be testjs_ci, sort-of
-    REPORTER = xunit
-    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
-else
-ifeq ($(UI_TEST_MODE),DEV_DEBUG)
-    # debug (breakpoint) dev testing run
-    test-ui: build-ui-for-browser-tests test-ui-debug
-else
-    # default dev testing run
-    test-ui: .istanbul.yml build-ui-for-coverage test-ui-for-coverage
-endif
-endif
-
-# helper tasks to test ui, don't call directly
-build-ui-for-coverage: UI_FLAGS=--node-tests --no-concat --no-styles
-build-ui-for-coverage: awx/ui/build_test
-
-REPORTER ?= standard
-UI_TESTS_TO_RUN ?= all
-ifeq ($(REPORTER), xunit)
-   test-ui-for-coverage:
-	    XUNIT_FILE=reports/test-results-ui.xml NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace --reporter xunit-file $(shell find  awx/ui/build_test -name '*-test.js'); cp coverage/ui-coverage-report.xml reports/coverage-report-ui.xml
-else
-ifeq ($(UI_TESTS_TO_RUN), all)
-   test-ui-for-coverage:
-	    NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover --include-all-sources $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '*-test.js')
-else
-test-ui-for-coverage:
-	 NODE_PATH=awx/ui/build_test $(ISTANBUL_BIN) cover $(MOCHA_BIN) -- --full-trace $(shell find  awx/ui/build_test -name '$(UI_TESTS_TO_RUN)')
-endif
-endif
-
-build-ui-for-browser-tests: UI_FLAGS=--no-styles --no-compress --browser-tests --no-node-tests
-build-ui-for-browser-tests: awx/ui/static
-
-TESTEM_DEBUG_BROWSER ?= Chrome
-test-ui-debug:
-	PATH=./node_modules/.bin:$(PATH) $(TESTEM) --file testem.yml -l $(TESTEM_DEBUG_BROWSER)
-
-# lint .js files
-jshint: node_modules Gruntfile.js
-	$(GRUNT) $@
-
-# generate ui docs
-ngdocs: build-ui Gruntfile.js
-	$(GRUNT) $@
+ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
+	$(NPM_BIN) --prefix awx/ui run test:saucelabs
 
 # END UI TASKS
 # --------------------------------------
@@ -688,7 +653,7 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-dist/$(SDIST_TAR_FILE): minjs
+dist/$(SDIST_TAR_FILE): ui-release
 	BUILD="$(BUILD)" $(PYTHON) setup.py sdist
 
 sdist: dist/$(SDIST_TAR_FILE)
@@ -730,7 +695,8 @@ rpm-build:
 
 rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
-	cp packaging/rpm/$(NAME).te rpm-build/
+	cp packaging/rpm/tower.te rpm-build/
+	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
@@ -800,7 +766,9 @@ debian: deb-build/$(DEB_TAR_NAME)
 endif
 
 deb-build/$(DEB_NVR).dsc: deb-build/$(DEB_TAR_NAME)
-	cd deb-build/$(DEB_TAR_NAME) && $(DEBUILD) -S
+	cd deb-build/$(DEB_TAR_NAME) && \
+		cp debian/control.$(DEB_DIST) debian/control && \
+		$(DEBUILD) -S
 
 deb-src: deb-build/$(DEB_NVR).dsc
 	@echo "#############################################"
@@ -890,28 +858,46 @@ install:
 	export SCL_PREFIX HTTPD_SCL_PREFIX
 	$(PYTHON) setup.py install $(SETUP_INSTALL_ARGS)
 
-# Docker Compose Development environment
-docker-compose:
-	docker-compose -f tools/docker-compose.yml up --no-recreate
+docker-auth:
+	docker login -e 1234@5678.com -u oauth2accesstoken -p "$(GCLOUD_AUTH)" https://gcr.io
 
-docker-compose-test:
-	cd tools && docker-compose run --rm --service-ports tower /bin/bash
+# Docker Compose Development environment
+docker-compose: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml up --no-recreate tower
+
+docker-compose-cluster: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml up
+
+docker-compose-test: docker-auth
+	cd tools && TAG=$(COMPOSE_TAG) docker-compose run --rm --service-ports tower /bin/bash
+
+docker-compose-build:
+	docker build -t ansible/tower_devel -f tools/docker-compose/Dockerfile .
+	docker tag ansible/tower_devel gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
+	#docker push gcr.io/ansible-tower-engineering/tower_devel:$(COMPOSE_TAG)
 
 MACHINE?=default
 docker-clean:
-	rm -f awx/lib/.deps_built
 	eval $$(docker-machine env $(MACHINE))
-	docker stop $$(docker ps -a -q)
-	-docker rm $$(docker ps -f name=tools_tower -a -q)
-	-docker rmi tools_tower
+	$(foreach container_id,$(shell docker ps -f name=tools_tower -aq),docker stop $(container_id); docker rm -f $(container_id);)
+	-docker images | grep "tower_devel" | awk '{print $$1 ":" $$2}' | xargs docker rmi
 
 docker-refresh: docker-clean docker-compose
 
-mongo-debug-ui:
-	docker run -it --rm --name mongo-express --link tools_mongo_1:mongo -e ME_CONFIG_OPTIONS_EDITORTHEME=ambiance -e ME_CONFIG_BASICAUTH_USERNAME=admin -e ME_CONFIG_BASICAUTH_PASSWORD=password -p 8081:8081 knickers/mongo-express
+# Docker Development Environment with Elastic Stack Connected
+docker-compose-elk: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose.yml -f tools/elastic/docker-compose.logstash-link.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
 
-mongo-container:
-	docker run -it --link tools_mongo_1:mongo --rm mongo sh -c 'exec mongo "$MONGO_PORT_27017_TCP_ADDR:$MONGO_PORT_27017_TCP_PORT/system_tracking_dev"'
+docker-compose-cluster-elk: docker-auth
+	TAG=$(COMPOSE_TAG) docker-compose -f tools/docker-compose-cluster.yml -f tools/elastic/docker-compose.logstash-link-cluster.yml -f tools/elastic/docker-compose.elastic-override.yml up --no-recreate
+
+clean-elk:
+	docker stop tools_kibana_1
+	docker stop tools_logstash_1
+	docker stop tools_elasticsearch_1
+	docker rm tools_logstash_1
+	docker rm tools_elasticsearch_1
+	docker rm tools_kibana_1
 
 psql-container:
-	docker run -it --link tools_postgres_1:postgres --rm postgres:9.4.1 sh -c 'exec psql -h "$$POSTGRES_PORT_5432_TCP_ADDR" -p "$$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+	docker run -it --net tools_default --rm postgres:9.4.1 sh -c 'exec psql -h "postgres" -p "5432" -U postgres'

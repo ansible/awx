@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
+import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 export default {
     name: 'adHocJobStdout',
@@ -16,20 +16,12 @@ export default {
         label: "{{ job.module_name }}"
     },
     data: {
-        jobType: 'ad_hoc_commands'
-    },
-    resolve: {
-        adhocEventsSocket: ['Socket', '$rootScope', function(Socket, $rootScope) {
-            if (!$rootScope.adhoc_event_socket) {
-                $rootScope.adhoc_event_socket = Socket({
-                    scope: $rootScope,
-                    endpoint: "ad_hoc_command_events"
-                });
-                $rootScope.adhoc_event_socket.init();
-                return true;
-            } else {
-                return true;
+        jobType: 'ad_hoc_commands',
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"],
+                "ad_hoc_command_events": []
             }
-        }]
+        }
     }
 };

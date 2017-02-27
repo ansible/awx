@@ -18,10 +18,11 @@
 
 export default
     angular.module('ActivityDetailDefinition', [])
-        .value('ActivityDetailForm', {
+        .factory('ActivityDetailForm', ['i18n', function(i18n) {
+        return {
 
             name: 'activity',
-            editTitle: 'Activity Detail',
+            editTitle: i18n._('Activity Detail'),
             well: false,
             'class': 'horizontal-narrow',
             formFieldSize: 'col-lg-10',
@@ -29,17 +30,17 @@ export default
 
             fields: {
                 user: {
-                    label: "Initiated by",
+                    label: i18n._("Initiated by"),
                     type: 'text',
                     readonly: true
                 },
                 operation: {
-                    label: 'Action',
+                    label: i18n._('Action'),
                     type: 'text',
                     readonly: true
                 },
                 changes: {
-                    label: 'Changes',
+                    label: i18n._('Changes'),
                     type: 'textarea',
                     class: 'Form-textAreaLabel',
                     ngHide: "!changes || changes =='' || changes == 'null'",
@@ -47,4 +48,4 @@ export default
                 }
             }
 
-        }); //Form
+        };}]); //Form

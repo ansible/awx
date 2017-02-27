@@ -1,23 +1,120 @@
 import pytest
 import mock
+import os
 
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
+from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import PermissionDenied
 
 from awx.main.access import (
     BaseAccess,
     check_superuser,
     JobTemplateAccess,
+    WorkflowJobTemplateAccess,
     SystemJobTemplateAccess,
 )
 
+from awx.conf.license import LicenseForbids
 from awx.main.models import (
     Credential,
     Inventory,
     Project,
     Role,
     Organization,
+    Instance,
 )
+
+
+@pytest.fixture
+def user_unit():
+    return User(username='rando', password='raginrando', email='rando@redhat.com')
+
+
+class TestRelatedFieldAccess:
+    @pytest.fixture
+    def resource_good(self, mocker):
+        good_role = mocker.MagicMock(__contains__=lambda self, user: True)
+        return mocker.MagicMock(related=mocker.MagicMock(admin_role=good_role),
+                                admin_role=good_role)
+
+    @pytest.fixture
+    def resource_bad(self, mocker):
+        bad_role = mocker.MagicMock(__contains__=lambda self, user: False)
+        return mocker.MagicMock(related=mocker.MagicMock(admin_role=bad_role),
+                                admin_role=bad_role)
+
+    @pytest.fixture
+    def access(self, user_unit):
+        return BaseAccess(user_unit)
+
+    def test_new_optional_fail(self, access, resource_bad, mocker):
+        """
+        User tries to create a new resource, but lacks permission
+        to the related resource they provided
+        """
+        data = {'related': resource_bad}
+        assert not access.check_related('related', mocker.MagicMock, data)
+
+    def test_new_with_bad_data(self, access, mocker):
+        data = {'related': 3.1415}
+        with pytest.raises(ParseError):
+            access.check_related('related', mocker.MagicMock, data)
+
+    def test_new_mandatory_fail(self, access, mocker):
+        access.user.is_superuser = False
+        assert not access.check_related(
+            'related', mocker.MagicMock, {}, mandatory=True)
+        assert not access.check_related(
+            'related', mocker.MagicMock, {'resource': None}, mandatory=True)
+
+    def test_existing_no_op(self, access, resource_bad, mocker):
+        """
+        User edits a resource, but does not change related field
+        lack of access to related field does not block action
+        """
+        data = {'related': resource_bad.related}
+        assert access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+        assert access.check_related(
+            'related', mocker.MagicMock, {}, obj=resource_bad)
+
+    def test_existing_required_access(self, access, resource_bad, mocker):
+        # no-op actions, but mandatory kwarg requires check to pass
+        assert not access.check_related(
+            'related', mocker.MagicMock, {}, obj=resource_bad, mandatory=True)
+        assert not access.check_related(
+            'related', mocker.MagicMock, {'related': resource_bad.related},
+            obj=resource_bad, mandatory=True)
+
+    def test_existing_no_access_to_current(
+            self, access, resource_good, resource_bad, mocker):
+        """
+        User gives a valid related resource (like organization), but does
+        not have access to _existing_ related resource, so deny action
+        """
+        data = {'related': resource_good}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+
+    def test_existing_no_access_to_new(
+            self, access, resource_good, resource_bad, mocker):
+        data = {'related': resource_bad}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_good)
+
+    def test_existing_not_allowed_to_remove(self, access, resource_bad, mocker):
+        data = {'related': None}
+        assert not access.check_related(
+            'related', mocker.MagicMock, data, obj=resource_bad)
+
+    def test_existing_not_null_null(self, access, mocker):
+        resource = mocker.MagicMock(related=None)
+        data = {'related': None}
+        # Not changing anything by giving null when it is already-null
+        # important for PUT requests
+        assert access.check_related(
+            'related', mocker.MagicMock, data, obj=resource, mandatory=True)
 
 
 @pytest.fixture
@@ -35,9 +132,6 @@ def job_template_with_ids(job_template_factory):
         persisted=False)
     return jt_objects.job_template
 
-@pytest.fixture
-def user_unit():
-    return User(username='rando', password='raginrando', email='rando@redhat.com')
 
 def test_superuser(mocker):
     user = mocker.MagicMock(spec=User, id=1, is_superuser=True)
@@ -46,12 +140,14 @@ def test_superuser(mocker):
     can_add = check_superuser(BaseAccess.can_add)
     assert can_add(access, None) is True
 
+
 def test_not_superuser(mocker):
     user = mocker.MagicMock(spec=User, id=1, is_superuser=False)
     access = BaseAccess(user)
 
     can_add = check_superuser(BaseAccess.can_add)
     assert can_add(access, None) is False
+
 
 def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     """Assure that permission checks are not required if submitted data is
@@ -61,6 +157,7 @@ def test_jt_existing_values_are_nonsensitive(job_template_with_ids, user_unit):
     access = JobTemplateAccess(user_unit)
 
     assert access.changes_are_non_sensitive(job_template_with_ids, data)
+
 
 def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
     """Assure that can_add is called with all ForeignKeys."""
@@ -83,6 +180,7 @@ def test_change_jt_sensitive_data(job_template_with_ids, mocker, user_unit):
         'cloud_credential': job_template_with_ids.cloud_credential.id,
         'network_credential': job_template_with_ids.network_credential.id
     })
+
 
 def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
     "Assure that permissions to add scan jobs work correctly"
@@ -113,10 +211,109 @@ def test_jt_add_scan_job_check(job_template_with_ids, user_unit):
                     'job_type': 'scan'
                 })
 
+
+def mock_raise_license_forbids(self, add_host=False, feature=None, check_expiration=True):
+    raise LicenseForbids("Feature not enabled")
+
+
+def mock_raise_none(self, add_host=False, feature=None, check_expiration=True):
+    return None
+
+
+def test_jt_can_start_ha(job_template_with_ids):
+    with mock.patch.object(Instance.objects, 'active_count', return_value=2):
+        with mock.patch('awx.main.access.BaseAccess.check_license', new=mock_raise_license_forbids):
+            with pytest.raises(LicenseForbids):
+                JobTemplateAccess(user_unit).can_start(job_template_with_ids)
+
+
 def test_jt_can_add_bad_data(user_unit):
     "Assure that no server errors are returned if we call JT can_add with bad data"
     access = JobTemplateAccess(user_unit)
     assert not access.can_add({'asdf': 'asdf'})
+
+
+class TestWorkflowAccessMethods:
+    @pytest.fixture
+    def workflow(self, workflow_job_template_factory):
+        objects = workflow_job_template_factory('test_workflow', persisted=False)
+        return objects.workflow_job_template
+
+    def test_workflow_can_add(self, workflow, user_unit):
+        organization = Organization(name='test-org')
+        workflow.organization = organization
+        organization.admin_role = Role()
+
+        def mock_get_object(Class, **kwargs):
+            if Class == Organization:
+                return organization
+            else:
+                raise Exception('Item requested has not been mocked')
+
+        access = WorkflowJobTemplateAccess(user_unit)
+        with mock.patch('awx.main.models.rbac.Role.__contains__', return_value=True):
+            with mock.patch('awx.main.access.get_object_or_400', mock_get_object):
+                assert access.can_add({'organization': 1})
+
+
+class TestCheckLicense:
+    @pytest.fixture
+    def validate_enhancements_mocker(self, mocker):
+        os.environ['SKIP_LICENSE_FIXUP_FOR_TEST'] = '1'
+
+        def fn(available_instances=1, free_instances=0, host_exists=False):
+
+            class MockFilter:
+                def exists(self):
+                    return host_exists
+
+            mocker.patch('awx.main.tasks.TaskEnhancer.validate_enhancements', return_value={'free_instances': free_instances, 'available_instances': available_instances, 'date_warning': True})
+
+            mock_filter = MockFilter()
+            mocker.patch('awx.main.models.Host.objects.filter', return_value=mock_filter)
+
+        return fn
+
+    def test_check_license_add_host_duplicate(self, validate_enhancements_mocker, user_unit):
+        validate_enhancements_mocker(available_instances=1, free_instances=0, host_exists=True)
+
+        BaseAccess(None).check_license(add_host_name='blah', check_expiration=False)
+
+    def test_check_license_add_host_new_exceed_licence(self, validate_enhancements_mocker, user_unit, mocker):
+        validate_enhancements_mocker(available_instances=1, free_instances=0, host_exists=False)
+        exception = None
+
+        try:
+            BaseAccess(None).check_license(add_host_name='blah', check_expiration=False)
+        except PermissionDenied as e:
+            exception = e
+
+        assert "License count of 1 instances has been reached." == str(exception)
+
+
+def test_user_capabilities_method():
+    """Unit test to verify that the user_capabilities method will defer
+    to the appropriate sub-class methods of the access classes.
+    Note that normal output is True/False, but a string is returned
+    in these tests to establish uniqueness.
+    """
+
+    class FooAccess(BaseAccess):
+        def can_change(self, obj, data):
+            return 'bar'
+
+        def can_copy(self, obj):
+            return 'foo'
+
+    user = User(username='auser')
+    foo_access = FooAccess(user)
+    foo = object()
+    foo_capabilities = foo_access.get_user_capabilities(foo, ['edit', 'copy'])
+    assert foo_capabilities == {
+        'edit': 'bar',
+        'copy': 'foo'
+    }
+
 
 def test_system_job_template_can_start(mocker):
     user = mocker.MagicMock(spec=User, id=1, is_system_auditor=True, is_superuser=False)

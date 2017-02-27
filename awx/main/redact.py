@@ -3,6 +3,7 @@ import urlparse
 
 REPLACE_STR = '$encrypted$'
 
+
 class UriCleaner(object):
     REPLACE_STR = REPLACE_STR
     # https://regex101.com/r/sV2dO2/2
@@ -51,9 +52,12 @@ class UriCleaner(object):
 
         return redactedtext
 
+
 class PlainTextCleaner(object):
     REPLACE_STR = REPLACE_STR
 
     @staticmethod
     def remove_sensitive(cleartext, sensitive):
+        if sensitive == '':
+            return cleartext
         return re.sub(r'%s' % re.escape(sensitive), '$encrypted$', cleartext)

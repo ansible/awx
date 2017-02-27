@@ -8,10 +8,10 @@
   * off of the settings page
   */
 
-export default function(){
+export default ['i18n', function(i18n){
     return {
         name:  'notification_templates' ,
-        listTitle: 'Notification Templates',
+        listTitle: i18n._('Notification Templates'),
         iterator: 'notification_template',
         index: false,
         hover: false,
@@ -20,22 +20,22 @@ export default function(){
             status: {
                 label: '',
                 iconOnly: true,
-                searchable: false,
                 nosort: true,
                 icon: 'icon-job-{{ notification_template.status }}',
                 awPopOver: '{{ notification_template.template_status_html }}',
-                dataTitle: "Recent Notifications",
+                dataTitle: i18n._("Recent Notifications"),
                 dataPlacement: 'right',
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumn--smallStatus'
             },
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-md-3 col-sm-9 col-xs-9',
                 linkTo: '/#/notification_templates/{{notification_template.id}}'
             },
             notification_type: {
-                    label: 'Type',
+                    label: i18n._('Type'),
+                    ngBind: "notification_template.type_label",
                     searchType: 'select',
                     searchOptions: [],
                     excludeModal: true,
@@ -47,9 +47,10 @@ export default function(){
             add: {
                 mode: 'all', // One of: edit, select, all
                 ngClick: 'addNotification()',
-                awToolTip: 'Create a new custom inventory',
+                awToolTip: i18n._('Create a new notification template'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ' + i18n._('ADD'),
+                ngShow: 'canAdd'
             }
         },
 
@@ -59,27 +60,38 @@ export default function(){
             test: {
                 ngClick: "testNotification(notification_template.id)",
                 icon: 'fa-bell-o',
-                label: 'Edit',
+                label: i18n._('Edit'),
                 "class": 'btn-sm',
-                awToolTip: 'Test notification',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Test notification'),
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
             },
             edit: {
                 ngClick: "editNotification(notification_template.id)",
                 icon: 'fa-edit',
-                label: 'Edit',
+                label: i18n._('Edit'),
                 "class": 'btn-sm',
-                awToolTip: 'Edit notification',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Edit notification'),
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                ngClick: "editNotification(notification_template.id)",
+                label: i18n._('View'),
+                "class": 'btn-sm',
+                awToolTip: i18n._('View notification'),
+                dataPlacement: 'top',
+                ngShow: '!notification_template.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 ngClick: "deleteNotification(notification_template.id, notification_template.name)",
                 icon: 'fa-trash',
-                label: 'Delete',
+                label: i18n._('Delete'),
                 "class": 'btn-sm',
-                awToolTip: 'Delete notification',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Delete notification'),
+                dataPlacement: 'top',
+                ngShow: 'notification_template.summary_fields.user_capabilities.delete'
             }
         }
     };
-}
+}];

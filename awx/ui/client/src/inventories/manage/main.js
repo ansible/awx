@@ -4,7 +4,6 @@
  * All Rights Reserved
  *************************************************/
 
-import route from './inventory-manage.route';
 import InventoryManageService from './inventory-manage.service';
 import HostManageService from './hosts/hosts.service';
 import GroupManageService from './groups/groups.service';
@@ -20,9 +19,6 @@ angular.module('inventoryManage', [
         copyMove.name,
         adhoc.name
     ])
-	.service('InventoryManageService', InventoryManageService)
+    .service('InventoryManageService', InventoryManageService)
     .service('HostManageService', HostManageService)
-    .service('GroupManageService', GroupManageService)
-    .run(['$stateExtender', function($stateExtender) {
-        $stateExtender.addState(route);
-    }]);
+    .service('GroupManageService', GroupManageService);

@@ -5,45 +5,100 @@
  *************************************************/
 
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
-import controller from '../../scheduler/scheduler.controller';
+import { templateUrl } from '../../shared/template-url/template-url.factory';
+import controller from '../../scheduler/schedulerList.controller';
 import addController from '../../scheduler/schedulerAdd.controller';
 import editController from '../../scheduler/schedulerEdit.controller';
+import { N_ } from '../../i18n';
 
 export default
-    angular.module('managementJobScheduler', [])
-        .controller('managementJobController', controller)
-        .controller('managementJobAddController', addController)
-        .controller('managementJobEditController', editController)
-        .run(['$stateExtender', function($stateExtender){
-            $stateExtender.addState({
-                name: 'managementJobSchedules',
-                route: '/management_jobs/:id/schedules',
-                templateUrl: templateUrl('scheduler/scheduler'),
-                controller: 'managementJobController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobsList',
-                    label: 'SCHEDULES'
+angular.module('managementJobScheduler', [])
+    .controller('managementJobController', controller)
+    .controller('managementJobAddController', addController)
+    .controller('managementJobEditController', editController)
+    .run(['$stateExtender', function($stateExtender) {
+        $stateExtender.addState({
+            searchPrefix: 'schedule',
+            name: 'managementJobSchedules',
+            route: '/management_jobs/:id/schedules',
+            ncyBreadcrumb: {
+                parent: 'managementJobsList',
+                label: N_('SCHEDULES')
+            },
+            views: {
+                '@': {
+                    templateProvider: function(ScheduleList, generateList, ParentObject) {
+                        // include name of parent resource in listTitle
+                        ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                        let html = generateList.build({
+                            list: ScheduleList,
+                            mode: 'edit'
+                        });
+                        html = generateList.wrapPanel(html);
+                        return generateList.insertFormView() + html;
+                    },
+                    controller: 'managementJobController',
                 }
-            });
-            $stateExtender.addState({
-                name: 'managementJobSchedules.add',
-                route: '/add',
-                templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
-                controller: 'managementJobAddController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobSchedules',
-                    label: 'CREATE SCHEDULED JOB'
+            },
+            resolve: {
+                Dataset: ['ScheduleList', 'QuerySet', '$stateParams', 'GetBasePath',
+                    function(list, qs, $stateParams, GetBasePath) {
+                        let path = `${GetBasePath('system_job_templates')}${$stateParams.id}/schedules`;
+                        return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                    }
+                ],
+                ParentObject: ['$stateParams', 'Rest', 'GetBasePath', function($stateParams, Rest, GetBasePath) {
+                    let path = `${GetBasePath('system_job_templates')}${$stateParams.id}`;
+                    Rest.setUrl(path);
+                    return Rest.get(path).then((res) => res.data);
+                }],
+                UnifiedJobsOptions: ['Rest', 'GetBasePath', '$stateParams', '$q',
+                    function(Rest, GetBasePath, $stateParams, $q) {
+                        Rest.setUrl(GetBasePath('unified_jobs'));
+                        var val = $q.defer();
+                        Rest.options()
+                            .then(function(data) {
+                                val.resolve(data.data);
+                            }, function(data) {
+                                val.reject(data);
+                            });
+                        return val.promise;
+                    }],
+                ScheduleList: ['SchedulesList', 'GetBasePath', '$stateParams',
+                    (SchedulesList, GetBasePath, $stateParams) => {
+                        let list = _.cloneDeep(SchedulesList);
+                        list.basePath = GetBasePath('system_job_templates') + $stateParams.id + '/schedules';
+                        return list;
+                    }
+                ]
+            }
+        });
+        $stateExtender.addState({
+            name: 'managementJobSchedules.add',
+            route: '/add',
+            ncyBreadcrumb: {
+                parent: 'managementJobSchedules',
+                label: N_('CREATE SCHEDULED JOB')
+            },
+            views: {
+                'form': {
+                    templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
+                    controller: 'managementJobAddController',
                 }
-            });
-            $stateExtender.addState({
-                name: 'managementJobSchedules.edit',
-                route: '/edit/:schedule_id',
-                templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
-                controller: 'managementJobEditController',
-                ncyBreadcrumb: {
-                    parent: 'managementJobSchedules',
-                    label: 'EDIT SCHEDULED JOB'
+            }
+        });
+        $stateExtender.addState({
+            name: 'managementJobSchedules.edit',
+            route: '/edit/:schedule_id',
+            ncyBreadcrumb: {
+                parent: 'managementJobSchedules',
+                label: N_('EDIT SCHEDULED JOB')
+            },
+            views: {
+                'form': {
+                    templateUrl: templateUrl('management-jobs/scheduler/schedulerForm'),
+                    controller: 'managementJobEditController'
                 }
-            });
-        }]);
+            }
+        });
+    }]);

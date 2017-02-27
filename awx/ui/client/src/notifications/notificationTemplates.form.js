@@ -10,86 +10,96 @@
  * @description This form is for adding/editing an organization
 */
 
-export default function() {
+export default ['i18n', function(i18n) {
     return {
 
-        addTitle: 'New Notification Template',
+        addTitle: i18n._('New Notification Template'),
         editTitle: '{{ name }}',
         name: 'notification_template',
+        // I18N for "CREATE NOTIFICATION_TEMPLATE"
+        // on /#/notification_templates/add
+        breadcrumbName: i18n._('NOTIFICATION TEMPLATE'),
+        stateTree: 'notifications',
+        basePath: 'notification_templates',
         showActions: true,
         subFormTitles: {
-            typeSubForm: 'Type Details',
+            typeSubForm: i18n._('Type Details'),
         },
+
 
         fields: {
             name: {
-                label: 'Name',
+                label: i18n._('Name'),
                 type: 'text',
-                addRequired: true,
-                editRequired: true,
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+                required: true,
                 capitalize: false
             },
             description: {
-                label: 'Description',
+                label: i18n._('Description'),
                 type: 'text',
-                addRequired: false,
-                editRequired: false
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             organization: {
-                label: 'Organization',
+                label: i18n._('Organization'),
                 type: 'lookup',
+                list: 'OrganizationList',
+                basePath: 'organizations',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                ngClick: 'lookUpOrganization()',
                 awRequiredWhen: {
                     reqExpression: "organizationrequired",
                     init: "true"
-                }
+                },
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notification_type: {
-                label:  'Type',
+                label:  i18n._('Type'),
                 type: 'select',
-                addRequired: true,
-                editRequired: true,
+                required: true,
                 class: 'NotificationsForm-typeSelect',
                 ngOptions: 'type.label for type in notification_type_options track by type.value',
                 ngChange: 'typeChange()',
-                hasSubForm: true
+                hasSubForm: true,
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             username: {
-                label: 'Username',
+                label: i18n._('Username'),
                 type: 'text',
                 ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
 
             host: {
-                label: 'Host',
+                label: i18n._('Host'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             sender: {
-                label: 'Sender Email',
+                label: i18n._('Sender Email'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "email_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             recipients: {
-                label: 'Recipient List',
+                label: i18n._('Recipient List'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line.</p>'+
-                            '<p>For example:<br>alias1@email.com<br>\n alias2@email.com<br>\n',
-                dataTitle: 'Recipient List',
+                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>alias1@email.com<br>\n alias2@email.com<br>\n',
+                dataTitle: i18n._('Recipient List'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -97,7 +107,8 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             password: {
                 labelBind: 'passwordLabel',
@@ -108,7 +119,8 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             port: {
                 labelBind: 'portLabel',
@@ -122,15 +134,16 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'email' || notification_type.value == 'irc'",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             channels: {
-                label: 'Destination Channels',
+                label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -138,15 +151,16 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'slack'",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             rooms: {
-                label: 'Destination Channels',
+                label: i18n._('Destination Channels'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>engineering<br>\n #support<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>engineering<br>\n #support<br>\n',
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -154,7 +168,8 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat'",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             token: {
                 labelBind: 'tokenLabel',
@@ -165,10 +180,11 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'slack' || notification_type.value == 'pagerduty' || notification_type.value == 'hipchat'",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_token: {
-                label: 'Account Token',
+                label: i18n._('Account Token'),
                 type: 'sensitive',
                 hasShowInputButton: true,
                 awRequiredWhen: {
@@ -176,27 +192,29 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             from_number: {
-                label: 'Source Phone Number',
+                label: i18n._('Source Phone Number'),
                 type: 'text',
-                awPopOver: '<p>Number associated with the "Messaging Service" in Twilio.</p>'+
-                            '<p>This must be of the form <code>+18005550199</code>.</p>',
+                awPopOver: '<p>' + i18n._('Number associated with the "Messaging Service" in Twilio.') + '</p>'+
+                            '<p>' + i18n.sprintf(i18n._('This must be of the form %s.'), '<code>+18005550199</code>') + '</p>',
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             to_numbers: {
-                label: 'Destination SMS Number',
+                label: i18n._('Destination SMS Number'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line.</p>'+
-                            '<p>For example:<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
-                dataTitle: 'Destination SMS Number',
+                awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
+                dataTitle: i18n._('Destination SMS Number'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -204,57 +222,63 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             account_sid: {
-                label: 'Account SID',
+                label: i18n._('Account SID'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "twilio_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'twilio' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             subdomain: {
-                label: 'Pagerduty subdomain',
+                label: i18n._('Pagerduty subdomain'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             service_key: {
-                label: 'API Service/Integration Key',
+                label: i18n._('API Service/Integration Key'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             client_name: {
-                label: 'Client Identifier',
+                label: i18n._('Client Identifier'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "pagerduty_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'pagerduty' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             message_from: {
-                label: 'Label to be shown with notification',
+                label: i18n._('Label to be shown with notification'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             api_url: {
                 label: 'API URL',
@@ -265,47 +289,52 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             color: {
-                label: 'Notification Color',
+                label: i18n._('Notification Color'),
                 type: 'text',
-                awPopOver: '<p>Color can be one of <code>yellow</code>, <code>green</code>, <code>red</code>, ' +
-                           '<code>purple</code>, <code>gray</code>, or <code>random</code>.\n',
+                awPopOver: '<p>' + i18n.sprintf(i18n._('Color can be one of %s.'), '<code>yellow</code>, <code>green</code>, <code>red</code>, ' +
+                           '<code>purple</code>, <code>gray</code>, <code>random</code>') + '\n',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'hipchat' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             notify: {
-                label: 'Notify Channel',
+                label: i18n._('Notify Channel'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'hipchat' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             url: {
-                label: 'Target URL',
+                label: i18n._('Target URL'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'webhook' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             headers: {
-                label: 'HTTP Headers',
+                label: i18n._('HTTP Headers'),
                 type: 'textarea',
+                name: 'headers',
                 rows: 5,
                 'class': 'Form-formGroup--fullWidth',
                 awRequiredWhen: {
                     reqExpression: "webhook_required",
                     init: "false"
                 },
-                awPopOver: '<p>Specify HTTP Headers in JSON format</p>' +
-                           '<p>For example:<br><pre>\n' +
+                awPopOver: '<p>' + i18n._('Specify HTTP Headers in JSON format') + '</p>' +
+                           '<p>' + i18n._('For example:') + '<br><pre>\n' +
                            '{\n' +
                            '  "X-Auth-Token": "828jf0",\n' +
                            '  "X-Ansible": "Is great!"\n' +
@@ -313,35 +342,38 @@ export default function() {
                            '</pre></p>',
                 dataPlacement: 'right',
                 ngShow: "notification_type.value == 'webhook' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             server: {
-                label: 'IRC Server Address',
+                label: i18n._('IRC Server Address'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "irc_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             nickname: {
-                label: 'IRC Nick',
+                label: i18n._('IRC Nick'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "irc_required",
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             targets: {
-                label: 'Destination Channels or Users',
+                label: i18n._('Destination Channels or Users'),
                 type: 'textarea',
                 rows: 3,
-                awPopOver: '<p>Type an option on each line. The pound symbol (#) is not required.</p>'+
-                            '<p>For example:<br>#support or support<br>\n @username or username<br>\n',
-                dataTitle: 'Destination Channels',
+                awPopOver: '<p>' + i18n._('Type an option on each line. The pound symbol (#) is not required.') + '</p>'+
+                            '<p>' + i18n._('For example:') + '<br>' + i18n.sprintf(i18n._('%s or %s'), '#support', 'support') + '<br>\n ' + i18n.sprintf(i18n._('%s or %s'), '@username', 'username') + '<br>\n',
+                dataTitle: i18n._('Destination Channels'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -349,31 +381,33 @@ export default function() {
                     init: "false"
                 },
                 ngShow: "notification_type.value == 'irc' ",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             use_ssl: {
-                label: 'SSL Connection',
+                label: i18n._('SSL Connection'),
                 type: 'checkbox',
                 ngShow: "notification_type.value == 'irc'",
-                subForm: 'typeSubForm'
+                subForm: 'typeSubForm',
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            checkbox_group: {
-                label: 'Options',
-                type: 'checkbox_group',
+            email_options: {
+                label: i18n._('Options'),
+                type: 'radio_group',
                 subForm: 'typeSubForm',
                 ngShow: "notification_type.value == 'email'",
-                fields: [{
-                    name: 'use_tls',
-                    label: 'Use TLS',
-                    type: 'checkbox',
+                ngChange: "emailOptionsChange()",
+                ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)',
+                options: [{
+                    value: 'use_tls',
+                    label: i18n._('Use TLS'),
                     ngShow: "notification_type.value == 'email' ",
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'NotificationsForm-radioButtons'
                 }, {
-                    name: 'use_ssl',
-                    label: 'Use SSL',
-                    type: 'checkbox',
+                    value: 'use_ssl',
+                    label: i18n._('Use SSL'),
                     ngShow: "notification_type.value == 'email'",
-                    labelClass: 'checkbox-options stack-inline'
+                    labelClass: 'NotificationsForm-radioButtons'
                 }]
             }
         },
@@ -381,11 +415,17 @@ export default function() {
         buttons: { //for now always generates <button> tags
             cancel: {
                 ngClick: 'formCancel()',
+                ngShow: '(notification_template.summary_fields.user_capabilities.edit || canAdd)'
+            },
+            close: {
+                ngClick: 'formCancel()',
+                ngShow: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
             save: {
-                ngClick: 'formSave()', //$scope.function to call on click, optional
+                ngClick: 'formSave()',
+                ngShow: '(notification_template.summary_fields.user_capabilities.edit || canAdd)', //$scope.function to call on click, optional
                 ngDisabled: true //Disable when $pristine or $invalid, optional
             }
         }
     };
-}
+}];

@@ -9,9 +9,11 @@ from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ForeignObjectRel
+from django.db.models.fields.related import ForeignObjectRel, ManyToManyField, ForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import force_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -19,12 +21,15 @@ from rest_framework.filters import BaseFilterBackend
 
 # Ansible Tower
 from awx.main.utils import get_type_for_model, to_python_boolean
+from awx.main.models.rbac import RoleAncestorEntry
+
 
 class MongoFilterBackend(BaseFilterBackend):
 
     # FIX: Note that MongoEngine can't use the filter backends from DRF
     def filter_queryset(self, request, queryset, view):
         return queryset
+
 
 class TypeFilterBackend(BaseFilterBackend):
     '''
@@ -62,6 +67,7 @@ class TypeFilterBackend(BaseFilterBackend):
             # Return a 400 for invalid field names.
             raise ParseError(*e.args)
 
+
 class FieldLookupBackend(BaseFilterBackend):
     '''
     Filter using field lookups provided via query string parameters.
@@ -73,7 +79,7 @@ class FieldLookupBackend(BaseFilterBackend):
     SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
                          'startswith', 'istartswith', 'endswith', 'iendswith',
                          'regex', 'iregex', 'gt', 'gte', 'lt', 'lte', 'in',
-                         'isnull')
+                         'isnull', 'search')
 
     def get_field_from_lookup(self, model, lookup):
         field = None
@@ -84,8 +90,8 @@ class FieldLookupBackend(BaseFilterBackend):
         # those lookups combined with request.user.get_queryset(Model) to make
         # sure user cannot query using objects he could not view.
         new_parts = []
-        for n, name in enumerate(parts[:-1]):
 
+        for name in parts[:-1]:
             # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
             if model._meta.object_name in ('Project', 'InventorySource'):
                 name = {
@@ -95,15 +101,28 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
-            new_parts.append(name)
+            if name == 'type' and 'polymorphic_ctype' in model._meta.get_all_field_names():
+                name = 'polymorphic_ctype'
+                new_parts.append('polymorphic_ctype__model')
+            else:
+                new_parts.append(name)
 
-            
             if name in getattr(model, 'PASSWORD_FIELDS', ()):
-                raise PermissionDenied('Filtering on password fields is not allowed.')
+                raise PermissionDenied(_('Filtering on password fields is not allowed.'))
             elif name == 'pk':
                 field = model._meta.pk
             else:
-                field = model._meta.get_field_by_name(name)[0]
+                name_alt = name.replace("_", "")
+                if name_alt in model._meta.fields_map.keys():
+                    field = model._meta.fields_map[name_alt]
+                    new_parts.pop()
+                    new_parts.append(name_alt)
+                else:
+                    field = model._meta.get_field_by_name(name)[0]
+                if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
+                elif getattr(field, '__prevent_search__', False):
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
             model = getattr(field, 'related_model', None) or field.model
 
         if parts:
@@ -123,14 +142,20 @@ class FieldLookupBackend(BaseFilterBackend):
             return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
-        elif isinstance(field, ForeignObjectRel):
+        elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
             return self.to_python_related(value)
         else:
             return field.to_python(value)
 
     def value_to_python(self, model, lookup, value):
         field, new_lookup = self.get_field_from_lookup(model, lookup)
-        if new_lookup.endswith('__isnull'):
+
+        # Type names are stored without underscores internally, but are presented and
+        # and serialized over the API containing underscores so we remove `_`
+        # for polymorphic_ctype__model lookups.
+        if new_lookup.startswith('polymorphic_ctype__model'):
+            value = value.replace('_','')
+        elif new_lookup.endswith('__isnull'):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []
@@ -144,6 +169,15 @@ class FieldLookupBackend(BaseFilterBackend):
                 re.compile(value)
             except re.error as e:
                 raise ValueError(e.args[0])
+        elif new_lookup.endswith('__search'):
+            related_model = getattr(field, 'related_model', None)
+            if not related_model:
+                raise ValueError('%s is not searchable' % new_lookup[:-8])
+            new_lookups = []
+            for rm_field in related_model._meta.fields:
+                if rm_field.name in ('username', 'first_name', 'last_name', 'email', 'name', 'description'):
+                    new_lookups.append('{}__{}__icontains'.format(new_lookup[:-8], rm_field.name))
+            return value, new_lookups
         else:
             value = self.value_to_python_for_field(field, value)
         return value, new_lookup
@@ -155,6 +189,8 @@ class FieldLookupBackend(BaseFilterBackend):
             and_filters = []
             or_filters = []
             chain_filters = []
+            role_filters = []
+            search_filters = []
             for key, values in request.query_params.lists():
                 if key in self.RESERVED_NAMES:
                     continue
@@ -170,6 +206,21 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key.endswith('__int'):
                     key = key[:-5]
                     q_int = True
+
+                # RBAC filtering
+                if key == 'role_level':
+                    role_filters.append(values[0])
+                    continue
+
+                # Search across related objects.
+                if key.endswith('__search'):
+                    for value in values:
+                        for search_term in force_text(value).replace(',', ' ').split():
+                            search_value, new_keys = self.value_to_python(queryset.model, key, search_term)
+                            assert isinstance(new_keys, list)
+                            for new_key in new_keys:
+                                search_filters.append((new_key, search_value))
+                    continue
 
                 # Custom chain__ and or__ filters, mutually exclusive (both can
                 # precede not__).
@@ -201,13 +252,21 @@ class FieldLookupBackend(BaseFilterBackend):
                         and_filters.append((q_not, new_key, value))
 
             # Now build Q objects for database query filter.
-            if and_filters or or_filters or chain_filters:
+            if and_filters or or_filters or chain_filters or role_filters or search_filters:
                 args = []
                 for n, k, v in and_filters:
                     if n:
                         args.append(~Q(**{k:v}))
                     else:
                         args.append(Q(**{k:v}))
+                for role_name in role_filters:
+                    args.append(
+                        Q(pk__in=RoleAncestorEntry.objects.filter(
+                            ancestor__in=request.user.roles.all(),
+                            content_type_id=ContentType.objects.get_for_model(queryset.model).id,
+                            role_field=role_name
+                        ).values_list('object_id').distinct())
+                    )
                 if or_filters:
                     q = Q()
                     for n,k,v in or_filters:
@@ -215,6 +274,11 @@ class FieldLookupBackend(BaseFilterBackend):
                             q |= ~Q(**{k:v})
                         else:
                             q |= Q(**{k:v})
+                    args.append(q)
+                if search_filters:
+                    q = Q()
+                    for k,v in search_filters:
+                        q |= Q(**{k:v})
                     args.append(q)
                 for n,k,v in chain_filters:
                     if n:
@@ -224,10 +288,11 @@ class FieldLookupBackend(BaseFilterBackend):
                     queryset = queryset.filter(q)
                 queryset = queryset.filter(*args).distinct()
             return queryset
-        except (FieldError, FieldDoesNotExist, ValueError) as e:
+        except (FieldError, FieldDoesNotExist, ValueError, TypeError) as e:
             raise ParseError(e.args[0])
         except ValidationError as e:
             raise ParseError(e.messages)
+
 
 class OrderByBackend(BaseFilterBackend):
     '''

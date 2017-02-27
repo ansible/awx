@@ -94,10 +94,10 @@ export default
             },
 
             issuePendoIdentity: function () {
-                var config,
-                    options,
+                var options,
                     c = ConfigService.get(),
-                config = c.license_info;
+                    config = c.license_info;
+
                 config.analytics_status = c.analytics_status;
                 config.version = c.version;
                 config.ansible_version = c.ansible_version;
@@ -114,7 +114,7 @@ export default
                     });
                 }
                 else {
-                    $log.debug('Pendo is turned off.')
+                    $log.debug('Pendo is turned off.');
                 }
              }
         };

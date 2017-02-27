@@ -30,13 +30,12 @@ export default
                 item: '=item'
             },
             require: '^multiSelectList',
-            template: '<input type="checkbox" data-multi-select-list-item ng-model="isSelected" ng-change="userInteractionSelect()">',
+            template: '<input type="checkbox" data-multi-select-list-item ng-model="item.isSelected" ng-click="userInteractionSelect()">',
             link: function(scope, element, attrs, multiSelectList) {
 
                 scope.decoratedItem = multiSelectList.registerItem(scope.item);
-                scope.isSelected = scope.decoratedItem.isSelected ? true : false;
 
-                scope.$watch('isSelected', function(value) {
+                scope.$watch('item.isSelected', function(value) {
                     if (value === true) {
                         multiSelectList.selectItem(scope.decoratedItem);
                     } else if (value === false) {

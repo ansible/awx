@@ -4,8 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default [
-function () {
+export default ['i18n',
+function (i18n) {
     return{
         getDetailFields: function(type) {
             var obj = {};
@@ -24,20 +24,20 @@ function () {
             obj.room_required = false;
             switch (type) {
                 case 'email':
-                    obj.portLabel = ' Port';
-                    obj.passwordLabel = ' Password';
+                    obj.portLabel = ' ' + i18n._('Port');
+                    obj.passwordLabel = ' ' + i18n._('Password');
                     obj.email_required = true;
                     obj.port_required = true;
                     obj.password_required = false;
                     break;
                 case 'slack':
-                    obj.tokenLabel =' Token';
+                    obj.tokenLabel =' ' + i18n._('Token');
                     obj.slack_required = true;
                     obj.token_required = true;
                     obj.channel_required = true;
                     break;
                 case 'hipchat':
-                    obj.tokenLabel = ' Token';
+                    obj.tokenLabel = ' ' + i18n._('Token');
                     obj.hipchat_required = true;
                     obj.room_required = true;
                     obj.token_required = true;
@@ -49,13 +49,13 @@ function () {
                     obj.webhook_required = true;
                     break;
                 case 'pagerduty':
-                    obj.tokenLabel = ' API Token';
+                    obj.tokenLabel = ' ' + i18n._('API Token');
                     obj.pagerduty_required = true;
                     obj.token_required = true;
                     break;
                 case 'irc':
-                    obj.portLabel = ' IRC Server Port';
-                    obj.passwordLabel = ' IRC Server Password';
+                    obj.portLabel = ' ' + i18n._('IRC Server Port');
+                    obj.passwordLabel = ' ' + i18n._('IRC Server Password');
                     obj.irc_required = true;
                     obj.password_required = true;
                     obj.port_required = true;

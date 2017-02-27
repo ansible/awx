@@ -4,11 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-import {ManageHostsAdd, ManageHostsEdit} from './hosts.route';
+import HostsAddController from './hosts-add.controller';
+import HostsEditController from './hosts-edit.controller';
 
 export default
-    angular.module('manageHosts', [])
-    	.run(['$stateExtender', function($stateExtender){
-    		$stateExtender.addState(ManageHostsAdd);
-    		$stateExtender.addState(ManageHostsEdit);
-    	}]);
+angular.module('manageHosts', [])
+    .controller('HostsAddController', HostsAddController)
+    .controller('HostEditController', HostsEditController);

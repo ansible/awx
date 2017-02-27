@@ -12,24 +12,26 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_str, smart_text
+from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now, make_aware, get_default_timezone
 
 # AWX
-from awx.lib.compat import slugify
 from awx.main.models.base import * # noqa
-from awx.main.models.jobs import Job
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin,
+)
 from awx.main.models.unified_jobs import * # noqa
 from awx.main.models.mixins import ResourceMixin
 from awx.main.utils import update_scm_url
 from awx.main.fields import ImplicitRoleField
-from awx.main.conf import tower_settings
 from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_ADMINISTRATOR,
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
+from awx.main.fields import JSONField
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -76,12 +78,14 @@ class ProjectOptions(models.Model):
         blank=True,
         default='',
         verbose_name=_('SCM Type'),
+        help_text=_("Specifies the source control system used to store the project."),
     )
     scm_url = models.CharField(
         max_length=1024,
         blank=True,
         default='',
         verbose_name=_('SCM URL'),
+        help_text=_("The location where the project is stored."),
     )
     scm_branch = models.CharField(
         max_length=256,
@@ -92,9 +96,11 @@ class ProjectOptions(models.Model):
     )
     scm_clean = models.BooleanField(
         default=False,
+        help_text=_('Discard any local changes before syncing the project.'),
     )
     scm_delete_on_update = models.BooleanField(
         default=False,
+        help_text=_('Delete the project before syncing.'),
     )
     credential = models.ForeignKey(
         'Credential',
@@ -103,6 +109,11 @@ class ProjectOptions(models.Model):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+    )
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+        help_text=_("The amount of time to run before the task is canceled."),
     )
 
     def clean_scm_type(self):
@@ -116,10 +127,10 @@ class ProjectOptions(models.Model):
             scm_url = update_scm_url(self.scm_type, scm_url,
                                      check_special_cases=False)
         except ValueError as e:
-            raise ValidationError((e.args or ('Invalid SCM URL.',))[0])
+            raise ValidationError((e.args or (_('Invalid SCM URL.'),))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
         if self.scm_type and not any(scm_url_parts):
-            raise ValidationError('SCM URL is required.')
+            raise ValidationError(_('SCM URL is required.'))
         return unicode(self.scm_url or '')
 
     def clean_credential(self):
@@ -128,7 +139,7 @@ class ProjectOptions(models.Model):
         cred = self.credential
         if cred:
             if cred.kind != 'scm':
-                raise ValidationError("Credential kind must be 'scm'.")
+                raise ValidationError(_("Credential kind must be 'scm'."))
             try:
                 scm_url = update_scm_url(self.scm_type, self.scm_url,
                                          check_special_cases=False)
@@ -143,7 +154,7 @@ class ProjectOptions(models.Model):
                     update_scm_url(self.scm_type, self.scm_url, scm_username,
                                    scm_password)
                 except ValueError as e:
-                    raise ValidationError((e.args or ('Invalid credential.',))[0])
+                    raise ValidationError((e.args or (_('Invalid credential.'),))[0])
             except ValueError:
                 pass
         return cred
@@ -215,10 +226,30 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     )
     scm_update_on_launch = models.BooleanField(
         default=False,
+        help_text=_('Update the project when a job is launched that uses the project.'),
     )
     scm_update_cache_timeout = models.PositiveIntegerField(
         default=0,
         blank=True,
+        help_text=_('The number of seconds after the last project update ran that a new'
+                    'project update will be launched as a job dependency.'),
+    )
+
+    scm_revision = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+        verbose_name=_('SCM Revision'),
+        help_text=_('The last revision fetched by a project update'),
+    )
+
+    playbook_files = JSONField(
+        blank=True,
+        default=[],
+        editable=False,
+        verbose_name=_('Playbook Files'),
+        help_text=_('List of playbooks found in the project'),
     )
 
     admin_role = ImplicitRoleField(parent_role=[
@@ -249,7 +280,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'local_path', 'scm_type', 'scm_url',
                 'scm_branch', 'scm_clean', 'scm_delete_on_update',
-                'credential', 'schedule']
+                'credential', 'schedule', 'timeout', 'launch_type',]
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -292,10 +323,6 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
             # inherit the child job status on failure
             elif self.last_job_failed:
                 return self.last_job.status
-            # Even on a successful child run, a missing project path overides
-            # the successful status
-            elif not self.get_project_path():
-                return 'missing'
             # Return the successful status
             else:
                 return self.last_job.status
@@ -373,7 +400,7 @@ class Project(UnifiedJobTemplate, ProjectOptions, ResourceMixin):
         return reverse('api:project_detail', args=(self.pk,))
 
 
-class ProjectUpdate(UnifiedJob, ProjectOptions):
+class ProjectUpdate(UnifiedJob, ProjectOptions, JobNotificationMixin):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -388,6 +415,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         editable=False,
     )
 
+    job_type = models.CharField(
+        max_length=64,
+        choices=PROJECT_UPDATE_JOB_TYPE_CHOICES,
+        default='check',
+    )
+
     @classmethod
     def _get_parent_field_name(cls):
         return 'project'
@@ -396,6 +429,9 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
     def _get_task_class(cls):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
+
+    def _global_timeout_setting(self):
+        return 'DEFAULT_PROJECT_UPDATE_TIMEOUT'
 
     def is_blocked_by(self, obj):
         if type(obj) == ProjectUpdate:
@@ -406,8 +442,10 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
                 return True
         return False
 
-    def socketio_emit_data(self):
-        return dict(project_id=self.project.id)
+    def websocket_emit_data(self):
+        websocket_data = super(ProjectUpdate, self).websocket_emit_data()
+        websocket_data.update(dict(project_id=self.project.id))
+        return websocket_data
 
     @property
     def task_impact(self):
@@ -431,11 +469,11 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
         return reverse('api:project_update_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urlparse.urljoin(tower_settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
+        return urlparse.urljoin(settings.TOWER_URL_BASE, "/#/scm_update/{}".format(self.pk))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
-        if parent_instance:
+        if parent_instance and self.job_type == 'check':
             update_fields = self._update_parent_instance_no_save(parent_instance)
             if self.status in ('successful', 'failed', 'error', 'canceled'):
                 if not self.failed and parent_instance.scm_delete_on_next_update:
@@ -443,3 +481,12 @@ class ProjectUpdate(UnifiedJob, ProjectOptions):
                     if 'scm_delete_on_next_update' not in update_fields:
                         update_fields.append('scm_delete_on_next_update')
             parent_instance.save(update_fields=update_fields)
+
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.project.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Project Update"

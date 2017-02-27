@@ -12,8 +12,6 @@ import sys
 import tempfile
 import time
 import urllib
-from multiprocessing import Process
-from subprocess import Popen
 import re
 import mock
 
@@ -24,16 +22,15 @@ import yaml
 import django.test
 from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.test.client import Client
 from django.test.utils import override_settings
 from django.utils.encoding import force_text
 
 # AWX
 from awx.main.models import * # noqa
-from awx.main.management.commands.run_callback_receiver import CallbackReceiver
-from awx.main.management.commands.run_task_system import run_taskmanager
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import get_ansible_version
-from awx.main.task_engine import TaskEngager as LicenseWriter
 from awx.sso.backends import LDAPSettings
 from awx.main.tests.URI import URI # noqa
 
@@ -44,9 +41,10 @@ TEST_PLAYBOOK = '''- hosts: mygroup
     command: test 1 = 1
 '''
 
+
 class QueueTestMixin(object):
     def start_queue(self):
-        self.start_redis()
+        self.start_rabbit()
         receiver = CallbackReceiver()
         self.queue_process = Process(target=receiver.run_subscriber,
                                      args=(False,))
@@ -55,18 +53,20 @@ class QueueTestMixin(object):
     def terminate_queue(self):
         if hasattr(self, 'queue_process'):
             self.queue_process.terminate()
-        self.stop_redis()
+        self.stop_rabbit()
 
-    def start_redis(self):
+    def start_rabbit(self):
         if not getattr(self, 'redis_process', None):
             # Centos 6.5 redis is runnable by non-root user but is not in a normal users path by default
             env = dict(os.environ)
             env['PATH'] = '%s:/usr/sbin/' % env['PATH']
-            self.redis_process = Popen('echo "port 16379" | redis-server - > /dev/null',
+            env['RABBITMQ_NODENAME'] = 'towerunittest'
+            env['RABBITMQ_NODE_PORT'] = '55672'
+            self.redis_process = Popen('rabbitmq-server > /dev/null',
                                        shell=True, executable='/bin/bash',
                                        env=env)
 
-    def stop_redis(self):
+    def stop_rabbit(self):
         if getattr(self, 'redis_process', None):
             self.redis_process.kill()
             self.redis_process = None
@@ -84,14 +84,18 @@ class QueueStartStopTestMixin(QueueTestMixin):
         super(QueueStartStopTestMixin, self).tearDown()
         self.terminate_queue()
 
+
 class MockCommonlySlowTestMixin(object):
     def __init__(self, *args, **kwargs):
         from awx.api import generics
         mock.patch.object(generics, 'get_view_description', return_value=None).start()
         super(MockCommonlySlowTestMixin, self).__init__(*args, **kwargs)
 
+
 ansible_version = get_ansible_version()
-class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
+
+
+class BaseTestMixin(MockCommonlySlowTestMixin):
     '''
     Mixin with shared code for use by all test cases.
     '''
@@ -129,17 +133,9 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         # Set flag so that task chain works with unit tests.
         settings.CELERY_UNIT_TEST = True
         settings.SYSTEM_UUID='00000000-0000-0000-0000-000000000000'
-        settings.BROKER_URL='redis://localhost:16379/'
+        settings.BROKER_URL='redis://localhost:55672/'
+        settings.CALLBACK_QUEUE = 'callback_tasks_unit'
 
-        # Create unique random consumer and queue ports for zeromq callback.
-        if settings.CALLBACK_CONSUMER_PORT:
-            callback_port = random.randint(55700, 55799)
-            settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
-            os.environ['CALLBACK_CONSUMER_PORT'] = settings.CALLBACK_CONSUMER_PORT
-            callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
-            self._temp_paths.append(callback_queue_path)
-            settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
-            settings.TASK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
         # Disable socket notifications for unit tests.
         settings.SOCKETIO_NOTIFICATION_PORT = None
         # Make temp job status directory for unit tests.
@@ -152,6 +148,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
                 'LOCATION': 'unittests'
             }
         }
+        cache.clear()
         self._start_time = time.time()
 
     def tearDown(self):
@@ -181,34 +178,26 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         rnd_str = '____' + str(random.randint(1, 9999999))
         return __name__ + '-generated-' + string + rnd_str
 
-    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features=None):
-        writer = LicenseWriter(
+    def create_test_license_file(self, instance_count=10000, license_date=int(time.time() + 3600), features={}):
+        settings.LICENSE = TaskEnhancer(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
             license_type='enterprise',
-            features=features)
-        handle, license_path = tempfile.mkstemp(suffix='.json')
-        os.close(handle)
-        writer.write_file(license_path)
-        self._temp_paths.append(license_path)
-        os.environ['AWX_LICENSE_FILE'] = license_path
+            features=features,
+        ).enhance()
 
     def create_basic_license_file(self, instance_count=100, license_date=int(time.time() + 3600)):
-        writer = LicenseWriter(
+        settings.LICENSE = TaskEnhancer(
             company_name='AWX',
             contact_name='AWX Admin',
             contact_email='awx@example.com',
             license_date=license_date,
             instance_count=instance_count,
-            license_type='basic')
-        handle, license_path = tempfile.mkstemp(suffix='.json')
-        os.close(handle)
-        writer.write_file(license_path)
-        self._temp_paths.append(license_path)
-        os.environ['AWX_LICENSE_FILE'] = license_path
+            license_type='basic',
+        ).enhance()
 
     def create_expired_license_file(self, instance_count=1000, grace_period=False):
         license_date = time.time() - 1
@@ -392,7 +381,7 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
         return cred
 
     def setup_instances(self):
-        instance = Instance(uuid=settings.SYSTEM_UUID, primary=True, hostname='127.0.0.1')
+        instance = Instance(uuid=settings.SYSTEM_UUID, hostname='127.0.0.1')
         instance.save()
 
     def setup_users(self, just_super_user=False):
@@ -692,27 +681,18 @@ class BaseTestMixin(QueueTestMixin, MockCommonlySlowTestMixin):
                              job.result_traceback)
 
 
-    def start_taskmanager(self, command_port):
-        self.start_redis()
-        self.taskmanager_process = Process(target=run_taskmanager,
-                                           args=(command_port,))
-        self.taskmanager_process.start()
-
-    def terminate_taskmanager(self):
-        if hasattr(self, 'taskmanager_process'):
-            self.taskmanager_process.terminate()
-        self.stop_redis()
-
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.
     '''
+
 
 class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
     '''
     Base class for tests requiring transactions (or where the test database
     needs to be accessed by subprocesses).
     '''
+
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
@@ -725,11 +705,12 @@ class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
         super(BaseLiveServerTest, self).setUp()
         settings.INTERNAL_API_URL = self.live_server_url
 
+
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local',
                    DEBUG=True)
-class BaseJobExecutionTest(QueueStartStopTestMixin, BaseLiveServerTest):
+class BaseJobExecutionTest(BaseLiveServerTest):
     '''
     Base class for celery task tests.
     '''

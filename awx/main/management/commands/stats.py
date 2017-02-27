@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 # AWX
 from awx.main.models import * # noqa
 
+
 class Command(BaseCommand):
     '''
     Emits some simple statistics suitable for external monitoring

@@ -4,9 +4,6 @@
 # Python
 import logging
 
-# Django
-from django.http import Http404
-
 # Django REST Framework
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework import permissions
@@ -19,7 +16,8 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission']
+           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',]
+
 
 class ModelAccessPermission(permissions.BasePermission):
     '''
@@ -49,6 +47,9 @@ class ModelAccessPermission(permissions.BasePermission):
             if not check_user_access(request.user, view.parent_model, 'read',
                                      parent_obj):
                 return False
+            if hasattr(view, 'parent_key'):
+                if not check_user_access(request.user, view.model, 'add', {view.parent_key: parent_obj.pk}):
+                    return False
             return True
         elif getattr(view, 'is_job_start', False):
             if not obj:
@@ -92,13 +93,6 @@ class ModelAccessPermission(permissions.BasePermission):
         method based on the request method.
         '''
 
-        # Check that obj (if given) is active, otherwise raise a 404.
-        active = getattr(obj, 'active', getattr(obj, 'is_active', True))
-        if callable(active):
-            active = active()
-        if not active:
-            raise Http404()
-
         # Don't allow anonymous users. 401, not 403, hence no raised exception.
         if not request.user or request.user.is_anonymous():
             return False
@@ -137,6 +131,7 @@ class ModelAccessPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view, obj)
 
+
 class JobTemplateCallbackPermission(ModelAccessPermission):
     '''
     Permission check used by job template callback view for requests from
@@ -162,6 +157,7 @@ class JobTemplateCallbackPermission(ModelAccessPermission):
         else:
             return True
 
+
 class TaskPermission(ModelAccessPermission):
     '''
     Permission checks used for API callbacks from running a task.
@@ -186,10 +182,9 @@ class TaskPermission(ModelAccessPermission):
         # token.
         if view.model == Inventory and request.method.lower() in ('head', 'get'):
             return bool(not obj or obj.pk == unified_job.inventory_id)
-        elif view.model in (JobEvent, AdHocCommandEvent) and request.method.lower() == 'post':
-            return bool(not obj or obj.pk == unified_job.pk)
         else:
             return False
+
 
 class ProjectUpdatePermission(ModelAccessPermission):
     '''
@@ -206,6 +201,10 @@ class ProjectUpdatePermission(ModelAccessPermission):
 
 class UserPermission(ModelAccessPermission):
     def check_post_permissions(self, request, view, obj=None):
-        if request.user.is_superuser:
+        if not request.data:
+            return request.user.admin_of_organizations.exists()
+        elif request.user.is_superuser:
             return True
         raise PermissionDenied()
+
+

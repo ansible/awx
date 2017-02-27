@@ -4,10 +4,12 @@ import pytest
 from awx.main.access import (
     BaseAccess,
     JobTemplateAccess,
+    ScheduleAccess
 )
 from awx.main.migrations import _rbac as rbac
 from awx.main.models import Permission
 from awx.main.models.jobs import JobTemplate
+from awx.main.models.schedules import Schedule
 from django.apps import apps
 
 from django.core.urlresolvers import reverse
@@ -19,6 +21,7 @@ def jt_objects(job_template_factory):
         'testJT', organization='org1', project='proj1', inventory='inventory1',
         credential='cred1', cloud_credential='aws1', network_credential='juniper1')
     return objects
+
 
 @pytest.mark.django_db
 def test_job_template_migration_check(credential, deploy_jobtemplate, check_jobtemplate, user):
@@ -50,6 +53,7 @@ def test_job_template_migration_check(credential, deploy_jobtemplate, check_jobt
     assert joe in check_jobtemplate.execute_role
     assert admin in deploy_jobtemplate.execute_role
     assert joe not in deploy_jobtemplate.execute_role
+
 
 @pytest.mark.django_db
 def test_job_template_migration_deploy(credential, deploy_jobtemplate, check_jobtemplate, user):
@@ -166,6 +170,7 @@ def test_job_template_access_superuser(check_license, user, deploy_jobtemplate):
     assert access.can_read(deploy_jobtemplate)
     assert access.can_add({})
 
+
 @pytest.mark.django_db
 def test_job_template_access_read_level(jt_objects, rando):
 
@@ -182,6 +187,7 @@ def test_job_template_access_read_level(jt_objects, rando):
     assert not access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
     assert not access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
 
+
 @pytest.mark.django_db
 def test_job_template_access_use_level(jt_objects, rando):
 
@@ -197,6 +203,7 @@ def test_job_template_access_use_level(jt_objects, rando):
     assert access.can_add(dict(credential=jt_objects.credential.pk, project=proj_pk))
     assert access.can_add(dict(cloud_credential=jt_objects.cloud_credential.pk, project=proj_pk))
     assert access.can_add(dict(network_credential=jt_objects.network_credential.pk, project=proj_pk))
+
 
 @pytest.mark.django_db
 def test_job_template_access_org_admin(jt_objects, rando):
@@ -217,6 +224,23 @@ def test_job_template_access_org_admin(jt_objects, rando):
 
     assert access.can_read(jt_objects.job_template)
     assert access.can_delete(jt_objects.job_template)
+
+
+@pytest.mark.django_db
+class TestOrphanJobTemplate:
+
+    def test_orphan_JT_readable_by_system_auditor(self, job_template, system_auditor):
+        assert system_auditor.is_system_auditor
+        assert job_template.project is None
+        access = JobTemplateAccess(system_auditor)
+        assert access.can_read(job_template)
+
+    def test_system_admin_orphan_capabilities(self, job_template, admin_user):
+        job_template.capabilities_cache = {'edit': False}
+        access = JobTemplateAccess(admin_user)
+        capabilities = access.get_user_capabilities(job_template, method_list=['edit'])
+        assert capabilities['edit']
+
 
 @pytest.mark.django_db
 @pytest.mark.job_permissions
@@ -240,3 +264,48 @@ def test_job_template_creator_access(project, rando, post):
     jt_obj = JobTemplate.objects.get(pk=jt_pk)
     # Creating a JT should place the creator in the admin role
     assert rando in jt_obj.admin_role
+
+
+@pytest.mark.django_db
+def test_associate_label(label, user, job_template):
+    access = JobTemplateAccess(user('joe', False))
+    job_template.admin_role.members.add(user('joe', False))
+    label.organization.read_role.members.add(user('joe', False))
+    assert access.can_attach(job_template, label, 'labels', None)
+
+
+@pytest.mark.django_db
+class TestJobTemplateSchedules:
+
+    rrule = 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1'
+    rrule2 = 'DTSTART:20151117T050000Z RRULE:FREQ=WEEKLY;INTERVAL=1;COUNT=1'
+
+    @pytest.fixture
+    def jt2(self):
+        return JobTemplate.objects.create(name="other-jt")
+
+    def test_move_schedule_to_JT_no_access(self, job_template, rando, jt2):
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule)
+        job_template.admin_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+
+
+    def test_move_schedule_from_JT_no_access(self, job_template, rando, jt2):
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule)
+        jt2.admin_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert not access.can_change(schedule, data=dict(unified_job_template=jt2.pk))
+
+
+    def test_can_create_schedule_with_execute(self, job_template, rando):
+        job_template.execute_role.members.add(rando)
+        access = ScheduleAccess(rando)
+        assert access.can_add({'unified_job_template': job_template})
+
+
+    def test_can_modify_ones_own_schedule(self, job_template, rando):
+        job_template.execute_role.members.add(rando)
+        schedule = Schedule.objects.create(unified_job_template=job_template, rrule=self.rrule, created_by=rando)
+        access = ScheduleAccess(rando)
+        assert access.can_change(schedule, {'rrule': self.rrule2})

@@ -1,0 +1,31 @@
+sudo: false
+language: python
+python:
+    - '2.7'
+env:
+    - TOXENV=api-lint
+    - TOXENV=api
+    - TOXENV=ui-lint
+    - TOXENV=ui
+install:
+    - pip install tox
+script:
+    - tox
+# after_success:
+#     - TOXENV=coveralls tox
+addons:
+    apt:
+        packages:
+            - swig
+            - libxmlsec1-dev
+            - postgresql-9.5
+            - libssl-dev
+cache:
+    pip: true
+    directories:
+        - node_modules
+        - .tox
+services:
+    - mongodb
+    # Enable when we stop using sqlite for API tests
+    # - postgresql

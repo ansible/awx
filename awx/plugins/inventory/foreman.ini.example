@@ -9,6 +9,9 @@ group_patterns = ["{app}-{tier}-{color}",
 	          "{app}-{color}",
 	          "{app}",
 		  "{tier}"]
+group_prefix = foreman_
+# Whether to fetch facts from Foreman and store them on the host
+want_facts = True
 
 [cache]
 path = .

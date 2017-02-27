@@ -7,12 +7,14 @@ from awx.main.models.jobs import JobTemplate
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.mark.django_db
 def test_get_notification_template_list(get, user, notification_template):
     url = reverse('api:notification_template_list')
     response = get(url, user('admin', True))
     assert response.status_code == 200
     assert len(response.data['results']) == 1
+
 
 @pytest.mark.django_db
 def test_basic_parameterization(get, post, user, organization):
@@ -38,6 +40,7 @@ def test_basic_parameterization(get, post, user, organization):
     assert 'url' in response.data['notification_configuration']
     assert 'headers' in response.data['notification_configuration']
 
+
 @pytest.mark.django_db
 def test_encrypted_subfields(get, post, user, organization):
     def assert_send(self, messages):
@@ -62,6 +65,7 @@ def test_encrypted_subfields(get, post, user, organization):
     assert response.data['notification_configuration']['account_token'] == "$encrypted$"
     with mock.patch.object(notification_template_actual.notification_class, "send_messages", assert_send):
         notification_template_actual.send("Test", {'body': "Test"})
+
 
 @pytest.mark.django_db
 def test_inherited_notification_templates(get, post, user, organization, project):
@@ -98,6 +102,7 @@ def test_inherited_notification_templates(get, post, user, organization, project
     assert len(project.notification_templates['any']) == 2
     assert len(g.inventory_source.notification_templates['any']) == 1
 
+
 @pytest.mark.django_db
 def test_notification_template_merging(get, post, user, organization, project, notification_template):
     user('admin-poster', True)
@@ -105,13 +110,16 @@ def test_notification_template_merging(get, post, user, organization, project, n
     project.notification_templates_any.add(notification_template)
     assert len(project.notification_templates['any']) == 1
 
+
 @pytest.mark.django_db
 def test_notification_template_simple_patch(patch, notification_template, admin):
     patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'name': 'foo'}, admin, expect=200)
 
+
 @pytest.mark.django_db
 def test_notification_template_invalid_notification_type(patch, notification_template, admin):
     patch(reverse('api:notification_template_detail', args=(notification_template.id,)), { 'notification_type': 'invalid'}, admin, expect=400)
+
 
 @pytest.mark.django_db
 def test_disallow_delete_when_notifications_pending(delete, user, notification_template):

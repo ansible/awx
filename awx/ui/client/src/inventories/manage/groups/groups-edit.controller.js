@@ -4,27 +4,76 @@
  * All Rights Reserved
  *************************************************/
 
- export default
-    ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'inventoryScriptsListObject', 'ToggleNotification', 'ParseVariableString',
-    'ParseTypeChange', 'GenerateForm', 'LookUpInit', 'RelatedSearchInit', 'RelatedPaginateInit', 'NotificationsListInit',
-    'GroupManageService','GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData', 'ToJSON',
-    function($state, $stateParams, $scope, GroupForm, CredentialList, InventoryScriptsList, ToggleNotification, ParseVariableString,
-        ParseTypeChange, GenerateForm, LookUpInit, RelatedSearchInit, RelatedPaginateInit, NotificationsListInit,
-        GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData, ToJSON){
-        var generator = GenerateForm,
-            form = GroupForm();
+export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
+    'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
+    function($state, $stateParams, $scope, ToggleNotification, ParseVariableString, rbacUiControlService, ToJSON,
+        ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData) {
 
-        // remove "type" field from search options
-        CredentialList = _.cloneDeep(CredentialList);
-        CredentialList.fields.kind.noSearch = true;
+        init();
 
-        $scope.formCancel = function(){
+        function init() {
+            rbacUiControlService.canAdd(GetBasePath('inventory') + $stateParams.inventory_id + "/groups")
+                .then(function(canAdd) {
+                $scope.canAdd = canAdd;
+            });
+            // instantiate expected $scope values from inventorySourceData & groupData
+            _.assign($scope, { credential: inventorySourceData.credential }, { overwrite: inventorySourceData.overwrite }, { overwrite_vars: inventorySourceData.overwrite_vars }, { update_on_launch: inventorySourceData.update_on_launch }, { update_cache_timeout: inventorySourceData.update_cache_timeout }, { instance_filters: inventorySourceData.instance_filters }, { inventory_script: inventorySourceData.source_script });
+            if (inventorySourceData.credential) {
+                $scope.credential_name = inventorySourceData.summary_fields.credential.name;
+            }
+            $scope = angular.extend($scope, groupData);
+
+            // display custom inventory_script name
+            if (inventorySourceData.source === 'custom') {
+                $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
+            }
+
+            $scope.$watch('summary_fields.user_capabilities.edit', function(val) {
+                $scope.canAdd = val;
+            });
+
+            // init codemirror(s)
+            $scope.variables = $scope.variables === null || $scope.variables === '' ? '---' : ParseVariableString($scope.variables);
+            $scope.parseType = 'yaml';
+            $scope.envParseType = 'yaml';
+
+            ParseTypeChange({
+                scope: $scope,
+                field_id: 'group_variables',
+                variable: 'variables',
+            });
+
+            initSources();
+        }
+
+        var initRegionSelect = function() {
+            CreateSelect2({
+                element: '#group_source_regions',
+                multiple: true
+            });
+            CreateSelect2({
+                element: '#group_group_by',
+                multiple: true
+            });
+        };
+
+        $scope.lookupCredential = function(){
+            let kind = ($scope.source.value === "ec2") ? "aws" : $scope.source.value;
+            $state.go('.credential', {
+                credential_search: {
+                    kind: kind,
+                    page_size: '5',
+                    page: '1'
+                }
+            });
+        };
+
+        $scope.formCancel = function() {
             $state.go('^');
         };
-        $scope.formSave = function(){
-            var params, source,
+        $scope.formSave = function() {
+            var params, source, json_data;
             json_data = ToJSON($scope.parseType, $scope.variables, true);
-
             // group fields
             var group = {
                 variables: json_data,
@@ -33,8 +82,7 @@
                 inventory: $scope.inventory,
                 id: groupData.id
             };
-
-            if ($scope.source){
+            if ($scope.source) {
                 // inventory_source fields
                 params = {
                     group: groupData.id,
@@ -52,70 +100,30 @@
                     source_vars: $scope[$scope.source.value + '_variables'] === '---' || $scope[$scope.source.value + '_variables'] === '{}' ? null : $scope[$scope.source.value + '_variables']
                 };
                 source = $scope.source.value;
-            }
-            else{
+            } else {
                 source = null;
             }
-            switch(source){
+            switch (source) {
                 // no inventory source set, just create a new group
                 // '' is the value supplied for Manual source type
                 case null || '':
-                    GroupManageService.put(group).then(() => $state.go($state.current, null, {reload: true}));
+                    GroupManageService.put(group).then(() => $state.go($state.current, null, { reload: true }));
                     break;
-                // create a new group and create/associate an inventory source
-                // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
+                    // create a new group and create/associate an inventory source
+                    // equal to case 'rax' || 'ec2' || 'azure' || 'azure_rm' || 'vmware' || 'satellite6' || 'cloudforms' || 'openstack' || 'custom'
                 default:
                     GroupManageService.put(group)
                         .then(() => GroupManageService.putInventorySource(params, groupData.related.inventory_source))
-                        .then(() => $state.go($state.current, null, {reload: true}));
+                        .then(() => $state.go($state.current, null, { reload: true }));
                     break;
             }
         };
-        $scope.toggleNotification = function(event, notifier_id, column) {
-            var notifier = this.notification;
-            try {
-                $(event.target).tooltip('hide');
-            }
-            catch(e) {
-                // ignore
-            }
-            ToggleNotification({
-                scope: $scope,
-                url: GetBasePath('inventory_sources'),
-                id: inventorySourceData.id,
-                notifier: notifier,
-                column: column,
-                callback: 'NotificationRefresh'
-            });
-        };
-        $scope.sourceChange = function(source){
+
+        $scope.sourceChange = function(source) {
             $scope.source = source;
-            if (source.value === 'custom'){
-                LookUpInit({
-                    scope: $scope,
-                    url: GetBasePath('inventory_script'),
-                    form: form,
-                    list: InventoryScriptsList,
-                    field: 'inventory_script',
-                    input_type: "radio"
-                });
-            }
-            else{
-                var credentialBasePath = (source.value === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (source.value === '' ? '' : '?kind=' + (source.value));
-                CredentialList.basePath = credentialBasePath;
-                $scope.cloudCredentialRequired = source.value !== '' && source.value !== 'custom' && source.value !== 'ec2' ? true : false;
-                LookUpInit({
-                    scope: $scope,
-                    url: credentialBasePath,
-                    form: form,
-                    list: CredentialList,
-                    field: 'credential',
-                    input_type: "radio"
-                });
-            }
             if (source.value === 'ec2' || source.value === 'custom' ||
-                source.value === 'vmware' || source.value === 'openstack'){
-                $scope[source.value + '_variables'] = $scope[source.value + '_variables'] === null ? '---' : $scope[source.value + '_variables'];
+                source.value === 'vmware' || source.value === 'openstack') {
+                $scope[source.value + '_variables'] = $scope[source.value + '_variables'] === (null || undefined) ? '---' : $scope[source.value + '_variables'];
                 ParseTypeChange({
                     scope: $scope,
                     field_id: source.value + '_variables',
@@ -134,18 +142,8 @@
             initRegionSelect();
         };
 
-        var initRegionSelect = function(){
-            CreateSelect2({
-                element: '#group_source_regions',
-                multiple: true
-            });
-            CreateSelect2({
-                element: '#group_group_by',
-                multiple: true
-            });
-        };
-        var initSourceSelect = function(){
-            $scope.source = _.find($scope.source_type_options, {value: inventorySourceData.source});
+        function initSourceSelect() {
+            $scope.source = _.find($scope.source_type_options, { value: inventorySourceData.source });
             CreateSelect2({
                 element: '#group_source',
                 multiple: false
@@ -153,8 +151,8 @@
             // After the source is set, conditional fields will be visible
             // CodeMirror is buggy if you instantiate it in a not-visible element
             // So we initialize it here instead of the init() routine
-            if(inventorySourceData.source === 'ec2' || inventorySourceData.source === 'openstack' ||
-             inventorySourceData.source ===  'custom' || inventorySourceData.source ===  'vmware'){
+            if (inventorySourceData.source === 'ec2' || inventorySourceData.source === 'openstack' ||
+                inventorySourceData.source === 'custom' || inventorySourceData.source === 'vmware') {
                 $scope[inventorySourceData.source + '_variables'] = inventorySourceData.source_vars === null || inventorySourceData.source_vars === '' ? '---' : ParseVariableString(inventorySourceData.source_vars);
                 ParseTypeChange({
                     scope: $scope,
@@ -163,29 +161,31 @@
                     parse_variable: 'envParseType',
                 });
             }
-        };
-        var initRegionData = function(){
+        }
+
+        function initRegionData() {
             var source = $scope.source.value === 'azure_rm' ? 'azure' : $scope.source.value;
             var regions = inventorySourceData.source_regions.split(',');
             // azure_rm regions choices are keyed as "azure" in an OPTIONS request to the inventory_sources endpoint
             $scope.source_region_choices = $scope[source + '_regions'];
 
             // the API stores azure regions as all-lowercase strings - but the azure regions received from OPTIONS are Snake_Cased
-            if (source === 'azure'){
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source+'_regions'], (o) => o.value.toLowerCase() === region));
+            if (source === 'azure') {
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value.toLowerCase() === region));
             }
             // all other regions are 1-1
-            else{
-                $scope.source_regions = _.map(regions, (region) => _.find($scope[source+'_regions'], (o) => o.value === region));
+            else {
+                $scope.source_regions = _.map(regions, (region) => _.find($scope[source + '_regions'], (o) => o.value === region));
             }
             $scope.group_by_choices = source === 'ec2' ? $scope.ec2_group_by : null;
-            if (source ==='ec2'){
+            if (source === 'ec2') {
                 var group_by = inventorySourceData.group_by.split(',');
-                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, {value: item}));
+                $scope.group_by = _.map(group_by, (item) => _.find($scope.ec2_group_by, { value: item }));
             }
             initRegionSelect();
-        };
-        var initSources = function(){
+        }
+
+        function initSources() {
             GetSourceTypeOptions({
                 scope: $scope,
                 variable: 'source_type_options',
@@ -231,87 +231,17 @@
                 choice_name: 'ec2_group_by_choices',
                 callback: 'choicesReadyGroup'
             });
-        };
+        }
+
         // region / source options callback
-        $scope.$on('choicesReadyGroup', function(){
-            if (angular.isObject($scope.source)){
+        $scope.$on('choicesReadyGroup', function() {
+            if (angular.isObject($scope.source)) {
                 initRegionData();
             }
         });
 
-        $scope.$on('sourceTypeOptionsReady', function(){
+        $scope.$on('sourceTypeOptionsReady', function() {
             initSourceSelect();
         });
-        var init = function(){
-            // instantiate expected $scope values from inventorySourceData & groupData
-            var relatedSets = form.relatedSets(groupData.related);
-            generator.inject(form, {mode: 'edit', related: false, id: 'Inventory-groupManage--panel', scope: $scope});
-            _.assign($scope,
-                {credential: inventorySourceData.credential},
-                {overwrite: inventorySourceData.overwrite},
-                {overwrite_vars: inventorySourceData.overwrite_vars},
-                {update_on_launch: inventorySourceData.update_on_launch},
-                {update_cache_timeout: inventorySourceData.update_cache_timeout},
-                {instance_filters: inventorySourceData.instance_filters},
-                {inventory_script: inventorySourceData.source_script}
-                );
-            if (inventorySourceData.credential){
-                $scope.credential_name = inventorySourceData.summary_fields.credential.name;
-            }
-            $scope = angular.extend($scope, groupData);
-
-            // instantiate lookup fields
-            if (inventorySourceData.source !== 'custom'){
-                var credentialBasePath = (inventorySourceData.source === 'ec2') ? GetBasePath('credentials') + '?kind=aws' : GetBasePath('credentials') + (inventorySourceData.source === '' ? '' : '?kind=' + (inventorySourceData.source));
-                CredentialList.basePath = credentialBasePath;
-                LookUpInit({
-                    scope: $scope,
-                    url: credentialBasePath,
-                    form: form,
-                    list: CredentialList,
-                    field: 'credential',
-                    input_type: "radio"
-                });
-            }
-            // equal to case 'custom'
-            else{
-                $scope.inventory_script_name = inventorySourceData.summary_fields.source_script.name;
-                LookUpInit({
-                    scope: $scope,
-                    url: GetBasePath('inventory_script'),
-                    form: form,
-                    list: InventoryScriptsList,
-                    field: 'inventory_script',
-                    input_type: "radio"
-                });
-            }
-            // init codemirror(s)
-            $scope.variables = $scope.variables === null || $scope.variables  === '' ? '---' : ParseVariableString($scope.variables);
-            $scope.parseType = 'yaml';
-            $scope.envParseType = 'yaml';
-
-            ParseTypeChange({
-                scope: $scope,
-                field_id: 'group_variables',
-                variable: 'variables',
-            });
-
-            NotificationsListInit({
-                scope: $scope,
-                url: GetBasePath('inventory_sources'),
-                id: inventorySourceData.id
-            });
-            RelatedSearchInit({
-                scope: $scope,
-                form: form,
-                relatedSets: relatedSets
-            });
-            RelatedPaginateInit({
-                scope: $scope,
-                relatedSets: relatedSets
-            });
-            initSources();
-            _.forEach(relatedSets, (value, key) => $scope.search(relatedSets[key].iterator));
-        };
-        init();
-    }];
+    }
+];

@@ -6,10 +6,9 @@
 
 export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
-    'Rest', 'ParamPass',
+    'Rest', 'ParamPass', 'ParentObject',
     function($compile, $filter, $state, $stateParams, AddSchedule, Wait, $scope,
-        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass) {
-
+        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass, ParentObject) {
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);
@@ -24,6 +23,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
     $scope.schedulerEndHour = "00";
     $scope.schedulerEndMinute = "00";
     $scope.schedulerEndSecond = "00";
+    $scope.parentObject = ParentObject;
 
     $scope.$on("ScheduleFormCreated", function(e, scope) {
         $scope.hideForm = false;
@@ -69,7 +69,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
 
     $scope.hideForm = true;
 
-    var schedule_url = ParamPass.get();
+    var schedule_url = ParentObject.related.schedules || `${ParentObject.related.inventory_source}schedules`;
 
     $scope.formCancel = function() {
         $state.go("^");
@@ -79,7 +79,23 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
     if ($state.current.name === 'jobTemplateSchedules.add'){
         $scope.parseType = 'yaml';
         // grab any existing extra_vars from parent job_template
-        var defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
+        let defaultUrl = GetBasePath('job_templates') + $stateParams.id + '/';
+        Rest.setUrl(defaultUrl);
+        Rest.get().then(function(res){
+            var data = res.data.extra_vars;
+            $scope.extraVars = data === '' ? '---' :  data;
+            ParseTypeChange({
+                scope: $scope,
+                variable: 'extraVars',
+                parse_variable: 'parseType',
+                field_id: 'SchedulerForm-extraVars'
+            });
+        });
+    }
+    else if ($state.current.name === 'workflowJobTemplateSchedules.add'){
+        $scope.parseType = 'yaml';
+        // grab any existing extra_vars from parent workflow_job_template
+        let defaultUrl = GetBasePath('workflow_job_templates') + $stateParams.id + '/';
         Rest.setUrl(defaultUrl);
         Rest.get().then(function(res){
             var data = res.data.extra_vars;
@@ -102,7 +118,7 @@ export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 
                 field_id: 'SchedulerForm-extraVars'
             });
     }
-    else if ($state.current.name === 'inventoryManage.schedules.add'){
+    else if ($state.current.name === 'inventoryManage.editGroup.schedules.add'){
         $scope.extraVars = '---';
         $scope.parseType = 'yaml';
         ParseTypeChange({

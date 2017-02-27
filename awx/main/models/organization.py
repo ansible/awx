@@ -23,7 +23,6 @@ from awx.main.models.rbac import (
     ROLE_SINGLETON_SYSTEM_AUDITOR,
 )
 from awx.main.models.mixins import ResourceMixin
-from awx.main.conf import tower_settings
 
 __all__ = ['Organization', 'Team', 'Permission', 'Profile', 'AuthToken']
 
@@ -71,7 +70,6 @@ class Organization(CommonModel, NotificationFieldsModel, ResourceMixin):
 
     def __unicode__(self):
         return self.name
-
 
 
 class Team(CommonModelNameNotUnique, ResourceMixin):
@@ -192,6 +190,7 @@ class Profile(CreatedModifiedModel):
         default='',
     )
 
+
 """
 Since expiration and session expiration is event driven a token could be
 invalidated for both reasons. Further, we only support a single reason for a
@@ -200,6 +199,8 @@ session token being invalid. For this case, mark the token as expired.
 Note: Again, because the value of reason is event based. The reason may not be
 set (i.e. may equal '') even though a session is expired or a limit is reached.
 """
+
+
 class AuthToken(BaseModel):
     '''
     Custom authentication tokens per user with expiration and request-specific
@@ -209,7 +210,7 @@ class AuthToken(BaseModel):
     REASON_CHOICES = [
         ('', _('Token not invalidated')),
         ('timeout_reached', _('Token is expired')),
-        ('limit_reached', _('Maximum per-user sessions reached')),
+        ('limit_reached', _('The maximum number of allowed sessions for this user has been exceeded.')),
         # invalid_token is not a used data-base value, but is returned by the
         # api when a token is not found
         ('invalid_token', _('Invalid token')),
@@ -219,12 +220,13 @@ class AuthToken(BaseModel):
         app_label = 'main'
 
     key = models.CharField(max_length=40, primary_key=True)
-    user = models.ForeignKey('auth.User', related_name='auth_tokens',
-                             on_delete=models.CASCADE)
+    user = prevent_search(models.ForeignKey('auth.User',
+                          related_name='auth_tokens', on_delete=models.CASCADE))
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     expires = models.DateTimeField(default=tz_now)
-    request_hash = models.CharField(max_length=40, blank=True, default='')
+    request_hash = prevent_search(models.CharField(max_length=40, blank=True,
+                                                   default=''))
     reason = models.CharField(
         max_length=1024,
         blank=True,
@@ -262,13 +264,13 @@ class AuthToken(BaseModel):
         if not now:
             now = tz_now()
         if not self.pk or not self.is_expired(now=now):
-            self.expires = now + datetime.timedelta(seconds=tower_settings.AUTH_TOKEN_EXPIRATION)
+            self.expires = now + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
             if save:
                 self.save()
 
     def invalidate(self, reason='timeout_reached', save=True):
         if not AuthToken.reason_long(reason):
-            raise ValueError('Invalid reason specified')
+            raise ValueError(_('Invalid reason specified'))
         self.reason = reason
         if save:
             self.save()
@@ -279,12 +281,12 @@ class AuthToken(BaseModel):
         if now is None:
             now = tz_now()
         invalid_tokens = AuthToken.objects.none()
-        if tower_settings.AUTH_TOKEN_PER_USER != -1:
+        if settings.AUTH_TOKEN_PER_USER != -1:
             invalid_tokens = AuthToken.objects.filter(
                 user=user,
                 expires__gt=now,
                 reason='',
-            ).order_by('-created')[tower_settings.AUTH_TOKEN_PER_USER:]
+            ).order_by('-created')[settings.AUTH_TOKEN_PER_USER:]
         return invalid_tokens
 
     def generate_key(self):
@@ -313,7 +315,7 @@ class AuthToken(BaseModel):
         valid_n_tokens_qs = self.user.auth_tokens.filter(
             expires__gt=now,
             reason='',
-        ).order_by('-created')[0:tower_settings.AUTH_TOKEN_PER_USER]
+        ).order_by('-created')[0:settings.AUTH_TOKEN_PER_USER]
         valid_n_tokens = valid_n_tokens_qs.values_list('key', flat=True)
 
         return bool(self.key in valid_n_tokens)

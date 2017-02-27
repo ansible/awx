@@ -1,8 +1,0 @@
-- hosts: all
-  connection: local
-  gather_facts: false
-  tasks:
-    - name: lint check w/ flake8
-      command: 'flake8 {{ playbook_dir }}/../../'
-      register: result
-

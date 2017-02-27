@@ -149,16 +149,17 @@ export default
             scope.job_id = job_id;
             scope.auto_scroll = false;
 
-            scope.searchPlaysEnabled = true;
-            scope.searchTasksEnabled = true;
-            scope.searchHostsEnabled = true;
-            scope.search_play_status = 'all';
-            scope.search_task_status = 'all';
-            scope.search_host_status = 'all';
-
-            scope.search_play_name = '';
-            scope.search_task_name = '';
-            scope.search_host_name = '';
+            // @issue: OLD SEARCH
+            // scope.searchPlaysEnabled = true;
+            // scope.searchTasksEnabled = true;
+            // scope.searchHostsEnabled = true;
+            // scope.search_play_status = 'all';
+            // scope.search_task_status = 'all';
+            // scope.search_host_status = 'all';
+            //
+            // scope.search_play_name = '';
+            // scope.search_task_name = '';
+            // scope.search_host_name = '';
 
             scope.haltEventQueue = false;
             scope.processing = false;
@@ -197,32 +198,22 @@ export default
                 "<p><i class=\"fa fa-circle changed-hosts-color\"></i> Changed</p>\n" +
                 "<p><i class=\"fa fa-circle unreachable-hosts-color\"></i> Unreachable</p>\n" +
                 "<p><i class=\"fa fa-circle failed-hosts-color\"></i> Failed</p>\n";
-            function openSocket() {
-                $rootScope.event_socket.on("job_events-" + job_id, function(data) {
-                    // update elapsed time on each event received
-                    scope.job_status.elapsed = GetElapsed({
-                        start: scope.job.created,
-                        end: Date.now()
-                    });
-                    if (api_complete && data.id > lastEventId) {
-                        scope.waiting = false;
-                        data.event = data.event_name;
-                        DigestEvent({ scope: scope, event: data });
-                    }
-                    UpdateDOM({ scope: scope });
-                });
-                // Unbind $rootScope socket event binding(s) so that they don't get triggered
-                // in another instance of this controller
-                scope.$on('$destroy', function() {
-                    $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
-                });
-            }
-            openSocket();
 
-            if ($rootScope.removeJobStatusChange) {
-                $rootScope.removeJobStatusChange();
-            }
-            $rootScope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobDetails', function(e, data) {
+            scope.$on(`ws-job_events-${job_id}`, function(e, data) {
+                // update elapsed time on each event received
+                scope.job_status.elapsed = GetElapsed({
+                    start: scope.job.created,
+                    end: Date.now()
+                });
+                if (api_complete && data.id > lastEventId) {
+                    scope.waiting = false;
+                    data.event = data.event_name;
+                    DigestEvent({ scope: scope, event: data });
+                }
+                UpdateDOM({ scope: scope });
+            });
+
+            scope.$on(`ws-jobs`, function(e, data) {
                 // if we receive a status change event for the current job indicating the job
                 // is finished, stop event queue processing and reload
                 if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
@@ -236,10 +227,7 @@ export default
                 }
             });
 
-            if ($rootScope.removeJobSummaryComplete) {
-                $rootScope.removeJobSummaryComplete();
-            }
-            $rootScope.removeJobSummaryComplete = $rootScope.$on('JobSummaryComplete', function() {
+            scope.$on('ws-jobs-summary', function() {
                 // the job host summary should now be available from the API
                 $log.debug('Trigging reload of job_host_summaries');
                 scope.$emit('InitialLoadComplete');
@@ -537,7 +525,7 @@ export default
                         scope.job_template_name = data.name;
                         scope.project_name = (data.summary_fields.project) ? data.summary_fields.project.name : '';
                         scope.inventory_name = (data.summary_fields.inventory) ? data.summary_fields.inventory.name : '';
-                        scope.job_template_url = '/#/job_templates/' + data.unified_job_template;
+                        scope.job_template_url = '/#/templates/' + data.unified_job_template;
                         scope.inventory_url = (scope.inventory_name && data.inventory) ? '/#/inventories/' + data.inventory : '';
                         scope.project_url = (scope.project_name && data.project) ? '/#/projects/' + data.project : '';
                         scope.credential_url = (data.credential) ? '/#/credentials/' + data.credential : '';
@@ -780,123 +768,116 @@ export default
                 }
             };
 
-            scope.filterTaskStatus = function() {
-                scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterPlayStatus = function() {
-                scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadPlays({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.filterHostStatus = function(){
-                scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents){
-                    if (scope.selectedTask !== null && scope.selectedPlay !== null){
-                        var params = {
-                            parent: scope.selectedTask,
-                            page_size: scope.hostResultsMaxRows,
-                            order: 'host_name,counter',
-                        };
-                        if (scope.search_host_status === 'failed'){
-                            params.failed = true;
-                        }
-                        JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                            scope.hostResults = JobDetailService.processHostEvents(res.results);
-                            scope.hostResultsLoading = false;
-                        });
-                    }
-                }
-            };
-
-            scope.searchPlays = function() {
-                if (scope.search_play_name) {
-                    scope.searchPlaysEnabled = false;
-                }
-                else {
-                    scope.searchPlaysEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    LoadPlays({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchPlaysKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchPlays();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchTasks = function() {
-                var params = {};
-                if (scope.search_task_name) {
-                    scope.searchTasksEnabled = false;
-                }
-                else {
-                    scope.searchTasksEnabled = true;
-                }
-                if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
-                    if (scope.search_task_status === 'failed'){
-                        params.failed = true;
-                    }
-                    LoadTasks({
-                        scope: scope
-                    });
-                }
-            };
-
-            scope.searchTasksKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchTasks();
-                    e.stopPropagation();
-                }
-            };
-
-            scope.searchHosts = function() {
-                var params = {};
-                if (scope.search_host_name) {
-                    scope.searchHostsEnabled = false;
-                }
-                else {
-                    scope.searchHostsEnabled = true;
-                }
-                if ((!scope.liveEventProcessing || scope.pauseLiveEvents) && scope.selectedTask) {
-                    scope.hostResultsLoading = true;
-                    params = {
-                        parent: scope.selectedTask,
-                        event__startswith: 'runner',
-                        page_size: scope.hostResultsMaxRows,
-                        order: 'host_name,counter',
-                        host_name__icontains: scope.search_host_name
-                    };
-                    if (scope.search_host_status === 'failed'){
-                        params.failed = true;
-                    }
-                    JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
-                        scope.hostResults = JobDetailService.processHostEvents(res.results);
-                        scope.hostResultsLoading = false;
-                    });
-                }
-            };
-
-            scope.searchHostsKeyPress = function(e) {
-                if (e.keyCode === 13) {
-                    scope.searchHosts();
-                    e.stopPropagation();
-                }
-            };
+            // @issue: OLD SEARCH
+            // scope.filterTaskStatus = function() {
+            //     scope.search_task_status = (scope.search_task_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadTasks({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.filterPlayStatus = function() {
+            //     scope.search_play_status = (scope.search_play_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadPlays({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.filterHostStatus = function(){
+            //     scope.search_host_status = (scope.search_host_status === 'all') ? 'failed' : 'all';
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents){
+            //         if (scope.selectedTask !== null && scope.selectedPlay !== null){
+            //             var params = {
+            //                 parent: scope.selectedTask,
+            //                 page_size: scope.hostResultsMaxRows,
+            //                 order: 'host_name,counter',
+            //             };
+            //             if (scope.search_host_status === 'failed'){
+            //                 params.failed = true;
+            //             }
+            //             JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+            //                 scope.hostResults = JobDetailService.processHostEvents(res.results);
+            //                 scope.hostResultsLoading = false;
+            //             });
+            //         }
+            //     }
+            // };
+            // scope.searchPlays = function() {
+            //     if (scope.search_play_name) {
+            //         scope.searchPlaysEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchPlaysEnabled = true;
+            //     }
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         LoadPlays({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.searchPlaysKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchPlays();
+            //         e.stopPropagation();
+            //     }
+            // };
+            // scope.searchTasks = function() {
+            //     var params = {};
+            //     if (scope.search_task_name) {
+            //         scope.searchTasksEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchTasksEnabled = true;
+            //     }
+            //     if (!scope.liveEventProcessing || scope.pauseLiveEvents) {
+            //         if (scope.search_task_status === 'failed'){
+            //             params.failed = true;
+            //         }
+            //         LoadTasks({
+            //             scope: scope
+            //         });
+            //     }
+            // };
+            // scope.searchTasksKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchTasks();
+            //         e.stopPropagation();
+            //     }
+            // };
+            // scope.searchHosts = function() {
+            //     var params = {};
+            //     if (scope.search_host_name) {
+            //         scope.searchHostsEnabled = false;
+            //     }
+            //     else {
+            //         scope.searchHostsEnabled = true;
+            //     }
+            //     if ((!scope.liveEventProcessing || scope.pauseLiveEvents) && scope.selectedTask) {
+            //         scope.hostResultsLoading = true;
+            //         params = {
+            //             parent: scope.selectedTask,
+            //             event__startswith: 'runner',
+            //             page_size: scope.hostResultsMaxRows,
+            //             order: 'host_name,counter',
+            //             host_name__icontains: scope.search_host_name
+            //         };
+            //         if (scope.search_host_status === 'failed'){
+            //             params.failed = true;
+            //         }
+            //         JobDetailService.getRelatedJobEvents(scope.job.id, params).success(function(res){
+            //             scope.hostResults = JobDetailService.processHostEvents(res.results);
+            //             scope.hostResultsLoading = false;
+            //         });
+            //     }
+            // };
+            // scope.searchHostsKeyPress = function(e) {
+            //     if (e.keyCode === 13) {
+            //         scope.searchHosts();
+            //         e.stopPropagation();
+            //     }
+            // };
 
             if (scope.removeDeleteFinished) {
                 scope.removeDeleteFinished();

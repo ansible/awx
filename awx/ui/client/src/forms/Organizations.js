@@ -12,80 +12,83 @@
 
 export default
     angular.module('OrganizationFormDefinition', [])
-        .value('OrganizationFormObject', {
+        .factory('OrganizationFormObject', ['i18n', function(i18n) {
+        return {
 
-            addTitle: 'New Organization', //Title in add mode
+            addTitle: i18n._('New Organization'), //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
+            stateTree: 'organizations',
             tabs: true,
 
             fields: {
                 name: {
-                    label: 'Name',
+                    label: i18n._('Name'),
                     type: 'text',
-                    addRequired: true,
-                    editRequired: true,
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    required: true,
                     capitalize: false
                 },
                 description: {
-                    label: 'Description',
+                    label: i18n._('Description'),
                     type: 'text',
-                    addRequired: false,
-                    editRequired: false
+                    ngDisabled: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             buttons: { //for now always generates <button> tags
                 cancel: {
-                    ngClick: 'formCancel()'
+                    ngClick: 'formCancel()',
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
+                close: {
+                    ngClick: 'formCancel()',
+                    ngShow: '!(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 save: {
                     ngClick: 'formSave()', //$scope.function to call on click, optional
-                    ngDisabled: true //Disable when $pristine or $invalid, optional
+                    ngDisabled: true,
+                    ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                 }
             },
 
             related: {
-                permissions: {
-                    basePath: 'organizations/:id/access_list/',
-                    awToolTip: 'Please save before assigning permissions',
+                users: {
+                    name: 'users',
                     dataPlacement: 'top',
+                    awToolTip: i18n._('Please save before adding users'),
+                    basePath: 'api/v1/organizations/{{$stateParams.organization_id}}/access_list/',
+                    search: {
+                        order_by: 'username'
+                    },
                     type: 'collection',
-                    title: 'Permissions',
-                    iterator: 'permission',
+                    title: i18n._('Users'),
+                    iterator: 'user',
                     index: false,
                     open: false,
-                    searchType: 'select',
                     actions: {
                         add: {
-                            ngClick: "addPermission",
-                            label: 'Add',
-                            awToolTip: 'Add a permission',
+                            ngClick: "$state.go('.add')",
+                            label: i18n._('Add'),
+                            awToolTip: i18n._('Add Users to this organization.'),
                             actionClass: 'btn List-buttonSubmit',
-                            buttonContent: '&#43; ADD'
+                            buttonContent: '&#43; ' + i18n._('ADD'),
+                            ngShow: '(organization_obj.summary_fields.user_capabilities.edit || canAdd)'
                         }
                     },
 
                     fields: {
                         username: {
                             key: true,
-                            label: 'User',
+                            label: i18n._('User'),
                             linkBase: 'users',
                             class: 'col-lg-3 col-md-3 col-sm-3 col-xs-4'
                         },
                         role: {
-                            label: 'Role',
+                            label: i18n._('Role'),
                             type: 'role',
-                            noSort: true,
-                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4',
-                            searchable: false
-                        },
-                        team_roles: {
-                            label: 'Team Roles',
-                            type: 'team_roles',
-                            noSort: true,
-                            class: 'col-lg-5 col-md-5 col-sm-5 col-xs-4',
-                            searchable: false
+                            nosort: true,
+                            class: 'col-lg-4 col-md-4 col-sm-4 col-xs-4'
                         }
                     }
                 },
@@ -94,20 +97,8 @@ export default
 
                 }
 
-            },
-            relatedSets: function(urls) {
-                return {
-                    permissions: {
-                        iterator: 'permission',
-                        url: urls.access_list
-                    },
-                    notifications: {
-                        iterator: 'notification',
-                        url: '/api/v1/notification_templates/'
-                    }
-                };
             }
-        })
+        };}])
 
         .factory('OrganizationForm', ['OrganizationFormObject', 'NotificationsList',
             function(OrganizationFormObject, NotificationsList) {

@@ -14,6 +14,7 @@ from awx.main.tests.base import BaseLiveServerTest
 
 __all__ = ['InventoryScriptTest']
 
+
 class BaseScriptTest(BaseLiveServerTest):
     '''
     Base class for tests that run external scripts to access the API.
@@ -55,6 +56,7 @@ class BaseScriptTest(BaseLiveServerTest):
         stdout, stderr = proc.communicate()
         return proc.returncode, stdout, stderr
 
+
 class InventoryScriptTest(BaseScriptTest):
     '''
     Test helper to run management command as standalone script.
@@ -62,7 +64,7 @@ class InventoryScriptTest(BaseScriptTest):
 
     def setUp(self):
         super(InventoryScriptTest, self).setUp()
-        self.start_redis()
+        self.start_rabbit()
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
@@ -128,7 +130,7 @@ class InventoryScriptTest(BaseScriptTest):
 
     def tearDown(self):
         super(InventoryScriptTest, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
 
     def run_inventory_script(self, *args, **options):
         rest_api_url = self.live_server_url

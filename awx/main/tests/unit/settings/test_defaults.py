@@ -3,6 +3,7 @@ import pytest
 from django.conf import settings
 from datetime import timedelta
 
+
 @pytest.mark.parametrize("job_name,function_path", [
     ('admin_checks', 'awx.main.tasks.run_administrative_checks'),
     ('tower_scheduler', 'awx.main.tasks.tower_periodic_scheduler'),

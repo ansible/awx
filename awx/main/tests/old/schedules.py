@@ -46,11 +46,13 @@ BAD_SCHEDULES = ["", "DTSTART:20140331T055000 RRULE:FREQ=MINUTELY;INTERVAL=10;CO
                  "DTSTART:20140331T055000Z RRULE:FREQ=YEARLY;BYWEEKNO=10;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=HOURLY;INTERVAL=1 DTSTART:20140331T055000Z RRULE:FREQ=HOURLY;INTERVAL=1",
                  "DTSTART:20140331T055000Z RRULE:FREQ=HOURLY;INTERVAL=1 RRULE:FREQ=HOURLY;INTERVAL=1"]
+
+
 class ScheduleTest(BaseTest):
 
     def setUp(self):
         super(ScheduleTest, self).setUp()
-        self.start_redis()
+        self.start_rabbit()
         self.setup_instances()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 2)
@@ -92,7 +94,7 @@ class ScheduleTest(BaseTest):
 
     def tearDown(self):
         super(ScheduleTest, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
 
     def test_schedules_list(self):
         url = reverse('api:schedule_list')

@@ -67,7 +67,6 @@
  *
  * | Attribute | Description |
  * | --------- | ----------- |
- * | addRequired | true or false. If true, set the required attribute when mode is 'add'. |
  * | awPopOver | Adds aw-pop-over directive. Set to a string containing the text or html to be evaluated by the directive. |
  * | awPopOverWatch | Causes the awPopOver directive to add a $scope.$watch on the specified scop variable. When the value of the variable changes the popover text will be updated with the change. |
  * | awRequiredWhen | Adds aw-required-when directive. Set to an object to be evaluated by the directive. |
@@ -79,7 +78,6 @@
  * | dataTitle | Used with awPopOver. String value for the title of the popover. |
  * | default | Default value to place in the field when the form is in 'add' mode. |
  * | defaultText | Default value to put into a select input. |
- * | editRequird | true or false. If true, set the required attribute when mode is 'edit'. |
  * | falseValue | For radio buttons and checkboxes. Value to set the model to when the checkbox or radio button is not selected. |
  * | genMD5 | true or false. If true, places the field in an input group with a button that when clicked replaces the field contents with an MD5 has key. Used with host_config_key on the job templates detail page. |
  * | integer | Adds the integer directive to validate that the value entered is of type integer. Add min and max to supply lower and upper range bounds to the entered value. |
@@ -88,7 +86,9 @@
  * | ngClick | Adds ng-click directive. Set to the JS expression to be evaluated by ng-click. |
  * | ngHide | Adds ng-hide directive. Set to the JS expression to be evaluated by ng-hide. |
  * | ngShow | Adds ng-show directive. Set to the JS expression to be evaluated by ng-show. |
+
  * | readonly | Defaults to false. When true the readonly attribute is set, disallowing changes to field content. |
+ * | required | boolean. Adds required flag to form field |
  * | rows | Integer value used to set the row attribute for a textarea. |
  * | sourceModel | Used in conjunction with sourceField when the data for the field is part of the summary_fields object returned by the API. Set to the name of the summary_fields object that contains the field. For example, the job_templates object returned by the API contains summary_fields.inventory. |
  * | sourceField | String containing the summary_field.object.field name from the API summary_field object. For example, if a fields should be associated to the summary_fields.inventory.name, set the sourceModel to 'inventory' and the sourceField to 'name'. |
@@ -140,12 +140,12 @@ export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
 .factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
-    'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
+    'Attr', 'Icon', 'Column',
     'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', 'getSearchHtml',
-    function ($rootScope, $location, $compile, GenerateList, SearchWidget,
-        PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, getSearchHtml) {
+    'Store', 'ActionButton', '$log', 'i18n',
+    function ($rootScope, $location, $compile, GenerateList,
+        Attr, Icon, Column, NavigationLink, HelpCollapse,
+        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -160,6 +160,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
             has: function (key) {
                 return (this.form[key] && this.form[key] !== null && this.form[key] !== undefined) ? true : false;
+            },
+            // Not a very good way to do this
+            // Form sub-states expect to target ui-views related@stateName & modal@stateName
+            // Also wraps mess of generated HTML in a .Panel
+            wrapPanel(html, ignorePanel){
+                if(ignorePanel) {
+                    return `<div>
+                    ${html}
+                    <div ui-view="related"></div>
+                    <div ui-view="modal"></div>
+                    </div>`;
+                }
+                else {
+                    return `<div class="Panel">
+                    ${html}
+                    <div ui-view="related"></div>
+                    <div ui-view="modal"></div>
+                    </div>`;
+                }
             },
 
             inject: function (form, options) {
@@ -245,11 +264,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     for (set in form.related) {
                         this.scope[set] = null;
                     }
-                    if (((!options.modal) && options.related) || this.form.forceListeners) {
-                        this.addListeners();
-                    }
+                    // if (((!options.modal) && options.related) || this.form.forceListeners) {
+                    //     this.addListeners();
+                    // }
                     if (options.mode === 'add') {
-                        this.applyDefaults();
+                        this.applyDefaults(form, this.scope);
                     }
                 }
 
@@ -261,22 +280,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 $('.popover').each(function () {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
-                });
-
-                // Prepend an asterisk to required field label
-                $('.form-control[required], input[type="radio"][required]').each(function () {
-                    var label, span;
-                    if (Empty($(this).attr('aw-required-when'))) {
-                        label = $(this).closest('.form-group').find('label').first();
-                        if (label.length > 0) {
-                            span = label.children('span');
-                            if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
-                                span.first().addClass('prepend-asterisk');
-                            } else if (span.length <= 0 && !label.first().hasClass('prepend-asterisk')) {
-                                label.first().addClass('prepend-asterisk');
-                            }
-                        }
-                    }
                 });
 
                 try {
@@ -367,18 +370,23 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //   html = GenerateForm.buildHTML(JobVarsPromptForm, { mode: 'edit', modal: true, scope: scope });
 
                 this.mode = options.mode;
-                this.modal = (options.modal) ? true : false;
+                //this.modal = (options.modal) ? true : false;
                 this.setForm(form);
                 return this.build(options);
             },
 
-            applyDefaults: function () {
-                for (var fld in this.form.fields) {
-                    if (this.form.fields[fld]['default'] || this.form.fields[fld]['default'] === 0) {
-                        if (this.form.fields[fld].type === 'select' && this.scope[fld + '_options']) {
-                            this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld]['default']];
+            applyDefaults: function (form, scope) {
+                // Note: This is a hack. Ideally, mode should be set in each <resource>-<mode>.controller.js
+                // The mode is needed by the awlookup directive to auto-populate form fields when there is a
+                // single related resource.
+                scope.mode = this.mode;
+
+                for (var fld in form.fields) {
+                    if (form.fields[fld]['default'] || form.fields[fld]['default'] === 0) {
+                        if (form.fields[fld].type === 'select' && scope[fld + '_options']) {
+                            scope[fld] = scope[fld + '_options'][form.fields[fld]['default']];
                         } else {
-                            this.scope[fld] = this.form.fields[fld]['default'];
+                            scope[fld] = form.fields[fld]['default'];
                         }
                     }
                 }
@@ -457,7 +465,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     }
                 }
                 if (this.mode === 'add') {
-                    this.applyDefaults();
+                    this.applyDefaults(form, scope);
                 }
             },
 
@@ -473,89 +481,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             model.$setViewValue(newVal);
                         }
                     }
-                }
-            },
-
-            addListeners: function () {
-
-                if (this.modal) {
-                    $('.jqui-accordion-modal').accordion({
-                        collapsible: false,
-                        heightStyle: 'content',
-                        active: 0
-                    });
-                } else {
-                    // For help collapse, toggle the plus/minus icon
-                    this.scope.accordionToggle = function (selector) {
-                        $(selector).collapse('toggle');
-                        if ($(selector + '-icon').hasClass('fa-minus')) {
-                            $(selector + '-icon').removeClass('fa-minus').addClass('fa-plus');
-                        } else {
-                            $(selector + '-icon').removeClass('fa-plus').addClass('fa-minus');
-                        }
-                    };
-
-                    $('.jqui-accordion').each(function () {
-                        var active = false,
-                            list = Store('accordions'),
-                            found = false,
-                            id, base, i;
-
-                        if ($(this).attr('data-open-first')) {
-                            active = 0;
-                        }
-                        else {
-                            if (list) {
-                                id = $(this).attr('id');
-                                base = ($location.path().replace(/^\//, '').split('/')[0]);
-                                for (i = 0; i < list.length && found === false; i++) {
-                                    if (list[i].base === base && list[i].id === id) {
-                                        found = true;
-                                        active = list[i].active;
-                                    }
-                                }
-                            }
-                            if (found === false && $(this).attr('data-open') === 'true') {
-                                active = 0;
-                            }
-                        }
-
-                        $(this).accordion({
-                            collapsible: true,
-                            heightStyle: 'content',
-                            active: active,
-                            activate: function () {
-                                // Maintain in local storage of list of all accordions by page, recording
-                                // the active panel for each. If user navigates away and comes back,
-                                // we can activate the last panely viewed.
-                                $('.jqui-accordion').each(function () {
-                                    var active = $(this).accordion('option', 'active'),
-                                        id = $(this).attr('id'),
-                                        base = ($location.path().replace(/^\//, '').split('/')[0]),
-                                        list = Store('accordions'),
-                                        found = false,
-                                        i;
-                                    if (!list) {
-                                        list = [];
-                                    }
-                                    for (i = 0; i < list.length && found === false; i++) {
-                                        if (list[i].base === base && list[i].id === id) {
-                                            found = true;
-                                            list[i].active = active;
-                                        }
-                                    }
-                                    if (found === false) {
-                                        list.push({
-                                            base: base,
-                                            id: id,
-                                            active: active
-                                        });
-                                    }
-                                    Store('accordions', list);
-                                });
-                            }
-                        });
-                    });
                 }
             },
 
@@ -575,21 +500,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 return html;
             },
 
-            clearApiErrors: function () {
+            clearApiErrors: function (scope) {
                 for (var fld in this.form.fields) {
                     if (this.form.fields[fld].sourceModel) {
-                        this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+                        scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
                         $('[name="' + this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '"]').removeClass('ng-invalid');
                     } else if (this.form.fields[fld].realName) {
                         this.scope[this.form.fields[fld].realName + '_api_error'] = '';
                         $('[name="' + this.form.fields[fld].realName + '"]').removeClass('ng-invalid');
                     } else {
-                        this.scope[fld + '_api_error'] = '';
+                        scope[fld + '_api_error'] = '';
                         $('[name="' + fld + '"]').removeClass('ng-invalid');
                     }
                 }
-                if (!this.scope.$$phase) {
-                    this.scope.$digest();
+                if (!scope.$$phase) {
+                    scope.$digest();
                 }
             },
 
@@ -620,18 +545,19 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += " " + field.columnClass;
                     html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
+                    html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
+                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
-                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
+                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</div></div></div>";
+                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
                 }
                 return html;
             },
 
 
             buildField: function (fld, field, options, form) {
-                var i, fldWidth, offset, html = '',
+                var i, fldWidth, offset, html = '', error_message,
                     horizontal = (this.form.horizontal) ? true : false;
 
                 function getFieldWidth() {
@@ -718,13 +644,14 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (field.label || field.labelBind) {
                         html += "<label class=\"";
                         html += (field.labelClass) ? field.labelClass : "";
+                        html += `${field.required ? ' prepend-asterisk ' : ''}`;
                         html += (horizontal) ? " " + getLabelWidth() : "Form-inputLabelContainer ";
                         html += "\" ";
                         html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                         html += "for=\"" + fld + '">\n';
                         html += (field.icon) ? Icon(field.icon) : "";
                         if (field.labelBind) {
-                            html += "\t\t<span class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
+                            html += "\t\t<span ng-class=class=\"Form-inputLabel\" ng-bind=\"" + field.labelBind + "\">\n\t\t</span>";
                         } else {
                             html += "\t\t<span class=\"Form-inputLabel\">\n\t\t\t" + field.label + "\n\t\t</span>";
                         }
@@ -749,6 +676,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             let cls = action["class"] || "";
                             html += `<a class="Form-labelAction ${cls}" href="${href}" ng-click="${ngClick}">${action.label}</a>`;
                         }
+
+                        if(field.reset && !field.disabled) {
+                            var resetValue = "'" + field.reset+ "'";
+                            var resetMessage = i18n._('Revert');
+                            html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">${resetMessage}</a>`;
+                        }
+
                         html += "\n\t</label>\n";
                     }
                     return html;
@@ -760,6 +694,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += " " + field.columnClass;
                     html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
                     html += (field.flag) ? field.flag : "enabled";
+                    html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
                     html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
                     html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
@@ -794,10 +729,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 if ((!field.readonly) || (field.readonly && options.mode === 'edit')) {
 
-                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock') {
+                    if((field.excludeMode === undefined || field.excludeMode !== options.mode) && field.type !== 'alertblock' && field.type !== 'workflow-chart') {
 
 
                     html += "<div class='form-group Form-formGroup ";
+                    html += (field.disabled) ? `Form-formGroup--disabled ` : ``;
                     html += (field.type === "checkbox") ? "Form-formGroup--checkbox" : "";
                     html += (field['class']) ? (field['class']) : "";
                     html += "'";
@@ -805,6 +741,20 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.ngHide) ? this.attr(field, 'ngHide') : "";
                     html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
+
+                    var definedInFileMessage = i18n._('This setting has been set manually in a settings file and is now disabled.');
+                    html += (field.definedInFile) ?
+                        `<span class="Form-tooltip--disabled">${definedInFileMessage}</span>` : ``;
+
+                    // toggle switches
+                    if(field.type === 'toggleSwitch') {
+                        html += label();
+                            html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
+                            data-placement="top">
+                            <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</button>
+                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</button>
+                        </div>`;
+                    }
 
                     //text fields
                     if (field.type === 'text' || field.type === 'password' || field.type === 'email') {
@@ -823,11 +773,11 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                             html += buildId(field, fld, this.form);
                             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
-                            html += "class=\"form-control Form-textInput ";
+                            html += "class=\"form-control Form-textInput";
                             html += "\" ";
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
-                            html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                            html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                            html += (field.required) ? "required " : "";
+                            html += (field.disabled) ? `disabled="disabled" `: ``;
                             html += (field.readonly || field.showonly) ? "readonly " : "";
                             html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                             html += (field.capitalize) ? "capitalize " : "";
@@ -865,6 +815,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += ">";
                             html += "<input type=\"checkbox\" ng-model=\"" + field.subCheckbox.variable + "\" ";
                             html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
@@ -872,22 +823,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
-                            field.awRequiredWhen) {
+                        if (field.required || field.awRequiredWhen) {
+                            error_message = i18n._('Please enter a value.');
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : error_message) + "</div>\n";
                         }
                         if (field.type === "email") {
+                            error_message = i18n._('Please enter a valid email address.');
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-email-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.email\">Please enter a valid email address.</div>\n";
+                                this.form.name + '_form.' + fld + `.$error.email">${error_message}</div>`;
                         }
                         if (field.awPassMatch) {
+                            error_message = i18n._('This value does not match the password you entered previously.  Please confirm that password.');
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-passmatch-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awpassmatch\">This value does not match the password you entered previously.  Please confirm that password.</div>\n";
+                                `.$error.awpassmatch">${error_message}</div>`;
                         }
                         if (field.awValidUrl) {
+                            error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-url-error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                ".$error.awvalidurl\">Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character. </div>\n";
+                                `.$error.awvalidurl">${error_message}</div>`;
                         }
 
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -900,33 +854,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //fields with sensitive data that needs to be obfuscated from view
                     if (field.type === 'sensitive') {
-                        field.showInputInnerHTML = "Show";
+                        field.showInputInnerHTML = i18n._("Show");
                         field.inputType = "password";
 
                         html += "\t" + label();
                         if (field.hasShowInputButton) {
-                            field.toggleInput = function(id) {
-                                var buttonId = id + "_show_input_button",
-                                    inputId = id + "_input",
-                                    buttonInnerHTML = $(buttonId).html();
-                                if (buttonInnerHTML.indexOf("Show") > -1) {
-                                    $(buttonId).html("Hide");
-                                    $(inputId).attr("type", "text");
-                                } else {
-                                    $(buttonId).html("Show");
-                                    $(inputId).attr("type", "password");
-                                }
-                            };
+                            var tooltip = i18n._("Toggle the display of plaintext.");
                             html += "\<div class='input-group";
                             html += (horizontal) ? " " + getFieldWidth() : "";
                             html += "'>\n";
                             // TODO: make it so that the button won't show up if the mode is edit, hasShowInputButton !== true, and there are no contents in the field.
                             html += "<span class='input-group-btn'>\n";
-                            html += "<button type='button' class='btn btn-default show_input_button Form-passwordButton' ";
+                            html += "<button aw-password-toggle type='button' class='btn btn-default show_input_button Form-passwordButton' ";
                             html += buildId(field, fld + "_show_input_button", this.form);
-                            html += "aw-tool-tip='Toggle the display of plaintext.' aw-tip-placement='top' ";
+                            html += `aw-tool-tip='${tooltip}'} aw-tip-placement='top'`;
                             html += "tabindex='-1' ";
-                            html += "ng-click='" + fld + "_field.toggleInput(\"#" + this.form.name + "_" + fld + "\")'";
                             html += (field.ngDisabled) ? "ng-disabled='" + field.ngDisabled + "'" : "";
                             html += ">\n" + field.showInputInnerHTML;
                             html += "\n</button>\n";
@@ -939,6 +881,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if (field.control === null || field.control === undefined || field.control) {
                             html += "<input ";
+                            html += (field.disabled) ? `disabled="disabled" `: ``;
                             html += buildId(field, fld + "_input", this.form);
                             html += "type='password' ";
                             html += "ng-model=\"" + fld + '" ';
@@ -953,9 +896,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += (field.chkPass) ? "chk-pass " : "";
 
                             html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
-                            html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                            html += (options.mode === 'add' && field.addRequired) ? "required " : "";
-
+                            html += (field.required) ? "required " : "";
+                            html += (field.ngRequired) ? `ng-required="${field.ngRequired}"` : "";
                             html += (field.readonly || field.showonly) ? "readonly " : "";
 
                             html += (field.awPassMatch) ? "awpassmatch='" + field.associated + "' " : "";
@@ -984,8 +926,10 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 field.subCheckbox.variable + "\" ";
                             html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
-                            if (field.subCheckbox.ngDisabled) {
+                            if (field.subCheckbox.ngDisabled !== undefined) {
                                 html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
+                            } else {
+                                html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             }
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
@@ -993,44 +937,52 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
-                            field.awRequiredWhen) {
+                        if (field.required || field.awRequiredWhen) {
+                            error_message = i18n._("Please enter a value.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-required-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
-                                this.form.name + "_form." + fld + ".$error.required'>\n" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "\n</div>\n";
+                                this.form.name + "_form." + fld + ".$error.required'>\n" + (field.requiredErrorMsg ? field.requiredErrorMsg : error_message) + "\n</div>\n";
                         }
                         if (field.type === "email") {
+                            error_message = i18n._("Please enter a valid email address.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-email-error' ng-show='" + this.form.name + "_form." + fld + ".$dirty && " +
-                                this.form.name + "_form." + fld + ".$error.email'>\nPlease enter a valid email address.\n</div>\n";
+                                this.form.name + "_form." + fld + `.$error.email'>${error_message}</div>`;
                         }
                         if (field.awPassMatch) {
+                            error_message = i18n._("This value does not match the password you entered previously.  Please confirm that password.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-passmatch-error' ng-show='" + this.form.name + "_form." + fld +
-                                ".$error.awpassmatch'>\nThis value does not match the password you entered previously.  Please confirm that password.\n</div>\n";
+                                `.$error.awpassmatch'>${error_message}</div>`;
                         }
                         if (field.awValidUrl) {
+                            error_message = i18n._("Please enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.");
                             html += "<div class='error' id='" + this.form.name + "-" + fld + "-url-error' ng-show='" + this.form.name + "_form." + fld +
-                                ".$error.awvalidurl'>\nPlease enter a URL that begins with ssh, http or https.  The URL may not contain the '@' character.\n</div>\n";
+                                `.$error.awvalidurl'>${error_message}</div>`;
                         }
                         if (field.chkPass && $AnsibleConfig) {
                             // password strength
                             if ($AnsibleConfig.password_length) {
+                                error_message = i18n.sprintf(i18n._("Your password must be %d characters long."), $AnsibleConfig.password_length);
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.password_length\">Your password must be " + $AnsibleConfig.password_length + " characters long.</div>\n";
+                                    `.$error.password_length">${error_message}</div>`;
                             }
                             if ($AnsibleConfig.password_hasLowercase) {
+                                error_message = i18n._("Your password must contain a lowercase letter.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasLowercase\">Your password must contain a lowercase letter.</div>\n";
+                                    `.$error.hasLowercase">${error_message}</div>`;
                             }
                             if ($AnsibleConfig.password_hasUppercase) {
+                                error_message = i18n._("Your password must contain an uppercase letter.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasUppercase\">Your password must contain an uppercase letter.</div>\n";
+                                    `.$error.hasUppercase">${error_message}</div>`;
                             }
                             if ($AnsibleConfig.password_hasNumber) {
+                                error_message = i18n._("Your password must contain a number.");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasNumber\">Your password must contain a number.</div>\n";
+                                    `.$error.hasNumber">${error_message}</div>`;
                             }
                             if ($AnsibleConfig.password_hasSymbol) {
+                                error_message = i18n.sprintf(i18n._("Your password must contain one of the following characters: %s"), "`~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,");
                                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld +
-                                    ".$error.hasSymbol\">Your password must contain one of the following characters: `~!@#$%^&*()_-+=|}\]{\[;:\"\'?\/>.<,</div>\n";
+                                    `.$error.hasSymbol">${error_message}</div>`;
                             }
                         }
 
@@ -1050,6 +1002,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += ">\n";
 
                         html += "<textarea ";
+                        html += (field.disabled) ? `disabled="disabled" `: ``;
                         html += (field.rows) ? this.attr(field, 'rows') : "";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
@@ -1061,9 +1014,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += buildId(field, fld, this.form);
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
-                        html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                        html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                        html += (field.required) ? "required " : "";
                         html += (field.ngRequired) ? "ng-required=\"" + field.ngRequired +"\"" : "";
+                        html += (field.ngTrim !== undefined) ? "ng-trim=\"" + field.ngTrim +"\"" : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
                         html += (field.awDropFile) ? "aw-drop-file " : "";
                         if(field.awRequiredWhen) {
@@ -1084,15 +1037,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if (field.subCheckbox.ngDisabled) {
                                 html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
                             }
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
                             html += "</label>";
                         }
 
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
+                        if (field.required) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please enter a value.") + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please enter a value.")) + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
                         html += "</div>\n";
@@ -1109,6 +1063,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<div class=\"Form-dropDownContainer\">\n";
                         html += "<select ";
+                        html += (field.disabled) ? `disabled="disabled" `: ``;
                         html += "ng-model=\"" + (field.ngModel ? field.ngModel : fld) + '" ';
                         html += 'name="' + fld + '" ';
                         html += "class=\"form-control Form-dropDown";
@@ -1119,8 +1074,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
                         html += (field.ngInit) ? this.attr(field, 'ngInit') : "";
                         html += buildId(field, fld, this.form);
-                        html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                        html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                        html += (field.required) ? "required " : "";
                         //used for select2 combo boxes
                         html += (field.multiSelect) ? "multiple " : "";
                         html += (field.readonly) ? "disabled " : "";
@@ -1133,7 +1087,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if(!field.multiSelect && !field.disableChooseOption){
                             html += "<option value=\"\">";
                                 // Add a custom default select 'value' (default text)
-                            html += (field.defaultText) ? field.defaultText : "Choose a " + field.label.toLowerCase();
+                            html += (field.defaultText) ? field.defaultText : i18n.sprintf(i18n._("Choose a %s"), field.label.toLowerCase());
                             html += "</option>\n";
                         }
 
@@ -1151,16 +1105,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             if (field.subCheckbox.ngDisabled) {
                                 html += "ng-disabled='" + field.subCheckbox.ngDisabled + "'";
                             }
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
                             html += "</label>";
                         }
 
                             // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
-                            field.awRequiredWhen) {
+                        if (field.required || field.awRequiredWhen) {
                                 html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                    this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.");
+                                    this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select a value."));
                                 if (field.includePlaybookNotFoundError) {
                                     html += "  <span ng-show=\"playbookNotFound\">Playbook {{ job_template_obj.playbook }} not found for project.</span>\n";
                                 }
@@ -1185,7 +1139,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         html += "<input ";
                         html += (field.spinner) ? "" : "type=\"text\" ";
-                        html += "\" value=\"" + field['default'] + "\" ";
+                        html += " value=\"" + field['default'] + "\" ";
                         html += "class=\"";
                         if (!field.slider && !field.spinner) {
                             html += "form-control";
@@ -1199,9 +1153,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.min || field.min === 0) ? this.attr(field, 'min') : "";
                         html += (field.max) ? this.attr(field, 'max') : "";
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                        html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                         html += (field.slider) ? "id=\"" + fld + "-number\"" : (field.id) ? this.attr(field, 'id') : "";
-                        html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                        html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                        html += (field.required) ? "required " : "";
                         html += (field.readonly) ? "readonly " : "";
                         html += (field.integer) ? "integer " : "";
                         html += (field.disabled) ? "data-disabled=\"true\" " : "";
@@ -1219,6 +1173,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<input type=\"checkbox\" ng-model=\"" +
                                 field.subCheckbox.variable + "\" ";
                             html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
@@ -1226,17 +1181,21 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
+                        if (field.required) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select a value.")) + "</div>\n";
                         }
                         if (field.integer) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please enter a number.</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">" + i18n._("Please enter a number.") + "</div>\n";
                         }
                         if (field.min !== undefined || field.max !== undefined) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-minmax-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " +
-                                this.form.name + '_form.' + fld + ".$error.max\">Please enter a number greater than " + field.min;
-                            html += (field.max !== undefined) ? " and less than " + field.max + "." : ".";
+                                this.form.name + '_form.' + fld + ".$error.max\">";
+                            if (field.max !== undefined) {
+                                html += i18n.sprintf(i18n._("Please enter a number greater than %d and less than %d."), field.min, field.max);
+                            } else {
+                                html += i18n.sprintf(i18n._("Please enter a number greater than %d."), field.min);
+                            }
                             html += "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -1259,16 +1218,16 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += buildCheckbox(this.form, field.fields[i], field.fields[i].name, i);
                         }
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
+                        if (field.required) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select at least one value.") + "</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select at least one value.")) + "</div>\n";
                         }
                         if (field.integer) {
-                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Please select a number.</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-integer-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">" + i18n._("Please select a number.") + "</div>\n";
                         }
                         if (field.min || field.max) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-minmax-error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " +
-                                this.form.name + '_form.' + fld + ".$error.max\">Please select a number between " + field.min + " and " +
+                                this.form.name + '_form.' + fld + ".$error.max\">" + i18n._("Please select a number between ") + field.min + i18n._(" and ") +
                                 field.max + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
@@ -1314,11 +1273,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += label();
 
                         html += "<div ";
-                        html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+                        html += (field.ngShow) ? "ng-show=\"" + field.ngShow + "\" " : "";
+                        html += (horizontal) ? "class=\"radio-group " + getFieldWidth() + "\"" : "class=\"radio-group\"";
                         html += ">\n";
 
                         for (i = 0; i < field.options.length; i++) {
-                            html += "<label class=\"radio-inline\" ";
+                            html += "<label class=\"radio-inline ";
+                            html += (field.options[i].labelClass) ? ` ${field.options[i].labelClass} "` : "\"";
                             html += (field.options[i].ngShow) ? this.attr(field.options[i], 'ngShow') : "";
                             html += ">";
                             html += "<input type=\"radio\" ";
@@ -1326,17 +1287,23 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "value=\"" + field.options[i].value + "\" ";
                             html += "ng-model=\"" + fld + "\" ";
                             html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
+                            html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}"` : "";
                             html += (field.readonly) ? "disabled " : "";
-                            html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
-                            html += (options.mode === 'add' && field.addRequired) ? "required " : "";
+                            html += (field.required) ? "required " : "";
+                            html += (field.ngshow) ? "ng-show=\"" + field.ngShow + "\" " : "";
+                            if(field.awRequiredWhen) {
+                                html += field.awRequiredWhen.init ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" " : "";
+                                html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
+                                html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
+                            }
                             html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "";
                             html += " > " + field.options[i].label + "\n";
                             html += "</label>\n";
                         }
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired)) {
+                        if (field.required || field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
                                 this.form.name + '_form.' + fld + ".$dirty && " +
-                                this.form.name + '_form.' + fld + ".$error.required\">Please select a value.</div>\n";
+                                this.form.name + '_form.' + fld + ".$error.required\">" + i18n._("Please select a value.") + "</div>\n";
                         }
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" +
                             fld + "_api_error\"></div>\n";
@@ -1382,24 +1349,25 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                     //lookup type fields
                     if (field.type === 'lookup') {
-
+                        let defaultLookupNgClick = `$state.go($state.current.name + '.${field.sourceModel}', {selected: ${field.sourceModel}})`;
                         html += label();
 
                         html += "<div ";
                         html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
                         html += ">\n";
 
-                        html += "<div class=\"input-group\">\n";
+                        html += `<div class="input-group">`;
                         html += "<span class=\"input-group-btn\">\n";
-                        html += "<button type=\"button\" class=\" Form-lookupButton btn btn-default\" " + this.attr(field, 'ngClick');
-                        html += (field.readonly || field.showonly) ? " disabled " : "";
-                        html += (field.ngDisabled) ? this.attr(field, "ngDisabled"): "";
-                        html += "id=\"" + fld + "-lookup-btn\"><i class=\"fa fa-search\"></i></button>\n";
+                        html += `<button type="button" class="Form-lookupButton btn btn-default" ng-click="${field.ngClick || defaultLookupNgClick}"
+                        ${field.readonly || field.showonly}
+                        ${this.attr(field, "ngDisabled")}
+                        id="${fld}-lookup-btn"><i class="fa fa-search"></i></button>`;
                         html += "</span>\n";
                         html += "<input type=\"text\" class=\"form-control Form-textInput input-medium lookup\" ";
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
                         html += "class=\"form-control\" ";
+                        html += (field.required) ? 'required ' : '';
                         html += (field.ngChange) ? this.attr(field, 'ngChange') : "";
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled') : "" ;
                         html += (field.ngRequired) ? this.attr(field, 'ngRequired') : "";
@@ -1412,6 +1380,13 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += field.awRequiredWhen.reqExpression ? "aw-required-when=\"" + field.awRequiredWhen.reqExpression + "\" " : "";
                             html += field.awRequiredWhen.alwaysShowAsterisk ? "data-awrequired-always-show-asterisk=true " : "";
                         }
+                        // the awlookup directive depends on a data-url attribute to make requests and set field validity
+                        html += `data-basePath="${field.basePath}"`;
+                        html += `data-source="${field.sourceModel}"`;
+                        html += `data-query="?${field.sourceField}__iexact=:value"`;
+                        html += (field.autopopulateLookup !== undefined)  ? ` autopopulateLookup=${field.autopopulateLookup} ` : "";
+                        html += (field.watchBasePath !== undefined) ? ` watchBasePath=${field.watchBasePath} ` : "";
+                        html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
                         html += " awlookup >\n";
                         html += "</div>\n";
 
@@ -1422,6 +1397,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             html += "<input type=\"checkbox\" ng-model=\"" +
                                 field.subCheckbox.variable + "\" ";
                             html += (field.subCheckbox.ngChange) ? "ng-change=\"" + field.subCheckbox.ngChange + "\" " : "";
+                            html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                             html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
                             html += ">";
                             html += field.subCheckbox.text ? field.subCheckbox.text : "";
@@ -1429,19 +1405,27 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         }
 
                         // Add error messages
-                        if ((options.mode === 'add' && field.addRequired) || (options.mode === 'edit' && field.editRequired) ||
-                            field.awRequiredWhen) {
+                        if (field.required || field.awRequiredWhen) {
                             html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-required-error\" ng-show=\"" +
                                 this.form.name + '_form.' +
                                 field.sourceModel + '_' + field.sourceField + ".$dirty && " +
                                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                                ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : "Please select a value.") + "</div>\n";
+                                ".$error.required\">" + (field.requiredErrorMsg ? field.requiredErrorMsg : i18n._("Please select a value.")) + "</div>\n";
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup && !(" + this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.required)\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
+                        } else {
+                            html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
+                                this.form.name + '_form.' +
+                                field.sourceModel + '_' + field.sourceField + ".$dirty && " +
+                                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
+                                ".$error.awlookup\">" + i18n._("That value was not found.  Please enter or select a valid value.") + "</div>\n";
                         }
-                        html += "<div class=\"error\" id=\"" + this.form.name + "-" + fld + "-notfound-error\" ng-show=\"" +
-                            this.form.name + '_form.' +
-                            field.sourceModel + '_' + field.sourceField + ".$dirty && " +
-                            this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField +
-                            ".$error.awlookup\">That value was not found.  Please enter or select a valid value.</div>\n";
                         html += "<div class=\"error api-error\" id=\"" + this.form.name + "-" + fld + "-api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField +
                             "_api_error\"></div>\n";
                         html += "</div>\n";
@@ -1472,8 +1456,8 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML
                 // string to be injected into the current view.
                 //
-                var btn, button, fld, field, html = '', i, section, group,
-                    tab, sectionShow, offset, width,ngDisabled, itm;
+                var btn, button, fld, field, html = '', section, group,
+                    sectionShow, offset, width,ngDisabled, itm;
 
                 // title and exit button
                 if(!(this.form.showHeader !== undefined && this.form.showHeader === false)) {
@@ -1482,9 +1466,9 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
                     if(this.form.name === "user"){
                         html+= "<span class=\"Form-title--is_superuser\" "+
-                            "ng-show='is_superuser'>Admin</span>";
+                            "ng-show='is_superuser'>" + i18n._("Admin") + "</span>";
                         html+= "<span class=\"Form-title--is_system_auditor\" "+
-                            "ng-show='is_system_auditor'>Auditor</span>";
+                            "ng-show='is_system_auditor'>" + i18n._("Auditor") + "</span>";
                         html+= "<span class=\"Form-title--is_ldap_user\" "+
                             "ng-show='ldap_user'>LDAP</span>";
                         html+= "<span class=\"Form-title--is_external_account\" "+
@@ -1509,39 +1493,78 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<i class=\"fa fa-times-circle\"></i>";
                         html += "</button></div>\n";
                     }
-                        html += "</div></div>\n"; //end of Form-header
+                        html += "</div>"; //end of Form-header
                 }
 
-                if (!_.isEmpty(this.form.related)) {
-                    var collection;
+                if (!_.isEmpty(this.form.related) || !_.isEmpty(this.form.relatedButtons)) {
+                    var collection, details = i18n._('Details');
                     html += "<div class=\"Form-tabHolder\">";
 
                     if(this.mode === "edit"){
-                        html += "<div id=\"" + this.form.name + "_tab\""+
-                            "class=\"Form-tab\" "+
-                            "ng-click=\"toggleFormTabs($event)\"" +
-                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">Details</div>";
+                        html += `<div id="${this.form.name}_tab" class="Form-tab" `;
+                        html += this.form.detailsClick ? `ng-click="` + this.form.detailsClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit')" `;
+                        html += `ng-class="{'is-selected': $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">` +
+                            `${details}</div>`;
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
-                            html += `<div id="${itm}_tab"`+
-                                `class="Form-tab"`+
-                                `ng-click="${this.form.related[itm].disabled} || toggleFormTabs($event)"`;
-                            if (collection.awToolTip){
-                                html += `aw-tool-tip="${collection.awToolTip}"` +
-                                `aw-tip-placement="${collection.dataPlacement}"` +
-                                `data-tip-watch="${collection.dataTipWatch}"`;
+                            html += `<div id="${itm}_tab" `+
+                                `class="Form-tab" `;
+                            html += (this.form.related[itm].ngClick) ? `ng-click="` + this.form.related[itm].ngClick + `" ` : `ng-click="$state.go('${this.form.stateTree}.edit.${itm}')" `;
+                            if (collection.awToolTip && collection.awToolTipTabEnabledInEditMode === true) {
+                                html += `aw-tool-tip="${collection.awToolTip}" ` +
+                                `aw-tip-placement="${collection.dataPlacement}" ` +
+                                `data-tip-watch="${collection.dataTipWatch}" `;
                             }
-                            html += `ng-class="{'is-selected': ${itm}Selected ` ;
+                            html += `ng-class="{'is-selected' : $state.is('${this.form.activeEditState}.${itm}') || $state.is('${this.form.stateTree}.edit.${itm}') ` ;
                             if(this.form.related[itm].disabled){
                                 html += `, 'Form-tab--disabled' : ${this.form.related[itm].disabled }`;
                             }
                             html +=  `}">${(collection.title || collection.editTitle)}</div>`;
                         }
+
+                        for (itm in this.form.relatedButtons) {
+                            button = this.form.relatedButtons[itm];
+
+                            // Build button HTML
+                            html += "<button type=\"button\" ";
+                            html += "class=\"btn btn-sm";
+                            html += (button['class']) ? " " + button['class'] : "";
+                            html += "\" ";
+                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                            if(button.ngShow){
+                                html += this.attr(button, 'ngShow');
+                            }
+                            if (button.ngClick) {
+                                html += this.attr(button, 'ngClick');
+                            }
+                            if (button.awFeature) {
+                                html += this.attr(button, 'awFeature');
+                            }
+                            if (button.ngDisabled) {
+                                ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
+                                if (btn !== 'reset') {
+                                    //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+                                    html += "ng-disabled=\"" + ngDisabled;
+                                    //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                    html += "\" ";
+                                } else {
+                                    //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                                    //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                    //html += "\" ";
+                                }
+                            }
+                            if(button.awToolTip) {
+                                html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                            }
+                            html += ">";
+                            html += " " + button.label + "</button>\n";
+                        }
                     }
                     else if(this.mode === "add"){
                         html += "<div id=\"" + this.form.name + "_tab\""+
-                            "class=\"Form-tab is-selected\">Details</div>";
+                            `class="Form-tab is-selected">${details}</div>`;
 
                         for (itm in this.form.related) {
                             collection = this.form.related[itm];
@@ -1551,13 +1574,35 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                 "class=\"Form-tab Form-tab--disabled\">" + (collection.title || collection.editTitle) +
                                 "</div>\n";
                         }
+
+                        for (itm in this.form.relatedButtons) {
+                            button = this.form.relatedButtons[itm];
+
+                            // Build button HTML
+                            html += "<button type=\"button\" ";
+                            html += "class=\"btn btn-sm Form-tab--disabled";
+                            html += (button['class']) ? " " + button['class'] : "";
+                            html += "\" ";
+                            html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                            if(button.ngShow){
+                                html += this.attr(button, 'ngShow');
+                            }
+                            if (button.awFeature) {
+                                html += this.attr(button, 'awFeature');
+                            }
+                            if(button.awToolTip) {
+                                html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
+                            }
+                            html += ">";
+                            html += " " + button.label + "</button>\n";
+                        }
                     }
                     html += "</div>";//tabHolder
                 }
 
                 if(!_.isEmpty(this.form.related) && this.mode === "edit"){
-                    html += "<div class=\"Form-tabSection\" "+
-                            "ng-class=\"{'is-selected': " + this.form.name + "Selected }\">";
+                    html += `<div class="Form-tabSection" ng-class="{'is-selected' : $state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.$current.data.formChildState }">`;
                 }
 
                 html += "<form class=\"Form";
@@ -1566,35 +1611,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
                 html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
-                if (this.form.licenseTabs) {
-                    html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
-                    for (i = 0; i < this.form.licenseTabs.length; i++) {
-                        tab = this.form.licenseTabs[i];
-                        html += "<li";
-                        if (i === 0) {
-                            html += " class=\"active\"";
-                        }
-                        html += "><a id=\"" + tab.name + "_link\" ng-click=\"toggleTab($event, '" + tab.name + "_link', '" +
-                            this.form.name + "_tabs')\" href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
-                    }
-                    html += "</ul>\n";
-                    html += "<div class=\"tab-content\">\n";
-                    for (i = 0; i < this.form.licenseTabs.length; i++) {
-                        tab = this.form.licenseTabs[i];
-                        html += "<div class=\"tab-pane";
-                        if (i === 0) {
-                            html += " active";
-                        }
-                        html += "\" id=\"" + tab.name + "\">\n";
-                        for (fld in this.form.fields) {
-                            if (this.form.fields[fld].tab === tab.name) {
-                                html += this.buildField(fld, this.form.fields[fld], options, this.form);
-                            }
-                        }
-                        html += "</div>\n";
-                    }
-                    html += "</div>\n";
-                } else {
                     var currentSubForm;
                     var hasSubFormField;
                     // original, single-column form
@@ -1639,10 +1655,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             }
                             else if (!field.subForm && currentSubForm !== undefined) {
                                currentSubForm = undefined;
-                               html += '</div></div> ';
+                               html += '</div> ';
                             }
 
                             html += this.buildField(fld, field, options, this.form);
+                           // console.log('*********')
+                           // console.log(html)
 
                         }
                     }
@@ -1656,7 +1674,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     if (group !== '') {
                         html += "</div>\n";
                     }
-                }
 
                 html += "</form>\n";
 
@@ -1667,7 +1684,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += "<div class=\"buttons Form-buttons\" ";
                         html += "id=\"" + this.form.name + "_controls\" ";
                         if (options.mode === 'edit' && !_.isEmpty(this.form.related)) {
-                            html += "ng-show=\"" + this.form.name + "Selected\"; ";
+                            html += `ng-show="$state.is('${this.form.activeEditState}') || $state.is('${this.form.stateTree}.edit') || $state.matches('lookup') "`;
                         }
                         html += ">\n";
 
@@ -1686,24 +1703,40 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                                 // Set default color and label for Save and Reset
                                 if (btn === 'save') {
-                                    button.label = 'Save';
+                                    button.label = i18n._('Save');
+                                    button['class'] = 'Form-saveButton';
+                                }
+                                if (btn === 'select') {
+                                    button.label = i18n._('Select');
                                     button['class'] = 'Form-saveButton';
                                 }
                                 if (btn === 'cancel') {
-                                    button.label = 'Cancel';
+                                    button.label = i18n._('Cancel');
+                                    button['class'] = 'Form-cancelButton';
+                                }
+                                if (btn === 'close') {
+                                    button.label = i18n._('Close');
                                     button['class'] = 'Form-cancelButton';
                                 }
                                 if (btn === 'launch') {
-                                    button.label = 'Launch';
+                                    button.label = i18n._('Launch');
                                     button['class'] = 'Form-launchButton';
                                 }
                                 if (btn === 'add_survey') {
-                                    button.label = 'Add Survey';
+                                    button.label = i18n._('Add Survey');
                                     button['class'] = 'Form-surveyButton';
                                 }
                                 if (btn === 'edit_survey') {
-                                    button.label = 'Edit Survey';
+                                    button.label =  i18n._('Edit Survey');
                                     button['class'] = 'Form-surveyButton';
+                                }
+                                if (btn === 'view_survey') {
+                                    button.label = i18n._('View Survey');
+                                    button['class'] = 'Form-surveyButton';
+                                }
+                                if (btn === 'workflow_editor') {
+                                    button.label = i18n._('Workflow Editor');
+                                    button['class'] = 'Form-primaryButton';
                                 }
 
                                 // Build button HTML
@@ -1723,17 +1756,29 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                                     html += this.attr(button, 'awFeature');
                                 }
                                 if (button.ngDisabled) {
-                                    ngDisabled = (button.ngDisabled===true) ? this.form.name+"_form.$invalid" : button.ngDisabled;
+                                    ngDisabled = (button.ngDisabled===true) ? `${this.form.name}_form.$invalid ||  ${this.form.name}_form.$pending`: button.ngDisabled;
                                     if (btn !== 'reset') {
                                         //html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-                                        html += "ng-disabled=\"" + ngDisabled;
-                                        //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                        html += "\" ";
+
+                                        if (button.disabled && button.disable !== true) {
+                                            // Allow disabled to overrule ng-disabled. Used for permissions.
+                                            // Example: system auditor can view but not update. Form validity
+                                            // is no longer a concern but ng-disabled will update disabled
+                                            // status on render so we stop applying it here.
+                                        } else {
+                                            html += "ng-disabled=\"" + ngDisabled;
+                                            //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                            html += "\" ";
+                                        }
+
                                     } else {
                                         //html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
                                         //html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
                                         //html += "\" ";
                                     }
+                                }
+                                if (button.disabled && button.disable !== true) {
+                                    html += ` disabled="disabled" `;
                                 }
                                 if(button.awToolTip) {
                                     html += " aw-tool-tip='" + button.awToolTip + "' data-placement='" + button.dataPlacement + "' data-tip-watch='" + button.dataTipWatch + "'";
@@ -1747,56 +1792,39 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         if (this.form.horizontal) {
                             html += "</div>\n";
                         }
-
-                        if(!_.isEmpty(this.form.related) && this.mode === "edit"){
-                            var collection1;
-                            html += "</div>\n"; // end of form's Form-tabSection
-
-                            for (itm in this.form.related) {
-                                collection1 = this.form.related[itm];
-
-                                html += "<div class=\"Form-tabSection\" "+
-                                    "ng-class=\"{'is-selected': " + itm + "Selected }\">";
-                                html += this.GenerateCollection({ form: this.form, related: itm }, options);
-                                html += "</div>\n";
-                            }
-                        }
-
                     }
                 }
 
-                return html;
+                if(!_.isEmpty(this.form.related) && this.mode === "edit"){
+                    html += `</div>`;
+                }
+
+                if (this.form.include){
+                    _.forEach(this.form.include, (template) =>{
+                        html += `<div ng-include="'${template}'"></div>`;
+                    });
+                }
+                // console.log(html);
+                return this.wrapPanel(html, options.noPanel);
             },
 
-            buildCollections: function (options) {
-                //
-                // Create TB accordians with imbedded lists for related collections
-                // Should not be called directly. Called internally by build().
-                //
-                var form = this.form,
-                    html = '',
-                    itm, collection;
+            buildCollection: function (params) {
+                // Currently, there are two ways we reference a list definition in a form
+                // Permissions lists are defined with boilerplate JSON in model.related
+                // this.GenerateCollection() is shaped around supporting this definition
+                // Notifications lists contain a reference to the NotificationList object, which contains the list's JSON definition
+                // However, Notification Lists contain fields that are only rendered by with generateList.build's chain
+                // @extendme rip out remaining HTML-concat silliness and directivize ¯\_(ツ)_/¯
+                this.form = params.form;
+                var html = '',
+                    collection = this.form.related[params.related];
 
-                if (!options.collapseAlreadyStarted) {
-                    html = "<div id=\"" + this.form.name + "-collapse-1\" class=\"jqui-accordion\">\n";
-                }
-
-                for (itm in form.related) {
-                    collection = form.related[itm];
-                    html += "<h3 class=\"" + itm + "_collapse\">" + (collection.title || collection.editTitle) + "</h3>\n";
-                    html += "<div>\n";
                     if (collection.generateList) {
-                        html += GenerateList.buildHTML(collection, { mode: 'edit' });
+                        html += GenerateList.build({ mode: params.mode, list: collection});
                     }
                     else {
-                        html += this.GenerateCollection({ form: form, related: itm }, options);
+                        html += this.GenerateCollection({ form: this.form, related: params.related }, {mode: params.mode});
                     }
-                    html += "</div>\n"; // accordion inner
-                }
-
-                if (!options.collapseAlreadyStarted) {
-                    html += "</div>\n"; // accordion body
-                }
 
                 return html;
             },
@@ -1814,13 +1842,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += "<strong>Hint: </strong>" + collection.instructions + "\n";
                     html += "</div>\n";
                 }
-                var rootID = $location.$$path.split("/")[2];
-                var endpoint = (collection.basePath) ? "/api/v1/" +
-                    collection.basePath
-                        .replace(":id", rootID) : "";
-                var tagSearch = getSearchHtml
-                    .inject(getSearchHtml.getList(collection),
-                        endpoint, itm, collection.iterator);
 
                 var actionButtons = "";
                 Object.keys(collection.actions || {})
@@ -1829,7 +1850,6 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                             .actions[act]);
                     });
                 var hideOnSuperuser = (hideOnSuperuser === true) ? true : false;
-
                 if(actionButtons.length === 0 ){
                     // The search bar should be full width if there are no
                     // action buttons
@@ -1838,100 +1858,78 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 else {
                     width = "col-lg-8 col-md-8 col-sm-8 col-xs-12";
                 }
-                html += `
-                    <div class=\"row\"
-                        ng-show=\"${collection.hideSearchAndActions ? false : true}\">
-                        <div class=\"${width}\"
-                            ng-show=\"${collection.iterator}Loading == true ||
-                                ${collection.iterator}_active_search == true || (
-                                    ${collection.iterator}Loading == false &&
-                                    ${collection.iterator}_active_search == false &&
-                                    ${collection.iterator}_total_rows > 0) &&
-                                    !(is_superuser && ${hideOnSuperuser})\">
-                            ${tagSearch}
-                        </div>`;
 
                 if(actionButtons.length>0){
-                    html += `<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-12 action_column\">
-                        <div class=\"list-actions\">
+                    html += `<div class="list-actions">
                             ${actionButtons}
-                        </div>
-                    </div>`;
+                        </div>`;
                 }
-                html += "</div>";
+
+                // smart-search directive
+                html += `
+                <div
+                    ng-hide="(${itm}.length === 0 && (searchTags | isEmpty)) || hideSmartSearch === true">
+                        <smart-search
+                            django-model="${itm}"
+                            search-size="${width}"
+                            base-path="${ collection.basePath }"
+                            iterator="${collection.iterator}"
+                            list="list"
+                            collection="${collection.iterator}s"
+                            dataset="${collection.iterator}_dataset"
+                            search-tags="searchTags">
+                        </smart-search>
+                </div>
+                    `;
+
+
+                //html += "</div>";
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.
-
                 html += `
                     <div
-                        class=\"row\"
-                        ng-show=\" ${collection.iterator}Loading == false &&
-                            ${collection.iterator}_active_search == true &&
-                            ${itm}.length == 0 &&
-                            !(is_superuser && ${collection.hideOnSuperuser})\">
-                        <div class=\"col-lg-12 List-searchNoResults\">
-                            No records matched your search.
-                        </div>
+                        class="row"
+                        ng-show="${itm}.length === 0 && !(searchTags | isEmpty)">
+                        <div class="col-lg-12 List-searchNoResults">`;
+                html += i18n._('No records matched your search.');
+                html += `</div>
                     </div>
                 `;
 
                 // Show the "no items" box when loading is done and the user isn't actively searching and there are no results
-                var emptyListText = (collection.emptyListText) ? collection.emptyListText : "PLEASE ADD ITEMS TO THIS LIST";
-                html += '<div ng-hide="is_superuser">';
-                html += "<div class=\"List-noItems\" ng-show=\"" + collection.iterator + "Loading == false && " + collection.iterator + "_active_search == false && " + collection.iterator + "_total_rows < 1\">" + emptyListText + "</div>";
+                var emptyListText = (collection.emptyListText) ? collection.emptyListText : i18n._("PLEASE ADD ITEMS TO THIS LIST");
+                html += `<div ng-hide="is_superuser">`;
+                html += `<div class="List-noItems" ng-show="${itm}.length === 0 && (searchTags | isEmpty)"> ${emptyListText} </div>`;
                 html += '</div>';
 
                 html += `
-                    <div class=\"List-noItems\" ng-show=\"is_superuser\">
+                    <div class="List-noItems" ng-show="is_superuser">
                         System Administrators have access to all ${collection.iterator}s
                     </div>
                 `;
 
                 // Start the list
                 html += `
-                <div class=\"list-wrapper\"
-                    ng-show=\"(${collection.iterator}Loading == true ||
-                        (${collection.iterator}Loading == false && ${itm}.length > 0)) &&
-                        !(is_superuser && ${collection.hideOnSuperuser})\">
-                    <table id=\"${itm}_table\" class=\"${collection.iterator} List-table\">
+                <div class="list-wrapper"
+                    ng-show="${collection.iterator}s.length > 0 && !is_superuser">
+                    <table id="${itm}_table" class="${collection.iterator} List-table">
                         <thead>
-                        <tr class=\"List-tableHeaderRow\">
+                        <tr class="List-tableHeaderRow">
                 `;
                 html += (collection.index === undefined || collection.index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                 for (fld in collection.fields) {
-                    if (!collection.fields[fld].searchOnly) {
-
-                        html += "<th class=\"List-tableHeader list-header ";
-                        html += (collection.fields[fld].columnClass) ? collection.fields[fld].columnClass : "";
-                        html += "\" id=\"" + collection.iterator + '-' + fld + "-header\" ";
-
-                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
-                            html += "ng-click=\"sort('" + collection.iterator + "', '" + fld + "')\">";
-                        } else {
-                            html += ">";
-                        }
-
-
-                        html += collection.fields[fld].label;
-
-                        if (!(collection.fields[fld].noSort  || collection.fields[fld].nosort)) {
-                            html += " <i class=\"";
-
-
-                            if (collection.fields[fld].key) {
-                                if (collection.fields[fld].desc) {
-                                    html += "fa fa-sort-down";
-                                } else {
-                                    html += "fa fa-sort-up";
-                                }
-                            } else {
-                                html += "fa fa-sort";
-                            }
-                            html += "\"></i>";
-                        }
-
-                        html += "</a></th>\n";
-                    }
+                    html += `<th class="List-tableHeader list-header ${collection.fields[fld].columnClass}"
+                        id="${collection.iterator}-${fld}-header"
+                        base-path="${collection.basePath}"
+                        collection="${collection.name}"
+                        dataset="${collection.iterator}_dataset"
+                        column-sort
+                        column-field="${fld}"
+                        column-iterator="${collection.iterator}"
+                        column-no-sort="${collection.fields[fld].nosort}"
+                        column-label="${collection.fields[fld].label}">
+                        ${collection.fields[fld].label}
+                        </th>`;
                 }
                 if (collection.fieldActions) {
                     html += "<th class=\"List-tableHeader List-tableHeader--actions\">Actions</th>\n";
@@ -1999,7 +1997,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                 // Message for loading
                 html += "<tr ng-show=\"" + collection.iterator + "Loading == true\">\n";
-                html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
+                html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">" + i18n._("Loading...") + "</div></td>\n";
                 html += "</tr>\n";
 
                 // End List
@@ -2008,12 +2006,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 //html += "</div>\n"; // close well
                 html += "</div>\n"; // close list-wrapper div
 
-                html += PaginateWidget({
-                    set: itm,
-                    iterator: collection.iterator,
-                    mini: true,
-                    hideOnSuperuser: collection.hideOnSuperuser
-                });
+                html += `<paginate base-path="${collection.basePath}" dataset="${collection.iterator}_dataset" collection="${collection.iterator}s" iterator="${collection.iterator}" ng-hide="hidePagination">`;
                 return html;
             }
         };

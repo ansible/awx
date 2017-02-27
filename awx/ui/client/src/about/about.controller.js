@@ -1,5 +1,6 @@
 export default
-	['$scope', '$state', 'ConfigService', function($scope, $state, ConfigService){
+	['$scope', '$state', 'ConfigService', 'i18n',
+        function($scope, $state, ConfigService, i18n){
 		var processVersion = function(version){
 					// prettify version & calculate padding
 					// e,g 3.0.0-0.git201602191743/ -> 3.0.0
@@ -20,6 +21,7 @@ export default
 				.then(function(config){
 					$scope.subscription = config.license_info.subscription_name;
 					$scope.version = processVersion(config.version);
+					$scope.version_str = i18n._("Version");
 					$('#about-modal').modal('show');
 				});
 		};

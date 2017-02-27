@@ -47,3 +47,4 @@ class Command(BaseCommand):
                                        inventory=i,
                                        credential=c)
         print('Default organization added.')
+        print('Demo Credential, Inventory, and Job Template added.')

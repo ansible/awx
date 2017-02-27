@@ -1,6 +1,8 @@
 # Helps with test cases.
 # Save all components of a uri (i.e. scheme, username, password, etc.) so that
 # when we construct a uri string and decompose it, we can verify the decomposition
+
+
 class URI(object):
     DEFAULTS = {
         'scheme' : 'http',

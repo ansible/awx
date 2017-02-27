@@ -1,0 +1,53 @@
+ @import "./client/src/shared/branding/colors.default.less";
+ @import "./client/src/shared/branding/colors.less";
+ // @todo cleanup these messy overrides for styles in ansible-ui.min.css
+
+
+.Paginate-controls--first a,
+.Paginate-controls--previous a{
+     border-radius: 4px 0 0 4px;
+ }
+.Paginate-controls--last a,
+.Paginate-controls--next a{
+  border-radius: 0px 4px 4px 0;
+}
+
+ .Paginate-controls--item a {
+     font-size: 12px;
+     padding: 3px 6px !important;
+     border-color: @list-pagin-bord;
+ }
+
+ .Paginate {
+     margin-top: 20px;
+     font-size: 12px !important;
+     color: @list-pagin-text;
+     text-transform: uppercase;
+     height: 22px;
+     display: flex;
+     justify-content: flex-end;
+ }
+
+ .Paginate-pager--pageof {
+     line-height: 22px;
+     margin-left: 10px;
+ }
+
+ .Paginate-wrapper {
+     display: flex;
+     flex: 1 0 auto;
+ }
+
+ .Paginate-controls {
+     margin-top: 0;
+     margin-bottom: 7px;
+     display: inline-block;
+     padding-left: 0;
+     border-radius: 4px;
+ }
+
+ .Paginate-controls--active {
+     color: #fff !important;
+     border-color: @default-icon-hov !important;
+     background-color: @default-icon-hov !important;
+ }

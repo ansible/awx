@@ -6,10 +6,11 @@ import logging
 import requests
 
 from django.utils.encoding import smart_text
-
+from django.utils.translation import ugettext_lazy as _
 from awx.main.notifications.base import TowerBaseEmailBackend
 
 logger = logging.getLogger('awx.main.notifications.hipchat_backend')
+
 
 class HipChatBackend(TowerBaseEmailBackend):
 
@@ -36,14 +37,15 @@ class HipChatBackend(TowerBaseEmailBackend):
             for rcp in m.recipients():
                 r = requests.post("{}/v2/room/{}/notification".format(self.api_url, rcp),
                                   params={"auth_token": self.token},
+                                  verify=False,
                                   json={"color": self.color,
                                         "message": m.subject,
                                         "notify": self.notify,
                                         "from": m.from_email,
                                         "message_format": "text"})
                 if r.status_code != 204:
-                    logger.error(smart_text("Error sending messages: {}".format(r.text)))
+                    logger.error(smart_text(_("Error sending messages: {}").format(r.text)))
                     if not self.fail_silently:
-                        raise Exception(smart_text("Error sending message to hipchat: {}".format(r.text)))
+                        raise Exception(smart_text(_("Error sending message to hipchat: {}").format(r.text)))
                 sent_messages += 1
         return sent_messages

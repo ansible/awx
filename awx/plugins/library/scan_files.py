@@ -99,6 +99,7 @@ EXAMPLES = '''
 #             },
 '''
 
+
 def main():
     module = AnsibleModule(
         argument_spec = dict(paths=dict(required=True, type='list'),
@@ -160,5 +161,6 @@ def main():
             files.append(d)
     results = dict(ansible_facts=dict(files=files))
     module.exit_json(**results)
+
 
 main()

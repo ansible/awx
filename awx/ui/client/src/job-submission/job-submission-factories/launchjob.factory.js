@@ -1,6 +1,6 @@
 
 export default
-    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location) {
+    function LaunchJob(Rest, Wait, ProcessErrors, ToJSON, Empty, GetBasePath, $state, $location, $rootScope, i18n) {
 
             // This factory gathers up all the job launch data and POST's it.
 
@@ -10,9 +10,17 @@ export default
                 var scope = params.scope,
                 job_launch_data = {},
                 url = params.url,
+                submitJobType = params.submitJobType,
                 vars_url = GetBasePath('job_templates')+scope.job_template_id + '/',
                 base = $location.path().replace(/^\//, '').split('/')[0],
                 extra_vars;
+
+                if(submitJobType === 'job_template') {
+                    vars_url = GetBasePath('job_templates')+scope.job_template_id + '/';
+                }
+                else if(submitJobType === 'workflow_job_template') {
+                    vars_url = GetBasePath('workflow_job_templates')+scope.workflow_job_template_id + '/';
+                }
 
                 //found it easier to assume that there will be extra vars, and then check for a blank object at the end
                 job_launch_data.extra_vars = {};
@@ -113,7 +121,7 @@ export default
                     .success(function(data) {
                         Wait('stop');
                         var job = data.job || data.system_job || data.project_update || data.inventory_update || data.ad_hoc_command;
-                        if((scope.portalMode===false || scope.$parent.portalMode===false ) && Empty(data.system_job) || (base === 'home')){
+                        if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
                             var goToJobDetails = function(state) {
@@ -122,6 +130,14 @@ export default
 
                             if(_.has(data, 'job')) {
                                 goToJobDetails('jobDetail');
+                            } else if(base === 'jobs'){
+                                if(scope.clearDialog) {
+                                    scope.clearDialog();
+                                }
+                                return;
+                            } else if(data.type && data.type === 'workflow_job') {
+                                job = data.id;
+                                goToJobDetails('workflowResults');
                             }
                             else if(_.has(data, 'ad_hoc_command')) {
                                 goToJobDetails('adHocJobStdout');
@@ -151,8 +167,10 @@ export default
                         }
                     })
                     .error(function(data, status) {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                        msg: 'Failed updating job ' + scope.job_template_id + ' with variables. POST returned: ' + status });
+                        let template_id = scope.job_template_id;
+                        template_id = (template_id === undefined) ? "undefined" : i18n.sprintf("%d", template_id);
+                        ProcessErrors(scope, data, status, null, { hdr: i18n._('Error!'),
+                        msg: i18n.sprintf(i18n._('Failed updating job %s with variables. POST returned: %d'), template_id, status) });
                     });
                 };
 
@@ -170,8 +188,8 @@ export default
                         buildData();
                     })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, { hdr: 'Error!',
-                        msg: 'Failed to retrieve job template extra variables.'  });
+                        ProcessErrors(scope, data, status, { hdr: i18n._('Error!'),
+                        msg: i18n._('Failed to retrieve job template extra variables.')  });
                     });
                 };
 
@@ -196,5 +214,7 @@ LaunchJob.$inject =
         'Empty',
         'GetBasePath',
         '$state',
-        '$location'
+        '$location',
+        '$rootScope',
+        'i18n'
     ];

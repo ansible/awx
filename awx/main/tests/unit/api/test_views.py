@@ -1,16 +1,21 @@
 import mock
 import pytest
 
+from collections import namedtuple
+
 from awx.api.views import (
     ApiV1RootView,
     JobTemplateLabelList,
+    JobTemplateSurveySpec,
 )
+
 
 @pytest.fixture
 def mock_response_new(mocker):
     m = mocker.patch('awx.api.views.Response.__new__')
     m.return_value = m
     return m
+
 
 class TestApiV1RootView:
     def test_get_endpoints(self, mocker, mock_response_new):
@@ -43,6 +48,8 @@ class TestApiV1RootView:
             'unified_job_templates',
             'unified_jobs',
             'activity_stream',
+            'workflow_job_templates',
+            'workflow_jobs',
         ]
         view = ApiV1RootView()
         ret = view.get(mocker.MagicMock())
@@ -52,6 +59,7 @@ class TestApiV1RootView:
         for endpoint in endpoints:
             assert endpoint in data_arg
 
+
 class TestJobTemplateLabelList:
     def test_inherited_mixin_unattach(self):
         with mock.patch('awx.api.generics.DeleteLastUnattachLabelMixin.unattach') as mixin_unattach:
@@ -60,3 +68,16 @@ class TestJobTemplateLabelList:
 
             super(JobTemplateLabelList, view).unattach(mock_request, None, None)
             assert mixin_unattach.called_with(mock_request, None, None)
+
+
+class TestJobTemplateSurveySpec(object):
+    @mock.patch('awx.api.views.feature_enabled', lambda feature: True)
+    def test_get_password_type(self, mocker, mock_response_new):
+        JobTemplate = namedtuple('JobTemplate', 'survey_spec')
+        obj = JobTemplate(survey_spec={'spec':[{'type': 'password', 'default': 'my_default'}]})
+        with mocker.patch.object(JobTemplateSurveySpec, 'get_object', return_value=obj):
+            view = JobTemplateSurveySpec()
+            response = view.get(mocker.MagicMock())
+            assert response == mock_response_new
+            # which there was a better way to do this!
+            assert response.call_args[0][1]['spec'][0]['default'] == '$encrypted$'

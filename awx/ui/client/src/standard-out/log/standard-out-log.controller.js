@@ -22,30 +22,20 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
         function openSockets() {
             if ($state.current.name === 'jobDetail') {
                $log.debug("socket watching on job_events-" + job_id);
-               $rootScope.event_socket.on("job_events-" + job_id, function() {
+               $scope.$on(`ws-job_events-${job_id}`, function() {
                    $log.debug("socket fired on job_events-" + job_id);
                    if (api_complete) {
                        event_queue++;
                    }
                });
-               // Unbind $rootScope socket event binding(s) so that they don't get triggered
-               // in another instance of this controller
-               $scope.$on('$destroy', function() {
-                   $rootScope.event_socket.removeAllListeners("job_events-" + job_id);
-               });
             }
             if ($state.current.name === 'adHocJobStdout') {
                 $log.debug("socket watching on ad_hoc_command_events-" + job_id);
-                $rootScope.adhoc_event_socket.on("ad_hoc_command_events-" + job_id, function() {
+                $scope.$on(`ws-ad_hoc_command_events-${job_id}`, function() {
                     $log.debug("socket fired on ad_hoc_command_events-" + job_id);
                     if (api_complete) {
                         event_queue++;
                     }
-                });
-                // Unbind $rootScope socket event binding(s) so that they don't get triggered
-                // in another instance of this controller
-                $scope.$on('$destroy', function() {
-                    $rootScope.adhoc_event_socket.removeAllListeners("ad_hoc_command_events-" + job_id);
                 });
             }
         }
@@ -189,10 +179,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         // We watch for job status changes here.  If the job completes we want to clear out the
         // stdout interval and kill the live_event_processing flag.
-        if ($scope.removeJobStatusChange) {
-            $scope.removeJobStatusChange();
-        }
-        $scope.removeJobStatusChange = $rootScope.$on('JobStatusChange-jobStdout', function(e, data) {
+        $scope.$on(`ws-jobs`, function(e, data) {
             if (parseInt(data.unified_job_id, 10) === parseInt(job_id,10)) {
                 if (data.status === 'failed' || data.status === 'canceled' ||
                         data.status === 'error' || data.status === 'successful') {

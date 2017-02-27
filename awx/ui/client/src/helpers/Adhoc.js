@@ -41,7 +41,7 @@
 
 export default
     angular.module('AdhocHelper', ['RestServices', 'Utilities',
-        'CredentialFormDefinition', 'CredentialsListDefinition', 'LookUpHelper',
+        'CredentialFormDefinition', 'CredentialsListDefinition',
         'JobSubmissionHelper', 'JobTemplateFormDefinition', 'ModalDialog',
         'FormGenerator', 'JobVarsPromptFormDefinition'])
 
@@ -104,7 +104,9 @@ export default
                 Rest.post(postData)
                     .success(function (data) {
                          Wait('stop');
-                         $state.go('adHocJobStdout', {id: data.id});
+                         if($location.path().replace(/^\//, '').split('/')[0] !== 'jobs') {
+                             $state.go('adHocJobStdout', {id: data.id});
+                         }
                     })
                     .error(function (data, status) {
                         ProcessErrors(scope, data, status, {

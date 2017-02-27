@@ -5,13 +5,18 @@ from awx.main.models import (
     Permission,
     Host,
     CustomInventoryScript,
+    Schedule
 )
 from awx.main.access import (
     InventoryAccess,
+    InventorySourceAccess,
     HostAccess,
-    InventoryUpdateAccess
+    InventoryUpdateAccess,
+    CustomInventoryScriptAccess,
+    ScheduleAccess
 )
 from django.apps import apps
+
 
 @pytest.mark.django_db
 def test_custom_inv_script_access(organization, user):
@@ -29,6 +34,26 @@ def test_custom_inv_script_access(organization, user):
     organization.admin_role.members.add(ou)
     assert ou in custom_inv.admin_role
 
+
+@pytest.mark.django_db
+def test_modify_inv_script_foreign_org_admin(org_admin, organization, organization_factory, project):
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', description='test',
+                                                      organization=organization)
+
+    other_org = organization_factory('not-my-org').organization
+    access = CustomInventoryScriptAccess(org_admin)
+    assert not access.can_change(custom_inv, {'organization': other_org.pk, 'name': 'new-project'})
+
+
+@pytest.mark.django_db
+def test_org_member_inventory_script_permissions(org_member, organization):
+    custom_inv = CustomInventoryScript.objects.create(name='test', script='test', organization=organization)
+    access = CustomInventoryScriptAccess(org_member)
+    assert access.can_read(custom_inv)
+    assert not access.can_delete(custom_inv)
+    assert not access.can_change(custom_inv, {'name': 'ed-test'})
+
+
 @pytest.mark.django_db
 def test_inventory_admin_user(inventory, permissions, user):
     u = user('admin', False)
@@ -42,6 +67,7 @@ def test_inventory_admin_user(inventory, permissions, user):
     assert u in inventory.admin_role
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
+
 
 @pytest.mark.django_db
 def test_inventory_auditor_user(inventory, permissions, user):
@@ -59,6 +85,7 @@ def test_inventory_auditor_user(inventory, permissions, user):
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists() is False
 
+
 @pytest.mark.django_db
 def test_inventory_updater_user(inventory, permissions, user):
     u = user('updater', False)
@@ -73,6 +100,7 @@ def test_inventory_updater_user(inventory, permissions, user):
     assert u not in inventory.admin_role
     assert inventory.use_role.members.filter(id=u.id).exists() is False
     assert inventory.update_role.members.filter(id=u.id).exists()
+
 
 @pytest.mark.django_db
 def test_inventory_executor_user(inventory, permissions, user):
@@ -89,7 +117,6 @@ def test_inventory_executor_user(inventory, permissions, user):
     assert u in inventory.read_role
     assert inventory.use_role.members.filter(id=u.id).exists()
     assert inventory.update_role.members.filter(id=u.id).exists() is False
-
 
 
 @pytest.mark.django_db
@@ -214,6 +241,7 @@ def test_access_auditor(organization, inventory, user):
     assert not access.can_delete(inventory)
     assert not access.can_run_ad_hoc_commands(inventory)
 
+
 @pytest.mark.django_db
 def test_inventory_update_org_admin(inventory_update, org_admin):
     access = InventoryUpdateAccess(org_admin)
@@ -246,4 +274,19 @@ def test_host_access(organization, inventory, group, user, group_factory):
     assert inventory_admin_access.can_read(host) is False
 
 
+@pytest.mark.django_db
+def test_inventory_source_credential_check(rando, inventory_source, credential):
+    inventory_source.group.inventory.admin_role.members.add(rando)
+    access = InventorySourceAccess(rando)
+    assert not access.can_change(inventory_source, {'credential': credential})
 
+
+@pytest.mark.django_db
+def test_inventory_source_org_admin_schedule_access(org_admin, inventory_source):
+    schedule = Schedule.objects.create(
+        unified_job_template=inventory_source,
+        rrule='DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=1')
+    access = ScheduleAccess(org_admin)
+    assert access.get_queryset()
+    assert access.can_read(schedule)
+    assert access.can_change(schedule, {'rrule': 'DTSTART:20151117T050000Z RRULE:FREQ=DAILY;INTERVAL=1;COUNT=2'})

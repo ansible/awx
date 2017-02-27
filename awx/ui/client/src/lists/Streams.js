@@ -7,53 +7,43 @@
 
 export default
     angular.module('StreamListDefinition', [])
-    .value('StreamList', {
+    .factory('StreamList', ['i18n', function(i18n) {
+    return {
 
         name: 'activities',
         iterator: 'activity',
-        editTitle: 'Activity Stream',
-        listTitle: 'Activity Stream<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
+        basePath: 'activity_stream',
+        editTitle: i18n._('Activity Stream'),
+        listTitle: i18n._('Activity Stream') + '<span ng-show="streamSubTitle"><div class="List-titleLockup"></div>{{streamSubTitle}}<span>',
         listTitleBadge: false,
-        emptyListText: 'There are no events to display at this time',
+        emptyListText: i18n._('There are no events to display at this time'),
         selectInstructions: '',
         index: false,
         hover: true,
         "class": "table-condensed",
-        searchWidgets: 3,
         toolbarAuxAction: "<stream-dropdown-nav></stream-dropdown-nav>",
 
         fields: {
             timestamp: {
-                label: 'Time',
+                label: i18n._('Time'),
                 key: true,
                 desc: true,
                 noLink: true,
-                searchable: false,
                 filter: "longDate",
                 columnClass: 'col-lg-3 col-md-2 col-sm-3 col-xs-3'
             },
             user: {
-                label: 'Initiated by',
-                ngBindHtml: 'activity.user',
+                label: i18n._('Initiated by'),
+                ngBindHtml: 'activity.user', // @todo punch monkey
                 sourceModel: 'actor',
                 sourceField: 'username',
-                searchPlaceholder: 'Username',
-                searchWidget: 1,
                 columnClass: 'col-lg-3 col-md-3 col-sm-3 col-xs-3'
             },
             description: {
-                label: 'Event',
-                ngBindHtml: 'activity.description',
+                label: i18n._('Event'),
+                ngBindHtml: 'activity.description', // @todo punch monkey
                 nosort: true,
-                searchable: false,
                 columnClass: 'ActivityStream-eventColumnHeader col-lg-5 col-md-6 col-sm-4 col-xs-4'
-            },
-            actor: {
-                label: 'System event',
-                searchOnly: true,
-                searchType: 'boolean',
-                sourceModel: 'actor',
-                sourceField: 'isnull'
             }
         },
 
@@ -61,10 +51,10 @@ export default
             refresh: {
                 mode: 'all',
                 id: 'activity-stream-refresh-btn',
-                awToolTip: "Refresh the page",
+                awToolTip: i18n._("Refresh the page"),
                 ngClick: "refreshStream()",
                 actionClass: 'btn List-buttonDefault ActivityStream-refreshButton',
-                buttonContent: 'REFRESH'
+                buttonContent: i18n._('REFRESH')
             }
         },
 
@@ -73,13 +63,13 @@ export default
             columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
 
             view: {
-                label: 'View',
+                label: i18n._('View'),
                 ngClick: "showDetail(activity.id)",
                 icon: 'fa-zoom-in',
                 "class": 'btn-default btn-xs',
-                awToolTip: 'View event details',
+                awToolTip: i18n._('View event details'),
                 dataPlacement: 'top'
             }
         }
 
-    });
+    };}]);

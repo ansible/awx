@@ -22,7 +22,10 @@ from awx.api.serializers import UserSerializer
 
 logger = logging.getLogger('awx.sso.views')
 
+
 class BaseRedirectView(RedirectView):
+
+    permanent = True
 
     def get_redirect_url(self, *args, **kwargs):
         last_path = self.request.COOKIES.get('lastPath', '')
@@ -32,6 +35,7 @@ class BaseRedirectView(RedirectView):
             return '%s#%s' % (url, last_path)
         else:
             return url
+
 
 sso_error = BaseRedirectView.as_view()
 sso_inactive = BaseRedirectView.as_view()
@@ -67,6 +71,7 @@ class CompleteView(BaseRedirectView):
             response.set_cookie('current_user', current_user)
         return response
 
+
 sso_complete = CompleteView.as_view()
 
 
@@ -80,10 +85,15 @@ class MetadataView(View):
             'saml',
             redirect_uri=complete_url,
         )
-        metadata, errors = saml_backend.generate_metadata_xml()
+        try:
+            metadata, errors = saml_backend.generate_metadata_xml()
+        except Exception as e:
+            logger.exception('unable to generate SAML metadata')
+            errors = e
         if not errors:
             return HttpResponse(content=metadata, content_type='text/xml')
         else:
             return HttpResponse(content=str(errors), content_type='text/plain')
+
 
 saml_metadata = MetadataView.as_view()

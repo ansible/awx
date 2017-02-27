@@ -1,6 +1,6 @@
 /** @define SmartStatus */
-@import "awx/ui/client/legacy-styles/animations.less";
-@import "../shared/branding/colors.default.less";
+@import "./client/legacy-styles/animations.less";
+@import "./client/src/shared/branding/colors.default.less";
 
 .SmartStatus-container{
     max-width: 165px;
@@ -14,14 +14,20 @@
 
 .SmartStatus--success{
     color: @default-succ;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     padding: 0px;
 }
 
 .SmartStatus--failed{
     color: @default-err;
-    margin-top: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     padding: 0px;
+}
+
+.SmartStatus--failed:before {
+    content: "\f06a";
 }
 
 .SmartStatus--running{
@@ -29,6 +35,12 @@
     margin-top: 10px;
     padding: 0px;
     .pulsate();
+}
+
+.SmartStatus-vertCenter{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0px;
 }
 
 .SmartStatus-tooltip{

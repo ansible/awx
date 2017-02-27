@@ -8,6 +8,7 @@ from jsonbfield.fields import JSONField
 
 __all__ = ('Fact', )
 
+
 class Fact(models.Model):
     """A model representing a fact returned from Ansible.
     Facts are stored as JSON dictionaries.
@@ -20,8 +21,8 @@ class Fact(models.Model):
         help_text=_('Host for the facts that the fact scan captured.'),
     )
     timestamp = models.DateTimeField(
-        default=None, 
-        editable=False, 
+        default=None,
+        editable=False,
         help_text=_('Date and time of the corresponding fact scan gathering time.')
     )
     module = models.CharField(max_length=128)

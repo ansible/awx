@@ -3,11 +3,16 @@
 
 # Python
 import logging
+import uuid
+
+import ldap
 
 # Django
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings as django_settings
+from django.core.signals import setting_changed
+from django.core.exceptions import ImproperlyConfigured
 
 # django-auth-ldap
 from django_auth_ldap.backend import LDAPSettings as BaseLDAPSettings
@@ -23,7 +28,7 @@ from social.backends.saml import SAMLAuth as BaseSAMLAuth
 from social.backends.saml import SAMLIdentityProvider as BaseSAMLIdentityProvider
 
 # Ansible Tower
-from awx.api.license import feature_enabled
+from awx.conf.license import feature_enabled
 
 logger = logging.getLogger('awx.sso.backends')
 
@@ -35,6 +40,16 @@ class LDAPSettings(BaseLDAPSettings):
         'TEAM_MAP': {},
     }.items())
 
+    def __init__(self, prefix='AUTH_LDAP_', defaults={}):
+        super(LDAPSettings, self).__init__(prefix, defaults)
+
+        # If a DB-backed setting is specified that wipes out the
+        # OPT_NETWORK_TIMEOUT, fall back to a sane default
+        if ldap.OPT_NETWORK_TIMEOUT not in getattr(self, 'CONNECTION_OPTIONS', {}):
+            options = getattr(self, 'CONNECTION_OPTIONS', {})
+            options[ldap.OPT_NETWORK_TIMEOUT] = 30
+            self.CONNECTION_OPTIONS = options
+
 
 class LDAPBackend(BaseLDAPBackend):
     '''
@@ -42,6 +57,20 @@ class LDAPBackend(BaseLDAPBackend):
     '''
 
     settings_prefix = 'AUTH_LDAP_'
+
+    def __init__(self, *args, **kwargs):
+        self._dispatch_uid = uuid.uuid4()
+        super(LDAPBackend, self).__init__(*args, **kwargs)
+        setting_changed.connect(self._on_setting_changed, dispatch_uid=self._dispatch_uid)
+
+    def __del__(self):
+        setting_changed.disconnect(dispatch_uid=self._dispatch_uid)
+
+    def _on_setting_changed(self, sender, **kwargs):
+        # If any AUTH_LDAP_* setting changes, force settings to be reloaded for
+        # this backend instance.
+        if kwargs.get('setting', '').startswith(self.settings_prefix):
+            self._settings = None
 
     def _get_settings(self):
         if self._settings is None:
@@ -59,7 +88,11 @@ class LDAPBackend(BaseLDAPBackend):
         if not feature_enabled('ldap'):
             logger.error("Unable to authenticate, license does not support LDAP authentication")
             return None
-        return super(LDAPBackend, self).authenticate(username, password)
+        try:
+            return super(LDAPBackend, self).authenticate(username, password)
+        except ImproperlyConfigured:
+            logger.error("Unable to authenticate, LDAP is improperly configured")
+            return None
 
     def get_user(self, user_id):
         if not self.settings.SERVER_URI:

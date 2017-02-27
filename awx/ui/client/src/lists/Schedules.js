@@ -7,18 +7,20 @@
 
 export default
     angular.module('SchedulesListDefinition', [])
-    .value('SchedulesList', {
+    .factory('SchedulesList', ['i18n', function(i18n) {
+    return {
 
         name: 'schedules',
         iterator: 'schedule',
         selectTitle: '',
         editTitle: 'Schedules',
-        listTitle: 'Schedules',
+        listTitle: '{{parentObject}} || Schedules',
         index: false,
         hover: true,
 
         fields: {
             toggleSchedule: {
+                ngDisabled: "!schedule.summary_fields.user_capabilities.edit",
                 label: '',
                 columnClass: 'List-staticColumn--toggle',
                 type: "toggle",
@@ -26,31 +28,27 @@ export default
                 awToolTip: "{{ schedule.play_tip }}",
                 dataTipWatch: "schedule.play_tip",
                 dataPlacement: "right",
-                searchable: false,
                 nosort: true,
             },
             name: {
                 key: true,
-                label: 'Name',
-                ngClick: "editSchedule(schedule.id)",
+                label: i18n._('Name'),
+                ngClick: "editSchedule(schedule)",
                 columnClass: "col-md-3 col-sm-3 col-xs-6"
             },
             dtstart: {
-                label: 'First Run',
+                label: i18n._('First Run'),
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-sm hidden-xs"
             },
             next_run: {
-                label: 'Next Run',
+                label: i18n._('Next Run'),
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-xs"
             },
             dtend: {
-                label: 'Final Run',
+                label: i18n._('Final Run'),
                 filter: "longDate",
-                searchable: false,
                 columnClass: "List-staticColumn--schedulerTime hidden-xs"
             },
         },
@@ -58,35 +56,45 @@ export default
         actions: {
             refresh: {
                 mode: 'all',
-                awToolTip: "Refresh the page",
+                awToolTip: i18n._("Refresh the page"),
                 ngClick: "refreshSchedules()",
                 actionClass: 'btn List-buttonDefault',
                 ngShow: "socketStatus == 'error'",
-                buttonContent: 'REFRESH'
+                buttonContent: i18n._('REFRESH')
             },
             add: {
                 mode: 'all',
                 ngClick: 'addSchedule()',
-                awToolTip: 'Add a new schedule',
+                awToolTip: i18n._('Add a new schedule'),
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD'
+                buttonContent: '&#43; ' + i18n._('ADD'),
+                ngShow: 'canAdd'
             }
         },
 
         fieldActions: {
             edit: {
-                label: 'Edit',
-                ngClick: "editSchedule(schedule.id)",
+                label: i18n._('Edit'),
+                ngClick: "editSchedule(schedule)",
                 icon: 'icon-edit',
-                awToolTip: 'Edit schedule',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Edit schedule'),
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                label: i18n._('View'),
+                ngClick: "editSchedule(schedule)",
+                awToolTip: i18n._('View schedule'),
+                dataPlacement: 'top',
+                ngShow: '!schedule.summary_fields.user_capabilities.edit'
             },
             "delete": {
-                label: 'Delete',
+                label: i18n._('Delete'),
                 ngClick: "deleteSchedule(schedule.id)",
                 icon: 'icon-trash',
-                awToolTip: 'Delete schedule',
-                dataPlacement: 'top'
+                awToolTip: i18n._('Delete schedule'),
+                dataPlacement: 'top',
+                ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
-    });
+    };}]);

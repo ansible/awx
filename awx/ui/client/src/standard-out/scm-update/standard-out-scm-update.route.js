@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-import {templateUrl} from '../../shared/template-url/template-url.factory';
+import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 // TODO: figure out what this route should be - should it be scm_update?
 
@@ -18,12 +18,11 @@ export default {
         label: "{{ project_name }}"
     },
     data: {
-        jobType: 'project_updates'
-    },
-    resolve: {
-        scmUpdateSocket: [function() {
-            // TODO: determine whether or not we have socket support for scm update standard out
-            return true;
-        }]
+        jobType: 'project_updates',
+        socket: {
+            "groups": {
+                "jobs": ["status_changed"]
+            }
+        },
     }
 };

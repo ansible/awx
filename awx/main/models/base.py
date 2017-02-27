@@ -23,13 +23,14 @@ from crum import get_current_user
 # Ansible Tower
 from awx.main.utils import encrypt_field
 
-__all__ = ['VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
+__all__ = ['prevent_search', 'VarsDictProperty', 'BaseModel', 'CreatedModifiedModel',
            'PasswordFieldsModel', 'PrimordialModel', 'CommonModel',
            'CommonModelNameNotUnique', 'NotificationFieldsModel',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_SCAN',
            'PERM_INVENTORY_CHECK', 'PERM_JOBTEMPLATE_CREATE', 'JOB_TYPE_CHOICES',
-           'AD_HOC_JOB_TYPE_CHOICES', 'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES',
+           'AD_HOC_JOB_TYPE_CHOICES', 'PROJECT_UPDATE_JOB_TYPE_CHOICES',
+           'PERMISSION_TYPE_CHOICES', 'CLOUD_INVENTORY_SOURCES',
            'VERBOSITY_CHOICES']
 
 PERM_INVENTORY_ADMIN  = 'admin'
@@ -47,6 +48,11 @@ JOB_TYPE_CHOICES = [
 ]
 
 AD_HOC_JOB_TYPE_CHOICES = [
+    (PERM_INVENTORY_DEPLOY, _('Run')),
+    (PERM_INVENTORY_CHECK, _('Check')),
+]
+
+PROJECT_UPDATE_JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
@@ -314,6 +320,7 @@ class CommonModelNameNotUnique(PrimordialModel):
         unique=False,
     )
 
+
 class NotificationFieldsModel(BaseModel):
 
     class Meta:
@@ -336,3 +343,21 @@ class NotificationFieldsModel(BaseModel):
         blank=True,
         related_name='%(class)s_notification_templates_for_any'
     )
+
+
+
+def prevent_search(relation):
+    """
+    Used to mark a model field or relation as "restricted from filtering"
+    e.g.,
+
+    class AuthToken(BaseModel):
+        user = prevent_search(models.ForeignKey(...))
+        sensitive_data = prevent_search(models.CharField(...))
+
+    The flag set by this function is used by
+    `awx.api.filters.FieldLookupBackend` to blacklist fields and relations that
+    should not be searchable/filterable via search query params
+    """
+    setattr(relation, '__prevent_search__', True)
+    return relation

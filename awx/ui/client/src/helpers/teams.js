@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
 /**
  * @ngdoc function
  * @name helpers.function:teams
@@ -15,16 +15,14 @@
 import listGenerator from '../shared/list-generator/main';
 
 export default
-    angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'SearchHelper',
-        'PaginationHelpers', listGenerator.name
+    angular.module('TeamHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', listGenerator.name
     ])
         .factory('SetTeamListeners', ['Alert', 'Rest',
             function (Alert, Rest) {
                 return function (params) {
 
                     var scope = params.scope,
-                        set = params.set,
-                        iterator = params.iterator;
+                        set = params.set;
 
                     // Listeners to perform lookups after main inventory list loads
 
@@ -40,7 +38,10 @@ export default
                                     }
                                 }
                             }
-                            scope[iterator + 'SearchSpin'] = false;
+
+                            // @issue: OLD SEARCH
+                            // scope[iterator + 'SearchSpin'] = false;
+
                             scope[set] = results;
                         }
                     });
@@ -72,64 +73,4 @@ export default
                     });
                 };
             }
-        ])
-
-    .factory('TeamLookUpOrganizationInit', ['Alert', 'Rest', 'OrganizationList', 'generateList', 'SearchInit', 'PaginateInit',
-        function (Alert, Rest, OrganizationList, GenerateList, SearchInit, PaginateInit) {
-            return function (params) {
-
-                var scope = params.scope;
-
-                // Show pop-up to select organization
-                scope.lookUpOrganization = function () {
-                    var list = OrganizationList,
-                        listGenerator = GenerateList,
-                        listScope = listGenerator.inject(list, { mode: 'lookup', hdr: 'Select Organization' }),
-                        defaultUrl = '/api/v1/organizations/';
-
-                    listScope.selectAction = function () {
-                        var i, found = false;
-                        for (i = 0; i < listScope[list.name].length; i++) {
-                            if (listScope[list.iterator + "_" + listScope[list.name][i].id + "_class"] === "success") {
-                                found = true;
-                                scope.organization = listScope[list.name][i].id;
-                                scope.organization_name = listScope[list.name][i].name;
-                                scope.team_form.$setDirty();
-                                listGenerator.hide();
-                            }
-                        }
-                        if (found === false) {
-                            Alert('No Selection', 'Click on a row to select an Organization before clicking the Select button.');
-                        }
-                    };
-
-                    listScope.toggle_organization = function (id) {
-                        // when user clicks a row, remove 'success' class from all rows except clicked-on row
-                        if (listScope[list.name]) {
-                            for (var i = 0; i < listScope[list.name].length; i++) {
-                                listScope[list.iterator + "_" + listScope[list.name][i].id + "_class"] = "";
-                            }
-                        }
-                        if (id !== null && id !== undefined) {
-                            listScope[list.iterator + "_" + id + "_class"] = "success";
-                        }
-                    };
-
-                    SearchInit({
-                        scope: listScope,
-                        set: list.name,
-                        list: list,
-                        url: defaultUrl
-                    });
-                    PaginateInit({
-                        scope: listScope,
-                        list: list,
-                        url: defaultUrl,
-                        mode: 'lookup'
-                    });
-                    scope.search(list.iterator);
-                    listScope.toggle_organization(scope.organization);
-                };
-            };
-        }
     ]);

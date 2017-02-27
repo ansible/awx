@@ -1,0 +1,116 @@
+@import "./client/src/shared/branding/colors.default.less";
+
+.link circle, .link .linkCross, .node .addCircle, .node .removeCircle, .node .WorkflowChart-hoverPath {
+    opacity: 0;
+}
+
+.node .addCircle, .link .addCircle {
+    fill: @default-succ;
+}
+
+.addCircle.addHovering {
+    fill: @default-succ-hov;
+}
+
+.node .removeCircle {
+    fill: @default-err;
+}
+
+.removeCircle.removeHovering {
+    fill: @default-err-hov;
+}
+
+.node {
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif, 'FontAwesome';
+}
+
+.WorkflowChart-defaultText {
+    fill: @default-interface-txt;
+}
+
+.WorkflowChart-startText {
+    fill: @default-bg;
+    cursor: default;
+}
+
+.node .rect {
+    fill: @default-secondary-bg;
+}
+
+.rect.placeholder {
+    stroke-dasharray: 3;
+}
+
+.node .transparentRect {
+    fill: @default-bg;
+    opacity: 0;
+}
+
+.WorkflowChart-alwaysShowAdd circle,
+.WorkflowChart-alwaysShowAdd path,
+.WorkflowChart-alwaysShowAdd .linkCross,
+.hovering .addCircle,
+.hovering .removeCircle,
+.hovering .WorkflowChart-hoverPath,
+.hovering .linkCross {
+    opacity: 1;
+}
+
+.link {
+  fill: none;
+  stroke-width: 2px;
+}
+
+.link.placeholder {
+    stroke-dasharray: 3;
+}
+
+.WorkflowChart-svg {
+    background-color: @default-no-items-bord;
+}
+.WorkflowChart-nodeTypeCircle {
+    fill: @default-icon;
+}
+.WorkflowChart-nodeTypeLetter {
+    fill: @default-bg;
+}
+.workflowChart-nodeStatus--running {
+    fill: @default-icon;
+}
+.workflowChart-nodeStatus--success {
+    fill: @default-succ;
+}
+.workflowChart-nodeStatus--failed {
+    fill: @default-err;
+}
+.WorkflowChart-detailsLink {
+    fill: @default-link;
+    cursor: pointer;
+    font-size: 10px;
+}
+.WorkflowChart-incompleteIcon {
+    color: @default-warning;
+}
+.WorkflowChart-incompleteText {
+    width: 90px;
+    color: @default-interface-txt;
+}
+.WorkflowChart-conflictIcon {
+    color: @default-err;
+}
+.WorkflowChart-conflictText {
+    width: 90px;
+    color: @default-interface-txt;
+}
+.WorkflowChart-activeNode {
+    fill: @default-link;
+}
+.WorkflowChart-elapsedHolder {
+    background-color: @b7grey;
+    color: @default-bg;
+    height: 13px;
+    width: 39px;
+    padding: 1px 3px;
+    border-radius: 4px;
+}

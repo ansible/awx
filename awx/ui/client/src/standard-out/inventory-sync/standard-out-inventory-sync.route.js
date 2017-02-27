@@ -18,12 +18,11 @@ export default {
         label: "{{ inventory_source_name }}"
     },
     data: {
+        socket: {
+            "groups":{
+                "jobs": ["status_changed"]
+            }
+        },
         jobType: 'inventory_updates'
-    },
-    resolve: {
-        inventorySyncSocket: [function() {
-            // TODO: determine whether or not we have socket support for inventory sync standard out
-            return true;
-        }]
     }
 };

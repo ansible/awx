@@ -21,7 +21,6 @@ import traceback
 import urlparse
 import uuid
 from distutils.version import LooseVersion as Version
-import dateutil.parser
 import yaml
 try:
     import psutil
@@ -33,7 +32,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init
+from celery.signals import celeryd_init, worker_process_init
 
 # Django
 from django.conf import settings
@@ -42,21 +41,26 @@ from django.utils.timezone import now
 from django.utils.encoding import smart_str
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
+from django.core.cache import cache
 
 # AWX
 from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.models import UnifiedJob
-from awx.main.queue import FifoQueue
-from awx.main.conf import tower_settings
-from awx.main.task_engine import TaskSerializer, TASK_TIMEOUT_INTERVAL
+from awx.main.queue import CallbackQueueDispatcher
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
-                            emit_websocket_notification,
-                            check_proot_installed, build_proot_temp_dir, wrap_args_with_proot)
+                            check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
+                            get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
+from awx.main.utils.reload import restart_local_services
+from awx.main.utils.handlers import configure_external_logger
+from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
-           'RunAdHocCommand', 'handle_work_error', 'handle_work_success',
-           'update_inventory_computed_fields', 'send_notifications', 'run_administrative_checks']
+           'RunAdHocCommand', 'handle_work_error',
+           'handle_work_success', 'update_inventory_computed_fields',
+           'send_notifications', 'run_administrative_checks', 'purge_old_stdout_files']
 
 HIDDEN_PASSWORD = '**********'
 
@@ -68,11 +72,13 @@ Try upgrading OpenSSH or providing your private key in an different format. \
 
 logger = logging.getLogger('awx.main.tasks')
 
+
 @celeryd_init.connect
 def celery_startup(conf=None, **kwargs):
     # Re-init all schedules
     # NOTE: Rework this during the Rampart work
-    logger.info("Syncing Tower Schedules")
+    startup_logger = logging.getLogger('awx.main.tasks')
+    startup_logger.info("Syncing Tower Schedules")
     for sch in Schedule.objects.all():
         try:
             sch.update_computed_fields()
@@ -80,14 +86,42 @@ def celery_startup(conf=None, **kwargs):
         except Exception as e:
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
-@task()
+
+@worker_process_init.connect
+def task_set_logger_pre_run(*args, **kwargs):
+    cache.close()
+    configure_external_logger(settings, async_flag=False, is_startup=False)
+
+
+def _clear_cache_keys(set_of_keys):
+    logger.debug('cache delete_many(%r)', set_of_keys)
+    cache.delete_many(set_of_keys)
+
+
+@task(queue='broadcast_all')
+def process_cache_changes(cache_keys):
+    logger.warn('Processing cache changes, task args: {0.args!r} kwargs: {0.kwargs!r}'.format(
+        process_cache_changes.request))
+    set_of_keys = set([key for key in cache_keys])
+    _clear_cache_keys(set_of_keys)
+    for setting_key in set_of_keys:
+        if setting_key.startswith('LOG_AGGREGATOR_'):
+            restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
+            break
+
+
+@task(queue='default')
 def send_notifications(notification_list, job_id=None):
     if not isinstance(notification_list, list):
         raise TypeError("notification_list should be of type list")
     if job_id is not None:
         job_actual = UnifiedJob.objects.get(id=job_id)
-    for notification_id in notification_list:
-        notification = Notification.objects.get(id=notification_id)
+
+    notifications = Notification.objects.filter(id__in=notification_list)
+    if job_id is not None:
+        job_actual.notifications.add(*notifications)
+
+    for notification in notifications:
         try:
             sent = notification.notification_template.send(notification.subject, notification.body)
             notification.status = "successful"
@@ -98,65 +132,65 @@ def send_notifications(notification_list, job_id=None):
             notification.error = smart_str(e)
         finally:
             notification.save()
-        if job_id is not None:
-            job_actual.notifications.add(notification)
 
-@task(bind=True)
+
+@task(bind=True, queue='default')
 def run_administrative_checks(self):
-    if not tower_settings.TOWER_ADMIN_ALERTS:
+    logger.warn("Running administrative checks.")
+    if not settings.TOWER_ADMIN_ALERTS:
         return
-    reader = TaskSerializer()
-    validation_info = reader.from_database()
+    validation_info = TaskEnhancer().validate_enhancements()
     if validation_info.get('instance_count', 0) < 1:
         return
     used_percentage = float(validation_info.get('current_instances', 0)) / float(validation_info.get('instance_count', 100))
     tower_admin_emails = User.objects.filter(is_superuser=True).values_list('email', flat=True)
     if (used_percentage * 100) > 90:
         send_mail("Ansible Tower host usage over 90%",
-                  "Ansible Tower host usage over 90%",
+                  _("Ansible Tower host usage over 90%"),
                   tower_admin_emails,
                   fail_silently=True)
-    if validation_info.get('time_remaining', 0) < TASK_TIMEOUT_INTERVAL:
+    if validation_info.get('date_warning', False):
         send_mail("Ansible Tower license will expire soon",
-                  "Ansible Tower license will expire soon",
+                  _("Ansible Tower license will expire soon"),
                   tower_admin_emails,
                   fail_silently=True)
 
-@task(bind=True)
+
+@task(bind=True, queue='default')
 def cleanup_authtokens(self):
+    logger.warn("Cleaning up expired authtokens.")
     AuthToken.objects.filter(expires__lt=now()).delete()
 
+
 @task(bind=True)
+def purge_old_stdout_files(self):
+    nowtime = time.time()
+    for f in os.listdir(settings.JOBOUTPUT_ROOT):
+        if os.path.getctime(os.path.join(settings.JOBOUTPUT_ROOT,f)) < nowtime - settings.LOCAL_STDOUT_EXPIRE_TIME:
+            os.unlink(os.path.join(settings.JOBOUTPUT_ROOT,f))
+            logger.info("Removing {}".format(os.path.join(settings.JOBOUTPUT_ROOT,f)))
+
+
+@task(bind=True)
+def cluster_node_heartbeat(self):
+    logger.debug("Cluster node heartbeat task.")
+    inst = Instance.objects.filter(hostname=settings.CLUSTER_HOST_ID)
+    if inst.exists():
+        inst = inst[0]
+        inst.capacity = get_system_task_capacity()
+        inst.save()
+        return
+    raise RuntimeError("Cluster Host Not Found: {}".format(settings.CLUSTER_HOST_ID))
+
+
+@task(bind=True, queue='default')
 def tower_periodic_scheduler(self):
-    def get_last_run():
-        if not os.path.exists(settings.SCHEDULE_METADATA_LOCATION):
-            return None
-        fd = open(settings.SCHEDULE_METADATA_LOCATION)
-        try:
-            last_run = dateutil.parser.parse(fd.read())
-            return last_run
-        except Exception as exc:
-            logger.error("get_last_run failed: {}".format(exc))
-            return None
-
-    def write_last_run(last_run):
-        fd = open(settings.SCHEDULE_METADATA_LOCATION, 'w')
-        fd.write(last_run.isoformat())
-        fd.close()
-
     run_now = now()
-    last_run = get_last_run()
-    if not last_run:
-        logger.debug("First run time")
-        write_last_run(run_now)
-        return
+    state = TowerScheduleState.get_solo()
+    last_run = state.schedule_last_run
     logger.debug("Last run was: %s", last_run)
-    write_last_run(run_now)
-
-    # Sanity check: If this is a secondary machine, there is nothing
-    # on the schedule.
-    if Instance.objects.my_role() == 'secondary':
-        return
+    state.schedule_last_run = run_now
+    state.save()
 
     old_schedules = Schedule.objects.enabled().before(last_run)
     for schedule in old_schedules:
@@ -169,132 +203,85 @@ def tower_periodic_scheduler(self):
             logger.warn("Cache timeout is in the future, bypassing schedule for template %s" % str(template.id))
             continue
         new_unified_job = template.create_unified_job(launch_type='scheduled', schedule=schedule)
-        can_start = new_unified_job.signal_start(extra_vars=schedule.extra_data)
+        can_start = new_unified_job.signal_start(extra_vars=parse_yaml_or_json(schedule.extra_data))
         if not can_start:
             new_unified_job.status = 'failed'
             new_unified_job.job_explanation = "Scheduled job could not start because it was not in the right state or required manual credentials"
             new_unified_job.save(update_fields=['status', 'job_explanation'])
-            new_unified_job.socketio_emit_status("failed")
-        emit_websocket_notification('/socket.io/schedules', 'schedule_changed', dict(id=schedule.id))
+            new_unified_job.websocket_emit_status("failed")
+        emit_channel_notification('schedules-changed', dict(id=schedule.id, group_name="schedules"))
+    state.save()
 
-@task()
-def notify_task_runner(metadata_dict):
-    """Add the given task into the Tower task manager's queue, to be consumed
-    by the task system.
-    """
-    queue = FifoQueue('tower_task_manager')
-    queue.push(metadata_dict)
 
-@task(bind=True)
+def _send_notification_templates(instance, status_str):
+    if status_str not in ['succeeded', 'failed']:
+        raise ValueError(_("status_str must be either succeeded or failed"))
+    notification_templates = instance.get_notification_templates()
+    if notification_templates:
+        all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
+        if len(all_notification_templates):
+            try:
+                (notification_subject, notification_body) = getattr(instance, 'build_notification_%s_message' % status_str)()
+            except AttributeError:
+                raise NotImplementedError("build_notification_%s_message() does not exist" % status_str)
+            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
+                                      for n in all_notification_templates],
+                                     job_id=instance.id)
+
+
+@task(bind=True, queue='default')
 def handle_work_success(self, result, task_actual):
-    if task_actual['type'] == 'project_update':
-        instance = ProjectUpdate.objects.get(id=task_actual['id'])
-        instance_name = instance.name
-        notification_templates = instance.project.notification_templates
-        friendly_name = "Project Update"
-    elif task_actual['type'] == 'inventory_update':
-        instance = InventoryUpdate.objects.get(id=task_actual['id'])
-        instance_name = instance.name
-        notification_templates = instance.inventory_source.notification_templates
-        friendly_name = "Inventory Update"
-    elif task_actual['type'] == 'job':
-        instance = Job.objects.get(id=task_actual['id'])
-        instance_name = instance.job_template.name
-        notification_templates = instance.job_template.notification_templates
-        friendly_name = "Job"
-    elif task_actual['type'] == 'ad_hoc_command':
-        instance = AdHocCommand.objects.get(id=task_actual['id'])
-        instance_name = instance.module_name
-        notification_templates = instance.notification_templates
-        friendly_name = "AdHoc Command"
-    elif task_actual['type'] == 'system_job':
-        instance = SystemJob.objects.get(id=task_actual['id'])
-        instance_name = instance.system_job_template.name
-        notification_templates = instance.system_job_template.notification_templates
-        friendly_name = "System Job"
-    else:
+    instance = UnifiedJob.get_instance_by_type(task_actual['type'], task_actual['id'])
+    if not instance:
         return
 
-    all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
-    if len(all_notification_templates):
-        notification_body = instance.notification_data()
-        notification_subject = "{} #{} '{}' succeeded on Ansible Tower: {}".format(friendly_name,
-                                                                                   task_actual['id'],
-                                                                                   smart_str(instance_name),
-                                                                                   notification_body['url'])
-        notification_body['friendly_name'] = friendly_name
-        send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                  for n in all_notification_templates],
-                                 job_id=task_actual['id'])
+    _send_notification_templates(instance, 'succeeded')
 
-@task(bind=True)
+    from awx.main.scheduler.tasks import run_job_complete
+    run_job_complete.delay(instance.id)
+
+
+@task(bind=True, queue='default')
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' %
           (str(self.request.id), str(subtasks)))
-    first_task = None
-    first_task_id = None
-    first_task_type = ''
-    first_task_name = ''
+    first_instance = None
+    first_instance_type = ''
     if subtasks is not None:
         for each_task in subtasks:
-            instance_name = ''
-            if each_task['type'] == 'project_update':
-                instance = ProjectUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.name
-                notification_templates = instance.project.notification_templates
-                friendly_name = "Project Update"
-            elif each_task['type'] == 'inventory_update':
-                instance = InventoryUpdate.objects.get(id=each_task['id'])
-                instance_name = instance.name
-                notification_templates = instance.inventory_source.notification_templates
-                friendly_name = "Inventory Update"
-            elif each_task['type'] == 'job':
-                instance = Job.objects.get(id=each_task['id'])
-                instance_name = instance.job_template.name
-                notification_templates = instance.job_template.notification_templates
-                friendly_name = "Job"
-            elif each_task['type'] == 'ad_hoc_command':
-                instance = AdHocCommand.objects.get(id=each_task['id'])
-                instance_name = instance.module_name
-                notification_templates = instance.notification_templates
-                friendly_name = "AdHoc Command"
-            elif each_task['type'] == 'system_job':
-                instance = SystemJob.objects.get(id=each_task['id'])
-                instance_name = instance.system_job_template.name
-                notification_templates = instance.system_job_template.notification_templates
-                friendly_name = "System Job"
-            else:
+            instance = UnifiedJob.get_instance_by_type(each_task['type'], each_task['id'])
+            if not instance:
                 # Unknown task type
                 logger.warn("Unknown task type: {}".format(each_task['type']))
                 continue
-            if first_task is None:
-                first_task = instance
-                first_task_id = instance.id
-                first_task_type = each_task['type']
-                first_task_name = instance_name
-                first_task_friendly_name = friendly_name
+
+            if first_instance is None:
+                first_instance = instance
+                first_instance_type = each_task['type']
+
             if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
-                    (first_task_type, first_task_name, first_task_id)
+                if not instance.job_explanation:
+                    instance.job_explanation = 'Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                                               (first_instance_type, first_instance.name, first_instance.id)
                 instance.save()
-                instance.socketio_emit_status("failed")
+                instance.websocket_emit_status("failed")
 
-        all_notification_templates = set(notification_templates.get('error', []) + notification_templates.get('any', []))
-        if len(all_notification_templates):
-            notification_body = first_task.notification_data()
-            notification_subject = "{} #{} '{}' failed on Ansible Tower: {}".format(first_task_friendly_name,
-                                                                                    first_task_id,
-                                                                                    smart_str(first_task_name),
-                                                                                    notification_body['url'])
-            notification_body['friendly_name'] = first_task_friendly_name
-            send_notifications.delay([n.generate_notification(notification_subject, notification_body).id
-                                      for n in all_notification_templates],
-                                     job_id=first_task_id)
+        if first_instance:
+            _send_notification_templates(first_instance, 'failed')
+
+    # We only send 1 job complete message since all the job completion message
+    # handling does is trigger the scheduler. If we extend the functionality of
+    # what the job complete message handler does then we may want to send a
+    # completion event for each job here.
+    if first_instance:
+        from awx.main.scheduler.tasks import run_job_complete
+        run_job_complete.delay(first_instance.id)
+        pass
 
 
-@task()
+@task(queue='default')
 def update_inventory_computed_fields(inventory_id, should_update_hosts=True):
     '''
     Signal handler and wrapper around inventory.update_computed_fields to
@@ -406,9 +393,12 @@ class BaseTask(Task):
                     data += '\n'
                 # For credentials used with ssh-add, write to a named pipe which
                 # will be read then closed, instead of leaving the SSH key on disk.
-                if name in ('credential', 'network_credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
+                if name in ('credential', 'scm_credential', 'ad_hoc_credential') and not ssh_too_old:
                     path = os.path.join(kwargs.get('private_data_dir', tempfile.gettempdir()), name)
                     self.open_fifo_write(path, data)
+                # Ansible network modules do not yet support ssh-agent.
+                # Instead, ssh private key file is explicitly passed via an
+                # env variable.
                 else:
                     handle, path = tempfile.mkstemp(dir=kwargs.get('private_data_dir', None))
                     f = os.fdopen(handle, 'w')
@@ -446,6 +436,8 @@ class BaseTask(Task):
                 if os.path.isdir(os.path.join(venv_libdir, python_ver)):
                     env['PYTHONPATH'] = os.path.join(venv_libdir, python_ver, "site-packages") + ":"
                     break
+        # Add awx/lib to PYTHONPATH.
+        env['PYTHONPATH'] = ':'.join(filter(None, [self.get_path_to('..', 'lib'), env.get('PYTHONPATH', '')]))
         return env
 
     def add_tower_venv(self, env):
@@ -472,7 +464,7 @@ class BaseTask(Task):
         # NOTE:
         # Derived class should call add_ansible_venv() or add_tower_venv()
         if self.should_use_proot(instance, **kwargs):
-            env['PROOT_TMP_DIR'] = tower_settings.AWX_PROOT_BASE_PATH
+            env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -486,7 +478,7 @@ class BaseTask(Task):
         for k,v in env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
-            elif k.startswith('ANSIBLE_'):
+            elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
             elif hidden_re.search(k):
                 env[k] = HIDDEN_PASSWORD
@@ -543,8 +535,19 @@ class BaseTask(Task):
         '''
         return OrderedDict()
 
+    def get_stdout_handle(self, instance):
+        '''
+        Return an open file object for capturing stdout.
+        '''
+        if not os.path.exists(settings.JOBOUTPUT_ROOT):
+            os.makedirs(settings.JOBOUTPUT_ROOT)
+        stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (instance.pk, str(uuid.uuid1())))
+        stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
+        assert stdout_handle.name == stdout_filename
+        return stdout_handle
+
     def run_pexpect(self, instance, args, cwd, env, passwords, stdout_handle,
-                    output_replacements=None):
+                    output_replacements=None, extra_update_fields=None):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -560,9 +563,18 @@ class BaseTask(Task):
         if pexpect_sleep is not None:
             logger.info("Suspending Job Execution for QA Work")
             time.sleep(pexpect_sleep)
+        global_timeout_setting_name = instance._global_timeout_setting()
+        if global_timeout_setting_name:
+            global_timeout = getattr(settings, global_timeout_setting_name, 0)
+            local_timeout = getattr(instance, 'timeout', 0)
+            job_timeout = global_timeout if local_timeout == 0 else local_timeout
+            job_timeout = 0 if local_timeout < 0 else job_timeout
+        else:
+            job_timeout = 0
         child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
+        timed_out = False
         last_stdout_update = time.time()
         idle_timeout = self.get_idle_timeout()
         expect_list = []
@@ -573,7 +585,9 @@ class BaseTask(Task):
             expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         instance = self.update_model(instance.pk, status='running',
+                                     execution_node=settings.CLUSTER_HOST_ID,
                                      output_replacements=output_replacements)
+        job_start = time.time()
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout, searchwindowsize=100)
             if result_id in expect_passwords:
@@ -584,45 +598,65 @@ class BaseTask(Task):
             # Refresh model instance from the database (to check cancel flag).
             instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                try:
-                    if tower_settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
-                        # NOTE: Refactor this once we get a newer psutil across the board
-                        if not psutil:
-                            os.kill(child.pid, signal.SIGKILL)
-                        else:
-                            try:
-                                main_proc = psutil.Process(pid=child.pid)
-                                if hasattr(main_proc, "children"):
-                                    child_procs = main_proc.children(recursive=True)
-                                else:
-                                    child_procs = main_proc.get_children(recursive=True)
-                                for child_proc in child_procs:
-                                    os.kill(child_proc.pid, signal.SIGKILL)
-                                os.kill(main_proc.pid, signal.SIGKILL)
-                            except TypeError:
-                                os.kill(child.pid, signal.SIGKILL)
-                    else:
-                        os.kill(child.pid, signal.SIGTERM)
-                    time.sleep(3)
-                    canceled = True
-                except OSError:
-                    logger.warn("Attempted to cancel already finished job, ignoring")
+                canceled = True
+            elif job_timeout != 0 and (time.time() - job_start) > job_timeout:
+                timed_out = True
+                if isinstance(extra_update_fields, dict):
+                    extra_update_fields['job_explanation'] = "Job terminated due to timeout"
+            if canceled or timed_out:
+                self._handle_termination(instance, child, is_cancel=canceled)
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
         if canceled:
             return 'canceled', child.exitstatus
-        elif child.exitstatus == 0:
+        elif child.exitstatus == 0 and not timed_out:
             return 'successful', child.exitstatus
         else:
             return 'failed', child.exitstatus
+
+    def _handle_termination(self, instance, job, is_cancel=True):
+        '''Helper function to properly terminate specified job.
+
+        Args:
+            instance: The corresponding model instance of this task.
+            job: The pexpect subprocess running the job.
+            is_cancel: Flag showing whether this termination is caused by instance's
+                cancel_flag.
+
+        Return:
+            None.
+        '''
+        try:
+            if settings.AWX_PROOT_ENABLED and self.should_use_proot(instance):
+                # NOTE: Refactor this once we get a newer psutil across the board
+                if not psutil:
+                    os.kill(job.pid, signal.SIGKILL)
+                else:
+                    try:
+                        main_proc = psutil.Process(pid=job.pid)
+                        if hasattr(main_proc, "children"):
+                            child_procs = main_proc.children(recursive=True)
+                        else:
+                            child_procs = main_proc.get_children(recursive=True)
+                        for child_proc in child_procs:
+                            os.kill(child_proc.pid, signal.SIGKILL)
+                        os.kill(main_proc.pid, signal.SIGKILL)
+                    except (TypeError, psutil.Error):
+                        os.kill(job.pid, signal.SIGKILL)
+            else:
+                os.kill(job.pid, signal.SIGTERM)
+            time.sleep(3)
+        except OSError:
+            keyword = 'cancel' if is_cancel else 'timeout'
+            logger.warn("Attempted to %s already finished job, ignoring" % keyword)
 
     def pre_run_hook(self, instance, **kwargs):
         '''
         Hook for any steps to run before the job/task starts
         '''
 
-    def post_run_hook(self, instance, **kwargs):
+    def post_run_hook(self, instance, status, **kwargs):
         '''
         Hook for any steps to run after job/task is complete.
         '''
@@ -631,11 +665,12 @@ class BaseTask(Task):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk, status='running', celery_task_id=self.request.id)
+        instance = self.update_model(pk, status='running', celery_task_id='' if self.request.id is None else self.request.id)
 
-        instance.socketio_emit_status("running")
+        instance.websocket_emit_status("running")
         status, rc, tb = 'error', None, ''
         output_replacements = []
+        extra_update_fields = {}
         try:
             self.pre_run_hook(instance, **kwargs)
             if instance.cancel_flag:
@@ -661,13 +696,10 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
-            if not os.path.exists(settings.JOBOUTPUT_ROOT):
-                os.makedirs(settings.JOBOUTPUT_ROOT)
-            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, "%d-%s.out" % (pk, str(uuid.uuid1())))
-            stdout_handle = codecs.open(stdout_filename, 'w', encoding='utf-8')
+            stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
-                    raise RuntimeError('proot is not installed')
+                    raise RuntimeError('bubblewrap is not installed')
                 kwargs['proot_temp_dir'] = build_proot_temp_dir()
                 args = wrap_args_with_proot(args, cwd, **kwargs)
                 safe_args = wrap_args_with_proot(safe_args, cwd, **kwargs)
@@ -678,8 +710,9 @@ class BaseTask(Task):
                 args = self.wrap_args_with_ssh_agent(args, ssh_key_path, ssh_auth_sock)
                 safe_args = self.wrap_args_with_ssh_agent(safe_args, ssh_key_path, ssh_auth_sock)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
-            status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
+                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_handle.name)
+            status, rc = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle,
+                                          extra_update_fields=extra_update_fields)
         except Exception:
             if status != 'canceled':
                 tb = traceback.format_exc()
@@ -699,17 +732,24 @@ class BaseTask(Task):
                 stdout_handle.close()
             except Exception:
                 pass
+
+        instance = self.update_model(pk)
+        if instance.cancel_flag:
+            status = 'canceled'
+
         instance = self.update_model(pk, status=status, result_traceback=tb,
-                                     output_replacements=output_replacements)
-        self.post_run_hook(instance, **kwargs)
-        instance.socketio_emit_status(status)
+                                     output_replacements=output_replacements,
+                                     **extra_update_fields)
+        self.post_run_hook(instance, status, **kwargs)
+        instance.websocket_emit_status(status)
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             if status == 'canceled':
                 raise Exception("Task %s(pk:%s) was canceled (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
             else:
-                raise Exception("Task %s(pk:%s) encountered an error (rc=%s)" % (str(self.model.__class__), str(pk), str(rc)))
+                raise Exception("Task %s(pk:%s) encountered an error (rc=%s), please see task stdout for details." %
+                                (str(self.model.__class__), str(pk), str(rc)))
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             self.signal_finished(pk)
 
@@ -781,9 +821,9 @@ class RunJob(BaseTask):
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
         plugin_dirs = [plugin_dir]
-        if hasattr(tower_settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
-                tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
-            plugin_dirs.append(tower_settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
+        if hasattr(settings, 'AWX_ANSIBLE_CALLBACK_PLUGINS') and \
+                settings.AWX_ANSIBLE_CALLBACK_PLUGINS:
+            plugin_dirs.extend(settings.AWX_ANSIBLE_CALLBACK_PLUGINS)
         plugin_path = ':'.join(plugin_dirs)
         env = super(RunJob, self).build_env(job, **kwargs)
         env = self.add_ansible_venv(env)
@@ -791,10 +831,18 @@ class RunJob(BaseTask):
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
+        if job.project:
+            env['PROJECT_REVISION'] = job.project.scm_revision
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
-        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['TOWER_HOST'] = settings.TOWER_URL_BASE
+        env['MAX_EVENT_RES'] = str(settings.MAX_EVENT_RES_DATA)
+        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
+        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -805,7 +853,7 @@ class RunJob(BaseTask):
         cp_dir = os.path.join(kwargs['private_data_dir'], 'cp')
         if not os.path.exists(cp_dir):
             os.mkdir(cp_dir, 0700)
-        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, 'ansible-ssh-%%h-%%p-%%r')
+        env['ANSIBLE_SSH_CONTROL_PATH'] = os.path.join(cp_dir, '%%h%%p%%r')
 
         # Allow the inventory script to include host variables inline via ['_meta']['hostvars'].
         env['INVENTORY_HOSTVARS'] = str(True)
@@ -851,13 +899,18 @@ class RunJob(BaseTask):
             env['ANSIBLE_NET_USERNAME'] = network_cred.username
             env['ANSIBLE_NET_PASSWORD'] = decrypt_field(network_cred, 'password')
 
+            ssh_keyfile = kwargs.get('private_data_files', {}).get('network_credential', '')
+            if ssh_keyfile:
+                env['ANSIBLE_NET_SSH_KEYFILE'] = ssh_keyfile
+
             authorize = network_cred.authorize
             env['ANSIBLE_NET_AUTHORIZE'] = unicode(int(authorize))
             if authorize:
-                env['ANSIBLE_NET_AUTHORIZE_PASSWORD'] = decrypt_field(network_cred, 'authorize_password')
+                env['ANSIBLE_NET_AUTH_PASS'] = decrypt_field(network_cred, 'authorize_password')
 
         # Set environment variables related to scan jobs
         if job.job_type == PERM_INVENTORY_SCAN:
+            env['FACT_QUEUE'] = settings.FACT_QUEUE
             env['ANSIBLE_LIBRARY'] = self.get_path_to('..', 'plugins', 'library')
             env['ANSIBLE_CACHE_PLUGINS'] = self.get_path_to('..', 'plugins', 'fact_caching')
             env['ANSIBLE_CACHE_PLUGIN'] = "tower"
@@ -891,27 +944,14 @@ class RunJob(BaseTask):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        try:
-            if Version(kwargs['ansible_version']) < Version('1.9'):
-                if become_method and become_method == "sudo" and become_username != "":
-                    args.extend(['-U', become_username])
-                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-sudo-pass")
-                if become_method and become_method == "su" and become_username != "":
-                    args.extend(['-R', become_username])
-                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-su-pass")
-            else:
-                if job.become_enabled:
-                    args.append('--become')
-                if become_method:
-                    args.extend(['--become-method', become_method])
-                if become_username:
-                    args.extend(['--become-user', become_username])
-                if 'become_password' in kwargs.get('passwords', {}):
-                    args.append('--ask-become-pass')
-        except ValueError:
-            pass
+        if job.become_enabled:
+            args.append('--become')
+        if become_method:
+            args.extend(['--become-method', become_method])
+        if become_username:
+            args.extend(['--become-user', become_username])
+        if 'become_password' in kwargs.get('passwords', {}):
+            args.append('--ask-become-pass')
         # Support prompting for a vault password.
         if 'vault_password' in kwargs.get('passwords', {}):
             args.append('--ask-vault-pass')
@@ -936,6 +976,10 @@ class RunJob(BaseTask):
             'tower_job_id': job.pk,
             'tower_job_launch_type': job.launch_type,
         }
+        if job.project:
+            extra_vars.update({
+                'tower_project_revision': job.project.scm_revision,
+            })
         if job.job_template:
             extra_vars.update({
                 'tower_job_template_id': job.job_template.pk,
@@ -947,7 +991,7 @@ class RunJob(BaseTask):
                 'tower_user_name': job.created_by.username,
             })
         if job.extra_vars_dict:
-            if kwargs.get('display', False) and job.job_template and job.job_template.survey_enabled:
+            if kwargs.get('display', False) and job.job_template:
                 extra_vars.update(json.loads(job.display_extra_vars()))
             else:
                 extra_vars.update(job.extra_vars_dict)
@@ -978,22 +1022,47 @@ class RunJob(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunJob, self).get_password_prompts()
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Vault password:\s*?$', re.M)] = 'vault_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Vault password:\s*?$', re.M)] = 'vault_password'
         return d
+
+    def get_stdout_handle(self, instance):
+        '''
+        Wrap stdout file object to capture events.
+        '''
+        stdout_handle = super(RunJob, self).get_stdout_handle(instance)
+
+        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
+            dispatcher = CallbackQueueDispatcher()
+
+            def job_event_callback(event_data):
+                event_data.setdefault('job_id', instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
+                dispatcher.dispatch(event_data)
+        else:
+            def job_event_callback(event_data):
+                event_data.setdefault('job_id', instance.id)
+                JobEvent.create_from_data(**event_data)
+
+        return OutputEventFilter(stdout_handle, job_event_callback)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
@@ -1002,32 +1071,53 @@ class RunJob(BaseTask):
         private_data_files = kwargs.get('private_data_files', {})
         if 'credential' in private_data_files:
             return private_data_files.get('credential')
-        elif 'network_credential' in private_data_files:
-            return private_data_files.get('network_credential')
+        '''
+        Note: Don't inject network ssh key data into ssh-agent for network
+        credentials because the ansible modules do not yet support it.
+        We will want to add back in support when/if Ansible network modules
+        support this.
+        '''
+        #elif 'network_credential' in private_data_files:
+        #    return private_data_files.get('network_credential')
+
         return ''
 
     def should_use_proot(self, instance, **kwargs):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def post_run_hook(self, job, **kwargs):
+    def pre_run_hook(self, job, **kwargs):
+        if job.project and job.project.scm_type:
+            local_project_sync = job.project.create_project_update(launch_type="sync")
+            local_project_sync.job_type = 'run'
+            local_project_sync.save()
+            # save the associated project update before calling run() so that a
+            # cancel() call on the job can cancel the project update
+            job = self.update_model(job.pk, project_update=local_project_sync)
+
+            project_update_task = local_project_sync._get_task_class()
+            try:
+                project_update_task().run(local_project_sync.id)
+                job = self.update_model(job.pk, scm_revision=job.project.scm_revision)
+            except Exception:
+                job = self.update_model(job.pk, status='failed',
+                                        job_explanation=('Previous Task Failed: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % 
+                                                         ('project_update', local_project_sync.name, local_project_sync.id)))
+                raise
+
+    def post_run_hook(self, job, status, **kwargs):
         '''
         Hook for actions to run after job/task has completed.
         '''
-        super(RunJob, self).post_run_hook(job, **kwargs)
+        super(RunJob, self).post_run_hook(job, status, **kwargs)
         try:
             inventory = job.inventory
         except Inventory.DoesNotExist:
             pass
         else:
             update_inventory_computed_fields.delay(inventory.id, True)
-        # Update job event fields after job has completed (only when using REST
-        # API callback).
-        if not settings.CALLBACK_CONSUMER_PORT:
-            for job_event in job.job_events.order_by('pk'):
-                job_event.save(post_process=True)
 
 
 class RunProjectUpdate(BaseTask):
@@ -1039,6 +1129,7 @@ class RunProjectUpdate(BaseTask):
         '''
         Return SSH private key data needed for this project update.
         '''
+        handle, self.revision_path = tempfile.mkstemp()
         private_data = {}
         if project_update.credential:
             credential = project_update.credential
@@ -1117,14 +1208,19 @@ class RunProjectUpdate(BaseTask):
             args.append('-v')
         scm_url, extra_vars = self._build_scm_url_extra_vars(project_update,
                                                              **kwargs)
-        scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
+        if project_update.project.scm_revision and project_update.job_type == 'run':
+            scm_branch = project_update.project.scm_revision
+        else:
+            scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
             'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'scm_delete_on_update': project_update.scm_delete_on_update,
+            'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
+            'scm_full_checkout': True if project_update.job_type == 'run' else False,
+            'scm_revision_output': self.revision_path
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
@@ -1179,12 +1275,12 @@ class RunProjectUpdate(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
-        d[re.compile(r'^Username for.*:\s*?$', re.M)] = 'scm_username'
-        d[re.compile(r'^Password for.*:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M)] = 'scm_password'
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'scm_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'Username for.*:\s*?$', re.M)] = 'scm_username'
+        d[re.compile(r'Password for.*:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'\S+?@\S+?\'s\s+?password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'scm_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         # FIXME: Configure whether we should auto accept host keys?
         d[re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M)] = 'yes'
         return d
@@ -1197,6 +1293,32 @@ class RunProjectUpdate(BaseTask):
         If using an SSH key, return the path for use by ssh-agent.
         '''
         return kwargs.get('private_data_files', {}).get('scm_credential', '')
+
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunProjectUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = ProjectUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
+    def post_run_hook(self, instance, status, **kwargs):
+        if instance.job_type == 'check' and status not in ('failed', 'canceled',):
+            p = instance.project
+            fd = open(self.revision_path, 'r')
+            lines = fd.readlines()
+            if lines:
+                p.scm_revision = lines[0].strip()
+                p.playbook_files = p.playbooks
+                p.save()
+            else:
+                logger.error("Could not find scm revision in check")
+        try:
+            os.remove(self.revision_path)
+        except Exception, e:
+            logger.error("Failed removing revision tmp file: {}".format(e))
+
 
 class RunInventoryUpdate(BaseTask):
 
@@ -1220,7 +1342,7 @@ class RunInventoryUpdate(BaseTask):
                                   project_name=credential.project)
             if credential.domain not in (None, ''):
                 openstack_auth['domain_name'] = credential.domain
-            private_state = str(inventory_update.source_vars_dict.get('private', 'true'))
+            private_state = inventory_update.source_vars_dict.get('private', True)
             # Retrieve cache path from inventory update vars if available,
             # otherwise create a temporary cache path only for this update.
             cache = inventory_update.source_vars_dict.get('cache', {})
@@ -1282,10 +1404,22 @@ class RunInventoryUpdate(BaseTask):
                                                          'password'))
         # Allow custom options to vmware inventory script.
         elif inventory_update.source == 'vmware':
-            section = 'defaults'
+            credential = inventory_update.credential
+
+            section = 'vmware'
             cp.add_section(section)
+            cp.set('vmware', 'cache_max_age', 0)
+
+            cp.set('vmware', 'username', credential.username)
+            cp.set('vmware', 'password', decrypt_field(credential, 'password'))
+            cp.set('vmware', 'server', credential.host)
+
             vmware_opts = dict(inventory_update.source_vars_dict.items())
-            vmware_opts.setdefault('guests_only', 'True')
+            if inventory_update.instance_filters:
+                vmware_opts.setdefault('host_filters', inventory_update.instance_filters)
+            if inventory_update.group_by:
+                vmware_opts.setdefault('groupby_patterns', inventory_update.groupby_patterns)
+
             for k,v in vmware_opts.items():
                 cp.set(section, k, unicode(v))
 
@@ -1306,7 +1440,9 @@ class RunInventoryUpdate(BaseTask):
 
             section = 'ansible'
             cp.add_section(section)
-            cp.set(section, 'group_patterns', '["{app}-{tier}-{color}", "{app}-{color}", "{app}", "{tier}"]')
+            cp.set(section, 'group_patterns', os.environ.get('SATELLITE6_GROUP_PATTERNS', []))
+            cp.set(section, 'want_facts', True)
+            cp.set(section, 'group_prefix', os.environ.get('SATELLITE6_GROUP_PREFIX', 'foreman_'))
 
             section = 'cache'
             cp.add_section(section)
@@ -1403,10 +1539,7 @@ class RunInventoryUpdate(BaseTask):
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
         elif inventory_update.source == 'vmware':
-            env['VMWARE_INI'] = cloud_credential
-            env['VMWARE_HOST'] = passwords.get('source_host', '')
-            env['VMWARE_USER'] = passwords.get('source_username', '')
-            env['VMWARE_PASSWORD'] = passwords.get('source_password', '')
+            env['VMWARE_INI_PATH'] = cloud_credential
         elif inventory_update.source == 'azure':
             env['AZURE_SUBSCRIPTION_ID'] = passwords.get('source_username', '')
             env['AZURE_CERT_PATH'] = cloud_credential
@@ -1460,7 +1593,6 @@ class RunInventoryUpdate(BaseTask):
         if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
         args.append('--source')
-
         # If this is a cloud-based inventory (e.g. from AWS, Rackspace, etc.)
         # then we need to set some extra flags based on settings in
         # Tower.
@@ -1516,21 +1648,41 @@ class RunInventoryUpdate(BaseTask):
             os.chmod(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
             args.append(runpath)
             args.append("--custom")
-            # try:
-            #     shutil.rmtree(runpath, True)
-            # except OSError:
-            #     pass
+            self.custom_dir_path.append(runpath)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:
             args.append('--traceback')
         return args
 
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunInventoryUpdate, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = InventoryUpdate.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
+
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
 
     def get_idle_timeout(self):
         return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
+
+    def pre_run_hook(self, instance, **kwargs):
+        self.custom_dir_path = []
+
+    def post_run_hook(self, instance, status, **kwargs):
+        print("In post run hook")
+        if self.custom_dir_path:
+            for p in self.custom_dir_path:
+                try:
+                    shutil.rmtree(p, True)
+                except OSError:
+                    pass
+
+
 
 class RunAdHocCommand(BaseTask):
     '''
@@ -1584,10 +1736,13 @@ class RunAdHocCommand(BaseTask):
         env['INVENTORY_HOSTVARS'] = str(True)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ANSIBLE_LOAD_CALLBACK_PLUGINS'] = '1'
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'  # Hardcoded by Ansible for ad-hoc commands (either minimal or oneline).
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = ad_hoc_command.task_auth_token or ''
-        env['CALLBACK_CONSUMER_PORT'] = str(settings.CALLBACK_CONSUMER_PORT)
+        env['CALLBACK_QUEUE'] = settings.CALLBACK_QUEUE
+        env['CALLBACK_CONNECTION'] = settings.BROKER_URL
         env['ANSIBLE_SFTP_BATCH_MODE'] = 'False'
+        env['CACHE'] = settings.CACHES['default']['LOCATION'] if 'LOCATION' in settings.CACHES['default'] else ''
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -1628,27 +1783,14 @@ class RunAdHocCommand(BaseTask):
             args.append('--ask-pass')
         # We only specify sudo/su user and password if explicitly given by the
         # credential.  Credential should never specify both sudo and su.
-        try:
-            if Version(kwargs['ansible_version']) < Version('1.9'):
-                if become_method and become_method == "sudo" and become_username != "":
-                    args.extend(['-U', become_username])
-                if become_method and become_method == "sudo" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-sudo-pass")
-                if become_method and become_method == "su" and become_username != "":
-                    args.extend(['-R', become_username])
-                if become_method and become_method == "su" and "become_password" in kwargs.get("passwords", {}):
-                    args.append("--ask-su-pass")
-            else:
-                if ad_hoc_command.become_enabled:
-                    args.append('--become')
-                if become_method:
-                    args.extend(['--become-method', become_method])
-                if become_username:
-                    args.extend(['--become-user', become_username])
-                if 'become_password' in kwargs.get('passwords', {}):
-                    args.append('--ask-become-pass')
-        except ValueError:
-            pass
+        if ad_hoc_command.become_enabled:
+            args.append('--become')
+        if become_method:
+            args.extend(['--become-method', become_method])
+        if become_username:
+            args.extend(['--become-user', become_username])
+        if 'become_password' in kwargs.get('passwords', {}):
+            args.append('--ask-become-pass')
 
         if ad_hoc_command.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % ad_hoc_command.forks)
@@ -1676,21 +1818,46 @@ class RunAdHocCommand(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunAdHocCommand, self).get_password_prompts()
-        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
-        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
-        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SUDO password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^su password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SU password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PBRUN password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pbrun password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^PFEXEC password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^pfexec password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^RUNAS password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^runas password.*:\s*?$', re.M)] = 'become_password'
-        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'sudo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SUDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'su password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SU password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PBRUN password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pbrun password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'PFEXEC password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'pfexec password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'RUNAS password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'runas password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'DZDO password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'dzdo password.*:\s*?$', re.M)] = 'become_password'
+        d[re.compile(r'SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'Password:\s*?$', re.M)] = 'ssh_password'
         return d
+
+    def get_stdout_handle(self, instance):
+        '''
+        Wrap stdout file object to capture events.
+        '''
+        stdout_handle = super(RunAdHocCommand, self).get_stdout_handle(instance)
+
+        if getattr(settings, 'USE_CALLBACK_QUEUE', False):
+            dispatcher = CallbackQueueDispatcher()
+
+            def ad_hoc_command_event_callback(event_data):
+                event_data.setdefault('ad_hoc_command_id', instance.id)
+                if 'uuid' in event_data:
+                    cache_event = cache.get('ev-{}'.format(event_data['uuid']), None)
+                    if cache_event is not None:
+                        event_data.update(cache_event)
+                dispatcher.dispatch(event_data)
+        else:
+            def ad_hoc_command_event_callback(event_data):
+                event_data.setdefault('ad_hoc_command_id', instance.id)
+                AdHocCommandEvent.create_from_data(**event_data)
+
+        return OutputEventFilter(stdout_handle, ad_hoc_command_event_callback)
 
     def get_ssh_key_path(self, instance, **kwargs):
         '''
@@ -1702,13 +1869,13 @@ class RunAdHocCommand(BaseTask):
         '''
         Return whether this task should use proot.
         '''
-        return getattr(tower_settings, 'AWX_PROOT_ENABLED', False)
+        return getattr(settings, 'AWX_PROOT_ENABLED', False)
 
-    def post_run_hook(self, ad_hoc_command, **kwargs):
+    def post_run_hook(self, ad_hoc_command, status, **kwargs):
         '''
         Hook for actions to run after ad hoc command has completed.
         '''
-        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, **kwargs)
+        super(RunAdHocCommand, self).post_run_hook(ad_hoc_command, status, **kwargs)
 
 
 class RunSystemJob(BaseTask):
@@ -1722,8 +1889,12 @@ class RunSystemJob(BaseTask):
             json_vars = json.loads(system_job.extra_vars)
             if 'days' in json_vars and system_job.job_type != 'cleanup_facts':
                 args.extend(['--days', str(json_vars.get('days', 60))])
+            if 'dry_run' in json_vars and json_vars['dry_run'] and system_job.job_type != 'cleanup_facts':
+                args.extend(['--dry-run'])
             if system_job.job_type == 'cleanup_jobs':
-                args.extend(['--jobs', '--project-updates', '--inventory-updates', '--management-jobs', '--ad-hoc-commands'])
+                args.extend(['--jobs', '--project-updates', '--inventory-updates',
+                             '--management-jobs', '--ad-hoc-commands', '--workflow-jobs',
+                             '--notifications'])
             if system_job.job_type == 'cleanup_facts':
                 if 'older_than' in json_vars:
                     args.extend(['--older_than', str(json_vars['older_than'])])
@@ -1732,6 +1903,15 @@ class RunSystemJob(BaseTask):
         except Exception as e:
             logger.error("Failed to parse system job: " + str(e))
         return args
+
+    def get_stdout_handle(self, instance):
+        stdout_handle = super(RunSystemJob, self).get_stdout_handle(instance)
+
+        def raw_callback(data):
+            instance_actual = SystemJob.objects.get(pk=instance.pk)
+            instance_actual.result_stdout_text += data
+            instance_actual.save()
+        return OutputEventFilter(stdout_handle, raw_callback=raw_callback)
 
     def build_env(self, instance, **kwargs):
         env = super(RunSystemJob, self).build_env(instance,

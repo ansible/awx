@@ -26,7 +26,6 @@ export default
             active_failures: {
                 label: '',
                 iconOnly: true,
-                searchable: false,
                 nosort: true,
                 // do not remove this ng-click directive
                 // the list generator case to handle fields without ng-click
@@ -43,31 +42,12 @@ export default
             name: {
                 key: true,
                 label: 'Hosts',
-                searchLabel: 'Name',
                 ngClick: "editHost(host.id)",
                 ngClass: "{ 'host-disabled-label': !host.enabled }",
                 columnClass: 'col-lg-6 col-md-8 col-sm-8 col-xs-7',
                 dataHostId: "{{ host.id }}",
                 dataType: "host",
                 class: 'InventoryManage-breakWord'
-            },
-            enabled: {
-                label: 'Disabled?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                typeOptions: [
-                    {label: "Yes", value: false},
-                    {label: "No", value: true}
-                ],
-                searchValue: 'false',
-                searchOnly: true
-            },
-            has_active_failures: {
-                label: 'Failed jobs?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
             }
         },
 
@@ -78,21 +58,31 @@ export default
                 mode: 'all',
                 ngClick: "copyMoveHost(host.id)",
                 awToolTip: 'Copy or move host to another group',
-                dataPlacement: "top"
+                dataPlacement: "top",
+                ngShow: 'host.summary_fields.user_capabilities.edit'
             },
             edit: {
                 //label: 'Edit',
                 ngClick: "editHost(host.id)",
                 icon: 'icon-edit',
                 awToolTip: 'Edit host',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'host.summary_fields.user_capabilities.edit'
+            },
+            view: {
+                //label: 'Edit',
+                ngClick: "editHost(host.id)",
+                awToolTip: 'View host',
+                dataPlacement: 'top',
+                ngShow: '!host.summary_fields.user_capabilities.edit'
             },
             "delete": {
                 //label: 'Delete',
                 ngClick: "deleteHost(host.id, host.name)",
                 icon: 'icon-trash',
                 awToolTip: 'Delete host',
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                ngShow: 'host.summary_fields.user_capabilities.delete'
             }
         },
 
@@ -107,7 +97,8 @@ export default
                 actionClass: 'btn List-buttonDefault system-tracking',
                 ngDisabled: 'systemTrackingDisabled || !hostsSelected',
                 showTipWhenDisabled: true,
-                tooltipInnerClass: "Tooltip-wide"
+                tooltipInnerClass: "Tooltip-wide",
+                ngShow: true
             },
             refresh: {
                 mode: 'all',
@@ -122,7 +113,9 @@ export default
                 ngClick: "createHost()",
                 awToolTip: "Create a new host",
                 actionClass: 'btn List-buttonSubmit',
-                buttonContent: '&#43; ADD HOST'
+                buttonContent: '&#43; ADD HOST',
+                ngShow: 'canAdd',
+                dataPlacement: "top",
             }
         }
 

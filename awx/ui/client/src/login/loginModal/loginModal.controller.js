@@ -57,10 +57,11 @@
 export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
     '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
     'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
-    'CheckLicense', 'FeaturesService',
+    'CheckLicense', 'FeaturesService', 'SocketService',
     function ($log, $cookieStore, $compile, $window, $rootScope, $location,
         Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
-        scope, pendoService, ConfigService, CheckLicense, FeaturesService) {
+        scope, pendoService, ConfigService, CheckLicense, FeaturesService,
+        SocketService) {
     var lastPath, lastUser, sessionExpired, loginAgain;
 
     loginAgain = function() {
@@ -92,13 +93,12 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
 
     $rootScope.loginConfig.promise.then(function () {
         if ($AnsibleConfig.custom_logo) {
-            scope.customLogo = "custom_console_logo.png";
+            scope.customLogo = $rootScope.custom_logo;
             scope.customLogoPresent = true;
         } else {
             scope.customLogo = "tower-logo-login.svg";
             scope.customLogoPresent = false;
         }
-
         scope.customLoginInfo = $AnsibleConfig.custom_login_info;
         scope.customLoginInfoPresent = (scope.customLoginInfo) ? true : false;
     });
@@ -135,16 +135,17 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
                 Authorization.setUserInfo(data);
                 Timer.init().then(function(timer){
                     $rootScope.sessionTimer = timer;
-                    $rootScope.$emit('OpenSocket');
+                    SocketService.init();
                     $rootScope.user_is_superuser = data.results[0].is_superuser;
                     $rootScope.user_is_system_auditor = data.results[0].is_system_auditor;
                     scope.$emit('AuthorizationGetLicense');
                 });
             })
             .error(function (data, status) {
-                Authorization.logout();
-                Wait('stop');
-                Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
+                Authorization.logout().then( () => {
+                    Wait('stop');
+                    Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', loginAgain);
+                });
             });
     });
 

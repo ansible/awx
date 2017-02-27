@@ -2,9 +2,12 @@
 # All Rights Reserved.
 
 import sys
+from datetime import timedelta
 
-from django.conf import settings
 from django.db import models
+from django.utils.timezone import now
+from django.db.models import Sum
+from django.conf import settings
 
 
 class HostManager(models.Manager):
@@ -17,6 +20,7 @@ class HostManager(models.Manager):
         except NotImplementedError: # For unit tests only, SQLite doesn't support distinct('name')
             return len(set(self.values_list('name', flat=True)))
 
+
 class InstanceManager(models.Manager):
     """A custom manager class for the Instance model.
 
@@ -26,33 +30,25 @@ class InstanceManager(models.Manager):
     def me(self):
         """Return the currently active instance."""
         # If we are running unit tests, return a stub record.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return self.model(id=1, primary=True,
+        if settings.IS_TESTING(sys.argv):
+            return self.model(id=1,
+                              hostname='localhost',
                               uuid='00000000-0000-0000-0000-000000000000')
 
-        # Return the appropriate record from the database.
-        return self.get(uuid=settings.SYSTEM_UUID)
+        node = self.filter(hostname=settings.CLUSTER_HOST_ID)
+        if node.exists():
+            return node[0]
+        raise RuntimeError("No instance found with the current cluster host id")
+
+    def active_count(self):
+        """Return count of active Tower nodes for licensing."""
+        return self.all().count()
+
+    def total_capacity(self):
+        sumval = self.filter(modified__gte=now() - timedelta(seconds=settings.AWX_ACTIVE_NODE_TIME)) \
+                     .aggregate(total_capacity=Sum('capacity'))['total_capacity']
+        return max(50, sumval)
 
     def my_role(self):
-        """Return the role of the currently active instance, as a string
-        ('primary' or 'secondary').
-        """
-        # If we are running unit tests, we are primary, because reasons.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return 'primary'
-
-        # Check if this instance is primary; if so, return "primary", otherwise
-        # "secondary".
-        if self.me().primary:
-            return 'primary'
-        return 'secondary'
-
-    def primary(self):
-        """Return the primary instance."""
-        # If we are running unit tests, return a stub record.
-        if len(sys.argv) >= 2 and sys.argv[1] == 'test':
-            return self.model(id=1, primary=True,
-                              uuid='00000000-0000-0000-0000-000000000000')
-
-        # Return the appropriate record from the database.
-        return self.get(primary=True)
+        # NOTE: TODO: Likely to repurpose this once standalone ramparts are a thing
+        return "tower"

@@ -1,0 +1,8 @@
+[jlaska-proot]
+name=Copr repo for proot owned by jlaska
+baseurl=https://copr-be.cloud.fedoraproject.org/results/jlaska/proot/epel-7-$basearch/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/jlaska/proot/pubkey.gpg
+enabled=1
+enabled_metadata=1

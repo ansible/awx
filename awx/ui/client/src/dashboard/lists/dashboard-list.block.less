@@ -32,34 +32,21 @@
 }
 
 .DashboardList-viewAll {
-    color: @btn-txt;
-    background-color: @btn-bg;
-    font-size: 12px;
-    border: 1px solid @default-icon-hov;
-    border-radius: 5px;
+    font-size: 11px;
     margin-right: 15px;
-    margin-top: 10px;
+    margin-top: 13px;
     margin-bottom: 10px;
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 5px;
     padding-top: 5px;
-    transition: background-color 0.2s;
-}
-
-.DashboardList-viewAll:hover {
-    color: @btn-txt;
-    background-color: @btn-bg-hov;
-}
-
-.DashboardList-viewAll:focus {
-    color: @btn-txt;
 }
 
 .DashboardList-container {
     flex: 1;
     width: 100%;
     padding: 20px;
+    padding-top: 0;
 }
 
 .DashboardList-tableHeader--name {
@@ -97,6 +84,18 @@
 
 .DashboardList-status--failed{
     color: @default-err;
+}
+
+.DashboardList-status--failed{
+    color: @default-err;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0px;
+    margin-right: 5px;
+}
+
+.DashboardList-status--failed:before {
+    content: "\f06a";
 }
 
 .DashboardList-nameCell {

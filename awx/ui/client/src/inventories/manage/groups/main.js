@@ -4,11 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-import {ManageGroupsAdd, ManageGroupsEdit} from './groups.route';
+import GroupAddController from './groups-add.controller';
+import GroupEditController from './groups-edit.controller';
 
 export default
-    angular.module('manageGroups', [])
-    	.run(['$stateExtender', function($stateExtender){
-    		$stateExtender.addState(ManageGroupsAdd);
-    		$stateExtender.addState(ManageGroupsEdit);
-    	}]);
+angular.module('manageGroups', [])
+    .controller('GroupAddController', GroupAddController)
+    .controller('GroupEditController', GroupEditController);

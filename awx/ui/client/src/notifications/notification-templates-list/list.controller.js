@@ -1,204 +1,191 @@
  /*************************************************
- * Copyright (c) 2015 Ansible, Inc.
- *
- * All Rights Reserved
- *************************************************/
+  * Copyright (c) 2015 Ansible, Inc.
+  *
+  * All Rights Reserved
+  *************************************************/
 
-export default
-    [   '$rootScope','Wait', 'generateList', 'NotificationTemplatesList',
-        'GetBasePath' , 'SearchInit' , 'PaginateInit', 'Rest' ,
-        'ProcessErrors', 'Prompt', '$state', 'GetChoices', 'Empty', 'Find',
-        'ngToast', '$compile', '$filter',
-        function(
-            $rootScope,Wait, GenerateList, NotificationTemplatesList,
-            GetBasePath, SearchInit, PaginateInit, Rest,
-            ProcessErrors, Prompt, $state, GetChoices, Empty, Find, ngToast,
-            $compile, $filter) {
-            var scope = $rootScope.$new(),
-                defaultUrl = GetBasePath('notification_templates'),
-                list = NotificationTemplatesList,
-                view = GenerateList;
+ export default ['$rootScope', '$scope', 'Wait', 'generateList', 'NotificationTemplatesList',
+     'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', 'GetChoices',
+     'Empty', 'Find', 'ngToast', '$compile', '$filter', 'Dataset', 'rbacUiControlService',
+     'i18n',
+     function(
+         $rootScope, $scope, Wait, GenerateList, NotificationTemplatesList,
+         GetBasePath, Rest, ProcessErrors, Prompt, $state, GetChoices,
+         Empty, Find, ngToast, $compile, $filter, Dataset, rbacUiControlService,
+         i18n) {
 
-            view.inject( list, {
-                mode: 'edit',
-                scope: scope
-            });
+         var defaultUrl = GetBasePath('notification_templates'),
+             list = NotificationTemplatesList;
 
-            scope.removePostRefresh = scope.$on('PostRefresh', function () {
-                Wait('stop');
-                if (scope.notification_templates) {
-                    scope.notification_templates.forEach(function(notification_template, i) {
-                        setStatus(notification_template);
-                        scope.notification_type_options.forEach(function(type) {
-                            if (type.value === notification_template.notification_type) {
-                                scope.notification_templates[i].notification_type = type.label;
-                                var recent_notifications = notification_template.summary_fields.recent_notifications;
-                                scope.notification_templates[i].status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
-                            }
-                        });
-                    });
-                }
-            });
+         init();
 
-            if (scope.removeChoicesHere) {
-                scope.removeChoicesHere();
-            }
-            scope.removeChoicesHere = scope.$on('choicesReadyNotifierList', function () {
-                list.fields.notification_type.searchOptions = scope.notification_type_options;
+         function init() {
+             $scope.canAdd = false;
 
-                SearchInit({
-                    scope: scope,
-                    set: 'notification_templates',
-                    list: list,
-                    url: defaultUrl
-                });
+             rbacUiControlService.canAdd("notification_templates")
+                 .then(function(canAdd) {
+                     $scope.canAdd = canAdd;
+                 });
 
-                if ($rootScope.addedItem) {
-                    scope.addedItem = $rootScope.addedItem;
-                    delete $rootScope.addedItem;
-                }
-                PaginateInit({
-                    scope: scope,
-                    list: list,
-                    url: defaultUrl
-                });
+             // search init
+             $scope.list = list;
+             $scope[`${list.iterator}_dataset`] = Dataset.data;
+             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+         }
 
-                scope.search(list.iterator);
+             $scope.$on(`notification_template_options`, function(event, data){
+                 $scope.options = data.data.actions.GET;
+                 optionsRequestDataProcessing();
+             });
 
-            });
+             $scope.$watchCollection("notification_templates", function() {
+                    optionsRequestDataProcessing();
+                 }
+             );
+             // iterate over the list and add fields like type label, after the
+             // OPTIONS request returns, or the list is sorted/paginated/searched.
+             function optionsRequestDataProcessing(){
+                 $scope[list.name].forEach(function(item, item_idx) {
+                     var itm = $scope[list.name][item_idx];
+                     // Set the item type label
+                     if (list.fields.notification_type && $scope.options &&
+                         $scope.options.hasOwnProperty('notification_type')) {
+                             $scope.options.notification_type.choices.forEach(function(choice) {
+                                 if (choice[0] === item.notification_type) {
+                                     itm.type_label = choice[1];
+                                     var recent_notifications = itm.summary_fields.recent_notifications;
+                                     itm.status = recent_notifications && recent_notifications.length > 0 ? recent_notifications[0].status : "none";
+                                 }
+                             });
+                     }
+                     setStatus(itm);
+                 });
+             }
 
-            GetChoices({
-                scope: scope,
-                url: defaultUrl,
-                field: 'notification_type',
-                variable: 'notification_type_options',
-                callback: 'choicesReadyNotifierList'
-            });
+         function setStatus(notification_template) {
+             var html, recent_notifications = notification_template.summary_fields.recent_notifications;
+             if (recent_notifications.length > 0) {
+                 html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+                 html += "<thead>\n";
+                 html += "<tr>";
+                 html += "<th>" + i18n._("Status") + "</th>";
+                 html += "<th>" + i18n._("Time") + "</th>";
+                 html += "</tr>\n";
+                 html += "</thead>\n";
+                 html += "<tbody>\n";
 
-            function setStatus(notification_template) {
-                var html, recent_notifications = notification_template.summary_fields.recent_notifications;
-                if (recent_notifications.length > 0) {
-                    html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
-                    html += "<thead>\n";
-                    html += "<tr>";
-                    html += "<th>Status</th>";
-                    html += "<th>Time</th>";
-                    html += "</tr>\n";
-                    html += "</thead>\n";
-                    html += "<tbody>\n";
+                 recent_notifications.forEach(function(row) {
+                     html += "<tr>\n";
+                     html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
+                     html += "<td>" + ($filter('longDate')(row.created)).replace(/ /, '<br />') + "</td>\n";
+                     html += "</tr>\n";
+                 });
+                 html += "</tbody>\n";
+                 html += "</table>\n";
+             } else {
+                 html = "<p>" + i18n._("No recent notifications.") + "</p>\n";
+             }
+             notification_template.template_status_html = html;
+         }
 
-                    recent_notifications.forEach(function(row) {
-                        html += "<tr>\n";
-                        html += `<td><i class=\"SmartStatus-tooltip--${row.status} fa icon-job-${row.status}"></i></td>`;
-                        html += "<td>" + ($filter('longDate')(row.created)).replace(/ /,'<br />') + "</td>\n";
-                        html += "</tr>\n";
-                    });
-                    html += "</tbody>\n";
-                    html += "</table>\n";
-                }
-                else {
-                    html = "<p>No recent notifications.</p>\n";
-                }
-                notification_template.template_status_html = html;
-            }
+         $scope.testNotification = function() {
+             var name = $filter('sanitize')(this.notification_template.name),
+                 pending_retries = 10;
 
-            scope.testNotification = function(){
-                var name = $filter('sanitize')(this.notification_template.name),
-                pending_retries = 10;
-
-                Rest.setUrl(defaultUrl + this.notification_template.id +'/test/');
-                Rest.post({})
-                    .then(function (data) {
-                        if(data && data.data && data.data.notification){
-                            Wait('start');
-                            // Using a setTimeout here to wait for the
-                            // notification to be processed and for a status
-                            // to be returned from the API.
-                            retrieveStatus(data.data.notification);
-                    }
-                    else {
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                            msg: 'Call to notifcatin templates failed. Notification returned status: ' + status });
-                    }
-                })
-                .catch(function () {
-                    ngToast.danger({
-                        content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification Failed.`,
+             Rest.setUrl(defaultUrl + this.notification_template.id + '/test/');
+             Rest.post({})
+                 .then(function(data) {
+                     if (data && data.data && data.data.notification) {
+                         Wait('start');
+                         // Using a setTimeout here to wait for the
+                         // notification to be processed and for a status
+                         // to be returned from the API.
+                         retrieveStatus(data.data.notification);
+                     } else {
+                         ProcessErrors($scope, data, status, null, {
+                             hdr: 'Error!',
+                             msg: 'Call to notifcatin templates failed. Notification returned status: ' + status
+                         });
+                     }
+                 })
+                 .catch(function() {
+                     ngToast.danger({
+                         content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> ` + i18n._('Notification Failed.'),
                      });
-                });
+                 });
 
-                function retrieveStatus(id){
-                    setTimeout(function(){
-                        var url = GetBasePath('notifications') + id;
-                        Rest.setUrl(url);
-                        Rest.get()
-                        .then(function (res) {
-                            if(res && res.data && res.data.status && res.data.status === "successful"){
-                                scope.search(list.iterator);
-                                ngToast.success({
-                                    content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
-                                });
-                                Wait('stop');
-                            }
-                            else if(res && res.data && res.data.status && res.data.status === "failed"){
-                                scope.search(list.iterator);
-                                ngToast.danger({
-                                    content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
-                                });
-                                Wait('stop');
-                            }
-                            else if(res && res.data && res.data.status && res.data.status === "pending" && pending_retries>0){
-                                pending_retries--;
-                                retrieveStatus(id);
-                            }
-                            else {
-                                Wait('stop');
-                                ProcessErrors(scope, null, status, null, { hdr: 'Error!',
-                                    msg: 'Call to test notifications failed.' });
-                            }
+             function retrieveStatus(id) {
+                 setTimeout(function() {
+                     var url = GetBasePath('notifications') + id;
+                     Rest.setUrl(url);
+                     Rest.get()
+                         .then(function(res) {
+                             if (res && res.data && res.data.status && res.data.status === "successful") {
+                                 ngToast.success({
+                                     content: `<i class="fa fa-check-circle Toast-successIcon"></i> <b>${name}:</b> Notification sent.`
+                                 });
+                                 $state.reload();
+                             } else if (res && res.data && res.data.status && res.data.status === "failed") {
+                                 ngToast.danger({
+                                     content: `<i class="fa fa-exclamation-triangle Toast-successIcon"></i> <b>${name}:</b> Notification failed.`
+                                 });
+                                 $state.reload();
+                             } else if (res && res.data && res.data.status && res.data.status === "pending" && pending_retries > 0) {
+                                 pending_retries--;
+                                 retrieveStatus(id);
+                             } else {
+                                 Wait('stop');
+                                 ProcessErrors($scope, null, status, null, {
+                                     hdr: 'Error!',
+                                     msg: 'Call to test notifications failed.'
+                                 });
+                             }
 
-                        });
-                    } , 5000);
-                }
-            };
+                         });
+                 }, 5000);
+             }
+         };
 
-            scope.addNotification = function(){
-                $state.transitionTo('notifications.add');
-            };
+         $scope.addNotification = function() {
+             $state.go('notifications.add');
+         };
 
-            scope.editNotification = function(){
-                $state.transitionTo('notifications.edit',{
-                    notification_template_id: this.notification_template.id,
-                    notification_template: this.notification_templates
-                });
-            };
+         $scope.editNotification = function() {
+             $state.go('notifications.edit', {
+                 notification_template_id: this.notification_template.id,
+                 notification_template: this.notification_templates
+             });
+         };
 
-            scope.deleteNotification =  function(id, name){
-                var action = function () {
-                    $('#prompt-modal').modal('hide');
-                    Wait('start');
-                    var url = defaultUrl + id + '/';
-                    Rest.setUrl(url);
-                    Rest.destroy()
-                        .success(function () {
-                            if (parseInt($state.params.notification_template_id) === id) {
-                                $state.go("^", null, {reload: true});
-                            } else {
-                                scope.search(list.iterator);
-                            }
-                        })
-                        .error(function (data, status) {
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!',
-                                msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                        });
-                };
-                var bodyHtml = '<div class="Prompt-bodyQuery">Are you sure you want to delete the notification template below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
-                Prompt({
-                    hdr: 'Delete',
-                    body: bodyHtml,
-                    action: action,
-                    actionText: 'DELETE'
-                });
-            };
-        }
-    ];
+         $scope.deleteNotification = function(id, name) {
+             var action = function() {
+                 $('#prompt-modal').modal('hide');
+                 Wait('start');
+                 var url = defaultUrl + id + '/';
+                 Rest.setUrl(url);
+                 Rest.destroy()
+                     .success(function() {
+                         if (parseInt($state.params.notification_template_id) === id) {
+                            $state.go("^", null, { reload: true });
+                         } else {
+                            $state.go('.', null, {reload: true});
+                         }
+                         Wait('stop');
+                     })
+                     .error(function(data, status) {
+                         ProcessErrors($scope, data, status, null, {
+                             hdr: 'Error!',
+                             msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
+                         });
+                     });
+             };
+             var bodyHtml = '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the notification template below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>';
+             Prompt({
+                 hdr: i18n._('Delete'),
+                 body: bodyHtml,
+                 action: action,
+                 actionText: i18n._('DELETE')
+             });
+         };
+     }
+ ];

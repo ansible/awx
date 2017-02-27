@@ -2,6 +2,7 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.mark.django_db
 def test_inventory_source_notification_on_cloud_only(get, post, group_factory, user, notification_template):
     u = user('admin', True)
@@ -47,6 +48,7 @@ def test_create_inventory_group(post, inventory, alice, role_field, expected_sta
     if role_field:
         getattr(inventory, role_field).members.add(alice)
     post(reverse('api:inventory_groups_list', args=(inventory.id,)), data, alice, expect=expected_status_code)
+
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
@@ -106,6 +108,7 @@ def test_create_inventory_host(post, inventory, alice, role_field, expected_stat
         getattr(inventory, role_field).members.add(alice)
     post(reverse('api:inventory_hosts_list', args=(inventory.id,)), data, alice, expect=expected_status_code)
 
+
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),
     ('admin_role', 201),
@@ -148,6 +151,7 @@ def test_delete_inventory_host(delete, host, alice, role_field, expected_status_
     if role_field:
         getattr(host.inventory, role_field).members.add(alice)
     delete(reverse('api:host_detail', args=(host.id,)), alice, expect=expected_status_code)
+
 
 @pytest.mark.parametrize("role_field,expected_status_code", [
     (None, 403),

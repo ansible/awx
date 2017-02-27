@@ -18,8 +18,7 @@
 import listGenerator from '../shared/list-generator/main';
 
 
-angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
-    'RefreshHelper', listGenerator.name, 'StreamWidget',
+angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', listGenerator.name, 'StreamWidget',
 ])
 
 .factory('BuildAnchor', [ '$log', '$filter',
@@ -77,9 +76,16 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         }
                         break;
                     case 'notification_template':
-                        throw {name : 'NotImplementedError', message : 'activity.summary_fields to build this url not implemented yet'};
+                        url += `notification_templates/${obj.id}`;
+                        break;
                     case 'role':
                         throw {name : 'NotImplementedError', message : 'role object management is not consolidated to a single UI view'};
+                    case 'job_template':
+                        url += `templates/job_template/${obj.id}`;
+                        break;
+                    case 'workflow_job_template':
+                        url += `templates/workflow_job_template/${obj.id}`;
+                        break;
                     default:
                         url += resource + 's/' + obj.id + '/';
                 }
@@ -93,8 +99,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     }
 ])
 
-.factory('BuildDescription', ['BuildAnchor', '$log',
-    function (BuildAnchor, $log) {
+.factory('BuildDescription', ['BuildAnchor', '$log', 'i18n',
+    function (BuildAnchor, $log, i18n) {
         return function (activity) {
 
             var pastTense = function(operation){
@@ -213,7 +219,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
             catch(err){
                 $log.debug(err);
-                activity.description = 'Event summary not available';
+                activity.description = i18n._('Event summary not available');
             }
         };
     }
@@ -222,12 +228,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 .factory('ShowDetail', ['$filter', '$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate',
     'ActivityDetailForm', 'Empty', 'Find',
     function ($filter, $rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
-        return function (params) {
+        return function (params, scope) {
 
             var activity_id = params.activity_id,
-                parent_scope = params.scope,
-                activity = Find({ list: parent_scope.activities, key: 'id', val: activity_id }),
-                scope, element;
+                activity = Find({ list: params.scope.activities, key: 'id', val: activity_id }),
+                element;
 
             if (activity) {
 
@@ -259,145 +264,22 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 ])
 
 .factory('Stream', ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
-    'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 'PaginateInit',
-    'generateList', 'FormatDate', 'BuildDescription',
+    'ProcessErrors', 'Wait', 'StreamList', 'generateList', 'FormatDate', 'BuildDescription',
     'ShowDetail',
     function ($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
-        Wait, StreamList, SearchInit, PaginateInit, GenerateList, FormatDate,
+        Wait, StreamList, GenerateList, FormatDate,
         BuildDescription, ShowDetail) {
         return function (params) {
 
-            var list = _.cloneDeep(StreamList),
-                defaultUrl = GetBasePath('activity_stream'),
-                view = GenerateList,
-                parent_scope = params.scope,
-                scope = parent_scope.$new(),
-                url = (params && params.url) ? params.url : null;
+            var scope = params.scope;
 
             $rootScope.flashMessage = null;
-
-            if (url) {
-                defaultUrl = url;
-            } else {
-
-                if($state.params && $state.params.target) {
-                    if($state.params.id) {
-                        // We have a type and an ID
-                        defaultUrl += '?' + $state.params.target + '__id=' + $state.params.id;
-                    }
-                    else {
-                        // We just have a type
-                        if ($state.params.target === 'inventory_script') {
-                            defaultUrl += '?or__object1=custom_inventory_script&or__object2=custom_inventory_script';
-                        } else if ($state.params.target === 'management_job') {
-                            defaultUrl += '?or__object1=job&or__object2=job';
-                        } else {
-                            defaultUrl += '?or__object1=' + $state.params.target + '&or__object2=' + $state.params.target;
-                        }
-                    }
-                }
-            }
-
-            if ($state.params.target === 'credential') {
-                list.fields.customSearchField = {
-                    label: 'Credential',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'credential',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'host') {
-                list.fields.customSearchField = {
-                    label: 'Host',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'host',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'inventory') {
-                list.fields.customSearchField = {
-                    label: 'Inventory',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'inventory',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'inventory_script') {
-                list.fields.customSearchField = {
-                    label: 'Inventory Script',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'custom_inventory_script',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'job_template') {
-                list.fields.customSearchField = {
-                    label: 'Job Template',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'job_template',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'job') {
-                list.fields.customSearchField = {
-                    label: 'Job',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'job',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'organization') {
-                list.fields.customSearchField = {
-                    label: 'Organization',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'organization',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'project') {
-                list.fields.customSearchField = {
-                    label: 'Project',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'project',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'schedule') {
-                list.fields.customSearchField = {
-                    label: 'Schedule',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'schedule',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'team') {
-                list.fields.customSearchField = {
-                    label: 'Team',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'team',
-                    sourceField: 'name'
-                };
-            } else if ($state.params.target === 'user') {
-                list.fields.customSearchField = {
-                    label: 'User',
-                    searchType: 'text',
-                    searchOnly: 'true',
-                    sourceModel: 'user',
-                    sourceField: 'username'
-                };
-            }
-
-            list.basePath = defaultUrl;
-
-            // Generate the list
-            view.inject(list, { mode: 'edit', id: 'stream-content', searchSize: 'col-lg-4 col-md-4 col-sm-12 col-xs-12', secondWidget: true, activityStream: true, scope: scope });
 
             // descriptive title describing what AS is showing
             scope.streamTitle = (params && params.title) ? params.title : null;
 
             scope.refreshStream = function () {
-                scope.search(list.iterator);
+                $state.go('.', null, {reload: true});
             };
 
             scope.showDetail = function (id) {
@@ -407,10 +289,16 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 });
             };
 
-            if (scope.removeStreamPostRefresh) {
-                scope.removeStreamPostRefresh();
+            if(scope.activities && scope.activities.length > 0) {
+                buildUserAndDescription();
             }
-            scope.removeStreamPostRefresh = scope.$on('PostRefresh', function () {
+
+            scope.$watch('activities', function(){
+                // Watch for future update to scope.activities (like page change, column sort, search, etc)
+                buildUserAndDescription();
+            });
+
+            function buildUserAndDescription(){
                 scope.activities.forEach(function(activity, i) {
                     // build activity.user
                     if (scope.activities[i].summary_fields.actor) {
@@ -423,21 +311,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     BuildDescription(scope.activities[i]);
 
                 });
-            });
-
-            // Initialize search and paginate pieces and load data
-            SearchInit({
-                scope: scope,
-                set: list.name,
-                list: list,
-                url: defaultUrl
-            });
-            PaginateInit({
-                scope: scope,
-                list: list,
-                url: defaultUrl
-            });
-            scope.search(list.iterator);
+            }
         };
     }
 ]);

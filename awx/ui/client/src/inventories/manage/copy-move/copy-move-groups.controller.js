@@ -5,13 +5,13 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'generateList', 'SearchInit', 'PaginateInit', 'GroupManageService', 'GetBasePath', 'CopyMoveGroupList', 'group',
-    function($scope, $state, $stateParams, GenerateList, SearchInit, PaginateInit, GroupManageService, GetBasePath, CopyMoveGroupList, group){
-        var list = CopyMoveGroupList,
-            view = GenerateList;
+    ['$scope', '$state', '$stateParams', 'GroupManageService', 'GetBasePath', 'CopyMoveGroupList', 'group', 'Dataset',
+    function($scope, $state, $stateParams, GroupManageService, GetBasePath, CopyMoveGroupList, group, Dataset){
+        var list = CopyMoveGroupList;
+
         $scope.item = group;
         $scope.submitMode = $stateParams.groups === undefined ? 'move' : 'copy';
-        $scope['toggle_'+ list.iterator] = function(id){
+        $scope.toggle_row = function(id){
             // toggle off anything else currently selected
             _.forEach($scope.groups, (item) => {return item.id === id ? item.checked = 1 : item.checked = null;});
             // yoink the currently selected thing
@@ -58,31 +58,15 @@
                 $(el).prop('disabled', (idx, value) => !value);
             });
         };
-        var init = function(){
-        var url = GetBasePath('inventory') + $stateParams.inventory_id + '/groups/';
-        url += $stateParams.group ? '?not__id__in=' + group.id + ',' + _.last($stateParams.group) : '?not__id=' + group.id;
-        list.basePath = url;
-        $scope.atRootLevel = $stateParams.group ? false : true;
-        view.inject(list, {
-                mode: 'lookup',
-                id: 'copyMove-list',
-                scope: $scope,
-                input_type: 'radio'
-            });
-            SearchInit({
-                scope: $scope,
-                set: list.name,
-                list: list,
-                url: url
-            });
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url : url,
-                mode: 'lookup'
-            });
-            $scope.search(list.iterator, null, true, false);
-            // remove the current group from list
-        };
+
+        function init(){
+            $scope.atRootLevel = $stateParams.group ? false : true;
+
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+        }
+
         init();
     }];

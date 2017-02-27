@@ -99,7 +99,7 @@ def test_organization_inventory_list(organization, inventory_factory, get, alice
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 def test_create_organization(post, admin, alice):
     new_org = {
         'name': 'new org',
@@ -111,7 +111,7 @@ def test_create_organization(post, admin, alice):
 
 
 @pytest.mark.django_db
-@mock.patch('awx.api.views.feature_enabled', lambda feature,bypass_db=None: True)
+@mock.patch('awx.api.views.feature_enabled', lambda feature: True)
 def test_create_organization_xfail(post, alice):
     new_org = {
         'name': 'new org',

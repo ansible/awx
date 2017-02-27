@@ -4,6 +4,7 @@ import pytest
 
 from django.core.urlresolvers import reverse
 
+
 @pytest.mark.django_db
 def test_basic_fields(hosts, fact_scans, get, user):
     hosts = hosts(host_count=1)

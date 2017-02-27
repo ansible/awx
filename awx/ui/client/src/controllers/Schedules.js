@@ -18,33 +18,33 @@ GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices) {
 
     var base, id, url, parentObject;
 
-    base = $location.path().replace(/^\//, '').split('/')[0];
+    // base = $location.path().replace(/^\//, '').split('/')[0];
 
-    if ($scope.removePostRefresh) {
-        $scope.removePostRefresh();
-    }
-    $scope.removePostRefresh = $scope.$on('PostRefresh', function() {
-        var list = $scope.schedules;
-        list.forEach(function(element, idx) {
-            list[idx].play_tip = (element.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
-        });
-    });
+    // if ($scope.removePostRefresh) {
+    //     $scope.removePostRefresh();
+    // }
+    // $scope.removePostRefresh = $scope.$on('PostRefresh', function() {
+    //     var list = $scope.schedules;
+    //     list.forEach(function(element, idx) {
+    //         list[idx].play_tip = (element.enabled) ? 'Schedule is Active. Click to temporarily stop.' : 'Schedule is temporarily stopped. Click to activate.';
+    //     });
+    // });
 
-    if ($scope.removeParentLoaded) {
-        $scope.removeParentLoaded();
-    }
-    $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
-        url += "schedules/";
-        SchedulesList.well = true;
-        LoadSchedulesScope({
-            parent_scope: $scope,
-            scope: $scope,
-            list: SchedulesList,
-            id: 'schedule-list-target',
-            url: url,
-            pageSize: 20
-        });
-    });
+    // if ($scope.removeParentLoaded) {
+    //     $scope.removeParentLoaded();
+    // }
+    // $scope.removeParentLoaded = $scope.$on('ParentLoaded', function() {
+    //     url += "schedules/";
+    //     SchedulesList.well = true;
+    //     LoadSchedulesScope({
+    //         parent_scope: $scope,
+    //         scope: $scope,
+    //         list: SchedulesList,
+    //         id: 'schedule-list-target',
+    //         url: url,
+    //         pageSize: 20
+    //     });
+    // });
 
 
     if ($scope.removeChoicesReady) {
@@ -67,7 +67,8 @@ GetBasePath, Wait, Find, LoadSchedulesScope, GetChoices) {
     });
 
     $scope.refreshJobs = function() {
-        $scope.search(SchedulesList.iterator);
+        // @issue: OLD SEARCH
+        // $scope.search(SchedulesList.iterator);
     };
 
     Wait('start');

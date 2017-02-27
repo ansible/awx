@@ -4,23 +4,26 @@ from awx.main.access import (
     LabelAccess,
 )
 
-from rest_framework.exceptions import ParseError
 
 @pytest.mark.django_db
 def test_label_get_queryset_user(label, user):
-    access = LabelAccess(user('user', False))
-    label.organization.member_role.members.add(user('user', False))
+    u = user('user', False)
+    access = LabelAccess(u)
+    label.organization.member_role.members.add(u)
     assert access.get_queryset().count() == 1
+
 
 @pytest.mark.django_db
 def test_label_get_queryset_su(label, user):
     access = LabelAccess(user('user', True))
     assert access.get_queryset().count() == 1
 
+
 @pytest.mark.django_db
 def test_label_access(label, user):
     access = LabelAccess(user('user', False))
     assert not access.can_read(label)
+
 
 @pytest.mark.django_db
 def test_label_access_superuser(label, user):
@@ -29,6 +32,7 @@ def test_label_access_superuser(label, user):
     assert access.can_read(label)
     assert access.can_change(label, None)
     assert access.can_delete(label)
+
 
 @pytest.mark.django_db
 def test_label_access_admin(organization_factory):
@@ -49,16 +53,15 @@ def test_label_access_admin(organization_factory):
     assert access.can_change(label, {'organization': members.organization.id})
     assert access.can_delete(label)
 
+
 @pytest.mark.django_db
 def test_label_access_user(label, user):
     access = LabelAccess(user('user', False))
     label.organization.member_role.members.add(user('user', False))
 
-    with pytest.raises(ParseError):
-        access.can_add({'organization': None})
+    assert not access.can_add({'organization': None})
     assert not access.can_change(label, None)
     assert not access.can_delete(label)
 
     assert access.can_read(label)
     assert access.can_add({'organization': label.organization.id})
-

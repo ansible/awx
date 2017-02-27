@@ -4,64 +4,59 @@
  * All Rights Reserved
  *************************************************/
 
-export default
-    [   '$rootScope', 'pagination', '$compile','SchedulerInit', 'Rest', 'Wait',
-        'inventoryScriptsFormObject', 'ProcessErrors', 'GetBasePath', 'Empty',
-        'GenerateForm', 'SearchInit' , 'PaginateInit',
-        'LookUpInit', 'OrganizationList', '$scope', '$state',
-        function(
-            $rootScope, pagination, $compile, SchedulerInit, Rest, Wait,
-            inventoryScriptsFormObject, ProcessErrors, GetBasePath, Empty,
-            GenerateForm, SearchInit, PaginateInit,
-            LookUpInit, OrganizationList, $scope, $state
-        ) {
-            var scope = $scope,
-                generator = GenerateForm,
-                form = inventoryScriptsFormObject,
-                url = GetBasePath('inventory_scripts');
+export default ['$rootScope', 'Rest', 'Wait',
+    'InventoryScriptsForm', 'ProcessErrors', 'GetBasePath', 'Empty',
+    'GenerateForm',  '$scope', '$state', 'Alert',
+    function($rootScope, Rest, Wait,
+        InventoryScriptsForm, ProcessErrors, GetBasePath, Empty,
+        GenerateForm, $scope, $state, Alert
+    ) {
+        var form = InventoryScriptsForm,
+            url = GetBasePath('inventory_scripts');
 
-            $scope.canEdit = true;
+        init();
 
-            generator.inject(form, {
-                mode: 'add' ,
-                scope:scope,
-                related: false
-            });
-            generator.reset();
-
-            LookUpInit({
-                    url: GetBasePath('organization'),
-                    scope: scope,
-                    form: form,
-                    list: OrganizationList,
-                    field: 'organization',
-                    input_type: 'radio'
+        function init() {
+            Rest.setUrl(url);
+            Rest.options()
+                .success(function(data) {
+                    if (!data.actions.POST) {
+                        $state.go("^");
+                        Alert('Permission Error', 'You do not have permission to add an inventory script.', 'alert-info');
+                    }
                 });
 
-            // Save
-            scope.formSave = function () {
-                generator.clearApiErrors();
-                Wait('start');
-                Rest.setUrl(url);
-                Rest.post({
-                    name: scope.name,
-                    description: scope.description,
-                    organization: scope.organization,
-                    script: scope.script
+            // apply form definition's default field values
+            GenerateForm.applyDefaults(form, $scope);
+
+            // @issue @jmitchell - this setting probably collides with new RBAC can* implementation?
+            $scope.canEdit = true;
+        }
+
+        // Save
+        $scope.formSave = function() {
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.post({
+                    name: $scope.name,
+                    description: $scope.description,
+                    organization: $scope.organization,
+                    script: $scope.script
                 })
-                .success(function (data) {
-                    $state.go('inventoryScripts.edit', {inventory_script_id: data.id}, {reload: true});
+                .success(function(data) {
+                    $state.go('inventoryScripts.edit', { inventory_script_id: data.id }, { reload: true });
                     Wait('stop');
                 })
-                .error(function (data, status) {
-                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                        msg: 'Failed to add new inventory script. POST returned status: ' + status });
+                .error(function(data, status) {
+                    ProcessErrors($scope, data, status, form, {
+                        hdr: 'Error!',
+                        msg: 'Failed to add new inventory script. POST returned status: ' + status
+                    });
                 });
-            };
+        };
 
-            scope.formCancel = function () {
-                $state.transitionTo('inventoryScripts');
-            };
-
-        }
-    ];
+        $scope.formCancel = function() {
+            $state.go('^');
+        };
+    }
+];

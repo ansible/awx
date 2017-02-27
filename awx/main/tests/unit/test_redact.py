@@ -78,7 +78,6 @@ TEST_CLEARTEXT.append({
 })
 
 
-
 # should redact sensitive usernames and passwords
 def test_uri_scm_simple_redacted():
     for uri in TEST_URIS:
@@ -88,11 +87,13 @@ def test_uri_scm_simple_redacted():
         if uri.password:
             assert uri.username not in redacted_str
 
+
 # should replace secret data with safe string, UriCleaner.REPLACE_STR
 def test_uri_scm_simple_replaced():
     for uri in TEST_URIS:
         redacted_str = UriCleaner.remove_sensitive(str(uri))
         assert redacted_str.count(UriCleaner.REPLACE_STR) == uri.get_secret_count()
+
 
 # should redact multiple uris in text
 def test_uri_scm_multiple():
@@ -108,6 +109,7 @@ def test_uri_scm_multiple():
     if uri.password:
         assert uri.username not in redacted_str
 
+
 # should replace multiple secret data with safe string
 def test_uri_scm_multiple_replaced():
     cleartext = ''
@@ -122,6 +124,7 @@ def test_uri_scm_multiple_replaced():
 
     redacted_str = UriCleaner.remove_sensitive(cleartext)
     assert redacted_str.count(UriCleaner.REPLACE_STR) == find_count
+
 
 # should redact and replace multiple secret data within a complex cleartext blob
 def test_uri_scm_cleartext_redact_and_replace():

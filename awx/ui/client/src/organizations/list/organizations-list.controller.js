@@ -4,27 +4,49 @@
  * All Rights Reserved
  *************************************************/
 
+
 export default ['$stateParams', '$scope', '$rootScope', '$location',
-    '$log', '$compile', 'Rest', 'PaginateInit',
-    'SearchInit', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'Wait',
-    '$state', 'generateList', '$filter',
+    '$log', '$compile', 'Rest', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset', 'i18n',
     function($stateParams, $scope, $rootScope, $location,
-        $log, $compile, Rest, PaginateInit,
-        SearchInit, OrganizationList, Alert, Prompt, ClearScope,
-        ProcessErrors, GetBasePath, Wait,
-        $state, generateList, $filter) {
+        $log, $compile, Rest, OrganizationList, Alert, Prompt, ClearScope,
+        ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset, i18n) {
 
         ClearScope();
 
         var defaultUrl = GetBasePath('organizations'),
-            list = OrganizationList,
-            pageSize = 24,
-            view = generateList;
+            list = OrganizationList;
 
-        var parseCardData = function(cards) {
+        init();
+
+        function init() {
+            $scope.canAdd = false;
+
+            rbacUiControlService.canAdd("organizations")
+                .then(function(canAdd) {
+                    $scope.canAdd = canAdd;
+                });
+            $scope.orgCount = Dataset.data.count;
+
+            // search init
+            $scope.list = list;
+            $scope[`${list.iterator}_dataset`] = Dataset.data;
+            $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
+
+            $scope.orgCards = parseCardData($scope[list.name]);
+            $rootScope.flashMessage = null;
+
+            // grab the pagination elements, move, destroy list generator elements
+            $('#organization-pagination').appendTo('#OrgCards');
+            $('#organizations tag-search').appendTo('.OrgCards-search');
+            $('#organizations-list').remove();
+        }
+
+        function parseCardData(cards) {
             return cards.map(function(card) {
-                var val = {}, url = '/#/organizations/' + card.id + '/';
+                var val = {},
+                    url = '/#/organizations/' + card.id + '/';
+                val.user_capabilities = card.summary_fields.user_capabilities;
                 val.name = card.name;
                 val.id = card.id;
                 val.description = card.description || undefined;
@@ -67,7 +89,7 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 });
                 return val;
             });
-        };
+        }
 
         $scope.$on("ReloadOrgListView", function() {
             Rest.setUrl($scope.current_url);
@@ -89,10 +111,10 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         if ($scope.removePostRefresh) {
             $scope.removePostRefresh();
         }
-        $scope.removePostRefresh = $scope.$on('PostRefresh', function() {
-            // Cleanup after a delete
-            Wait('stop');
-            $('#prompt-modal').modal('hide');
+
+        $scope.$watchCollection(`${list.iterator}_dataset`, function(data) {
+            $scope[list.name] = data.results;
+            $scope.orgCards = parseCardData($scope[list.name]);
         });
 
         $scope.addOrganization = function() {
@@ -100,11 +122,20 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
         };
 
         $scope.editOrganization = function(id) {
-            $scope.activeCard = id;
             $state.transitionTo('organizations.edit', {
                 organization_id: id
             });
         };
+
+        function isDeletedOrganizationBeingEdited(deleted_organization_id, editing_organization_id) {
+            if (editing_organization_id === undefined) {
+                return false;
+            }
+            if (deleted_organization_id === editing_organization_id) {
+                return true;
+            }
+            return false;
+        }
 
         $scope.deleteOrganization = function(id, name) {
 
@@ -116,17 +147,10 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
                 Rest.destroy()
                     .success(function() {
                         Wait('stop');
-                        if ($state.current.name !== "organizations") {
-                            if ($state.current
-                                .name === 'organizations.edit' &&
-                                id === parseInt($state.params
-                                    .organization_id)) {
-                                $state.go("organizations", {}, {reload: true});
-                            } else {
-                                $state.go($state.current, {}, {reload: true});
-                            }
+                        if (isDeletedOrganizationBeingEdited(id, parseInt($stateParams.organization_id)) === true) {
+                            $state.go('^', null, { reload: true });
                         } else {
-                            $state.go($state.current, {}, {reload: true});
+                            $state.reload('organizations');
                         }
                     })
                     .error(function(data, status) {
@@ -138,56 +162,11 @@ export default ['$stateParams', '$scope', '$rootScope', '$location',
             };
 
             Prompt({
-                hdr: 'Delete',
-                body: '<div class="Prompt-bodyQuery">Are you sure you want to delete the organization below?</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
+                hdr: i18n._('Delete'),
+                body: '<div class="Prompt-bodyQuery">' + i18n._('Are you sure you want to delete the organization below?') + '</div><div class="Prompt-bodyTarget">' + $filter('sanitize')(name) + '</div>',
                 action: action,
-                actionText: 'DELETE'
+                actionText: i18n._('DELETE')
             });
         };
-        var init = function(){
-            // Pagination depends on html appended by list generator
-            view.inject(list, {
-                id: 'organizations-list',
-                scope: $scope,
-                mode: 'edit'
-            });
-            // grab the pagination elements, move, destroy list generator elements
-            $('#organization-pagination').appendTo('#OrgCards');
-            $('#organizations tag-search').appendTo('.OrgCards-search');
-            $('#organizations-list').remove();
-
-            PaginateInit({
-                scope: $scope,
-                list: list,
-                url: defaultUrl,
-                pageSize: pageSize,
-            });
-            SearchInit({
-                scope: $scope,
-                list: list,
-                url: defaultUrl,
-                set: 'organizations'
-            });
-
-            $scope.list = list;
-            $rootScope.flashMessage = null;
-
-            $scope.search(list.iterator);
-            var getOrgCount = function() {
-                Rest.setUrl(defaultUrl);
-                Rest.get()
-                    .success(function(data) {
-                        $scope.orgCount = data.count;
-                    })
-                    .error(function(data, status) {
-                        ProcessErrors($scope, data, status, null, {
-                            hdr: 'Error!',
-                            msg: 'Call to ' + defaultUrl + ' failed. DELETE returned status: ' + status
-                        });
-                    });
-            };
-            getOrgCount();
-        };
-        init();
     }
 ];

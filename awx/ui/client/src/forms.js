@@ -16,7 +16,6 @@ import JobEventData from "./forms/JobEventData";
 import JobSummary from "./forms/JobSummary";
 import JobTemplates from "./forms/JobTemplates";
 import JobVarsPrompt from "./forms/JobVarsPrompt";
-import Jobs from "./forms/Jobs";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
@@ -24,6 +23,8 @@ import ProjectStatus from "./forms/ProjectStatus";
 import Projects from "./forms/Projects";
 import Teams from "./forms/Teams";
 import Users from "./forms/Users";
+import WorkflowMaker from "./forms/WorkflowMaker";
+import Workflows from "./forms/Workflows";
 
 
 export
@@ -39,12 +40,13 @@ export
         JobSummary,
         JobTemplates,
         JobVarsPrompt,
-        Jobs,
         LogViewerOptions,
         LogViewerStatus,
         Organizations,
         ProjectStatus,
         Projects,
         Teams,
-        Users
+        Users,
+        WorkflowMaker,
+        Workflows
     };

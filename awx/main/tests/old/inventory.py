@@ -39,11 +39,12 @@ inventory['group-\u037c\u03b4\u0138\u0137\u03cd\u03a1\u0121\u0137\u0138\u01a1'].
 print json.dumps(inventory)
 """
 
+
 @unittest.skipIf(os.environ.get('SKIP_SLOW_TESTS', False), 'Skipping slow test')
 class InventoryTest(BaseTest):
 
     def setUp(self):
-        self.start_redis()
+        self.start_rabbit()
         super(InventoryTest, self).setUp()
         self.setup_instances()
         self.setup_users()
@@ -63,7 +64,7 @@ class InventoryTest(BaseTest):
 
     def tearDown(self):
         super(InventoryTest, self).tearDown()
-        self.stop_redis()
+        self.stop_rabbit()
 
     def test_get_inventory_list(self):
         url = reverse('api:inventory_list')

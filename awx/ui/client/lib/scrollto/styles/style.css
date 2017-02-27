@@ -1,6 +1,0 @@
-@import url("../vendor/yui-cssreset.css");
-@import url("./generic.css");
-.demo a{cursor:pointer;color:#00f;display:block;margin-bottom:5px;}
-.demo a:hover{text-decoration:underline}
-.demo .demo-pieces{width:500px;height:200px;overflow:scroll;border:5px ridge #fff;}
-.demo .demo-pieces div{width:90%;height:300px;padding:15px 4%}

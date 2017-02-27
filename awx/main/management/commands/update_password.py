@@ -9,10 +9,11 @@ from django.core.management.base import BaseCommand
 from django.core.management.base import CommandError
 from django.contrib.auth.models import User
 
+
 class UpdatePassword(object):
     def update_password(self, username, password):
         changed = False
-        u = User.objects.get(username=username)       
+        u = User.objects.get(username=username)
         if not u:
             raise RuntimeError("User not found")
         check = u.check_password(password)
@@ -21,6 +22,7 @@ class UpdatePassword(object):
             u.save()
             changed = True
         return changed
+
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (

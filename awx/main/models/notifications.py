@@ -18,13 +18,13 @@ from awx.main.notifications.pagerduty_backend import PagerDutyBackend
 from awx.main.notifications.hipchat_backend import HipChatBackend
 from awx.main.notifications.webhook_backend import WebhookBackend
 from awx.main.notifications.irc_backend import IrcBackend
+from awx.main.fields import JSONField
 
-# Django-JSONField
-from jsonfield import JSONField
 
 logger = logging.getLogger('awx.main.models.notifications')
 
 __all__ = ['NotificationTemplate', 'Notification']
+
 
 class NotificationTemplate(CommonModel):
 
@@ -75,7 +75,7 @@ class NotificationTemplate(CommonModel):
                 setattr(self, '_saved_{}_{}'.format("config", field), value)
                 self.notification_configuration[field] = ''
             else:
-                encrypted = encrypt_field(self, 'notification_configuration', subfield=field)
+                encrypted = encrypt_field(self, 'notification_configuration', subfield=field, skip_utf8=True)
                 self.notification_configuration[field] = encrypted
                 if 'notification_configuration' not in update_fields:
                     update_fields.append('notification_configuration')
@@ -116,6 +116,7 @@ class NotificationTemplate(CommonModel):
         backend_obj = self.notification_class(**self.notification_configuration)
         notification_obj = EmailMessage(subject, backend_obj.format_body(body), sender, recipients)
         return backend_obj.send_messages([notification_obj])
+
 
 class Notification(CreatedModifiedModel):
     '''
@@ -171,3 +172,27 @@ class Notification(CreatedModifiedModel):
     
     def get_absolute_url(self):
         return reverse('api:notification_detail', args=(self.pk,))
+
+
+class JobNotificationMixin(object):
+    def get_notification_templates(self):
+        raise RuntimeError("Define me")
+
+    def get_notification_friendly_name(self):
+        raise RuntimeError("Define me")
+
+    def _build_notification_message(self, status_str):
+        notification_body = self.notification_data()
+        notification_subject = u"{} #{} '{}' {} on Ansible Tower: {}".format(self.get_notification_friendly_name(),
+                                                                             self.id,
+                                                                             self.name,
+                                                                             status_str,
+                                                                             notification_body['url'])
+        notification_body['friendly_name'] = self.get_notification_friendly_name()
+        return (notification_subject, notification_body)
+
+    def build_notification_succeeded_message(self):
+        return self._build_notification_message('succeeded')
+
+    def build_notification_failed_message(self):
+        return self._build_notification_message('failed')

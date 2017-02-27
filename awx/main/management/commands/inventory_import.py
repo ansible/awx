@@ -26,10 +26,9 @@ from django.utils.encoding import smart_text
 
 # AWX
 from awx.main.models import * # noqa
+from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import ignore_inventory_computed_fields, check_proot_installed, wrap_args_with_proot
 from awx.main.signals import disable_activity_stream
-from awx.main.task_engine import TaskSerializer as LicenseReader
-from awx.main.conf import tower_settings
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
 
@@ -65,7 +64,7 @@ class MemObject(object):
         all_vars = {}
         files_found = 0
         for suffix in ('', '.yml', '.yaml', '.json'):
-            path = ''.join([base_path, suffix])
+            path = ''.join([base_path, suffix]).encode("utf-8")
             if not os.path.exists(path):
                 continue
             if not os.path.isfile(path):
@@ -358,7 +357,7 @@ class ExecutableJsonLoader(BaseLoader):
         data = {}
         stdout, stderr = '', ''
         try:
-            if self.is_custom and getattr(tower_settings, 'AWX_PROOT_ENABLED', False):
+            if self.is_custom and getattr(settings, 'AWX_PROOT_ENABLED', False):
                 if not check_proot_installed():
                     raise RuntimeError("proot is not installed but is configured for use")
                 kwargs = {'proot_temp_dir': self.source_dir} # TODO: Remove proot dir
@@ -463,7 +462,7 @@ class ExecutableJsonLoader(BaseLoader):
         # to set their variables
         for k,v in self.all_group.all_hosts.iteritems():
             if 'hostvars' not in _meta:
-                data = self.command_to_json([self.source, '--host', k])
+                data = self.command_to_json([self.source, '--host', k.encode("utf-8")])
             else:
                 data = _meta['hostvars'].get(k, {})
             if isinstance(data, dict):
@@ -483,6 +482,7 @@ def load_inventory_source(source, all_group=None, group_filter_re=None,
     # good naming conventions
     source = source.replace('azure.py', 'windows_azure.py')
     source = source.replace('satellite6.py', 'foreman.py')
+    source = source.replace('vmware.py', 'vmware_inventory.py')
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group
     if not os.path.exists(source):
@@ -1191,9 +1191,8 @@ class Command(NoArgsCommand):
         self._create_update_group_hosts()
 
     def check_license(self):
-        reader = LicenseReader()
-        license_info = reader.from_database()
-        if not license_info or len(license_info) == 0:
+        license_info = TaskEnhancer().validate_enhancements()
+        if license_info.get('license_key', 'UNLICENSED') == 'UNLICENSED':
             self.logger.error(LICENSE_NON_EXISTANT_MESSAGE)
             raise CommandError('No Tower license found!')
         available_instances = license_info.get('available_instances', 0)
@@ -1254,6 +1253,12 @@ class Command(NoArgsCommand):
             self.host_filter_re = re.compile(self.host_filter)
         except re.error:
             raise CommandError('invalid regular expression for --host-filter')
+
+        '''
+        TODO: Remove this deprecation when we remove support for rax.py
+        '''
+        if self.source == "rax.py":
+            self.logger.info("Rackspace inventory sync is Deprecated in Tower 3.1.0 and support for Rackspace will be removed in a future release.")
 
         begin = time.time()
         self.load_inventory_from_database()

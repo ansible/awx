@@ -22,19 +22,21 @@ from awx.main.constants import CLOUD_PROVIDERS
 from awx.main.fields import AutoOneToOneField, ImplicitRoleField
 from awx.main.managers import HostManager
 from awx.main.models.base import * # noqa
-from awx.main.models.jobs import Job
 from awx.main.models.unified_jobs import * # noqa
+from awx.main.models.jobs import Job
 from awx.main.models.mixins import ResourceMixin
-from awx.main.models.notifications import NotificationTemplate
+from awx.main.models.notifications import (
+    NotificationTemplate,
+    JobNotificationMixin,
+)
 from awx.main.utils import _inventory_updates
-from awx.main.conf import tower_settings
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate', 'CustomInventoryScript']
 
 logger = logging.getLogger('awx.main.models.inventory')
 
 
-class Inventory(CommonModel, ResourceMixin):
+class Inventory(CommonModelNameNotUnique, ResourceMixin):
     '''
     an inventory source contains lists and hosts.
     '''
@@ -341,6 +343,7 @@ class Host(CommonModelNameNotUnique):
         max_length=1024,
         blank=True,
         default='',
+        help_text=_('The value used by the remote inventory source to uniquely identify the host'),
     )
     variables = models.TextField(
         blank=True,
@@ -858,6 +861,10 @@ class InventorySourceOptions(BaseModel):
         default=False,
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
+    timeout = models.IntegerField(
+        blank=True,
+        default=0,
+    )
 
     @classmethod
     def get_ec2_region_choices(cls):
@@ -884,16 +891,16 @@ class InventorySourceOptions(BaseModel):
     @classmethod
     def get_ec2_group_by_choices(cls):
         return [
-            ('availability_zone', 'Availability Zone'),
-            ('ami_id', 'Image ID'),
-            ('instance_id', 'Instance ID'),
-            ('instance_type', 'Instance Type'),
-            ('key_pair', 'Key Name'),
-            ('region', 'Region'),
-            ('security_group', 'Security Group'),
-            ('tag_keys', 'Tags'),
-            ('vpc_id', 'VPC ID'),
-            ('tag_none', 'Tag None'),
+            ('availability_zone', _('Availability Zone')),
+            ('ami_id', _('Image ID')),
+            ('instance_id', _('Instance ID')),
+            ('instance_type', _('Instance Type')),
+            ('key_pair', _('Key Name')),
+            ('region', _('Region')),
+            ('security_group', _('Security Group')),
+            ('tag_keys', _('Tags')),
+            ('vpc_id', _('VPC ID')),
+            ('tag_none', _('Tag None')),
         ]
 
     @classmethod
@@ -964,14 +971,14 @@ class InventorySourceOptions(BaseModel):
             # credentials; Rackspace requires Rackspace credentials; etc...)
             if self.source.replace('ec2', 'aws') != cred.kind:
                 raise ValidationError(
-                    'Cloud-based inventory sources (such as %s) require '
-                    'credentials for the matching cloud service.' % self.source
+                    _('Cloud-based inventory sources (such as %s) require '
+                      'credentials for the matching cloud service.') % self.source
                 )
         # Allow an EC2 source to omit the credential.  If Tower is running on
         # an EC2 instance with an IAM Role assigned, boto will use credentials
         # from the instance metadata instead of those explicitly provided.
         elif self.source in CLOUD_PROVIDERS and self.source != 'ec2':
-            raise ValidationError('Credential is required for a cloud source.')
+            raise ValidationError(_('Credential is required for a cloud source.'))
         return cred
 
     def clean_source_regions(self):
@@ -996,9 +1003,8 @@ class InventorySourceOptions(BaseModel):
             if r not in valid_regions and r not in invalid_regions:
                 invalid_regions.append(r)
         if invalid_regions:
-            raise ValidationError('Invalid %s region%s: %s' % (self.source,
-                                  '' if len(invalid_regions) == 1 else 's',
-                                  ', '.join(invalid_regions)))
+            raise ValidationError(_('Invalid %(source)s region: %(region)s') % {
+                'source': self.source, 'region': ', '.join(invalid_regions)})
         return ','.join(regions)
 
     source_vars_dict = VarsDictProperty('source_vars')
@@ -1022,9 +1028,8 @@ class InventorySourceOptions(BaseModel):
             if instance_filter_name not in self.INSTANCE_FILTER_NAMES:
                 invalid_filters.append(instance_filter)
         if invalid_filters:
-            raise ValidationError('Invalid filter expression%s: %s' %
-                                  ('' if len(invalid_filters) == 1 else 's',
-                                   ', '.join(invalid_filters)))
+            raise ValidationError(_('Invalid filter expression: %(filter)s') %
+                                  {'filter': ', '.join(invalid_filters)})
         return instance_filters
 
     def clean_group_by(self):
@@ -1041,9 +1046,8 @@ class InventorySourceOptions(BaseModel):
             if c not in valid_choices and c not in invalid_choices:
                 invalid_choices.append(c)
         if invalid_choices:
-            raise ValidationError('Invalid group by choice%s: %s' %
-                                  ('' if len(invalid_choices) == 1 else 's',
-                                   ', '.join(invalid_choices)))
+            raise ValidationError(_('Invalid group by choice: %(choice)s') %
+                                  {'choice': ', '.join(invalid_choices)})
         return ','.join(choices)
 
 
@@ -1082,7 +1086,8 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
     @classmethod
     def _get_unified_job_field_names(cls):
         return ['name', 'description', 'source', 'source_path', 'source_script', 'source_vars', 'schedule',
-                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars']
+                'credential', 'source_regions', 'instance_filters', 'group_by', 'overwrite', 'overwrite_vars',
+                'timeout', 'launch_type',]
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -1188,11 +1193,11 @@ class InventorySource(UnifiedJobTemplate, InventorySourceOptions):
             existing_sources = qs.exclude(pk=self.pk)
             if existing_sources.count():
                 s = u', '.join([x.group.name for x in existing_sources])
-                raise ValidationError('Unable to configure this item for cloud sync. It is already managed by %s.' % s)
+                raise ValidationError(_('Unable to configure this item for cloud sync. It is already managed by %s.') % s)
         return source
 
 
-class InventoryUpdate(UnifiedJob, InventorySourceOptions):
+class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -1220,10 +1225,14 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
 
-    def socketio_emit_data(self):
+    def _global_timeout_setting(self):
+        return 'DEFAULT_INVENTORY_UPDATE_TIMEOUT'
+
+    def websocket_emit_data(self):
+        websocket_data = super(InventoryUpdate, self).websocket_emit_data()
         if self.inventory_source.group is not None:
-            return dict(group_id=self.inventory_source.group.id)
-        return {}
+            websocket_data.update(dict(group_id=self.inventory_source.group.id))
+        return websocket_data
 
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
@@ -1241,16 +1250,7 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
         return reverse('api:inventory_update_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
-
-    def is_blocked_by(self, obj):
-        if type(obj) == InventoryUpdate:
-            if self.inventory_source.inventory == obj.inventory_source.inventory:
-                return True
-        if type(obj) == Job:
-            if self.inventory_source.inventory == obj.inventory:
-                return True
-        return False
+        return urljoin(settings.TOWER_URL_BASE, "/#/inventory_sync/{}".format(self.pk))
 
     @property
     def task_impact(self):
@@ -1268,6 +1268,21 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions):
             return False
         return True
 
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.inventory_source.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "Inventory Update"
+
+    def cancel(self):
+        res = super(InventoryUpdate, self).cancel()
+        if res:
+            map(lambda x: x.cancel(), Job.objects.filter(dependent_jobs__in=[self.id]))
+        return res
+
 
 class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
 
@@ -1276,11 +1291,11 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
         unique_together = [('name', 'organization')]
         ordering = ('name',)
 
-    script = models.TextField(
+    script = prevent_search(models.TextField(
         blank=True,
         default='',
         help_text=_('Inventory script contents'),
-    )
+    ))
     organization = models.ForeignKey(
         'Organization',
         related_name='custom_inventory_scripts',
@@ -1299,4 +1314,3 @@ class CustomInventoryScript(CommonModelNameNotUnique, ResourceMixin):
 
     def get_absolute_url(self):
         return reverse('api:inventory_script_detail', args=(self.pk,))
-

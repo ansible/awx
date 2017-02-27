@@ -1,6 +1,8 @@
-runserver:      make runserver
+nginx:          make nginx
+runworker:      make runworker
+daphne:         make daphne
 celeryd:        make celeryd
-taskmanager:    make taskmanager
 receiver:       make receiver
-socketservice:  make socketservice
 factcacher:     make factcacher
+flower:         make flower
+uwsgi:          make uwsgi

@@ -2,34 +2,33 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import hmac
-import json
 import logging
 from urlparse import urljoin
 
 # Django
 from django.conf import settings
 from django.db import models
+from django.utils.dateparse import parse_datetime
 from django.utils.text import Truncator
+from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
-# Django-JSONField
-from jsonfield import JSONField
-
 # AWX
 from awx.main.models.base import * # noqa
 from awx.main.models.unified_jobs import * # noqa
-from awx.main.utils import decrypt_field
-from awx.main.conf import tower_settings
+from awx.main.models.notifications import JobNotificationMixin, NotificationTemplate
+from awx.main.fields import JSONField
 
 logger = logging.getLogger('awx.main.models.ad_hoc_commands')
 
 __all__ = ['AdHocCommand', 'AdHocCommandEvent']
 
 
-class AdHocCommand(UnifiedJob):
+class AdHocCommand(UnifiedJob, JobNotificationMixin):
 
     class Meta(object):
         app_label = 'main'
@@ -84,24 +83,24 @@ class AdHocCommand(UnifiedJob):
         editable=False,
         through='AdHocCommandEvent',
     )
-    extra_vars = models.TextField(
+    extra_vars = prevent_search(models.TextField(
         blank=True,
         default='',
-    )
+    ))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     def clean_inventory(self):
         inv = self.inventory
         if not inv:
-            raise ValidationError('No valid inventory.')
+            raise ValidationError(_('No valid inventory.'))
         return inv
 
     def clean_credential(self):
         cred = self.credential
         if cred and cred.kind != 'ssh':
             raise ValidationError(
-                'You must provide a machine / SSH credential.',
+                _('You must provide a machine / SSH credential.'),
             )
         return cred
 
@@ -112,18 +111,18 @@ class AdHocCommand(UnifiedJob):
 
     def clean_module_name(self):
         if type(self.module_name) not in (str, unicode):
-            raise ValidationError("Invalid type for ad hoc command")
+            raise ValidationError(_("Invalid type for ad hoc command"))
         module_name = self.module_name.strip() or 'command'
-        if module_name not in tower_settings.AD_HOC_COMMANDS:
-            raise ValidationError('Unsupported module for ad hoc commands.')
+        if module_name not in settings.AD_HOC_COMMANDS:
+            raise ValidationError(_('Unsupported module for ad hoc commands.'))
         return module_name
 
     def clean_module_args(self):
         if type(self.module_args) not in (str, unicode):
-            raise ValidationError("Invalid type for ad hoc command")
+            raise ValidationError(_("Invalid type for ad hoc command"))
         module_args = self.module_args
         if self.module_name in ('command', 'shell') and not module_args:
-            raise ValidationError('No argument passed to %s module.' % self.module_name)
+            raise ValidationError(_('No argument passed to %s module.') % self.module_name)
         return module_args
 
     @property
@@ -147,7 +146,7 @@ class AdHocCommand(UnifiedJob):
         return reverse('api:ad_hoc_command_detail', args=(self.pk,))
 
     def get_ui_url(self):
-        return urljoin(tower_settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/ad_hoc_commands/{}".format(self.pk))
 
     @property
     def task_auth_token(self):
@@ -158,18 +157,20 @@ class AdHocCommand(UnifiedJob):
 
     @property
     def notification_templates(self):
-        all_inventory_sources = set()
+        all_orgs = set()
         for h in self.hosts.all():
-            for invsrc in h.inventory_sources.all():
-                all_inventory_sources.add(invsrc)
+            all_orgs.add(h.inventory.organization)
         active_templates = dict(error=set(),
                                 success=set(),
                                 any=set())
-        for invsrc in all_inventory_sources:
-            notifications_dict = invsrc.notification_templates
-            for notification_type in active_templates.keys():
-                for templ in notifications_dict[notification_type]:
-                    active_templates[notification_type].add(templ)
+        base_notification_templates = NotificationTemplate.objects
+        for org in all_orgs:
+            for templ in base_notification_templates.filter(organization_notification_templates_for_errors=org):
+                active_templates['error'].add(templ)
+            for templ in base_notification_templates.filter(organization_notification_templates_for_success=org):
+                active_templates['success'].add(templ)
+            for templ in base_notification_templates.filter(organization_notification_templates_for_any=org):
+                active_templates['any'].add(templ)
         active_templates['error'] = list(active_templates['error'])
         active_templates['any'] = list(active_templates['any'])
         active_templates['success'] = list(active_templates['success'])
@@ -178,48 +179,12 @@ class AdHocCommand(UnifiedJob):
     def get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start
 
-    def is_blocked_by(self, obj):
-        from awx.main.models import InventoryUpdate
-        if type(obj) == InventoryUpdate:
-            if self.inventory == obj.inventory_source.inventory:
-                return True
-        return False
-
     @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
         from awx.main.models.inventory import Host
         count_hosts = Host.objects.filter( enabled=True, inventory__ad_hoc_commands__pk=self.pk).count()
         return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
-
-    def generate_dependencies(self, active_tasks):
-        from awx.main.models import InventoryUpdate
-        if not self.inventory:
-            return []
-        inventory_sources = self.inventory.inventory_sources.filter( update_on_launch=True)
-        inventory_sources_found = []
-        dependencies = []
-        for obj in active_tasks:
-            if type(obj) == InventoryUpdate:
-                if obj.inventory_source in inventory_sources:
-                    inventory_sources_found.append(obj.inventory_source)
-        # Skip updating any inventory sources that were already updated before
-        # running this job (via callback inventory refresh).
-        try:
-            start_args = json.loads(decrypt_field(self, 'start_args'))
-        except Exception:
-            start_args = None
-        start_args = start_args or {}
-        inventory_sources_already_updated = start_args.get('inventory_sources_already_updated', [])
-        if inventory_sources_already_updated:
-            for source in inventory_sources.filter(pk__in=inventory_sources_already_updated):
-                if source not in inventory_sources_found:
-                    inventory_sources_found.append(source)
-        if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
-            for source in inventory_sources:
-                if source not in inventory_sources_found and source.needs_update_on_launch:
-                    dependencies.append(source.create_inventory_update(launch_type='dependency'))
-        return dependencies
 
     def copy(self):
         data = {}
@@ -237,6 +202,15 @@ class AdHocCommand(UnifiedJob):
                 update_fields.append('name')
         super(AdHocCommand, self).save(*args, **kwargs)
 
+    '''
+    JobNotificationMixin
+    '''
+    def get_notification_templates(self):
+        return self.notification_templates
+
+    def get_notification_friendly_name(self):
+        return "AdHoc Command"
+
 
 class AdHocCommandEvent(CreatedModifiedModel):
     '''
@@ -249,24 +223,38 @@ class AdHocCommandEvent(CreatedModifiedModel):
         ('runner_on_ok', _('Host OK'), False),
         ('runner_on_unreachable', _('Host Unreachable'), True),
         # Tower won't see no_hosts (check is done earlier without callback).
-        #('runner_on_no_hosts', _('No Hosts Matched'), False),
+        # ('runner_on_no_hosts', _('No Hosts Matched'), False),
         # Tower will see skipped (when running in check mode for a module that
         # does not support check mode).
         ('runner_on_skipped', _('Host Skipped'), False),
-        # Tower does not support async for ad hoc commands.
-        #('runner_on_async_poll', _('Host Polling'), False),
-        #('runner_on_async_ok', _('Host Async OK'), False),
-        #('runner_on_async_failed', _('Host Async Failure'), True),
-        # Tower does not yet support --diff mode
-        #('runner_on_file_diff', _('File Difference'), False),
+        # Tower does not support async for ad hoc commands (not used in v2).
+        # ('runner_on_async_poll', _('Host Polling'), False),
+        # ('runner_on_async_ok', _('Host Async OK'), False),
+        # ('runner_on_async_failed', _('Host Async Failure'), True),
+        # Tower does not yet support --diff mode.
+        # ('runner_on_file_diff', _('File Difference'), False),
+
+        # Additional event types for captured stdout not directly related to
+        # runner events.
+        ('debug', _('Debug'), False),
+        ('verbose', _('Verbose'), False),
+        ('deprecated', _('Deprecated'), False),
+        ('warning', _('Warning'), False),
+        ('system_warning', _('System Warning'), False),
+        ('error', _('Error'), False),
     ]
     FAILED_EVENTS = [x[0] for x in EVENT_TYPES if x[2]]
     EVENT_CHOICES = [(x[0], x[1]) for x in EVENT_TYPES]
 
     class Meta:
         app_label = 'main'
-        unique_together = [('ad_hoc_command', 'host_name')]
         ordering = ('-pk',)
+        index_together = [
+            ('ad_hoc_command', 'event'),
+            ('ad_hoc_command', 'uuid'),
+            ('ad_hoc_command', 'start_line'),
+            ('ad_hoc_command', 'end_line'),
+        ]
 
     ad_hoc_command = models.ForeignKey(
         'AdHocCommand',
@@ -303,8 +291,30 @@ class AdHocCommandEvent(CreatedModifiedModel):
         default=False,
         editable=False,
     )
+    uuid = models.CharField(
+        max_length=1024,
+        default='',
+        editable=False,
+    )
     counter = models.PositiveIntegerField(
         default=0,
+        editable=False,
+    )
+    stdout = models.TextField(
+        default='',
+        editable=False,
+    )
+    verbosity = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    start_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
+    end_line = models.PositiveIntegerField(
+        default=0,
+        editable=False,
     )
 
     def get_absolute_url(self):
@@ -342,3 +352,28 @@ class AdHocCommandEvent(CreatedModifiedModel):
         except (IndexError, AttributeError):
             pass
         super(AdHocCommandEvent, self).save(*args, **kwargs)
+
+    @classmethod
+    def create_from_data(self, **kwargs):
+        # Convert the datetime for the ad hoc command event's creation
+        # appropriately, and include a time zone for it.
+        #
+        # In the event of any issue, throw it out, and Django will just save
+        # the current time.
+        try:
+            if not isinstance(kwargs['created'], datetime.datetime):
+                kwargs['created'] = parse_datetime(kwargs['created'])
+            if not kwargs['created'].tzinfo:
+                kwargs['created'] = kwargs['created'].replace(tzinfo=utc)
+        except (KeyError, ValueError):
+            kwargs.pop('created', None)
+
+        # Sanity check: Don't honor keys that we don't recognize.
+        valid_keys = {'ad_hoc_command_id', 'event', 'event_data', 'created',
+                      'counter', 'uuid', 'stdout', 'start_line', 'end_line',
+                      'verbosity'}
+        for key in kwargs.keys():
+            if key not in valid_keys:
+                kwargs.pop(key)
+
+        return AdHocCommandEvent.objects.create(**kwargs)
