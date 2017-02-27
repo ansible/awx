@@ -17,7 +17,7 @@ class DjangoSearchModel {
         }
         this.name = name;
         this.searchExamples = [];
-        this.related = _.map(relatedSearchFields, trimRelated);
+        this.related = _.uniq(_.map(relatedSearchFields, trimRelated));
         // Remove "object" type fields from this list
         for (var key in baseFields) {
             if (baseFields.hasOwnProperty(key)) {
