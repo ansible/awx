@@ -25,9 +25,9 @@ msgid ""
 "put the username and key in the URL. If using Bitbucket and SSH, do not "
 "supply your Bitbucket username."
 msgstr ""
-"%sRemarque%s : Mercurial ne prend pas en charge l'authentification par mot "
-"de passe pour SSH. N'entrez ni le nom d'utilisateur, ni la clé dans l'URL. "
-"Si vous utilisez Bitbucket et SSH, ne saisissez pas votre nom d'utilisateur "
+"%sRemarque%s : Mercurial ne prend pas en charge l’authentification par mot "
+"de passe pour SSH. N’entrez ni le nom d’utilisateur, ni la clé dans l’URL. "
+"Si vous utilisez Bitbucket et SSH, ne saisissez pas votre nom d’utilisateur "
 "Bitbucket."
 
 #: client/src/controllers/Projects.js:424
@@ -39,10 +39,10 @@ msgid ""
 "only protocol (git://) does not use username or password information."
 msgstr ""
 "%sRemarque%s : Si vous utilisez le protocole SSH pour GitHub ou Bitbucket, "
-"entrez uniquement une clé SSH sans nom d'utilisateur (autre que git). De "
-"plus, GitHub et Bitbucket ne prennent pas en charge l'authentification par "
+"entrez uniquement une clé SSH sans nom d’utilisateur (autre que git). De "
+"plus, GitHub et Bitbucket ne prennent pas en charge l’authentification par "
 "mot de passe lorsque SSH est utilisé. Le protocole GIT en lecture seule (git:"
-"//) n'utilise pas les informations de nom d'utilisateur ou de mot de passe."
+"//) n’utilise pas les informations de nom d’utilisateur ou de mot de passe."
 
 #: client/src/forms/Credentials.js:288
 msgid "(defaults to %s)"
@@ -74,7 +74,7 @@ msgstr "ACTION"
 
 #: client/src/activity-stream/activitystream.route.js:27
 msgid "ACTIVITY STREAM"
-msgstr "FLUX D'ACTIVITÉ"
+msgstr "FLUX D’ACTIVITÉ"
 
 #: client/src/forms/Credentials.js:450
 #: client/src/forms/JobTemplates.js:430
@@ -121,7 +121,7 @@ msgstr "Clé API"
 
 #: client/src/notifications/notificationTemplates.form.js:251
 msgid "API Service/Integration Key"
-msgstr "Service API/Clé d'intégration"
+msgstr "Service API/Clé d’intégration"
 
 #: client/src/notifications/shared/type-change.service.js:52
 msgid "API Token"
@@ -133,7 +133,7 @@ msgstr "Tower"
 
 #: client/src/forms/Credentials.js:92
 msgid "Access Key"
-msgstr "Clé d'accès"
+msgstr "Clé d’accès"
 
 #: client/src/notifications/notificationTemplates.form.js:229
 msgid "Account SID"
@@ -159,13 +159,13 @@ msgstr "Activité"
 
 #: client/src/forms/ActivityDetail.js:25
 msgid "Activity Detail"
-msgstr "Détails sur l'activité"
+msgstr "Détails sur l’activité"
 
 #: client/src/configuration/system-form/configuration-system.controller.js:81
 #: client/src/lists/Streams.js:16
 #: client/src/lists/Streams.js:17
 msgid "Activity Stream"
-msgstr "Flux d'activité"
+msgstr "Flux d’activité"
 
 #: client/src/forms/Inventories.js:105
 #: client/src/forms/Organizations.js:73
@@ -177,7 +177,7 @@ msgstr "Ajouter"
 
 #: client/src/lists/Credentials.js:17
 msgid "Add Credentials"
-msgstr "Ajouter des informations d'identification"
+msgstr "Ajouter des informations d’identification"
 
 #: client/src/dashboard/hosts/dashboard-hosts.list.js:12
 msgid "Add Existing Hosts"
@@ -239,7 +239,7 @@ msgid ""
 msgstr ""
 "Ajouter des mots de passe, des clés SSH, etc. pour Tower afin de les "
 "utiliser lors du lancement de tâches sur des machines ou durant la "
-"synchronisation d'inventaires ou de projets."
+"synchronisation d’inventaires ou de projets."
 
 #: client/src/shared/form-generator.js:1462
 msgid "Admin"
@@ -268,13 +268,13 @@ msgstr "Toutes les tâches"
 #: client/src/forms/JobTemplates.js:303
 #: client/src/forms/JobTemplates.js:310
 msgid "Allow Provisioning Callbacks"
-msgstr "Autoriser les rappels d'exécution de Tower job_template"
+msgstr "Autoriser les rappels d’exécution de Tower job_template"
 
 #: client/src/setup-menu/setup-menu.partial.html:11
 msgid "Allow others to sign into Tower and own the content they create."
 msgstr ""
 "Autoriser les autres à se connecter à Tower et à devenir propriétaire du "
-"contenu qu'ils créent."
+"contenu qu’ils créent."
 
 #: client/src/forms/WorkflowMaker.js:50
 msgid "Always"
@@ -285,13 +285,13 @@ msgid ""
 "An SCM update does not appear to be running for project: %s. Click the "
 "%sRefresh%s button to view the latest status."
 msgstr ""
-"Une mise à jour SCM ne semble pas s'exécuter pour le projet : %s. Cliquez "
-"sur le bouton %sActualiser%s pour voir l'état le plus récent."
+"Une mise à jour SCM ne semble pas s’exécuter pour le projet : %s. Cliquez "
+"sur le bouton %sActualiser%s pour voir l’état le plus récent."
 
 #: client/src/controllers/Credentials.js:105
 msgid "Are you sure you want to delete the credential below?"
 msgstr ""
-"Voulez-vous vraiment supprimer les informations d'identification ci-"
+"Voulez-vous vraiment supprimer les informations d’identification ci-"
 "dessous ?"
 
 #: client/src/helpers/Jobs.js:231
@@ -304,7 +304,7 @@ msgstr "Voulez-vous vraiment supprimer le modèle de notification ci-dessous ?"
 
 #: client/src/organizations/list/organizations-list.controller.js:166
 msgid "Are you sure you want to delete the organization below?"
-msgstr "Voulez-vous vraiment supprimer l'organisation ci-dessous ?"
+msgstr "Voulez-vous vraiment supprimer l’organisation ci-dessous ?"
 
 #: client/src/controllers/Projects.js:202
 msgid "Are you sure you want to delete the project below?"
@@ -312,7 +312,7 @@ msgstr "Voulez-vous vraiment supprimer le projet ci-dessous ?"
 
 #: client/src/controllers/Users.js:102
 msgid "Are you sure you want to delete the user below?"
-msgstr "Voulez-vous vraiment supprimer l'utilisateur ci-dessous ?"
+msgstr "Voulez-vous vraiment supprimer l’utilisateur ci-dessous ?"
 
 #: client/src/controllers/Credentials.js:579
 #: client/src/controllers/Projects.js:687
@@ -328,7 +328,7 @@ msgstr "Arguments"
 #: client/src/forms/Credentials.js:312
 #: client/src/forms/Credentials.js:398
 msgid "Ask at runtime?"
-msgstr "Demander durant l'éxecution ?"
+msgstr "Demander durant l’éxecution ?"
 
 #: client/src/shared/form-generator.js:1464
 msgid "Auditor"
@@ -344,10 +344,10 @@ msgid ""
 "usernames, passwords, and authorize information. Network credentials are "
 "used when submitting jobs to run playbooks against network devices."
 msgstr ""
-"Authentification pour l'accès aux périphériques réseau. Il peut s'agir de "
-"clés SSH, de noms d'utilisateur, de mots de passe et d'informations "
-"d'autorisation. Les informations d'identification réseau sont utilisées au "
-"cours de l'envoi de tâches afin d'exécuter des playbooks sur des "
+"Authentification pour l’accès aux périphériques réseau. Il peut s’agir de "
+"clés SSH, de noms d’utilisateur, de mots de passe et d’informations "
+"d’autorisation. Les informations d’identification réseau sont utilisées au "
+"cours de l’envoi de tâches afin d’exécuter des playbooks sur des "
 "périphériques réseau."
 
 #: client/src/forms/Credentials.js:69
@@ -356,10 +356,10 @@ msgid ""
 "usernames, passwords, and sudo information. Machine credentials are used "
 "when submitting jobs to run playbooks against remote hosts."
 msgstr ""
-"Authentification pour l'accès aux machines distantes. Il peut s'agir de clés "
-"SSH, de noms d'utilisateur, de mots de passe et d'informations sudo. Les "
-"informations d'identification de machine sont utilisées au cours de l'envoi "
-"de tâches afin d'exécuter des playbooks sur des hôtes distants."
+"Authentification pour l’accès aux machines distantes. Il peut s’agir de clés "
+"SSH, de noms d’utilisateur, de mots de passe et d’informations sudo. Les "
+"informations d’identification de machine sont utilisées au cours de l’envoi "
+"de tâches afin d’exécuter des playbooks sur des hôtes distants."
 
 #: client/src/forms/Credentials.js:344
 msgid "Authorize"
@@ -367,7 +367,7 @@ msgstr "Autoriser"
 
 #: client/src/forms/Credentials.js:352
 msgid "Authorize Password"
-msgstr "Mot de passe d'autorisation"
+msgstr "Mot de passe d’autorisation"
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:101
 msgid "Azure AD"
@@ -392,7 +392,7 @@ msgstr ""
 
 #: client/src/forms/JobTemplates.js:297
 msgid "Become Privilege Escalation"
-msgstr "Activer l'élévation des privilèges"
+msgstr "Activer l’élévation des privilèges"
 
 #: client/src/license/license.partial.html:104
 msgid "Browse"
@@ -429,46 +429,46 @@ msgstr "CRÉER UNE TÂCHE PROGRAMMÉE"
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:80
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:82
 msgid "CREDENTIAL"
-msgstr "INFORMATIONS D'IDENTIFICATION"
+msgstr "INFORMATIONS D’IDENTIFICATION"
 
 #: client/src/app.js:319
 #: client/src/helpers/ActivityStream.js:29
 msgid "CREDENTIALS"
-msgstr "INFORMATIONS D'IDENTIFICATION"
+msgstr "INFORMATIONS D’IDENTIFICATION"
 
 #: client/src/forms/Projects.js:194
 msgid "Cache Timeout"
-msgstr "Expiration du délai d'attente du cache"
+msgstr "Expiration du délai d’attente du cache"
 
 #: client/src/forms/Projects.js:183
 msgid "Cache Timeout%s (seconds)%s"
-msgstr "Expiration du délai d'attente du cache%s (secondes)%s"
+msgstr "Expiration du délai d’attente du cache%s (secondes)%s"
 
 #: client/src/controllers/Projects.js:193
 #: client/src/controllers/Users.js:95
 msgid "Call to %s failed. DELETE returned status:"
-msgstr "Échec de l'appel de %s. État DELETE renvoyé :"
+msgstr "Échec de l’appel de %s. État DELETE renvoyé :"
 
 #: client/src/controllers/Projects.js:241
 #: client/src/controllers/Projects.js:257
 msgid "Call to %s failed. GET status:"
-msgstr "Échec de l'appel de %s. État GET :"
+msgstr "Échec de l’appel de %s. État GET :"
 
 #: client/src/controllers/Projects.js:681
 msgid "Call to %s failed. POST returned status:"
-msgstr "Échec de l'appel de %s. État POST renvoyé :"
+msgstr "Échec de l’appel de %s. État POST renvoyé :"
 
 #: client/src/controllers/Projects.js:220
 msgid "Call to %s failed. POST status:"
-msgstr "Échec de l'appel de %s. État POST :"
+msgstr "Échec de l’appel de %s. État POST :"
 
 #: client/src/management-jobs/card/card.controller.js:30
 msgid "Call to %s failed. Return status: %d"
-msgstr "Échec de l'appel de %s. État du renvoie : %d"
+msgstr "Échec de l’appel de %s. État du renvoie : %d"
 
 #: client/src/controllers/Projects.js:266
 msgid "Call to get project failed. GET status:"
-msgstr "Échec de l'appel du projet en GET. État GET :"
+msgstr "Échec de l’appel du projet en GET. État GET :"
 
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:171
 #: client/src/configuration/configuration.controller.js:449
@@ -503,7 +503,7 @@ msgstr "Impossible de rechercher les tâches en cours"
 
 #: client/src/forms/Projects.js:82
 msgid "Change %s under \"Configure Tower\" to change this location."
-msgstr "Modifiez %s sous \"Configurer Tower\" pour changer d'emplacement."
+msgstr "Modifiez %s sous \"Configurer Tower\" pour changer d’emplacement."
 
 #: client/src/forms/ActivityDetail.js:43
 msgid "Changes"
@@ -523,7 +523,7 @@ msgid ""
 "submit."
 msgstr ""
 "Choisissez votre fichier de licence, acceptez le Contrat de licence de "
-"l'utilisateur final et validez."
+"l’utilisateur final et validez."
 
 #: client/src/forms/Projects.js:151
 msgid "Clean"
@@ -573,7 +573,7 @@ msgstr "Fermer"
 #: client/src/forms/JobTemplates.js:180
 #: client/src/job-detail/job-detail.partial.html:124
 msgid "Cloud Credential"
-msgstr "Informations d'identification cloud"
+msgstr "Informations d’identification cloud"
 
 #: client/src/helpers/Credentials.js:160
 #: client/src/helpers/Credentials.js:296
@@ -588,7 +588,7 @@ msgstr "Tout réduire"
 
 #: client/src/notifications/notificationTemplates.form.js:298
 msgid "Color can be one of %s."
-msgstr "La couleur peut être l'une des %s."
+msgstr "La couleur peut être l’une des %s."
 
 #: client/src/lists/CompletedJobs.js:18
 msgid "Completed Jobs"
@@ -622,14 +622,14 @@ msgstr "Confirmer la réinitialisation usine"
 msgid ""
 "Consult the Ansible documentation for further details on the usage of tags."
 msgstr ""
-"Consultez la documentation d'Ansible pour en savoir plus sur l'utilisation "
+"Consultez la documentation d’Ansible pour en savoir plus sur l’utilisation "
 "des balises."
 
 #: client/src/forms/JobTemplates.js:245
 msgid ""
 "Control the level of output ansible will produce as the playbook executes."
 msgstr ""
-"Contrôlez le niveau de sortie qu'Ansible génère lors de l'exécution du "
+"Contrôlez le niveau de sortie qu’Ansible génère lors de l’exécution du "
 "playbook."
 
 #: client/src/lists/Templates.js:99
@@ -642,7 +642,7 @@ msgstr "Copier le modèle"
 
 #: client/src/forms/Credentials.js:18
 msgid "Create Credential"
-msgstr "Créer des informations d'identification"
+msgstr "Créer des informations d’identification"
 
 #: client/src/lists/Users.js:52
 msgid "Create New"
@@ -650,7 +650,7 @@ msgstr "Créer"
 
 #: client/src/lists/Credentials.js:58
 msgid "Create a new credential"
-msgstr "Créer de nouvelles informations d'identification"
+msgstr "Créer de nouvelles informations d’identification"
 
 #: client/src/inventory-scripts/inventory-scripts.list.js:43
 msgid "Create a new custom inventory"
@@ -689,7 +689,7 @@ msgstr "Créer un utilisateur"
 msgid "Create and edit scripts to dynamically load hosts from any source."
 msgstr ""
 "Créez et modifiez des scripts pour charger dynamiquement des hôtes à partir "
-"de n'importe quelle source."
+"de n’importe quelle source."
 
 #: client/src/setup-menu/setup-menu.partial.html:42
 msgid ""
@@ -709,7 +709,7 @@ msgstr "Créé le"
 #: client/src/forms/WorkflowMaker.js:69
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:67
 msgid "Credential"
-msgstr "Information d'identification"
+msgstr "Information d’identification"
 
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:123
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:57
@@ -718,7 +718,7 @@ msgstr "Information d'identification"
 #: client/src/lists/Credentials.js:19
 #: client/src/setup-menu/setup-menu.partial.html:22
 msgid "Credentials"
-msgstr "Informations d'identification"
+msgstr "Informations d’identification"
 
 #: client/src/controllers/Credentials.js:349
 msgid ""
@@ -726,9 +726,9 @@ msgid ""
 "organization to delegate credential permissions. The organization cannot be "
 "edited after credentials are assigned."
 msgstr ""
-"Les informations d'identification ne peuvent être partagées que dans "
-"l'organisation. Allouer les informations d'identification à une organisation "
-"pour déléguer les permissions d'informations d'identification."
+"Les informations d’identification ne peuvent être partagées que dans "
+"l’organisation. Allouer les informations d’identification à une organisation "
+"pour déléguer les permissions d’informations d’identification."
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:53
 #: client/src/inventory-scripts/inventory-scripts.form.js:63
@@ -780,15 +780,15 @@ msgstr "Supprimer"
 
 #: client/src/lists/Credentials.js:93
 msgid "Delete credential"
-msgstr "Supprimer les informations d'identification"
+msgstr "Supprimer les informations d’identification"
 
 #: client/src/lists/Inventories.js:94
 msgid "Delete inventory"
-msgstr "Supprimer l'inventaire"
+msgstr "Supprimer l’inventaire"
 
 #: client/src/inventory-scripts/inventory-scripts.list.js:76
 msgid "Delete inventory script"
-msgstr "Supprimer le script d'inventaire"
+msgstr "Supprimer le script d’inventaire"
 
 #: client/src/notifications/notificationTemplates.list.js:91
 msgid "Delete notification"
@@ -804,7 +804,7 @@ msgstr "Supprimer la programmation"
 
 #: client/src/lists/Teams.js:81
 msgid "Delete team"
-msgstr "Supprimer l'équipe"
+msgstr "Supprimer l’équipe"
 
 #: client/src/lists/Templates.js:127
 msgid "Delete template"
@@ -832,15 +832,15 @@ msgstr "Supprimer la planification"
 
 #: client/src/lists/Users.js:91
 msgid "Delete user"
-msgstr "Supprimer l'utilisateur"
+msgstr "Supprimer l’utilisateur"
 
 #: client/src/forms/Projects.js:163
 msgid ""
 "Depending on the size of the repository this may significantly increase the "
 "amount of time required to complete an update."
 msgstr ""
-"Selon la taille du référentiel, cette opération risque d'augmenter "
-"considérablement le délai d'exécution de la mise à jour."
+"Selon la taille du référentiel, cette opération risque d’augmenter "
+"considérablement le délai d’exécution de la mise à jour."
 
 #: client/src/forms/Credentials.js:41
 #: client/src/forms/Inventories.js:37
@@ -892,11 +892,11 @@ msgstr "Ignorer les modifications"
 
 #: client/src/forms/Teams.js:146
 msgid "Dissasociate permission from team"
-msgstr "Dissocier la permission de l'équipe"
+msgstr "Dissocier la permission de l’équipe"
 
 #: client/src/forms/Users.js:222
 msgid "Dissasociate permission from user"
-msgstr "Dissocier la permission de l'utilisateur"
+msgstr "Dissocier la permission de l’utilisateur"
 
 #: client/src/forms/Credentials.js:385
 #: client/src/helpers/Credentials.js:134
@@ -917,7 +917,7 @@ msgid ""
 "Drag and drop your custom inventory script file here or create one in the "
 "field to import your custom inventory."
 msgstr ""
-"Faites glisser votre script d'inventaire personnalisé et déposez-le ici ou "
+"Faites glisser votre script d’inventaire personnalisé et déposez-le ici ou "
 "créez-en un dans le champ pour importer votre inventaire personnalisé."
 
 #: client/src/management-jobs/scheduler/main.js:88
@@ -944,7 +944,7 @@ msgid ""
 "Each time a job runs using this project, perform an update to the local "
 "repository prior to starting the job."
 msgstr ""
-"Chaque fois qu'une tâche s'exécute avec ce projet, réalisez une mise à jour "
+"Chaque fois qu’une tâche s’exécute avec ce projet, réalisez une mise à jour "
 "dans le référentiel local avant de lancer la tâche."
 
 #: client/src/dashboard/hosts/dashboard-hosts.list.js:62
@@ -971,24 +971,24 @@ msgid "Edit Survey"
 msgstr "Modifier le questionnaire"
 
 #: client/src/setup-menu/setup-menu.partial.html:54
-msgid "Edit Tower's configuration."
+msgid "Edit Tower’s configuration."
 msgstr "Modifier la configuration de Tower."
 
 #: client/src/lists/Credentials.js:74
 msgid "Edit credential"
-msgstr "Modifier les informations d'identification"
+msgstr "Modifier les informations d’identification"
 
 #: client/src/dashboard/hosts/dashboard-hosts.list.js:65
 msgid "Edit host"
-msgstr "Modifier l'hôte"
+msgstr "Modifier l’hôte"
 
 #: client/src/lists/Inventories.js:80
 msgid "Edit inventory"
-msgstr "Modifier l'inventaire"
+msgstr "Modifier l’inventaire"
 
 #: client/src/inventory-scripts/inventory-scripts.list.js:59
 msgid "Edit inventory script"
-msgstr "Modifier le script d'inventaire"
+msgstr "Modifier le script d’inventaire"
 
 #: client/src/notifications/notificationTemplates.list.js:74
 msgid "Edit notification"
@@ -1000,7 +1000,7 @@ msgstr "Modifier la programmation"
 
 #: client/src/lists/Teams.js:64
 msgid "Edit team"
-msgstr "Modifier l'équipe"
+msgstr "Modifier l’équipe"
 
 #: client/src/lists/Templates.js:109
 msgid "Edit template"
@@ -1008,7 +1008,7 @@ msgstr "Modifier le modèle"
 
 #: client/src/workflow-results/workflow-results.partial.html:109
 msgid "Edit the User"
-msgstr "Modifier l'Utilisateur"
+msgstr "Modifier l’Utilisateur"
 
 #: client/src/lists/Projects.js:103
 msgid "Edit the project"
@@ -1020,15 +1020,15 @@ msgstr "Modifier la planification"
 
 #: client/src/lists/Users.js:72
 msgid "Edit user"
-msgstr "Modifier l'utilisateur"
+msgstr "Modifier l’utilisateur"
 
 #: client/src/controllers/Projects.js:236
 msgid ""
 "Either you do not have access or the SCM update process completed. Click the "
 "%sRefresh%s button to view the latest status."
 msgstr ""
-"Vous n'avez pas accès, ou la mise à jour SCM est terminée. Cliquez sur le "
-"bouton %sActualiser%s pour voir l'état le plus récent."
+"Vous n’avez pas accès, ou la mise à jour SCM est terminée. Cliquez sur le "
+"bouton %sActualiser%s pour voir l’état le plus récent."
 
 #: client/src/forms/EventsViewer.js:81
 #: client/src/forms/LogViewerStatus.js:50
@@ -1050,21 +1050,21 @@ msgstr "Activer les tâches parallèles"
 
 #: client/src/forms/JobTemplates.js:292
 msgid "Enable Privilege Escalation"
-msgstr "Activer l'élévation des privilèges"
+msgstr "Activer l’élévation des privilèges"
 
 #: client/src/forms/JobTemplates.js:307
 msgid ""
 "Enables creation of a provisioning callback URL. Using the URL a host can "
 "contact Tower and request a configuration update using this job template."
 msgstr ""
-"Active la création d'une URL de rappels d'exécution de Tower job_template. "
+"Active la création d’une URL de rappels d’exécution de Tower job_template. "
 "Avec cette URL, un hôte peut contacter Tower et demander une mise à jour de "
-"la configuration à l'aide de ce modèle de tâche."
+"la configuration à l’aide de ce modèle de tâche."
 
 #: client/src/helpers/Credentials.js:414
 msgid "Encrypted credentials are not supported."
 msgstr ""
-"Les informations d'identification chiffrées ne sont pas prises en charge."
+"Les informations d’identification chiffrées ne sont pas prises en charge."
 
 #: client/src/forms/EventsViewer.js:77
 msgid "End"
@@ -1072,14 +1072,14 @@ msgstr "Fin"
 
 #: client/src/license/license.partial.html:108
 msgid "End User License Agreement"
-msgstr "Contrat de licence de l'utilisateur final"
+msgstr "Contrat de licence de l’utilisateur final"
 
 #: client/src/forms/Inventories.js:60
 msgid ""
 "Enter inventory variables using either JSON or YAML syntax. Use the radio "
 "button to toggle between the two."
 msgstr ""
-"Entrez les variables d'inventaire avec la syntaxe JSON ou YAML. Utilisez le "
+"Entrez les variables d’inventaire avec la syntaxe JSON ou YAML. Utilisez le "
 "bouton radio pour basculer entre les deux."
 
 #: client/src/helpers/Credentials.js:161
@@ -1088,7 +1088,7 @@ msgid ""
 "Enter the URL for the virtual machine which %scorresponds to your CloudForm "
 "instance. %sFor example, %s"
 msgstr ""
-"Veuillez saisir l'URL de la machine virtuelle qui correspond à votre "
+"Veuillez saisir l’URL de la machine virtuelle qui correspond à votre "
 "instance de CloudForm. %sPar exemple, %s"
 
 #: client/src/helpers/Credentials.js:151
@@ -1097,7 +1097,7 @@ msgid ""
 "Enter the URL which corresponds to your %sRed Hat Satellite 6 server. %sFor "
 "example, %s"
 msgstr ""
-"Veuillez saisir l'URL qui correspond à votre serveur %sRed Hat Satellite 6. "
+"Veuillez saisir l’URL qui correspond à votre serveur %sRed Hat Satellite 6. "
 "%sPar exemple, %s"
 
 #: client/src/helpers/Credentials.js:129
@@ -1105,7 +1105,7 @@ msgstr ""
 msgid ""
 "Enter the hostname or IP address which corresponds to your VMware vCenter."
 msgstr ""
-"Entrez le nom d'hôte ou l'adresse IP qui correspond à votre VMware vCenter."
+"Entrez le nom d’hôte ou l’adresse IP qui correspond à votre VMware vCenter."
 
 #: client/src/configuration/configuration.controller.js:307
 #: client/src/configuration/configuration.controller.js:385
@@ -1153,7 +1153,7 @@ msgstr "Événement"
 
 #: client/src/widgets/Stream.js:216
 msgid "Event summary not available"
-msgstr "Récapitulatif de l'événement non disponible"
+msgstr "Récapitulatif de l’événement non disponible"
 
 #: client/src/lists/JobEvents.js:31
 msgid "Events"
@@ -1162,17 +1162,17 @@ msgstr "Événements"
 #: client/src/controllers/Projects.js:421
 #: client/src/controllers/Projects.js:704
 msgid "Example URLs for GIT SCM include:"
-msgstr "Exemples d'URL pour le SCM GIT :"
+msgstr "Exemples d’URL pour le SCM GIT :"
 
 #: client/src/controllers/Projects.js:434
 #: client/src/controllers/Projects.js:716
 msgid "Example URLs for Mercurial SCM include:"
-msgstr "Exemples d'URL pour le SCM Mercurial :"
+msgstr "Exemples d’URL pour le SCM Mercurial :"
 
 #: client/src/controllers/Projects.js:429
 #: client/src/controllers/Projects.js:711
 msgid "Example URLs for Subversion SCM include:"
-msgstr "Exemples d'URL pour le SCM Subversion :"
+msgstr "Exemples d’URL pour le SCM Subversion :"
 
 #: client/src/job-results/job-results.controller.js:11
 #: client/src/job-results/job-results.controller.js:207
@@ -1227,11 +1227,11 @@ msgstr "Échec des hôtes"
 
 #: client/src/controllers/Users.js:182
 msgid "Failed to add new user. POST returned status:"
-msgstr "L'ajout de l'utilisateur a échoué. État POST renvoyé :"
+msgstr "L’ajout de l’utilisateur a échoué. État POST renvoyé :"
 
 #: client/src/helpers/Credentials.js:419
 msgid "Failed to create new Credential. POST status:"
-msgstr "La création des informations d'identification a échoué. État POST :"
+msgstr "La création des informations d’identification a échoué. État POST :"
 
 #: client/src/controllers/Projects.js:404
 msgid "Failed to create new project. POST returned status:"
@@ -1239,12 +1239,12 @@ msgstr "La création du projet a échoué. État POST renvoyé :"
 
 #: client/src/login/loginModal/thirdPartySignOn/thirdPartySignOn.service.js:120
 msgid "Failed to get third-party login types.  Returned status:"
-msgstr "L'obtention des types de connexion tiers a échoué. État renvoyé :"
+msgstr "L’obtention des types de connexion tiers a échoué. État renvoyé :"
 
 #: client/src/job-submission/job-submission-factories/launchjob.factory.js:188
 msgid "Failed to retrieve job template extra variables."
 msgstr ""
-"N'a pas pu extraire les variables supplémentaires du modèle de la tâche."
+"N’a pas pu extraire les variables supplémentaires du modèle de la tâche."
 
 #: client/src/controllers/Projects.js:598
 msgid "Failed to retrieve project: %s. GET status:"
@@ -1253,21 +1253,21 @@ msgstr "La récupération du projet a échoué : %s. État GET :"
 #: client/src/controllers/Users.js:272
 #: client/src/controllers/Users.js:340
 msgid "Failed to retrieve user: %s. GET status:"
-msgstr "La récupération de l'utilisateur a échoué : %s. État GET :"
+msgstr "La récupération de l’utilisateur a échoué : %s. État GET :"
 
 #: client/src/configuration/configuration.controller.js:386
 msgid "Failed to save settings. Returned status:"
-msgstr "L'enregistrement des paramètres a échoué. État renvoyé :"
+msgstr "L’enregistrement des paramètres a échoué. État renvoyé :"
 
 #: client/src/configuration/configuration.controller.js:420
 msgid "Failed to save toggle settings. Returned status:"
 msgstr ""
-"L'enregistrement des paramètres d'activation/désactivation a échoué. État "
+"L’enregistrement des paramètres d’activation/désactivation a échoué. État "
 "renvoyé :"
 
 #: client/src/helpers/Credentials.js:435
 msgid "Failed to update Credential. PUT status:"
-msgstr "La mise à jour des informations d'identification a échoué. État PUT :"
+msgstr "La mise à jour des informations d’identification a échoué. État PUT :"
 
 #: client/src/controllers/Projects.js:663
 msgid "Failed to update project: %s. PUT status:"
@@ -1278,11 +1278,11 @@ msgstr "La mise à jour du projet a échoué : %s. État PUT :"
 #: client/src/management-jobs/card/card.controller.js:241
 msgid "Failed updating job %s with variables. POST returned: %d"
 msgstr ""
-"N'a pas pu mettre à jour la tâche %s avec les variables. Retour POST : %d"
+"N’a pas pu mettre à jour la tâche %s avec les variables. Retour POST : %d"
 
 #: client/src/helpers/Projects.js:73
 msgid "Failed. Click for details"
-msgstr "Échec. Cliquer pour obtenir davantage d'informations"
+msgstr "Échec. Cliquer pour obtenir davantage d’informations"
 
 #: client/src/notifications/notifications.list.js:48
 msgid "Failure"
@@ -1337,7 +1337,7 @@ msgid ""
 "For hosts that are part of an external inventory, this flag cannot be "
 "changed. It will be set by the inventory sync process."
 msgstr ""
-"Pour les hôtes qui font partie d'un inventaire externe, ce marqueur ne peut "
+"Pour les hôtes qui font partie d’un inventaire externe, ce marqueur ne peut "
 "pas être modifié. Il sera défini par le processus de synchronisation des "
 "inventaires."
 
@@ -1347,7 +1347,7 @@ msgid ""
 "For more information and examples see %sthe Patterns topic at docs.ansible."
 "com%s."
 msgstr ""
-"Pour obtenir plus d'informations et voir des exemples, reportez-vous à la "
+"Pour obtenir plus d’informations et voir des exemples, reportez-vous à la "
 "rubrique %sPatterns sur docs.ansible.com%s."
 
 #: client/src/forms/JobTemplates.js:203
@@ -1391,7 +1391,7 @@ msgid ""
 "Group all of your content to manage permissions across departments in your "
 "company."
 msgstr ""
-"Regroupez l'ensemble du contenu pour gérer les permissions entre les "
+"Regroupez l’ensemble du contenu pour gérer les permissions entre les "
 "différents services de votre entreprise."
 
 #: client/src/dashboard/hosts/main.js:55
@@ -1405,7 +1405,7 @@ msgstr "En-têtes HTTP"
 
 #: client/src/bread-crumb/bread-crumb.directive.js:111
 msgid "Hide Activity Stream"
-msgstr "Cacher le flux d'activité"
+msgstr "Cacher le flux d’activité"
 
 #: client/src/forms/Credentials.js:140
 #: client/src/forms/EventsViewer.js:20
@@ -1417,12 +1417,12 @@ msgstr "Hôte"
 #: client/src/helpers/Credentials.js:132
 #: client/src/helpers/Credentials.js:268
 msgid "Host (Authentication URL)"
-msgstr "Hôte (URL d'authentification)"
+msgstr "Hôte (URL d’authentification)"
 
 #: client/src/forms/JobTemplates.js:341
 #: client/src/forms/JobTemplates.js:350
 msgid "Host Config Key"
-msgstr "Clé de configuration de l'hôte"
+msgstr "Clé de configuration de l’hôte"
 
 #: client/src/dashboard/hosts/dashboard-hosts.list.js:54
 msgid "Host Enabled"
@@ -1430,11 +1430,11 @@ msgstr "Hôte activé"
 
 #: client/src/job-detail/job-detail.partial.html:269
 msgid "Host Status"
-msgstr "Statut de l'hôte"
+msgstr "Statut de l’hôte"
 
 #: client/src/lists/JobEvents.js:37
 msgid "Host Summary"
-msgstr "Récapitulatif de l'hôte"
+msgstr "Récapitulatif de l’hôte"
 
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:25
 #: client/src/dashboard/counts/dashboard-counts.directive.js:39
@@ -1456,7 +1456,7 @@ msgstr "Hôtes utilisés"
 
 #: client/src/license/license.partial.html:116
 msgid "I agree to the End User License Agreement"
-msgstr "J'accepte le Contrat de licence de l'utilisateur final"
+msgstr "J’accepte le Contrat de licence de l’utilisateur final"
 
 #: client/src/forms/EventsViewer.js:28
 msgid "ID"
@@ -1476,12 +1476,12 @@ msgstr "INVENTAIRES"
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:23
 msgid "INVENTORY SCRIPT"
-msgstr "SCRIPT D'INVENTAIRE"
+msgstr "SCRIPT D’INVENTAIRE"
 
 #: client/src/helpers/ActivityStream.js:47
 #: client/src/inventory-scripts/main.js:66
 msgid "INVENTORY SCRIPTS"
-msgstr "SCRIPTS D'INVENTAIRE"
+msgstr "SCRIPTS D’INVENTAIRE"
 
 #: client/src/notifications/notificationTemplates.form.js:360
 msgid "IRC Nick"
@@ -1518,13 +1518,13 @@ msgid ""
 "If enabled, run this playbook as an administrator. This is the equivalent of "
 "passing the %s option to the %s command."
 msgstr ""
-"Si cette option est activée, exécutez ce playbook en tant qu'administrateur. "
-"Cette opération revient à transmettre l'option %s à la commande %s."
+"Si cette option est activée, exécutez ce playbook en tant qu’administrateur. "
+"Cette opération revient à transmettre l’option %s à la commande %s."
 
 #: client/src/forms/JobTemplates.js:319
 msgid "If enabled, simultaneous runs of this job template will be allowed."
 msgstr ""
-"Si activé, il sera possible d'avoir des exécutions de ce modèle de tâche en "
+"Si activé, il sera possible d’avoir des exécutions de ce modèle de tâche en "
 "simultané."
 
 #: client/src/forms/Credentials.js:54
@@ -1534,11 +1534,11 @@ msgid ""
 "can assign an organization so that roles for the credential can be assigned "
 "to users and teams in that organization."
 msgstr ""
-"Si aucune organisation n'est renseignée, les informations d'identification "
-"ne peuvent être utilisées que par l'utilisateur qui les crée. Les "
-"administrateurs d'organisation et les administrateurs système peuvent "
+"Si aucune organisation n’est renseignée, les informations d’identification "
+"ne peuvent être utilisées que par l’utilisateur qui les crée. Les "
+"administrateurs d’organisation et les administrateurs système peuvent "
 "assigner une organisation pour que les rôles liés aux informations "
-"d'identification puissent être associés aux utilisateurs et aux équipes de "
+"d’identification puissent être associés aux utilisateurs et aux équipes de "
 "cette organisation."
 
 #: client/src/license/license.partial.html:70
@@ -1553,7 +1553,7 @@ msgid ""
 "Indicates if a host is available and should be included in running jobs."
 msgstr ""
 "Indique si un hôte est disponible et doit être ajouté aux tâches en cours "
-"d'exécution."
+"d’exécution."
 
 #: client/src/forms/ActivityDetail.js:33
 #: client/src/lists/Streams.js:36
@@ -1566,7 +1566,7 @@ msgid ""
 "problems."
 msgstr ""
 "À la place, %s vérifie la syntaxe du playbook, teste la configuration de "
-"l'environnement et signale les problèmes."
+"l’environnement et signale les problèmes."
 
 #: client/src/license/license.partial.html:11
 msgid "Invalid License"
@@ -1579,7 +1579,7 @@ msgstr "Format de fichier non valide. Chargez un fichier JSON valide."
 
 #: client/src/login/loginModal/loginModal.partial.html:34
 msgid "Invalid username and/or password.  Please try again."
-msgstr "Nom d'utilisateur et/ou mot de passe non valide. Veuillez réessayer."
+msgstr "Nom d’utilisateur et/ou mot de passe non valide. Veuillez réessayer."
 
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:116
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:51
@@ -1604,7 +1604,7 @@ msgstr "Inventaire"
 #: client/src/inventory-scripts/inventory-scripts.list.js:12
 #: client/src/setup-menu/setup-menu.partial.html:34
 msgid "Inventory Scripts"
-msgstr "Scripts d'inventaire"
+msgstr "Scripts d’inventaire"
 
 #: client/src/dashboard/graphs/dashboard-graphs.partial.html:46
 msgid "Inventory Sync"
@@ -1616,7 +1616,7 @@ msgstr "Erreurs de synchronisation des inventaires"
 
 #: client/src/forms/Inventories.js:67
 msgid "Inventory Variables"
-msgstr "Variables d'inventaire"
+msgstr "Variables d’inventaire"
 
 #: client/src/forms/EventsViewer.js:49
 #: client/src/job-detail/job-detail.partial.html:350
@@ -1645,7 +1645,7 @@ msgstr "TÂCHES"
 
 #: client/src/lists/JobEvents.js:15
 msgid "Job Events"
-msgstr "Événements d'une tâche"
+msgstr "Événements d’une tâche"
 
 #: client/src/forms/JobTemplates.js:252
 #: client/src/forms/JobTemplates.js:260
@@ -1796,7 +1796,7 @@ msgid ""
 "automatically update in real-time."
 msgstr ""
 "Événements en direct : connecté. Les pages contenant des informations sur "
-"l'état de la tâche seront automatiquement mises à jour en temps réel."
+"l’état de la tâche seront automatiquement mises à jour en temps réel."
 
 #: client/src/shared/socket/socket.service.js:176
 msgid "Live events: error connecting to the Tower server."
@@ -1835,14 +1835,14 @@ msgstr "Machine"
 #: client/src/forms/JobTemplates.js:139
 #: client/src/job-detail/job-detail.partial.html:117
 msgid "Machine Credential"
-msgstr "Informations d'identification de la machine"
+msgstr "Informations d’identification de la machine"
 
 #: client/src/setup-menu/setup-menu.partial.html:29
 msgid ""
 "Manage the cleanup of old job history, activity streams, data marked for "
 "deletion, and system tracking info."
 msgstr ""
-"Gérez le nettoyage de l'historique des anciennes tâches, des flux "
+"Gérez le nettoyage de l’historique des anciennes tâches, des flux "
 "d’activité, des données marquées pour suppression et des informations de "
 "suivi du système."
 
@@ -1882,7 +1882,7 @@ msgstr "Système divers"
 
 #: client/src/helpers/Projects.js:76
 msgid "Missing. Click for details"
-msgstr "Manquant. Cliquer pour obtenir davantage d'informations"
+msgstr "Manquant. Cliquer pour obtenir davantage d’informations"
 
 #: client/src/forms/EventsViewer.js:53
 msgid "Module"
@@ -1912,7 +1912,7 @@ msgstr "AUCUN HÔTE DÉTECTÉ"
 
 #: client/src/login/loginModal/loginModal.partial.html:89
 msgid "NOTICE"
-msgstr "ENVOI D'INFOS"
+msgstr "ENVOI D’INFOS"
 
 #: client/src/notifications/notificationTemplates.form.js:21
 msgid "NOTIFICATION TEMPLATE"
@@ -1971,15 +1971,15 @@ msgstr "Réseau"
 #: client/src/forms/JobTemplates.js:197
 #: client/src/job-detail/job-detail.partial.html:131
 msgid "Network Credential"
-msgstr "Informations d'identification réseau"
+msgstr "Informations d’identification réseau"
 
 #: client/src/forms/JobTemplates.js:196
 msgid ""
 "Network credentials are used by Ansible networking modules to connect to and "
 "manage networking devices."
 msgstr ""
-"Les informations d'identification sont utilisées par les modules de mise en "
-"réseau d'Ansible pour connecter et gérer les périphériques réseau."
+"Les informations d’identification sont utilisées par les modules de mise en "
+"réseau d’Ansible pour connecter et gérer les périphériques réseau."
 
 #: client/src/inventory-scripts/inventory-scripts.form.js:16
 msgid "New Custom Inventory"
@@ -2019,7 +2019,7 @@ msgstr "Nouveau modèle de tâche Workflow"
 
 #: client/src/controllers/Users.js:174
 msgid "New user successfully created!"
-msgstr "Création de l'utilisateur réussie"
+msgstr "Création de l’utilisateur réussie"
 
 #: client/src/lists/ScheduledJobs.js:52
 #: client/src/lists/Schedules.js:45
@@ -2028,7 +2028,7 @@ msgstr "Exécution suivante"
 
 #: client/src/lists/Credentials.js:24
 msgid "No Credentials Have Been Created"
-msgstr "Informations d'identification non créées"
+msgstr "Informations d’identification non créées"
 
 #: client/src/controllers/Projects.js:161
 msgid "No SCM Configuration"
@@ -2036,7 +2036,7 @@ msgstr "Aucune configuration SCM"
 
 #: client/src/helpers/Projects.js:58
 msgid "No SCM updates have run for this project"
-msgstr "Aucune mise à jour SCM n'a été exécutée pour ce projet"
+msgstr "Aucune mise à jour SCM n’a été exécutée pour ce projet"
 
 #: client/src/access/rbac-multiselect/permissionsTeams.list.js:18
 msgid "No Teams exist"
@@ -2064,7 +2064,7 @@ msgstr "Aucun modèle de tâche utilisé récemment."
 
 #: client/src/lists/AllJobs.js:20
 msgid "No jobs have yet run."
-msgstr "Aucune tâche exécutée pour l'instant."
+msgstr "Aucune tâche exécutée pour l’instant."
 
 #: client/src/dashboard/lists/jobs/jobs-list.partial.html:46
 msgid "No jobs were recently run."
@@ -2072,7 +2072,7 @@ msgstr "Aucune tâche récemment exécutée."
 
 #: client/src/job-detail/job-detail.partial.html:374
 msgid "No matching host events"
-msgstr "Aucun événement d'hôte correspondant"
+msgstr "Aucun événement d’hôte correspondant"
 
 #: client/src/job-detail/job-detail.partial.html:307
 msgid "No matching hosts."
@@ -2158,11 +2158,11 @@ msgstr "REMPLACER VARS"
 
 #: client/src/forms/WorkflowMaker.js:45
 msgid "On&nbsp;Failure"
-msgstr "Lors&nbsp;d'un échec"
+msgstr "Lors&nbsp;d’un échec"
 
 #: client/src/forms/WorkflowMaker.js:40
 msgid "On&nbsp;Success"
-msgstr "Lors&nbsp;d'une réussite"
+msgstr "Lors&nbsp;d’une réussite"
 
 #: client/src/forms/Credentials.js:380
 msgid ""
@@ -2170,7 +2170,7 @@ msgid ""
 "Keystone v3 authentication URLs. Common scenarios include:"
 msgstr ""
 "Les domaines OpenStack définissent les limites administratives. Ils sont "
-"nécessaires seulement pour les URL d'authentification Keystone v3. Les "
+"nécessaires seulement pour les URL d’authentification Keystone v3. Les "
 "scénarios courants incluent :"
 
 #: client/src/forms/JobTemplates.js:362
@@ -2182,7 +2182,7 @@ msgid ""
 msgstr ""
 "Libellés facultatifs décrivant ce modèle de tâche, par exemple 'dev' ou "
 "'test'. Les libellés peuvent être utilisés pour regrouper et filtrer les "
-"modèles de tâche et les tâches terminées dans l'affichage de Tower."
+"modèles de tâche et les tâches terminées dans l’affichage de Tower."
 
 #: client/src/forms/JobTemplates.js:288
 #: client/src/notifications/notificationTemplates.form.js:395
@@ -2269,7 +2269,7 @@ msgid ""
 "JSON."
 msgstr ""
 "Transmettez des variables de ligne de commande supplémentaires au playbook. "
-"Il s'agit du paramètre de ligne de commande %s ou %s pour %s. Entrez des "
+"Il s’agit du paramètre de ligne de commande %s ou %s pour %s. Entrez des "
 "paires clé/valeur avec la syntaxe YAML ou JSON."
 
 #: client/src/forms/Credentials.js:227
@@ -2314,7 +2314,7 @@ msgid ""
 "Paste the contents of the PEM file associated with the service account email."
 ""
 msgstr ""
-"Collez le contenu du fichier PEM associé à l'adresse électronique du compte "
+"Collez le contenu du fichier PEM associé à l’adresse électronique du compte "
 "de service."
 
 #: client/src/helpers/Credentials.js:115
@@ -2392,11 +2392,11 @@ msgstr "Veuillez allouer des rôles aux utilisateurs / équipes sélectionnées"
 
 #: client/src/license/license.partial.html:84
 msgid ""
-"Please click the button below to visit Ansible's website to get a Tower "
+"Please click the button below to visit Ansible’s website to get a Tower "
 "license key."
 msgstr ""
-"Cliquez sur le bouton ci-dessous pour visiter le site Web d'Ansible afin "
-"d'obtenir une clé de licence Tower."
+"Cliquez sur le bouton ci-dessous pour visiter le site Web d’Ansible afin "
+"d’obtenir une clé de licence Tower."
 
 #: client/src/shared/form-generator.js:836
 #: client/src/shared/form-generator.js:950
@@ -2404,7 +2404,7 @@ msgid ""
 "Please enter a URL that begins with ssh, http or https.  The URL may not "
 "contain the '@' character."
 msgstr ""
-"Veuillez saisir une URL commençant par ssh, http ou https. L'URL ne doit pas "
+"Veuillez saisir une URL commençant par ssh, http ou https. L’URL ne doit pas "
 "contenir le caractère '@'."
 
 #: client/src/shared/form-generator.js:1188
@@ -2425,7 +2425,7 @@ msgstr "Entrez un mot de passe."
 
 #: client/src/login/loginModal/loginModal.partial.html:58
 msgid "Please enter a username."
-msgstr "Entrez un nom d'utilisateur."
+msgstr "Entrez un nom d’utilisateur."
 
 #: client/src/shared/form-generator.js:826
 #: client/src/shared/form-generator.js:940
@@ -2444,11 +2444,11 @@ msgstr "Veuillez enregistrer et exécuter une tâche à afficher"
 
 #: client/src/notifications/notifications.list.js:15
 msgid "Please save before adding notifications"
-msgstr "Veuillez enregistrer avant d'ajouter des notifications"
+msgstr "Veuillez enregistrer avant d’ajouter des notifications"
 
 #: client/src/forms/Teams.js:69
 msgid "Please save before adding users"
-msgstr "Veuillez enregistrer avant d'ajouter des utilisateurs"
+msgstr "Veuillez enregistrer avant d’ajouter des utilisateurs"
 
 #: client/src/controllers/Credentials.js:161
 #: client/src/forms/Inventories.js:92
@@ -2458,16 +2458,16 @@ msgstr "Veuillez enregistrer avant d'ajouter des utilisateurs"
 #: client/src/forms/Teams.js:113
 #: client/src/forms/Workflows.js:110
 msgid "Please save before assigning permissions"
-msgstr "Veuillez enregistrer avant d'attribuer des permissions"
+msgstr "Veuillez enregistrer avant d’attribuer des permissions"
 
 #: client/src/forms/Users.js:122
 #: client/src/forms/Users.js:180
 msgid "Please save before assigning to organizations"
-msgstr "Veuillez enregistrer avant l'attribution à des organisations"
+msgstr "Veuillez enregistrer avant l’attribution à des organisations"
 
 #: client/src/forms/Users.js:149
 msgid "Please save before assigning to teams"
-msgstr "Veuillez enregistrer avant l'attribution à des équipes"
+msgstr "Veuillez enregistrer avant l’attribution à des équipes"
 
 #: client/src/forms/Workflows.js:186
 msgid "Please save before defining the workflow graph"
@@ -2484,14 +2484,14 @@ msgstr "Veuillez sélectionner des utilisateurs dans la liste ci-dessous."
 
 #: client/src/forms/WorkflowMaker.js:65
 msgid "Please select a Credential."
-msgstr "Sélectionnez des informations d'identification."
+msgstr "Sélectionnez des informations d’identification."
 
 #: client/src/forms/JobTemplates.js:153
 msgid ""
 "Please select a Machine Credential or check the Prompt on launch option."
 msgstr ""
-"Sélectionnez les informations d'identification de la machine ou cochez "
-"l'option Me le demander au lancement."
+"Sélectionnez les informations d’identification de la machine ou cochez "
+"l’option Me le demander au lancement."
 
 #: client/src/shared/form-generator.js:1223
 msgid "Please select a number between"
@@ -2516,7 +2516,7 @@ msgstr "Sélectionnez une valeur."
 #: client/src/forms/JobTemplates.js:84
 msgid "Please select an Inventory or check the Prompt on launch option."
 msgstr ""
-"Sélectionnez un inventaire ou cochez l'option Me le demander au lancement."
+"Sélectionnez un inventaire ou cochez l’option Me le demander au lancement."
 
 #: client/src/forms/WorkflowMaker.js:86
 msgid "Please select an Inventory."
@@ -2552,12 +2552,12 @@ msgstr "Élévation des privilèges"
 #: client/src/helpers/Credentials.js:227
 #: client/src/helpers/Credentials.js:91
 msgid "Privilege Escalation Password"
-msgstr "Mot de passe pour l'élévation des privilèges"
+msgstr "Mot de passe pour l’élévation des privilèges"
 
 #: client/src/helpers/Credentials.js:226
 #: client/src/helpers/Credentials.js:90
 msgid "Privilege Escalation Username"
-msgstr "Nom d'utilisateur pour l'élévation des privilèges"
+msgstr "Nom d’utilisateur pour l’élévation des privilèges"
 
 #: client/src/forms/JobTemplates.js:116
 #: client/src/forms/JobTemplates.js:99
@@ -2591,7 +2591,7 @@ msgstr "Erreurs de synchronisation du projet"
 
 #: client/src/controllers/Projects.js:172
 msgid "Project lookup failed. GET returned:"
-msgstr "La recherche de projet n'a pas abouti. GET renvoyé :"
+msgstr "La recherche de projet n’a pas abouti. GET renvoyé :"
 
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:109
 #: client/src/access/add-rbac-user-team/rbac-user-team.partial.html:46
@@ -2626,18 +2626,18 @@ msgid ""
 "managed or affected by the playbook. Multiple patterns can be separated by "
 "%s %s or %s"
 msgstr ""
-"Entrez un modèle d'hôte pour limiter davantage la liste des hôtes qui seront "
+"Entrez un modèle d’hôte pour limiter davantage la liste des hôtes qui seront "
 "gérés ou attribués par le playbook. Plusieurs modèles peuvent être séparés "
 "par des %s %s ou des %s"
 
 #: client/src/forms/JobTemplates.js:328
 #: client/src/forms/JobTemplates.js:336
 msgid "Provisioning Callback URL"
-msgstr "URL de rappel d'exécution de Tower job_template"
+msgstr "URL de rappel d’exécution de Tower job_template"
 
 #: client/src/helpers/Projects.js:63
 msgid "Queued. Click for details"
-msgstr "En file d'attente. Cliquer pour obtenir davantage d'informations"
+msgstr "En file d’attente. Cliquer pour obtenir davantage d’informations"
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:107
 msgid "RADIUS"
@@ -2739,7 +2739,7 @@ msgstr "Supprimer"
 #: client/src/forms/Projects.js:153
 msgid "Remove any local modifications prior to performing an update."
 msgstr ""
-"Supprimez toutes les modifications locales avant d'effectuer une mise à jour."
+"Supprimez toutes les modifications locales avant d’effectuer une mise à jour."
 ""
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:149
@@ -2807,7 +2807,7 @@ msgstr "Rôle"
 
 #: client/src/helpers/Projects.js:67
 msgid "Running! Click for details"
-msgstr "En cours d'exécution. Cliquer pour obtenir davantage d'informations"
+msgstr "En cours d’exécution. Cliquer pour obtenir davantage d’informations"
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:108
 msgid "SAML"
@@ -2836,7 +2836,7 @@ msgstr "Nettoyage SCM"
 
 #: client/src/forms/Projects.js:130
 msgid "SCM Credential"
-msgstr "Information d'identification SCM"
+msgstr "Information d’identification SCM"
 
 #: client/src/forms/Projects.js:165
 msgid "SCM Delete"
@@ -3006,8 +3006,8 @@ msgid ""
 "Management (IAM) users."
 msgstr ""
 "Le service de jeton de sécurité (STS) est un service Web qui permet de "
-"demander des informations d'identification provisoires avec des privilèges "
-"limités pour les utilisateurs d'AWS Identity and Access Management (IAM)."
+"demander des informations d’identification provisoires avec des privilèges "
+"limités pour les utilisateurs d’AWS Identity and Access Management (IAM)."
 
 #: client/src/shared/form-generator.js:1703
 msgid "Select"
@@ -3047,16 +3047,16 @@ msgid ""
 "hosts. Choose the credential containing  the username and SSH key or "
 "password that Ansible will need to log into the remote hosts."
 msgstr ""
-"Sélectionnez les informations d'identification que la tâche doit utiliser "
-"lors de l'accès à des hôtes distants. Choisissez les informations "
-"d'identification contenant le nom d'utilisateur et la clé SSH ou le mot de "
+"Sélectionnez les informations d’identification que la tâche doit utiliser "
+"lors de l’accès à des hôtes distants. Choisissez les informations "
+"d’identification contenant le nom d’utilisateur et la clé SSH ou le mot de "
 "passe dont Ansible aura besoin pour se connecter aux hôtes distants."
 
 #: client/src/forms/JobTemplates.js:86
 #: client/src/forms/WorkflowMaker.js:88
 msgid "Select the inventory containing the hosts you want this job to manage."
 msgstr ""
-"Sélectionnez l'inventaire contenant les hôtes que vous souhaitez gérer."
+"Sélectionnez l’inventaire contenant les hôtes que vous souhaitez gérer."
 
 #: client/src/forms/JobTemplates.js:132
 msgid "Select the playbook to be executed by this job."
@@ -3078,14 +3078,14 @@ msgid ""
 "the access credentials to the running playbook, allowing provisioning into "
 "the cloud without manually passing parameters to the included modules."
 msgstr ""
-"La sélection d'informations identification cloud facultatives dans le modèle "
-"de tâche transmettra les informations d'identification d'accès au playbook "
-"en cours d'exécution, ce qui permet une authentification dans le cloud sans "
+"La sélection d’informations identification cloud facultatives dans le modèle "
+"de tâche transmettra les informations d’identification d’accès au playbook "
+"en cours d’exécution, ce qui permet une authentification dans le cloud sans "
 "transmettre manuellement les paramètres aux modules inclus."
 
 #: client/src/notifications/notificationTemplates.form.js:86
 msgid "Sender Email"
-msgstr "Adresse électronique de l'expéditeur"
+msgstr "Adresse électronique de l’expéditeur"
 
 #: client/src/helpers/Credentials.js:234
 #: client/src/helpers/Credentials.js:98
@@ -3096,22 +3096,22 @@ msgstr "Adresse électronique du compte de service"
 #: client/src/forms/WorkflowMaker.js:108
 msgid ""
 "Setting the type to %s will execute the playbook and store any  scanned "
-"facts for use with Tower's System Tracking feature."
+"facts for use with Tower’s System Tracking feature."
 msgstr ""
 "La définition du type sur %s exécute le playbook et stocke tous les faits "
 "scannés à utiliser avec la fonctionnalité de suivi System Tracking de Tower."
 
 #: client/src/forms/JobTemplates.js:57
 msgid "Setting the type to %s will not execute the playbook."
-msgstr "La définition du type sur %s n'exécute pas le playbook."
+msgstr "La définition du type sur %s n’exécute pas le playbook."
 
 #: client/src/forms/WorkflowMaker.js:106
 msgid ""
 "Setting the type to %s will not execute the playbook. Instead, %s will check "
 "playbook  syntax, test environment setup and report problems."
 msgstr ""
-"La définition du type sur %s n'exécute pas le playbook. À la place, %s "
-"vérifie la syntaxe du playbook, teste la configuration de l'environnement et "
+"La définition du type sur %s n’exécute pas le playbook. À la place, %s "
+"vérifie la syntaxe du playbook, teste la configuration de l’environnement et "
 "signale les problèmes."
 
 #: client/src/main-menu/main-menu.partial.html:147
@@ -3152,7 +3152,7 @@ msgid ""
 "specific parts of a play or task."
 msgstr ""
 "Les balises de saut sont utiles si votre playbook est important et que vous "
-"souhaitez ignorer certaines parties d'une scène ou d'une tâche."
+"souhaitez ignorer certaines parties d’une scène ou d’une tâche."
 
 #: client/src/forms/Credentials.js:76
 msgid "Source Control"
@@ -3187,7 +3187,7 @@ msgid ""
 "Split up your organization to associate content and control permissions for "
 "groups."
 msgstr ""
-"Divisez votre organisation afin d'associer du contenu et des permissions de "
+"Divisez votre organisation afin d’associer du contenu et des permissions de "
 "contrôle pour les groupes."
 
 #: client/src/partials/logviewer.html:5
@@ -3243,7 +3243,7 @@ msgstr "Valider"
 
 #: client/src/helpers/Jobs.js:230
 msgid "Submit the request to cancel?"
-msgstr "Demander l'annulation de la demande ?"
+msgstr "Demander l’annulation de la demande ?"
 
 #: client/src/license/license.partial.html:27
 msgid "Subscription"
@@ -3252,12 +3252,12 @@ msgstr "Abonnement"
 #: client/src/forms/Credentials.js:152
 #: client/src/forms/Credentials.js:163
 msgid "Subscription ID"
-msgstr "ID d'abonnement"
+msgstr "ID d’abonnement"
 
 #: client/src/forms/Credentials.js:162
 msgid "Subscription ID is an Azure construct, which is mapped to a username."
 msgstr ""
-"L'ID d'abonnement est une construction Azure mappée à un nom d'utilisateur."
+"L’ID d’abonnement est une construction Azure mappée à un nom d’utilisateur."
 
 #: client/src/notifications/notifications.list.js:38
 msgid "Success"
@@ -3265,7 +3265,7 @@ msgstr "Réussite"
 
 #: client/src/helpers/Projects.js:70
 msgid "Success! Click for details"
-msgstr "Réussi. Cliquer pour obtenir davantage d'informations"
+msgstr "Réussi. Cliquer pour obtenir davantage d’informations"
 
 #: client/src/dashboard/graphs/dashboard-graphs.partial.html:77
 msgid "Successful"
@@ -3286,7 +3286,7 @@ msgstr "Auditeur système"
 #: client/src/configuration/configuration.partial.html:3
 msgid "System auditors have read-only permissions in this section."
 msgstr ""
-"Les auditeurs de système n'ont que des permissions lecture-seule sur cette "
+"Les auditeurs de système n’ont que des permissions lecture-seule sur cette "
 "section."
 
 #: client/src/app.js:343
@@ -3313,7 +3313,7 @@ msgid ""
 "specific part of a play or task."
 msgstr ""
 "Les balises sont utiles si votre playbook est important et que vous "
-"souhaitez exécuter une partie donnée d'une scène ou d'une tâche."
+"souhaitez exécuter une partie donnée d’une scène ou d’une tâche."
 
 #: client/src/notifications/notificationTemplates.form.js:316
 msgid "Target URL"
@@ -3333,7 +3333,7 @@ msgstr "Tâches"
 #: client/src/forms/Projects.js:256
 #: client/src/forms/Workflows.js:147
 msgid "Team Roles"
-msgstr "Rôles d'équipe"
+msgstr "Rôles d’équipe"
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:40
 #: client/src/activity-stream/streamDropdownNav/stream-dropdown-nav.directive.js:33
@@ -3368,7 +3368,7 @@ msgstr "Notification test"
 #: client/src/shared/form-generator.js:1420
 msgid "That value was not found.  Please enter or select a valid value."
 msgstr ""
-"Cette valeur n'a pas été trouvée. Veuillez entrer ou sélectionner une valeur "
+"Cette valeur n’a pas été trouvée. Veuillez entrer ou sélectionner une valeur "
 "valide."
 
 #: client/src/helpers/Credentials.js:106
@@ -3377,17 +3377,17 @@ msgid ""
 "The Project ID is the GCE assigned identification. It is constructed as two "
 "words followed by a three digit number.  Such as:"
 msgstr ""
-"L'ID du projet est l'identifiant attribué par GCE. Il se compose de deux "
-"mots suivis d'un nombre à trois chiffres. Exemple :"
+"L’ID du projet est l’identifiant attribué par GCE. Il se compose de deux "
+"mots suivis d’un nombre à trois chiffres. Exemple :"
 
 #: client/src/controllers/Projects.js:733
 msgid "The SCM update process is running."
-msgstr "Le processus de mise à jour SCM est en cours d'exécution."
+msgstr "Le processus de mise à jour SCM est en cours d’exécution."
 
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:70
 msgid "The credential used to run this command."
 msgstr ""
-"Les informations d'identification utilisées pour exécuter cette commande."
+"Les informations d’identification utilisées pour exécuter cette commande."
 
 #: client/src/forms/Credentials.js:191
 msgid ""
@@ -3399,15 +3399,15 @@ msgstr ""
 #: client/src/helpers/Credentials.js:142
 #: client/src/helpers/Credentials.js:278
 msgid "The host to authenticate with."
-msgstr "Hôte avec lequel s'authentifier."
+msgstr "Hôte avec lequel s’authentifier."
 
 #: client/src/helpers/Credentials.js:75
 msgid "The host value"
-msgstr "Valeur de l'hôte"
+msgstr "Valeur de l’hôte"
 
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:61
 msgid "The inventory this command ran on."
-msgstr "L'inventaire sur lequel cette commande a été exécutée."
+msgstr "L’inventaire sur lequel cette commande a été exécutée."
 
 #: client/src/forms/JobTemplates.js:212
 msgid ""
@@ -3415,7 +3415,7 @@ msgid ""
 "playbook. 0 signifies the default value from the %sansible configuration "
 "file%s."
 msgstr ""
-"Nombre de processus parallèles ou simultanés à utiliser lors de l'exécution "
+"Nombre de processus parallèles ou simultanés à utiliser lors de l’exécution "
 "du playbook. 0 indique la valeur par défaut du %sfichier de configuration  "
 "ansible%s."
 
@@ -3433,17 +3433,17 @@ msgid ""
 "The selected project is not configured for SCM. To configure for SCM, edit "
 "the project and provide SCM settings, and then run an update."
 msgstr ""
-"Le projet sélectionné n'est pas configuré pour SCM. Afin de le configurer "
+"Le projet sélectionné n’est pas configuré pour SCM. Afin de le configurer "
 "pour SCM, modifiez le projet et définissez les paramètres SCM, puis lancez "
 "une mise à jour."
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:124
 msgid "The time must be in HH24:MM:SS format."
-msgstr "L'heure doit être sous le format suivant HH24:MM:SS"
+msgstr "L’heure doit être sous le format suivant HH24:MM:SS"
 
 #: client/src/standard-out/adhoc/standard-out-adhoc.partial.html:79
 msgid "The user who ran this command."
-msgstr "L'utilisateur qui a exécuté cette commande."
+msgstr "L’utilisateur qui a exécuté cette commande."
 
 #: client/src/lists/Streams.js:19
 msgid "There are no events to display at this time"
@@ -3463,33 +3463,33 @@ msgid ""
 "not yet been  completed.  If you have not already done so, start an update "
 "for this project."
 msgstr ""
-"Aucune information de mise à jour SCM n'est disponible pour ce projet. Une "
-"mise à jour n'est pas encore terminée. Si vous n'avez pas encore lancé une "
+"Aucune information de mise à jour SCM n’est disponible pour ce projet. Une "
+"mise à jour n’est pas encore terminée. Si vous n’avez pas encore lancé une "
 "mise à jour pour ce projet, faites-le."
 
 #: client/src/configuration/configuration.controller.js:308
 msgid "There was an error resetting value. Returned status:"
 msgstr ""
-"Une erreur s'est produite lors de la réinitialisation de la valeur. État "
+"Une erreur s’est produite lors de la réinitialisation de la valeur. État "
 "renvoyé :"
 
 #: client/src/configuration/configuration.controller.js:439
 msgid "There was an error resetting values. Returned status:"
 msgstr ""
-"Une erreur s'est produite lors de la réinitialisation des valeurs. État "
+"Une erreur s’est produite lors de la réinitialisation des valeurs. État "
 "renvoyé :"
 
 #: client/src/management-jobs/scheduler/schedulerForm.partial.html:168
 msgid "This is not a valid number."
-msgstr "Le nombre n'est pas valide."
+msgstr "Le nombre n’est pas valide."
 
 #: client/src/helpers/Credentials.js:139
 #: client/src/helpers/Credentials.js:275
 msgid ""
 "This is the tenant name.  This value is usually the same  as the username."
 msgstr ""
-"Il s'agit du nom du client. Cette valeur est habituellement la même que "
-"celle du nom d'utilisateur."
+"Il s’agit du nom du client. Cette valeur est habituellement la même que "
+"celle du nom d’utilisateur."
 
 #: client/src/notifications/notifications.list.js:21
 msgid ""
@@ -3505,7 +3505,7 @@ msgstr "Elle doit se présenter au format %s."
 
 #: client/src/forms/Users.js:161
 msgid "This user is not a member of any teams"
-msgstr "Cet utilisateur n'est pas membre d'une équipe"
+msgstr "Cet utilisateur n’est pas membre d’une équipe"
 
 #: client/src/shared/form-generator.js:831
 #: client/src/shared/form-generator.js:945
@@ -3541,10 +3541,10 @@ msgid ""
 "update. If it is older than Cache Timeout, it is not considered current, and "
 "a new project update will be performed."
 msgstr ""
-"Délai en secondes à prévoir pour qu'un projet soit actualisé. Durant "
-"l'exécution des tâches et les rappels, le système de tâches évalue "
-"l'horodatage de la dernière mise à jour du projet. Si elle est plus ancienne "
-"que le délai d'expiration du cache, elle n'est pas considérée comme "
+"Délai en secondes à prévoir pour qu’un projet soit actualisé. Durant "
+"l’exécution des tâches et les rappels, le système de tâches évalue "
+"l’horodatage de la dernière mise à jour du projet. Si elle est plus ancienne "
+"que le délai d’expiration du cache, elle n’est pas considérée comme "
 "actualisée, et une nouvelle mise à jour du projet sera effectuée."
 
 #: client/src/forms/EventsViewer.js:74
@@ -3558,8 +3558,8 @@ msgid ""
 "To learn more about the IAM STS Token, refer to the %sAmazon documentation%s."
 ""
 msgstr ""
-"Pour en savoir plus sur le token STS d'IAM, reportez-vous à la documentation "
-"d'%sAmazon%s."
+"Pour en savoir plus sur le token STS d’IAM, reportez-vous à la documentation "
+"d’%sAmazon%s."
 
 #: client/src/job-detail/job-detail.partial.html:416
 msgid "Toggle Output"
@@ -3567,7 +3567,7 @@ msgstr "Basculer Sortie"
 
 #: client/src/shared/form-generator.js:856
 msgid "Toggle the display of plaintext."
-msgstr "Bascule l'affichage du texte en clair."
+msgstr "Bascule l’affichage du texte en clair."
 
 #: client/src/notifications/shared/type-change.service.js:34
 #: client/src/notifications/shared/type-change.service.js:40
@@ -3610,17 +3610,17 @@ msgstr "Tapez une option sur chaque ligne."
 #: client/src/notifications/notificationTemplates.form.js:374
 msgid "Type an option on each line. The pound symbol (#) is not required."
 msgstr ""
-"Tapez une option sur chaque ligne. Le symbole dièse (#) n'est pas nécessaire."
+"Tapez une option sur chaque ligne. Le symbole dièse (#) n’est pas nécessaire."
 ""
 
 #: client/src/controllers/Projects.js:442
 #: client/src/controllers/Projects.js:724
 msgid "URL popover text"
-msgstr "Texte popover de l'URL"
+msgstr "Texte popover de l’URL"
 
 #: client/src/login/loginModal/loginModal.partial.html:49
 msgid "USERNAME"
-msgstr "NOM D'UTILISATEUR"
+msgstr "NOM D’UTILISATEUR"
 
 #: client/src/app.js:367
 #: client/src/helpers/ActivityStream.js:32
@@ -3660,7 +3660,7 @@ msgid ""
 msgstr ""
 "Utilisé pour vérifier et synchroniser les référentiels de playbooks avec un "
 "SCM à distance tel que Git, Subversion (svn) ou Mercurial (hg). Ces "
-"informations d'identification sont utilisées par les Projets."
+"informations d’identification sont utilisées par les Projets."
 
 #: client/src/forms/Credentials.js:457
 #: client/src/forms/Inventories.js:116
@@ -3677,7 +3677,7 @@ msgstr "Interface utilisateur"
 
 #: client/src/forms/Users.js:94
 msgid "User Type"
-msgstr "Type d'utilisateur"
+msgstr "Type d’utilisateur"
 
 #: client/src/access/rbac-multiselect/permissionsUsers.list.js:36
 #: client/src/forms/Users.js:49
@@ -3690,7 +3690,7 @@ msgstr "Type d'utilisateur"
 #: client/src/lists/Users.js:37
 #: client/src/notifications/notificationTemplates.form.js:67
 msgid "Username"
-msgstr "Nom d'utilisateur"
+msgstr "Nom d’utilisateur"
 
 #: client/src/forms/Credentials.js:81
 msgid ""
@@ -3698,9 +3698,9 @@ msgid ""
 "cloud or infrastructure provider. These are used for dynamic inventory "
 "sources and for cloud provisioning and deployment in playbook runs."
 msgstr ""
-"Noms d'utilisateur, mots de passe et clés d'accès pour s'authentifier auprès "
-"du fournisseur de cloud ou d'infrastructure spécifié. Ceux-ci sont utilisés "
-"pour les sources d'inventaire dynamique et pour l'authentification de "
+"Noms d’utilisateur, mots de passe et clés d’accès pour s’authentifier auprès "
+"du fournisseur de cloud ou d’infrastructure spécifié. Ceux-ci sont utilisés "
+"pour les sources d’inventaire dynamique et pour l’authentification de "
 "services dans le cloud et leur déploiement dans les playbooks."
 
 #: client/src/access/add-rbac-resource/rbac-resource.partial.html:35
@@ -3767,7 +3767,7 @@ msgstr "Afficher"
 
 #: client/src/bread-crumb/bread-crumb.directive.js:111
 msgid "View Activity Stream"
-msgstr "Afficher le flux d'activité"
+msgstr "Afficher le flux d’activité"
 
 #: client/src/main-menu/main-menu.partial.html:173
 msgid "View Documentation"
@@ -3797,24 +3797,24 @@ msgstr "Affichez et modifiez vos informations de licence."
 
 #: client/src/lists/Credentials.js:83
 msgid "View credential"
-msgstr "Afficher les informations d'identification"
+msgstr "Afficher les informations d’identification"
 
 #: client/src/lists/JobEvents.js:100
 #: client/src/lists/Streams.js:70
 msgid "View event details"
-msgstr "Afficher les détails de l'événement"
+msgstr "Afficher les détails de l’événement"
 
 #: client/src/setup-menu/setup-menu.partial.html:60
 msgid "View information about this version of Ansible Tower."
-msgstr "Afficher les informations sur cette version d'Ansible Tower."
+msgstr "Afficher les informations sur cette version d’Ansible Tower."
 
 #: client/src/lists/Inventories.js:87
 msgid "View inventory"
-msgstr "Afficher l'inventaire"
+msgstr "Afficher l’inventaire"
 
 #: client/src/inventory-scripts/inventory-scripts.list.js:67
 msgid "View inventory script"
-msgstr "Afficher le script d'inventaire"
+msgstr "Afficher le script d’inventaire"
 
 #: client/src/notifications/notificationTemplates.list.js:82
 msgid "View notification"
@@ -3826,7 +3826,7 @@ msgstr "Afficher le calendrier"
 
 #: client/src/lists/Teams.js:72
 msgid "View team"
-msgstr "Afficher l'équipe"
+msgstr "Afficher l’équipe"
 
 #: client/src/lists/Templates.js:118
 msgid "View template"
@@ -3846,7 +3846,7 @@ msgstr "Afficher le calendrier"
 
 #: client/src/lists/Users.js:81
 msgid "View user"
-msgstr "Afficher l'utilisateur"
+msgstr "Afficher l’utilisateur"
 
 #: client/src/standard-out/inventory-sync/standard-out-inventory-sync.partial.html:25
 #: client/src/standard-out/scm-update/standard-out-scm-update.partial.html:25
@@ -3914,19 +3914,19 @@ msgstr ""
 
 #: client/src/controllers/Projects.js:508
 msgid "You do not have access to view this property"
-msgstr "Vous n'avez pas d'accès pour afficher cette propriété"
+msgstr "Vous n’avez pas d’accès pour afficher cette propriété"
 
 #: client/src/templates/job_templates/add-job-template/job-template-add.controller.js:26
 msgid "You do not have permission to add a job template."
-msgstr "Vous n'êtes pas autorisé à ajouter un modèle de tâche."
+msgstr "Vous n’êtes pas autorisé à ajouter un modèle de tâche."
 
 #: client/src/controllers/Projects.js:324
 msgid "You do not have permission to add a project."
-msgstr "Vous n'êtes pas autorisé à ajouter un projet."
+msgstr "Vous n’êtes pas autorisé à ajouter un projet."
 
 #: client/src/controllers/Users.js:141
 msgid "You do not have permission to add a user."
-msgstr "Vous n'êtes pas autorisé à ajouter un utilisateur."
+msgstr "Vous n’êtes pas autorisé à ajouter un utilisateur."
 
 #: client/src/configuration/auth-form/configuration-auth.controller.js:67
 #: client/src/configuration/configuration.controller.js:178
@@ -3936,7 +3936,7 @@ msgid ""
 "You have unsaved changes. Would you like to proceed <strong>without</strong> "
 "saving?"
 msgstr ""
-"Des modifications n'ont pas été enregistrées. Voulez-vous continuer "
+"Des modifications n’ont pas été enregistrées. Voulez-vous continuer "
 "<strong>sans</ strong> les enregistrer ?"
 
 #: client/src/shared/form-generator.js:957
@@ -3957,18 +3957,18 @@ msgstr "Votre mot de passe doit contenir une lettre majuscule."
 
 #: client/src/shared/form-generator.js:977
 msgid "Your password must contain one of the following characters: %s"
-msgstr "Votre mot de passe doit contenir l'un des caractères suivants : %s"
+msgstr "Votre mot de passe doit contenir l’un des caractères suivants : %s"
 
 #: client/src/controllers/Projects.js:216
 msgid "Your request to cancel the update was submitted to the task manager."
 msgstr ""
-"Votre demande d'annulation de la mise à jour a été envoyée au gestionnaire "
+"Votre demande d’annulation de la mise à jour a été envoyée au gestionnaire "
 "de tâches."
 
 #: client/src/login/loginModal/loginModal.partial.html:22
 msgid "Your session timed out due to inactivity. Please sign in."
 msgstr ""
-"Votre session a expiré en raison d'un temps d'inactivité. Veuillez vous "
+"Votre session a expiré en raison d’un temps d’inactivité. Veuillez vous "
 "connecter."
 
 #: client/src/shared/form-generator.js:1223
