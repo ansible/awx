@@ -3052,6 +3052,9 @@ class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCre
             data[fd] = None
         return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
+    def get_queryset(self):
+        return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
+
 
 class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
 
@@ -3161,7 +3164,9 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     new_in_310 = True
-    ordering = ('id',)
+
+    def get_queryset(self):
+        return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
 class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):
