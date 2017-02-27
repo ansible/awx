@@ -52,13 +52,18 @@
             // grab standard out & standard error if present from the host
             // event's "res" object, for things like Ansible modules
             try{
-                $scope.module_name = hostEvent.event_data.res.invocation.module_name || hostEvent.event_data.res.task_action || "No result found";
+                $scope.module_name = hostEvent.event_data.res.invocation.module_name || hostEvent.event_data.task_action || "No result found";
                 $scope.stdout = hostEvent.event_data.res.stdout;
                 $scope.stderr = hostEvent.event_data.res.stderr;
                 $scope.json = hostEvent.event_data.res;
             }
             catch(err){
                 // do nothing, no stdout/stderr for this module
+            }
+            if($scope.module_name === "debug" &&
+                hostEvent.event_data.res.hasOwnProperty('result') &&
+                hostEvent.event_data.res.result.hasOwnProperty('stdout')){
+                    $scope.stdout = hostEvent.event_data.res.result.stdout;
             }
             if($scope.module_name === "yum" &&
                 hostEvent.event_data.res.hasOwnProperty('results') &&
