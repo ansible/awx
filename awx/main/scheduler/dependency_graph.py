@@ -83,6 +83,11 @@ class DependencyGraph(object):
     '''
     def should_update_related_project(self, job):
         now = self.get_now()
+
+        # Already processed dependencies for this job
+        if job.data['dependent_jobs__id'] is not None:
+            return False
+
         latest_project_update = self.data[self.LATEST_PROJECT_UPDATES].get(job['project_id'], None)
         if not latest_project_update:
             return True
