@@ -7,11 +7,11 @@
 export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'BecomeMethodChange',
-    'OwnerChange', 'FormSave', '$state', 'CreateSelect2', 'i18n',
+    'OwnerChange', 'CredentialFormSave', '$state', 'CreateSelect2', 'i18n',
     function($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, GetChoices, Empty, KindChange, BecomeMethodChange,
-    OwnerChange, FormSave, $state, CreateSelect2, i18n) {
+    OwnerChange, CredentialFormSave, $state, CreateSelect2, i18n) {
 
         ClearScope();
 
@@ -126,7 +126,7 @@ export default ['$scope', '$rootScope', '$compile', '$location',
         // Save
         $scope.formSave = function() {
             if ($scope[form.name + '_form'].$valid) {
-                FormSave({ scope: $scope, mode: 'add' });
+                CredentialFormSave({ scope: $scope, mode: 'add' });
             }
         };
 

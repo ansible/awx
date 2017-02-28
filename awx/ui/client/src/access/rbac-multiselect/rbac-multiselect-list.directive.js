@@ -6,9 +6,9 @@
 
 /* jshint unused: vars */
 export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList',
-    'InventoryList', 'CredentialList', '$compile', 'generateList', 'GetBasePath', 'SelectionInit',
+    'InventoryList', 'CredentialList', '$compile', 'generateList', 'GetBasePath',
     function(addPermissionsTeamsList, addPermissionsUsersList, TemplateList, ProjectList,
-    InventoryList, CredentialList, $compile, generateList, GetBasePath, SelectionInit) {
+    InventoryList, CredentialList, $compile, generateList, GetBasePath) {
     return {
         restrict: 'E',
         scope: {

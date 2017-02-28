@@ -6,12 +6,12 @@
 
 export default ['$scope', '$rootScope', '$location', '$log', '$stateParams', 'OrgTeamList',
     'Rest', 'Alert', 'Prompt', 'OrgTeamsDataset', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'SetTeamListeners', 'GetBasePath',
-    'SelectionInit', 'Wait', '$state',
+    'ProcessErrors', 'GetBasePath',
+    'Wait', '$state',
     function($scope, $rootScope, $location, $log, $stateParams, OrgTeamList,
         Rest, Alert, Prompt, Dataset, ReturnToCaller, ClearScope,
-        ProcessErrors, SetTeamListeners, GetBasePath,
-        SelectionInit, Wait, $state) {
+        ProcessErrors, GetBasePath,
+        Wait, $state) {
 
         var list = OrgTeamList,
             orgBase = GetBasePath('organizations');

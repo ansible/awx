@@ -8,12 +8,18 @@ import ProjectsList from './list/projects-list.controller';
 import ProjectsAdd from './add/projects-add.controller';
 import ProjectsEdit from './edit/projects-edit.controller';
 import { N_ } from '../i18n';
+import GetProjectPath from './factories/get-project-path.factory';
+import GetProjectIcon from './factories/get-project-icon.factory';
+import GetProjectToolTip from './factories/get-project-tool-tip.factory';
 
 export default
 angular.module('Projects', [])
     .controller('ProjectsList', ProjectsList)
     .controller('ProjectsAdd', ProjectsAdd)
     .controller('ProjectsEdit', ProjectsEdit)
+    .factory('GetProjectPath', GetProjectPath)
+    .factory('GetProjectIcon', GetProjectIcon)
+    .factory('GetProjectToolTip', GetProjectToolTip)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

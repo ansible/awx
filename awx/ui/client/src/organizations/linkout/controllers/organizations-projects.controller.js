@@ -7,11 +7,11 @@
 export default ['$scope', '$rootScope', '$location', '$log',
     '$stateParams', 'Rest', 'Alert', 'Prompt',
     'ReturnToCaller', 'ClearScope', 'OrgProjectList', 'OrgProjectDataset',
-    'ProcessErrors', 'GetBasePath', 'SelectionInit', 'ProjectUpdate',
+    'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
     'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state',
     function($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, Prompt,
         ReturnToCaller, ClearScope, OrgProjectList, Dataset,
-        ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate,
+        ProcessErrors, GetBasePath, ProjectUpdate,
         Wait, GetChoices, Empty, Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
 
         var list = OrgProjectList,
