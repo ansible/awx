@@ -866,6 +866,11 @@ TOWER_SETTINGS_MANIFEST = {}
 
 LOG_AGGREGATOR_ENABLED = False
 
+# The number of retry attempts for websocket session establishment
+# If you're encountering issues establishing websockets in clustered Tower,
+# raising this value can help
+CHANNEL_LAYER_RECEIVE_MAX_RETRY = 10
+
 # Logging configuration.
 LOGGING = {
     'version': 1,
