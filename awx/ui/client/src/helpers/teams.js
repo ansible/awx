@@ -39,9 +39,6 @@ export default
                                 }
                             }
 
-                            // @issue: OLD SEARCH
-                            // scope[iterator + 'SearchSpin'] = false;
-
                             scope[set] = results;
                         }
                     });

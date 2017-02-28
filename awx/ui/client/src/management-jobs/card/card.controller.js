@@ -51,14 +51,6 @@ export default
                         //ignore
                     }
 
-                    // @issue: OLD SEARCH
-                    // if (scope.searchCleanup) {
-                    //     scope.searchCleanup();
-                    // }
-                    // else {
-                    //     Wait('stop');
-                    // }
-
                     Wait('stop');
                 };
 
@@ -274,6 +266,7 @@ export default
                 };
 
                 parent_scope.refreshJobs = function(){
+                    // TODO: what should I do here?
                     // @issue: OLD SEARCH
                     // scope.search(SchedulesList.iterator);
                 };

@@ -838,14 +838,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                parent_scope.removeAddTreeRefreshed();
                            }
                            parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
-                               // Clean up
                                Wait('stop');
-
-                                // @issue: OLD SEARCH
-                                //    if (modal_scope.searchCleanUp) {
-                                //        modal_scope.searchCleanup();
-                                //    }
-
                                try {
                                    $('#group-modal-dialog').dialog('close');
                                }
@@ -948,18 +941,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                                catch(e) {
                                    //ignore
                                }
-
-                                // @issue: OLD SEARCH
-                                //    if (modal_scope.searchCleanup) {
-                                //        modal_scope.searchCleanup();
-                                //    }
-                                //    if (parent_scope.restoreSearch) {
-                                //        parent_scope.restoreSearch();
-                                //    }
-                                //    else {
-                                //        Wait('stop');
-                                //    }
-
                                 Wait('stop');
                            };
 
