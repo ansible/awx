@@ -23,7 +23,7 @@ export default ['$scope', '$compile', '$stateParams', '$rootScope', '$location',
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard host graph data: ' + status });
             });
 
-            Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
+            Rest.setUrl("api/v1/unified_jobs?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
             Rest.get()
             .success(function (data) {
                 $scope.dashboardJobsListData = data.results;
@@ -99,7 +99,7 @@ export default ['$scope', '$compile', '$stateParams', '$rootScope', '$location',
             .error(function (data, status) {
                 ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             });
-            Rest.setUrl(GetBasePath("jobs") + "?order_by=-finished&page_size=5&finished__isnull=false");
+            Rest.setUrl("api/v1/unified_jobs?order_by=-finished&page_size=5&finished__isnull=false&type=workflow_job,job");
             Rest.get()
             .success(function (data) {
                 data = data.results;
