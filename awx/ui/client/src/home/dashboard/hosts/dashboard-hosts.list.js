@@ -10,8 +10,8 @@ export default [ 'i18n', function(i18n){
         name: 'hosts',
         iterator: 'host',
         selectTitle: i18n._('Add Existing Hosts'),
-        editTitle: 'Hosts',
-        listTitle: 'Hosts',
+        editTitle: i18n._('Hosts'),
+        listTitle: i18n._('Hosts'),
         index: false,
         hover: true,
         well: true,
@@ -33,7 +33,7 @@ export default [ 'i18n', function(i18n){
             },
             name: {
                 key: true,
-                label: 'Name',
+                label: i18n._('Name'),
                 columnClass: 'col-lg-5 col-md-5 col-sm-5 col-xs-8 ellipsis List-staticColumnAdjacent',
                 ngClick: 'editHost(host.id)'
             },
@@ -52,6 +52,7 @@ export default [ 'i18n', function(i18n){
                 nosort: true,
                 awToolTip: "<p>" + i18n._("Indicates if a host is available and should be included in running jobs.") + "</p><p>" + i18n._("For hosts that are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.") + "</p>",
                 dataTitle: i18n._('Host Enabled'),
+                ngDisabled: 'host.has_inventory_sources'
             }
         },
 

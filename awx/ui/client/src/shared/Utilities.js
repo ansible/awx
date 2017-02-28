@@ -192,7 +192,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             }
             if (status === 403) {
                 msg = 'The API responded with a 403 Access Denied error. ';
-                if (data.detail) {
+                if (data && data.detail) {
                     msg += 'Detail: ' + data.detail;
                 } else {
                     msg += 'Please contact your system administrator.';
@@ -203,7 +203,7 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
             } else if (status === 410) {
                 Alert('Deleted Object', 'The requested object was previously deleted and can no longer be accessed.');
             } else if ((status === 'Token is expired') || (status === 401 && data.detail && data.detail === 'Token is expired') ||
-                (status === 401 && data.detail && data.detail === 'Invalid token')) {
+                (status === 401 && data && data.detail && data.detail === 'Invalid token')) {
                 if ($rootScope.sessionTimer) {
                     $rootScope.sessionTimer.expireSession('idle');
                 }

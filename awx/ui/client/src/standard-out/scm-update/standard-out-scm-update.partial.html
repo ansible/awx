@@ -9,8 +9,8 @@
                     </div>
                     <div class="StandardOut-actions">
                         <button id="relaunch-job-button" class="List-actionButton JobDetail-launchButton" data-placement="top" mode="all" ng-click="relaunchJob()" aw-tool-tip="{{'Relaunch using the same parameters'|translate}}" data-original-title="" title=""><i class="icon-launch"></i> </button>
-                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status == 'running' || job.status=='pending' " aw-tool-tip="{{'Cancel'|translate}}" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
-                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status == 'running' || job.status == 'pending' " aw-tool-tip="{{'Delete'|translate}}" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
+                        <button id="cancel-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-show="job.status === 'waiting' || job.status === 'running' || job.status === 'pending'" aw-tool-tip="{{'Cancel'|translate}}" data-original-title="" title=""><i class="fa fa-minus-circle"></i> </button>
+                        <button id="delete-job-button" class="List-actionButton List-actionButton--delete JobDetail-launchButton" data-placement="top" ng-click="deleteJob()" ng-hide="job.status === 'waiting' || job.status === 'running' || job.status === 'pending' " aw-tool-tip="{{'Delete'|translate}}" data-original-title="" title=""><i class="fa fa-trash-o"></i> </button>
                     </div>
                 </div>
                 <div class="StandardOut-details">
@@ -18,7 +18,7 @@
                     <div class="StandardOut-detailsRow" ng-show="project_name">
                         <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>NAME</div>
                         <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                            <a ui-sref="projects.edit({id: job.project})">
+                            <a ui-sref="projects.edit({project_id: job.project})">
                                 {{ project_name }}
                             </a>
                             <a href="{{ workflow_result_link }}"
@@ -72,7 +72,7 @@
                     <div class="StandardOut-detailsRow" ng-show="project_name">
                         <div class="StandardOut-detailsLabel col-lg-3 col-md-3 col-sm-3 col-xs-4" translate>PROJECT</div>
                         <div class="StandardOut-detailsContent col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                            <a ui-sref="projects.edit({id: job.project})">
+                            <a ui-sref="projects.edit({project_id: job.project})">
                                 {{ project_name }}
                             </a>
                         </div>

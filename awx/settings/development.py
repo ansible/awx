@@ -112,3 +112,15 @@ except ImportError:
 CLUSTER_HOST_ID = socket.gethostname()
 CELERY_ROUTES['awx.main.tasks.cluster_node_heartbeat'] = {'queue': CLUSTER_HOST_ID, 'routing_key': CLUSTER_HOST_ID}
 
+# Supervisor service name dictionary used for programatic restart
+SERVICE_NAME_DICT = {
+    "celery": "celeryd",
+    "callback": "receiver",
+    "runworker": "channels",
+    "uwsgi": "uwsgi",
+    "daphne": "daphne",
+    "fact": "factcacher",
+    "nginx": "nginx"}
+# Used for sending commands in automatic restart
+UWSGI_FIFO_LOCATION = '/awxfifo'
+

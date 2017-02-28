@@ -6,6 +6,8 @@ import sys
 import threading
 import time
 
+import six
+
 # Django
 from django.conf import settings, UserSettingsHolder
 from django.core.cache import cache as django_cache
@@ -17,6 +19,7 @@ from rest_framework.fields import empty, SkipField
 
 # Tower
 from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.utils.db import get_tower_migration_version
 from awx.conf import settings_registry
 from awx.conf.models import Setting
 
@@ -57,7 +60,10 @@ def _log_database_error():
     try:
         yield
     except (ProgrammingError, OperationalError) as e:
-        logger.warning('Database settings are not available, using defaults (%s)', e, exc_info=True)
+        if get_tower_migration_version() < '310':
+            logger.info('Using default settings until version 3.1 migration.')
+        else:
+            logger.warning('Database settings are not available, using defaults (%s)', e, exc_info=True)
     finally:
         pass
 
@@ -88,7 +94,17 @@ class EncryptedCacheProxy(object):
 
     def get(self, key, **kwargs):
         value = self.cache.get(key, **kwargs)
-        return self._handle_encryption(self.decrypter, key, value)
+        value = self._handle_encryption(self.decrypter, key, value)
+
+        # python-memcached auto-encodes unicode on cache set in python2
+        # https://github.com/linsomniac/python-memcached/issues/79
+        # https://github.com/linsomniac/python-memcached/blob/288c159720eebcdf667727a859ef341f1e908308/memcache.py#L961
+        if six.PY2 and isinstance(value, six.binary_type):
+            try:
+                six.text_type(value)
+            except UnicodeDecodeError:
+                value = value.decode('utf-8')
+        return value
 
     def set(self, key, value, **kwargs):
         self.cache.set(

@@ -16,7 +16,12 @@
 
 .JobResults-leftSide {
     .OnePlusTwo-left--panel(100%, @breakpoint-md);
+    max-width: 33%;
     height: ~"calc(100vh - 177px)";
+
+    @media screen and (max-width: @breakpoint-md) {
+        max-width: 100%;
+    }
 }
 
 .JobResults-rightSide {
@@ -175,7 +180,14 @@ smart-search {
 
 job-results-standard-out {
     flex: 1;
+    flex-basis: auto;
+    height: ~"calc(100% - 800px)";
     display: flex
+}
+@media screen and (max-width: @breakpoint-md) {
+  job-results-standard-out {
+      height: auto;
+  }
 }
 
 .JobResults-extraVarsHelp {

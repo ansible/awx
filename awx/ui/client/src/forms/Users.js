@@ -119,6 +119,7 @@ export default
 
             related: {
                 organizations: {
+                    name: 'organizations',
                     awToolTip: i18n._('Please save before assigning to organizations'),
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/organizations',
                     emptyListText: i18n._('Please add user to an Organization.'),
@@ -146,6 +147,7 @@ export default
                     //hideOnSuperuser: true // RBAC defunct
                 },
                 teams: {
+                    name: 'teams',
                     awToolTip: i18n._('Please save before assigning to teams'),
                     basePath: 'api/v1/users/{{$stateParams.user_id}}/teams',
                     search: {

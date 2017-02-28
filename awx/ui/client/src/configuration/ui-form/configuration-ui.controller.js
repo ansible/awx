@@ -52,7 +52,8 @@
 
          function addFieldInfo(form, key) {
              _.extend(form.fields[key], {
-                 awPopOver: $scope.$parent.configDataResolve[key].help_text,
+                 awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
+                     null: $scope.$parent.configDataResolve[key].help_text,
                  label: $scope.$parent.configDataResolve[key].label,
                  name: key,
                  toggleSource: key,
@@ -70,30 +71,38 @@
              id: 'configure-ui-form',
              mode: 'edit',
              scope: $scope.$parent,
-             related: true
+             related: true,
+             noPanel: true
          });
 
          // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
          var dropdownRendered = false;
 
-         $scope.$on('populated', function(){
+         function populatePendoTrackingState(flag){
+             if($scope.$parent.PENDO_TRACKING_STATE !== null) {
+                 $scope.$parent.PENDO_TRACKING_STATE = _.find($scope.$parent.PENDO_TRACKING_STATE_options, { value: $scope.$parent.PENDO_TRACKING_STATE });
+             }
+
+             if(flag !== undefined){
+                 dropdownRendered = flag;
+             }
+
              if(!dropdownRendered) {
                  dropdownRendered = true;
                  CreateSelect2({
                      element: '#configuration_ui_template_PENDO_TRACKING_STATE',
                      multiple: false,
-                     placeholder: i18n._('Select commands'),
-                     opts: [{
-                         id: $scope.$parent.PENDO_TRACKING_STATE,
-                         text: $scope.$parent.PENDO_TRACKING_STATE
-                     }]
+                     placeholder: i18n._('Select commands')
                  });
-                 // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-                 // TODO Find better solution for this bug
-                 $timeout(function(){
-                     $scope.$parent.configuration_ui_template_form.$setPristine();
-                 }, 1000);
              }
+         }
+
+         $scope.$on('PENDO_TRACKING_STATE_populated', function(e, data, flag) {
+             populatePendoTrackingState(flag);
+         });
+
+         $scope.$on('populated', function(){
+             populatePendoTrackingState(false);
          });
 
          angular.extend(uiVm, {

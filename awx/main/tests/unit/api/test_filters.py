@@ -2,21 +2,25 @@ import pytest
 
 from rest_framework.exceptions import PermissionDenied
 from awx.api.filters import FieldLookupBackend
-from awx.main.models import Credential, JobTemplate
+from awx.main.models import (AdHocCommand, AuthToken, CustomInventoryScript,
+                             Credential, Job, JobTemplate, SystemJob,
+                             UnifiedJob, User, WorkflowJob,
+                             WorkflowJobTemplate, WorkflowJobOptions)
+from awx.main.models.jobs import JobOptions
 
 
 @pytest.mark.parametrize(u"empty_value", [u'', ''])
 def test_empty_in(empty_value):
     field_lookup = FieldLookupBackend()
     with pytest.raises(ValueError) as excinfo:
-        field_lookup.value_to_python(JobTemplate, 'project__in', empty_value)
+        field_lookup.value_to_python(JobTemplate, 'project__name__in', empty_value)
     assert 'empty value for __in' in str(excinfo.value)
 
 
 @pytest.mark.parametrize(u"valid_value", [u'foo', u'foo,'])
 def test_valid_in(valid_value):
     field_lookup = FieldLookupBackend()
-    value, new_lookup = field_lookup.value_to_python(JobTemplate, 'project__in', valid_value)
+    value, new_lookup = field_lookup.value_to_python(JobTemplate, 'project__name__in', valid_value)
     assert 'foo' in value
 
 
@@ -37,4 +41,29 @@ def test_filter_on_related_password_field(password_field, lookup_suffix):
     lookup = '__'.join(filter(None, ['credential', password_field, lookup_suffix]))
     with pytest.raises(PermissionDenied) as excinfo:
         field, new_lookup = field_lookup.get_field_from_lookup(JobTemplate, lookup)
+    assert 'not allowed' in str(excinfo.value)
+
+
+@pytest.mark.parametrize('model, query', [
+    (AuthToken, 'request_hash__icontains'),
+    (User, 'password__icontains'),
+    (User, 'auth_tokens__key__icontains'),
+    (User, 'settings__value__icontains'),
+    (UnifiedJob, 'job_args__icontains'),
+    (UnifiedJob, 'job_env__icontains'),
+    (UnifiedJob, 'start_args__icontains'),
+    (AdHocCommand, 'extra_vars__icontains'),
+    (JobOptions, 'extra_vars__icontains'),
+    (SystemJob, 'extra_vars__icontains'),
+    (WorkflowJobOptions, 'extra_vars__icontains'),
+    (Job, 'survey_passwords__icontains'),
+    (WorkflowJob, 'survey_passwords__icontains'),
+    (JobTemplate, 'survey_spec__icontains'),
+    (WorkflowJobTemplate, 'survey_spec__icontains'),
+    (CustomInventoryScript, 'script__icontains')
+])
+def test_filter_sensitive_fields_and_relations(model, query):
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(PermissionDenied) as excinfo:
+        field, new_lookup = field_lookup.get_field_from_lookup(model, query)
     assert 'not allowed' in str(excinfo.value)

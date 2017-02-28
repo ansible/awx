@@ -153,10 +153,13 @@ table, tbody {
 .List-actionHolder {
     justify-content: flex-end;
     display: flex;
+    // margin-bottom: 20px;
+    // float: right;
 }
 
 .List-actions {
     display: flex;
+    margin-bottom: -32px;
 }
 
 .List-auxAction {
@@ -275,6 +278,7 @@ table, tbody {
 }
 
 .List-noItems {
+    margin-top: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,6 +291,9 @@ table, tbody {
     text-transform: uppercase;
 }
 
+.modal-body > .List-noItems {
+    margin-top: 0px;
+}
 .List-editButton--selected {
     background-color: @list-actn-bg-hov !important;
     color: @list-actn-icn-hov;
@@ -419,7 +426,51 @@ table, tbody {
         flex: 1 0 auto;
         margin-top: 12px;
     }
+    .List-actions {
+        margin-bottom: 20px;
+    }
     .List-well {
         margin-top: 20px;
     }
+    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+        margin-left: 0;
+    }
 }
+
+.InventoryManage-container, .modal-body {
+    .List-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .List-actionHolder {
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1 0 auto;
+        margin-top: 12px;
+    }
+    .List-actions {
+        margin-bottom: 20px;
+    }
+    .List-well {
+        margin-top: 20px;
+    }
+    .List-action:not(.ng-hide) ~ .List-action:not(.ng-hide) {
+        margin-left: 0;
+    }
+}
+
+// Inventory Manage exceptions
+.InventoryManage-container {
+    .List-actionHolder {
+        justify-content: flex-end;
+        margin-top: -52px;
+    }
+    .List-action button {
+        margin-left: 12px;
+    }
+    .SmartSearch-searchTermContainer {
+        width: 100%;
+    }
+}
+
+

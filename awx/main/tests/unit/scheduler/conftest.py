@@ -223,7 +223,8 @@ def job_factory(epoch):
             'celery_task_id': '', 
             'project__scm_update_on_launch': project__scm_update_on_launch, 
             'inventory__inventory_sources': inventory__inventory_sources,
-            'forks': 5 
+            'forks': 5,
+            'dependent_jobs__id': None,
         })
     return fn
 

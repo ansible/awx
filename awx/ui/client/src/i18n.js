@@ -19,8 +19,10 @@ export default
     .factory('I18NInit', ['$window', 'gettextCatalog',
     function ($window, gettextCatalog) {
         return function() {
-            var langInfo = $window.navigator.language ||
-                    $window.navigator.userLanguage;
+            var langInfo = ($window.navigator.languages || [])[0] ||
+                    $window.navigator.language ||
+                    $window.navigator.userLanguage ||
+                    '';
             var langUrl = langInfo.replace('-', '_');
             //gettextCatalog.debug = true;
             gettextCatalog.setCurrentLanguage(langInfo);

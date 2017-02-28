@@ -6,8 +6,8 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent', 'hostResults', 'parseStdoutService',
-    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent, hostResults, parseStdoutService){
+    ['$stateParams', '$scope', '$state', 'Wait', 'JobDetailService', 'hostEvent', 'hostResults',
+    function($stateParams, $scope, $state, Wait, JobDetailService, hostEvent, hostResults){
 
         $scope.processEventStatus = JobDetailService.processEventStatus;
         $scope.hostResults = [];
@@ -18,7 +18,7 @@
             else {return true;}
         };
         $scope.isStdOut = function(){
-            if ($state.current.name === 'jobDetails.host-event.stdout' || $state.current.name === 'jobDetaisl.histe-event.stderr'){
+            if ($state.current.name === 'jobDetail.host-event.stdout' || $state.current.name === 'jobDetail.host-event.stderr'){
                 return 'StandardOut-preContainer StandardOut-preContent';
             }
         };
@@ -48,16 +48,27 @@
             hostEvent.event_name = hostEvent.event;
             $scope.event = _.cloneDeep(hostEvent);
             $scope.hostResults = hostResults;
-            $scope.json = JobDetailService.processJson(hostEvent);
 
-            // grab standard out & standard error if present, and remove from the results displayed in the details panel
-            if (hostEvent.stdout){
-                $scope.stdout = parseStdoutService.prettify(hostEvent.stdout);
-                delete $scope.event.stdout;
+            // grab standard out & standard error if present from the host
+            // event's "res" object, for things like Ansible modules
+            try{
+                $scope.module_name = hostEvent.event_data.res.invocation.module_name || hostEvent.event_data.task_action || "No result found";
+                $scope.stdout = hostEvent.event_data.res.stdout;
+                $scope.stderr = hostEvent.event_data.res.stderr;
+                $scope.json = hostEvent.event_data.res;
             }
-            if (hostEvent.stderr){
-                $scope.stderr = hostEvent.stderr;
-                delete $scope.event.stderr;
+            catch(err){
+                // do nothing, no stdout/stderr for this module
+            }
+            if($scope.module_name === "debug" &&
+                hostEvent.event_data.res.hasOwnProperty('result') &&
+                hostEvent.event_data.res.result.hasOwnProperty('stdout')){
+                    $scope.stdout = hostEvent.event_data.res.result.stdout;
+            }
+            if($scope.module_name === "yum" &&
+                hostEvent.event_data.res.hasOwnProperty('results') &&
+                _.isArray(hostEvent.event_data.res.results)){
+                    $scope.stdout = hostEvent.event_data.res.results[0];
             }
             // instantiate Codemirror
             // try/catch pattern prevents the abstract-state controller from complaining about element being null

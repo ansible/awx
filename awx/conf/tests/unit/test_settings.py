@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2017 Ansible, Inc.
 # All Rights Reserved.
 
@@ -9,10 +11,10 @@ from django.conf import LazySettings
 from django.core.cache.backends.locmem import LocMemCache
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import fields
 import pytest
+import six
 
-from awx.conf import models
+from awx.conf import models, fields
 from awx.conf.settings import SettingsWrapper, EncryptedCacheProxy, SETTING_CACHE_NOTSET
 from awx.conf.registry import SettingsRegistry
 
@@ -59,6 +61,15 @@ def test_unregistered_setting(settings):
     "native Django settings are not stored in DB, and aren't cached"
     assert settings.DEBUG is True
     assert settings.cache.get('DEBUG') is None
+
+
+def test_cached_settings_unicode_is_auto_decoded(settings):
+    # https://github.com/linsomniac/python-memcached/issues/79
+    # https://github.com/linsomniac/python-memcached/blob/288c159720eebcdf667727a859ef341f1e908308/memcache.py#L961
+
+    value = six.u('Iñtërnâtiônàlizætiøn').encode('utf-8')  # this simulates what python-memcached does on cache.set()
+    settings.cache.set('DEBUG', value)
+    assert settings.cache.get('DEBUG') == six.u('Iñtërnâtiônàlizætiøn')
 
 
 def test_read_only_setting(settings):
@@ -240,6 +251,31 @@ def test_setting_from_db(settings, mocker):
         assert settings.cache.get('AWX_SOME_SETTING') == 'FROM_DB'
 
 
+@pytest.mark.parametrize('encrypted', (True, False))
+def test_setting_from_db_with_unicode(settings, mocker, encrypted):
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        default='DEFAULT',
+        encrypted=encrypted
+    )
+    # this simulates a bug in python-memcached; see https://github.com/linsomniac/python-memcached/issues/79
+    value = six.u('Iñtërnâtiônàlizætiøn').encode('utf-8')
+
+    setting_from_db = mocker.Mock(key='AWX_SOME_SETTING', value=value)
+    mocks = mocker.Mock(**{
+        'order_by.return_value': mocker.Mock(**{
+            '__iter__': lambda self: iter([setting_from_db]),
+            'first.return_value': setting_from_db
+        }),
+    })
+    with mocker.patch('awx.conf.models.Setting.objects.filter', return_value=mocks):
+        assert settings.AWX_SOME_SETTING == six.u('Iñtërnâtiônàlizætiøn')
+        assert settings.cache.get('AWX_SOME_SETTING') == six.u('Iñtërnâtiônàlizætiøn')
+
+
 @pytest.mark.defined_in_file(AWX_SOME_SETTING='DEFAULT')
 def test_read_only_setting_assignment(settings):
     "read-only settings cannot be overwritten"
@@ -328,6 +364,31 @@ def test_read_only_setting_deletion(settings):
     with pytest.raises(ImproperlyConfigured):
         del settings.AWX_SOME_SETTING
     assert settings.AWX_SOME_SETTING == 'DEFAULT'
+
+
+def test_charfield_properly_sets_none(settings, mocker):
+    "see: https://github.com/ansible/ansible-tower/issues/5322"
+    settings.registry.register(
+        'AWX_SOME_SETTING',
+        field_class=fields.CharField,
+        category=_('System'),
+        category_slug='system',
+        allow_null=True
+    )
+
+    setting_list = mocker.Mock(**{'order_by.return_value.first.return_value': None})
+    with apply_patches([
+        mocker.patch('awx.conf.models.Setting.objects.filter',
+                     return_value=setting_list),
+        mocker.patch('awx.conf.models.Setting.objects.create', mocker.Mock())
+    ]):
+        settings.AWX_SOME_SETTING = None
+
+    models.Setting.objects.create.assert_called_with(
+        key='AWX_SOME_SETTING',
+        user=None,
+        value=None
+    )
 
 
 def test_settings_use_an_encrypted_cache(settings):

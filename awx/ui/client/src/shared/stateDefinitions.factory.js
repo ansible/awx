@@ -272,6 +272,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             dynamic: true
                         }
                     },
+                    ncyBreadcrumb:{
+                        skip:true
+                    },
                     views: {
                         [`modal@${formStateDefinition.name}`]: {
                             template: `<add-rbac-user-team resolve="$resolve" title="` + i18n._('Add Permissions') + `"></add-rbac-user-team>`
@@ -341,6 +344,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         [`modal@${formStateDefinition.name}`]: {
                             template: `<add-rbac-resource users-dataset="$resolve.usersDataset" teams-dataset="$resolve.teamsDataset" selected="allSelected" resource-data="$resolve.resourceData" title="` + i18n._('Add Users') + ' / ' + i18n._('Teams') + `"></add-rbac-resource>`
                         }
+                    },
+                    ncyBreadcrumb:{
+                        skip:true
                     },
                     resolve: {
                         usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
@@ -511,6 +517,9 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             template: `<add-rbac-resource users-dataset="$resolve.usersDataset" selected="allSelected" resource-data="$resolve.resourceData" without-team-permissions="true" title="` + i18n._('Add Users') + `"></add-rbac-resource>`
                         }
                     },
+                    ncyBreadcrumb:{
+                        skip:true
+                    },
                     resolve: {
                         usersDataset: ['addPermissionsUsersList', 'QuerySet', '$stateParams', 'GetBasePath',
                             function(list, qs, $stateParams, GetBasePath) {
@@ -646,6 +655,32 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
         generateLookupNodes: function(form, formStateDefinition) {
 
             function buildFieldDefinition(field) {
+
+                // Some lookup modals require some additional default params,
+                // namely organization and inventory_script. If these params
+                // aren't set as default params out of the gate, then smart
+                // search will think they need to be set as search tags.
+                var params;
+                if(field.sourceModel === "organization"){
+                    params = {
+                        page_size: '5',
+                        role_level: 'admin_role'
+                    };
+                }
+                else if(field.sourceModel === "inventory_script"){
+                    params = {
+                        page_size: '5',
+                        role_level: 'admin_role',
+                        organization: null
+                    };
+                }
+                else {
+                    params = {
+                        page_size: '5',
+                        role_level: 'use_role'
+                    };
+                }
+
                 let state = $stateExtender.buildDefinition({
                     searchPrefix: field.sourceModel,
                     //squashSearchUrl: true, @issue enable
@@ -658,10 +693,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                     },
                     params: {
                         [field.sourceModel + '_search']: {
-                            value: {
-                                page_size: '5',
-                                role_level: 'use_role'
-                            }
+                            value: params
                         }
                     },
                     ncyBreadcrumb: {

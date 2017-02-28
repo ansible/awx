@@ -17,8 +17,10 @@ def graph():
 
 
 @pytest.fixture
-def job():
-    return dict(project_id=1)
+def job(job_factory):
+    j = job_factory()
+    j.project_id = 1
+    return j
 
 
 @pytest.fixture
@@ -36,13 +38,11 @@ def unsuccessful_last_project(graph, job):
 
 
 @pytest.fixture
-def last_dependent_project(graph):
+def last_dependent_project(graph, job):
     now = tz_now()
 
-    job = {
-        'project_id': 1,
-        'created': now,
-    }
+    job['project_id'] = 1
+    job['created'] = now
     pu = ProjectUpdateDict(dict(id=1, project_id=1, status='waiting',
                                 project__scm_update_cache_timeout=0,
                                 launch_type='dependency',
@@ -57,10 +57,8 @@ def last_dependent_project(graph):
 def timedout_project_update(graph, job):
     now = tz_now()
 
-    job = {
-        'project_id': 1,
-        'created': now,
-    }
+    job['project_id'] = 1
+    job['created'] = now
     pu = ProjectUpdateDict(dict(id=1, project_id=1, status='successful',
                                 project__scm_update_cache_timeout=10,
                                 launch_type='dependency',
@@ -76,10 +74,8 @@ def timedout_project_update(graph, job):
 def not_timedout_project_update(graph, job):
     now = tz_now()
 
-    job = {
-        'project_id': 1,
-        'created': now,
-    }
+    job['project_id'] = 1
+    job['created'] = now
     pu = ProjectUpdateDict(dict(id=1, project_id=1, status='successful',
                                 project__scm_update_cache_timeout=3600,
                                 launch_type='dependency',

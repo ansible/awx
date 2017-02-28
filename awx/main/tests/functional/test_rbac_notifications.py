@@ -2,7 +2,8 @@ import pytest
 
 from awx.main.access import (
     NotificationTemplateAccess,
-    NotificationAccess
+    NotificationAccess,
+    JobTemplateAccess
 )
 
 
@@ -117,6 +118,15 @@ def test_notification_access_system_admin(notification, admin):
     access = NotificationAccess(admin)
     assert access.can_read(notification)
     assert access.can_delete(notification)
+
+
+@pytest.mark.django_db
+def test_system_auditor_JT_attach(system_auditor, job_template, notification_template):
+    job_template.admin_role.members.add(system_auditor)
+    access = JobTemplateAccess(system_auditor)
+    assert not access.can_attach(
+        job_template, notification_template, 'notification_templates_success',
+        {'id': notification_template.id})
 
 
 @pytest.mark.django_db

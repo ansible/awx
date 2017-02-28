@@ -83,6 +83,11 @@ class DependencyGraph(object):
     '''
     def should_update_related_project(self, job):
         now = self.get_now()
+
+        # Already processed dependencies for this job
+        if job.data['dependent_jobs__id'] is not None:
+            return False
+
         latest_project_update = self.data[self.LATEST_PROJECT_UPDATES].get(job['project_id'], None)
         if not latest_project_update:
             return True
@@ -113,20 +118,14 @@ class DependencyGraph(object):
 
     def should_update_related_inventory_source(self, job, inventory_source_id):
         now = self.get_now()
+
+        # Already processed dependencies for this job
+        if job.data['dependent_jobs__id'] is not None:
+            return False
+
         latest_inventory_update = self.data[self.LATEST_INVENTORY_UPDATES].get(inventory_source_id, None)
         if not latest_inventory_update:
             return True
-
-        '''
-        This is a bit of fuzzy logic.
-        If the latest inventory update has a created time == job_created_time-2
-        then consider the inventory update found. This is so we don't enter an infinite loop
-        of updating the project when cache timeout is 0.
-        '''
-        if latest_inventory_update['inventory_source__update_cache_timeout'] == 0 and \
-                latest_inventory_update['launch_type'] == 'dependency' and \
-                latest_inventory_update['created'] == job['created'] - timedelta(seconds=2):
-            return False
 
         '''
         Normal, expected, cache timeout logic

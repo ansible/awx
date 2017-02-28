@@ -42,7 +42,9 @@ from awx.main.constants import SCHEDULEABLE_PROVIDERS
 from awx.main.models import * # noqa
 from awx.main.access import get_user_capabilities
 from awx.main.fields import ImplicitRoleField
-from awx.main.utils import get_type_for_model, get_model_for_type, build_url, timestamp_apiformat, camelcase_to_underscore, getattrd
+from awx.main.utils import (
+    get_type_for_model, get_model_for_type, build_url, timestamp_apiformat,
+    camelcase_to_underscore, getattrd, parse_yaml_or_json)
 from awx.main.validators import vars_validate_or_raise
 
 from awx.conf.license import feature_enabled
@@ -1307,10 +1309,7 @@ class BaseVariableDataSerializer(BaseSerializer):
         if obj is None:
             return {}
         ret = super(BaseVariableDataSerializer, self).to_representation(obj)
-        try:
-            return json.loads(ret.get('variables', '') or '{}')
-        except ValueError:
-            return yaml.safe_load(ret.get('variables', ''))
+        return parse_yaml_or_json(ret.get('variables', '') or '{}')
 
     def to_internal_value(self, data):
         data = {'variables': json.dumps(data)}
@@ -1622,8 +1621,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
                 role_dict['user_capabilities'] = {'unattach': False}
             return { 'role': role_dict, 'descendant_roles': get_roles_on_resource(obj, role)}
 
-        def format_team_role_perm(team_role, permissive_role_ids):
+        def format_team_role_perm(naive_team_role, permissive_role_ids):
             ret = []
+            team_role = naive_team_role
+            if naive_team_role.role_field == 'admin_role':
+                team_role = naive_team_role.content_object.member_role
             for role in team_role.children.filter(id__in=permissive_role_ids).all():
                 role_dict = {
                     'id': role.id,
@@ -1682,11 +1684,11 @@ class ResourceAccessListElementSerializer(UserSerializer):
 
         ret['summary_fields']['direct_access'] \
             = [format_role_perm(r) for r in direct_access_roles.distinct()] \
-            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x]
+            + [y for x in (format_team_role_perm(r, direct_permissive_role_ids) for r in direct_team_roles.distinct()) for y in x] \
+            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
 
         ret['summary_fields']['indirect_access'] \
-            = [format_role_perm(r) for r in indirect_access_roles.distinct()] \
-            + [y for x in (format_team_role_perm(r, all_permissive_role_ids) for r in indirect_team_roles.distinct()) for y in x]
+            = [format_role_perm(r) for r in indirect_access_roles.distinct()]
 
         return ret
 

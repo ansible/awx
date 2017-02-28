@@ -49,7 +49,8 @@ export default [
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: $scope.$parent.configDataResolve[key].help_text,
+                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
+                    null: $scope.$parent.configDataResolve[key].help_text,
                 label: $scope.$parent.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
@@ -67,7 +68,8 @@ export default [
             id: 'configure-jobs-form',
             mode: 'edit',
             scope: $scope.$parent,
-            related: false
+            related: false,
+            noPanel: true
         });
 
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
@@ -75,6 +77,7 @@ export default [
 
 
         function populateAdhocCommand(flag){
+            $scope.$parent.AD_HOC_COMMANDS = $scope.$parent.AD_HOC_COMMANDS.toString();
             var ad_hoc_commands = $scope.$parent.AD_HOC_COMMANDS.split(',');
             $scope.$parent.AD_HOC_COMMANDS = _.map(ad_hoc_commands, (item) => _.find($scope.$parent.AD_HOC_COMMANDS_options, { value: item }));
 
@@ -92,12 +95,12 @@ export default [
             }
         }
 
-        $scope.$on('adhoc_populated', function(e, data, flag) {
+        $scope.$on('AD_HOC_COMMANDS_populated', function(e, data, flag) {
             populateAdhocCommand(flag);
         });
 
-        $scope.$on('populated', function(e, data, flag) {
-            populateAdhocCommand(flag);
+        $scope.$on('populated', function() {
+            populateAdhocCommand(false);
         });
 
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal

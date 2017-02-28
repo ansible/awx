@@ -46,7 +46,7 @@ angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
 
         return function(params) {
 
-            var scope = params.scope,
+            let scope = params.scope,
                 buttonSet = params.buttons,
                 width = params.width || 500,
                 height = params.height || 600,

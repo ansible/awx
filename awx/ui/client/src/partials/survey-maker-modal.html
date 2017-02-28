@@ -10,12 +10,12 @@
                     </div>
                 </div>
                 <div class="Modal-body ng-binding">
-                    <div class="Prompt-bodyQuery">Are you sure you want to delete this {{deleteMode}}?</div>
+                    <div class="Prompt-bodyQuery" translate>Are you sure you want to delete this {{deleteMode}}?</div>
                     <div class="Prompt-bodyTarget">{{survey_questions[questionToBeDeleted].question_name}}</div>
                 </div>
                 <div class="Modal-footer">
-                    <button ng-click="hideDeleteOverlay()" class="btn Modal-defaultButton Modal-footerButton">CANCEL</a>
-                    <button ng-click="deleteMode === 'survey' ? deleteSurvey() : (deleteMode === 'question' ? deleteQuestion(questionToBeDeleted) : '')" class="btn Modal-footerButton ng-binding Modal-errorButton">DELETE</a>
+                    <button ng-click="hideDeleteOverlay()" class="btn Modal-defaultButton Modal-footerButton" translate>CANCEL</a>
+                    <button ng-click="deleteMode === 'survey' ? deleteSurvey() : (deleteMode === 'question' ? deleteQuestion(questionToBeDeleted) : '')" class="btn Modal-footerButton ng-binding Modal-errorButton" translate>DELETE</a>
                 </div>
             </div>
     </div>
@@ -23,8 +23,8 @@
         <div class="SurveyMaker-title">
             <div class="SurveyMaker-titleText">{{name || "New Job Template"}}<div class="SurveyMaker-titleLockup"></div>SURVEY</div>
             <div class="ScheduleToggle" ng-class="{'is-on': survey_enabled}" aw-tool-tip="surveyEnabledTooltip" data-placement="right" data-tip-watch="surveyEnabledTooltip">
-                <div ng-show="survey_enabled" class="ScheduleToggle-switch is-on" ng-click="toggleSurveyEnabled()">ON</div>
-                <div ng-show="!survey_enabled" class="ScheduleToggle-switch" ng-click="toggleSurveyEnabled()">OFF</div>
+                <button ng-show="survey_enabled" class="ScheduleToggle-switch is-on" ng-click="toggleSurveyEnabled()" translate>ON</button>
+                <button ng-show="!survey_enabled" class="ScheduleToggle-switch" ng-click="toggleSurveyEnabled()" translate>OFF</button>
             </div>
         </div>
         <div class="SurveyMaker-close">
@@ -40,9 +40,9 @@
         </div>
         <div class="SurveyMaker-previewPanel" ng-class="{'SurveyMaker-previewPanel--viewOnly': !(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)}">
             <div style="display: flex; flex-direction: column; width: 100%;">
-                <div class="SurveyMaker-panelHeader">PREVIEW</div>
+                <div class="SurveyMaker-panelHeader" translate>PREVIEW</div>
                 <div class="SurveyMaker-panelBody">
-                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions">PLEASE ADD A SURVEY PROMPT ON THE LEFT.</div>
+                    <div ng-if="survey_questions.length < 1" class="SurveyMaker-noQuestions" translate>PLEASE ADD A SURVEY PROMPT ON THE LEFT.</div>
                     <ul dnd-list="survey_questions" class="SurveyMaker-previewRows" dnd-drop="surveyQuestionDropped(index, item)">
                         <li ng-repeat="question in survey_questions" dnd-draggable="question" dnd-effect-allowed="move" class="SurveyMaker-previewRow">
                             <dnd-nodrag>
@@ -73,17 +73,17 @@
                                 </dnd-nodrag>
                             </div>
                         </li>
-                        <li class="SurveyMaker-previewRow dndPlaceholder">
+                        <li class="SurveyMaker-previewRow dndPlaceholder" translate>
                             Drop question here to reorder
                         </li>
                     </ul>
                 </div>
                 <div class="SurveyMaker-panelFooter">
                     <div class="Form-buttons">
-                        <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)" ng-click="showDeleteOverlay('survey')">DELETE SURVEY</button>
-                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">CANCEL</button>
-                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="!(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">CLOSE</button>
-                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)">SAVE</button>
+                        <button id="survey-delete-button" class="btn btn-sm SurveyMaker-deleteButton" ng-show="survey_exists && (job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)" ng-click="showDeleteOverlay('survey')" translate>DELETE SURVEY</button>
+                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)" translate>CANCEL</button>
+                        <button id="survey-close-button" class="btn btn-sm Form-buttonDefault" ng-click="closeSurvey('survey-modal-dialog')" ng-show="!(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)" translate>CLOSE</button>
+                        <button id="survey-save-button" class="btn btn-sm Form-saveButton" ng-click="saveSurvey()" ng-disabled="survey_questions.length < 1 || !can_edit || editQuestionIndex !== null" ng-show="(job_template_obj.summary_fields.user_capabilities.edit || workflow_job_template_obj.summary_fields.user_capabilities.edit || canAdd)" translate>SAVE</button>
                     </div>
                 </div>
             </div>

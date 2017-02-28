@@ -1,7 +1,7 @@
 export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n',
     function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService, i18n) {
 
-        let path, relations,
+        let path,
             defaults,
             queryset,
             stateChangeSuccessListener;
@@ -12,7 +12,9 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
         else {
             // steps through the current tree of $state configurations, grabs default search params
             defaults = _.find($state.$current.path, (step) => {
-                return step.params.hasOwnProperty(`${$scope.iterator}_search`);
+                if(step && step.params && step.params.hasOwnProperty(`${$scope.iterator}_search`)){
+                    return step.params.hasOwnProperty(`${$scope.iterator}_search`);
+                }
             }).params[`${$scope.iterator}_search`].config.value;
         }
 
@@ -28,9 +30,8 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         function init() {
             path = GetBasePath($scope.basePath) || $scope.basePath;
-            relations = getRelationshipFields($scope.dataset.results);
             $scope.searchTags = stripDefaultParams($state.params[`${$scope.iterator}_search`]);
-            qs.initFieldset(path, $scope.djangoModel, relations).then((data) => {
+            qs.initFieldset(path, $scope.djangoModel).then((data) => {
                 $scope.models = data.models;
                 $scope.options = data.options.data;
                 $scope.$emit(`${$scope.list.iterator}_options`, data.options);
@@ -107,14 +108,6 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
             return _(strippedCopy).map(qs.decodeParam).flatten().value();
         }
 
-        // searchable relationships
-        function getRelationshipFields(dataset) {
-            let flat = _(dataset).map((value) => {
-                return _.keys(value.related);
-            }).flatten().uniq().value();
-            return flat;
-        }
-
         function setDefaults(term) {
             if ($scope.list.defaultSearchParams) {
                 return $scope.list.defaultSearchParams(term);
@@ -148,9 +141,25 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         // remove tag, merge new queryset, $state.go
         $scope.remove = function(index) {
-            let tagToRemove = $scope.searchTags.splice(index, 1)[0];
-            let termParts = SmartSearchService.splitTermIntoParts(tagToRemove);
-            let removed;
+            let tagToRemove = $scope.searchTags.splice(index, 1)[0],
+                termParts = SmartSearchService.splitTermIntoParts(tagToRemove),
+                removed;
+
+            let removeFromQuerySet = function(set) {
+                _.each(removed, (value, key) => {
+                    if (Array.isArray(set[key])){
+                        _.remove(set[key], (item) => item === value);
+                        // If the array is now empty, remove that key
+                        if(set[key].length === 0) {
+                            delete set[key];
+                        }
+                    }
+                    else {
+                        delete set[key];
+                    }
+                });
+            };
+
             if (termParts.length === 1) {
                 removed = setDefaults(tagToRemove);
             }
@@ -159,31 +168,38 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                 let encodeParams = {
                     term: tagToRemove
                 };
-                if(_.has($scope.options.actions.GET, root)) {
-                    if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                if($scope.models[$scope.list.name]) {
+                    if(_.has($scope.models[$scope.list.name].base, root)) {
+                        if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
+                            encodeParams.relatedSearchTerm = true;
+                        }
+                        else {
+                            encodeParams.searchTerm = true;
+                        }
+                        removed = qs.encodeParam(encodeParams);
+                    }
+                    else if(_.contains($scope.models[$scope.list.name].related, root)) {
                         encodeParams.relatedSearchTerm = true;
+                        removed = qs.encodeParam(encodeParams);
                     }
                     else {
-                        encodeParams.searchTerm = true;
-                    }
-                }
-                removed = qs.encodeParam(encodeParams);
-            }
-            _.each(removed, (value, key) => {
-                if (Array.isArray(queryset[key])){
-                    _.remove(queryset[key], (item) => item === value);
-                    // If the array is now empty, remove that key
-                    if(queryset[key].length === 0) {
-                        delete queryset[key];
+                        removed = setDefaults(termParts[termParts.length-1]);
                     }
                 }
                 else {
-                    delete queryset[key];
+                    removed = setDefaults(termParts[termParts.length-1]);
                 }
-            });
+            }
+            removeFromQuerySet(queryset);
             if(!$scope.querySet) {
                 $state.go('.', {
-                    [$scope.iterator + '_search']: queryset }, {notify: false});
+                    [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                        // ISSUE: for some reason deleting a tag from a list in a modal does not
+                        // remove the param from $stateParams.  Here we'll manually check to make sure
+                        // that that happened and remove it if it didn't.
+
+                        removeFromQuerySet($stateParams[`${$scope.iterator}_search`]);
+                    });
             }
             qs.search(path, queryset).then((res) => {
                 if($scope.querySet) {
@@ -227,13 +243,20 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     } else {
                         // Figure out if this is a search term
                         let root = termParts[0].split(".")[0].replace(/^-/, '');
-                        if(_.has($scope.options.actions.GET, root)) {
-                            if($scope.options.actions.GET[root].type && $scope.options.actions.GET[root].type === 'field') {
+                        if(_.has($scope.models[$scope.list.name].base, root)) {
+                            if($scope.models[$scope.list.name].base[root].type && $scope.models[$scope.list.name].base[root].type === 'field') {
                                 params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
                             }
                             else {
                                 params = _.merge(params, qs.encodeParam({term: term, searchTerm: true}), combineSameSearches);
                             }
+                        }
+                        // The related fields need to also be checked for related searches.
+                        // The related fields for the search are retrieved from the API
+                        // options endpoint, and are stored in the $scope.model. FYI, the
+                        // Django search model is what sets the related fields on the model.
+                        else if(_.contains($scope.models[$scope.list.name].related, root)) {
+                            params = _.merge(params, qs.encodeParam({term: term, relatedSearchTerm: true}), combineSameSearches);
                         }
                         // Its not a search term or a related search term - treat it as a string
                         else {
@@ -243,7 +266,6 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                     }
                 });
 
-                params.page = '1';
                 queryset = _.merge(queryset, params, (objectValue, sourceValue, key, object) => {
                     if (object[key] && object[key] !== sourceValue){
                         if(_.isArray(object[key])) {
@@ -262,12 +284,20 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
                         return undefined;
                     }
                 });
+
+                // Go back to the first page after a new search
+                delete queryset.page;
+
                 // https://ui-router.github.io/docs/latest/interfaces/params.paramdeclaration.html#dynamic
                 // This transition will not reload controllers/resolves/views
                 // but will register new $stateParams[$scope.iterator + '_search'] terms
                 if(!$scope.querySet) {
                     $state.go('.', {
-                        [$scope.iterator + '_search']: queryset }, {notify: false});
+                        [$scope.iterator + '_search']: queryset }, {notify: false}).then(function(){
+                            // ISSUE: same as above in $scope.remove.  For some reason deleting the page
+                            // from the queryset works for all lists except lists in modals.
+                            delete $stateParams[$scope.iterator + '_search'].page;
+                        });
                 }
                 qs.search(path, queryset).then((res) => {
                     if($scope.querySet) {

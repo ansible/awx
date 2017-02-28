@@ -117,10 +117,10 @@ class JobOptions(BaseModel):
         blank=True,
         default=0,
     )
-    extra_vars = models.TextField(
+    extra_vars = prevent_search(models.TextField(
         blank=True,
         default='',
-    )
+    ))
     job_tags = models.CharField(
         max_length=1024,
         blank=True,
@@ -1252,10 +1252,10 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         on_delete=models.SET_NULL,
     )
 
-    extra_vars = models.TextField(
+    extra_vars = prevent_search(models.TextField(
         blank=True,
         default='',
-    )
+    ))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

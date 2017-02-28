@@ -5,8 +5,12 @@ describe('Controller: jobResultsController', () => {
     // Setup
     let jobResultsController;
 
-    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService;
+    let jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, eventResolve, populateResolve, $rScope, q, $log, Dataset, Rest, $state, QuerySet, i18n,fieldChoices, fieldLabels, $interval, workflowResultsService, statusSocket;
 
+    statusSocket = function() {
+        var fn = function() {};
+        return fn;
+    }
     jobData = {
         related: {}
     };
@@ -70,6 +74,8 @@ describe('Controller: jobResultsController', () => {
                 return jasmine.createSpyObj('workflowResultsService', ['createOneSecondTimer', 'destroyTimer']);
             });
 
+            $provide.value('statusSocket', statusSocket);
+
             $provide.value('jobData', jobData);
             $provide.value('jobDataOptions', jobDataOptions);
             $provide.value('jobLabels', jobLabels);
@@ -90,7 +96,7 @@ describe('Controller: jobResultsController', () => {
     };
 
     let injectVals = () => {
-        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_, _$interval_, _workflowResultsService_) => {
+        angular.mock.inject((_jobData_, _jobDataOptions_, _jobLabels_, _jobFinished_, _count_, _ParseTypeChange_, _ParseVariableString_, _jobResultsService_, _eventQueue_, _$compile_, $rootScope, $controller, $q, $httpBackend, _$log_, _Dataset_, _Rest_, _$state_, _QuerySet_, _$interval_, _workflowResultsService_, _statusSocket_) => {
             // when you call $scope.$apply() (which you need to do to
             // to get inside of .then blocks to test), something is
             // causing a request for all static files.
@@ -127,6 +133,7 @@ describe('Controller: jobResultsController', () => {
             QuerySet = _QuerySet_;
             $interval = _$interval_;
             workflowResultsService = _workflowResultsService_;
+            statusSocket = _statusSocket_;
 
             jobResultsService.getEvents.and
                 .returnValue(eventResolve);
@@ -157,7 +164,8 @@ describe('Controller: jobResultsController', () => {
                 Dataset: Dataset,
                 Rest: Rest,
                 $state: $state,
-                QuerySet: QuerySet
+                QuerySet: QuerySet,
+                statusSocket: statusSocket
             });
         });
     };

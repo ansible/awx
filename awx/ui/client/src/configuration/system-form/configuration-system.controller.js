@@ -122,7 +122,8 @@ export default [
 
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: $scope.$parent.configDataResolve[key].help_text,
+                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
+                    null: $scope.$parent.configDataResolve[key].help_text,
                 label: $scope.$parent.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
@@ -144,35 +145,40 @@ export default [
                 id: form.id,
                 mode: 'edit',
                 scope: $scope.$parent,
-                related: true
+                related: true,
+                noPanel: true
             });
         });
 
         var dropdownRendered = false;
 
         $scope.$on('populated', function() {
+            populateLogAggregator(false);
+        });
 
-            var opts = [];
+        $scope.$on('LOG_AGGREGATOR_TYPE_populated', function(e, data, flag) {
+            populateLogAggregator(flag);
+        });
+
+        function populateLogAggregator(flag){
             if($scope.$parent.LOG_AGGREGATOR_TYPE !== null) {
-                _.each(ConfigurationUtils.listToArray($scope.$parent.LOG_AGGREGATOR_TYPE), function(type) {
-                    opts.push({
-                        id: type,
-                        text: type
-                    });
-                });
+                $scope.$parent.LOG_AGGREGATOR_TYPE = _.find($scope.$parent.LOG_AGGREGATOR_TYPE_options, { value: $scope.$parent.LOG_AGGREGATOR_TYPE });
+            }
+
+            if(flag !== undefined){
+                dropdownRendered = flag;
             }
 
             if(!dropdownRendered) {
                 dropdownRendered = true;
                 CreateSelect2({
                     element: '#configuration_logging_template_LOG_AGGREGATOR_TYPE',
-                    multiple: true,
+                    multiple: false,
                     placeholder: i18n._('Select types'),
-                    opts: opts
                 });
+                $scope.$parent.configuration_logging_template_form.LOG_AGGREGATOR_TYPE.$setPristine();
             }
-
-        });
+        }
 
         // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
         // TODO Find better solution for this bug

@@ -26,7 +26,7 @@ from the API. These data loggers are the following.
 
 These loggers only use log-level of INFO.
 
-Additionally, the standard Tower logs should be deliverable through this
+Additionally, the standard Tower logs are be deliverable through this
 same mechanism. It should be obvious to the user how to enable to disable
 each of these 5 sources of data without manipulating a complex dictionary
 in their local settings file, as well as adjust the log-level consumed
@@ -34,16 +34,19 @@ from the standard Tower logs.
 
 ## Supported Services
 
-Currently committed to support:
+Committed to support:
 
  - Splunk
  - Elastic Stack / ELK Stack / Elastic Cloud
 
-Under consideration for testing:
+Have tested:
 
- - Sumo Logic
- - Datadog
+ - Sumologic
  - Loggly
+
+Considered, but have not tested:
+
+ - Datadog
  - Red Hat Common Logging via logstash connector
 
 ### Elastic Search Instructions
@@ -64,8 +67,8 @@ make docker-compose-elk
 make docker-compose-cluster-elk
 ```
 
-Kibana is the visualization service, and it can be accessed in a web browser
-by going to `{server address}:5601`.
+For more instructions on getting started with the environment this stands
+up, also refer to instructions in `/tools/elastic/README.md`.
 
 If you were to start from scratch, standing up your own version the elastic
 stack, then the only change you should need is to add the following lines
@@ -149,6 +152,8 @@ the job model.
 
 In addition to the common fields, this will contain a `msg` field with
 the log message. Errors contain a separate `traceback` field.
+These logs can be enabled or disabled in CTiT by adding or removing
+it to the setting `LOG_AGGREGATOR_LOGGERS`.
 
 # Configuring Inside of Tower
 
@@ -158,10 +163,12 @@ supported services:
 
  - Host
  - Port
- - some kind of token
- - enabling sending logs, and selecting which loggers to send
- - use fully qualified domain name (fqdn) or not
- - flag to use HTTPS or not
+ - The type of service, allowing service-specific customizations
+ - Optional username for the connection, used by certain services
+ - Some kind of token or password
+ - A flag to indicate how system tracking records will be sent
+ - Selecting which loggers to send
+ - Enabling sending logs
 
 Some settings for the log handler will not be exposed to the user via
 this mechanism. In particular, threading (enabled), and connection type

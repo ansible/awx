@@ -127,7 +127,7 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
         let resourceType = scope.currentTab(),
             item = value.value;
 
-        if (item.isSelected) {
+        if (value.isSelected) {
             scope.selected[resourceType][item.id] = item;
             scope.selected[resourceType][item.id].roles = [];
             aggregateKey(item, resourceType);

@@ -12,9 +12,11 @@ import traceback
 
 from requests_futures.sessions import FuturesSession
 
-# custom
-from django.conf import settings as django_settings
-from django.utils.log import NullHandler
+# AWX
+from awx.main.utils.formatters import LogstashFormatter
+
+
+__all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'configure_external_logger']
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -38,30 +40,31 @@ def unused_callback(sess, resp):
     pass
 
 
-class HTTPSNullHandler(NullHandler):
+class HTTPSNullHandler(logging.NullHandler):
     "Placeholder null handler to allow loading without database access"
 
-    def __init__(self, host, **kwargs):
+    def __init__(self, *args, **kwargs):
         return super(HTTPSNullHandler, self).__init__()
 
 
-class HTTPSHandler(logging.Handler):
+class BaseHTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
-        super(HTTPSHandler, self).__init__()
+        super(BaseHTTPSHandler, self).__init__()
         self.fqdn = fqdn
         self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
-            # settings values take precedence over the input params
-            settings_name = PARAM_NAMES[fd]
-            settings_val = getattr(django_settings, settings_name, None)
-            if settings_val:
-                setattr(self, fd, settings_val)
-            elif fd in kwargs:
-                setattr(self, fd, kwargs[fd])
-            else:
-                setattr(self, fd, None)
-        self.session = FuturesSession()
+            setattr(self, fd, kwargs.get(fd, None))
+        if self.async:
+            self.session = FuturesSession()
+        else:
+            self.session = requests.Session()
         self.add_auth_information()
+
+    @classmethod
+    def from_django_settings(cls, settings, *args, **kwargs):
+        for param, django_setting_name in PARAM_NAMES.items():
+            kwargs[param] = getattr(settings, django_setting_name, None)
+        return cls(*args, **kwargs)
 
     def get_full_message(self, record):
         if record.exc_info:
@@ -85,7 +88,7 @@ class HTTPSHandler(logging.Handler):
             self.session.headers.update(headers)
 
     def get_http_host(self):
-        host = self.host
+        host = self.host or ''
         if not host.startswith('http'):
             host = 'http://%s' % self.host
         if self.port != 80 and self.port is not None:
@@ -113,14 +116,25 @@ class HTTPSHandler(logging.Handler):
         if not logger_name.startswith('awx.analytics'):
             # Tower log emission is only turned off by enablement setting
             return False
-        return self.enabled_loggers is None or logger_name.split('.')[-1] not in self.enabled_loggers
+        return self.enabled_loggers is None or logger_name[len('awx.analytics.'):] not in self.enabled_loggers
 
     def emit(self, record):
+        """
+            Emit a log record.  Returns a list of zero or more
+            ``concurrent.futures.Future`` objects.
+
+            When ``self.async`` is True, the list will contain one
+            Future object for each HTTP request made.  When ``self.async`` is
+            False, the list will be empty.
+
+            See:
+            https://docs.python.org/3/library/concurrent.futures.html#future-objects
+            http://pythonhosted.org/futures/
+        """
         if self.skip_log(record.name):
-            return
+            return []
         try:
             payload = self.format(record)
-            host = self.get_http_host()
 
             # Special action for System Tracking, queue up multiple log messages
             if self.indv_facts:
@@ -129,18 +143,56 @@ class HTTPSHandler(logging.Handler):
                     module_name = payload_data['module_name']
                     if module_name in ['services', 'packages', 'files']:
                         facts_dict = payload_data.pop(module_name)
+                        async_futures = []
                         for key in facts_dict:
                             fact_payload = copy(payload_data)
                             fact_payload.update(facts_dict[key])
-                            self.session.post(host, **self.get_post_kwargs(fact_payload))
-                        return
+                            if self.async:
+                                async_futures.append(self._send(fact_payload))
+                            else:
+                                self._send(fact_payload)
+                        return async_futures
 
             if self.async:
-                self.session.post(host, **self.get_post_kwargs(payload))
-            else:
-                requests.post(host, auth=requests.auth.HTTPBasicAuth(self.username, self.password), **self.get_post_kwargs(payload))
+                return [self._send(payload)]
+
+            self._send(payload)
+            return []
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             self.handleError(record)
 
+    def _send(self, payload):
+        return self.session.post(self.get_http_host(),
+                                 **self.get_post_kwargs(payload))
+
+
+def add_or_remove_logger(address, instance):
+    specific_logger = logging.getLogger(address)
+    for i, handler in enumerate(specific_logger.handlers):
+        if isinstance(handler, (HTTPSNullHandler, BaseHTTPSHandler)):
+            specific_logger.handlers[i] = instance or HTTPSNullHandler()
+            break
+    else:
+        if instance is not None:
+            specific_logger.handlers.append(instance)
+
+
+def configure_external_logger(settings_module, async_flag=True, is_startup=True):
+
+    is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
+    if is_startup and (not is_enabled):
+        # Pass-through if external logging not being used
+        return
+
+    instance = None
+    if is_enabled:
+        instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
+        instance.setFormatter(LogstashFormatter(settings_module=settings_module))
+    awx_logger_instance = instance
+    if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
+        awx_logger_instance = None
+
+    add_or_remove_logger('awx.analytics', instance)
+    add_or_remove_logger('awx', awx_logger_instance)

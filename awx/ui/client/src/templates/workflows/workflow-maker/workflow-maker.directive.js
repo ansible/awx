@@ -6,8 +6,8 @@
 
 import workflowMakerController from './workflow-maker.controller';
 
-export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
-    function(templateUrl, CreateDialog, Wait, $state) {
+export default ['templateUrl', 'CreateDialog', 'Wait', '$state', '$window',
+    function(templateUrl, CreateDialog, Wait, $state, $window) {
         return {
             scope: {
                 workflowJobTemplateObj: '=',
@@ -17,11 +17,17 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
             templateUrl: templateUrl('templates/workflows/workflow-maker/workflow-maker'),
             controller: workflowMakerController,
             link: function(scope) {
+
+                let availableHeight = $(window).height(),
+                    availableWidth = $(window).width(),
+                    minimumWidth = 1300,
+                    minimumHeight = 550;
+
                 CreateDialog({
                     id: 'workflow-modal-dialog',
                     scope: scope,
-                    width: 1400,
-                    height: 720,
+                    width: availableWidth > minimumWidth ? availableWidth : minimumWidth,
+                    height: availableHeight > minimumHeight ? availableHeight : minimumHeight,
                     draggable: false,
                     dialogClass: 'SurveyMaker-dialog',
                     position: ['center', 20],
@@ -34,6 +40,10 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
                         // Let the modal height be variable based on the content
                         // and set a uniform padding
                         $('#workflow-modal-dialog').css({ 'padding': '20px' });
+                        $('#workflow-modal-dialog').parent('.ui-dialog').height(availableHeight > minimumHeight ? availableHeight : minimumHeight);
+                        $('#workflow-modal-dialog').parent('.ui-dialog').width(availableWidth > minimumWidth ? availableWidth : minimumWidth);
+                        $('#workflow-modal-dialog').outerHeight(availableHeight > minimumHeight ? availableHeight : minimumHeight);
+                        $('#workflow-modal-dialog').outerWidth(availableWidth > minimumWidth ? availableWidth : minimumWidth);
 
                     },
                     _allowInteraction: function(e) {
@@ -55,6 +65,24 @@ export default ['templateUrl', 'CreateDialog', 'Wait', '$state',
 
                     $state.go('^');
                 };
+
+                function onResize(){
+                    availableHeight = $(window).height();
+                    availableWidth = $(window).width();
+                    $('#workflow-modal-dialog').parent('.ui-dialog').height(availableHeight > minimumHeight ? availableHeight : minimumHeight);
+                    $('#workflow-modal-dialog').parent('.ui-dialog').width(availableWidth > minimumWidth ? availableWidth : minimumWidth);
+                    $('#workflow-modal-dialog').outerHeight(availableHeight > minimumHeight ? availableHeight : minimumHeight);
+                    $('#workflow-modal-dialog').outerWidth(availableWidth > minimumWidth ? availableWidth : minimumWidth);
+
+                    scope.$broadcast('workflowMakerModalResized');
+                }
+
+                function cleanUpResize() {
+                    angular.element($window).off('resize', onResize);
+                }
+
+                angular.element($window).on('resize', onResize);
+                scope.$on('$destroy', cleanUpResize);
             }
         };
     }

@@ -5,11 +5,11 @@
  *************************************************/
 
 export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
-    'generateList', '$compile', 'Wait', 'OrgAdminList', 'AddAdminList',
-    'OrgAdminsDataset', 'AddAdminsDataset',
+    'generateList', '$compile', 'Wait', 'OrgAdminList',
+    'OrgAdminsDataset',
     'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
     function($stateParams, $scope, UserList, Rest, $state, GenerateList,
-        $compile, Wait, OrgAdminList, AddAdminList, OrgAdminsDataset, AddAdminsDataset, Prompt, ProcessErrors,
+        $compile, Wait, OrgAdminList, OrgAdminsDataset, Prompt, ProcessErrors,
         GetBasePath, $filter) {
 
         var orgBase = GetBasePath('organizations');
@@ -19,11 +19,8 @@ export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
         function init() {
             // search init
             $scope.list = OrgAdminList;
-            $scope.add_user_list = AddAdminList;
             $scope.user_dataset = OrgAdminsDataset.data;
             $scope.users = $scope.user_dataset.results;
-            $scope.add_user_dataset = AddAdminsDataset.data;
-            $scope.add_users = $scope.add_user_dataset.results;
 
             Rest.setUrl(orgBase + $stateParams.organization_id);
             Rest.get()

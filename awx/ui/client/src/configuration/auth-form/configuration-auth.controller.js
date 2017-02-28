@@ -60,9 +60,11 @@ export default [
         }
 
         var activeForm = function() {
+
             if(!$scope.$parent[formTracker.currentFormName()].$dirty) {
                 authVm.activeAuthForm = authVm.dropdownValue;
                 formTracker.setCurrentAuth(authVm.activeAuthForm);
+                startCodeMirrors();
             } else {
                 var msg = i18n._('You have unsaved changes. Would you like to proceed <strong>without</strong> saving?');
                 var title = i18n._('Warning: Unsaved Changes');
@@ -115,28 +117,36 @@ export default [
 
         var authForms = [{
                 formDef: configurationAzureForm,
-                id: 'auth-azure-form'
+                id: 'auth-azure-form',
+                name: 'azure'
             }, {
                 formDef: configurationGithubForm,
-                id: 'auth-github-form'
+                id: 'auth-github-form',
+                name: 'github'
             }, {
                 formDef: configurationGithubOrgForm,
-                id: 'auth-github-org-form'
+                id: 'auth-github-org-form',
+                name: 'github_org'
             }, {
                 formDef: configurationGithubTeamForm,
-                id: 'auth-github-team-form'
+                id: 'auth-github-team-form',
+                name: 'github_team'
             }, {
                 formDef: configurationGoogleForm,
-                id: 'auth-google-form'
+                id: 'auth-google-form',
+                name: 'google_oauth'
             }, {
                 formDef: configurationLdapForm,
-                id: 'auth-ldap-form'
+                id: 'auth-ldap-form',
+                name: 'ldap'
             }, {
                 formDef: configurationRadiusForm,
-                id: 'auth-radius-form'
+                id: 'auth-radius-form',
+                name: 'radius'
             }, {
                 formDef: configurationSamlForm,
-                id: 'auth-saml-form'
+                id: 'auth-saml-form',
+                name: 'saml'
             }, ];
 
         var forms = _.pluck(authForms, 'formDef');
@@ -161,9 +171,42 @@ export default [
             form.buttons.save.disabled = $rootScope.user_is_system_auditor;
         });
 
+        function startCodeMirrors(key){
+            var form = _.find(authForms, function(f){
+               return f.name === $scope.authVm.activeAuthForm;
+            });
+
+            if(!key){
+                // Attach codemirror to fields that need it
+                _.each(form.formDef.fields, function(field) {
+                    // Codemirror balks at empty values so give it one
+                    if($scope.$parent[field.name] === null && field.codeMirror) {
+                      $scope.$parent[field.name] = '{}';
+                    }
+                    if(field.codeMirror) {
+                        createIt(field.name);
+                    }
+                });
+            }
+            else if(key){
+                createIt(key);
+            }
+
+            function createIt(name){
+                ParseTypeChange({
+                   scope: $scope.$parent,
+                   variable: name,
+                   parse_variable: 'parseType',
+                   field_id: form.formDef.name + '_' + name
+                 });
+                 $scope.parseTypeChange('parseType', name);
+            }
+        }
+
         function addFieldInfo(form, key) {
             _.extend(form.fields[key], {
-                awPopOver: $scope.$parent.configDataResolve[key].help_text,
+                awPopOver: ($scope.$parent.configDataResolve[key].defined_in_file) ?
+                    null: $scope.$parent.configDataResolve[key].help_text,
                 label: $scope.$parent.configDataResolve[key].label,
                 name: key,
                 toggleSource: key,
@@ -186,40 +229,23 @@ export default [
                 id: form.id,
                 mode: 'edit',
                 scope: $scope.$parent,
-                related: true
+                related: true,
+                noPanel: true
             });
         });
 
         // Flag to avoid re-rendering and breaking Select2 dropdowns on tab switching
         var dropdownRendered = false;
 
-        $scope.$on('populated', function() {
-            // Attach codemirror to fields that need it
-            _.each(authForms, function(form) {
-                    _.each(form.formDef.fields, function(field) {
-                        // Codemirror balks at empty values so give it one
-                        if($scope.$parent[field.name] === null && field.codeMirror) {
-                          $scope.$parent[field.name] = '{}';
-                        }
-                        if(field.codeMirror) {
-                            ParseTypeChange({
-                               scope: $scope.$parent,
-                               variable: field.name,
-                               parse_variable: 'parseType',
-                               field_id: form.formDef.name + '_' + field.name,
-                               readonly: true,
-                             });
-                        }
-                    });
-            });
 
-            // Create Select2 fields
-            var opts = [];
+
+        function populateLDAPGroupType(flag){
             if($scope.$parent.AUTH_LDAP_GROUP_TYPE !== null) {
-                opts.push({
-                    id: $scope.$parent.AUTH_LDAP_GROUP_TYPE,
-                    text: $scope.$parent.AUTH_LDAP_GROUP_TYPE
-                });
+                $scope.$parent.AUTH_LDAP_GROUP_TYPE = _.find($scope.$parent.AUTH_LDAP_GROUP_TYPE_options, { value: $scope.$parent.AUTH_LDAP_GROUP_TYPE });
+            }
+
+            if(flag !== undefined){
+                dropdownRendered = flag;
             }
 
             if(!dropdownRendered) {
@@ -228,15 +254,21 @@ export default [
                     element: '#configuration_ldap_template_AUTH_LDAP_GROUP_TYPE',
                     multiple: false,
                     placeholder: i18n._('Select group types'),
-                    opts: opts
                 });
-                // Fix for bug where adding selected opts causes form to be $dirty and triggering modal
-                // TODO Find better solution for this bug
-                $timeout(function(){
-                    $scope.$parent.configuration_ldap_template_form.$setPristine();
-                }, 1000);
             }
+        }
 
+        $scope.$on('AUTH_LDAP_GROUP_TYPE_populated', function(e, data, flag) {
+            populateLDAPGroupType(flag);
+        });
+
+        $scope.$on('codeMirror_populated', function(e, key) {
+            startCodeMirrors(key);
+        });
+
+        $scope.$on('populated', function() {
+            startCodeMirrors();
+            populateLDAPGroupType(false);
         });
 
         angular.extend(authVm, {

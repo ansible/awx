@@ -111,6 +111,7 @@ register(
     help_text=_('List of modules allowed to be used by ad-hoc jobs.'),
     category=_('Jobs'),
     category_slug='jobs',
+    required=False,
 )
 
 register(
@@ -258,7 +259,8 @@ register(
 register(
     'LOG_AGGREGATOR_USERNAME',
     field_class=fields.CharField,
-    allow_null=True,
+    allow_blank=True,
+    default='',
     label=_('Logging Aggregator Username'),
     help_text=_('Username for external log aggregator (if required).'),
     category=_('Logging'),
@@ -268,7 +270,8 @@ register(
 register(
     'LOG_AGGREGATOR_PASSWORD',
     field_class=fields.CharField,
-    allow_null=True,
+    allow_blank=True,
+    default='',
     encrypted=True,
     label=_('Logging Aggregator Password/Token'),
     help_text=_('Password or authentication token for external log aggregator (if required).'),
@@ -310,4 +313,14 @@ register(
     help_text=_('Enable sending logs to external log aggregator.'),
     category=_('Logging'),
     category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_TOWER_UUID',
+    field_class=fields.CharField,
+    allow_blank=True,
+    label=_('Cluster-wide Tower unique identifier.'),
+    help_text=_('Useful to uniquely identify Tower instances.'),
+    category=_('Logging'),
+    category_slug='logging',
+    default=None,
 )

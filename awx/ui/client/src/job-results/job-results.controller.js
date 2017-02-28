@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket) {
     var toDestroy = [];
     var cancelRequests = false;
     var runTimeElapsedTimer = null;
@@ -298,6 +298,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     $scope.job.finished = mungedEvent.finishedTime;
                     $scope.jobFinished = true;
                     $scope.followTooltip = "Jump to last line of standard out.";
+                    if ($scope.followEngaged) {
+                        if (!$scope.followScroll) {
+                            $scope.followScroll = function() {
+                                $log.error("follow scroll undefined, standard out directive not loaded yet?");
+                            };
+                        }
+                        $scope.followScroll();
+                    }
                 }
 
                 if (change === 'countFinished') {
@@ -365,25 +373,30 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
                             var putAfter;
                             var isDup = false;
-                            $(".header_" + putIn + ",." + putIn)
-                                .each((i, v) => {
-                                    if (angular.element(v).scope()
-                                        .event.start_line < mungedEvent
-                                        .start_line) {
-                                        putAfter = v;
-                                    } else if (angular.element(v).scope()
-                                        .event.start_line === mungedEvent
-                                        .start_line) {
-                                        isDup = true;
-                                        return false;
-                                    } else if (angular.element(v).scope()
-                                        .event.start_line > mungedEvent
-                                        .start_line) {
-                                        return false;
-                                    }  else {
-                                        appendToBottom(mungedEvent);
-                                    }
-                                });
+
+                            if ($(".header_" + putIn + ",." + putIn).length === 0) {
+                                appendToBottom(mungedEvent);
+                            } else {
+                                $(".header_" + putIn + ",." + putIn)
+                                    .each((i, v) => {
+                                        if (angular.element(v).scope()
+                                            .event.start_line < mungedEvent
+                                            .start_line) {
+                                            putAfter = v;
+                                        } else if (angular.element(v).scope()
+                                            .event.start_line === mungedEvent
+                                            .start_line) {
+                                            isDup = true;
+                                            return false;
+                                        } else if (angular.element(v).scope()
+                                            .event.start_line > mungedEvent
+                                            .start_line) {
+                                            return false;
+                                        }  else {
+                                            appendToBottom(mungedEvent);
+                                        }
+                                    });
+                            }
 
                             if (!isDup) {
                                 $(putAfter).after($compile(mungedEvent
@@ -407,17 +420,6 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                     // container
                     $(".JobResultsStdOut-followAnchor")
                         .appendTo(".JobResultsStdOut-stdoutContainer");
-
-                    // if follow is engaged,
-                    // scroll down to the followAnchor
-                    if ($scope.followEngaged) {
-                        if (!$scope.followScroll) {
-                            $scope.followScroll = function() {
-                                $log.error("follow scroll undefined, standard out directive not loaded yet?");
-                            };
-                        }
-                        $scope.followScroll();
-                    }
                 }
             });
 
@@ -435,13 +437,35 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     $scope.playCount = 0;
     $scope.taskCount = 0;
 
+
+    // used to show a message to just download for old jobs
+    // remove in 3.2.0
+    $scope.isOld = 0;
+    $scope.showLegacyJobErrorMessage = false;
+
+    toDestroy.push($scope.$watch('isOld', function (val) {
+        if (val >= 2) {
+            $scope.showLegacyJobErrorMessage = true;
+        }
+    }));
+
     // get header and recap lines
     var skeletonPlayCount = 0;
     var skeletonTaskCount = 0;
     var getSkeleton = function(url) {
         jobResultsService.getEvents(url)
             .then(events => {
+                // old job check: if the job is complete, there is result stdout, and
+                // there are no job events, it's an old job
+                if ($scope.jobFinished) {
+                    $scope.showLegacyJobErrorMessage = $scope.job.result_stdout.length &&
+                        !events.results.length;
+                }
+
                 events.results.forEach(event => {
+                    if (event.start_line === 0 && event.end_line === 0) {
+                        $scope.isOld++;
+                    }
                     // get the name in the same format as the data
                     // coming over the websocket
                     event.event_name = event.event;
@@ -586,10 +610,25 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
     var buffer = [];
 
     var processBuffer = function() {
-        buffer.forEach((event, i) => {
-            processEvent(event);
+        var follow = function() {
+            // if follow is engaged,
+            // scroll down to the followAnchor
+            if ($scope.followEngaged) {
+                if (!$scope.followScroll) {
+                    $scope.followScroll = function() {
+                        $log.error("follow scroll undefined, standard out directive not loaded yet?");
+                    };
+                }
+                $scope.followScroll();
+            }
+        };
+
+        for (let i = 0; i < 4; i++) {
+            processEvent(buffer[i]);
             buffer.splice(i, 1);
-        });
+        }
+
+        follow();
     };
 
     var bufferInterval;
@@ -628,9 +667,16 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
                 $scope.taskCount++;
             }
             buffer.push(data);
-            processEvent(data);
         });
     }));
+
+    // get previously set up socket messages from resolve
+    if (statusSocket && statusSocket[0] && statusSocket[0].job_status) {
+        $scope.job_status = statusSocket[0].job_status;
+    }
+    if ($scope.job_status === "running" && !$scope.job.elapsed) {
+        runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+    }
 
     // Processing of job-status messages from the websocket
     toDestroy.push($scope.$on(`ws-jobs`, function(e, data) {
@@ -639,15 +685,15 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
             // controller is defined, so set the job_status
             $scope.job_status = data.status;
             if (data.status === "running") {
-                runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+                if (!runTimeElapsedTimer) {
+                    runTimeElapsedTimer = workflowResultsService.createOneSecondTimer(moment(), updateJobElapsedTimer);
+                }
             } else if (data.status === "successful" ||
                 data.status === "failed" ||
                 data.status === "error" ||
                 data.status === "canceled") {
                     workflowResultsService.destroyTimer(runTimeElapsedTimer);
-                    if (bufferInterval) {
-                        clearInterval(bufferInterval);
-                    }
+
                     // When the fob is finished retrieve the job data to
                     // correct anything that was out of sync from the job run
                     jobResultsService.getJobData($scope.job.id).then(function(data){
@@ -669,7 +715,14 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
         }
     }));
 
+    if (statusSocket && statusSocket[1]) {
+        statusSocket[1]();
+    }
+
     $scope.$on('$destroy', function(){
+        if (statusSocket && statusSocket[1]) {
+            statusSocket[1]();
+        }
         $( ".JobResultsStdOut-aLineOfStdOut" ).remove();
         cancelRequests = true;
         eventQueue.initialize();

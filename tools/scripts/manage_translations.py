@@ -24,11 +24,11 @@
 # to update django.pot file, run:
 #  $ python tools/scripts/manage_translations.py update
 #
-# to update both pot files, run:
+# to update both pot files locally, run:
 #  $ python tools/scripts/manage_translations.py update --both
 #
-# to push both pot files (update also), run:
-#  $ python tools/scripts/manage_translations.py push --both
+# to push both pot files (update also) and ja translations, run:
+#  $ python tools/scripts/manage_translations.py push --both --lang ja
 #
 # to pull both translations for Japanese and French, run:
 #  $ python tools/scripts/manage_translations.py pull --both --lang ja,fr
@@ -128,17 +128,21 @@ def push(lang=None, both=None):
         (1) for angularjs - project_type should be gettext - {locale}.po format
         (2) for django - project_type should be podir - {locale}/{filename}.po format
         (3) only required languages should be kept enabled
+    This will update/overwrite PO file with translations found for input lang(s)
+    [!] POT and PO must remain in sync as messages would overwrite as per POT file
     """
-
-    command = "zanata push --project-config %(config)s --push-type both --force --disable-ssl-cert"
+    command = "zanata push --project-config %(config)s --push-type both --force --lang %(lang)s --disable-ssl-cert"
+    lang = lang[0] if lang and len(lang) > 0 else 'en-us'
 
     if both:
-        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS}, stdout=PIPE, stderr=PIPE, shell=True)
+        p = Popen(command % {'config': ZNTA_CONFIG_FRONTEND_TRANS, 'lang': lang},
+                  stdout=PIPE, stderr=PIPE, shell=True)
         output, errors = p.communicate()
         if _handle_response(output, errors):
             _print_zanata_project_url(ZNTA_CONFIG_FRONTEND_TRANS)
 
-    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS}, stdout=PIPE, stderr=PIPE, shell=True)
+    p = Popen(command % {'config': ZNTA_CONFIG_BACKEND_TRANS, 'lang': lang},
+              stdout=PIPE, stderr=PIPE, shell=True)
     output, errors = p.communicate()
     if _handle_response(output, errors):
         _print_zanata_project_url(ZNTA_CONFIG_BACKEND_TRANS)

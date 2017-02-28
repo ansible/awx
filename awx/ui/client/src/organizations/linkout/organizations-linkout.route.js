@@ -27,16 +27,6 @@ export default [{
                 });
                 return generateList.wrapPanel(html);
             },
-        },
-        'modalBody@': {
-            templateProvider: function(AddUserList, generateList) {
-                let html = generateList.build({
-                    list: AddUserList,
-                    mode: 'edit',
-                    listTitle: false
-                });
-                return html;
-            },
         }
     },
     params: {
@@ -44,14 +34,6 @@ export default [{
             value: {
                 order_by: 'username'
             }
-        },
-        add_user_search: {
-            value: {
-                order_by: 'username',
-                page_size: '5',
-            },
-            dynamic: true,
-            squash: true
         }
     },
     ncyBreadcrumb: {
@@ -73,12 +55,6 @@ export default [{
                 return qs.search(path, $stateParams.user_search);
             }
         ],
-        AddUsersDataset: ['AddUserList', 'QuerySet', '$stateParams', 'GetBasePath',
-            function(list, qs, $stateParams, GetBasePath) {
-                let path = GetBasePath(list.basePath) || list.basePath;
-                return qs.search(path, $stateParams.add_user_search);
-            }
-        ],
         OrgUserList: ['UserList', 'GetBasePath', '$stateParams', function(UserList, GetBasePath, $stateParams) {
             let list = _.cloneDeep(UserList);
             delete list.actions.add;
@@ -92,17 +68,6 @@ export default [{
                 }
             };
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
-            return list;
-        }],
-        AddUserList: ['UserList', function(UserList) {
-            let list = _.cloneDeep(UserList);
-            list.basePath = 'users';
-            list.iterator = 'add_user';
-            list.name = 'add_users';
-            list.multiSelect = true;
-            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
-            delete list.actions;
-            delete list.fieldActions;
             return list;
         }]
     }
@@ -269,7 +234,9 @@ export default [{
     params: {
         template_search: {
             value: {
-                project__organization: null
+                or__project__organization: null,
+                or__inventory__organization: null,
+                page_size: 20
             }
         }
     },
@@ -314,7 +281,8 @@ export default [{
         OrgJobTemplateDataset: ['OrgJobTemplateList', 'QuerySet', '$stateParams', 'GetBasePath',
             function(list, qs, $stateParams, GetBasePath) {
                 let path = GetBasePath(list.name);
-                $stateParams.template_search.project__organization = $stateParams.organization_id;
+                $stateParams.template_search.or__project__organization = $stateParams.organization_id;
+                $stateParams.template_search.or__inventory__organization = $stateParams.organization_id;
                 return qs.search(path, $stateParams.template_search);
             }
         ]
@@ -349,16 +317,6 @@ export default [{
                 });
                 return generateList.wrapPanel(html);
             },
-        },
-        'modalBody@': {
-            templateProvider: function(AddAdminList, generateList) {
-                let html = generateList.build({
-                    list: AddAdminList,
-                    mode: 'edit',
-                    listTitle: false
-                });
-                return html;
-            },
         }
     },
     data: {
@@ -379,12 +337,6 @@ export default [{
                 return qs.search(path, $stateParams[`user_search`]);
             }
         ],
-        AddAdminsDataset: ['AddAdminList', 'QuerySet', '$stateParams', 'GetBasePath',
-            function(list, qs, $stateParams, GetBasePath) {
-                let path = GetBasePath(list.basePath) || list.basePath;
-                return qs.search(path, $stateParams[`add_user_search`]);
-            }
-        ],
         OrgAdminList: ['UserList', 'GetBasePath', '$stateParams', function(UserList, GetBasePath, $stateParams) {
             let list = _.cloneDeep(UserList);
             delete list.actions.add;
@@ -399,17 +351,6 @@ export default [{
             };
             list.searchSize = "col-lg-12 col-md-12 col-sm-12 col-xs-12";
             list.listTitle = 'Admins';
-            return list;
-        }],
-        AddAdminList: ['UserList', function(UserList) {
-            let list = _.cloneDeep(UserList);
-            list.basePath = 'users';
-            list.iterator = 'add_user';
-            list.name = 'add_users';
-            list.multiSelect = true;
-            list.fields.username.ngClick = 'linkoutUser(add_user.id)';
-            delete list.actions;
-            delete list.fieldActions;
             return list;
         }]
     }

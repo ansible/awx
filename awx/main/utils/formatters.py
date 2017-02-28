@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 from logstash.formatter import LogstashFormatterVersion1
-from django.conf import settings
 from copy import copy
 import json
 import time
@@ -10,8 +9,11 @@ import time
 
 class LogstashFormatter(LogstashFormatterVersion1):
     def __init__(self, **kwargs):
+        settings_module = kwargs.pop('settings_module', None)
         ret = super(LogstashFormatter, self).__init__(**kwargs)
-        self.host_id = settings.CLUSTER_HOST_ID
+        if settings_module:
+            self.host_id = settings_module.CLUSTER_HOST_ID
+            self.tower_uuid = settings_module.LOG_AGGREGATOR_TOWER_UUID
         return ret
 
     def reformat_data_for_log(self, raw_data, kind=None):
@@ -56,6 +58,21 @@ class LogstashFormatter(LogstashFormatterVersion1):
                     adict[name] = subdict
             return adict
 
+        def convert_to_type(t, val):
+            if t is float:
+                val = val[:-1] if val.endswith('s') else val
+                try:
+                    return float(val)
+                except ValueError:
+                    return val
+            elif t is int:
+                try:
+                    return int(val)
+                except ValueError:
+                    return val
+            elif t is str:
+                return val
+
         if kind == 'job_events':
             data.update(data.get('event_data', {}))
             for fd in data:
@@ -81,12 +98,35 @@ class LogstashFormatter(LogstashFormatterVersion1):
             else:
                 data_for_log['facts'] = data
             data_for_log['module_name'] = module_name
+        elif kind == 'performance':
+            request = raw_data['python_objects']['request']
+            response = raw_data['python_objects']['response']
+
+            # Note: All of the below keys may not be in the response "dict"
+            # For example, X-API-Query-Time and X-API-Query-Count will only
+            # exist if SQL_DEBUG is turned on in settings.
+            headers = [
+                (float, 'X-API-Time'),  # may end with an 's' "0.33s"
+                (int, 'X-API-Query-Count'),
+                (float, 'X-API-Query-Time'), # may also end with an 's'
+                (str, 'X-API-Node'),
+            ]
+            data_for_log['x_api'] = {k: convert_to_type(t, response[k]) for (t, k) in headers if k in response}
+
+            data_for_log['request'] = {
+                'method': request.method,
+                'path': request.path,
+                'path_info': request.path_info,
+                'query_string': request.META['QUERY_STRING'],
+                'data': request.data,
+            }
+
         return data_for_log
 
     def get_extra_fields(self, record):
         fields = super(LogstashFormatter, self).get_extra_fields(record)
         if record.name.startswith('awx.analytics'):
-            log_kind = record.name.split('.')[-1]
+            log_kind = record.name[len('awx.analytics.'):]
             fields = self.reformat_data_for_log(fields, kind=log_kind)
         return fields
 
@@ -104,8 +144,12 @@ class LogstashFormatter(LogstashFormatterVersion1):
             # Extra Fields
             'level': record.levelname,
             'logger_name': record.name,
-            'cluster_host_id': self.host_id
         }
+
+        if getattr(self, 'tower_uuid', None):
+            message['tower_uuid'] = self.tower_uuid
+        if getattr(self, 'host_id', None):
+            message['cluster_host_id'] = self.host_id
 
         # Add extra fields
         message.update(self.get_extra_fields(record))

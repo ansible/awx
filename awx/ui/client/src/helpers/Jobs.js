@@ -88,21 +88,17 @@ export default
 
                 // Set the item type label
                 if (list.fields.type) {
-                    parent_scope.type_choices.every(function(choice) {
+                    parent_scope.type_choices.forEach(function(choice) {
                         if (choice.value === item.type) {
                             itm.type_label = choice.label;
-                            return false;
                         }
-                        return true;
                     });
                 }
                 // Set the job status label
-                parent_scope.status_choices.every(function(status) {
+                parent_scope.status_choices.forEach(function(status) {
                     if (status.value === item.status) {
                         itm.status_label = status.label;
-                        return false;
                     }
-                    return true;
                 });
 
                 if (list.name === 'completed_jobs' || list.name === 'running_jobs') {

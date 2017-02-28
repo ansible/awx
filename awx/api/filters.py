@@ -9,9 +9,11 @@ from django.core.exceptions import FieldError, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.fields import FieldDoesNotExist
-from django.db.models.fields.related import ForeignObjectRel
+from django.db.models.fields.related import ForeignObjectRel, ManyToManyField, ForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.encoding import force_text
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -88,8 +90,8 @@ class FieldLookupBackend(BaseFilterBackend):
         # those lookups combined with request.user.get_queryset(Model) to make
         # sure user cannot query using objects he could not view.
         new_parts = []
-        for n, name in enumerate(parts[:-1]):
 
+        for name in parts[:-1]:
             # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
             if model._meta.object_name in ('Project', 'InventorySource'):
                 name = {
@@ -99,15 +101,28 @@ class FieldLookupBackend(BaseFilterBackend):
                     'last_updated': 'last_job_run',
                 }.get(name, name)
 
-            new_parts.append(name)
+            if name == 'type' and 'polymorphic_ctype' in model._meta.get_all_field_names():
+                name = 'polymorphic_ctype'
+                new_parts.append('polymorphic_ctype__model')
+            else:
+                new_parts.append(name)
 
-            
             if name in getattr(model, 'PASSWORD_FIELDS', ()):
-                raise PermissionDenied('Filtering on password fields is not allowed.')
+                raise PermissionDenied(_('Filtering on password fields is not allowed.'))
             elif name == 'pk':
                 field = model._meta.pk
             else:
-                field = model._meta.get_field_by_name(name)[0]
+                name_alt = name.replace("_", "")
+                if name_alt in model._meta.fields_map.keys():
+                    field = model._meta.fields_map[name_alt]
+                    new_parts.pop()
+                    new_parts.append(name_alt)
+                else:
+                    field = model._meta.get_field_by_name(name)[0]
+                if isinstance(field, ForeignObjectRel) and getattr(field.field, '__prevent_search__', False):
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
+                elif getattr(field, '__prevent_search__', False):
+                    raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
             model = getattr(field, 'related_model', None) or field.model
 
         if parts:
@@ -127,14 +142,20 @@ class FieldLookupBackend(BaseFilterBackend):
             return to_python_boolean(value, allow_none=True)
         elif isinstance(field, models.BooleanField):
             return to_python_boolean(value)
-        elif isinstance(field, ForeignObjectRel):
+        elif isinstance(field, (ForeignObjectRel, ManyToManyField, GenericForeignKey, ForeignKey)):
             return self.to_python_related(value)
         else:
             return field.to_python(value)
 
     def value_to_python(self, model, lookup, value):
         field, new_lookup = self.get_field_from_lookup(model, lookup)
-        if new_lookup.endswith('__isnull'):
+
+        # Type names are stored without underscores internally, but are presented and
+        # and serialized over the API containing underscores so we remove `_`
+        # for polymorphic_ctype__model lookups.
+        if new_lookup.startswith('polymorphic_ctype__model'):
+            value = value.replace('_','')
+        elif new_lookup.endswith('__isnull'):
             value = to_python_boolean(value)
         elif new_lookup.endswith('__in'):
             items = []

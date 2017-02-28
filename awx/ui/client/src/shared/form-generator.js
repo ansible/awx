@@ -545,11 +545,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += " " + field.columnClass;
                     html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
+                    html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
+                    html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
-                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</div><div ng-show='!" + form.iterator + "." ;
+                    html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ng-show='!" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : "enabled";
-                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</div></div></div>";
+                    html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></div>";
                 }
                 return html;
             },
@@ -678,7 +679,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
 
                         if(field.reset && !field.disabled) {
                             var resetValue = "'" + field.reset+ "'";
-                            var resetMessage = i18n._('Reset');
+                            var resetMessage = i18n._('Revert');
                             html+= `<a class="Form-resetValue" ng-click="resetValue(${resetValue})">${resetMessage}</a>`;
                         }
 
@@ -693,6 +694,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += " " + field.columnClass;
                     html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + form.iterator + ".";
                     html += (field.flag) ? field.flag : "enabled";
+                    html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
                     html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><div ng-show='" + form.iterator + "." ;
                     html += (field.flag) ? field.flag : 'enabled';
                     html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</div><div ng-show='!" + form.iterator + "." ;
@@ -740,13 +742,17 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     html += (field.awFeature) ? "aw-feature=\"" + field.awFeature + "\" " : "";
                     html += ">\n";
 
+                    var definedInFileMessage = i18n._('This setting has been set manually in a settings file and is now disabled.');
+                    html += (field.definedInFile) ?
+                        `<span class="Form-tooltip--disabled">${definedInFileMessage}</span>` : ``;
+
                     // toggle switches
                     if(field.type === 'toggleSwitch') {
                         html += label();
                             html += `<div class="ScheduleToggle" ng-class="{'is-on': ${field.toggleSource}}" aw-tool-tip=""
-                            data-placement="undefined" data-tip-watch="undefined" data-original-title="" title="">
-                            <div ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</div>
-                            <div ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</div>
+                            data-placement="top">
+                            <button ng-show="${field.toggleSource}" class="ScheduleToggle-switch is-on" ng-click="toggleForm('${field.toggleSource}')">ON</button>
+                            <button ng-show="!${field.toggleSource}" class="ScheduleToggle-switch" ng-click="toggleForm('${field.toggleSource}')">OFF</button>
                         </div>`;
                     }
 
@@ -1010,6 +1016,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += (field.ngDisabled) ? this.attr(field, 'ngDisabled'): "";
                         html += (field.required) ? "required " : "";
                         html += (field.ngRequired) ? "ng-required=\"" + field.ngRequired +"\"" : "";
+                        html += (field.ngTrim !== undefined) ? "ng-trim=\"" + field.ngTrim +"\"" : "";
                         html += (field.readonly || field.showonly) ? "readonly " : "";
                         html += (field.awDropFile) ? "aw-drop-file " : "";
                         if(field.awRequiredWhen) {
@@ -1852,6 +1859,12 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                     width = "col-lg-8 col-md-8 col-sm-8 col-xs-12";
                 }
 
+                if(actionButtons.length>0){
+                    html += `<div class="list-actions">
+                            ${actionButtons}
+                        </div>`;
+                }
+
                 // smart-search directive
                 html += `
                 <div
@@ -1869,11 +1882,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                 </div>
                     `;
 
-                if(actionButtons.length>0){
-                    html += `<div class="list-actions">
-                            ${actionButtons}
-                        </div>`;
-                }
+
                 //html += "</div>";
 
                 // Message for when a search returns no results.  This should only get shown after a search is executed with no results.

@@ -1,28 +1,3 @@
-// Ignored fields are not surfaced in the UI's search key
-let isIgnored = function(key, value) {
-    let ignored = [
-        'type',
-        'url',
-        'related',
-        'summary_fields',
-        'object_roles',
-        'activity_stream',
-        'update',
-        'teams',
-        'users',
-        'owner_teams',
-        'owner_users',
-        'access_list',
-        'notification_templates_error',
-        'notification_templates_success',
-        'ad_hoc_command_events',
-        'fact_versions',
-        'variable_data',
-        'playbooks'
-    ];
-    return ignored.indexOf(key) > -1 || value.type === 'field';
-};
-
 export default
 class DjangoSearchModel {
     /*
@@ -36,21 +11,40 @@ class DjangoSearchModel {
         }
         @@property related ['field' ...]
     */
-    constructor(name, endpoint, baseFields, relations) {
-        let base = {};
+    constructor(name, baseFields, relatedSearchFields) {
+        function trimRelated(relatedSearchField){
+            return relatedSearchField.replace(/\__search$/, "");
+        }
         this.name = name;
-        this.related = _.reject(relations, isIgnored);
+        this.searchExamples = [];
+        this.related = _.uniq(_.map(relatedSearchFields, trimRelated));
+        // Remove "object" type fields from this list
+        for (var key in baseFields) {
+            if (baseFields.hasOwnProperty(key)) {
+                if (baseFields[key].type === 'object'){
+                    delete baseFields[key];
+                }
+            }
+        }
+        delete baseFields.url;
+        this.base = baseFields;
+        if(baseFields.id) {
+            this.searchExamples.push("id:>10");
+        }
+        // Loop across the base fields and try find one of type = string and one of type = datetime
+        let stringFound = false,
+            dateTimeFound = false;
+
         _.forEach(baseFields, (value, key) => {
-            if (!isIgnored(key, value)) {
-                base[key] = value;
+            if(!stringFound && value.type === 'string') {
+                this.searchExamples.push(key + ":foobar");
+                stringFound = true;
+            }
+            if(!dateTimeFound && value.type === 'datetime') {
+                this.searchExamples.push(key + ":>=\"2000-01-01T00:00:00Z\"");
+                this.searchExamples.push(key + ":<2000-01-01");
+                dateTimeFound = true;
             }
         });
-        this.base = base;
-    }
-
-    fields() {
-        let result = this.base;
-        result.related = this.related;
-        return result;
     }
 }

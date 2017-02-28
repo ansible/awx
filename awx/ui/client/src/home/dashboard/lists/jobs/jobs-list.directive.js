@@ -29,7 +29,7 @@ export default
                 // detailsUrl, status, name, time
                 scope.jobs = _.map(list, function(job){
                 return {
-                    detailsUrl: job.url.replace("api/v1", "#"),
+                    detailsUrl: job.type && job.type === 'workflow_job' ? job.url.replace("api/v1/workflow_jobs", "#/workflows") : job.url.replace("api/v1", "#"),
                     status: job.status,
                     name: job.name,
                     id: job.id,

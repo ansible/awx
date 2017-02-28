@@ -65,6 +65,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         description: list.fields.description
                     };
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.ngHref = '#/templates/job_template/{{job_template.id}}';
                     list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
 
@@ -77,6 +78,7 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                         description: list.fields.description
                     };
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.name.ngHref = '#/templates/workflow_job_template/{{workflow_template.id}}';
                     list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 case 'Users':
@@ -119,10 +121,39 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
 
             scope.$watch(list.name, function(){
                 _.forEach(scope[`${list.name}`], isSelected);
+                optionsRequestDataProcessing();
             });
 
+            scope.$on(`${list.iterator}_options`, function(event, data){
+                scope.options = data.data.actions.GET;
+                optionsRequestDataProcessing();
+            });
+
+            // iterate over the list and add fields like type label, after the
+            // OPTIONS request returns, or the list is sorted/paginated/searched
+            function optionsRequestDataProcessing(){
+                if(scope.list.name === 'projects'){
+                    if (scope[list.name] !== undefined) {
+                        scope[list.name].forEach(function(item, item_idx) {
+                            var itm = scope[list.name][item_idx];
+
+                            // Set the item type label
+                            if (list.fields.scm_type && scope.options &&
+                                scope.options.hasOwnProperty('scm_type')) {
+                                    scope.options.scm_type.choices.forEach(function(choice) {
+                                        if (choice[0] === item.scm_type) {
+                                            itm.type_label = choice[1];
+                                        }
+                                    });
+                            }
+
+                        });
+                    }
+                }
+            }
+
             function isSelected(item){
-                if(_.find(scope.allSelected, {id: item.id})){
+                if(_.find(scope.allSelected, {id: item.id, type: item.type})){
                     item.isSelected = true;
                 }
                 return item;

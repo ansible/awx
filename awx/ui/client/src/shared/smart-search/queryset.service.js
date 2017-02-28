@@ -1,42 +1,31 @@
-export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', '$cacheFactory', 'SmartSearchService',
-    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, $cacheFactory, SmartSearchService) {
+export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSearchModel', 'SmartSearchService',
+    function($q, Rest, ProcessErrors, $rootScope, Wait, DjangoSearchModel, SmartSearchService) {
         return {
             // kick off building a model for a specific endpoint
             // this is usually a list's basePath
             // unified_jobs is the exception, where we need to fetch many subclass OPTIONS and summary_fields
-            initFieldset(path, name, relations) {
-                // get or set $cachFactory.Cache object with id '$http'
-                let defer = $q.defer(),
-                    cache = $cacheFactory.get('$http') || $cacheFactory('$http');
-                defer.resolve(this.getCommonModelOptions(path, name, relations, cache));
+            initFieldset(path, name) {
+                let defer = $q.defer();
+                defer.resolve(this.getCommonModelOptions(path, name));
                 return defer.promise;
             },
 
-            getCommonModelOptions(path, name, relations, cache) {
+            getCommonModelOptions(path, name) {
                 let resolve, base,
                     defer = $q.defer();
 
-                // grab a single model from the cache, if present
-                if (cache.get(path)) {
-                    defer.resolve({
-                        models: {
-                            [name] : new DjangoSearchModel(name, path, cache.get(path), relations)
-                        },
-                        options: cache.get(path)
-                    });
-                } else {
-                    this.url = path;
-                    resolve = this.options(path)
-                        .then((res) => {
-                            base = res.data.actions.GET;
-                            defer.resolve({
-                                models: {
-                                    [name]: new DjangoSearchModel(name, path, base, relations)
-                                },
-                                options: res
-                            });
+                this.url = path;
+                resolve = this.options(path)
+                    .then((res) => {
+                        base = res.data.actions.GET;
+                        let relatedSearchFields = res.data.related_search_fields;
+                        defer.resolve({
+                            models: {
+                                [name]: new DjangoSearchModel(name, base, relatedSearchFields)
+                            },
+                            options: res
                         });
-                }
+                    });
                 return defer.promise;
             },
 
@@ -76,7 +65,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                         let concated = '';
                         angular.forEach(value, function(item){
                             if(item && typeof item === 'string') {
-                                item = item.replace(/"|'/g, "");
+                                item = decodeURIComponent(item).replace(/"|'/g, "");
                             }
                             concated += `${key}=${item}&`;
                         });
@@ -84,7 +73,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                     else {
                         if(value && typeof value === 'string') {
-                            value = value.replace(/"|'/g, "");
+                            value = decodeURIComponent(value).replace(/"|'/g, "");
                         }
                         return `${key}=${value}&`;
                     }
@@ -139,7 +128,7 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }
                 }
 
-                return {[paramString] : valueString};
+                return {[paramString] : encodeURIComponent(valueString)};
             },
             // decodes a django queryset param into a ui smart-search tag or set of tags
             decodeParam(value, key){
@@ -175,7 +164,10 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                             decodedParam = '<=' + decodedParam;
                             split = split.splice(0, split.length-1);
                         }
-                        return exclude ? `-${split.join('.')}:${decodedParam}` : `${split.join('.')}:${decodedParam}`;
+
+                        let uriDecodedParam = decodeURIComponent(decodedParam);
+
+                        return exclude ? `-${split.join('.')}:${uriDecodedParam}` : `${split.join('.')}:${uriDecodedParam}`;
                     }
                 };
 
@@ -264,13 +256,13 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
 
                         this.error(response.data, response.status);
 
-                        return response;
+                        throw response;
                     }.bind(this));
             },
             error(data, status) {
-                ProcessErrors($rootScope, data, status, null, {
+                ProcessErrors($rootScope, null, status, null, {
                     hdr: 'Error!',
-                    msg: 'Call to ' + this.url + '. GET returned: ' + status
+                    msg: "Invalid search term entered."
                 });
             }
         };

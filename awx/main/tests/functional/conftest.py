@@ -56,15 +56,6 @@ def clear_cache():
     cache.clear()
 
 
-@pytest.fixture(scope="session", autouse=False)
-def disable_signals():
-    '''
-    Disable all django model signals.
-    '''
-    mocked = mock.patch('django.dispatch.Signal.send', autospec=True)
-    mocked.start()
-
-
 @pytest.fixture(scope="session", autouse=True)
 def celery_memory_broker():
     '''

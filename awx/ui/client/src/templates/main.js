@@ -102,8 +102,9 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         job_template_search: {
                             value: {
                                 page_size: '5',
-                                type: 'job_template',
-                                order_by: 'name'
+                                order_by: 'name',
+                                inventory__isnull: false,
+                                credential__isnull: false
                             },
                             squash: true,
                             dynamic: true
@@ -451,6 +452,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                         WorkflowMakerJobTemplateList: ['TemplateList',
                             (TemplateList) => {
                                 let list = _.cloneDeep(TemplateList);
+                                delete list.actions;
                                 delete list.fields.type;
                                 delete list.fields.description;
                                 delete list.fields.smart_status;
@@ -459,6 +461,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
                                 list.fields.name.columnClass = "col-md-8";
                                 list.iterator = 'job_template';
                                 list.name = 'job_templates';
+                                list.basePath = "job_templates";
                                 list.fields.info = {
                                     ngInclude: "'/static/partials/job-template-details.html'",
                                     type: 'template',

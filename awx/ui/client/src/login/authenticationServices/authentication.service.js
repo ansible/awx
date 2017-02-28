@@ -61,7 +61,10 @@ export default
             deleteToken: function () {
                 return $http({
                     method: 'DELETE',
-                    url: GetBasePath('authtoken')
+                    url: GetBasePath('authtoken'),
+                    headers: {
+                        'Authorization': 'Token ' + this.getToken()
+                    }
                 });
             },
 

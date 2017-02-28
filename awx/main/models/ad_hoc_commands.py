@@ -83,10 +83,10 @@ class AdHocCommand(UnifiedJob, JobNotificationMixin):
         editable=False,
         through='AdHocCommandEvent',
     )
-    extra_vars = models.TextField(
+    extra_vars = prevent_search(models.TextField(
         blank=True,
         default='',
-    )
+    ))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

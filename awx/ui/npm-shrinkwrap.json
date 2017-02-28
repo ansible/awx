@@ -1391,9 +1391,9 @@
       "dev": true
     },
     "d3": {
-      "version": "3.5.17",
-      "from": "d3@>=3.3.13 <4.0.0",
-      "resolved": "https://registry.npmjs.org/d3/-/d3-3.5.17.tgz"
+      "version": "3.3.13",
+      "from": "d3@3.3.13",
+      "resolved": "https://registry.npmjs.org/d3/-/d3-3.3.13.tgz"
     },
     "dashdash": {
       "version": "1.14.1",

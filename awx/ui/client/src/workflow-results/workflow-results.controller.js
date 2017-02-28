@@ -88,6 +88,11 @@ export default ['workflowData',
                 runTimeElapsedTimer = workflowResultsService.createOneSecondTimer($scope.workflow.started, updateWorkflowJobElapsedTimer);
             }
 
+            if(workflowData.summary_fields && workflowData.summary_fields.workflow_job_template &&
+                workflowData.summary_fields.workflow_job_template.id){
+                    $scope.workflow_job_template_link = `/#/templates/workflow_job_template/${$scope.workflow.summary_fields.workflow_job_template.id}`;
+            }
+
             // stdout full screen toggle tooltip text
             $scope.toggleStdoutFullscreenTooltip = i18n._("Expand Output");
 
@@ -125,6 +130,9 @@ export default ['workflowData',
         }
 
         $scope.toggleStdoutFullscreen = function() {
+
+            $scope.$broadcast('workflowDetailsResized');
+
             $scope.stdoutFullScreen = !$scope.stdoutFullScreen;
 
             if ($scope.stdoutFullScreen === true) {

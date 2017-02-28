@@ -22,7 +22,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.core.exceptions import FieldError
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from django.db import IntegrityError, transaction, connection
 from django.shortcuts import get_object_or_404
 from django.utils.encoding import smart_text, force_text
@@ -518,7 +518,7 @@ class AuthView(APIView):
     def get(self, request):
         data = OrderedDict()
         err_backend, err_message = request.session.get('social_auth_error', (None, None))
-        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS).items()
+        auth_backends = load_backends(settings.AUTHENTICATION_BACKENDS, force_load=True).items()
         # Return auth backends in consistent order: Google, GitHub, SAML.
         auth_backends.sort(key=lambda x: 'g' if x[0] == 'google-oauth2' else x[0])
         for name, backend in auth_backends:
@@ -646,15 +646,16 @@ class OrganizationCountsMixin(object):
             self.request.user, 'read_role').values('organization').annotate(
             Count('organization')).order_by('organization')
 
-        JT_reference = 'project__organization'
-        db_results['job_templates'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').exclude(job_type='scan').values(JT_reference).annotate(
-            Count(JT_reference)).order_by(JT_reference)
+        JT_project_reference = 'project__organization'
+        JT_inventory_reference = 'inventory__organization'
+        db_results['job_templates_project'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').exclude(
+            project__organization=F(JT_inventory_reference)).values(JT_project_reference).annotate(
+            Count(JT_project_reference)).order_by(JT_project_reference)
 
-        JT_scan_reference = 'inventory__organization'
-        db_results['job_templates_scan'] = JobTemplate.accessible_objects(
-            self.request.user, 'read_role').filter(job_type='scan').values(JT_scan_reference).annotate(
-            Count(JT_scan_reference)).order_by(JT_scan_reference)
+        db_results['job_templates_inventory'] = JobTemplate.accessible_objects(
+            self.request.user, 'read_role').values(JT_inventory_reference).annotate(
+            Count(JT_inventory_reference)).order_by(JT_inventory_reference)
 
         db_results['projects'] = project_qs\
             .values('organization').annotate(Count('organization')).order_by('organization')
@@ -672,16 +673,16 @@ class OrganizationCountsMixin(object):
                 'inventories': 0, 'teams': 0, 'users': 0, 'job_templates': 0,
                 'admins': 0, 'projects': 0}
 
-        for res in db_results:
-            if res == 'job_templates':
-                org_reference = JT_reference
-            elif res == 'job_templates_scan':
-                org_reference = JT_scan_reference
+        for res, count_qs in db_results.items():
+            if res == 'job_templates_project':
+                org_reference = JT_project_reference
+            elif res == 'job_templates_inventory':
+                org_reference = JT_inventory_reference
             elif res == 'users':
                 org_reference = 'id'
             else:
                 org_reference = 'organization'
-            for entry in db_results[res]:
+            for entry in count_qs:
                 org_id = entry[org_reference]
                 if org_id in count_context:
                     if res == 'users':
@@ -690,11 +691,13 @@ class OrganizationCountsMixin(object):
                         continue
                     count_context[org_id][res] = entry['%s__count' % org_reference]
 
-        # Combine the counts for job templates with scan job templates
+        # Combine the counts for job templates by project and inventory
         for org in org_id_list:
             org_id = org['id']
-            if 'job_templates_scan' in count_context[org_id]:
-                count_context[org_id]['job_templates'] += count_context[org_id].pop('job_templates_scan')
+            count_context[org_id]['job_templates'] = 0
+            for related_path in ['job_templates_project', 'job_templates_inventory']:
+                if related_path in count_context[org_id]:
+                    count_context[org_id]['job_templates'] += count_context[org_id].pop(related_path)
 
         full_context['related_field_counts'] = count_context
 
@@ -1865,6 +1868,16 @@ class GroupChildrenList(EnforceParentRelationshipMixin, SubListCreateAttachDetac
     relationship = 'children'
     enforce_parent_relationship = 'inventory'
 
+    def unattach(self, request, *args, **kwargs):
+        sub_id = request.data.get('id', None)
+        if sub_id is not None:
+            return super(GroupChildrenList, self).unattach(request, *args, **kwargs)
+        parent = self.get_parent_object()
+        if not request.user.can_access(self.model, 'delete', parent):
+            raise PermissionDenied()
+        parent.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class GroupPotentialChildrenList(SubListAPIView):
 
@@ -2484,7 +2497,7 @@ class JobTemplateSurveySpec(GenericAPIView):
                 return Response(dict(error=_("'required' missing from survey question %s.") % str(idx)), status=status.HTTP_400_BAD_REQUEST)
 
             if survey_item["type"] == "password":
-                if "default" in survey_item and survey_item["default"].startswith('$encrypted$'):
+                if survey_item.get("default") and survey_item["default"].startswith('$encrypted$'):
                     old_spec = obj.survey_spec
                     for old_item in old_spec['spec']:
                         if old_item['variable'] == survey_item['variable']:
@@ -3039,6 +3052,9 @@ class WorkflowJobTemplateWorkflowNodesList(WorkflowsEnforcementMixin, SubListCre
             data[fd] = None
         return super(WorkflowJobTemplateWorkflowNodesList, self).update_raw_data(data)
 
+    def get_queryset(self):
+        return super(WorkflowJobTemplateWorkflowNodesList, self).get_queryset().order_by('id')
+
 
 class WorkflowJobTemplateJobsList(WorkflowsEnforcementMixin, SubListAPIView):
 
@@ -3148,6 +3164,9 @@ class WorkflowJobWorkflowNodesList(WorkflowsEnforcementMixin, SubListAPIView):
     relationship = 'workflow_job_nodes'
     parent_key = 'workflow_job'
     new_in_310 = True
+
+    def get_queryset(self):
+        return super(WorkflowJobWorkflowNodesList, self).get_queryset().order_by('id')
 
 
 class WorkflowJobCancel(WorkflowsEnforcementMixin, RetrieveAPIView):

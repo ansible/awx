@@ -28,6 +28,10 @@ export default ['$log', 'moment', function($log, moment){
 
                 // ansi classes
                 line = line.replace(/\[1;im/g, '<span class="JobResultsStdOut-cappedLine">');
+                line = line.replace(/\[0;30m/g, '<span class="ansi30">');
+                line = line.replace(/\[1;30m/g, '<span class="ansi1 ansi30">');
+                line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
+                line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[1;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;31m/g, '<span class="ansi1 ansi31">');
                 line = line.replace(/\[0;32m/g, '<span class="ansi32">');
@@ -36,6 +40,7 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/\[0;33m/g, '<span class="ansi33">');
                 line = line.replace(/\[0;34m/g, '<span class="ansi34">');
                 line = line.replace(/\[0;35m/g, '<span class="ansi35">');
+                line = line.replace(/\[1;35m/g, '<span class="ansi35">');
                 line = line.replace(/\[0;36m/g, '<span class="ansi36">');
                 line = line.replace(/(<host.*?>)\s/g, '$1');
 
@@ -47,6 +52,8 @@ export default ['$log', 'moment', function($log, moment){
                 line = line.replace(/u001b/g, '');
 
                 // ansi classes
+                line = line.replace(/\[0;30m/g, '');
+                line = line.replace(/\[1;30m/g, '');
                 line = line.replace(/\[1;31m/g, '');
                 line = line.replace(/\[0;31m/g, '');
                 line = line.replace(/\[0;32m/g, '');
@@ -70,7 +77,7 @@ export default ['$log', 'moment', function($log, moment){
                 return `"`;
             }
             else{
-                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobDetail.host-event.stdout({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
+                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobDetail.host-event.json({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
             }
 
         },
@@ -198,6 +205,45 @@ export default ['$log', 'moment', function($log, moment){
                 return emptySpan;
             }
         },
+        distributeColors: function(lines) {
+            var colorCode;
+            return lines.map(line => {
+
+                if (colorCode) {
+                    line = colorCode + line;
+                }
+
+                if (line.indexOf("[0m") === -1) {
+                    if (line.indexOf("[1;31m") > -1) {
+                        colorCode = "[1;31m";
+                    } else if (line.indexOf("[1;30m") > -1) {
+                        colorCode = "[1;30m";
+                    } else if (line.indexOf("[0;31m") > -1) {
+                        colorCode = "[0;31m";
+                    } else if (line.indexOf("[0;32m=") > -1) {
+                        colorCode = "[0;32m=";
+                    } else if (line.indexOf("[0;32m1") > -1) {
+                        colorCode = "[0;32m1";
+                    } else if (line.indexOf("[0;32m") > -1) {
+                        colorCode = "[0;32m";
+                    } else if (line.indexOf("[0;33m") > -1) {
+                        colorCode = "[0;33m";
+                    } else if (line.indexOf("[0;34m") > -1) {
+                        colorCode = "[0;34m";
+                    } else if (line.indexOf("[0;35m") > -1) {
+                        colorCode = "[0;35m";
+                    }  else if (line.indexOf("[1;35m") > -1) {
+                        colorCode = "[1;35m";
+                    } else if (line.indexOf("[0;36m") > -1) {
+                        colorCode = "[0;36m";
+                    }
+                } else {
+                    colorCode = null;
+                }
+
+                return line;
+            });
+        },
         getLineArr: function(event) {
             let lineNums = _.range(event.start_line + 1,
                 event.end_line + 1);
@@ -218,6 +264,8 @@ export default ['$log', 'moment', function($log, moment){
                     lines.push("");
                 }
             }
+
+            lines = this.distributeColors(lines);
 
             // hack around no-carriage return issues
             if (lineNums.length === lines.length) {

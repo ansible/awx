@@ -19,6 +19,18 @@ logger = logging.getLogger('awx.conf.fields')
 #   appropriate Python type to be used in settings.
 
 
+class CharField(CharField):
+
+    def to_representation(self, value):
+        # django_rest_frameworks' default CharField implementation casts `None`
+        # to a string `"None"`:
+        #
+        # https://github.com/tomchristie/django-rest-framework/blob/cbad236f6d817d992873cd4df6527d46ab243ed1/rest_framework/fields.py#L761
+        if value is None:
+            return None
+        return super(CharField, self).to_representation(value)
+
+
 class StringListField(ListField):
 
     child = CharField()

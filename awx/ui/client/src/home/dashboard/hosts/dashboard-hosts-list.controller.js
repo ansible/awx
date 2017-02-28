@@ -43,6 +43,9 @@ export default ['$scope', '$state', '$stateParams', 'GetBasePath', 'DashboardHos
         };
 
         $scope.toggleHostEnabled = function(host) {
+            if (host.has_inventory_sources){
+                return;
+            }
             DashboardHostService.setHostStatus(host, !host.enabled)
                 .then(function(res) {
                     var index = _.findIndex($scope.hosts, function(o) {

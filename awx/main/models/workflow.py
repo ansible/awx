@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 #from django import settings as tower_settings
 
 # AWX
-from awx.main.models import UnifiedJobTemplate, UnifiedJob
+from awx.main.models import prevent_search, UnifiedJobTemplate, UnifiedJob
 from awx.main.models.notifications import (
     NotificationTemplate,
     JobNotificationMixin
@@ -280,10 +280,10 @@ class WorkflowJobOptions(BaseModel):
     class Meta:
         abstract = True
 
-    extra_vars = models.TextField(
+    extra_vars = prevent_search(models.TextField(
         blank=True,
         default='',
-    )
+    ))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 

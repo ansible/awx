@@ -343,6 +343,9 @@ class BaseAccess(object):
                 if validation_errors:
                     user_capabilities[display_method] = False
                     continue
+            elif display_method == 'copy' and isinstance(obj, WorkflowJobTemplate) and obj.organization_id is None:
+                user_capabilities[display_method] = self.user.is_superuser
+                continue
             elif display_method in ['start', 'schedule'] and isinstance(obj, Group):
                 if obj.inventory_source and not obj.inventory_source._can_update():
                     user_capabilities[display_method] = False
@@ -355,6 +358,9 @@ class BaseAccess(object):
             # Grab the answer from the cache, if available
             if hasattr(obj, 'capabilities_cache') and display_method in obj.capabilities_cache:
                 user_capabilities[display_method] = obj.capabilities_cache[display_method]
+                if self.user.is_superuser and not user_capabilities[display_method]:
+                    # Cache override for models with bad orphaned state
+                    user_capabilities[display_method] = True
                 continue
 
             # Aliases for going form UI language to API language
@@ -1223,6 +1229,13 @@ class JobTemplateAccess(BaseAccess):
                                  "active_jobs": active_jobs})
         return True
 
+    @check_superuser
+    def can_attach(self, obj, sub_obj, relationship, data, skip_sub_obj_read_check=False):
+        if isinstance(sub_obj, NotificationTemplate):
+            return self.check_related('organization', Organization, {}, obj=sub_obj, mandatory=True)
+        return super(JobTemplateAccess, self).can_attach(
+            obj, sub_obj, relationship, data, skip_sub_obj_read_check=skip_sub_obj_read_check)
+
 
 class JobAccess(BaseAccess):
     '''
@@ -1952,13 +1965,12 @@ class ScheduleAccess(BaseAccess):
         qs = qs.prefetch_related('unified_job_template')
         if self.user.is_superuser or self.user.is_system_auditor:
             return qs.all()
-        job_template_qs = self.user.get_queryset(JobTemplate)
-        inventory_source_qs = self.user.get_queryset(InventorySource)
-        project_qs = self.user.get_queryset(Project)
-        unified_qs = UnifiedJobTemplate.objects.filter(jobtemplate__in=job_template_qs) | \
-            UnifiedJobTemplate.objects.filter(Q(project__in=project_qs)) | \
-            UnifiedJobTemplate.objects.filter(Q(inventorysource__in=inventory_source_qs))
-        return qs.filter(unified_job_template__in=unified_qs)
+
+        unified_pk_qs = UnifiedJobTemplate.accessible_pk_qs(self.user, 'read_role')
+        inv_src_qs = InventorySource.objects.filter(inventory_id=Inventory._accessible_pk_qs(Inventory, self.user, 'read_role'))
+        return qs.filter(
+            Q(unified_job_template_id__in=unified_pk_qs) |
+            Q(unified_job_template_id__in=inv_src_qs.values_list('pk', flat=True)))
 
     @check_superuser
     def can_read(self, obj):

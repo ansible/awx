@@ -180,8 +180,16 @@ def rbac_activity_stream(instance, sender, **kwargs):
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents
-                if role is not None and role.content_type is not None:
-                    parent = role.content_type.name + "." + role.role_field
+                if role is not None:
+                    if role.content_type is None:
+                        if role.is_singleton():
+                            parent = 'singleton:' + role.singleton_name
+                        else:
+                            # Ill-defined role, may need additional logic in the
+                            # case of future expansions of the RBAC system
+                            parent = str(role.role_field)
+                    else:
+                        parent = role.content_type.name + "." + role.role_field
                     # Get the list of implicit parents that were defined at the class level.
                     # We have to take this list from the class property to avoid including parents
                     # that may have been added since the creation of the ImplicitRoleField
@@ -210,18 +218,24 @@ def cleanup_detached_labels_on_deleted_parent(sender, instance, **kwargs):
             l.delete()
 
 
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
-m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
-post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
-post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+def connect_computed_field_signals():
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.parents.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
+    m2m_changed.connect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_save.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    post_delete.connect(emit_update_inventory_on_created_or_deleted, sender=Job)
+
+
+connect_computed_field_signals()
+
+
 post_save.connect(emit_job_event_detail, sender=JobEvent)
 post_save.connect(emit_ad_hoc_command_event_detail, sender=AdHocCommandEvent)
 m2m_changed.connect(rebuild_role_ancestor_list, Role.parents.through)
@@ -338,6 +352,24 @@ def disable_activity_stream():
         yield
     finally:
         activity_stream_enabled.enabled = previous_value
+
+
+@contextlib.contextmanager
+def disable_computed_fields():
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Host)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Group)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.hosts.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.parents.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Host.inventory_sources.through)
+    m2m_changed.disconnect(emit_update_inventory_computed_fields, sender=Group.inventory_sources.through)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=InventorySource)
+    post_save.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    post_delete.disconnect(emit_update_inventory_on_created_or_deleted, sender=Job)
+    yield
+    connect_computed_field_signals()
 
 
 model_serializer_mapping = {

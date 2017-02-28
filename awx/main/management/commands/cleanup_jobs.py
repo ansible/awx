@@ -12,7 +12,17 @@ from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, AdHocCommand, ProjectUpdate, InventoryUpdate, SystemJob, WorkflowJob, Notification
+from awx.main.models import (
+    Job, AdHocCommand, ProjectUpdate, InventoryUpdate,
+    SystemJob, WorkflowJob, Notification
+)
+from awx.main.signals import ( # noqa
+    emit_update_inventory_on_created_or_deleted,
+    emit_update_inventory_computed_fields,
+    disable_activity_stream,
+    disable_computed_fields
+)
+from django.db.models.signals import post_save, post_delete, m2m_changed # noqa
 
 
 class Command(NoArgsCommand):
@@ -237,10 +247,11 @@ class Command(NoArgsCommand):
                 models_to_cleanup.add(m)
         if not models_to_cleanup:
             models_to_cleanup.update(model_names)
-        for m in model_names:
-            if m in models_to_cleanup:
-                skipped, deleted = getattr(self, 'cleanup_%s' % m)()
-                if self.dry_run:
-                    self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
-                else:
-                    self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)
+        with disable_activity_stream(), disable_computed_fields():
+            for m in model_names:
+                if m in models_to_cleanup:
+                    skipped, deleted = getattr(self, 'cleanup_%s' % m)()
+                    if self.dry_run:
+                        self.logger.log(99, '%s: %d would be deleted, %d would be skipped.', m.replace('_', ' '), deleted, skipped)
+                    else:
+                        self.logger.log(99, '%s: %d deleted, %d skipped.', m.replace('_', ' '), deleted, skipped)

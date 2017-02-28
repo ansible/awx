@@ -41,6 +41,7 @@ export default
             $scope.fileName = N_("No file selected.");
             $scope.title = $rootScope.licenseMissing ? ("Tower " + i18n._("License")) : i18n._("License Management");
             Wait('start');
+            ConfigService.delete();
             ConfigService.getConfig().then(function(config){
                 $scope.license = config;
                 $scope.license.version = config.version.split('-')[0];

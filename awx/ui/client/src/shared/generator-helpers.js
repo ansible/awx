@@ -449,8 +449,8 @@ angular.module('GeneratorHelpers', [systemStatus.name])
     };
 }])
 
-.factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', 'BuildLink', 'Template',
-    function (Attr, Icon, DropDown, Badge, BadgeCount, BuildLink, Template) {
+.factory('Column', ['i18n', 'Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', 'BuildLink', 'Template',
+    function (i18n, Attr, Icon, DropDown, Badge, BadgeCount, BuildLink, Template) {
         return function (params) {
             var list = params.list,
                 fld = params.fld,
@@ -507,18 +507,19 @@ angular.module('GeneratorHelpers', [systemStatus.name])
             } else if (field.type === 'toggle') {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";
-                html += " " + field.columnClass;
+                html += field.columnClass ? " " + field.columnClass : "";
                 html += "\"><div class='ScheduleToggle' ng-class='{\"is-on\": " + list.iterator + ".";
-                html += (field.flag) ? field.flag : "enabled\}' ";
-                html += "aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ";
+                html += (field.flag) ? field.flag : "enabled";
+                html += (field.ngDisabled) ? ', "ScheduleToggle--disabled": ' + field.ngDisabled : '';
+                html += "\}' aw-tool-tip='" + field.awToolTip + "' data-placement='" + field.dataPlacement + "' data-tip-watch='" + field.dataTipWatch + "'><button ";
                 html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
                 html += "ng-show='" + list.iterator + "." ;
                 html += (field.flag) ? field.flag : 'enabled';
-                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>ON</button><button ";
+                html += "' class='ScheduleToggle-switch is-on' ng-click='" + field.ngClick + "'>" + i18n._("ON") + "</button><button ";
                 html += (field.ngDisabled) ? `ng-disabled="${field.ngDisabled}" ` : "";
                 html += "ng-show='!" + list.iterator + "." ;
                 html += (field.flag) ? field.flag : "enabled";
-                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>OFF</button></div></td>";
+                html += "' class='ScheduleToggle-switch' ng-click='" + field.ngClick + "'>" + i18n._("OFF") + "</button></div></td>";
             } else {
                 html += "<td class=\"List-tableCell " + fld + "-column";
                 html += (field['class']) ? " " + field['class'] : "";

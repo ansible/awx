@@ -103,7 +103,7 @@ angular.module('inventory', [
                                     mode: 'edit'
                                 });
                                 html = generateList.wrapPanel(html);
-                                return generateList.insertFormView() + html;
+                                return "<div class='InventoryManage-container'>" + generateList.insertFormView() + html + "</div>";
                             },
                             controller: 'schedulerListController'
                         }

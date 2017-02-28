@@ -9,6 +9,7 @@ import time
 # Django
 from django.conf import settings
 from django.db import connection
+from django.db.models.fields import FieldDoesNotExist
 from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -26,6 +27,7 @@ from rest_framework import status
 from rest_framework import views
 
 # AWX
+from awx.api.filters import FieldLookupBackend
 from awx.main.models import *  # noqa
 from awx.main.utils import * # noqa
 from awx.api.serializers import ResourceAccessListElementSerializer
@@ -41,6 +43,7 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView',
            'DeleteLastUnattachLabelMixin',]
 
 logger = logging.getLogger('awx.api.generics')
+analytics_logger = logging.getLogger('awx.analytics.performance')
 
 
 def get_view_name(cls, suffix=None):
@@ -117,6 +120,8 @@ class APIView(views.APIView):
             q_times = [float(q['time']) for q in connection.queries[queries_before:]]
             response['X-API-Query-Count'] = len(q_times)
             response['X-API-Query-Time'] = '%0.3fs' % sum(q_times)
+
+        analytics_logger.info("api response", extra=dict(python_objects=dict(request=request, response=response)))
         return response
 
     def get_authenticate_header(self, request):
@@ -274,22 +279,48 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
 
     @property
     def related_search_fields(self):
-        fields = []
+        def skip_related_name(name):
+            return (
+                name is None or name.endswith('_role') or name.startswith('_') or
+                name.startswith('deprecated_') or name.endswith('_set') or
+                name == 'polymorphic_ctype')
+
+        fields = set([])
         for field in self.model._meta.fields:
-            if field.name.endswith('_role'):
+            if skip_related_name(field.name):
                 continue
             if getattr(field, 'related_model', None):
-                fields.append('{}__search'.format(field.name))
+                fields.add('{}__search'.format(field.name))
         for rel in self.model._meta.related_objects:
-            name = rel.get_accessor_name()
-            if name.endswith('_set'):
+            name = rel.related_model._meta.verbose_name.replace(" ", "_")
+            if skip_related_name(name):
                 continue
-            fields.append('{}__search'.format(name))
-        for relationship in self.model._meta.local_many_to_many:
+            fields.add('{}__search'.format(name))
+        m2m_rel = []
+        m2m_rel += self.model._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJobTemplate) and self.model != UnifiedJobTemplate:
+            m2m_rel += UnifiedJobTemplate._meta.local_many_to_many
+        if issubclass(self.model, UnifiedJob) and self.model != UnifiedJob:
+            m2m_rel += UnifiedJob._meta.local_many_to_many
+        for relationship in m2m_rel:
+            if skip_related_name(relationship.name):
+                continue
             if relationship.related_model._meta.app_label != 'main':
                 continue
-            fields.append('{}__search'.format(relationship.name))
-        return fields
+            fields.add('{}__search'.format(relationship.name))
+        fields = list(fields)
+
+        allowed_fields = []
+        for field in fields:
+            try:
+                FieldLookupBackend().get_field_from_lookup(self.model, field)
+            except PermissionDenied:
+                pass
+            except FieldDoesNotExist:
+                allowed_fields.append(field)
+            else:
+                allowed_fields.append(field)
+        return allowed_fields
 
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):

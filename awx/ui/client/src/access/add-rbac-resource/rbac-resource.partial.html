@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                <div id="AddPermissions-users" class="AddPermissions-list" ng-if="usersSelected">
+                <div id="AddPermissions-users" class="AddPermissions-list" ng-show="usersSelected">
                     <rbac-multiselect-list view="Users" all-selected="allSelected" dataset="usersDataset"></rbac-multiselect-list>
                 </div>
                 <div id="AddPermissions-teams" class="AddPermissions-list" ng-if="teamsSelected">
@@ -62,7 +62,7 @@
                     <translate>Please assign roles to the selected users/teams</translate>
                     <div class="AddPermissions-keyToggle btn"
                         ng-class="{'is-active': showKeyPane}"
-                        ng-click="toggleKeyPane()">
+                        ng-click="toggleKeyPane()" translate>
                         Key
                     </div>
                 </div>
@@ -104,13 +104,13 @@
                 <div class="buttons Form-buttons AddPermissions-buttons">
                     <button type="button"
                         class="btn btn-sm Form-cancelButton"
-                        ng-click="closeModal()">
+                        ng-click="closeModal()" translate>
                         Cancel
                     </button>
                     <button type="button"
                         class="btn btn-sm Form-saveButton"
                         ng-click="updatePermissions()"
-                        ng-disabled="userRoleForm.$invalid || !allSelected || !allSelected.length">
+                        ng-disabled="userRoleForm.$invalid || !allSelected || !allSelected.length" translate>
                         Save
                     </button>
                 </div>

@@ -382,8 +382,11 @@ var tower = angular.module('Tower', [
                             Authorization.restoreUserInfo(); //user must have hit browser refresh
                         }
                         if (next && (next.name !== "signIn"  && next.name !== "signOut" && next.name !== "license")) {
-                            // if not headed to /login or /logout, then check the license
-                            CheckLicense.test(event);
+                            if($rootScope.configReady === true){
+                                // if not headed to /login or /logout, then check the license
+                                CheckLicense.test(event);
+                            }
+
                         }
                     }
                     activateTab();

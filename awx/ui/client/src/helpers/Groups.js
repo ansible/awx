@@ -78,7 +78,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', listGenerator.name
                  scope.removeSourceReady = scope.$on('SourceReady', function(e, source) {
 
                     // Get the ID from the correct summary field
-                    var update_id = (source.current_update) ? source.summary_fields.current_update.id : source.summary_fields.last_update.id;
+                    var update_id = (source.summary_fields.current_update) ? source.summary_fields.current_update.id : source.summary_fields.last_update.id;
 
                     $state.go('inventorySyncStdout', {id: update_id});
 

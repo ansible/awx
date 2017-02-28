@@ -70,8 +70,11 @@ class CallbackBrokerWorker(ConsumerMixin):
                          callbacks=[self.process_task])]
 
     def process_task(self, body, message):
-        if "uuid" in body:
-            queue = UUID(body['uuid']).int % settings.JOB_EVENT_WORKERS
+        if "uuid" in body and body['uuid']:
+            try:
+                queue = UUID(body['uuid']).int % settings.JOB_EVENT_WORKERS
+            except Exception:
+                queue = self.total_messages % settings.JOB_EVENT_WORKERS
         else:
             queue = self.total_messages % settings.JOB_EVENT_WORKERS
         self.write_queue_worker(queue, body)

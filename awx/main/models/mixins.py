@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User # noqa
 
 # AWX
+from awx.main.models.base import prevent_search
 from awx.main.models.rbac import (
     Role, RoleAncestorEntry, get_roles_on_resource
 )
@@ -86,10 +87,10 @@ class SurveyJobTemplateMixin(models.Model):
     survey_enabled = models.BooleanField(
         default=False,
     )
-    survey_spec = JSONField(
+    survey_spec = prevent_search(JSONField(
         blank=True,
         default={},
-    )
+    ))
 
     def survey_password_variables(self):
         vars = []
@@ -215,11 +216,11 @@ class SurveyJobMixin(models.Model):
     class Meta:
         abstract = True
 
-    survey_passwords = JSONField(
+    survey_passwords = prevent_search(JSONField(
         blank=True,
         default={},
         editable=False,
-    )
+    ))
 
     def display_extra_vars(self):
         '''

@@ -22,6 +22,7 @@ tower/tower_warnings.log
 celerybeat-schedule
 awx/ui/static
 awx/ui/build_test
+awx/ui/client/languages
 
 # Tower setup playbook testing
 setup/test/roles/postgresql
@@ -112,3 +113,4 @@ local/
 awx/lib/.deps_built
 awx/lib/site-packages
 venv/*
+use_dev_supervisor.txt

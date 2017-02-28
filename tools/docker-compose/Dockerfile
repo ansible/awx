@@ -19,6 +19,7 @@ RUN mkdir -p /etc/tower
 RUN mkdir -p /data/db
 ADD tools/docker-compose/license /etc/tower/license
 RUN pip2 install honcho
+RUN pip2 install supervisor
 RUN curl -LO https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 && chmod +x ./dumb-init_1.1.3_amd64 && mv ./dumb-init_1.1.3_amd64 /usr/bin/dumb-init
 ADD tools/docker-compose/ansible-tower.egg-link /tmp/ansible-tower.egg-link
 ADD tools/docker-compose/tower-manage /usr/local/bin/tower-manage

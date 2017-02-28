@@ -46,6 +46,7 @@ function($compile, CreateDialog, Wait, ParseTypeChange) {
         label: "Launch",
         onClick: function() {
           scope.$emit(callback);
+          $('#password-modal').dialog('close');
         },
         icon: "fa-check",
         "class": "btn btn-primary",

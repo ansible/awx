@@ -24,11 +24,15 @@ export default ['i18n', function(i18n) {
                 reset: 'SOCIAL_AUTH_SAML_SP_ENTITY_ID'
             },
             SOCIAL_AUTH_SAML_SP_PUBLIC_CERT: {
-                type: 'text',
+                type: 'textarea',
+                rows: 6,
+                elementClass: 'Form-monospace',
                 reset: 'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT'
             },
             SOCIAL_AUTH_SAML_SP_PRIVATE_KEY: {
-                type: 'sensitive',
+                type: 'textarea',
+                rows: 6,
+                elementClass: 'Form-monospace',
                 hasShowInputButton: true,
                 reset: 'SOCIAL_AUTH_SAML_SP_PRIVATE_KEY'
             },

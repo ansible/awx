@@ -32,8 +32,7 @@ import pexpect
 
 # Celery
 from celery import Task, task
-from celery.signals import celeryd_init, worker_ready
-from celery import current_app
+from celery.signals import celeryd_init, worker_process_init
 
 # Django
 from django.conf import settings
@@ -54,6 +53,8 @@ from awx.main.task_engine import TaskEnhancer
 from awx.main.utils import (get_ansible_version, get_ssh_version, decrypt_field, update_scm_url,
                             check_proot_installed, build_proot_temp_dir, wrap_args_with_proot,
                             get_system_task_capacity, OutputEventFilter, parse_yaml_or_json)
+from awx.main.utils.reload import restart_local_services
+from awx.main.utils.handlers import configure_external_logger
 from awx.main.consumers import emit_channel_notification
 
 __all__ = ['RunJob', 'RunSystemJob', 'RunProjectUpdate', 'RunInventoryUpdate',
@@ -86,41 +87,10 @@ def celery_startup(conf=None, **kwargs):
             logger.error("Failed to rebuild schedule {}: {}".format(sch, e))
 
 
-def _setup_tower_logger():
-    global logger
-    from django.utils.log import configure_logging
-    LOGGING_DICT = settings.LOGGING
-    if settings.LOG_AGGREGATOR_ENABLED:
-        LOGGING_DICT['handlers']['http_receiver']['class'] = 'awx.main.utils.handlers.HTTPSHandler'
-        LOGGING_DICT['handlers']['http_receiver']['async'] = False
-        if 'awx' in settings.LOG_AGGREGATOR_LOGGERS:
-            if 'http_receiver' not in LOGGING_DICT['loggers']['awx']['handlers']:
-                LOGGING_DICT['loggers']['awx']['handlers'] += ['http_receiver']
-    configure_logging(settings.LOGGING_CONFIG, LOGGING_DICT)
-    logger = logging.getLogger('awx.main.tasks')
-
-
-@worker_ready.connect
+@worker_process_init.connect
 def task_set_logger_pre_run(*args, **kwargs):
     cache.close()
-    if settings.LOG_AGGREGATOR_ENABLED:
-        _setup_tower_logger()
-        logger.debug('Custom Tower logger configured for worker process.')
-
-
-def _uwsgi_reload():
-    # http://uwsgi-docs.readthedocs.io/en/latest/MasterFIFO.html#available-commands
-    logger.warn('Initiating uWSGI chain reload of server')
-    TRIGGER_CHAIN_RELOAD = 'c'
-    with open('/var/lib/awx/awxfifo', 'w') as awxfifo:
-        awxfifo.write(TRIGGER_CHAIN_RELOAD)
-
-
-def _reset_celery_logging():
-    # Worker logger reloaded, now send signal to restart pool
-    app = current_app._get_current_object()
-    app.control.broadcast('pool_restart', arguments={'reload': True},
-                          destination=['celery@{}'.format(settings.CLUSTER_HOST_ID)], reply=False)
+    configure_external_logger(settings, async_flag=False, is_startup=False)
 
 
 def _clear_cache_keys(set_of_keys):
@@ -136,8 +106,7 @@ def process_cache_changes(cache_keys):
     _clear_cache_keys(set_of_keys)
     for setting_key in set_of_keys:
         if setting_key.startswith('LOG_AGGREGATOR_'):
-            _uwsgi_reload()
-            _reset_celery_logging()
+            restart_local_services(['uwsgi', 'celery', 'beat', 'callback', 'fact'])
             break
 
 
@@ -864,6 +833,7 @@ class RunJob(BaseTask):
         env['INVENTORY_ID'] = str(job.inventory.pk)
         if job.project:
             env['PROJECT_REVISION'] = job.project.scm_revision
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = "False"
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_path
         env['ANSIBLE_STDOUT_CALLBACK'] = 'tower_display'
         env['REST_API_URL'] = settings.INTERNAL_API_URL
@@ -1159,6 +1129,7 @@ class RunProjectUpdate(BaseTask):
         '''
         Return SSH private key data needed for this project update.
         '''
+        handle, self.revision_path = tempfile.mkstemp()
         private_data = {}
         if project_update.credential:
             credential = project_update.credential
@@ -1247,9 +1218,9 @@ class RunProjectUpdate(BaseTask):
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project_update.scm_clean,
-            'scm_delete_on_update': project_update.scm_delete_on_update,
+            'scm_delete_on_update': project_update.scm_delete_on_update if project_update.job_type == 'check' else False,
             'scm_full_checkout': True if project_update.job_type == 'run' else False,
-            'scm_revision_output': '/tmp/_{}_syncrev'.format(project_update.id) # TODO: TempFile
+            'scm_revision_output': self.revision_path
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
@@ -1335,7 +1306,7 @@ class RunProjectUpdate(BaseTask):
     def post_run_hook(self, instance, status, **kwargs):
         if instance.job_type == 'check' and status not in ('failed', 'canceled',):
             p = instance.project
-            fd = open('/tmp/_{}_syncrev'.format(instance.id), 'r')
+            fd = open(self.revision_path, 'r')
             lines = fd.readlines()
             if lines:
                 p.scm_revision = lines[0].strip()
@@ -1343,6 +1314,10 @@ class RunProjectUpdate(BaseTask):
                 p.save()
             else:
                 logger.error("Could not find scm revision in check")
+        try:
+            os.remove(self.revision_path)
+        except Exception, e:
+            logger.error("Failed removing revision tmp file: {}".format(e))
 
 
 class RunInventoryUpdate(BaseTask):

@@ -266,6 +266,7 @@ export default
                 var dft;
 
                 master = masterObject;
+
                 getPlaybooks($scope.project);
 
                 dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? false : true;
