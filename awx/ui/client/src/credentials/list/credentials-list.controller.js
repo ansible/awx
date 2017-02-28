@@ -52,12 +52,10 @@ export default ['$scope', '$rootScope', '$location', '$log',
                     // Set the item type label
                     if (list.fields.kind && $scope.options &&
                         $scope.options.hasOwnProperty('kind')) {
-                            $scope.options.kind.choices.every(function(choice) {
+                            $scope.options.kind.choices.forEach(function(choice) {
                                 if (choice[0] === item.kind) {
                                     itm.kind_label = choice[1];
-                                    return false;
                                 }
-                                return true;
                             });
                     }
                 });
