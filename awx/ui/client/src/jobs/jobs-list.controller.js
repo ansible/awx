@@ -112,29 +112,29 @@
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
     };
 
-    $scope.viewJobDetails = function(job) {
+    $scope.viewjobResults = function(job) {
 
-        var goToJobDetails = function(state) {
+        var goTojobResults = function(state) {
             $state.go(state, { id: job.id }, { reload: true });
         };
         switch (job.type) {
             case 'job':
-                goToJobDetails('jobDetail');
+                goTojobResults('jobResult');
                 break;
             case 'ad_hoc_command':
-                goToJobDetails('adHocJobStdout');
+                goTojobResults('adHocJobStdout');
                 break;
             case 'system_job':
-                goToJobDetails('managementJobStdout');
+                goTojobResults('managementJobStdout');
                 break;
             case 'project_update':
-                goToJobDetails('scmUpdateStdout');
+                goTojobResults('scmUpdateStdout');
                 break;
             case 'inventory_update':
-                goToJobDetails('inventorySyncStdout');
+                goTojobResults('inventorySyncStdout');
                 break;
             case 'workflow_job':
-                goToJobDetails('workflowResults');
+                goTojobResults('workflowResults');
                 break;
         }
 

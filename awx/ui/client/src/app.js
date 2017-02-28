@@ -347,19 +347,19 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on("$stateChangeStart", function (event, next) {
                     // Remove any lingering intervals
-                    // except on jobDetails.* states
-                    var jobDetailStates = [
-                        'jobDetail',
-                        'jobDetail.host-summary',
-                        'jobDetail.host-event.details',
-                        'jobDetail.host-event.json',
-                        'jobDetail.host-events',
-                        'jobDetail.host-event.stdout'
+                    // except on jobResults.* states
+                    var jobResultStates = [
+                        'jobResult',
+                        'jobResult.host-summary',
+                        'jobResult.host-event.details',
+                        'jobResult.host-event.json',
+                        'jobResult.host-events',
+                        'jobResult.host-event.stdout'
                     ];
-                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
-                        window.clearInterval($rootScope.jobDetailInterval);
+                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, next.name) ) {
+                        window.clearInterval($rootScope.jobResultInterval);
                     }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 

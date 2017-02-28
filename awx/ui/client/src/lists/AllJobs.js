@@ -30,12 +30,12 @@ export default
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobDetails(job)",
+                ngClick:"viewjobResults(job)",
                 nosort: true
             },
             id: {
                 label: 'ID',
-                ngClick:"viewJobDetails(job)",
+                ngClick:"viewjobResults(job)",
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ job.status_tip }}",
                 dataPlacement: 'top',
@@ -44,7 +44,7 @@ export default
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-2 col-md-3 col-sm-4 col-xs-6',
-                ngClick: "viewJobDetails(job)",
+                ngClick: "viewjobResults(job)",
                 badgePlacement: 'right',
                 badgeCustom: true,
                 badgeIcon: `<a href="{{ job.workflow_result_link }}"
@@ -90,7 +90,7 @@ export default
             columnClass: 'col-lg-2 col-md-2 col-sm-3 col-xs-4',
             "view": {
                 mode: "all",
-                ngClick: "viewJobDetails(job)",
+                ngClick: "viewjobResults(job)",
                 awToolTip: i18n._("View the job"),
                 dataPlacement: "top"
             },

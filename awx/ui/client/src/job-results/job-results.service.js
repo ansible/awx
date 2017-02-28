@@ -199,33 +199,33 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
         processEventStatus: function(event){
             if (event.event === 'runner_on_unreachable'){
                 return {
-                    class: 'HostEvents-status--unreachable',
+                    class: 'HostEvent-status--unreachable',
                     status: 'unreachable'
                 };
             }
             // equiv to 'runner_on_error' && 'runner on failed'
             if (event.failed){
                 return {
-                    class: 'HostEvents-status--failed',
+                    class: 'HostEvent-status--failed',
                     status: 'failed'
                 };
             }
             // catch the changed case before ok, because both can be true
             if (event.changed){
                 return {
-                    class: 'HostEvents-status--changed',
+                    class: 'HostEvent-status--changed',
                     status: 'changed'
                 };
             }
             if (event.event === 'runner_on_ok' || event.event === 'runner_on_async_ok'){
                 return {
-                    class: 'HostEvents-status--ok',
+                    class: 'HostEvent-status--ok',
                     status: 'ok'
                 };
             }
             if (event.event === 'runner_on_skipped'){
                 return {
-                    class: 'HostEvents-status--skipped',
+                    class: 'HostEvent-status--skipped',
                     status: 'skipped'
                 };
             }

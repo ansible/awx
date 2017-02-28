@@ -830,7 +830,7 @@ export default [ '$state','moment', '$timeout', '$window',
                 this.on("click", function(d) {
                     if(d.job.id && d.unifiedJobTemplate) {
                         if(d.unifiedJobTemplate.unified_job_type === 'job') {
-                            $state.go('jobDetail', {id: d.job.id});
+                            $state.go('jobResult', {id: d.job.id});
                         }
                         else if(d.unifiedJobTemplate.unified_job_type === 'inventory_update') {
                             $state.go('inventorySyncStdout', {id: d.job.id});

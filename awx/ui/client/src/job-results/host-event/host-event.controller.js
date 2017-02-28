@@ -56,7 +56,7 @@
             }
             // instantiate Codemirror
             // try/catch pattern prevents the abstract-state controller from complaining about element being null
-            if ($state.current.name === 'jobDetail.host-event.json'){
+            if ($state.current.name === 'jobResult.host-event.json'){
                 try{
                     initCodeMirror('HostEvent-codemirror', JSON.stringify($scope.json, null, 4), {name: "javascript", json: true});
                 }
@@ -64,7 +64,7 @@
                     // element with id HostEvent-codemirror is not the view controlled by this instance of HostEventController
                 }
             }
-            else if ($state.current.name === 'jobDetail.host-event.stdout'){
+            else if ($state.current.name === 'jobResult.host-event.stdout'){
                 try{
                     initCodeMirror('HostEvent-codemirror', $scope.stdout, 'shell');
                 }
@@ -72,7 +72,7 @@
                     // element with id HostEvent-codemirror is not the view controlled by this instance of HostEventController
                 }
             }
-            else if ($state.current.name === 'jobDetail.host-event.stderr'){
+            else if ($state.current.name === 'jobResult.host-event.stderr'){
                 try{
                     initCodeMirror('HostEvent-codemirror', $scope.stderr, 'shell');
                 }

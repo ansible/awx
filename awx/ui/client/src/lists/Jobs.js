@@ -20,7 +20,7 @@ export default
         fields: {
             id: {
                 label: 'ID',
-                ngClick:"viewJobDetails(job)",
+                ngClick:"viewjobResults(job)",
                 key: true,
                 desc: true,
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2',
@@ -35,7 +35,7 @@ export default
                 dataTitle: "{{ job.status_popover_title }}",
                 icon: 'icon-job-{{ job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobDetails(job)"
+                ngClick:"viewjobResults(job)"
             },
             started: {
                 label: 'Started',
@@ -52,7 +52,7 @@ export default
             name: {
                 label: 'Name',
                 columnClass: 'col-md-3 col-xs-5',
-                ngClick: "viewJobDetails(job)",
+                ngClick: "viewjobResults(job)",
             }
         },
 
