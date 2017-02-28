@@ -18,9 +18,6 @@ var hostEventModal = {
                 id: $stateParams.eventId
             }).then(function(res) {
                 return res.data.results[0]; });
-        }],
-        hostResults: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
-            return jobResultsService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
         }]
     },
     onExit: function() {

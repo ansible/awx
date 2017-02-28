@@ -46,7 +46,6 @@ import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
-import jobDetail from './job-detail/main';
 import workflowResults from './workflow-results/main';
 import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
@@ -119,7 +118,6 @@ var tower = angular.module('Tower', [
     login.name,
     activityStream.name,
     footer.name,
-    jobDetail.name,
     workflowResults.name,
     jobResults.name,
     jobSubmission.name,

@@ -6,48 +6,32 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'jobResultsService', 'hostEvent', 'hostResults',
-    function($stateParams, $scope, $state, Wait, jobResultsService, hostEvent, hostResults){
+    ['$stateParams', '$scope', '$state', 'Wait', 'jobResultsService', 'hostEvent',
+    function($stateParams, $scope, $state, Wait, jobResultsService, hostEvent){
 
         $scope.processEventStatus = jobResultsService.processEventStatus;
-        $scope.hostResults = [];
-        // Avoid rendering objects in the details fieldset
-        // ng-if="processResults(value)" via host-event-details.partial.html
         $scope.processResults = function(value){
             if (typeof value === 'object'){return false;}
             else {return true;}
         };
-        $scope.isStdOut = function(){
-            if ($state.current.name === 'jobDetail.host-event.stdout' || $state.current.name === 'jobDetail.host-event.stderr'){
-                return 'StandardOut-preContainer StandardOut-preContent';
-            }
-        };
-        /*ignore jslint start*/
+
         var initCodeMirror = function(el, data, mode){
             var container = document.getElementById(el);
-            var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
+            var editor = CodeMirror.fromTextArea(container, {
                 lineNumbers: true,
                 mode: mode
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
         };
-        /*ignore jslint end*/
+
         $scope.isActiveState = function(name){
             return $state.current.name === name;
-        };
-
-        $scope.getActiveHostIndex = function(){
-            var result = $scope.hostResults.filter(function( obj ) {
-                return obj.id === $scope.event.id;
-            });
-            return $scope.hostResults.indexOf(result[0]);
         };
 
         var init = function(){
             hostEvent.event_name = hostEvent.event;
             $scope.event = _.cloneDeep(hostEvent);
-            $scope.hostResults = hostResults;
 
             // grab standard out & standard error if present from the host
             // event's "res" object, for things like Ansible modules

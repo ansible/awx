@@ -247,19 +247,6 @@ function ($q, Prompt, $filter, Wait, Rest, $state, ProcessErrors, InitiatePlaybo
                         msg: 'Call to ' + url + '. GET returned: ' + status });
                 });
         },
-        getJobEventChildren: function(id){
-            var url = GetBasePath('job_events');
-            url = url + id + '/children/?order_by=host_name';
-            Rest.setUrl(url);
-            return Rest.get()
-                .success(function(data){
-                    return data;
-                })
-                .error(function(data, status) {
-                    ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
-                        msg: 'Call to ' + url + '. GET returned: ' + status });
-                });
-        },
         stringifyParams: function(params){
             return  _.reduce(params, (result, value, key) => {
                 return result + key + '=' + value + '&';
