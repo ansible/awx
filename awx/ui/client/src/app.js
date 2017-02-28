@@ -189,7 +189,6 @@ var tower = angular.module('Tower', [
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'JobDetailHelper',
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'PortalJobsListDefinition',

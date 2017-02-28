@@ -17,14 +17,14 @@
 
         var initCodeMirror = function(el, data, mode){
             var container = document.getElementById(el);
-            var editor = CodeMirror.fromTextArea(container, {
+            var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
                 lineNumbers: true,
                 mode: mode
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
         };
-
+        /*ignore jslint end*/
         $scope.isActiveState = function(name){
             return $state.current.name === name;
         };
