@@ -382,7 +382,7 @@ class TaskManager():
                 ))
                 task_obj.save()
                 _send_notification_templates(task_obj, 'failed')
-                connection.on_commit(lambda: task_obj.websocket_emit_status('failed'))
+                task_obj.websocket_emit_status('failed')
 
                 logger.error("Task %s appears orphaned... marking as failed" % task)
 
