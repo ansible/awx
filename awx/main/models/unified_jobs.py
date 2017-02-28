@@ -880,7 +880,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                                        workflow_node_id=self.workflow_node_id))
         return websocket_data
 
-    def websocket_emit_status(self, status):
+    def _websocket_emit_status(self, status):
         status_data = dict(unified_job_id=self.id, status=status)
         status_data.update(self.websocket_emit_data())
         status_data['group_name'] = 'jobs'
@@ -889,6 +889,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
         if self.spawned_by_workflow:
             status_data['group_name'] = "workflow_events"
             emit_channel_notification('workflow_events-' + str(self.workflow_job_id), status_data)
+
+    def websocket_emit_status(self, status):
+        connection.on_commit(lambda: self._websocket_emit_status(status))
 
     def notification_data(self):
         return dict(id=self.id,
