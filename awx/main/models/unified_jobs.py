@@ -964,10 +964,13 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
 
         # Save the pending status, and inform the SocketIO listener.
         self.update_fields(start_args=json.dumps(kwargs), status='pending')
-        self.websocket_emit_status("pending")
 
-        from awx.main.scheduler.tasks import run_job_launch
-        connection.on_commit(lambda: run_job_launch.delay(self.id))
+        def post_commit():
+            from awx.main.scheduler.tasks import run_job_launch
+            self.websocket_emit_status("pending")
+            run_job_launch.delay(self.id)
+
+        connection.on_commit(post_commit)
 
         # Each type of unified job has a different Task class; get the
         # appropirate one.
