@@ -31,8 +31,7 @@ export default
                         });
                 };
                 getManagementJobs();
-                var scope = $rootScope.$new(),
-                    parent_scope = scope;
+                var scope = $rootScope.$new();
                 scope.cleanupJob = true;
 
                 // This handles the case where the user refreshes the management job notifications page.
