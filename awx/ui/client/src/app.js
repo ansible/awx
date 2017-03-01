@@ -39,7 +39,6 @@ if ($basePath) {
 // Modules
 import './helpers';
 import './lists';
-import './widgets';
 import './filters';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
@@ -179,7 +178,6 @@ var tower = angular.module('Tower', [
     'md5Helper',
     'SelectionHelper',
     'HostGroupsFormDefinition',
-    'StreamWidget',
     'JobsHelper',
     'CredentialsHelper',
     'StreamListDefinition',
