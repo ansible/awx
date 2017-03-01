@@ -601,7 +601,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
             function applyValidationStrategy(viewValue, ctrl) {
 
                 // use supplied data attributes to build an endpoint, query, resolve outstanding promise
-                function applyValidation(viewValue) {console.log(viewValue);
+                function applyValidation(viewValue) {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
                     query = elm.attr('data-query');
                     query = query.replace(/\:value/, encodeURIComponent(viewValue));
