@@ -284,12 +284,6 @@ export default ['$scope', '$rootScope', '$location', '$log',
                 });
         };
 
-        $scope.refresh = function() {
-            // TODO: what should I do here?
-            // @issue: OLD SEARCH
-            // $scope.search(list.iterator);
-        };
-
         $scope.SCMUpdate = function(project_id, event) {
             try {
                 $(event.target).tooltip('hide');

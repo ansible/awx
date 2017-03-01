@@ -265,12 +265,6 @@ export default
                     });
                 };
 
-                parent_scope.refreshJobs = function(){
-                    // TODO: what should I do here?
-                    // @issue: OLD SEARCH
-                    // scope.search(SchedulesList.iterator);
-                };
-
                 var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {
                      if(toState.name === "managementJobsList") {
                          // We are on the management job list view - nothing needs to be highlighted
