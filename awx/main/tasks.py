@@ -1318,10 +1318,10 @@ class RunProjectUpdate(BaseTask):
             lines = fd.readlines()
             if lines:
                 p.scm_revision = lines[0].strip()
-                p.playbook_files = p.playbooks
-                p.save()
             else:
-                logger.error("Could not find scm revision in check")
+                logger.info("Could not find scm revision in check")
+            p.playbook_files = p.playbooks
+            p.save()
         try:
             os.remove(self.revision_path)
         except Exception, e:
