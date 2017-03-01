@@ -10,10 +10,9 @@
  * @description This form is for adding/editing projects
 */
 
-export default
-angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
-    .factory('ProjectsFormObject', ['i18n', function(i18n) {
-    return {
+export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
+    return function() {
+    var projectsFormObj = {
 
         addTitle: i18n._('NEW PROJECT'),
         editTitle: '{{ name }}',
@@ -266,18 +265,15 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             }
         }
 
-    };}])
+    };
 
-    .factory('ProjectsForm', ['ProjectsFormObject', 'NotificationsList',
-    function(ProjectsFormObject, NotificationsList) {
-        return function() {
-            var itm;
-            for (itm in ProjectsFormObject.related) {
-                if (ProjectsFormObject.related[itm].include === "NotificationsList") {
-                    ProjectsFormObject.related[itm] = NotificationsList;
-                    ProjectsFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-                }
-            }
-            return ProjectsFormObject;
-        };
-    }]);
+    var itm;
+
+    for (itm in projectsFormObj.related) {
+        if (projectsFormObj.related[itm].include === "NotificationsList") {
+            projectsFormObj.related[itm] = NotificationsList;
+            projectsFormObj.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+        }
+    }
+    return projectsFormObj;
+}}];
