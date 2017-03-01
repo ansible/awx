@@ -276,4 +276,4 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
         }
     }
     return projectsFormObj;
-}}];
+};}];
