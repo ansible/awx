@@ -46,7 +46,6 @@ import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
-import jobDetail from './job-detail/main';
 import workflowResults from './workflow-results/main';
 import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
@@ -119,7 +118,6 @@ var tower = angular.module('Tower', [
     login.name,
     activityStream.name,
     footer.name,
-    jobDetail.name,
     workflowResults.name,
     jobResults.name,
     jobSubmission.name,
@@ -191,7 +189,6 @@ var tower = angular.module('Tower', [
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'JobDetailHelper',
     'lrInfiniteScroll',
     'LoadConfigHelper',
     'PortalJobsListDefinition',
@@ -350,19 +347,19 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on("$stateChangeStart", function (event, next) {
                     // Remove any lingering intervals
-                    // except on jobDetails.* states
-                    var jobDetailStates = [
-                        'jobDetail',
-                        'jobDetail.host-summary',
-                        'jobDetail.host-event.details',
-                        'jobDetail.host-event.json',
-                        'jobDetail.host-events',
-                        'jobDetail.host-event.stdout'
+                    // except on jobResults.* states
+                    var jobResultStates = [
+                        'jobResult',
+                        'jobResult.host-summary',
+                        'jobResult.host-event.details',
+                        'jobResult.host-event.json',
+                        'jobResult.host-events',
+                        'jobResult.host-event.stdout'
                     ];
-                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
-                        window.clearInterval($rootScope.jobDetailInterval);
+                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, next.name) ) {
+                        window.clearInterval($rootScope.jobResultInterval);
                     }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 

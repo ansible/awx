@@ -20,7 +20,7 @@ export default ['$log', '$rootScope', '$scope', '$state', '$stateParams', 'Proce
 
         // Open up a socket for events depending on the type of job
         function openSockets() {
-            if ($state.current.name === 'jobDetail') {
+            if ($state.current.name === 'jobResult') {
                $log.debug("socket watching on job_events-" + job_id);
                $scope.$on(`ws-job_events-${job_id}`, function() {
                    $log.debug("socket fired on job_events-" + job_id);

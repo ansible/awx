@@ -12,7 +12,6 @@ import Credentials from "./helpers/Credentials";
 import Events from "./helpers/Events";
 import Groups from "./helpers/Groups";
 import Hosts from "./helpers/Hosts";
-import JobDetail from "./helpers/JobDetail";
 import JobSubmission from "./helpers/JobSubmission";
 import JobTemplates from "./helpers/JobTemplates";
 import Jobs from "./helpers/Jobs";
@@ -38,7 +37,6 @@ export
         Events,
         Groups,
         Hosts,
-        JobDetail,
         JobSubmission,
         JobTemplates,
         Jobs,

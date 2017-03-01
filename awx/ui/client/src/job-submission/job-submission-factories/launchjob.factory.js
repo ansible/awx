@@ -124,12 +124,12 @@ export default
                         if($rootScope.portalMode===false && Empty(data.system_job) || (base === 'home')){
                             // use $state.go with reload: true option to re-instantiate sockets in
 
-                            var goToJobDetails = function(state) {
+                            var goTojobResults = function(state) {
                                 $state.go(state, {id: job}, {reload:true});
                             };
 
                             if(_.has(data, 'job')) {
-                                goToJobDetails('jobDetail');
+                                goTojobResults('jobResult');
                             } else if(base === 'jobs'){
                                 if(scope.clearDialog) {
                                     scope.clearDialog();
@@ -137,20 +137,20 @@ export default
                                 return;
                             } else if(data.type && data.type === 'workflow_job') {
                                 job = data.id;
-                                goToJobDetails('workflowResults');
+                                goTojobResults('workflowResults');
                             }
                             else if(_.has(data, 'ad_hoc_command')) {
-                                goToJobDetails('adHocJobStdout');
+                                goTojobResults('adHocJobStdout');
                             }
                             else if(_.has(data, 'system_job')) {
-                                goToJobDetails('managementJobStdout');
+                                goTojobResults('managementJobStdout');
                             }
                             else if(_.has(data, 'project_update')) {
                                 // If we are on the projects list or any child state of that list
                                 // then we want to stay on that page.  Otherwise go to the stdout
                                 // view.
                                 if(!$state.includes('projects')) {
-                                    goToJobDetails('scmUpdateStdout');
+                                    goTojobResults('scmUpdateStdout');
                                 }
                             }
                             else if(_.has(data, 'inventory_update')) {
@@ -158,7 +158,7 @@ export default
                                 // page then we want to stay on that page.  Otherwise go to the stdout
                                 // view.
                                 if(!$state.includes('inventoryManage')) {
-                                    goToJobDetails('inventorySyncStdout');
+                                    goTojobResults('inventorySyncStdout');
                                 }
                             }
                         }

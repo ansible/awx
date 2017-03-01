@@ -33,14 +33,14 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
 
         if (data.status === 'failed' || data.status === 'canceled' || data.status === 'error' || data.status === 'successful') {
             // Go out and refresh the job details
-            getJobDetails();
+            getjobResults();
         }
     });
 
     // Set the parse type so that CodeMirror knows how to display extra params YAML/JSON
     $scope.parseType = 'yaml';
 
-    function getJobDetails() {
+    function getjobResults() {
 
         // Go out and get the job details based on the job type.  jobType gets defined
         // in the data block of the route declaration for each of the different types
@@ -260,7 +260,7 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
         RelaunchJob({ scope: $scope, id: typeId, type: job.type, name: job.name });
     };
 
-    getJobDetails();
+    getjobResults();
 
 }
 

@@ -177,10 +177,10 @@ export default ['$scope', '$rootScope', '$location', '$log',
             $state.go('projects.edit', { project_id: id });
         };
 
-        if ($scope.removeGoToJobDetails) {
-            $scope.removeGoToJobDetails();
+        if ($scope.removeGoTojobResults) {
+            $scope.removeGoTojobResults();
         }
-        $scope.removeGoToJobDetails = $scope.$on('GoToJobDetails', function(e, data) {
+        $scope.removeGoTojobResults = $scope.$on('GoTojobResults', function(e, data) {
             if (data.summary_fields.current_update || data.summary_fields.last_update) {
 
                 Wait('start');
@@ -207,7 +207,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
                 Rest.setUrl(project.url);
                 Rest.get()
                     .success(function(data) {
-                        $scope.$emit('GoToJobDetails', data);
+                        $scope.$emit('GoTojobResults', data);
                     })
                     .error(function(data, status) {
                         ProcessErrors($scope, data, status, null, {

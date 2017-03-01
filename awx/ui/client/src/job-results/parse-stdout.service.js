@@ -77,7 +77,7 @@ export default ['$log', 'moment', function($log, moment){
                 return `"`;
             }
             else{
-                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobDetail.host-event.json({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
+                return ` JobResultsStdOut-stdoutColumn--clickable" ui-sref="jobResult.host-event.json({eventId: ${event.id}, taskUuid: '${event.event_data.task_uuid}' })" aw-tool-tip="Event ID: ${event.id} <br>Status: ${event.event_display} <br>Click for details" data-placement="top"`;
             }
 
         },

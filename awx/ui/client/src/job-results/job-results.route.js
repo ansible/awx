@@ -13,7 +13,7 @@ const defaultParams = {
 };
 
 export default {
-    name: 'jobDetail',
+    name: 'jobResult',
     url: '/jobs/{id: int}',
     searchPrefix: 'job_event',
     ncyBreadcrumb: {
