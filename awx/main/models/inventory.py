@@ -11,7 +11,7 @@ import os.path
 
 # Django
 from django.conf import settings
-from django.db import models
+from django.db import models, connection
 from django.utils.translation import ugettext_lazy as _
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -20,6 +20,7 @@ from django.utils.timezone import now
 # AWX
 from awx.api.versioning import reverse
 from awx.main.constants import CLOUD_PROVIDERS
+from awx.main.consumers import emit_channel_notification
 from awx.main.fields import (
     ImplicitRoleField,
     JSONBField,
@@ -152,6 +153,11 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         blank=True,
         null=True,
         default=None,
+    )
+    pending_deletion = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=_('Flag indicating the inventory is being deleted.'),
     )
 
 
@@ -350,6 +356,12 @@ class Inventory(CommonModelNameNotUnique, ResourceMixin):
         if computed_fields:
             iobj.save(update_fields=computed_fields.keys())
         logger.debug("Finished updating inventory computed fields")
+
+    def websocket_emit_status(self, status):
+        connection.on_commit(lambda: emit_channel_notification(
+            'inventories-status_changed',
+            {'group_name': 'inventories', 'inventory_id': self.id, 'status': status}
+        ))
 
     @property
     def root_groups(self):

@@ -70,6 +70,13 @@ class Migration(migrations.Migration):
             unique_together=set([('host', 'inventory')]),
         ),
 
+        # Background Inventory deletion
+        migrations.AddField(
+            model_name='inventory',
+            name='pending_deletion',
+            field=models.BooleanField(default=False, help_text='Flag indicating the inventory is being deleted.', editable=False),
+        ),
+
         # Facts
         migrations.AlterField(
             model_name='fact',
