@@ -178,7 +178,6 @@ var tower = angular.module('Tower', [
     'md5Helper',
     'SelectionHelper',
     'HostGroupsFormDefinition',
-    'StreamWidget',
     'JobsHelper',
     'CredentialsHelper',
     'StreamListDefinition',
