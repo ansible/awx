@@ -70,9 +70,6 @@ import jobs from './jobs/main';
 import teams from './teams/main';
 import users from './users/main';
 import projects from './projects/main';
-import variables from './shared/variables/main';
-import parse from './shared/parse/main';
-import loadconfig from './shared/load-config/main';
 
 import RestServices from './rest/main';
 import access from './access/main';
@@ -138,9 +135,6 @@ var tower = angular.module('Tower', [
     teams.name,
     users.name,
     projects.name,
-    variables.name,
-    parse.name,
-    loadconfig.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
