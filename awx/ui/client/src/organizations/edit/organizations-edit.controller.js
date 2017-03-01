@@ -121,9 +121,6 @@ export default ['$scope', '$rootScope', '$location', '$log', '$stateParams',
                 Rest.post({ id: itm_id, disassociate: 1 })
                     .success(function() {
                         $('#prompt-modal').modal('hide');
-
-                        // @issue: OLD SEARCH
-                        // $scope.search(form.related[set].iterator);
                     })
                     .error(function(data, status) {
                         $('#prompt-modal').modal('hide');

@@ -283,8 +283,6 @@ export default ['$scope', '$rootScope', '$compile', '$location',
                     })
                     .success(function() {
                         $('#prompt-modal').modal('hide');
-                        // @issue: OLD SEARCH
-                        // $scope.search(form.related[set].iterator);
                     })
                     .error(function(data, status) {
                         $('#prompt-modal').modal('hide');

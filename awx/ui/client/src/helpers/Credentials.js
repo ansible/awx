@@ -386,15 +386,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                      Rest.post(data)
                      .success(function (data) {
                          scope.addedItem = data.id;
-
-                         // @issue: OLD SEARCH
-                        //  Refresh({
-                        //      scope: scope,
-                        //      set: 'credentials',
-                        //      iterator: 'credential',
-                        //      url: url
-                        //  });
-
                          Wait('stop');
                          var base = $location.path().replace(/^\//, '').split('/')[0];
                          if (base === 'credentials') {

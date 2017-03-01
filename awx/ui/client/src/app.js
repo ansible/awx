@@ -287,6 +287,14 @@ var tower = angular.module('Tower', [
                 $log.debug(`$state.defaultErrorHandler: ${error}`);
             });
 
+            $rootScope.refresh = function() {
+                $state.go('.', null, {reload: true});
+            };
+
+            $rootScope.refreshJobs = function(){
+                $state.go('.', null, {reload: true});
+            };
+
             function activateTab() {
                 // Make the correct tab active
                 var base = $location.path().replace(/^\//, '').split('/')[0];

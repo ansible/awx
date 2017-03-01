@@ -169,18 +169,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                           var scope = params.scope,
                           parent_scope = params.parent_scope;
 
-                          // @issue: OLD SEARCH
-                        //   var list = InventoryHosts,
-                        // group_id = params.group_id,
-                        // inventory_id = params.inventory_id;
-                        //   pageSize = (params.pageSize) ? params.pageSize : 20,
-                          //
-                        //   url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
-                        //       GetBasePath('inventory') + inventory_id + '/hosts/';
-
-                            // @issue: OLD SEARCH
-                            //   scope.search_place_holder='Search ' + scope.selected_group_name;
-
                           if (scope.removeHostsReloadPostRefresh) {
                               scope.removeHostsReloadPostRefresh();
                           }
@@ -198,27 +186,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', listGenerator.name,
                                   }
                               }
                           });
-
-                        // @issue: OLD SEARCH
-                        //   SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
-                        //   PaginateInit({ scope: scope, list: list, url: url, pageSize: pageSize });
-                          //
-                        //   if ($stateParams.host_name) {
-                        //       scope[list.iterator + 'InputDisable'] = false;
-                        //       scope[list.iterator + 'SearchValue'] = $stateParams.host_name;
-                        //       scope[list.iterator + 'SearchField'] = 'name';
-                        //       scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
-                        //       scope[list.iterator + 'SearchSelectValue'] = null;
-                        //   }
-                          //
-                        //   if (scope.show_failures) {
-                        //       scope[list.iterator + 'InputDisable'] = true;
-                        //       scope[list.iterator + 'SearchValue'] = 'true';
-                        //       scope[list.iterator + 'SearchField'] = 'has_active_failures';
-                        //       scope[list.iterator + 'SearchFieldLabel'] = list.fields.has_active_failures.label;
-                        //       scope[list.iterator + 'SearchSelectValue'] = { value: 1 };
-                        //   }
-                        //   scope.search(list.iterator, null, true);
                       };
                   }])
 
@@ -274,31 +241,11 @@ return function(params) {
         scope.removeHostCopyDialogReady();
     }
     scope.removeCopyDialogReady = scope.$on('HostCopyDialogReady', function() {
-        // @issue: OLD SEARCH
-        // var url = GetBasePath('inventory') + group_scope.inventory.id + '/groups/';
-
         GenerateList.inject(GroupList, {
             mode: 'lookup',
             id: 'copy-host-select-container',
             scope: scope
-            //,
-            //instructions: instructions
         });
-
-        // @issue: OLD SEARCH
-        // SearchInit({
-        //     scope: scope,
-        //     set: GroupList.name,
-        //     list: GroupList,
-        //     url: url
-        // });
-        // PaginateInit({
-        //     scope: scope,
-        //     list: GroupList,
-        //     url: url,
-        //     mode: 'lookup'
-        // });
-        // scope.search(GroupList.iterator, null, true, false);
     });
 
     if (scope.removeShowDialog) {
@@ -348,12 +295,6 @@ return function(params) {
         catch(e) {
             // ignore
         }
-
-        // @issue: OLD SEARCH
-        // scope.searchCleanup();
-
-        // @issue: OLD SEARCH
-        // group_scope.restoreSearch();  // Restore all parent search stuff and refresh hosts and groups lists
         scope.$destroy();
     };
 

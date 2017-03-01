@@ -118,11 +118,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
                             // And we found the affected project
                             $log.debug('Received event for project: ' + project.name);
                             $log.debug('Status changed to: ' + data.status);
-                            if (data.status === 'successful' || data.status === 'failed') {
-                                // @issue: OLD SEARCH
-                                // $scope.search(list.iterator, null, null, null, null, false);
-
-                            } else {
+                            if (!(data.status === 'successful' || data.status === 'failed')) {
                                 project.scm_update_tooltip = "SCM update currently running";
                                 project.scm_type_class = "btn-disabled";
                             }
@@ -288,11 +284,6 @@ export default ['$scope', '$rootScope', '$location', '$log',
                 });
         };
 
-        $scope.refresh = function() {
-            // @issue: OLD SEARCH
-            // $scope.search(list.iterator);
-        };
-
         $scope.SCMUpdate = function(project_id, event) {
             try {
                 $(event.target).tooltip('hide');
@@ -301,13 +292,7 @@ export default ['$scope', '$rootScope', '$location', '$log',
             }
             $scope.projects.forEach(function(project) {
                 if (project.id === project_id) {
-                    if (project.scm_type === "Manual" || Empty(project.scm_type)) {
-                        // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
-                        // to work. So user can click, but we just won't do anything.
-                        //Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
-                    } else if (project.status === 'updating' || project.status === 'running' || project.status === 'pending') {
-                        // Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info');
-                    } else {
+                    if (!((project.scm_type === "Manual" || Empty(project.scm_type)) || (project.status === 'updating' || project.status === 'running' || project.status === 'pending'))) {
                         ProjectUpdate({ scope: $scope, project_id: project.id });
                     }
                 }
