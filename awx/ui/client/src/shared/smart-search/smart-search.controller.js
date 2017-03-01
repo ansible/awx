@@ -110,7 +110,7 @@ export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', '
 
         function setDefaults(term) {
             if ($scope.list.defaultSearchParams) {
-                return $scope.list.defaultSearchParams(term);
+                return $scope.list.defaultSearchParams(encodeURIComponent(term));
             } else {
                return {
                     search: encodeURIComponent(term)
