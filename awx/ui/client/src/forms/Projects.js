@@ -137,6 +137,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 },
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',
+                awLookupType: 'scm_credential',
                 sourceField: 'name',
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm'
