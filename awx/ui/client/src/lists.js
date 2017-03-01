@@ -4,10 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-import CloudCredentials from "./lists/CloudCredentials";
 import CompletedJobs from "./lists/CompletedJobs";
 import AllJobs from "./lists/AllJobs";
-import Credentials from "./lists/Credentials";
 import Groups from "./lists/Groups";
 import Hosts from "./lists/Hosts";
 import Inventories from "./lists/Inventories";
@@ -28,10 +26,8 @@ import Templates from "./lists/Templates";
 import Users from "./lists/Users";
 
 export
-    {   CloudCredentials,
-        CompletedJobs,
+    {   CompletedJobs,
         AllJobs,
-        Credentials,
         Groups,
         Hosts,
         Inventories,

@@ -7,9 +7,7 @@
 
 
 
-export default
-    angular.module('CredentialsListDefinition', [])
-    .factory('CredentialList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'credentials',
@@ -95,4 +93,4 @@ export default
                 ngShow: 'credential.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

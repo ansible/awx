@@ -4,12 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'CredentialList', 'Prompt', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, $rootScope, $location, $log,
-    $stateParams, Rest, Alert, CredentialList, Prompt, ClearScope,
-    ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
+export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
+    'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
+    'rbacUiControlService', 'Dataset', 'i18n',
+    function($scope, Rest, CredentialList, Prompt, ClearScope, ProcessErrors,
+    GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
     i18n) {
 
         ClearScope();

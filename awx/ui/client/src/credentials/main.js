@@ -12,6 +12,8 @@ import BecomeMethodChange from './factories/become-method-change.factory';
 import CredentialFormSave from './factories/credential-form-save.factory';
 import KindChange from './factories/kind-change.factory';
 import OwnerChange from './factories/owner-change.factory';
+import CredentialList from './credentials.list';
+import CredentialForm from './credentials.form';
 import { N_ } from '../i18n';
 
 export default
@@ -24,6 +26,8 @@ export default
         .controller('CredentialsList', CredentialsList)
         .controller('CredentialsAdd', CredentialsAdd)
         .controller('CredentialsEdit', CredentialsEdit)
+        .factory('CredentialList', CredentialList)
+        .factory('CredentialForm', CredentialForm)
         .config(['$stateProvider', 'stateDefinitionsProvider',
             function($stateProvider, stateDefinitionsProvider) {
                 let stateDefinitions = stateDefinitionsProvider.$get();

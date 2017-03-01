@@ -10,9 +10,7 @@
  * @description This form is for adding/editing a Credential
 */
 
-export default
-    angular.module('CredentialFormDefinition', [])
-        .factory('CredentialForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('CREATE CREDENTIAL'), //Legend in add mode
@@ -474,4 +472,4 @@ export default
                     }
                 }
             }
-        };}]);
+        };}];

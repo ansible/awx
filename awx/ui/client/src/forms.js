@@ -5,7 +5,6 @@
 *************************************************/
 
 import ActivityDetail from "./forms/ActivityDetail";
-import Credentials from "./forms/Credentials";
 import EventsViewer from "./forms/EventsViewer";
 import Groups from "./forms/Groups";
 import HostGroups from "./forms/HostGroups";
@@ -27,7 +26,6 @@ import Workflows from "./forms/Workflows";
 
 export
     {   ActivityDetail,
-        Credentials,
         EventsViewer,
         Groups,
         HostGroups,
