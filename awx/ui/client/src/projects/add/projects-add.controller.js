@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$compile', '$location', '$log',
-    '$stateParams', 'GenerateForm', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
+export default ['$scope', '$location', '$stateParams', 'GenerateForm',
+    'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath',
     'GetProjectPath', 'GetChoices', 'Wait', '$state', 'CreateSelect2', 'i18n',
-    function($scope, $rootScope, $compile, $location, $log,
-    $stateParams, GenerateForm, ProjectsForm, Rest, Alert, ProcessErrors,
-    GetBasePath, GetProjectPath, GetChoices, Wait, $state, CreateSelect2, i18n) {
+    function($scope, $location, $stateParams, GenerateForm, ProjectsForm, Rest,
+    Alert, ProcessErrors, GetBasePath, GetProjectPath, GetChoices, Wait, $state,
+    CreateSelect2, i18n) {
 
         var form = ProjectsForm(),
             base = $location.path().replace(/^\//, '').split('/')[0],

@@ -4,14 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$compile', '$location', '$log',
-    '$stateParams', 'ProjectsForm', 'Rest', 'Alert', 'ProcessErrors', 'GenerateForm',
-    'Prompt', 'ClearScope', 'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
-    'DebugForm', 'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification', 'i18n',
-    function($scope, $rootScope, $compile, $location, $log,
-    $stateParams, ProjectsForm, Rest, Alert, ProcessErrors, GenerateForm,
-    Prompt, ClearScope, GetBasePath, GetProjectPath, Authorization,
-    GetChoices, Empty, DebugForm, Wait, ProjectUpdate, $state, CreateSelect2, ToggleNotification, i18n) {
+export default ['$scope', '$rootScope', '$stateParams', 'ProjectsForm', 'Rest',
+    'Alert', 'ProcessErrors', 'GenerateForm', 'Prompt', 'ClearScope',
+    'GetBasePath', 'GetProjectPath', 'Authorization', 'GetChoices', 'Empty',
+    'Wait', 'ProjectUpdate', '$state', 'CreateSelect2', 'ToggleNotification',
+    'i18n',
+    function($scope, $rootScope, $stateParams, ProjectsForm, Rest, Alert,
+    ProcessErrors, GenerateForm, Prompt, ClearScope, GetBasePath,
+    GetProjectPath, Authorization, GetChoices, Empty, Wait, ProjectUpdate,
+    $state, CreateSelect2, ToggleNotification, i18n) {
 
         ClearScope('htmlTemplate');
 

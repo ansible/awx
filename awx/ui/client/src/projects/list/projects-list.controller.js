@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log', '$stateParams',
-    'Rest', 'Alert', 'ProjectList', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'ProjectUpdate', 'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon',
-    'GetProjectToolTip', '$filter', '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet',
-    function($scope, $rootScope, $location, $log, $stateParams,
-    Rest, Alert, ProjectList, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
-    GetBasePath, ProjectUpdate, Wait, GetChoices, Empty, Find, GetProjectIcon,
-    GetProjectToolTip, $filter, $state, rbacUiControlService, Dataset, i18n, qs) {
+export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
+    'ProjectList', 'Prompt', 'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
+    'Wait', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter',
+    '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet',
+    function($scope, $rootScope, $log, $stateParams,Rest, Alert, ProjectList,
+    Prompt, ProcessErrors, GetBasePath, ProjectUpdate, Wait, Empty, Find,
+    GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService,
+    Dataset, i18n, qs) {
 
         var list = ProjectList,
             defaultUrl = GetBasePath('projects');
