@@ -16,7 +16,7 @@
 
 
 export default
-    angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition'])
+    angular.module('ProjectsHelper', ['RestServices', 'Utilities'])
 
         .factory('GetProjectIcon', [ function() {
             return function(status) {

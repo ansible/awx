@@ -147,7 +147,6 @@ var tower = angular.module('Tower', [
     'JobTemplateFormDefinition',
     'JobTemplatesHelper',
     'JobSubmissionHelper',
-    'ProjectStatusDefinition',
     'CompletedJobsDefinition',
     'AllJobsDefinition',
     'JobSummaryDefinition',

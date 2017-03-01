@@ -19,7 +19,6 @@ import JobVarsPrompt from "./forms/JobVarsPrompt";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
-import ProjectStatus from "./forms/ProjectStatus";
 import Teams from "./forms/Teams";
 import Users from "./forms/Users";
 import WorkflowMaker from "./forms/WorkflowMaker";
@@ -42,7 +41,6 @@ export
         LogViewerOptions,
         LogViewerStatus,
         Organizations,
-        ProjectStatus,
         Teams,
         Users,
         WorkflowMaker,
