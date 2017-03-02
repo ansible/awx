@@ -71,6 +71,19 @@ def test_run_admin_checks_usage(mocker, current_instances, call_count):
             assert 'expire' in mock_sm.call_args_list[0][0][0]
 
 
+@pytest.mark.parametrize("key,value", [
+    ('REST_API_TOKEN', 'SECRET'),
+    ('SECRET_KEY', 'SECRET'),
+    ('RABBITMQ_PASS', 'SECRET'),
+    ('VMWARE_PASSWORD', 'SECRET'),
+    ('API_SECRET', 'SECRET'),
+    ('CALLBACK_CONNECTION', 'amqp://tower:password@localhost:5672/tower'),
+])
+def test_safe_env_filtering(key, value):
+    task = tasks.RunJob()
+    assert task.build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
+
+
 def test_openstack_client_config_generation(mocker):
     update = tasks.RunInventoryUpdate()
     inventory_update = mocker.Mock(**{

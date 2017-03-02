@@ -471,14 +471,13 @@ class BaseTask(Task):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
-    def build_safe_env(self, instance, **kwargs):
+    def build_safe_env(self, env, **kwargs):
         '''
         Build environment dictionary, hiding potentially sensitive information
         such as passwords or keys.
         '''
         hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
-        urlpass_re = re.compile(r'^.*?://.?:(.*?)@.*?$')
-        env = self.build_env(instance, **kwargs)
+        urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
         for k,v in env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
@@ -699,7 +698,7 @@ class BaseTask(Task):
             output_replacements = self.build_output_replacements(instance, **kwargs)
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
-            safe_env = self.build_safe_env(instance, **kwargs)
+            safe_env = self.build_safe_env(env, **kwargs)
             stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
