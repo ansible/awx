@@ -16,7 +16,6 @@ import JobTemplates from "./forms/JobTemplates";
 import JobVarsPrompt from "./forms/JobVarsPrompt";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
-import Organizations from "./forms/Organizations";
 
 export
     {   EventsViewer,
@@ -31,5 +30,4 @@ export
         JobVarsPrompt,
         LogViewerOptions,
         LogViewerStatus,
-        Organizations,
     };

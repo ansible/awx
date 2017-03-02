@@ -5,11 +5,10 @@
  *************************************************/
 
 export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
-    'generateList', '$compile', 'Wait', 'OrgUsersDataset',
-    'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
-    function($stateParams, $scope, OrgUserList, Rest, $state, GenerateList,
-        $compile, Wait, OrgUsersDataset, Prompt, ProcessErrors,
-        GetBasePath, $filter) {
+    '$compile', 'Wait', 'OrgUsersDataset', 'Prompt', 'ProcessErrors',
+    'GetBasePath', '$filter',
+    function($stateParams, $scope, OrgUserList, Rest, $state, $compile, Wait,
+    OrgUsersDataset, Prompt, ProcessErrors, GetBasePath, $filter) {
 
         var orgBase = GetBasePath('organizations');
 

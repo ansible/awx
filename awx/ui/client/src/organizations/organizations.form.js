@@ -10,10 +10,10 @@
  * @description This form is for adding/editing an organization
 */
 
-export default
-    angular.module('OrganizationFormDefinition', [])
-        .factory('OrganizationFormObject', ['i18n', function(i18n) {
-        return {
+export default ['NotificationsList', 'i18n',
+    function(NotificationsList, i18n) {
+    return function() {
+        var OrganizationFormObject = {
 
             addTitle: i18n._('NEW ORGANIZATION'), //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
@@ -98,18 +98,15 @@ export default
                 }
 
             }
-        };}])
+        };
 
-        .factory('OrganizationForm', ['OrganizationFormObject', 'NotificationsList',
-            function(OrganizationFormObject, NotificationsList) {
-            return function() {
-                var itm;
-                for (itm in OrganizationFormObject.related) {
-                    if (OrganizationFormObject.related[itm].include === "NotificationsList") {
-                        OrganizationFormObject.related[itm] = NotificationsList;
-                        OrganizationFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-                    }
-                }
-                return OrganizationFormObject;
-            };
-        }]);
+        var itm;
+        for (itm in OrganizationFormObject.related) {
+            if (OrganizationFormObject.related[itm].include === "NotificationsList") {
+                OrganizationFormObject.related[itm] = NotificationsList;
+                OrganizationFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+            }
+        }
+        return OrganizationFormObject;
+    };
+}];
