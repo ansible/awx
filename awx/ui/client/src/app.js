@@ -58,7 +58,6 @@ import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import configuration from './configuration/main';
 import home from './home/main';
-import moment from './shared/moment/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
@@ -68,14 +67,8 @@ import jobs from './jobs/main';
 import teams from './teams/main';
 import users from './users/main';
 import projects from './projects/main';
-
 import RestServices from './rest/main';
 import access from './access/main';
-import './shared/prompt-dialog';
-import './shared/directives';
-import './shared/filters';
-import './shared/features/main';
-import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
@@ -114,7 +107,6 @@ var tower = angular.module('Tower', [
     mainMenu.name,
     breadCrumb.name,
     home.name,
-    moment.name,
     login.name,
     activityStream.name,
     footer.name,
@@ -125,7 +117,6 @@ var tower = angular.module('Tower', [
     standardOut.name,
     Templates.name,
     portalMode.name,
-    config.name,
     credentials.name,
     jobs.name,
     teams.name,
