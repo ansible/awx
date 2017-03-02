@@ -24,6 +24,12 @@ import variables from './variables/main';
 import parse from './parse/main';
 import loadconfig from './load-config/main';
 import Modal from './Modal';
+import moment from './moment/main';
+import config from './config/main';
+import PromptDialog from './prompt-dialog';
+import directives from './directives';
+import filters from './filters';
+import features from './features/main';
 import 'angular-duration-format';
 
 export default
@@ -44,6 +50,12 @@ angular.module('shared', [listGenerator.name,
         parse.name,
         loadconfig.name,
         Modal.name,
+        moment.name,
+        config.name,
+        PromptDialog.name,
+        directives.name,
+        filters.name,
+        features.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])
