@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default [ '$state','moment', '$timeout', '$window',
+export default ['$state','moment', '$timeout', '$window',
     function($state, moment, $timeout, $window) {
 
     return {

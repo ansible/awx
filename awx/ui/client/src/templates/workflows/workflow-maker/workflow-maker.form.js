@@ -10,16 +10,9 @@
  * @description This form is for adding/editing a Job Template
 */
 
-// export default
-//     angular.module('WorkflowMakerFormDefinition', [])
-//
-//         .value ('WorkflowMakerFormObject', {
-
-export default
-    angular.module('WorkflowMakerFormDefinition', [])
-
-        .factory('WorkflowMakerFormObject', ['i18n', function(i18n) {
-        return {
+export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
+    return function() {
+        var WorkflowMakerFormObject = {
 
             addTitle: '',
             editTitle: '',
@@ -176,16 +169,15 @@ export default
                     ngShow: '(workflowJobTemplateObj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
                 }
             }
-        };}])
-        .factory('WorkflowMakerForm', ['WorkflowMakerFormObject', 'NotificationsList', function(WorkflowMakerFormObject, NotificationsList) {
-            return function() {
-                var itm;
-                for (itm in WorkflowMakerFormObject.related) {
-                    if (WorkflowMakerFormObject.related[itm].include === "NotificationsList") {
-                        WorkflowMakerFormObject.related[itm] = NotificationsList;
-                        WorkflowMakerFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-                    }
-                }
-                return WorkflowMakerFormObject;
-            };
-        }]);
+        };
+
+        var itm;
+        for (itm in WorkflowMakerFormObject.related) {
+            if (WorkflowMakerFormObject.related[itm].include === "NotificationsList") {
+                WorkflowMakerFormObject.related[itm] = NotificationsList;
+                WorkflowMakerFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+            }
+        }
+        return WorkflowMakerFormObject;
+    };
+}];

@@ -17,9 +17,6 @@ import JobVarsPrompt from "./forms/JobVarsPrompt";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 import Organizations from "./forms/Organizations";
-import WorkflowMaker from "./forms/WorkflowMaker";
-import Workflows from "./forms/Workflows";
-
 
 export
     {   EventsViewer,
@@ -35,6 +32,4 @@ export
         LogViewerOptions,
         LogViewerStatus,
         Organizations,
-        WorkflowMaker,
-        Workflows
     };

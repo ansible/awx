@@ -10,11 +10,9 @@
  * @description This form is for adding/editing a Workflow
 */
 
-export default
-    angular.module('WorkflowFormDefinition', [])
-
-        .factory('WorkflowFormObject', ['i18n', function(i18n) {
-        return {
+export default ['NotificationsList', 'i18n', function(NotificationsList, i18n) {
+    return function() {
+        var WorkflowFormObject = {
 
             addTitle: i18n._('NEW WORKFLOW JOB TEMPLATE'),
             editTitle: '{{ name }}',
@@ -190,21 +188,18 @@ export default
                     class: 'Form-primaryButton'
                 }
             }
-        };}])
+        };
 
-        .factory('WorkflowForm', ['WorkflowFormObject', 'NotificationsList',
-        function(WorkflowFormObject, NotificationsList) {
-            return function() {
-                var itm;
+        var itm;
 
-                for (itm in WorkflowFormObject.related) {
-                    if (WorkflowFormObject.related[itm].include === "NotificationsList") {
-                        WorkflowFormObject.related[itm] = _.clone(NotificationsList);
-                        WorkflowFormObject.related[itm].ngClick = "$state.go('templates.editWorkflowJobTemplate.notifications')";
-                        WorkflowFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-                    }
-                }
+        for (itm in WorkflowFormObject.related) {
+            if (WorkflowFormObject.related[itm].include === "NotificationsList") {
+                WorkflowFormObject.related[itm] = _.clone(NotificationsList);
+                WorkflowFormObject.related[itm].ngClick = "$state.go('templates.editWorkflowJobTemplate.notifications')";
+                WorkflowFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+            }
+        }
 
-                return WorkflowFormObject;
-            };
-        }]);
+        return WorkflowFormObject;
+    };
+}];

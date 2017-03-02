@@ -20,6 +20,7 @@ import workflowService from './workflows/workflow.service';
 import templateCopyService from './copy-template/template-copy.service';
 import CallbackHelpInit from './job_templates/factories/callback-help-init.factory';
 import md5Setup from './job_templates/factories/md-5-setup.factory';
+import WorkflowForm from './workflows.form';
 
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
@@ -31,6 +32,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
     .service('TemplateCopyService', templateCopyService)
     .factory('CallbackHelpInit', CallbackHelpInit)
     .factory('md5Setup', md5Setup)
+    .factory('WorkflowForm', WorkflowForm)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateTree, addJobTemplate, editJobTemplate, addWorkflow, editWorkflow,
