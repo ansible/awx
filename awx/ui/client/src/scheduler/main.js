@@ -16,6 +16,7 @@ import EditSchedule from './factories/edit-schedule.factory';
 import RRuleToAPI from './factories/r-rule-to-api.factory';
 import SchedulePost from './factories/schedule-post.factory';
 import ToggleSchedule from './factories/toggle-schedule.factory';
+import SchedulesList from './schedules.list';
 
 export default
     angular.module('scheduler', [])
@@ -28,6 +29,7 @@ export default
         .factory('RRuleToAPI', RRuleToAPI)
         .factory('SchedulePost', SchedulePost)
         .factory('ToggleSchedule', ToggleSchedule)
+        .factory('SchedulesList', SchedulesList)
         .directive('schedulerDatePicker', schedulerDatePicker)
         .run(['$stateExtender', function($stateExtender) {
             // Inventory sync schedule states registered in: awx/ui/client/src/inventories/manage/groups/main.js
