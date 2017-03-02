@@ -232,12 +232,12 @@ var tower = angular.module('Tower', [
             // })
         }
     ])
-    .run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
+    .run(['$stateExtender', '$q', '$compile', '$cookies', '$rootScope', '$log', '$stateParams',
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
         'FeaturesService', '$filter', 'SocketService',
-        function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
+        function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
@@ -339,7 +339,7 @@ var tower = angular.module('Tower', [
                         // capture most recent URL, excluding login/logout
                         $rootScope.lastPath = $location.path();
                         $rootScope.enteredPath = $location.path();
-                        $cookieStore.put('lastPath', $location.path());
+                        $cookies.put('lastPath', $location.path());
                     }
 
                     if (Authorization.isUserLoggedIn() === false) {
@@ -405,7 +405,7 @@ var tower = angular.module('Tower', [
                     // User not authenticated, redirect to login page
                     $location.path('/login');
                 } else {
-                    var lastUser = $cookieStore.get('current_user'),
+                    var lastUser = $cookies.getObject('current_user'),
                         timestammp = Store('sessionTime');
                     if (lastUser && lastUser.id && timestammp && timestammp[lastUser.id] && timestammp[lastUser.id].loggedIn) {
                         var stime = timestammp[lastUser.id].time,

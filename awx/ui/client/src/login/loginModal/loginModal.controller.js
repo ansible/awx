@@ -54,11 +54,11 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
+export default ['$log', '$cookies', '$compile', '$window', '$rootScope',
     '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
     'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
     'CheckLicense', 'FeaturesService', 'SocketService',
-    function ($log, $cookieStore, $compile, $window, $rootScope, $location,
+    function ($log, $cookies, $compile, $window, $rootScope, $location,
         Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
         scope, pendoService, ConfigService, CheckLicense, FeaturesService,
         SocketService) {
@@ -70,13 +70,13 @@ export default ['$log', '$cookieStore', '$compile', '$window', '$rootScope',
         }, 1000);
     };
 
-    scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
+    scope.sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookies.get('sessionExpired') : $rootScope.sessionExpired;
     scope.login_username = '';
     scope.login_password = '';
 
 
     lastPath = function () {
-        return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
+        return (Empty($rootScope.lastPath)) ? $cookies.get('lastPath') : $rootScope.lastPath;
     };
 
     lastUser = function(){

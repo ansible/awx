@@ -22,9 +22,9 @@
  * @description
  */
 export default
-    ['$rootScope', '$cookieStore', 'CreateDialog', 'Authorization',
+    ['$rootScope', '$cookies', 'CreateDialog', 'Authorization',
         'Store', '$interval', '$state', '$q', 'i18n',
-    function ($rootScope, $cookieStore, CreateDialog, Authorization,
+    function ($rootScope, $cookies, CreateDialog, Authorization,
         Store, $interval, $state, $q, i18n) {
         return {
 
@@ -81,7 +81,7 @@ export default
                 }
                 this.sessionTime = 0;
                 this.clearTimers();
-                $cookieStore.put('sessionExpired', true);
+                $cookies.put('sessionExpired', true);
             },
 
             moveForward: function () {
@@ -101,7 +101,7 @@ export default
                 y[$rootScope.current_user.id] = x;
                 Store('sessionTime' , y);
                 $rootScope.sessionExpired = false;
-                $cookieStore.put('sessionExpired', false);
+                $cookies.put('sessionExpired', false);
                 this.startTimers();
             },
 
