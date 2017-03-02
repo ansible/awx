@@ -7,6 +7,8 @@
 import UsersList from './list/users-list.controller';
 import UsersAdd from './add/users-add.controller';
 import UsersEdit from './edit/users-edit.controller';
+import UserForm from './users.form';
+import UserList from './users.list';
 import { N_ } from '../i18n';
 
 export default
@@ -14,6 +16,8 @@ angular.module('Users', [])
     .controller('UsersList', UsersList)
     .controller('UsersAdd', UsersAdd)
     .controller('UsersEdit', UsersEdit)
+    .factory('UserForm', UserForm)
+    .factory('UserList', UserList)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

@@ -10,9 +10,7 @@
  * @description This form is for adding/editing users
 */
 
-export default
-    angular.module('UserFormDefinition', [])
-        .factory('UserForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('NEW USER'),
@@ -229,4 +227,4 @@ export default
                 }
             }
 
-        };}]);
+        };}];

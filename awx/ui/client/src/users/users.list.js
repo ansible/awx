@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('UserListDefinition', [])
-    .factory('UserList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'users',
@@ -87,4 +85,4 @@ export default
                 ngShow: 'user.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

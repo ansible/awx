@@ -22,7 +22,6 @@ import ScheduledJobs from "./lists/ScheduledJobs";
 import Schedules from "./lists/Schedules";
 import Streams from "./lists/Streams";
 import Templates from "./lists/Templates";
-import Users from "./lists/Users";
 
 export
     {   CompletedJobs,
@@ -42,6 +41,5 @@ export
         ScheduledJobs,
         Schedules,
         Streams,
-        Templates,
-        Users
+        Templates
     };
