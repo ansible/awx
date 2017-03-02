@@ -304,6 +304,12 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_runner_on_ok(self, result):
         # FIXME: Display detailed results or not based on verbosity.
+
+        # strip environment vars from the job event; it already exists on the
+        # job and sensitive values are filtered there
+        if result._task.get_name() == 'setup':
+            result._result.get('ansible_facts', {}).pop('ansible_env', None)
+
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,
