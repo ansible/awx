@@ -55,8 +55,8 @@
  */
 
 export default
-    ['$http', '$rootScope', '$cookieStore', '$q', 'Authorization',
-        function ($http, $rootScope, $cookieStore, $q, Authorization) {
+    ['$http', '$rootScope', '$cookies', '$q', 'Authorization',
+        function ($http, $rootScope, $cookies, $q, Authorization) {
             return {
 
                 headers: {},
