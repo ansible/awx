@@ -131,6 +131,9 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
 )
 
+# Graph of resources that can have named-url
+NAMED_URL_GRAPH = {}
+
 # Maximum number of the same job that can be waiting to run when launching from scheduler
 # Note: This setting may be overridden by database settings.
 SCHEDULE_MAX_JOBS = 10
@@ -209,6 +212,7 @@ MIDDLEWARE_CLASSES = (  # NOQA
     'awx.sso.middleware.SocialAuthMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'awx.main.middleware.AuthTokenTimeoutMiddleware',
+    'awx.main.middleware.URLModificationMiddleware',
 )
 
 TEMPLATE_DIRS = (

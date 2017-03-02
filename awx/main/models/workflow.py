@@ -326,6 +326,7 @@ class WorkflowJobOptions(BaseModel):
 
 
 class WorkflowJobTemplate(UnifiedJobTemplate, WorkflowJobOptions, SurveyJobTemplateMixin, ResourceMixin):
+
     class Meta:
         app_label = 'main'
 

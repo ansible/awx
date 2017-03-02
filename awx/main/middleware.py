@@ -4,15 +4,21 @@
 import logging
 import threading
 import uuid
+import six
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.db import IntegrityError
 from django.utils.functional import curry
+from django.shortcuts import get_object_or_404
+from django.apps import apps
+from django.utils.translation import ugettext_lazy as _
 
 from awx.main.models import ActivityStream
 from awx.api.authentication import TokenAuthentication
+from awx.main.utils.named_url_graph import generate_graph, GraphNode
+from awx.conf import fields, register
 
 
 logger = logging.getLogger('awx.main.middleware')
@@ -75,7 +81,7 @@ class ActivityStreamMiddleware(threading.local):
 
 class AuthTokenTimeoutMiddleware(object):
     """Presume that when the user includes the auth header, they go through the
-    authentication mechanism. Further, that mechanism is presumed to extend 
+    authentication mechanism. Further, that mechanism is presumed to extend
     the users session validity time by AUTH_TOKEN_EXPIRATION.
 
     If the auth token is not supplied, then don't include the header
@@ -86,4 +92,62 @@ class AuthTokenTimeoutMiddleware(object):
 
         response['Auth-Token-Timeout'] = int(settings.AUTH_TOKEN_EXPIRATION)
         return response
-        
+
+
+def _customize_graph():
+    from awx.main.models import Instance, Schedule, UnifiedJobTemplate
+    for model in [Schedule, UnifiedJobTemplate]:
+        if model in settings.NAMED_URL_GRAPH:
+            settings.NAMED_URL_GRAPH[model].remove_bindings()
+            settings.NAMED_URL_GRAPH.pop(model)
+    if User not in settings.NAMED_URL_GRAPH:
+        settings.NAMED_URL_GRAPH[User] = GraphNode(User, ['username'], [])
+        settings.NAMED_URL_GRAPH[User].add_bindings()
+    if Instance not in settings.NAMED_URL_GRAPH:
+        settings.NAMED_URL_GRAPH[Instance] = GraphNode(Instance, ['hostname'], [])
+        settings.NAMED_URL_GRAPH[Instance].add_bindings()
+
+
+class URLModificationMiddleware(object):
+
+    def __init__(self):
+        models = apps.get_app_config('main').get_models()
+        generate_graph(models)
+        _customize_graph()
+        register(
+            'NAMED_URL_FORMATS',
+            field_class=fields.DictField,
+            read_only=True,
+            label=_('Formats of all available named urls'),
+            help_text=_('Read-only list of key-value pairs that shows the format of all available named'
+                        ' URLs. Use this list as a guide when composing named URLs for resources'),
+            category=_('System'),
+            category_slug='system',
+        )
+
+    def _named_url_to_pk(self, node, named_url):
+        kwargs = {}
+        if not node.populate_named_url_query_kwargs(kwargs, named_url):
+            return named_url
+        return str(get_object_or_404(node.model, **kwargs).pk)
+
+    def _convert_named_url(self, url_path):
+        url_units = url_path.split('/')
+        if len(url_units) < 6 or url_units[1] != 'api' or url_units[2] not in ['v2']:
+            return url_path
+        resource = url_units[3]
+        if resource in settings.NAMED_URL_MAPPINGS:
+            url_units[4] = self._named_url_to_pk(settings.NAMED_URL_GRAPH[settings.NAMED_URL_MAPPINGS[resource]],
+                                                 url_units[4])
+        return '/'.join(url_units)
+
+    def process_request(self, request):
+        if 'REQUEST_URI' in request.environ:
+            old_path = six.moves.urllib.parse.urlsplit(request.environ['REQUEST_URI']).path
+            old_path = old_path[request.path.find(request.path_info):]
+        else:
+            old_path = request.path_info
+        new_path = self._convert_named_url(old_path)
+        if request.path_info != new_path:
+            request.path = request.path.replace(request.path_info, new_path)
+            request.path_info = new_path

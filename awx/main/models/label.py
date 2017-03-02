@@ -44,7 +44,7 @@ class Label(CommonModelNameNotUnique):
     def is_detached(self):
         return bool(
             Label.objects.filter(
-                id=self.id, 
+                id=self.id,
                 unifiedjob_labels__isnull=True,
                 unifiedjobtemplate_labels__isnull=True
             ).count())
