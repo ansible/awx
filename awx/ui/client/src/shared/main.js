@@ -20,6 +20,10 @@ import templateUrl from './template-url/main';
 import RestServices from '../rest/main';
 import stateDefinitions from './stateDefinitions.factory';
 import apiLoader from './api-loader';
+import variables from './variables/main';
+import parse from './parse/main';
+import loadconfig from './load-config/main';
+import Modal from './Modal';
 import 'angular-duration-format';
 
 export default
@@ -36,6 +40,10 @@ angular.module('shared', [listGenerator.name,
         templateUrl.name,
         RestServices.name,
         apiLoader.name,
+        variables.name,
+        parse.name,
+        loadconfig.name,
+        Modal.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])

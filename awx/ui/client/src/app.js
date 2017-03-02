@@ -37,7 +37,7 @@ if ($basePath) {
 }
 
 // Modules
-import './helpers';
+import './forms';
 import './lists';
 import './filters';
 import portalMode from './portal-mode/main';
@@ -71,7 +71,6 @@ import projects from './projects/main';
 
 import RestServices from './rest/main';
 import access from './access/main';
-import './shared/Modal';
 import './shared/prompt-dialog';
 import './shared/directives';
 import './shared/filters';
@@ -91,6 +90,7 @@ var tower = angular.module('Tower', [
     require('angular-sanitize'),
     require('angular-scheduler').name,
     require('angular-tz-extensions'),
+    require('angular-md5'),
     require('lr-infinite-scroll'),
     require('ng-toast'),
     'gettext',
@@ -138,66 +138,46 @@ var tower = angular.module('Tower', [
     'OrganizationListDefinition',
     'templates',
     'UserListDefinition',
-    'UserHelper',
     'PromptDialog',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
-    'InventoryHelper',
     'InventoryGroupsDefinition',
     'InventoryHostsDefinition',
-    'HostsHelper',
     'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
     'GroupListDefinition',
-    'GroupsHelper',
     'TeamsListDefinition',
     'TeamFormDefinition',
-    'TeamHelper',
     'CredentialsListDefinition',
     'CredentialFormDefinition',
     'TemplatesListDefinition',
     'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',
-    'JobTemplatesHelper',
-    'JobSubmissionHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',
     'ProjectStatusDefinition',
-    'ProjectsHelper',
     'CompletedJobsDefinition',
     'AllJobsDefinition',
     'JobSummaryDefinition',
-    'ParseHelper',
-    'ChildrenHelper',
-    'ProjectPathHelper',
-    'md5Helper',
-    'SelectionHelper',
     'HostGroupsFormDefinition',
-    'JobsHelper',
-    'CredentialsHelper',
     'StreamListDefinition',
     'ActivityDetailDefinition',
-    'VariablesHelper',
     'SchedulesListDefinition',
     'ScheduledJobsDefinition',
     //'Timezones',
-    'SchedulesHelper',
     'JobsListDefinition',
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
     'lrInfiniteScroll',
-    'LoadConfigHelper',
     'PortalJobsListDefinition',
     'features',
     'longDateFilter',
     'pendolytics',
     scheduler.name,
-    'ApiModelHelper',
-    'ActivityStreamHelper',
     'WorkflowFormDefinition',
     'InventorySourcesListDefinition',
     'WorkflowMakerFormDefinition'

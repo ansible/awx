@@ -14,10 +14,10 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', '$location',
     '$stateParams', 'UserForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
-    'ResetForm', 'Wait', 'CreateSelect2', '$state', 'i18n',
+    'Wait', 'CreateSelect2', '$state', 'i18n',
     function($scope, $rootScope, $location,
     $stateParams, UserForm, Rest, ProcessErrors,
-    ClearScope, GetBasePath, ResetForm, Wait, CreateSelect2, $state, i18n) {
+    ClearScope, GetBasePath, Wait, CreateSelect2, $state, i18n) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);
