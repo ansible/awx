@@ -19,7 +19,6 @@ import Organizations from "./lists/Organizations";
 import PortalJobTemplates from "./lists/PortalJobTemplates";
 import PortalJobs from "./lists/PortalJobs";
 import ScheduledJobs from "./lists/ScheduledJobs";
-import Streams from "./lists/Streams";
 import Templates from "./lists/Templates";
 
 export
@@ -38,6 +37,5 @@ export
         PortalJobTemplates,
         PortalJobs,
         ScheduledJobs,
-        Streams,
         Templates
     };

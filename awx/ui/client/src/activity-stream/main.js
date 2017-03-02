@@ -14,6 +14,8 @@ import ShowDetail from './factories/show-detail.factory';
 import Stream from './factories/stream.factory';
 import GetTargetTitle from './get-target-title.factory';
 import ModelToBasePathKey from './model-to-base-path-key.factory';
+import ActivityDetailForm from './activity-detail.form';
+import StreamList from './streams.list';
 
 export default angular.module('activityStream', [streamDetailModal.name])
     .controller('activityStreamController', activityStreamController)
@@ -24,6 +26,8 @@ export default angular.module('activityStream', [streamDetailModal.name])
     .factory('Stream', Stream)
     .factory('GetTargetTitle', GetTargetTitle)
     .factory('ModelToBasePathKey', ModelToBasePathKey)
+    .factory('ActivityDetailForm', ActivityDetailForm)
+    .factory('StreamList', StreamList)
     .run(['$stateExtender', function($stateExtender) {
         $stateExtender.addState(activityStreamRoute);
     }]);

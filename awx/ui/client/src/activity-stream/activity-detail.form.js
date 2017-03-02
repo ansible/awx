@@ -16,9 +16,7 @@
  * @description This form is for activity detail modal that can be shown on most pages.
 */
 
-export default
-    angular.module('ActivityDetailDefinition', [])
-        .factory('ActivityDetailForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
             name: 'activity',
@@ -48,4 +46,4 @@ export default
                 }
             }
 
-        };}]); //Form
+        };}];

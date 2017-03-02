@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('StreamListDefinition', [])
-    .factory('StreamList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'activities',
@@ -72,4 +70,4 @@ export default
             }
         }
 
-    };}]);
+    };}];

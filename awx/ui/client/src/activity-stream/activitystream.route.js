@@ -60,8 +60,8 @@ export default {
                 return qs.search(path, stateParams);
             }
         ],
-        features: ['FeaturesService', 'ProcessErrors', '$state', '$rootScope',
-            function(FeaturesService, ProcessErrors, $state, $rootScope) {
+        features: ['FeaturesService', '$state', '$rootScope',
+            function(FeaturesService, $state, $rootScope) {
                 var features = FeaturesService.get();
                 if (features) {
                     if (FeaturesService.featureEnabled('activity_streams')) {
@@ -81,12 +81,10 @@ export default {
                 });
             }
         ],
-        subTitle: ['$stateParams',
-            'Rest',
-            'ModelToBasePathKey',
-            'GetBasePath',
+        subTitle: ['$stateParams', 'Rest', 'ModelToBasePathKey', 'GetBasePath',
             'ProcessErrors',
-            function($stateParams, rest, ModelToBasePathKey, getBasePath, ProcessErrors) {
+            function($stateParams, rest, ModelToBasePathKey, getBasePath,
+            ProcessErrors) {
                 // If we have a target and an ID then we want to go grab the name of the object
                 // that we're examining with the activity stream.  This name will be used in the
                 // subtitle.

@@ -4,7 +4,6 @@
  * All Rights Reserved
 *************************************************/
 
-import ActivityDetail from "./forms/ActivityDetail";
 import EventsViewer from "./forms/EventsViewer";
 import Groups from "./forms/Groups";
 import HostGroups from "./forms/HostGroups";
@@ -23,8 +22,7 @@ import Workflows from "./forms/Workflows";
 
 
 export
-    {   ActivityDetail,
-        EventsViewer,
+    {   EventsViewer,
         Groups,
         HostGroups,
         Hosts,

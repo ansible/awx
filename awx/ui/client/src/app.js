@@ -143,8 +143,6 @@ var tower = angular.module('Tower', [
     'AllJobsDefinition',
     'JobSummaryDefinition',
     'HostGroupsFormDefinition',
-    'StreamListDefinition',
-    'ActivityDetailDefinition',
     'ScheduledJobsDefinition',
     'JobsListDefinition',
     'LogViewerStatusDefinition',
