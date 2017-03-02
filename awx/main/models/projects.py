@@ -142,7 +142,7 @@ class ProjectOptions(models.Model):
         cred = self.credential
         if cred:
             if cred.kind != 'scm':
-                raise ValidationError(_("Credential kind must be either 'scm'."))
+                raise ValidationError(_("Credential kind must be 'scm'."))
             try:
                 if self.scm_type == 'insights':
                     self.scm_url = settings.INSIGHTS_URL_BASE
