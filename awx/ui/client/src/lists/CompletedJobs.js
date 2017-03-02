@@ -6,7 +6,7 @@
 
 
 export default
-    angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
+    angular.module('CompletedJobsDefinition', [])
     .factory('CompletedJobsList', ['i18n', function(i18n) {
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view

@@ -11,7 +11,7 @@
  */
 
 function InventoriesList($scope, $rootScope, $location, $log,
-    $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList, Prompt,
+    $stateParams, $compile, $filter, Rest, Alert, InventoryList, Prompt,
     ClearScope, ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
     let list = InventoryList,
@@ -304,6 +304,6 @@ function InventoriesList($scope, $rootScope, $location, $log,
 }
 
 export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList',
+    '$stateParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList',
     'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
 ];
