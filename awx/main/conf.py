@@ -322,5 +322,5 @@ register(
     help_text=_('Useful to uniquely identify Tower instances.'),
     category=_('Logging'),
     category_slug='logging',
-    default=None,
+    default='',
 )
