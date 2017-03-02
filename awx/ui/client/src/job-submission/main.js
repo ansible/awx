@@ -7,6 +7,12 @@
 import InitiatePlaybookRun from './job-submission-factories/initiateplaybookrun.factory';
 import LaunchJob from './job-submission-factories/launchjob.factory';
 import GetSurveyQuestions from './job-submission-factories/getsurveyquestions.factory';
+import AdhocRun from './job-submission-factories/adhoc-run.factory.js';
+import CheckPasswords from './job-submission-factories/check-passwords.factory';
+import CreateLaunchDialog from './job-submission-factories/create-launch-dialog.factory';
+import InventoryUpdate from './job-submission-factories/inventory-update.factory';
+import ProjectUpdate from './job-submission-factories/project-update.factory';
+import PromptForPasswords from './job-submission-factories/prompt-for-passwords.factory';
 import submitJob from './job-submission.directive';
 import credentialList from './lists/credential/job-sub-cred-list.directive';
 import inventoryList from './lists/inventory/job-sub-inv-list.directive';
@@ -16,6 +22,12 @@ export default
 		.factory('InitiatePlaybookRun', InitiatePlaybookRun)
 		.factory('LaunchJob', LaunchJob)
 		.factory('GetSurveyQuestions', GetSurveyQuestions)
+		.factory('AdhocRun', AdhocRun)
+		.factory('CheckPasswords', CheckPasswords)
+		.factory('CreateLaunchDialog', CreateLaunchDialog)
+		.factory('InventoryUpdate', InventoryUpdate)
+		.factory('ProjectUpdate', ProjectUpdate)
+		.factory('PromptForPasswords', PromptForPasswords)
 		.directive('submitJob', submitJob)
 		.directive('jobSubCredList', credentialList)
 		.directive('jobSubInvList', inventoryList);

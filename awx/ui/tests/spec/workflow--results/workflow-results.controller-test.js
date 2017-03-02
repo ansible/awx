@@ -7,7 +7,6 @@ describe('Controller: workflowResults', () => {
     let $controller;
     let workflowResults;
     let $rootScope;
-    let ParseVariableString;
     let workflowResultsService;
     let $interval;
 
@@ -17,10 +16,8 @@ describe('Controller: workflowResults', () => {
         }
     };
 
-    beforeEach(angular.mock.module('VariablesHelper'));
-
     beforeEach(angular.mock.module('workflowResults', ($provide) => {
-        ['PromptDialog', 'Prompt', 'Wait', 'Rest', '$state', 'ProcessErrors', 
+        ['PromptDialog', 'Prompt', 'Wait', 'Rest', '$state', 'ProcessErrors',
          'InitiatePlaybookRun', 'jobLabels', 'workflowNodes', 'count',
         ].forEach((item) => {
             $provide.value(item, {});
@@ -30,8 +27,9 @@ describe('Controller: workflowResults', () => {
         $provide.value('workflowData', workflow_job_json);
         $provide.value('workflowDataOptions', workflow_job_options_json);
         $provide.value('ParseTypeChange', function() {});
+        $provide.value('ParseVariableString', function() {});
         $provide.value('i18n', { '_': (a) => { return a; } });
-        $provide.provider('$stateProvider', { '$get': function() { return function() {} } });
+        $provide.provider('$stateProvider', { '$get': function() { return function() {}; } });
         $provide.service('WorkflowService', function($q) {
             return {
                 buildTree: function() {
@@ -39,14 +37,13 @@ describe('Controller: workflowResults', () => {
                     deferred.resolve(treeData);
                     return deferred.promise;
                 }
-            }
+            };
         });
     }));
 
-    beforeEach(angular.mock.inject(function(_$controller_, _$rootScope_, _ParseVariableString_, _workflowResultsService_, _$interval_){
+    beforeEach(angular.mock.inject(function(_$controller_, _$rootScope_, _workflowResultsService_, _$interval_){
         $controller = _$controller_;
         $rootScope = _$rootScope_;
-        ParseVariableString = _ParseVariableString_;
         workflowResultsService = _workflowResultsService_;
         $interval = _$interval_;
 
@@ -102,7 +99,7 @@ describe('Controller: workflowResults', () => {
             describe('job waiting', () => {
                 beforeEach(() => {
                     jobWaitingWorkflowResultsControllerFixture(null, 'waiting');
-                });           
+                });
 
                 it('should not start elapsed timer', () => {
                     expect(workflowResultsService.createOneSecondTimer).not.toHaveBeenCalled();

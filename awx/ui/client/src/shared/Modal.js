@@ -17,7 +17,7 @@
 
 
 export default
-angular.module('ModalDialog', ['Utilities', 'ParseHelper'])
+angular.module('ModalDialog', ['Utilities'])
 
     /**
      * @ngdoc method

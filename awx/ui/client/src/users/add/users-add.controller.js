@@ -14,10 +14,10 @@ const user_type_options = [
 
 export default ['$scope', '$rootScope', '$stateParams', 'UserForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
-    'ResetForm', 'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
+    'Wait', 'CreateSelect2', '$state', '$location', 'i18n',
     function($scope, $rootScope, $stateParams, UserForm,
     GenerateForm, Rest, Alert, ProcessErrors, ReturnToCaller, ClearScope,
-    GetBasePath, ResetForm, Wait, CreateSelect2, $state, $location, i18n) {
+    GetBasePath, Wait, CreateSelect2, $state, $location, i18n) {
 
         ClearScope();
 
