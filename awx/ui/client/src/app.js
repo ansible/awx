@@ -138,8 +138,6 @@ var tower = angular.module('Tower', [
     'HostListDefinition',
     'GroupFormDefinition',
     'GroupListDefinition',
-    'TeamsListDefinition',
-    'TeamFormDefinition',
     'TemplatesListDefinition',
     'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',

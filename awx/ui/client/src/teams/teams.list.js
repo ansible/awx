@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('TeamsListDefinition', [])
-    .factory('TeamList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'teams',
@@ -83,4 +81,4 @@ export default
                 ngShow: 'team.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

@@ -10,9 +10,7 @@
  * @description This form is for adding/editing teams
 */
 
-export default
-    angular.module('TeamFormDefinition', [])
-        .factory('TeamForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('NEW TEAM'), //Legend in add mode
@@ -162,4 +160,4 @@ export default
                     }
                 }
             },
-        };}]); //InventoryForm
+        };}];
