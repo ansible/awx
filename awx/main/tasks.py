@@ -478,16 +478,17 @@ class BaseTask(Task):
         '''
         hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
         urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
-        for k,v in env.items():
+        safe_env = dict(env)
+        for k,v in safe_env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
             elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
             elif hidden_re.search(k):
-                env[k] = HIDDEN_PASSWORD
+                safe_env[k] = HIDDEN_PASSWORD
             elif type(v) == str and urlpass_re.match(v):
-                env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
-        return env
+                safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
+        return safe_env
 
     def args2cmdline(self, *args):
         return ' '.join([pipes.quote(a) for a in args])

@@ -84,6 +84,12 @@ def test_safe_env_filtering(key, value):
     assert task.build_safe_env({key: value})[key] == tasks.HIDDEN_PASSWORD
 
 
+def test_safe_env_returns_new_copy():
+    task = tasks.RunJob()
+    env = {'foo': 'bar'}
+    assert task.build_safe_env(env) is not env
+
+
 def test_openstack_client_config_generation(mocker):
     update = tasks.RunInventoryUpdate()
     inventory_update = mocker.Mock(**{
