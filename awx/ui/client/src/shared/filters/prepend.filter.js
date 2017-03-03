@@ -1,9 +1,15 @@
 export default function() {
     return function(string, prepend) {
         if (string) {
-            return prepend + string;
+            if(prepend) {
+                return prepend + string;
+            }
+            else {
+                return string;
+            }
         }
-
-        return "";
+        else {
+            return "";
+        }
     };
 }

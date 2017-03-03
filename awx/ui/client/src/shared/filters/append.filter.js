@@ -1,10 +1,15 @@
 export default function() {
     return function(string, append) {
         if (string) {
-            return string + append;
+            if (append) {
+                return string + append;
+            }
+            else {
+                return string;
+            }
         }
-
-        return "";
+        else {
+            return "";
+        }
     };
 }
-

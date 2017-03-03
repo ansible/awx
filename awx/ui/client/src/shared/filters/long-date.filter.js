@@ -7,7 +7,7 @@
  export default ['moment', function(moment) {
      return function(input) {
         var date;
-         if(input === null){
+         if(input === null || input === undefined){
              return "";
          }else {
              date = moment(input);
@@ -15,23 +15,3 @@
          }
      };
  }];
-
-
-// function longDateFilter(moment, input) {
-//     var date;
-//     if(input === null){
-//         return "";
-//     }else {
-//         date = moment(input);
-//         return date.format('l LTS');
-//     }
-// }
-//
-// export default
-//     angular.module('longDateFilter', [])
-//         .filter('longDate',
-//                 [   'moment',
-//                     function(moment) {
-//                         return _.partial(longDateFilter, moment);
-//                     }
-//                 ]);
