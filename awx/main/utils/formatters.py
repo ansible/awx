@@ -14,6 +14,7 @@ class LogstashFormatter(LogstashFormatterVersion1):
         if settings_module:
             self.host_id = settings_module.CLUSTER_HOST_ID
             self.tower_uuid = settings_module.LOG_AGGREGATOR_TOWER_UUID
+            self.message_type = settings_module.LOG_AGGREGATOR_TYPE
         return ret
 
     def reformat_data_for_log(self, raw_data, kind=None):
