@@ -431,8 +431,8 @@
             <div class="Panel JobResults-panelRight">
 
                 <!-- RIGHT PANE HEADER -->
-                <div class="StandardOut-panelHeader">
-                    <div class="StandardOut-panelHeaderText">
+                <div class="StandardOut-panelHeader JobResults-panelRightTitle">
+                    <div class="StandardOut-panelHeaderText JobResults-panelRightTitleText">
                         <i class="JobResults-statusResultIcon
                             fa icon-job-{{ job_status }}"
                             ng-show="stdoutFullScreen"
@@ -443,76 +443,77 @@
                         </i>
                         {{ job.name }}
                     </div>
+                    <div class="JobResults-badgeAndActionRow">
+                        <!-- HEADER COUNTS -->
+                        <div class="JobResults-badgeRow">
+                            <!-- PLAYS COUNT -->
+                            <div class="JobResults-badgeTitle">
+                                Plays
+                            </div>
+                            <span class="badge List-titleBadge">
+                                {{ playCount || 0}}
+                            </span>
 
-                    <!-- HEADER COUNTS -->
-                    <div class="JobResults-badgeRow">
-                        <!-- PLAYS COUNT -->
-                        <div class="JobResults-badgeTitle">
-                            Plays
+                            <!-- TASKS COUNT -->
+                            <div class="JobResults-badgeTitle">
+                                Tasks
+                            </div>
+                            <span class="badge List-titleBadge">
+                                {{ taskCount || 0}}
+                            </span>
+
+                            <!-- HOSTS COUNT -->
+                            <div class="JobResults-badgeTitle">
+                                Hosts
+                            </div>
+                            <span class="badge List-titleBadge"
+                                ng-if="jobFinished">
+                                {{ hostCount || 0}}
+                            </span>
+
+                            <span class="badge List-titleBadge"
+                                aw-tool-tip="The host count will update when the job is complete."
+                                data-placement="top"
+                                ng-if="!jobFinished">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </span>
+
+                            <!-- ELAPSED TIME -->
+                            <div class="JobResults-badgeTitle">
+                                Elapsed
+                            </div>
+                            <span class="badge List-titleBadge">
+                                {{ job.elapsed * 1000 | duration: "hh:mm:ss" }}
+                            </span>
                         </div>
-                        <span class="badge List-titleBadge">
-                            {{ playCount || 0}}
-                        </span>
 
-                        <!-- TASKS COUNT -->
-                        <div class="JobResults-badgeTitle">
-                            Tasks
-                        </div>
-                        <span class="badge List-titleBadge">
-                            {{ taskCount || 0}}
-                        </span>
+                        <!-- HEADER ACTIONS -->
+                        <div class="StandardOut-panelHeaderActions">
 
-                        <!-- HOSTS COUNT -->
-                        <div class="JobResults-badgeTitle">
-                            Hosts
-                        </div>
-                        <span class="badge List-titleBadge"
-                            ng-if="jobFinished">
-                            {{ hostCount || 0}}
-                        </span>
-
-                        <span class="badge List-titleBadge"
-                            aw-tool-tip="The host count will update when the job is complete."
-                            data-placement="top"
-                            ng-if="!jobFinished">
-                            <i class="fa fa-ellipsis-h"></i>
-                        </span>
-
-                        <!-- ELAPSED TIME -->
-                        <div class="JobResults-badgeTitle">
-                            Elapsed
-                        </div>
-                        <span class="badge List-titleBadge">
-                            {{ job.elapsed * 1000 | duration: "hh:mm:ss" }}
-                        </span>
-                    </div>
-
-                    <!-- HEADER ACTIONS -->
-                    <div class="StandardOut-panelHeaderActions">
-
-                        <!-- FULL-SCREEN TOGGLE ACTION -->
-                        <button class="StandardOut-actionButton"
-                            aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
-                            data-tip-watch="toggleStdoutFullscreenTooltip"
-                            data-placement="top"
-                            ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
-                            ng-click="toggleStdoutFullscreen()">
-                            <i class="fa fa-arrows-alt"></i>
-                        </button>
-
-                        <!-- DOWNLOAD ACTION -->
-                        <a ng-show="job.status === 'failed' ||
-                            job.status === 'successful' ||
-                            job.status === 'canceled'"
-                            href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download">
+                            <!-- FULL-SCREEN TOGGLE ACTION -->
                             <button class="StandardOut-actionButton"
-                                aw-tool-tip="{{ standardOutTooltip }}"
-                                data-tip-watch="standardOutTooltip"
-                                data-placement="top">
-                                <i class="fa fa-download"></i>
+                                aw-tool-tip="{{ toggleStdoutFullscreenTooltip }}"
+                                data-tip-watch="toggleStdoutFullscreenTooltip"
+                                data-placement="top"
+                                ng-class="{'StandardOut-actionButton--active': stdoutFullScreen}"
+                                ng-click="toggleStdoutFullscreen()">
+                                <i class="fa fa-arrows-alt"></i>
                             </button>
-                        </a>
 
+                            <!-- DOWNLOAD ACTION -->
+                            <a ng-show="job.status === 'failed' ||
+                                job.status === 'successful' ||
+                                job.status === 'canceled'"
+                                href="/api/v1/jobs/{{ job.id }}/stdout?format=txt_download">
+                                <button class="StandardOut-actionButton"
+                                    aw-tool-tip="{{ standardOutTooltip }}"
+                                    data-tip-watch="standardOutTooltip"
+                                    data-placement="top">
+                                    <i class="fa fa-download"></i>
+                                </button>
+                            </a>
+
+                        </div>
                     </div>
                 </div>
                 <host-status-bar></host-status-bar>
