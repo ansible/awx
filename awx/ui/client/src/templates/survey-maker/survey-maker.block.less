@@ -10,12 +10,14 @@
 }
 .SurveyMaker-header {
     display: flex;
-    align-items: center;
 }
 .SurveyMaker-title {
     align-items: center;
     flex: 1 0 auto;
     display: flex;
+    word-wrap: break-word;
+    word-break: break-all;
+    max-width: 98%;
 }
 .SurveyMaker-titleText {
     color: @list-title-txt;
@@ -23,6 +25,7 @@
     font-weight: bold;
     margin-right: 10px;
     text-transform: uppercase;
+    max-width: 50%;
 }
 .SurveyMaker-titleLockup {
     margin-left: 4px;
