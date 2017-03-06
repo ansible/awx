@@ -123,8 +123,6 @@ var tower = angular.module('Tower', [
     scheduler.name,
 
     'Utilities',
-    'OrganizationFormDefinition',
-    'OrganizationListDefinition',
     'templates',
     'PromptDialog',
     'AWDirectives',
