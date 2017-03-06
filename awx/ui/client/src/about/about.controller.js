@@ -1,6 +1,6 @@
 export default
-	['$scope', '$state', 'ConfigService', 'i18n',
-        function($scope, $state, ConfigService, i18n){
+	['$scope', '$state', 'ConfigService',
+        function($scope, $state, ConfigService){
 		var init = function(){
 			ConfigService.getConfig()
 				.then(function(config){
