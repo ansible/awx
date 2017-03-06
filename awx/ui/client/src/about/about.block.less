@@ -3,56 +3,58 @@
 
 
 .About-ansibleVersion,
-.About-cowsay--code {
+.About-cowsayCode {
 		font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
 }
 
-.About-ansibleVersion {
-	color: @default-data-txt;
+.About-cowsayContainer {
+		width: 340px;
+		margin: 0 auto;
+}
+.About-cowsayCode {
+		background-color: @default-bg;
+		padding-left: 30px;
+		border-style: none;
+		max-width: 340px;
+		padding-left: 30px;
+}
+.About-modalHeader {
+		border: none;
+		padding-bottom: 0px;
+}
+.About-modalDialog {
+		max-width: 500px;
 }
 
-.About-cowsay--container{
-	width: 340px;
-	margin: 0 auto;
+.About-modalBody {
+		padding-top: 0px;
+		padding-bottom: 0px;
 }
-.About-cowsay--code{
-	background-color: @default-bg;
-	padding-left: 30px;
-	border-style: none;
-	max-width: 340px;
-	padding-left: 30px;
-}
-.About .modal-header{
-	border: none;
-	padding-bottom: 0px;
-}
-.About .modal-dialog{
-	max-width: 500px;
-}
-.About .modal-body{
-	padding-top: 0px;
-}
-.About-brand--redhat{
+.About-brandImg {
     float: left;
     width: 112px;
 		padding-top: 13px;
 }
-.About-brand--ansible{
-	max-width: 120px;
-	margin: 0 auto;
+
+.About-close {
+		position: absolute;
+		top: 15px;
+		right: 15px;
+	  z-index: 10;
 }
-.About-close{
-	position: absolute;
-	top: 15px;
-	right: 15px;
-    z-index: 10;
+
+.About-modalFooter {
+    clear: both;
 }
-.About p{
-	color: @default-interface-txt;
+
+.About-footerText {
+		text-align: right;
+		color: @default-interface-txt;
     margin: 0;
     font-size: 12px;
     padding-top: 10px;
 }
-.About-modal--footer {
-    clear: both;
+
+.About-ansibleVersion {
+		color: @default-data-txt;
 }
