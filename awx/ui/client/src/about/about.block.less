@@ -1,6 +1,16 @@
 /** @define About */
 @import "./client/src/shared/branding/colors.default.less";
 
+
+.About-ansibleVersion,
+.About-cowsay--code {
+		font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+}
+
+.About-ansibleVersion {
+	color: @default-data-txt;
+}
+
 .About-cowsay--container{
 	width: 340px;
 	margin: 0 auto;
@@ -25,6 +35,7 @@
 .About-brand--redhat{
     float: left;
     width: 112px;
+		padding-top: 13px;
 }
 .About-brand--ansible{
 	max-width: 120px;
