@@ -218,7 +218,11 @@ def _send_notification_templates(instance, status_str):
         raise ValueError(_("status_str must be either succeeded or failed"))
     notification_templates = instance.get_notification_templates()
     if notification_templates:
-        all_notification_templates = set(notification_templates.get('success', []) + notification_templates.get('any', []))
+        if status_str == 'succeeded':
+            notification_template_type = 'success'
+        else:
+            notification_template_type = 'error'
+        all_notification_templates = set(notification_templates.get(notification_template_type, []) + notification_templates.get('any', []))
         if len(all_notification_templates):
             try:
                 (notification_subject, notification_body) = getattr(instance, 'build_notification_%s_message' % status_str)()
