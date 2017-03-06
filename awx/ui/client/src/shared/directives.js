@@ -169,6 +169,15 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 scope.imageData = $rootScope.custom_logo;
             });
 
+            scope.$watch('imagePresent', () => {
+                if(!scope.imagePresent){
+                    filePickerButton.html(browseText);
+                }
+                else{
+                    filePickerButton.html(removeText);
+                }
+            });
+
             scope.$on(fieldKey+'_reverted', function(e) {
                 scope.update(e, true);
             });
