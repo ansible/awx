@@ -38,6 +38,17 @@ export default
                     required: true,
                     capitalize: true
                 },
+                organization: {
+                    label: i18n._('Organization'),
+                    type: 'lookup',
+                    list: 'OrganizationList',
+                    basePath: 'organizations',
+                    sourceModel: 'organization',
+                    sourceField: 'name',
+                    required: true,
+                    excludeMode: 'edit',
+                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
+                },
                 email: {
                     label: i18n._('Email'),
                     type: 'email',
@@ -53,17 +64,6 @@ export default
                         init: true
                     },
                     autocomplete: false,
-                    ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
-                },
-                organization: {
-                    label: i18n._('Organization'),
-                    type: 'lookup',
-                    list: 'OrganizationList',
-                    basePath: 'organizations',
-                    sourceModel: 'organization',
-                    sourceField: 'name',
-                    required: true,
-                    excludeMode: 'edit',
                     ngDisabled: '!(user_obj.summary_fields.user_capabilities.edit || canAdd)'
                 },
                 password: {

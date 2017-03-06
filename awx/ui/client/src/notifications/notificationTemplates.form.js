@@ -70,20 +70,20 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-
-            host: {
-                label: i18n._('Host'),
-                type: 'text',
+            password: {
+                labelBind: 'passwordLabel',
+                type: 'sensitive',
+                hasShowInputButton: true,
                 awRequiredWhen: {
-                    reqExpression: "email_required",
+                    reqExpression: "password_required" ,
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'email' ",
+                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            sender: {
-                label: i18n._('Sender Email'),
+            host: {
+                label: i18n._('Host'),
                 type: 'text',
                 awRequiredWhen: {
                     reqExpression: "email_required",
@@ -110,15 +110,14 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            password: {
-                labelBind: 'passwordLabel',
-                type: 'sensitive',
-                hasShowInputButton: true,
+            sender: {
+                label: i18n._('Sender Email'),
+                type: 'text',
                 awRequiredWhen: {
-                    reqExpression: "password_required" ,
+                    reqExpression: "email_required",
                     init: "false"
                 },
-                ngShow: "notification_type.value == 'email' || notification_type.value == 'irc' ",
+                ngShow: "notification_type.value == 'email' ",
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
@@ -269,9 +268,10 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            message_from: {
-                label: i18n._('Label to be shown with notification'),
+            api_url: {
+                label: 'API URL',
                 type: 'text',
+                placeholder: 'https://mycompany.hipchat.com',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
@@ -280,10 +280,9 @@ export default ['i18n', function(i18n) {
                 subForm: 'typeSubForm',
                 ngDisabled: '!(notification_template.summary_fields.user_capabilities.edit || canAdd)'
             },
-            api_url: {
-                label: 'API URL',
+            message_from: {
+                label: i18n._('Notification Label'),
                 type: 'text',
-                placeholder: 'https://mycompany.hipchat.com',
                 awRequiredWhen: {
                     reqExpression: "hipchat_required",
                     init: "false"
