@@ -97,7 +97,7 @@ export function ProjectsList($scope, $rootScope, $location, $log, $stateParams,
 
     $scope.reloadList = function(){
         let path = GetBasePath(list.basePath) || GetBasePath(list.name);
-        qs.search(path, $stateParams[`${list.iterator}_search`])
+        qs.search(path, $state.params[`${list.iterator}_search`])
         .then(function(searchResponse) {
             $scope[`${list.iterator}_dataset`] = searchResponse.data;
             $scope[list.name] = $scope[`${list.iterator}_dataset`].results;
