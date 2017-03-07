@@ -50,6 +50,7 @@ class CompleteView(BaseRedirectView):
             try:
                 token = AuthToken.objects.filter(user=request.user,
                                                  request_hash=request_hash,
+                                                 reason='',
                                                  expires__gt=now())[0]
                 token.refresh()
                 logger.info(smart_text(u"User {} logged in".format(self.request.user.username)))
