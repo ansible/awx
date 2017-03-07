@@ -349,7 +349,11 @@ export default
                     dataPlacement: 'right',
                     dataTitle: i18n._("Host Config Key"),
                     dataContainer: "body",
-                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)'
+                    ngDisabled: '!(job_template_obj.summary_fields.user_capabilities.edit || canAddJobTemplate)',
+                    awRequiredWhen: {
+                        reqExpression: 'allow_callbacks',
+                        alwaysShowAsterisk: true
+                    }
                 },
                 labels: {
                     label: i18n._('Labels'),
