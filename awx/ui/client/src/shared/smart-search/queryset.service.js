@@ -260,9 +260,15 @@ export default ['$q', 'Rest', 'ProcessErrors', '$rootScope', 'Wait', 'DjangoSear
                     }.bind(this));
             },
             error(data, status) {
-                ProcessErrors($rootScope, null, status, null, {
+                if(data && data.detail){
+                    let error = JSON.parse(data.detail);
+                    if(_.isArray(error)){
+                        data.detail = error[0];
+                    }
+                }
+                ProcessErrors($rootScope, data, status, null, {
                     hdr: 'Error!',
-                    msg: "Invalid search term entered."
+                    msg: `Invalid search term entered. GET returned: ${status}`
                 });
             }
         };
