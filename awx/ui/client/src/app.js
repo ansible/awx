@@ -39,7 +39,6 @@ if ($basePath) {
 // Modules
 import './forms';
 import './lists';
-import './filters';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -135,7 +134,6 @@ var tower = angular.module('Tower', [
     'InventoryFormDefinition',
     'InventoryGroupsDefinition',
     'InventoryHostsDefinition',
-    'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
@@ -166,7 +164,6 @@ var tower = angular.module('Tower', [
     'lrInfiniteScroll',
     'PortalJobsListDefinition',
     'features',
-    'longDateFilter',
     'pendolytics',
     scheduler.name,
     'WorkflowFormDefinition',

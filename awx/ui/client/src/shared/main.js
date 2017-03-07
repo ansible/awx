@@ -11,7 +11,7 @@ import smartSearch from './smart-search/main';
 import paginate from './paginate/main';
 import columnSort from './column-sort/main';
 import lodashAsPromised from './lodash-as-promised';
-import stringFilters from './string-filters/main';
+import filters from './filters/main';
 import truncatedText from './truncated-text.directive';
 import stateExtender from './stateExtender.provider';
 import rbacUiControl from './rbacUiControl';
@@ -28,7 +28,6 @@ import moment from './moment/main';
 import config from './config/main';
 import PromptDialog from './prompt-dialog';
 import directives from './directives';
-import filters from './filters';
 import features from './features/main';
 import 'angular-duration-format';
 
@@ -39,7 +38,7 @@ angular.module('shared', [listGenerator.name,
 		smartSearch.name,
         paginate.name,
         columnSort.name,
-        stringFilters.name,
+        filters.name,
         'ui.router',
         rbacUiControl.name,
         socket.name,

@@ -18,7 +18,7 @@
 
 
 export default
-angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
+angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method

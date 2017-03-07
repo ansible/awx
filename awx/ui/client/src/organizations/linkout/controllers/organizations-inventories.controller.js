@@ -5,11 +5,11 @@
  *************************************************/
 
 export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', '$compile', '$filter', 'sanitizeFilter', 'Rest', 'Alert', 'InventoryList',
+    '$stateParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList',
     'generateList', 'Prompt', 'ReturnToCaller', 'OrgInventoryDataset', 'OrgInventoryList',
     'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state',
     function($scope, $rootScope, $location, $log,
-        $stateParams, $compile, $filter, sanitizeFilter, Rest, Alert, InventoryList,
+        $stateParams, $compile, $filter, Rest, Alert, InventoryList,
         generateList, Prompt, ReturnToCaller, Dataset, OrgInventoryList,
         ClearScope, ProcessErrors, GetBasePath, Wait,
         Find, Empty, $state) {

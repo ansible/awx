@@ -30,7 +30,7 @@
 */
 
 export default
-angular.module('PromptDialog', ['Utilities', 'sanitizeFilter'])
+angular.module('PromptDialog', ['Utilities'])
     .factory('Prompt', [
         function () {
             return function (params) {

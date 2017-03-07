@@ -6,7 +6,7 @@
 
 
 export default
-    angular.module('AllJobsDefinition', ['sanitizeFilter', 'capitalizeFilter'])
+    angular.module('AllJobsDefinition', [])
     .factory('AllJobsList', ['i18n', function(i18n) {
     return {
 
