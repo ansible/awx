@@ -1,0 +1,3 @@
+FROM logstash:5-alpine
+COPY logstash.conf /
+CMD ["-f", "/logstash.conf"]
