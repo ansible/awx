@@ -27,7 +27,7 @@
      },
      ncyBreadcrumb: {
          parent: 'setup',
-         label: N_("Edit Configuration")
+         label: N_("EDIT CONFIGURATION")
      },
      controller: ConfigurationController,
      resolve: {
