@@ -482,6 +482,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 autopopulateLookup,
                 modelKey = attrs.ngModel,
                 modelName = attrs.source,
+                lookupType = attrs.awlookuptype,
                 watcher = attrs.awRequiredWhen || undefined,
                 watchBasePath;
 
@@ -516,9 +517,13 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 }
                 else {
                     basePath = GetBasePath(elm.attr('data-basePath')) || elm.attr('data-basePath');
-                    switch(modelName) {
+                    let switchType = lookupType ? lookupType : modelName;
+                    switch(switchType) {
                         case 'credential':
                             query = '?kind=ssh&role_level=use_role';
+                            break;
+                        case 'scm_credential':
+                            query = '?kind=scm&role_level=use_role';
                             break;
                         case 'network_credential':
                             query = '?kind=net&role_level=use_role';
@@ -601,7 +606,7 @@ function(ConfigurationUtils, i18n, $rootScope) {
                     query = elm.attr('data-query');
                     query = query.replace(/\:value/, encodeURIComponent(viewValue));
 
-                    let base = ctrl.$name.split('_name')[0];
+                    let base = lookupType ? lookupType : ctrl.$name.split('_name')[0];
                     if (attrs.watchbasepath !== undefined && scope[attrs.watchbasepath] !== undefined) {
                         basePath = scope[attrs.watchbasepath];
                         query += '&role_level=use_role';
@@ -611,6 +616,9 @@ function(ConfigurationUtils, i18n, $rootScope) {
                         switch(base) {
                             case 'credential':
                                 query += '&kind=ssh&role_level=use_role';
+                                break;
+                            case 'scm_credential':
+                                query += '&kind=scm&role_level=use_role';
                                 break;
                             case 'network_credential':
                                 query += '&kind=net&role_level=use_role';

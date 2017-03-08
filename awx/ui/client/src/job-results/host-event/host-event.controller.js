@@ -36,9 +36,9 @@
             // grab standard out & standard error if present from the host
             // event's "res" object, for things like Ansible modules
             try{
-                $scope.module_name = hostEvent.event_data.res.invocation.module_name || hostEvent.event_data.task_action || "No result found";
-                $scope.stdout = hostEvent.event_data.res.stdout;
-                $scope.stderr = hostEvent.event_data.res.stderr;
+                $scope.module_name = hostEvent.event_data.task_action ||  "No result found";
+                $scope.stdout = hostEvent.event_data.res.stdout ? hostEvent.event_data.res.stdout : hostEvent.event_data.res.stdout === "" ? " " : undefined;
+                $scope.stderr = hostEvent.event_data.res.stderr ? hostEvent.event_data.res.stderr : hostEvent.event_data.res.stderr === "" ? " " : undefined;
                 $scope.json = hostEvent.event_data.res;
             }
             catch(err){

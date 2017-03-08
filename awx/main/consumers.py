@@ -2,10 +2,11 @@ import json
 import logging
 import urllib
 
-from channels import Group
+from channels import Group, channel_layers
 from channels.sessions import channel_session
 from channels.handler import AsgiRequest
 
+from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 
 from django.contrib.auth.models import User
@@ -49,11 +50,19 @@ def ws_disconnect(message):
 @channel_session
 def ws_receive(message):
     from awx.main.access import consumer_access
+    channel_layer_settings = channel_layers.configs[message.channel_layer.alias]
+    max_retries = channel_layer_settings.get('RECEIVE_MAX_RETRY', settings.CHANNEL_LAYER_RECEIVE_MAX_RETRY)
 
     user_id = message.channel_session.get('user_id', None)
     if user_id is None:
-        logger.error("No valid user found for websocket.")
+        retries = message.content.get('connect_retries', 0) + 1
+        message.content['connect_retries'] = retries
         message.reply_channel.send({"text": json.dumps({"error": "no valid user"})})
+        retries_left = max_retries - retries
+        if retries_left > 0:
+            message.channel_layer.send(message.channel.name, message.content)
+        else:
+            logger.error("No valid user found for websocket.")
         return None
 
     user = User.objects.get(pk=user_id)

@@ -1384,6 +1384,7 @@ angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerat
                         html += `data-basePath="${field.basePath}"`;
                         html += `data-source="${field.sourceModel}"`;
                         html += `data-query="?${field.sourceField}__iexact=:value"`;
+                        html += (field.awLookupType !== undefined)  ? ` data-awLookupType=${field.awLookupType} ` : "";
                         html += (field.autopopulateLookup !== undefined)  ? ` autopopulateLookup=${field.autopopulateLookup} ` : "";
                         html += (field.watchBasePath !== undefined) ? ` watchBasePath=${field.watchBasePath} ` : "";
                         html += `ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 300, 'blur': 0 } }"`;
