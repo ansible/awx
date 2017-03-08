@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pytest
 
 from rest_framework.exceptions import PermissionDenied
@@ -22,6 +24,14 @@ def test_valid_in(valid_value):
     field_lookup = FieldLookupBackend()
     value, new_lookup = field_lookup.value_to_python(JobTemplate, 'project__name__in', valid_value)
     assert 'foo' in value
+
+
+def test_invalid_field():
+    invalid_field = u"ヽヾ"
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(ValueError) as excinfo:
+        field_lookup.value_to_python(WorkflowJobTemplate, invalid_field, 'foo')
+    assert 'is not an allowed field name. Must be ascii encodable.' in excinfo.value.message
 
 
 @pytest.mark.parametrize('lookup_suffix', ['', 'contains', 'startswith', 'in'])
