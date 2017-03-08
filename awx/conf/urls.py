@@ -12,4 +12,5 @@ urlpatterns = patterns(
     'awx.conf.views',
     url(r'^$', 'setting_category_list'),
     url(r'^(?P<category_slug>[a-z0-9-]+)/$', 'setting_singleton_detail'),
+    url(r'^logging/test/$', 'setting_logging_test'),
 )

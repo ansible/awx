@@ -16,7 +16,8 @@ from awx.main.utils import get_object_or_400
 logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
-           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',]
+           'TaskPermission', 'ProjectUpdatePermission', 'UserPermission',
+           'IsSuperUser']
 
 
 class ModelAccessPermission(permissions.BasePermission):
@@ -208,3 +209,10 @@ class UserPermission(ModelAccessPermission):
         raise PermissionDenied()
 
 
+class IsSuperUser(permissions.BasePermission):
+    """
+    Allows access only to admin users.
+    """
+
+    def has_permission(self, request, view):
+        return request.user and request.user.is_superuser

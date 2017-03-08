@@ -19,7 +19,9 @@ from rest_framework import status
 
 # Tower
 from awx.api.generics import *  # noqa
+from awx.api.permissions import IsSuperUser
 from awx.main.utils import *  # noqa
+from awx.main.utils.handlers import BaseHTTPSHandler, LoggingConnectivityException
 from awx.conf.license import get_licensed_features
 from awx.conf.models import Setting
 from awx.conf.serializers import SettingCategorySerializer, SettingSingletonSerializer
@@ -128,6 +130,32 @@ class SettingSingletonDetail(RetrieveUpdateDestroyAPIView):
             url = '{}://{}'.format(self.request.scheme, self.request.get_host())
             if settings.TOWER_URL_BASE != url:
                 settings.TOWER_URL_BASE = url
+
+
+class SettingLoggingTest(GenericAPIView):
+
+    view_name = _('Logging Connectivity Test')
+    model = Setting
+    serializer_class = SettingSingletonSerializer
+    permission_classes = (IsSuperUser,)
+    filter_backends = []
+    new_in_320 = True
+
+    def post(self, request, *args, **kwargs):
+        defaults = dict()
+        for key in settings_registry.get_registered_settings(category_slug='logging'):
+            try:
+                defaults[key] = settings_registry.get_setting_field(key).get_default()
+            except serializers.SkipField:
+                defaults[key] = None
+        obj = type('Settings', (object,), defaults)()
+        serializer = self.get_serializer(obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            BaseHTTPSHandler.perform_test(serializer.validated_data)
+        except LoggingConnectivityException as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(status=status.HTTP_200_OK)
 
 
 # Create view functions for all of the class-based views to simplify inclusion

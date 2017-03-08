@@ -5,6 +5,7 @@
 import logging
 import json
 import requests
+from requests.exceptions import RequestException
 from copy import copy
 
 # loggly
@@ -40,6 +41,10 @@ def unused_callback(sess, resp):
     pass
 
 
+class LoggingConnectivityException(Exception):
+    pass
+
+
 class HTTPSNullHandler(logging.NullHandler):
     "Placeholder null handler to allow loading without database access"
 
@@ -65,6 +70,31 @@ class BaseHTTPSHandler(logging.Handler):
         for param, django_setting_name in PARAM_NAMES.items():
             kwargs[param] = getattr(settings, django_setting_name, None)
         return cls(*args, **kwargs)
+
+    @classmethod
+    def perform_test(cls, settings):
+        """
+        Tests logging connectivity for the current logging settings.
+        @raises LoggingConnectivityException
+        """
+        handler = cls.from_django_settings(settings, async=True)
+        handler.enabled_flag = True
+        handler.setFormatter(LogstashFormatter(settings_module=settings))
+        logger = logging.getLogger(__file__)
+        fn, lno, func = logger.findCaller()
+        record = logger.makeRecord('awx', 10, fn, lno,
+                                   'Ansible Tower Connection Test', tuple(),
+                                   None, func)
+        futures = handler.emit(record)
+        for future in futures:
+            try:
+                resp = future.result()
+                if not resp.ok:
+                    raise LoggingConnectivityException(
+                        ': '.join([str(resp.status_code), resp.reason or ''])
+                    )
+            except RequestException as e:
+                raise LoggingConnectivityException(str(e))
 
     def get_full_message(self, record):
         if record.exc_info:
