@@ -15,7 +15,7 @@ export default
         .factory('TeamForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Team'), //Legend in add mode
+            addTitle: i18n._('NEW TEAM'), //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'team',
             // the top-most node of generated state tree

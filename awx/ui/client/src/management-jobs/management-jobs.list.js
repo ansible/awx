@@ -10,7 +10,7 @@ export default function(){
         iterator: 'configure_job',
         index: false,
         hover: true,
-        listTitle: 'Management Jobs',
+        listTitle: 'MANAGEMENT JOBS',
 
         fields: {
             name: {

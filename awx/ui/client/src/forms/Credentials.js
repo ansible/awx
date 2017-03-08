@@ -15,7 +15,7 @@ export default
         .factory('CredentialForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('Create Credential'), //Legend in add mode
+            addTitle: i18n._('CREATE CREDENTIAL'), //Legend in add mode
             editTitle: '{{ name }}', //Legend in edit mode
             name: 'credential',
             // the top-most node of generated state tree

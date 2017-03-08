@@ -15,7 +15,7 @@ export default
         .factory('HostForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('Create Host'),
+            addTitle: i18n._('CREATE HOST'),
             editTitle: '{{ host.name }}',
             name: 'host',
             basePath: 'hosts',

@@ -22,7 +22,7 @@ export default
         return {
 
             name: 'activity',
-            editTitle: i18n._('Activity Detail'),
+            editTitle: i18n._('ACTIVITY DETAIL'),
             well: false,
             'class': 'horizontal-narrow',
             formFieldSize: 'col-lg-10',

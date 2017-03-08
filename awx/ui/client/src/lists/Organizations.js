@@ -15,7 +15,7 @@ export default
         selectInstructions: '<p>Select existing organizations by clicking each organization or checking the related checkbox. When finished, ' +
             'click the blue <em>Select</em> button, located bottom right.</p><p>Create a new organization by clicking the ' +
             '<i class=\"fa fa-plus\"></i> button.</p>',
-        editTitle: 'Organizations',
+        editTitle: 'ORGANIZATIONS',
         hover: true,
         index: false,
 

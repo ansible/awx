@@ -14,7 +14,7 @@ export default
     angular.module('HostGroupsFormDefinition', [])
         .value('HostGroupsForm', {
 
-            editTitle: 'Host Groups',
+            editTitle: 'HOST GROUPS',
             name: 'host',
             well: false,
             formLabelSize: 'col-lg-3',

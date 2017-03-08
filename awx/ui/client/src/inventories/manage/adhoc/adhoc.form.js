@@ -12,7 +12,7 @@
 
 export default function() {
     return {
-        addTitle: 'Execute Command',
+        addTitle: 'EXECUTE COMMAND',
         name: 'adhoc',
         well: true,
         forceListeners: true,

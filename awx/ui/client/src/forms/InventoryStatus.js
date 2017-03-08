@@ -3,7 +3,7 @@
  *
  * All Rights Reserved
  *************************************************/
- 
+
  /**
  * @ngdoc function
  * @name forms.function:InventoryStatus
@@ -14,7 +14,7 @@ export default
         .value('InventoryStatusForm', {
 
             name: 'inventory_update',
-            editTitle: 'Inventory Status',
+            editTitle: 'INVENTORY STATUS',
             well: false,
             'class': 'horizontal-narrow',
 
