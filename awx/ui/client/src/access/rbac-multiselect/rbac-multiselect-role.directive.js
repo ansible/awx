@@ -16,7 +16,6 @@ export default
                     roles: '=',
                     model: '='
                 },
-                // @issue why is the read-only role ommited from this selection?
                 template: '<select ng-cloak class="AddPermissions-selectHide roleSelect2 form-control" ng-model="model" ng-options="role.name for role in roles track by role.id" multiple required></select>',
                 link: function(scope, element, attrs, ctrl) {
                     CreateSelect2({
