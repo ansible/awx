@@ -18,7 +18,9 @@ export default ['$rootScope', '$scope', 'GetBasePath', 'Rest', '$q', 'Wait', 'Pr
     // the object permissions are being added to
     scope.object = scope.resourceData.data;
     // array for all possible roles for the object
-    scope.roles = scope.object.summary_fields.object_roles;
+    scope.roles = _.omit(scope.object.summary_fields.object_roles, (key) => {
+        return key.name === 'Read';
+    });
 
     // TODO: get working with api
     // array w roles and descriptions for key
