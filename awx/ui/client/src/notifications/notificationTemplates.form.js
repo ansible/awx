@@ -13,7 +13,7 @@
 export default ['i18n', function(i18n) {
     return {
 
-        addTitle: i18n._('New Notification Template'),
+        addTitle: i18n._('NEW NOTIFICATION TEMPLATE'),
         editTitle: '{{ name }}',
         name: 'notification_template',
         // I18N for "CREATE NOTIFICATION_TEMPLATE"

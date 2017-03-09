@@ -15,8 +15,8 @@ export default
         name: 'credentials',
         iterator: 'credential',
         selectTitle: i18n._('Add Credentials'),
-        editTitle: i18n._('Credentials'),
-        listTitle: i18n._('Credentials'),
+        editTitle: i18n._('CREDENTIALS'),
+        listTitle: i18n._('CREDENTIALS'),
         selectInstructions: "<p>Select existing credentials by clicking each credential or checking the related checkbox. When " +
             "finished, click the blue <em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking ",
         index: false,

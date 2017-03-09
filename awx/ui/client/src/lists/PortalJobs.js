@@ -12,11 +12,11 @@ export default
 
         name: 'jobs',
         iterator: 'job',
-        editTitle: i18n._('Jobs'),
+        editTitle: i18n._('JOBS'),
         index: false,
         hover: true,
         well: true,
-        listTitle: i18n._('Jobs'),
+        listTitle: i18n._('JOBS'),
         emptyListText: i18n._('There are no jobs to display at this time'),
 
         fields: {

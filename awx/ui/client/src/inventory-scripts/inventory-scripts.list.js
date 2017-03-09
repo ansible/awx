@@ -9,7 +9,7 @@
 export default ['i18n', function(i18n){
     return {
         name:  'inventory_scripts' ,
-        listTitle: i18n._('Inventory Scripts'),
+        listTitle: i18n._('INVENTORY SCRIPTS'),
         iterator: 'inventory_script',
         index: false,
         hover: false,

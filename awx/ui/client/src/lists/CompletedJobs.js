@@ -15,7 +15,7 @@ export default
         name: 'completed_jobs',
         basePath: 'api/v1/job_templates/{{$stateParams.job_template_id}}/jobs/?or__status=successful&or__status=failed&or__status=error&or__status=canceled',
         iterator: 'completed_job',
-        editTitle: i18n._('Completed Jobs'),
+        editTitle: i18n._('COMPLETED JOBS'),
         index: false,
         hover: true,
         well: false,

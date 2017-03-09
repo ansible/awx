@@ -14,7 +14,7 @@ export default
     angular.module('GroupFormDefinition', [])
         .value('GroupFormObject', {
 
-            addTitle: 'Create Group',
+            addTitle: 'CREATE GROUP',
             editTitle: '{{ name }}',
             showTitle: true,
             name: 'group',

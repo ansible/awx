@@ -15,7 +15,7 @@ export default
         .factory('UserForm', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New User'),
+            addTitle: i18n._('NEW USER'),
             editTitle: '{{ username }}',
             name: 'user',
             // the top-most node of generated state tree

@@ -12,7 +12,7 @@ export default
 
         name: 'jobevents',
         iterator: 'jobevent',
-        editTitle: i18n._('Job Events'),
+        editTitle: i18n._('JOB EVENTS'),
         index: false,
         hover: true,
         "class": "condensed",

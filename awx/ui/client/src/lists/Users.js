@@ -17,8 +17,8 @@ export default
         },
         iterator: 'user',
         selectTitle: i18n._('Add Users'),
-        editTitle: i18n._('Users'),
-        listTitle: i18n._('Users'),
+        editTitle: i18n._('USERS'),
+        listTitle: i18n._('USERS'),
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>When available, a brand new user can be created by clicking the ' +
             '<i class=\"fa fa-plus\"></i> button.</p>',

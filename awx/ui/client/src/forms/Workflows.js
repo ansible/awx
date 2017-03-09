@@ -16,7 +16,7 @@ export default
         .factory('WorkflowFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Workflow Job Template'),
+            addTitle: i18n._('NEW WORKFLOW JOB TEMPLATE'),
             editTitle: '{{ name }}',
             name: 'workflow_job_template',
             breadcrumbName: i18n._('WORKFLOW'),

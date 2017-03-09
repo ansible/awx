@@ -15,7 +15,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .factory('ProjectsFormObject', ['i18n', function(i18n) {
     return {
 
-        addTitle: i18n._('New Project'),
+        addTitle: i18n._('NEW PROJECT'),
         editTitle: '{{ name }}',
         name: 'project',
         basePath: 'projects',

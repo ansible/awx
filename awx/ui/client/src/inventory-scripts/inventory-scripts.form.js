@@ -13,7 +13,7 @@
 export default ['i18n', function(i18n) {
     return {
 
-        addTitle: i18n._('New Custom Inventory'),
+        addTitle: i18n._('NEW CUSTOM INVENTORY'),
         editTitle: '{{ name }}',
         name: 'inventory_script',
         basePath: 'inventory_scripts',
