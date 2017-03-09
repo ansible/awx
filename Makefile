@@ -215,6 +215,7 @@ clean-bundle:
 clean-ui:
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
+	rm -rf awx/ui/coverage/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
 
