@@ -23,12 +23,13 @@ export default [ '$state','moment', '$timeout', '$window',
 
             let margin = {top: 20, right: 20, bottom: 20, left: 20},
                 i = 0,
-                nodeW = 120,
+                nodeW = 180,
                 nodeH = 60,
                 rootW = 60,
                 rootH = 40,
                 startNodeOffsetY = scope.mode === 'details' ? 17 : 10,
                 verticalSpaceBetweenNodes = 20,
+                maxNodeTextLength = 27,
                 windowHeight,
                 windowWidth,
                 tree,
@@ -125,11 +126,8 @@ export default [ '$state','moment', '$timeout', '$window',
             // TODO: this function is hacky and we need to come up with a better solution
             // see: http://stackoverflow.com/questions/15975440/add-ellipses-to-overflowing-text-in-svg#answer-27723752
             function wrap(text) {
-
-                let maxLength = scope.mode === 'details' ? 14 : 15;
-
-                if(text && text.length > maxLength) {
-                    return text.substring(0,maxLength) + '...';
+                if(text && text.length > maxNodeTextLength) {
+                    return text.substring(0,maxNodeTextLength) + '...';
                 }
                 else {
                     return text;
@@ -216,7 +214,7 @@ export default [ '$state','moment', '$timeout', '$window',
                         links = tree.links(nodes);
                     let node = svgGroup.selectAll("g.node")
                         .data(nodes, function(d) {
-                            d.y = d.depth * 180;
+                            d.y = d.depth * 240;
                             return d.id || (d.id = ++i);
                         });
 
@@ -347,11 +345,32 @@ export default [ '$state','moment', '$timeout', '$window',
                                 .call(edit_node)
                                 .on("mouseover", function(d) {
                                     if(!d.isStartNode) {
+                                        let resourceName = (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
+                                        if(resourceName && resourceName.length > maxNodeTextLength) {
+                                            // Render the tooltip quickly in the dom and then remove.  This lets us know how big the tooltip is so that we can place
+                                            // it properly on the workflow
+                                            let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div>");
+                                            $('body').append(tooltipDimensionChecker);
+                                            let tipWidth = $(tooltipDimensionChecker).outerWidth();
+                                            let tipHeight = $(tooltipDimensionChecker).outerHeight();
+                                            $(tooltipDimensionChecker).remove();
+
+                                            thisNode.append("foreignObject")
+                                                .attr("x", (nodeW / 2) - (tipWidth / 2))
+                                                .attr("y", (tipHeight + 15) * -1)
+                                                .attr("width", tipWidth)
+                                                .attr("height", tipHeight+20)
+                                                .attr("class", "WorkflowChart-tooltip")
+                                                .html(function(){
+                                                    return "<div class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div><div class='WorkflowChart-tooltipArrow'></div>";
+                                                });
+                                        }
                                         d3.select("#node-" + d.id)
                                             .classed("hovering", true);
                                     }
                                 })
                                 .on("mouseout", function(d){
+                                    $('.WorkflowChart-tooltip').remove();
                                     if(!d.isStartNode) {
                                         d3.select("#node-" + d.id)
                                             .classed("hovering", false);
