@@ -310,11 +310,15 @@ class BaseCallbackModule(CallbackBase):
         if result._task.get_name() == 'setup':
             result._result.get('ansible_facts', {}).pop('ansible_env', None)
 
+        res = result._result
+        if res.get('_ansible_no_log', False):
+            res = {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}
+
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,
             task=result._task,
-            res=result._result,
+            res=res,
             event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
         )
         with self.capture_event_data('runner_on_ok', **event_data):
