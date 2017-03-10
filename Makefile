@@ -609,7 +609,7 @@ ui-test-ci: $(UI_DEPS_FLAG_FILE)
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
-jshint:
+jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 
 ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)
