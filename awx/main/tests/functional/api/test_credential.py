@@ -339,6 +339,21 @@ def test_list_created_org_credentials(post, get, organization, org_admin, org_me
     assert response.data['count'] == 0
 
 
+@pytest.mark.parametrize('order_by', ('password', '-password', 'password,pk', '-password,pk'))
+@pytest.mark.django_db
+def test_list_cannot_order_by_encrypted_field(post, get, organization, org_admin, order_by):
+    for i, password in enumerate(('abc', 'def', 'xyz')):
+        response = post(reverse('api:credential_list'), {
+            'organization': organization.id,
+            'name': 'C%d' % i,
+            'password': password
+        }, org_admin)
+
+    response = get(reverse('api:credential_list'), org_admin,
+                   QUERY_STRING='order_by=%s' % order_by, status=400)
+    assert response.status_code == 400
+
+
 #
 # Openstack Credentials
 #
