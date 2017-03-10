@@ -25,7 +25,7 @@ if ([System.IntPtr]::Size -eq 4) {
     # This is a 32-bit Windows system, so we only check for 32-bit programs, which will be
     # at the native registry location.
 
-    $packages = Get-ChildItem -Path $uninstall_native_path |
+    [PSObject []]$packages = Get-ChildItem -Path $uninstall_native_path |
         Get-ItemProperty |
         Select-Object -Property @{Name="name"; Expression={$_."DisplayName"}},
             @{Name="version"; Expression={$_."DisplayVersion"}},
@@ -38,7 +38,7 @@ if ([System.IntPtr]::Size -eq 4) {
     # This is a 64-bit Windows system, so we check for 64-bit programs in the native
     # registry location, and also for 32-bit programs under Wow6432Node.
 
-    $packages = Get-ChildItem -Path $uninstall_native_path |
+    [PSObject []]$packages = Get-ChildItem -Path $uninstall_native_path |
         Get-ItemProperty |
         Select-Object -Property @{Name="name"; Expression={$_."DisplayName"}},
             @{Name="version"; Expression={$_."DisplayVersion"}},
