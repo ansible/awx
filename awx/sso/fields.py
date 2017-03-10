@@ -322,7 +322,7 @@ class LDAPUserFlagsField(fields.DictField):
     default_error_messages = {
         'invalid_flag': _('Invalid user flag: "{invalid_flag}".'),
     }
-    valid_user_flags = {'is_superuser'}
+    valid_user_flags = {'is_superuser', 'is_system_auditor'}
     child = LDAPDNField()
 
     def to_internal_value(self, data):

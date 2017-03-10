@@ -13,7 +13,7 @@ export default
         name: 'jobs',
         basePath: 'unified_jobs',
         iterator: 'job',
-        editTitle: i18n._('All Jobs'),
+        editTitle: i18n._('ALL JOBS'),
         index: false,
         hover: true,
         well: false,

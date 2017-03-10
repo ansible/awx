@@ -12,7 +12,7 @@ export default
 
         name: 'schedules',
         iterator: 'schedule',
-        editTitle: i18n._('Scheduled Jobs'),
+        editTitle: i18n._('SCHEDULED JOBS'),
         hover: true,
         well: false,
         emptyListText: i18n._('No schedules exist'),

@@ -13,8 +13,8 @@ export default
         iterator: 'project',
         basePath: 'projects',
         selectTitle: i18n._('Add Project'),
-        editTitle: i18n._('Projects'),
-        listTitle: i18n._('Projects'),
+        editTitle: i18n._('PROJECTS'),
+        listTitle: i18n._('PROJECTS'),
         selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p><p>Create a new project by clicking the <i class=\"fa fa-plus\"></i> button.</p>',
         index: false,

@@ -15,7 +15,7 @@ angular.module('InventoryFormDefinition', [])
     .factory('InventoryForm', ['i18n', function(i18n) {
         return {
 
-        addTitle: i18n._('New Inventory'),
+        addTitle: i18n._('NEW INVENTORY'),
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
         basePath: 'inventory',

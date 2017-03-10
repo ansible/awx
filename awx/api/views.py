@@ -3503,6 +3503,7 @@ class BaseJobEventsList(SubListAPIView):
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
     view_name = _('Job Events List')
+    search_fields = ('stdout',)
 
     def finalize_response(self, request, response, *args, **kwargs):
         response['X-UI-Max-Events'] = settings.RECOMMENDED_MAX_EVENTS_DISPLAY_HEADER

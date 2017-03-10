@@ -3,6 +3,7 @@
 
 # Python
 import re
+import json
 
 # Django
 from django.core.exceptions import FieldError, ValidationError
@@ -296,7 +297,7 @@ class FieldLookupBackend(BaseFilterBackend):
         except (FieldError, FieldDoesNotExist, ValueError, TypeError) as e:
             raise ParseError(e.args[0])
         except ValidationError as e:
-            raise ParseError(e.messages)
+            raise ParseError(json.dumps(e.messages, ensure_ascii=False))
 
 
 class OrderByBackend(BaseFilterBackend):

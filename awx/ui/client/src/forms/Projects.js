@@ -15,7 +15,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
     .factory('ProjectsFormObject', ['i18n', function(i18n) {
     return {
 
-        addTitle: i18n._('New Project'),
+        addTitle: i18n._('NEW PROJECT'),
         editTitle: '{{ name }}',
         name: 'project',
         basePath: 'projects',
@@ -105,7 +105,7 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_url: {
                 label: 'SCM URL',
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== 'manual'",
+                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights' ",
                 awRequiredWhen: {
                     reqExpression: "scmRequired",
                     init: false
@@ -122,12 +122,12 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type && scm_type.value !== 'manual'",
+                ngShow: "scm_type && scm_type.value !== 'manual' && scm_type.value !== 'insights'",
                 ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)',
                 subForm: 'sourceSubForm',
             },
             credential: {
-                label: i18n._('SCM Credential'),
+                labelBind: 'credentialLabel',
                 type: 'lookup',
                 basePath: 'credentials',
                 list: 'CredentialList',

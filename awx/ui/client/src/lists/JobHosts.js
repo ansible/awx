@@ -11,7 +11,7 @@ export default
 
         name: 'jobhosts',
         iterator: 'jobhost',
-        editTitle: 'All summaries',
+        editTitle: 'ALL SUMMARIES',
         "class": "table-condensed",
         index: false,
         hover: true,

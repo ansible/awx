@@ -40,7 +40,6 @@
 
 .Form-title{
     flex: 0 1 auto;
-    text-transform: uppercase;
     color: @list-header-txt;
     font-size: 14px;
     font-weight: bold;
@@ -48,6 +47,10 @@
     max-width: 90%;
     word-wrap: break-word;
     margin-bottom: 20px;
+}
+
+.Form-title--uppercase {
+    text-transform: uppercase;
 }
 
 .Form-secondaryTitle{
@@ -98,8 +101,8 @@
 
 .Form-tabHolder{
     display: flex;
-    margin-bottom: 20px;
     min-height: 30px;
+    flex-wrap:wrap;
 }
 
 .Form-tabs {
@@ -115,6 +118,7 @@
     height: 30px;
     border-radius: 5px;
     margin-right: 20px;
+    margin-bottom: 20px;
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 5px;
@@ -560,6 +564,8 @@ input[type='radio']:checked:before {
     padding-left:15px;
     padding-right: 15px;
     margin-right: 20px;
+    min-height: 30px;
+    margin-bottom: 20px;
 }
 
 .Form-primaryButton:hover {

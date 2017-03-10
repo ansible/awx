@@ -471,24 +471,24 @@ class BaseTask(Task):
             env['PROOT_TMP_DIR'] = settings.AWX_PROOT_BASE_PATH
         return env
 
-    def build_safe_env(self, instance, **kwargs):
+    def build_safe_env(self, env, **kwargs):
         '''
         Build environment dictionary, hiding potentially sensitive information
         such as passwords or keys.
         '''
         hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS', re.I)
-        urlpass_re = re.compile(r'^.*?://.?:(.*?)@.*?$')
-        env = self.build_env(instance, **kwargs)
-        for k,v in env.items():
+        urlpass_re = re.compile(r'^.*?://[^:]+:(.*?)@.*?$')
+        safe_env = dict(env)
+        for k,v in safe_env.items():
             if k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
                 continue
             elif k.startswith('ANSIBLE_') and not k.startswith('ANSIBLE_NET'):
                 continue
             elif hidden_re.search(k):
-                env[k] = HIDDEN_PASSWORD
+                safe_env[k] = HIDDEN_PASSWORD
             elif type(v) == str and urlpass_re.match(v):
-                env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
-        return env
+                safe_env[k] = urlpass_re.sub(HIDDEN_PASSWORD, v)
+        return safe_env
 
     def args2cmdline(self, *args):
         return ' '.join([pipes.quote(a) for a in args])
@@ -699,7 +699,7 @@ class BaseTask(Task):
             output_replacements = self.build_output_replacements(instance, **kwargs)
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
-            safe_env = self.build_safe_env(instance, **kwargs)
+            safe_env = self.build_safe_env(env, **kwargs)
             stdout_handle = self.get_stdout_handle(instance)
             if self.should_use_proot(instance, **kwargs):
                 if not check_proot_installed():
@@ -1189,6 +1189,9 @@ class RunProjectUpdate(BaseTask):
                     scm_username = False
             elif scm_url_parts.scheme.endswith('ssh'):
                 scm_password = False
+            elif scm_type == 'insights':
+                extra_vars['scm_username'] = scm_username
+                extra_vars['scm_password'] = scm_password
             scm_url = update_scm_url(scm_type, scm_url, scm_username,
                                      scm_password, scp_format=True)
         else:
@@ -1218,6 +1221,7 @@ class RunProjectUpdate(BaseTask):
             scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
             'project_path': project_update.get_project_path(check_if_exists=False),
+            'insights_url': settings.INSIGHTS_URL_BASE,
             'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
@@ -1314,10 +1318,10 @@ class RunProjectUpdate(BaseTask):
             lines = fd.readlines()
             if lines:
                 p.scm_revision = lines[0].strip()
-                p.playbook_files = p.playbooks
-                p.save()
             else:
-                logger.error("Could not find scm revision in check")
+                logger.info("Could not find scm revision in check")
+            p.playbook_files = p.playbooks
+            p.save()
         try:
             os.remove(self.revision_path)
         except Exception, e:

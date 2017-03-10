@@ -11,7 +11,7 @@ export default
         name: 'groups',
         iterator: 'group',
         editTitle: '{{ inventory.name }}',
-        listTitle: 'Groups',
+        listTitle: 'GROUPS',
         searchSize: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
         showTitle: false,
         well: true,

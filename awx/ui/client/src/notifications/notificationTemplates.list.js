@@ -11,7 +11,7 @@
 export default ['i18n', function(i18n){
     return {
         name:  'notification_templates' ,
-        listTitle: i18n._('Notification Templates'),
+        listTitle: i18n._('NOTIFICATION TEMPLATES'),
         iterator: 'notification_template',
         index: false,
         hover: false,

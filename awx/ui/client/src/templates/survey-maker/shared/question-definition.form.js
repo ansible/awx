@@ -13,8 +13,8 @@
 export default
     {
 
-        addTitle: 'Add Survey Prompt',
-        editTitle: 'Edit Survey Prompt',
+        addTitle: 'ADD SURVEY PROMPT',
+        editTitle: 'EDIT SURVEY PROMPT',
         titleClass: 'Form-secondaryTitle',
         base: 'survey_question',
         name: 'survey_question',

@@ -83,7 +83,7 @@ export default
                     '@': {
                         templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'
@@ -176,7 +176,7 @@ export default
                     '@': {
                         templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'
@@ -266,7 +266,7 @@ export default
                     '@': {
                         templateProvider: function(ScheduleList, generateList, ParentObject){
                             // include name of parent resource in listTitle
-                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('Schedules');
+                            ScheduleList.listTitle = `${ParentObject.name}<div class='List-titleLockup'></div>` + N_('SCHEDULES');
                             let html = generateList.build({
                                 list: ScheduleList,
                                 mode: 'edit'

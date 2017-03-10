@@ -830,7 +830,7 @@ amazon-ebs:
 	cd packaging/packer && $(PACKER) build -only $@ $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
 
 # Vagrant box using virtualbox provider
-vagrant-virtualbox: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box
+vagrant-virtualbox: packaging/packer/ansible-tower-$(VERSION)-virtualbox.box tar-build/$(SETUP_TAR_FILE)
 
 packaging/packer/ansible-tower-$(VERSION)-virtualbox.box: packaging/packer/output-virtualbox-iso/centos-7.ovf
 	cd packaging/packer && $(PACKER) build -only virtualbox-ovf $(PACKER_BUILD_OPTS) -var "aws_instance_count=$(AWS_INSTANCE_COUNT)" -var "product_version=$(VERSION)" packer-$(NAME).json
@@ -841,7 +841,7 @@ packaging/packer/output-virtualbox-iso/centos-7.ovf:
 virtualbox-iso: packaging/packer/output-virtualbox-iso/centos-7.ovf
 
 # Vagrant box using VMware provider
-vagrant-vmware: packaging/packer/ansible-tower-$(VERSION)-vmware.box
+vagrant-vmware: packaging/packer/ansible-tower-$(VERSION)-vmware.box tar-build/$(SETUP_TAR_FILE)
 
 packaging/packer/output-vmware-iso/centos-7.vmx:
 	cd packaging/packer && $(PACKER) build -only vmware-iso packer-centos-7.json

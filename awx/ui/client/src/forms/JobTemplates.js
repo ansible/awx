@@ -17,7 +17,7 @@ export default
         .factory('JobTemplateFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Job Template'),
+            addTitle: i18n._('NEW JOB TEMPLATE'),
             editTitle: '{{ name }}',
             name: 'job_template',
             breadcrumbName: i18n._('JOB TEMPLATE'),

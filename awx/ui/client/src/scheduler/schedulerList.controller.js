@@ -110,7 +110,12 @@ export default [
         };
 
         $scope.addSchedule = function() {
-            $state.go('.add');
+            if($state.current.name.endsWith('.edit')) {
+                $state.go('^.add');
+            }
+            else if(!$state.current.name.endsWith('.add')) {
+                $state.go('.add');
+            }
         };
 
         $scope.editSchedule = function(schedule) {
@@ -118,7 +123,15 @@ export default [
                 routeToScheduleForm(schedule, 'edit');
             }
             else {
-                $state.go('.edit', { schedule_id: schedule.id });
+                if($state.current.name.endsWith('.add')) {
+                    $state.go('^.edit', { schedule_id: schedule.id });
+                }
+                else if($state.current.name.endsWith('.edit')) {
+                    $state.go('.', { schedule_id: schedule.id });
+                }
+                else {
+                    $state.go('.edit', { schedule_id: schedule.id });
+                }
             }
 
             function buildStateMap(schedule){

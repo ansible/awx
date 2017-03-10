@@ -15,7 +15,7 @@ export default
         .factory('OrganizationFormObject', ['i18n', function(i18n) {
         return {
 
-            addTitle: i18n._('New Organization'), //Title in add mode
+            addTitle: i18n._('NEW ORGANIZATION'), //Title in add mode
             editTitle: '{{ name }}', //Title in edit mode
             name: 'organization', //entity or model name in singular form
             stateTree: 'organizations',

@@ -662,6 +662,20 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                     $(element).select2(config);
 
+                    // Don't toggle the dropdown when a multiselect option is
+                    // being removed
+                    if (multiple) {
+                        $(element).on('select2:opening', (e) => {
+                            var unselecting = $(e.target).data('select2-unselecting');
+                            if (unselecting === true) {
+                                $(e.target).removeData('select2-unselecting');
+                                e.preventDefault();
+                            }
+                        }).on('select2:unselecting', (e) => {
+                            $(e.target).data('select2-unselecting', true);
+                        });
+                    }
+
                     if (options) {
                         for (var d = 0; d < $(element + " option").length; d++) {
                             var item = $(element + " option")[d];
