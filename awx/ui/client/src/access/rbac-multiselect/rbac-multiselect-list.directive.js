@@ -7,8 +7,10 @@
 /* jshint unused: vars */
 export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateList', 'ProjectList',
     'InventoryList', 'CredentialList', '$compile', 'generateList', 'GetBasePath', 'SelectionInit',
+    'OrganizationList',
     function(addPermissionsTeamsList, addPermissionsUsersList, TemplateList, ProjectList,
-    InventoryList, CredentialList, $compile, generateList, GetBasePath, SelectionInit) {
+    InventoryList, CredentialList, $compile, generateList, GetBasePath, SelectionInit,
+    OrganizationList) {
     return {
         restrict: 'E',
         scope: {
@@ -27,7 +29,8 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                 JobTemplates: TemplateList,
                 WorkflowTemplates: TemplateList,
                 Inventories: InventoryList,
-                Credentials: CredentialList
+                Credentials: CredentialList,
+                Organizations: OrganizationList
             };
             list = _.cloneDeep(listMap[scope.view]);
             list.multiSelect = true;
@@ -98,6 +101,14 @@ export default ['addPermissionsTeamsList', 'addPermissionsUsersList', 'TemplateL
                     };
                     list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
                     list.fields.organization.columnClass = 'col-md-5 col-sm-5 hidden-xs';
+                    break;
+                case 'Organizations':
+                    list.fields = {
+                        name: list.fields.name,
+                        description: list.fields.description,
+                    };
+                    list.fields.name.columnClass = 'col-md-6 col-sm-6 col-xs-11';
+                    list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                     break;
                 default:
                     list.fields = {

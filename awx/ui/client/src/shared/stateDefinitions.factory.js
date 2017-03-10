@@ -270,6 +270,10 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         credential_search: {
                             value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
                             dynamic: true
+                        },
+                        organization_search: {
+                            value: {order_by: 'name', page_size: '5', role_level: 'admin_role'},
+                            dynamic: true
                         }
                     },
                     ncyBreadcrumb:{
@@ -306,6 +310,12 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                             }
                         ],
                         credentialsDataset: ['CredentialList', 'QuerySet', '$stateParams', 'GetBasePath',
+                            function(list, qs, $stateParams, GetBasePath) {
+                                let path = GetBasePath(list.basePath) || GetBasePath(list.name);
+                                return qs.search(path, $stateParams[`${list.iterator}_search`]);
+                            }
+                        ],
+                        organizationsDataset: ['OrganizationList', 'QuerySet', '$stateParams', 'GetBasePath',
                             function(list, qs, $stateParams, GetBasePath) {
                                 let path = GetBasePath(list.basePath) || GetBasePath(list.name);
                                 return qs.search(path, $stateParams[`${list.iterator}_search`]);

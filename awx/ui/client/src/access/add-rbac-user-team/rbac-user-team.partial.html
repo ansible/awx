@@ -1,7 +1,8 @@
 <div id="add-permissions-modal" class="AddPermissions modal fade">
     <div class="AddPermissions-backDrop is-loggedOut"></div>
     <div class="AddPermissions-dialog">
-        <div class="AddPermissions-content is-loggedOut">
+        <div class="AddPermissions-content AddPermissions-content--userTeam
+            is-loggedOut">
             <!-- begin header -->
             <div class="AddPermissions-header">
                 <div class="List-header">
@@ -9,7 +10,7 @@
                         <div class="List-titleText ng-binding">
                             {{ owner.name || owner.username }}
                             <div class="List-titleLockup"></div>
-                            {{ title }}
+                            {{ title | uppercase }}
                         </div>
                     </div>
                     <div class="Form-exitHolder">
@@ -60,6 +61,12 @@
                     translate>
                         Credentials
                     </div>
+                    <div class="Form-tab"
+                        ng-click="selectTab('organizations')"
+                        ng-class="{'is-selected': tab.organizations}"
+                    translate>
+                        Organizations
+                    </div>
                 </div>
 
                 <div id="AddPermissions-jobTemplates" class="AddPermissions-list" ng-show="tab.job_templates">
@@ -76,6 +83,9 @@
                 </div>
                 <div id="AddPermissions-credentials" class="AddPermissions-list" ng-show="tab.credentials">
                     <rbac-multiselect-list view="Credentials" all-selected="allSelected" dataset="resolve.credentialsDataset"></rbac-multiselect-list>
+                </div>
+                <div id="AddPermissions-organizations" class="AddPermissions-list" ng-show="tab.organizations">
+                    <rbac-multiselect-list view="Organizations" all-selected="allSelected" dataset="resolve.organizationsDataset"></rbac-multiselect-list>
                 </div>
                 <!-- end section 1 -->
 
@@ -127,6 +137,13 @@
                         translate>
                             Credentials
                         </div>
+                        <div class="Form-tab"
+                            ng-click="selectTab('organizations')"
+                            ng-class="{'is-selected': tab.organizations}"
+                            ng-show="showSection2Tab('organizations')"
+                        translate>
+                            Organizations
+                        </div>
                     </div>
                     <div class="AddPermissions-keyPane"
                         ng-show="showKeyPane">
@@ -142,7 +159,8 @@
                     </div>
 
                     <!-- role drop-downs -->
-                    <div ng-repeat="(type, roleSet) in keys" ng-show="tab[type]">
+                    <div ng-repeat="(type, roleSet) in keys"
+                        ng-show="tab[type] && showSection2Tab(type)">
                         <select
                             id="{{type}}-role-select" class="form-control"
                             ng-model="roleSelection[type]"
