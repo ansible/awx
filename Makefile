@@ -264,8 +264,8 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/ansible/bin/pip install --force-reinstall setuptools==23.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install --force-reinstall pip==8.1.2; \
 		fi; \
 	fi
 
@@ -276,8 +276,8 @@ virtualenv_tower:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
-			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/tower/bin/pip install --force-reinstall setuptools==23.0.0 && \
+			$(VENV_BASE)/tower/bin/pip install --force-reinstall pip==8.1.2; \
 		fi; \
 	fi
 
