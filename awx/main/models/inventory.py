@@ -1277,10 +1277,20 @@ class InventoryUpdate(UnifiedJob, InventorySourceOptions, JobNotificationMixin):
     def get_notification_friendly_name(self):
         return "Inventory Update"
 
-    def cancel(self):
-        res = super(InventoryUpdate, self).cancel()
+    def _build_job_explanation(self):
+        if not self.job_explanation:
+            return 'Previous Task Canceled: {"job_type": "%s", "job_name": "%s", "job_id": "%s"}' % \
+                   (self.model_to_str(), self.name, self.id)
+        return None
+
+    def get_dependent_jobs(self):
+        return Job.objects.filter(dependent_jobs__in=[self.id])
+
+    def cancel(self, job_explanation=None):
+
+        res = super(InventoryUpdate, self).cancel(job_explanation=job_explanation)
         if res:
-            map(lambda x: x.cancel(), Job.objects.filter(dependent_jobs__in=[self.id]))
+            map(lambda x: x.cancel(job_explanation=self._build_job_explanation()), self.get_dependent_jobs())
         return res
 
 

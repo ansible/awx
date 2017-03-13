@@ -633,10 +633,10 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     Canceling a job also cancels the implicit project update with launch_type
     run.
     '''
-    def cancel(self):
-        res = super(Job, self).cancel()
+    def cancel(self, job_explanation=None):
+        res = super(Job, self).cancel(job_explanation=job_explanation)
         if self.project_update:
-            self.project_update.cancel()
+            self.project_update.cancel(job_explanation=job_explanation)
         return res
 
 
