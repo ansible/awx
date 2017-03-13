@@ -708,6 +708,30 @@ rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
+brewrpmtar: rpm-build/python-deps.tar.gz rpmtar
+
+rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
+	tar czf rpm-build/python-deps.tar.gz requirements/vendor
+
+requirements/vendor:
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements_ansible.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements_setup_requires.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
