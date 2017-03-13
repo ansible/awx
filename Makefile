@@ -264,8 +264,8 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install --force-reinstall setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install --force-reinstall pip==8.1.2; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --force-reinstall setuptools==23.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --force-reinstall pip==8.1.2; \
 		fi; \
 	fi
 
@@ -276,13 +276,13 @@ virtualenv_tower:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
-			$(VENV_BASE)/tower/bin/pip install --force-reinstall setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install --force-reinstall pip==8.1.2; \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --force-reinstall setuptools==23.0.0 && \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --force-reinstall pip==8.1.2; \
 		fi; \
 	fi
 
 requirements_ansible: virtualenv_ansible
-	$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt
+	$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt
 	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_dev:
@@ -292,7 +292,7 @@ requirements_ansible_dev:
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
-	$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt
+	$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt
 	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_tower_dev:
