@@ -282,14 +282,8 @@ virtualenv_tower:
 	fi
 
 requirements_ansible: virtualenv_ansible
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
-		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
-	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
-	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
-	fi
+	$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt
+	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
 
 requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
@@ -298,21 +292,12 @@ requirements_ansible_dev:
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
-	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
-	pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
-	fi
+	$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_tower_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
-	fi
+	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
 
 requirements: requirements_ansible requirements_tower
 
