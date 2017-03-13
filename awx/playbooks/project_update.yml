@@ -25,7 +25,7 @@
     - name: update project using git and accept hostkey
       git:
         dest: "{{project_path|quote}}"
-        repo: "{{scm_url|quote}}"
+        repo: "{{scm_url}}"
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
         accept_hostkey: "{{scm_accept_hostkey}}"
@@ -42,7 +42,7 @@
     - name: update project using git
       git:
         dest: "{{project_path|quote}}"
-        repo: "{{scm_url|quote}}"
+        repo: "{{scm_url}}"
         version: "{{scm_branch|quote}}"
         force: "{{scm_clean}}"
         #clone: "{{ scm_full_checkout }}"
