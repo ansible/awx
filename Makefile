@@ -284,7 +284,7 @@ virtualenv_tower:
 requirements_ansible: virtualenv_ansible
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
+		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
 		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	else \
 	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
@@ -295,7 +295,7 @@ requirements_ansible: virtualenv_ansible
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
+		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
 		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
 	else \
 	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
