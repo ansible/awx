@@ -6,7 +6,7 @@
 
 
 export default
-    angular.module('CompletedJobsDefinition', ['sanitizeFilter'])
+    angular.module('CompletedJobsDefinition', [])
     .factory('CompletedJobsList', ['i18n', function(i18n) {
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
@@ -30,11 +30,11 @@ export default
                 dataTitle: "{{ completed_job.status_popover_title }}",
                 icon: 'icon-job-{{ completed_job.status }}',
                 iconOnly: true,
-                ngClick:"viewJobDetails(completed_job)",
+                ngClick:"viewjobResults(completed_job)",
             },
             id: {
                 label: 'ID',
-                ngClick:"viewJobDetails(completed_job)",
+                ngClick:"viewjobResults(completed_job)",
                 columnClass: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 List-staticColumnAdjacent',
                 awToolTip: "{{ completed_job.status_tip }}",
                 dataPlacement: 'top'
@@ -42,7 +42,7 @@ export default
             name: {
                 label: i18n._('Name'),
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-6',
-                ngClick: "viewJobDetails(completed_job)",
+                ngClick: "viewjobResults(completed_job)",
                 awToolTip: "{{ completed_job.name | sanitize }}",
                 dataPlacement: 'top'
             },

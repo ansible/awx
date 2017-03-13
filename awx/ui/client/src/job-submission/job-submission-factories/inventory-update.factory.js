@@ -1,0 +1,76 @@
+export default
+    function InventoryUpdate(PromptForPasswords, LaunchJob, Rest, GetBasePath, ProcessErrors, Alert, Wait) {
+        return function (params) {
+
+            var scope = params.scope,
+            url = params.url,
+            inventory_source;
+
+            if (scope.removeUpdateSubmitted) {
+                scope.removeUpdateSubmitted();
+            }
+            scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function () {
+                Wait('stop');
+                if (scope.socketStatus === 'error') {
+                    Alert('Sync Started', '<div>The request to start the inventory sync process was submitted. ' +
+                    'To monitor the status refresh the page by clicking the <i class="fa fa-refresh"></i> button.</div>', 'alert-info', null, null, null, null, true);
+                    if (scope.refreshGroups) {
+                        // inventory detail page
+                        scope.refreshGroups();
+                    }
+                    else if (scope.refresh) {
+                        scope.refresh();
+                    }
+                }
+            });
+
+            if (scope.removePromptForPasswords) {
+                scope.removePromptForPasswords();
+            }
+            scope.removePromptForPasswords = scope.$on('PromptForPasswords', function() {
+                PromptForPasswords({ scope: scope, passwords: inventory_source.passwords_needed_to_update, callback: 'StartTheUpdate' });
+            });
+
+            if (scope.removeStartTheUpdate) {
+                scope.removeStartTheUpdate();
+            }
+            scope.removeStartTheUpdate = scope.$on('StartTheUpdate', function(e, passwords) {
+                LaunchJob({ scope: scope, url: url, passwords: passwords, callback: 'UpdateSubmitted' });
+            });
+
+            // Check to see if we have permission to perform the update and if any passwords are needed
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.get()
+            .success(function (data) {
+                inventory_source = data;
+                if (data.can_update) {
+                    if (data.passwords_needed_to_update) {
+                        Wait('stop');
+                        scope.$emit('PromptForPasswords');
+                    }
+                    else {
+                        scope.$emit('StartTheUpdate', {});
+                    }
+                } else {
+                    Wait('stop');
+                    Alert('Permission Denied', 'You do not have access to run the inventory sync. Please contact your system administrator.',
+                    'alert-danger');
+                }
+            })
+            .error(function (data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                msg: 'Failed to get inventory source ' + url + ' GET returned: ' + status });
+                });
+            };
+    }
+
+InventoryUpdate.$inject =
+    [   'PromptForPasswords',
+        'LaunchJob',
+        'Rest',
+        'GetBasePath',
+        'ProcessErrors',
+        'Alert',
+        'Wait'
+    ];

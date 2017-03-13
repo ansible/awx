@@ -6,7 +6,7 @@
 
 
 export default
-    angular.module('ScheduledJobsDefinition', ['sanitizeFilter'])
+    angular.module('ScheduledJobsDefinition', [])
     .factory('ScheduledJobsList', ['i18n', function(i18n) {
     return {
 

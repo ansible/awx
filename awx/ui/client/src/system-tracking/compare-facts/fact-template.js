@@ -1,7 +1,4 @@
-import stringFilters from '../../shared/string-filters/main';
-import formatEpoch from '../../shared/format-epoch/main';
-
-var $injector = angular.injector(['ng', stringFilters.name, formatEpoch.name]);
+var $injector = angular.injector(['ng']);
 var $interpolate = $injector.get('$interpolate');
 
 function FactTemplate(templateString) {

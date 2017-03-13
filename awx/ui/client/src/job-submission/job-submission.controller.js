@@ -136,7 +136,7 @@ export default
 
                 // As of 3.0, the only place the user can relaunch a
                 // playbook is on jobTemplates.edit (completed_jobs tab),
-                // jobs, and jobDetails $states.
+                // jobs, and jobResults $states.
 
                 if (!$scope.submitJobRelaunch) {
                     if($scope.submitJobType && $scope.submitJobType === 'job_template') {
@@ -236,18 +236,18 @@ export default
                             // Go out and get some of the job details like inv, cred, name
                             Rest.setUrl(GetBasePath('jobs') + $scope.submitJobId);
                             Rest.get()
-                            .success(function (jobDetailData) {
+                            .success(function (jobResultData) {
                                 $scope.job_template_data = {
-                                    name: jobDetailData.name
+                                    name: jobResultData.name
                                 };
                                 $scope.defaults = {};
-                                if(jobDetailData.summary_fields.inventory) {
-                                    $scope.defaults.inventory = angular.copy(jobDetailData.summary_fields.inventory);
-                                    $scope.selected_inventory = angular.copy(jobDetailData.summary_fields.inventory);
+                                if(jobResultData.summary_fields.inventory) {
+                                    $scope.defaults.inventory = angular.copy(jobResultData.summary_fields.inventory);
+                                    $scope.selected_inventory = angular.copy(jobResultData.summary_fields.inventory);
                                 }
-                                if(jobDetailData.summary_fields.credential) {
-                                    $scope.defaults.credential = angular.copy(jobDetailData.summary_fields.credential);
-                                    $scope.selected_credential = angular.copy(jobDetailData.summary_fields.credential);
+                                if(jobResultData.summary_fields.credential) {
+                                    $scope.defaults.credential = angular.copy(jobResultData.summary_fields.credential);
+                                    $scope.selected_credential = angular.copy(jobResultData.summary_fields.credential);
                                     updateRequiredPasswords();
                                 }
                                 initiateModal();

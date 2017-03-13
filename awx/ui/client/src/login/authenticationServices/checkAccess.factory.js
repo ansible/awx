@@ -12,8 +12,8 @@
 
 
 export default
-    ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors', '$cookieStore',
-    function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors, $cookieStore) {
+    ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors', '$cookies',
+    function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors, $cookies) {
         return function (params) {
             // set PermissionAddAllowed to true or false based on user access. admins and org admins are granted
             // accesss.
@@ -22,7 +22,7 @@ export default
                 me;
 
             // uer may have refreshed the browser, in which case retrieve current user info from session cookie
-            me = ($rootScope.current_user) ? $rootScope.current_user : $cookieStore.get('current_user');
+            me = ($rootScope.current_user) ? $rootScope.current_user : $cookies.getObject('current_user');
 
             if (me.is_superuser) {
                 scope.PermissionAddAllowed = true;

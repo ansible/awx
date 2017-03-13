@@ -6,8 +6,18 @@
 
 import GroupAddController from './groups-add.controller';
 import GroupEditController from './groups-edit.controller';
+import GetHostsStatusMsg from './factories/get-hosts-status-msg.factory';
+import GetSourceTypeOptions from './factories/get-source-type-options.factory';
+import GetSyncStatusMsg from './factories/get-sync-status-msg.factory';
+import GroupsCancelUpdate from './factories/groups-cancel-update.factory';
+import ViewUpdateStatus from './factories/view-update-status.factory';
 
 export default
 angular.module('manageGroups', [])
+    .factory('GetHostsStatusMsg', GetHostsStatusMsg)
+    .factory('GetSourceTypeOptions', GetSourceTypeOptions)
+    .factory('GetSyncStatusMsg', GetSyncStatusMsg)
+    .factory('GroupsCancelUpdate', GroupsCancelUpdate)
+    .factory('ViewUpdateStatus', ViewUpdateStatus)
     .controller('GroupAddController', GroupAddController)
     .controller('GroupEditController', GroupEditController);

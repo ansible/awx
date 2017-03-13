@@ -14,7 +14,7 @@
  */
 
 export default
-angular.module('AWDirectives', ['RestServices', 'Utilities', 'JobsHelper'])
+angular.module('AWDirectives', ['RestServices', 'Utilities'])
 
 // awpassmatch:  Add to password_confirm field. Will test if value
 //               matches that of 'input[name="password"]'

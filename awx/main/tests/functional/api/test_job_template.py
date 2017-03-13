@@ -95,6 +95,23 @@ def test_edit_playbook(patch, job_template_factory, alice):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('json_body',
+                         ["abc", True, False, "{\"name\": \"test\"}", 100, .5])
+def test_invalid_json_body(patch, job_template_factory, alice, json_body):
+    objs = job_template_factory('jt', organization='org1')
+    objs.job_template.admin_role.members.add(alice)
+    resp = patch(
+        reverse('api:job_template_detail', args=(objs.job_template.id,)),
+        json_body,
+        alice,
+        expect=400
+    )
+    assert resp.data['detail'] == (
+        u'JSON parse error - not a JSON object'
+    )
+
+
+@pytest.mark.django_db
 def test_edit_nonsenstive(patch, job_template_factory, alice):
     objs = job_template_factory('jt', organization='org1', project='prj', inventory='inv', credential='cred')
     jt = objs.job_template

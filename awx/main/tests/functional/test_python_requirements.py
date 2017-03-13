@@ -15,14 +15,21 @@ def test_env_matches_requirements_txt():
             return False
         return True
 
+    def skip_line(line):
+        return (
+            line == '' or line.strip().startswith('#') or
+            line.strip().startswith('git') or line.startswith('-e') or
+            '## The following requirements were added by pip freeze' in line
+        )
+
     base_dir = settings.BASE_DIR
     requirements_path = os.path.join(base_dir, '../', 'requirements/requirements.txt')
 
     reqs_actual = []
     xs = freeze.freeze(local_only=True)
     for x in xs:
-        if '## The following requirements were added by pip freeze' in x:
-            break
+        if skip_line(x):
+            continue
         x = x.lower()
         (pkg_name, pkg_version) = x.split('==')
         reqs_actual.append([pkg_name, pkg_version])
@@ -33,11 +40,7 @@ def test_env_matches_requirements_txt():
             line = line.partition('#')[0]
             line = line.rstrip().lower()
             # TODO: process git requiremenst and use egg
-            if line == '':
-                continue
-            if line.strip().startswith('#') or line.strip().startswith('git'):
-                continue
-            if line.startswith('-e'):
+            if skip_line(line):
                 continue
 
             '''

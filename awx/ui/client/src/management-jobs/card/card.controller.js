@@ -31,8 +31,7 @@ export default
                         });
                 };
                 getManagementJobs();
-                var scope = $rootScope.$new(),
-                    parent_scope = scope;
+                var scope = $rootScope.$new();
                 scope.cleanupJob = true;
 
                 // This handles the case where the user refreshes the management job notifications page.
@@ -50,14 +49,6 @@ export default
                     catch(e) {
                         //ignore
                     }
-
-                    // @issue: OLD SEARCH
-                    // if (scope.searchCleanup) {
-                    //     scope.searchCleanup();
-                    // }
-                    // else {
-                    //     Wait('stop');
-                    // }
 
                     Wait('stop');
                 };
@@ -271,11 +262,6 @@ export default
                     $state.transitionTo('managementJobSchedules', {
                         id: id
                     });
-                };
-
-                parent_scope.refreshJobs = function(){
-                    // @issue: OLD SEARCH
-                    // scope.search(SchedulesList.iterator);
                 };
 
                 var cleanUpStateChangeListener = $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams) {

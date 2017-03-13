@@ -37,20 +37,14 @@ if ($basePath) {
 }
 
 // Modules
-import './helpers';
+import './forms';
 import './lists';
-import './widgets';
-import './filters';
-import { Home } from './controllers/Home';
-import { SocketsController } from './controllers/Sockets';
-import { CredentialsAdd, CredentialsEdit, CredentialsList } from './controllers/Credentials';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
 import inventoryScripts from './inventory-scripts/main';
 import organizations from './organizations/main';
 import managementJobs from './management-jobs/main';
-import jobDetail from './job-detail/main';
 import workflowResults from './workflow-results/main';
 import jobResults from './job-results/main';
 import jobSubmission from './job-submission/main';
@@ -62,30 +56,21 @@ import mainMenu from './main-menu/main';
 import breadCrumb from './bread-crumb/main';
 import browserData from './browser-data/main';
 import configuration from './configuration/main';
-import dashboard from './dashboard/main';
-import moment from './shared/moment/main';
+import home from './home/main';
 import login from './login/main';
 import activityStream from './activity-stream/main';
 import standardOut from './standard-out/main';
 import Templates from './templates/main';
 import credentials from './credentials/main';
 import jobs from './jobs/main';
-import { ProjectsList, ProjectsAdd, ProjectsEdit } from './controllers/Projects';
-import { UsersList, UsersAdd, UsersEdit } from './controllers/Users';
-import { TeamsList, TeamsAdd, TeamsEdit } from './controllers/Teams';
-
+import teams from './teams/main';
+import users from './users/main';
+import projects from './projects/main';
 import RestServices from './rest/main';
 import access from './access/main';
-import './shared/Modal';
-import './shared/prompt-dialog';
-import './shared/directives';
-import './shared/filters';
-import './shared/features/main';
-import config from './shared/config/main';
 import './login/authenticationServices/pendo/ng-pendo';
 import footer from './footer/main';
 import scheduler from './scheduler/main';
-import { N_ } from './i18n';
 
 var tower = angular.module('Tower', [
     // how to add CommonJS / AMD  third-party dependencies:
@@ -97,6 +82,7 @@ var tower = angular.module('Tower', [
     require('angular-sanitize'),
     require('angular-scheduler').name,
     require('angular-tz-extensions'),
+    require('angular-md5'),
     require('lr-infinite-scroll'),
     require('ng-toast'),
     'gettext',
@@ -119,12 +105,10 @@ var tower = angular.module('Tower', [
     setupMenu.name,
     mainMenu.name,
     breadCrumb.name,
-    dashboard.name,
-    moment.name,
+    home.name,
     login.name,
     activityStream.name,
     footer.name,
-    jobDetail.name,
     workflowResults.name,
     jobResults.name,
     jobSubmission.name,
@@ -132,9 +116,11 @@ var tower = angular.module('Tower', [
     standardOut.name,
     Templates.name,
     portalMode.name,
-    config.name,
     credentials.name,
     jobs.name,
+    teams.name,
+    users.name,
+    projects.name,
     //'templates',
     'Utilities',
     'OrganizationFormDefinition',
@@ -142,68 +128,44 @@ var tower = angular.module('Tower', [
     'OrganizationListDefinition',
     'templates',
     'UserListDefinition',
-    'UserHelper',
     'PromptDialog',
     'AWDirectives',
     'InventoriesListDefinition',
     'InventoryFormDefinition',
-    'InventoryHelper',
     'InventoryGroupsDefinition',
     'InventoryHostsDefinition',
-    'HostsHelper',
-    'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',
     'GroupFormDefinition',
     'GroupListDefinition',
-    'GroupsHelper',
     'TeamsListDefinition',
     'TeamFormDefinition',
-    'TeamHelper',
     'CredentialsListDefinition',
     'CredentialFormDefinition',
     'TemplatesListDefinition',
     'PortalJobTemplatesListDefinition',
     'JobTemplateFormDefinition',
-    'JobTemplatesHelper',
-    'JobSubmissionHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',
     'ProjectStatusDefinition',
-    'ProjectsHelper',
     'CompletedJobsDefinition',
     'AllJobsDefinition',
     'JobSummaryDefinition',
-    'ParseHelper',
-    'ChildrenHelper',
-    'ProjectPathHelper',
-    'md5Helper',
-    'SelectionHelper',
     'HostGroupsFormDefinition',
-    'StreamWidget',
-    'JobsHelper',
-    'CredentialsHelper',
     'StreamListDefinition',
     'ActivityDetailDefinition',
-    'VariablesHelper',
     'SchedulesListDefinition',
     'ScheduledJobsDefinition',
     //'Timezones',
-    'SchedulesHelper',
     'JobsListDefinition',
     'LogViewerStatusDefinition',
     'StandardOutHelper',
     'LogViewerOptionsDefinition',
-    'JobDetailHelper',
     'lrInfiniteScroll',
-    'LoadConfigHelper',
     'PortalJobsListDefinition',
     'features',
-    'longDateFilter',
     'pendolytics',
     scheduler.name,
-    'ApiModelHelper',
-    'ActivityStreamHelper',
     'WorkflowFormDefinition',
     'InventorySourcesListDefinition',
     'WorkflowMakerFormDefinition'
@@ -227,10 +189,9 @@ var tower = angular.module('Tower', [
         });
     }])
     .config(['$urlRouterProvider', '$breadcrumbProvider', 'QuerySetProvider',
-        '$urlMatcherFactoryProvider', 'stateDefinitionsProvider', '$stateProvider',
+        '$urlMatcherFactoryProvider',
         function($urlRouterProvider, $breadcrumbProvider, QuerySet,
-            $urlMatcherFactoryProvider, stateDefinitionsProvider, $stateProvider) {
-            let stateDefinitions = stateDefinitionsProvider.$get();
+            $urlMatcherFactoryProvider) {
             $urlMatcherFactoryProvider.strictMode(false);
             $breadcrumbProvider.setOptions({
                 templateUrl: urlPrefix + 'partials/breadcrumb.html'
@@ -266,117 +227,14 @@ var tower = angular.module('Tower', [
             // $stateProvider.stateRegistry.onStatesChanged((event, states) =>{
             //     console.log(event, states)
             // })
-
-
-            // lazily generate a tree of substates which will replace this node in ui-router's stateRegistry
-            // see: stateDefinition.factory for usage documentation
-            $stateProvider.state({
-                name: 'projects',
-                url: '/projects',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'projects', // top-most node in the generated tree (will replace this state definition)
-                    modes: ['add', 'edit'],
-                    list: 'ProjectList',
-                    form: 'ProjectsForm',
-                    controllers: {
-                        list: ProjectsList, // DI strings or objects
-                        add: ProjectsAdd,
-                        edit: ProjectsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'project',
-                        socket: {
-                            "groups": {
-                                "jobs": ["status_changed"]
-                            }
-                        }
-                    },
-                    ncyBreadcrumb: {
-                        label: N_('PROJECTS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'credentials',
-                url: '/credentials',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'credentials',
-                    modes: ['add', 'edit'],
-                    list: 'CredentialList',
-                    form: 'CredentialForm',
-                    controllers: {
-                        list: CredentialsList,
-                        add: CredentialsAdd,
-                        edit: CredentialsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'credential'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('CREDENTIALS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'teams',
-                url: '/teams',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'teams',
-                    modes: ['add', 'edit'],
-                    list: 'TeamList',
-                    form: 'TeamForm',
-                    controllers: {
-                        list: TeamsList,
-                        add: TeamsAdd,
-                        edit: TeamsEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'team'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('TEAMS')
-                    }
-                })
-            });
-
-            $stateProvider.state({
-                name: 'users',
-                url: '/users',
-                lazyLoad: () => stateDefinitions.generateTree({
-                    parent: 'users',
-                    modes: ['add', 'edit'],
-                    list: 'UserList',
-                    form: 'UserForm',
-                    controllers: {
-                        list: UsersList,
-                        add: UsersAdd,
-                        edit: UsersEdit
-                    },
-                    data: {
-                        activityStream: true,
-                        activityStreamTarget: 'user'
-                    },
-                    ncyBreadcrumb: {
-                        parent: 'setup',
-                        label: N_('USERS')
-                    }
-                })
-            });
         }
     ])
-    .run(['$stateExtender', '$q', '$compile', '$cookieStore', '$rootScope', '$log', '$stateParams',
+    .run(['$stateExtender', '$q', '$compile', '$cookies', '$rootScope', '$log', '$stateParams',
         'CheckLicense', '$location', 'Authorization', 'LoadBasePaths', 'Timer',
         'ClearScope', 'LoadConfig', 'Store', 'pendoService', 'Prompt', 'Rest',
         'Wait', 'ProcessErrors', '$state', 'GetBasePath', 'ConfigService',
         'FeaturesService', '$filter', 'SocketService',
-        function($stateExtender, $q, $compile, $cookieStore, $rootScope, $log, $stateParams,
+        function($stateExtender, $q, $compile, $cookies, $rootScope, $log, $stateParams,
             CheckLicense, $location, Authorization, LoadBasePaths, Timer,
             ClearScope, LoadConfig, Store, pendoService, Prompt, Rest, Wait,
             ProcessErrors, $state, GetBasePath, ConfigService, FeaturesService,
@@ -392,67 +250,13 @@ var tower = angular.module('Tower', [
                 $log.debug(`$state.defaultErrorHandler: ${error}`);
             });
 
-            $stateExtender.addState({
-                name: 'dashboard',
-                url: '/home',
-                templateUrl: urlPrefix + 'partials/home.html',
-                controller: Home,
-                params: { licenseMissing: null },
-                data: {
-                    activityStream: true,
-                    refreshButton: true,
-                    socket: {
-                        "groups": {
-                            "jobs": ["status_changed"]
-                        }
-                    },
-                },
-                ncyBreadcrumb: {
-                    label: N_("DASHBOARD")
-                },
-                resolve: {
-                    graphData: ['$q', 'jobStatusGraphData', '$rootScope',
-                        function($q, jobStatusGraphData, $rootScope) {
-                            return $rootScope.featuresConfigured.promise.then(function() {
-                                return $q.all({
-                                    jobStatus: jobStatusGraphData.get("month", "all"),
-                                });
-                            });
-                        }
-                    ]
-                }
-            });
+            $rootScope.refresh = function() {
+                $state.go('.', null, {reload: true});
+            };
 
-            $stateExtender.addState({
-                name: 'userCredentials',
-                url: '/users/:user_id/credentials',
-                templateUrl: urlPrefix + 'partials/users.html',
-                controller: CredentialsList
-            });
-
-            $stateExtender.addState({
-                name: 'userCredentialAdd',
-                url: '/users/:user_id/credentials/add',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsAdd
-            });
-
-            $stateExtender.addState({
-                name: 'teamUserCredentialEdit',
-                url: '/teams/:user_id/credentials/:credential_id',
-                templateUrl: urlPrefix + 'partials/teams.html',
-                controller: CredentialsEdit
-            });
-
-            $stateExtender.addState({
-                name: 'sockets',
-                url: '/sockets',
-                templateUrl: urlPrefix + 'partials/sockets.html',
-                controller: SocketsController,
-                ncyBreadcrumb: {
-                    label: N_('SOCKETS')
-                }
-            });
+            $rootScope.refreshJobs = function(){
+                $state.go('.', null, {reload: true});
+            };
 
             function activateTab() {
                 // Make the correct tab active
@@ -511,19 +315,19 @@ var tower = angular.module('Tower', [
 
                 $rootScope.$on("$stateChangeStart", function (event, next) {
                     // Remove any lingering intervals
-                    // except on jobDetails.* states
-                    var jobDetailStates = [
-                        'jobDetail',
-                        'jobDetail.host-summary',
-                        'jobDetail.host-event.details',
-                        'jobDetail.host-event.json',
-                        'jobDetail.host-events',
-                        'jobDetail.host-event.stdout'
+                    // except on jobResults.* states
+                    var jobResultStates = [
+                        'jobResult',
+                        'jobResult.host-summary',
+                        'jobResult.host-event.details',
+                        'jobResult.host-event.json',
+                        'jobResult.host-events',
+                        'jobResult.host-event.stdout'
                     ];
-                    if ($rootScope.jobDetailInterval && !_.includes(jobDetailStates, next.name) ) {
-                        window.clearInterval($rootScope.jobDetailInterval);
+                    if ($rootScope.jobResultInterval && !_.includes(jobResultStates, next.name) ) {
+                        window.clearInterval($rootScope.jobResultInterval);
                     }
-                    if ($rootScope.jobStdOutInterval && !_.includes(jobDetailStates, next.name) ) {
+                    if ($rootScope.jobStdOutInterval && !_.includes(jobResultStates, next.name) ) {
                         window.clearInterval($rootScope.jobStdOutInterval);
                     }
 
@@ -532,7 +336,7 @@ var tower = angular.module('Tower', [
                         // capture most recent URL, excluding login/logout
                         $rootScope.lastPath = $location.path();
                         $rootScope.enteredPath = $location.path();
-                        $cookieStore.put('lastPath', $location.path());
+                        $cookies.put('lastPath', $location.path());
                     }
 
                     if (Authorization.isUserLoggedIn() === false) {
@@ -598,7 +402,7 @@ var tower = angular.module('Tower', [
                     // User not authenticated, redirect to login page
                     $location.path('/login');
                 } else {
-                    var lastUser = $cookieStore.get('current_user'),
+                    var lastUser = $cookies.getObject('current_user'),
                         timestammp = Store('sessionTime');
                     if (lastUser && lastUser.id && timestammp && timestammp[lastUser.id] && timestammp[lastUser.id].loggedIn) {
                         var stime = timestammp[lastUser.id].time,

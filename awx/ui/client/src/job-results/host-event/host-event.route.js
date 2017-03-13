@@ -7,20 +7,17 @@
 import { templateUrl } from '../../shared/template-url/template-url.factory';
 
 var hostEventModal = {
-    name: 'jobDetail.host-event',
+    name: 'jobResult.host-event',
     url: '/host-event/:eventId',
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-modal'),
     'abstract': false,
     resolve: {
-        hostEvent: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
-            return JobDetailService.getRelatedJobEvents($stateParams.id, {
+        hostEvent: ['jobResultsService', '$stateParams', function(jobResultsService, $stateParams) {
+            return jobResultsService.getRelatedJobEvents($stateParams.id, {
                 id: $stateParams.eventId
             }).then(function(res) {
                 return res.data.results[0]; });
-        }],
-        hostResults: ['JobDetailService', '$stateParams', function(JobDetailService, $stateParams) {
-            return JobDetailService.getJobEventChildren($stateParams.taskId).then(res => res.data.results);
         }]
     },
     onExit: function() {
@@ -34,21 +31,21 @@ var hostEventModal = {
 };
 
 var hostEventJson = {
-    name: 'jobDetail.host-event.json',
+    name: 'jobResult.host-event.json',
     url: '/json',
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-codemirror')
 };
 
 var hostEventStdout = {
-    name: 'jobDetail.host-event.stdout',
+    name: 'jobResult.host-event.stdout',
     url: '/stdout',
     controller: 'HostEventController',
         templateUrl: templateUrl('job-results/host-event/host-event-stdout')
 };
 
 var hostEventStderr = {
-    name: 'jobDetail.host-event.stderr',
+    name: 'jobResult.host-event.stderr',
     url: '/stderr',
     controller: 'HostEventController',
     templateUrl: templateUrl('job-results/host-event/host-event-stderr')

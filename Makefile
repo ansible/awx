@@ -215,6 +215,7 @@ clean-bundle:
 clean-ui:
 	rm -rf awx/ui/static/
 	rm -rf awx/ui/node_modules/
+	rm -rf awx/ui/coverage/
 	rm -f $(UI_DEPS_FLAG_FILE)
 	rm -f $(UI_RELEASE_FLAG_FILE)
 
@@ -608,7 +609,7 @@ ui-test-ci: $(UI_DEPS_FLAG_FILE)
 testjs_ci:
 	echo "Update UI unittests later" #ui-test-ci
 
-jshint:
+jshint: $(UI_DEPS_FLAG_FILE)
 	$(NPM_BIN) run --prefix awx/ui jshint
 
 ui-test-saucelabs: $(UI_DEPS_FLAG_FILE)

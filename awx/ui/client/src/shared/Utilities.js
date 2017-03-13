@@ -18,7 +18,7 @@
 
 
 export default
-angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
+angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /**
  * @ngdoc method
@@ -179,8 +179,8 @@ angular.module('Utilities', ['RestServices', 'Utilities', 'sanitizeFilter'])
  * @methodOf shared.function:Utilities
  * @description For handling errors that are returned from the API
  */
-.factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
-    function($rootScope, $cookieStore, $log, $location, Alert, Wait) {
+.factory('ProcessErrors', ['$rootScope', '$cookies', '$log', '$location', 'Alert', 'Wait',
+    function($rootScope, $cookies, $log, $location, Alert, Wait) {
         return function(scope, data, status, form, defaultMsg) {
             var field, fieldErrors, msg, keys;
             Wait('stop');

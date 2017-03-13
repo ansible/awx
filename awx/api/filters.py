@@ -149,6 +149,11 @@ class FieldLookupBackend(BaseFilterBackend):
             return field.to_python(value)
 
     def value_to_python(self, model, lookup, value):
+        try:
+            lookup = lookup.encode("ascii")
+        except UnicodeEncodeError:
+            raise ValueError("%r is not an allowed field name. Must be ascii encodable." % lookup)
+
         field, new_lookup = self.get_field_from_lookup(model, lookup)
 
         # Type names are stored without underscores internally, but are presented and
