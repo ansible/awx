@@ -742,6 +742,8 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
 
+brew-srpm: brewrpmtar mock-srpm
+
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
