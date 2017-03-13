@@ -9,7 +9,9 @@ import jobSubCredListController from './job-sub-cred-list.controller';
 export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'CredentialList',
     function(templateUrl, qs, GetBasePath, GenerateList, $compile, CredentialList) {
     return {
-        scope: {},
+        scope: {
+          selectedCredential: '='
+        },
         templateUrl: templateUrl('job-submission/lists/credential/job-sub-cred-list'),
         controller: jobSubCredListController,
         restrict: 'E',
@@ -43,11 +45,11 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
                     $('#job-submission-credential-lookup').append($compile(html)(scope));
 
-                    scope.$watchCollection('credentials', function () {
-                        if(scope.selected_credential) {
+                    scope.$watchCollection('selectedCredential', function () {
+                        if(scope.selectedCredential) {
                             // Loop across the inventories and see if one of them should be "checked"
                             scope.credentials.forEach(function(row, i) {
-                                if (row.id === scope.selected_credential.id) {
+                                if (row.id === scope.selectedCredential.id) {
                                     scope.credentials[i].checked = 1;
                                 }
                                 else {
@@ -56,7 +58,6 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                             });
                         }
                     });
-
                 });
         }
     };

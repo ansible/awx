@@ -9,7 +9,9 @@ import jobSubInvListController from './job-sub-inv-list.controller';
 export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'InventoryList',
     function(templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList) {
     return {
-        scope: {},
+        scope: {
+          selectedInventory: '='
+        },
         templateUrl: templateUrl('job-submission/lists/inventory/job-sub-inv-list'),
         controller: jobSubInvListController,
         restrict: 'E',
@@ -41,11 +43,11 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
                     $('#job-submission-inventory-lookup').append($compile(html)(scope));
 
-                    scope.$watchCollection('inventories', function () {
-                        if(scope.selected_inventory) {
+                    scope.$watchCollection('selectedInventory', function () {
+                        if(scope.selectedInventory) {
                             // Loop across the inventories and see if one of them should be "checked"
                             scope.inventories.forEach(function(row, i) {
-                                if (row.id === scope.selected_inventory.id) {
+                                if (row.id === scope.selectedInventory.id) {
                                     scope.inventories[i].checked = 1;
                                 }
                                 else {
