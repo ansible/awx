@@ -55,7 +55,8 @@ export default
                     dataTitle: i18n._('Organization') + ' ',
                     dataPlacement: 'bottom',
                     dataContainer: "body",
-                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd)'
+                    ngDisabled: '!(credential_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                    awLookupWhen: '(credential_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
                 },
                 kind: {
                     label: i18n._('Type'),

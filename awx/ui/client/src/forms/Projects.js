@@ -50,7 +50,8 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 required: true,
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                awLookupWhen: '(project_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
             scm_type: {
                 label: i18n._('SCM Type'),
