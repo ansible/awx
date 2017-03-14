@@ -60,7 +60,7 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                     }));
                 });
 
-            scope.$on('$destory', () => toDestroy.forEach(watcher => watcher()));
+            scope.$on('$destroy', () => toDestroy.forEach(watcher => watcher()));
         }
     };
 }];
