@@ -1,3 +1,5 @@
+from collections import OrderedDict
+import json
 import mock
 import os
 import sys
@@ -36,7 +38,7 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
 
 @pytest.fixture()
 def local_cache():
-    class Cache(dict):
+    class Cache(OrderedDict):
         def set(self, key, value):
             self[key] = value
     return Cache()
@@ -44,8 +46,7 @@ def local_cache():
 
 @pytest.fixture()
 def executor(tmpdir_factory, request):
-    playbooks_marker = request.node.get_marker('playbooks')
-    playbooks = playbooks_marker.kwargs if playbooks_marker else {}
+    playbooks = request.node.callspec.params.get('playbook')
     playbook_files = []
     for name, playbook in playbooks.items():
         filename = str(tmpdir_factory.mktemp('data').join(name))
@@ -71,17 +72,68 @@ def executor(tmpdir_factory, request):
                                    'playbook_on_play_start',
                                    'playbook_on_task_start', 'runner_on_ok',
                                    'playbook_on_stats'})
-@pytest.mark.playbooks(**{
-    'helloworld.yml': '''
+@pytest.mark.parametrize('playbook', [
+{'helloworld.yml': '''
 - name: Hello World Sample
   connection: local
   hosts: all
+  gather_facts: no
   tasks:
     - name: Hello Message
       debug:
-        msg: "Hello World!"'''
-})
-def test_callback_plugin_receives_events(executor, event, local_cache):
+        msg: "Hello World!"
+'''}  # noqa
+])
+def test_callback_plugin_receives_events(executor, local_cache, event,
+                                         playbook):
     with mock.patch.object(event_context, 'cache', local_cache):
         executor.run()
         assert event in [task['event'] for task in local_cache.values()]
+
+
+@pytest.mark.parametrize('playbook', [
+{'no_log_on_ok.yml': '''
+- name: args should not be logged when task-level no_log is set
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+    - shell: echo "SENSITIVE"
+      no_log: true
+'''},  # noqa
+{'no_log_on_fail.yml': '''
+- name: failed args should not be logged when task-level no_log is set
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+    - shell: echo "SENSITIVE"
+      no_log: true
+      failed_when: true
+      ignore_errors: true
+'''},  # noqa
+{'no_log_on_skip.yml': '''
+- name: skipped task args should be suppressed with no_log
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+    - shell: echo "SENSITIVE"
+      no_log: true
+      when: false
+'''},  # noqa
+{'no_log_on_play.yml': '''
+- name: play-level no_log set
+  connection: local
+  hosts: all
+  gather_facts: no
+  no_log: true
+  tasks:
+      - name: args should not be logged when play-level no_log set
+        shell: echo "SENSITIVE"
+'''},  # noqa
+])
+def test_callback_plugin_no_log_filters(executor, local_cache, playbook):
+    with mock.patch.object(event_context, 'cache', local_cache):
+        executor.run()
+        assert 'SENSITIVE' not in json.dumps(local_cache.items())
