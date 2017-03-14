@@ -12,10 +12,6 @@ import Inventories from "./lists/Inventories";
 import InventoryGroups from "./lists/InventoryGroups";
 import InventoryHosts from "./lists/InventoryHosts";
 import InventorySources from "./lists/InventorySources";
-import JobEvents from "./lists/JobEvents";
-import JobHosts from "./lists/JobHosts";
-import Jobs from "./lists/Jobs";
-import PortalJobTemplates from "./lists/PortalJobTemplates";
 import PortalJobs from "./lists/PortalJobs";
 import ScheduledJobs from "./lists/ScheduledJobs";
 import Templates from "./lists/Templates";
@@ -29,10 +25,6 @@ export
         InventoryGroups,
         InventoryHosts,
         InventorySources,
-        JobEvents,
-        JobHosts,
-        Jobs,
-        PortalJobTemplates,
         PortalJobs,
         ScheduledJobs,
         Templates
