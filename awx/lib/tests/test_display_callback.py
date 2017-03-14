@@ -137,3 +137,21 @@ def test_callback_plugin_no_log_filters(executor, local_cache, playbook):
     with mock.patch.object(event_context, 'cache', local_cache):
         executor.run()
         assert 'SENSITIVE' not in json.dumps(local_cache.items())
+
+
+@pytest.mark.parametrize('playbook', [
+{'strip_env_vars.yml': '''
+- name: sensitive environment variables should be stripped from events
+  connection: local
+  hosts: all
+  tasks:
+    - shell: echo "Hello, World!"
+'''},  # noqa
+])
+def test_callback_plugin_strips_task_environ_variables(executor, local_cache,
+                                                       playbook):
+    with mock.patch.object(event_context, 'cache', local_cache):
+        executor.run()
+        for event in local_cache.values():
+            if event['event_data'].get('task') == 'setup':
+                assert os.environ['VIRTUAL_ENV'] not in json.dumps(event)
