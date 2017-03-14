@@ -42,7 +42,8 @@ export default
                     sourceModel: 'organization',
                     basePath: 'organizations',
                     sourceField: 'name',
-                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd)',
+                    ngDisabled: '!(team_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                    awLookupWhen: '(team_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg',
                     required: true,
                 }
             },

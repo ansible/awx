@@ -8,12 +8,12 @@
  [   '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
      'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange', 'Wait', 'Empty',
      'ToJSON', 'initSurvey', '$state', 'CreateSelect2', 'ParseVariableString',
-     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService', 'ToggleNotification',
+     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService', 'ToggleNotification', 'OrgAdminLookup',
      function(
          $scope, $stateParams, WorkflowForm, GenerateForm, Alert, ProcessErrors,
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-         TemplatesService, OrganizationList, Rest, WorkflowService, ToggleNotification
+         TemplatesService, OrganizationList, Rest, WorkflowService, ToggleNotification, OrgAdminLookup
      ) {
 
         ClearScope();
@@ -145,6 +145,17 @@
                         workflowJobTemplateData.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     }
                 }
+
+                if(workflowJobTemplateData.organization) {
+                    OrgAdminLookup.checkForAdminAccess({organization: workflowJobTemplateData.organization})
+                    .then(function(canEditOrg){
+                        $scope.canEditOrg = canEditOrg;
+                    });
+                }
+                else {
+                    $scope.canEditOrg = true;
+                }
+
                 Wait('stop');
                 $scope.url = workflowJobTemplateData.url;
                 $scope.survey_enabled = workflowJobTemplateData.survey_enabled;

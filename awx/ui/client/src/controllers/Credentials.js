@@ -288,7 +288,7 @@ CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location',
 export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
     $stateParams, CredentialForm, Rest, Alert, ProcessErrors, ClearScope, Prompt,
     GetBasePath, GetChoices, KindChange, BecomeMethodChange, Empty, OwnerChange, FormSave, Wait,
-    $state, CreateSelect2, Authorization, i18n) {
+    $state, CreateSelect2, Authorization, i18n, OrgAdminLookup) {
 
     ClearScope();
 
@@ -499,6 +499,16 @@ export function CredentialsEdit($scope, $rootScope, $compile, $location, $log,
 
                 setAskCheckboxes();
 
+                if(data.organization) {
+                    OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+                    .then(function(canEditOrg){
+                        $scope.canEditOrg = canEditOrg;
+                    });
+                }
+                else {
+                    $scope.canEditOrg = true;
+                }
+
                 $scope.$emit('credentialLoaded');
                 Wait('stop');
             })
@@ -626,5 +636,5 @@ CredentialsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'CredentialForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
     'KindChange', 'BecomeMethodChange', 'Empty', 'OwnerChange',
-    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n',
+    'FormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n', 'OrgAdminLookup'
 ];

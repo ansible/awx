@@ -493,14 +493,14 @@ function(ConfigurationUtils, i18n, $rootScope) {
                 modelName = attrs.source,
                 lookupType = attrs.awlookuptype,
                 watcher = attrs.awRequiredWhen || undefined,
-                watchBasePath;
+                watchBasePath,
+                awLookupWhen = attrs.awLookupWhen;
 
             if (attrs.autopopulatelookup !== undefined) {
                autopopulateLookup = JSON.parse(attrs.autopopulatelookup);
             } else {
                autopopulateLookup = true;
             }
-
 
             // The following block of code is for instances where the
             // lookup field is reused by varying sub-forms. Example: The groups
@@ -602,7 +602,12 @@ function(ConfigurationUtils, i18n, $rootScope) {
             // form.$pending will contain object reference to any ngModelControllers with outstanding requests
             fieldCtrl.$asyncValidators.validResource = function(modelValue, viewValue) {
 
-                applyValidationStrategy(viewValue, fieldCtrl);
+                if(awLookupWhen === undefined || (awLookupWhen !== undefined && Boolean(scope.$eval(awLookupWhen)) === true)) {
+                    applyValidationStrategy(viewValue, fieldCtrl);
+                }
+                else {
+                    defer.resolve();
+                }
 
                 return defer.promise;
             };

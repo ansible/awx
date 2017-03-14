@@ -46,6 +46,9 @@ angular.module('inventory', [
                     data: {
                         activityStream: true,
                         activityStreamTarget: 'inventory'
+                    },
+                    ncyBreadcrumb: {
+                        label: N_('INVENTORIES')
                     }
                 });
 

@@ -154,7 +154,7 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Generat
 
 
 export function TeamsEdit($scope, $rootScope, $stateParams,
-    TeamForm, Rest, ProcessErrors, ClearScope, GetBasePath, Wait, $state) {
+    TeamForm, Rest, ProcessErrors, ClearScope, GetBasePath, Wait, $state, OrgAdminLookup) {
 
     ClearScope();
 
@@ -171,6 +171,11 @@ export function TeamsEdit($scope, $rootScope, $stateParams,
         Rest.get(defaultUrl).success(function(data) {
             setScopeFields(data);
             $scope.organization_name = data.summary_fields.organization.name;
+
+            OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+            .then(function(canEditOrg){
+                $scope.canEditOrg = canEditOrg;
+            });
 
             $scope.team_obj = data;
             Wait('stop');
@@ -243,5 +248,5 @@ export function TeamsEdit($scope, $rootScope, $stateParams,
 }
 
 TeamsEdit.$inject = ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'Rest',
-    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', '$state'
+    'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait', '$state', 'OrgAdminLookup'
 ];

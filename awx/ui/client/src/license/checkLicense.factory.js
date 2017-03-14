@@ -5,9 +5,9 @@
  *************************************************/
 
 export default
-	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$q',
+	['$state', '$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors',
 		'ConfigService',
-	function($state, $rootScope, Rest, GetBasePath, ProcessErrors, $q,
+	function($state, $rootScope, Rest, GetBasePath, ProcessErrors,
 		ConfigService){
 			return {
 				get: function() {
@@ -29,7 +29,7 @@ export default
 	                        msg: 'Call to '+ defaultUrl + ' failed. Return status: '+ status});
 	                    });
 				},
-				
+
 				valid: function(license) {
 					if (!license.valid_key){
 						return false;
