@@ -7,7 +7,7 @@
 import jobSubCredListController from './job-sub-cred-list.controller';
 
 export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'CredentialList',
-    function(templateUrl, qs, GetBasePath, GenerateList, $compile, CredentialList) {
+    (templateUrl, qs, GetBasePath, GenerateList, $compile, CredentialList) => {
     return {
         scope: {
           selectedCredential: '='
@@ -15,7 +15,9 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
         templateUrl: templateUrl('job-submission/lists/credential/job-sub-cred-list'),
         controller: jobSubCredListController,
         restrict: 'E',
-        link: function(scope) {
+        link: scope => {
+            let toDestroy = [];
+
             scope.credential_default_params = {
                 order_by: 'name',
                 page_size: 5,
@@ -30,11 +32,11 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
             // Fire off the initial search
             qs.search(GetBasePath('credentials'), scope.credential_default_params)
-                .then(function(res) {
+                .then(res => {
                     scope.credential_dataset = res.data;
                     scope.credentials = scope.credential_dataset.results;
 
-                    var credList = _.cloneDeep(CredentialList);
+                    let credList = _.cloneDeep(CredentialList);
                     let html = GenerateList.build({
                         list: credList,
                         input_type: 'radio',
@@ -45,10 +47,10 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
                     $('#job-submission-credential-lookup').append($compile(html)(scope));
 
-                    scope.$watchCollection('selectedCredential', function () {
+                    toDestroy.push(scope.$watchCollection('selectedCredential', () => {
                         if(scope.selectedCredential) {
                             // Loop across the inventories and see if one of them should be "checked"
-                            scope.credentials.forEach(function(row, i) {
+                            scope.credentials.forEach((row, i) => {
                                 if (row.id === scope.selectedCredential.id) {
                                     scope.credentials[i].checked = 1;
                                 }
@@ -57,8 +59,10 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                                 }
                             });
                         }
-                    });
+                    }));
                 });
+
+            scope.$on('$destroy', () => toDestroy.forEach(watcher => watcher()));
         }
     };
 }];
