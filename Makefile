@@ -487,7 +487,7 @@ check: flake8 pep8 # pyflakes pylint
 
 TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
-test:
+test: test_ansible
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
