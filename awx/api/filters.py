@@ -339,12 +339,12 @@ class OrderByBackend(BaseFilterBackend):
     def _strip_sensitive_model_fields(self, model, order_by):
         for field_name in order_by:
             # strip off the negation prefix `-` if it exists
-            field_name = field_name.split('-')[-1]
+            _field_name = field_name.split('-')[-1]
             try:
                 # if the field name is encrypted/sensitive, don't sort on it
-                if field_name in getattr(model, 'PASSWORD_FIELDS', ()) or \
-                        getattr(model._meta.get_field(field_name), '__prevent_search__', False):
-                    raise ParseError(_('cannot order by field %s') % field_name)
+                if _field_name in getattr(model, 'PASSWORD_FIELDS', ()) or \
+                        getattr(model._meta.get_field(_field_name), '__prevent_search__', False):
+                    raise ParseError(_('cannot order by field %s') % _field_name)
             except FieldDoesNotExist:
                 pass
             yield field_name
