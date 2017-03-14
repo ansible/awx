@@ -18,7 +18,7 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
 
     function init(){
 
-        let resources = ['job_templates', 'workflow_templates', 'projects', 'inventories', 'credentials'];
+        let resources = ['job_templates', 'workflow_templates', 'projects', 'inventories', 'credentials', 'organizations'];
 
         // data model:
         // selected - keyed by type of resource
@@ -43,7 +43,8 @@ function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, W
             workflow_templates: false,
             projects: false,
             inventories: false,
-            credentials: false
+            credentials: false,
+            organizations: false
         };
 
         // initializes select2 per select field

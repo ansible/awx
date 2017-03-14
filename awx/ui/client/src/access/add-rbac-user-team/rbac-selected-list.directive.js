@@ -7,8 +7,10 @@
 /* jshint unused: vars */
 export default ['$compile','templateUrl', 'i18n', 'generateList',
     'ProjectList', 'TemplateList', 'InventoryList', 'CredentialList',
+    'OrganizationList',
     function($compile, templateUrl, i18n, generateList,
-    ProjectList, TemplateList, InventoryList, CredentialList) {
+    ProjectList, TemplateList, InventoryList, CredentialList,
+    OrganizationList) {
         return {
             restrict: 'E',
             scope: {
@@ -24,7 +26,8 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                     job_templates: TemplateList,
                     workflow_templates: TemplateList,
                     inventories: InventoryList,
-                    credentials: CredentialList
+                    credentials: CredentialList,
+                    organizations: OrganizationList
                 };
 
                 list = _.cloneDeep(listMap[scope.resourceType]);
@@ -63,6 +66,9 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                         break;
 
                     case 'job_templates':
+                    case 'workflow_templates':
+                    case 'credentials':
+                    case 'organizations':
                         list.name = 'job_templates';
                         list.iterator = 'job_template';
                         list.fields = {
@@ -72,25 +78,6 @@ export default ['$compile','templateUrl', 'i18n', 'generateList',
                         list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
                         list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                         break;
-
-                    case 'workflow_templates':
-                        list.name = 'workflow_templates';
-                        list.iterator = 'workflow_template';
-                        list.basePath = 'workflow_job_templates';
-                        list.fields = {
-                            name: list.fields.name,
-                            description: list.fields.description
-                        };
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
-                        break;
-                    case 'credentials':
-                        list.fields = {
-                            name: list.fields.name,
-                            description: list.fields.description
-                        };
-                        list.fields.name.columnClass = 'col-md-5 col-sm-5 col-xs-10';
-                        list.fields.description.columnClass = 'col-md-5 col-sm-5 hidden-xs';
                 }
 
                 list.fields = _.each(list.fields, (field) => field.nosort = true);
