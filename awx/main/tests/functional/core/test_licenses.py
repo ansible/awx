@@ -100,7 +100,7 @@ def test_cloudforms_license(mocker):
         task_enhancer = TaskEnhancer()
         vdata = task_enhancer.validate_enhancements()
         assert vdata['compliant'] is True
-        assert vdata['subscription_name'] == "Cloudforms License"
+        assert vdata['subscription_name'] == "Red Hat CloudForms License"
         assert vdata['available_instances'] == 9999999
         assert vdata['license_type'] == 'enterprise'
         assert vdata['features']['ha'] is True
