@@ -17,17 +17,17 @@ import JobVarsPrompt from "./forms/JobVarsPrompt";
 import LogViewerOptions from "./forms/LogViewerOptions";
 import LogViewerStatus from "./forms/LogViewerStatus";
 
-export
-    {   EventsViewer,
-        Groups,
-        HostGroups,
-        Hosts,
-        Inventories,
-        InventoryStatus,
-        JobEventData,
-        JobSummary,
-        JobTemplates,
-        JobVarsPrompt,
-        LogViewerOptions,
-        LogViewerStatus,
-    };
+export {
+    EventsViewer,
+    Groups,
+    HostGroups,
+    Hosts,
+    Inventories,
+    InventoryStatus,
+    JobEventData,
+    JobSummary,
+    JobTemplates,
+    JobVarsPrompt,
+    LogViewerOptions,
+    LogViewerStatus
+};
