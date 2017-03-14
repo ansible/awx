@@ -1160,6 +1160,7 @@ class RunProjectUpdate(BaseTask):
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
         env = self.add_ansible_venv(env)
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
