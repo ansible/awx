@@ -126,6 +126,7 @@ export function CredentialsAdd($scope, $rootScope, $compile, $location, $log,
     init();
 
     function init() {
+        $scope.canEditOrg = true;
         // Load the list of options for Kind
         GetChoices({
             scope: $scope,

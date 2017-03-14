@@ -39,6 +39,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
     init();
 
     function init() {
+        $scope.canEditOrg = true;
         form.formLabelSize = null;
         form.formFieldSize = null;
 
