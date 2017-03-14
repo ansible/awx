@@ -7,6 +7,8 @@
 import ProjectsList from './list/projects-list.controller';
 import ProjectsAdd from './add/projects-add.controller';
 import ProjectsEdit from './edit/projects-edit.controller';
+import ProjectList from './projects.list';
+import ProjectsForm from './projects.form';
 import { N_ } from '../i18n';
 import GetProjectPath from './factories/get-project-path.factory';
 import GetProjectIcon from './factories/get-project-icon.factory';
@@ -20,6 +22,8 @@ angular.module('Projects', [])
     .factory('GetProjectPath', GetProjectPath)
     .factory('GetProjectIcon', GetProjectIcon)
     .factory('GetProjectToolTip', GetProjectToolTip)
+    .factory('ProjectList', ProjectList)
+    .factory('ProjectsForm', ProjectsForm)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

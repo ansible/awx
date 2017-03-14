@@ -4,9 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default
-    angular.module('ProjectsListDefinition', [])
-    .factory('ProjectList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'projects',
@@ -124,4 +122,4 @@ export default
                 dataPlacement: 'top'
             }
         }
-    };}]);
+    };}];
