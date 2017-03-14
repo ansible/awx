@@ -348,6 +348,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         });
 
         $scope.scmRequired = false;
+        $scope.credRequired = false;
         master.scm_type = $scope.scm_type;
     });
 
@@ -408,6 +409,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+            $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         }
 
@@ -442,7 +444,8 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
                 case 'insights':
                     $scope.pathRequired = false;
                     $scope.scmRequired = false;
-                    $scope.credentialLabel = "Red Hat Insights";
+                    $scope.credRequired = true;
+                    $scope.credentialLabel = "Credential";
                 break;
                 default:
                     $scope.credentialLabel = "SCM Credential";
@@ -518,6 +521,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
 
         $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
         $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+        $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
         $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? 'Revision #' : 'SCM Branch';
         Wait('stop');
 
@@ -706,6 +710,7 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
         if ($scope.scm_type) {
             $scope.pathRequired = ($scope.scm_type.value === 'manual') ? true : false;
             $scope.scmRequired = ($scope.scm_type.value !== 'manual') ? true : false;
+            $scope.credRequired = ($scope.scm_type.value === 'insights') ? true : false;
             $scope.scmBranchLabel = ($scope.scm_type.value === 'svn') ? i18n._('Revision #') : i18n._('SCM Branch');
         }
 
@@ -738,7 +743,8 @@ export function ProjectsEdit($scope, $rootScope, $compile, $location, $log,
                 case 'insights':
                     $scope.pathRequired = false;
                     $scope.scmRequired = false;
-                    $scope.credentialLabel = "Red Hat Insights";
+                    $scope.credRequired = true;
+                    $scope.credentialLabel = "Credential";
                     break;
                 default:
                     $scope.credentialLabel = "SCM Credential";
