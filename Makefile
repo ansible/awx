@@ -176,11 +176,11 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
-	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
-	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian debsign pbuilder reprepro setup_tarball \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-bundle setup_bundle_tarball \
+	receiver test test_unit test_ansible test_coverage coverage_html \
+	test_jenkins dev_build release_build release_clean sdist rpmtar mock-rpm \
+	mock-srpm rpm-sign deb deb-src debian debsign pbuilder \
+	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
+	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
 
@@ -291,6 +291,11 @@ requirements_ansible: virtualenv_ansible
 	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
 	fi
 
+requirements_ansible_dev:
+	if [ "$(VENV_BASE)" ]; then \
+		$(VENV_BASE)/ansible/bin/pip install pytest; \
+	fi
+
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
 	if [ "$(VENV_BASE)" ]; then \
@@ -311,7 +316,7 @@ requirements_tower_dev:
 
 requirements: requirements_ansible requirements_tower
 
-requirements_dev: requirements requirements_tower_dev
+requirements_dev: requirements requirements_tower_dev requirements_ansible_dev
 
 requirements_test: requirements
 
@@ -493,6 +498,12 @@ test_unit:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
+
+test_ansible:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/ansible/bin/activate; \
+	fi; \
+	py.test awx/lib/tests -c awx/lib/tests/pytest.ini
 
 # Run all API unit tests with coverage enabled.
 test_coverage:

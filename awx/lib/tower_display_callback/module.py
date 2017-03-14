@@ -326,10 +326,15 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         # FIXME: Add verbosity for exception/results output.
+
+        res = result._result
+        if res.get('_ansible_no_log', False):
+            res = {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}
+
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,
-            res=result._result,
+            res=res,
             task=result._task,
             ignore_errors=ignore_errors,
             event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
