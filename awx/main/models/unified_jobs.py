@@ -1025,7 +1025,7 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
             if settings.DEBUG:
                 raise
 
-    def cancel(self):
+    def cancel(self, job_explanation=None):
         if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
@@ -1033,6 +1033,9 @@ class UnifiedJob(PolymorphicModel, PasswordFieldsModel, CommonModelNameNotUnique
                 if self.status in ('pending', 'waiting', 'new'):
                     self.status = 'canceled'
                     cancel_fields.append('status')
+                if job_explanation is not None:
+                    self.job_explanation = job_explanation
+                    cancel_fields.append('job_explanation')
                 self.save(update_fields=cancel_fields)
                 self.websocket_emit_status("canceled")
             if settings.BROKER_URL.startswith('amqp://'):
