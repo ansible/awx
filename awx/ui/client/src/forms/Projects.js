@@ -136,6 +136,11 @@ angular.module('ProjectFormDefinition', ['SchedulesListDefinition'])
                 search: {
                     kind: 'scm'
                 },
+                autopopulateLookup: false,
+                awRequiredWhen: {
+                    reqExpression: "credRequired",
+                    init: false
+                },
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',
                 awLookupType: 'scm_credential',
