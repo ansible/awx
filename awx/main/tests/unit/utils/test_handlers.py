@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 
+from django.conf import settings
 from django.conf import LazySettings
 import pytest
 import requests
@@ -40,15 +41,14 @@ def ok200_adapter():
     return OK200Adapter()
 
 
-def test_https_logging_handler_requests_sync_implementation():
-    handler = HTTPSHandler(async=False)
-    assert not isinstance(handler.session, FuturesSession)
-    assert isinstance(handler.session, requests.Session)
-
-
 def test_https_logging_handler_requests_async_implementation():
-    handler = HTTPSHandler(async=True)
+    handler = HTTPSHandler()
     assert isinstance(handler.session, FuturesSession)
+
+
+def test_https_logging_handler_has_default_http_timeout():
+    handler = HTTPSHandler.from_django_settings(settings)
+    assert handler.http_timeout == 5
 
 
 @pytest.mark.parametrize('param', PARAM_NAMES.keys())
@@ -114,18 +114,12 @@ def test_https_logging_handler_skip_log(params, logger_name, expected):
     assert handler.skip_log(logger_name) is expected
 
 
-@pytest.mark.parametrize('message_type, async', [
-    ('logstash', False),
-    ('logstash', True),
-    ('splunk', False),
-    ('splunk', True),
-])
+@pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
 def test_https_logging_handler_emit(ok200_adapter, dummy_log_record,
-                                    message_type, async):
+                                    message_type):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            message_type=message_type,
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', ok200_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -151,14 +145,12 @@ def test_https_logging_handler_emit(ok200_adapter, dummy_log_record,
     assert body['message'] == 'User joe logged in'
 
 
-@pytest.mark.parametrize('async', (True, False))
 def test_https_logging_handler_emit_logstash_with_creds(ok200_adapter,
-                                                        dummy_log_record, async):
+                                                        dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            username='user', password='pass',
                            message_type='logstash',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', ok200_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -169,13 +161,11 @@ def test_https_logging_handler_emit_logstash_with_creds(ok200_adapter,
     assert request.headers['Authorization'] == 'Basic %s' % base64.b64encode("user:pass")
 
 
-@pytest.mark.parametrize('async', (True, False))
 def test_https_logging_handler_emit_splunk_with_creds(ok200_adapter,
-                                                      dummy_log_record, async):
+                                                      dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            password='pass', message_type='splunk',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', ok200_adapter)
     async_futures = handler.emit(dummy_log_record)

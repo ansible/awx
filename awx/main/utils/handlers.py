@@ -33,6 +33,7 @@ PARAM_NAMES = {
     'enabled_loggers': 'LOG_AGGREGATOR_LOGGERS',
     'indv_facts': 'LOG_AGGREGATOR_INDIVIDUAL_FACTS',
     'enabled_flag': 'LOG_AGGREGATOR_ENABLED',
+    'http_timeout': 'LOG_AGGREGATOR_HTTP_TIMEOUT',
 }
 
 
@@ -51,13 +52,9 @@ class BaseHTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
         super(BaseHTTPSHandler, self).__init__()
         self.fqdn = fqdn
-        self.async = kwargs.get('async', True)
         for fd in PARAM_NAMES:
             setattr(self, fd, kwargs.get(fd, None))
-        if self.async:
-            self.session = FuturesSession()
-        else:
-            self.session = requests.Session()
+        self.session = FuturesSession()
         self.add_auth_information()
 
     @classmethod
@@ -105,10 +102,8 @@ class BaseHTTPSHandler(logging.Handler):
             payload_str = json.dumps(payload_input)
         else:
             payload_str = payload_input
-        if self.async:
-            return dict(data=payload_str, background_callback=unused_callback)
-        else:
-            return dict(data=payload_str)
+        return dict(data=payload_str, background_callback=unused_callback,
+                    timeout=self.http_timeout)
 
     def skip_log(self, logger_name):
         if self.host == '' or (not self.enabled_flag):
@@ -122,10 +117,6 @@ class BaseHTTPSHandler(logging.Handler):
         """
             Emit a log record.  Returns a list of zero or more
             ``concurrent.futures.Future`` objects.
-
-            When ``self.async`` is True, the list will contain one
-            Future object for each HTTP request made.  When ``self.async`` is
-            False, the list will be empty.
 
             See:
             https://docs.python.org/3/library/concurrent.futures.html#future-objects
@@ -147,17 +138,10 @@ class BaseHTTPSHandler(logging.Handler):
                         for key in facts_dict:
                             fact_payload = copy(payload_data)
                             fact_payload.update(facts_dict[key])
-                            if self.async:
-                                async_futures.append(self._send(fact_payload))
-                            else:
-                                self._send(fact_payload)
+                            async_futures.append(self._send(fact_payload))
                         return async_futures
 
-            if self.async:
-                return [self._send(payload)]
-
-            self._send(payload)
-            return []
+            return [self._send(payload)]
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -179,7 +163,7 @@ def add_or_remove_logger(address, instance):
             specific_logger.handlers.append(instance)
 
 
-def configure_external_logger(settings_module, async_flag=True, is_startup=True):
+def configure_external_logger(settings_module, is_startup=True):
 
     is_enabled = settings_module.LOG_AGGREGATOR_ENABLED
     if is_startup and (not is_enabled):
@@ -188,7 +172,7 @@ def configure_external_logger(settings_module, async_flag=True, is_startup=True)
 
     instance = None
     if is_enabled:
-        instance = BaseHTTPSHandler.from_django_settings(settings_module, async=async_flag)
+        instance = BaseHTTPSHandler.from_django_settings(settings_module)
         instance.setFormatter(LogstashFormatter(settings_module=settings_module))
     awx_logger_instance = instance
     if is_enabled and 'awx' not in settings_module.LOG_AGGREGATOR_LOGGERS:
