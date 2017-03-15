@@ -5,6 +5,8 @@
 import logging
 import json
 import requests
+import time
+from concurrent.futures import ThreadPoolExecutor
 from copy import copy
 
 # loggly
@@ -17,6 +19,8 @@ from awx.main.utils.formatters import LogstashFormatter
 
 
 __all__ = ['HTTPSNullHandler', 'BaseHTTPSHandler', 'configure_external_logger']
+
+logger = logging.getLogger('awx.main.utils.handlers')
 
 # AWX external logging handler, generally designed to be used
 # with the accompanying LogstashHandler, derives from python-logstash library
@@ -48,13 +52,41 @@ class HTTPSNullHandler(logging.NullHandler):
         return super(HTTPSNullHandler, self).__init__()
 
 
+class VerboseThreadPoolExecutor(ThreadPoolExecutor):
+
+    last_log_emit = 0
+
+    def submit(self, func, *args, **kwargs):
+        def _wrapped(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception:
+                # If an exception occurs in a concurrent thread worker (like
+                # a ConnectionError or a read timeout), periodically log
+                # that failure.
+                #
+                # This approach isn't really thread-safe, so we could
+                # potentially log once per thread every 10 seconds, but it
+                # beats logging *every* failed HTTP request in a scenario where
+                # you've typo'd your log aggregator hostname.
+                now = time.time()
+                if now - self.last_log_emit > 10:
+                    logger.exception('failed to emit log to external aggregator')
+                    self.last_log_emit = now
+                raise
+        return super(VerboseThreadPoolExecutor, self).submit(_wrapped, *args,
+                                                             **kwargs)
+
+
 class BaseHTTPSHandler(logging.Handler):
     def __init__(self, fqdn=False, **kwargs):
         super(BaseHTTPSHandler, self).__init__()
         self.fqdn = fqdn
         for fd in PARAM_NAMES:
             setattr(self, fd, kwargs.get(fd, None))
-        self.session = FuturesSession()
+        self.session = FuturesSession(executor=VerboseThreadPoolExecutor(
+            max_workers=2  # this is the default used by requests_futures
+        ))
         self.add_auth_information()
 
     @classmethod

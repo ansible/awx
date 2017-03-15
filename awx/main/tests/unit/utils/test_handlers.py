@@ -1,4 +1,5 @@
 import base64
+import cStringIO
 import json
 import logging
 
@@ -39,6 +40,17 @@ def ok200_adapter():
             return resp
 
     return OK200Adapter()
+
+
+@pytest.fixture()
+def connection_error_adapter():
+    class ConnectionErrorAdapter(requests.adapters.HTTPAdapter):
+
+        def send(self, request, **kwargs):
+            err = requests.packages.urllib3.exceptions.SSLError()
+            raise requests.exceptions.ConnectionError(err, request=request)
+
+    return ConnectionErrorAdapter()
 
 
 def test_https_logging_handler_requests_async_implementation():
@@ -112,6 +124,33 @@ def test_https_logging_handler_http_host_format(host, port, normalized):
 def test_https_logging_handler_skip_log(params, logger_name, expected):
     handler = HTTPSHandler(**params)
     assert handler.skip_log(logger_name) is expected
+
+
+def test_https_logging_handler_connection_error(connection_error_adapter,
+                                                dummy_log_record):
+    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
+                           message_type='logstash',
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler.setFormatter(LogstashFormatter())
+    handler.session.mount('http://', connection_error_adapter)
+
+    buff = cStringIO.StringIO()
+    logging.getLogger('awx.main.utils.handlers').addHandler(
+        logging.StreamHandler(buff)
+    )
+
+    async_futures = handler.emit(dummy_log_record)
+    with pytest.raises(requests.exceptions.ConnectionError):
+        [future.result() for future in async_futures]
+    assert 'failed to emit log to external aggregator\nTraceback' in buff.getvalue()
+
+    # we should only log failures *periodically*, so causing *another*
+    # immediate failure shouldn't report a second ConnectionError
+    buff.truncate(0)
+    async_futures = handler.emit(dummy_log_record)
+    with pytest.raises(requests.exceptions.ConnectionError):
+        [future.result() for future in async_futures]
+    assert buff.getvalue() == ''
 
 
 @pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
