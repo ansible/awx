@@ -1,0 +1,5 @@
+pbr>=1.8
+setuptools_scm>=1.15.0
+vcversioner>=2.16.0.0
+pytest-runner
+isort

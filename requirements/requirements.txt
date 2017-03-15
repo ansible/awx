@@ -197,4 +197,5 @@ xmltodict==0.10.2
 zope.interface==4.3.3     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via cryptography, django-polymorphic, python-ldap, zope.interface
+pip==8.1.2
+setuptools==23.0.0
