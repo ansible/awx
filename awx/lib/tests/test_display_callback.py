@@ -28,7 +28,7 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
     from ansible.vars import VariableManager
 
     # Add awx/lib to sys.path so we can use the plugin
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    path = os.path.abspath(os.path.join(PLUGINS, '..', '..'))
     if path not in sys.path:
         sys.path.insert(0, path)
 
@@ -37,11 +37,15 @@ with mock.patch.dict(os.environ, {'ANSIBLE_STDOUT_CALLBACK': CALLBACK,
 
 
 @pytest.fixture()
-def local_cache():
+def cache(request):
     class Cache(OrderedDict):
         def set(self, key, value):
             self[key] = value
-    return Cache()
+    local_cache = Cache()
+    patch = mock.patch.object(event_context, 'cache', local_cache)
+    patch.start()
+    request.addfinalizer(patch.stop)
+    return local_cache
 
 
 @pytest.fixture()
@@ -84,11 +88,10 @@ def executor(tmpdir_factory, request):
         msg: "Hello World!"
 '''}  # noqa
 ])
-def test_callback_plugin_receives_events(executor, local_cache, event,
-                                         playbook):
-    with mock.patch.object(event_context, 'cache', local_cache):
-        executor.run()
-        assert event in [task['event'] for task in local_cache.values()]
+def test_callback_plugin_receives_events(executor, cache, event, playbook):
+    executor.run()
+    assert len(cache)
+    assert event in [task['event'] for task in cache.values()]
 
 
 @pytest.mark.parametrize('playbook', [
@@ -132,11 +135,23 @@ def test_callback_plugin_receives_events(executor, local_cache, event,
       - name: args should not be logged when play-level no_log set
         shell: echo "SENSITIVE"
 '''},  # noqa
+{'async_no_log.yml': '''
+- name: async task args should suppressed with no_log
+  connection: local
+  hosts: all
+  gather_facts: no
+  no_log: true
+  tasks:
+    - async: 10
+      poll: 1
+      shell: echo "SENSITIVE"
+      no_log: true
+'''},  # noqa
 ])
-def test_callback_plugin_no_log_filters(executor, local_cache, playbook):
-    with mock.patch.object(event_context, 'cache', local_cache):
-        executor.run()
-        assert 'SENSITIVE' not in json.dumps(local_cache.items())
+def test_callback_plugin_no_log_filters(executor, cache, playbook):
+    executor.run()
+    assert len(cache)
+    assert 'SENSITIVE' not in json.dumps(cache.items())
 
 
 @pytest.mark.parametrize('playbook', [
@@ -148,10 +163,8 @@ def test_callback_plugin_no_log_filters(executor, local_cache, playbook):
     - shell: echo "Hello, World!"
 '''},  # noqa
 ])
-def test_callback_plugin_strips_task_environ_variables(executor, local_cache,
-                                                       playbook):
-    with mock.patch.object(event_context, 'cache', local_cache):
-        executor.run()
-        for event in local_cache.values():
-            if event['event_data'].get('task') == 'setup':
-                assert os.environ['VIRTUAL_ENV'] not in json.dumps(event)
+def test_callback_plugin_strips_task_environ_variables(executor, cache, playbook):
+    executor.run()
+    assert len(cache)
+    for event in cache.values():
+        assert os.environ['VIRTUAL_ENV'] not in json.dumps(event)
