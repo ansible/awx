@@ -102,8 +102,10 @@ function InventoriesList($scope, $rootScope, $location, $log,
         elem.removeAttr('ng-click');
         $compile(elem)($scope);
         $scope.triggerPopover(event);
-    }
 
+        $('.popover-content').addClass('Inventories Inventories--popover-content');
+        $('.popover-title').addClass('Inventories Inventories--popover-title');
+    } 
     if ($scope.removeHostSummaryReady) {
         $scope.removeHostSummaryReady();
     }
@@ -112,7 +114,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
         var html, title = "Recent Jobs";
         Wait('stop');
         if (data.count > 0) {
-            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
+            html = "<table class=\"Inventories table table-condensed flyout Inventories--popover-table\" style=\"width: 100%\">\n";
             html += "<thead>\n";
             html += "<tr>";
             html += "<th>Status</th>";
@@ -125,7 +127,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
             data.results.forEach(function(row) {
                 html += "<tr>\n";
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>\n";
+                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
                 html += "<td>" + ($filter('longDate')(row.finished)).replace(/ /,'<br />') + "</td>";
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
