@@ -310,8 +310,10 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         elif self.variables_needed_to_start:
             variables_needed = True
         prompting_needed = False
-        for value in self._ask_for_vars_dict().values():
-            if value:
+        for key, value in self._ask_for_vars_dict().iteritems():
+            if value and not (key == 'extra_vars'
+                              and callback_extra_vars is not None
+                              and not variables_needed):
                 prompting_needed = True
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
@@ -1139,7 +1141,7 @@ class JobEvent(CreatedModifiedModel):
         # Save artifact data to parent job (if provided).
         if artifact_dict:
             if event_data and isinstance(event_data, dict):
-                # Note: Core has not added support for marking artifacts as 
+                # Note: Core has not added support for marking artifacts as
                 # sensitive yet. Going forward, core will not use
                 # _ansible_no_log to denote sensitive set_stats calls.
                 # Instead, they plan to add a flag outside of the traditional
