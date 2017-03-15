@@ -29,6 +29,7 @@
              generator = GenerateForm;
 
          function init() {
+             $scope.canEditOrg = true;
              $scope.parseType = 'yaml';
              $scope.can_edit = true;
              // apply form definition's default field values

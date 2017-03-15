@@ -314,6 +314,7 @@ export function ProjectsAdd($scope, $rootScope, $compile, $location, $log,
     init();
 
     function init() {
+        $scope.canEditOrg = true;
         Rest.setUrl(GetBasePath('projects'));
         Rest.options()
             .success(function(data) {
