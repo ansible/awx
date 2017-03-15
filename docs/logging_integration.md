@@ -4,7 +4,8 @@ This feature builds in the capability to send detailed logs to several kinds
 of 3rd party external log aggregation services. Services connected to this
 data feed should be useful in order to gain insights into Tower usage
 or technical trends. The data is intended to be
-sent in JSON format over a HTTP connection using minimal service-specific
+sent in JSON format via three ways: over a HTTP connection, a direct TCP
+connection or a direct UDP connection. It uses minimal service-specific
 tweaks engineered in a custom handler or via an imported library.
 
 ## Loggers
@@ -169,14 +170,24 @@ supported services:
  - A flag to indicate how system tracking records will be sent
  - Selecting which loggers to send
  - Enabling sending logs
+ - Connection type, which can be HTTPS, TCP and UDP.
+ - Timeout value if connection type is based on TCP protocol (HTTPS and TCP).
 
 Some settings for the log handler will not be exposed to the user via
-this mechanism. In particular, threading (enabled), and connection type
-(designed for HTTP/HTTPS).
+this mechanism. For example, threading (enabled).
 
 Parameters for the items listed above should be configurable through
 the Configure-Tower-in-Tower interface.
 
+One note on configuring Host and Port: When entering URL it is customary to
+include port number, like `https://localhost:4399/foo/bar`. So for the convenience
+of users, when connection type is HTTPS, we allow entering hostname as a URL
+with port number and thus ignore Port field. In other words, Port field is
+optional in this case. On the other hand, TCP and UDP connections are determined
+by `<hostname, port number>` tuple rather than URL. So in the case of TCP/UDP
+connection, Port field is supposed to be provided and Host field is supposed to
+contain hostname only. If instead a URL is entered in Host field, its hostname
+portion will be extracted as the actual hostname.
 
 # Acceptance Criteria Notes
 
@@ -204,4 +215,3 @@ request-response cycle. For example, loggly examples use
 threading work to fire the message without interfering with other
 operations. A timeout on the part of the log aggregation service should
 not cause Tower operations to hang.
-

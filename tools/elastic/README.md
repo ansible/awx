@@ -35,8 +35,8 @@ by going to `{server address}:5601`.
 
 ### Authentication
 
-The default logstash configuration makes use of basic auth, so a username
-and password is needed in the configuration, in addition to the other
+The default HTTPS logstash configuration makes use of basic auth, so a username
+and password is needed in HTTPS configuration, in addition to the other
 parameters. The following settings are supported:
 
 ```
@@ -53,10 +53,47 @@ parameters. The following settings are supported:
         "system_tracking"
     ],
     "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
-    "LOG_AGGREGATOR_ENABLED": true
+    "LOG_AGGREGATOR_ENABLED": true,
+    "LOG_AGGREGATOR_PROTOCOL": "https",
+    "LOG_AGGREGATOR_TCP_TIMEOUT": 5
 }
 ```
-
+and
+```
+{
+    "LOG_AGGREGATOR_HOST": "logstash",
+    "LOG_AGGREGATOR_PORT": 8086,
+    "LOG_AGGREGATOR_TYPE": "logstash",
+    "LOG_AGGREGATOR_LOGGERS": [
+        "awx",
+        "activity_stream",
+        "job_events",
+        "system_tracking"
+    ],
+    "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
+    "LOG_AGGREGATOR_ENABLED": true,
+    "LOG_AGGREGATOR_PROTOCOL": "udp",
+    "LOG_AGGREGATOR_TCP_TIMEOUT": 5
+}
+```
+and
+```
+{
+    "LOG_AGGREGATOR_HOST": "logstash",
+    "LOG_AGGREGATOR_PORT": 8087,
+    "LOG_AGGREGATOR_TYPE": "logstash",
+    "LOG_AGGREGATOR_LOGGERS": [
+        "awx",
+        "activity_stream",
+        "job_events",
+        "system_tracking"
+    ],
+    "LOG_AGGREGATOR_INDIVIDUAL_FACTS": false,
+    "LOG_AGGREGATOR_ENABLED": true,
+    "LOG_AGGREGATOR_PROTOCOL": "tcp",
+    "LOG_AGGREGATOR_TCP_TIMEOUT": 5
+}
+```
 These can be entered via Configure-Tower-in-Tower by making a POST to
 `/api/v1/settings/logging/`.
 
@@ -81,4 +118,3 @@ Nov 18, 2016
 
  - Original branch point `b5a4deee142b152d4f9232ebac5bbabb2d2cef3c`
    Sep 25, 2016, before X-Pack support
-

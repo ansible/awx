@@ -320,9 +320,30 @@ register(
     'LOG_AGGREGATOR_TOWER_UUID',
     field_class=fields.CharField,
     allow_blank=True,
+    default='',
     label=_('Cluster-wide Tower unique identifier.'),
     help_text=_('Useful to uniquely identify Tower instances.'),
     category=_('Logging'),
     category_slug='logging',
-    default='',
+)
+register(
+    'LOG_AGGREGATOR_PROTOCOL',
+    field_class=fields.ChoiceField,
+    choices=['https', 'tcp', 'udp'],
+    default='https',
+    label=_('Logging Aggregator Protocol'),
+    help_text=_('Protocol used to communicate with log aggregator.'),
+    category=_('Logging'),
+    category_slug='logging',
+)
+register(
+    'LOG_AGGREGATOR_TCP_TIMEOUT',
+    field_class=fields.IntegerField,
+    default=5,
+    label=_('TCP Connection Timeout'),
+    help_text=_('Number of seconds for a TCP connection to external log '
+                'aggregator to timeout. Applies to HTTPS and TCP log '
+                'aggregator protocols.'),
+    category=_('Logging'),
+    category_slug='logging',
 )
