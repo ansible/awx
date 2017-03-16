@@ -311,9 +311,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
             variables_needed = True
         prompting_needed = False
         for key, value in self._ask_for_vars_dict().iteritems():
-            if value and not (key == 'extra_vars'
-                              and callback_extra_vars is not None
-                              and not variables_needed):
+            if value and not (key == 'extra_vars' and
+                              callback_extra_vars is not None):
                 prompting_needed = True
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
