@@ -111,7 +111,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
         var html, title = "Recent Jobs";
         Wait('stop');
         if (data.count > 0) {
-            html = "<table class=\"Inventories table table-condensed flyout Inventories--popover-table\" style=\"width: 100%\">\n";
+            html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
             html += "<thead>\n";
             html += "<tr>";
             html += "<th>Status</th>";
