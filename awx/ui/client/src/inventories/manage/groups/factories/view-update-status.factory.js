@@ -1,5 +1,5 @@
 export default
-    function ViewUpdateStatus($state, Rest, ProcessErrors, GetBasePath, Alert, Wait, Empty, Find) {
+    function ViewUpdateStatus($state, Rest, ProcessErrors, Alert, Wait, Empty, Find) {
         return function(params) {
             var scope = params.scope,
             group_id = params.group_id,
@@ -42,5 +42,5 @@ export default
 
 ViewUpdateStatus.$inject =
     [   '$state', 'Rest', 'ProcessErrors',
-        'GetBasePath', 'Alert', 'Wait', 'Empty', 'Find'
+        'Alert', 'Wait', 'Empty', 'Find'
     ];

@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export function PortalModeJobsController($scope, $rootScope, $state, $stateParams, qs, GetBasePath, PortalJobsList, Dataset) {
+export function PortalModeJobsController($scope, $state, qs, GetBasePath, PortalJobsList, Dataset) {
 
     var list = PortalJobsList;
 
@@ -38,4 +38,4 @@ export function PortalModeJobsController($scope, $rootScope, $state, $stateParam
     };
 }
 
-PortalModeJobsController.$inject = ['$scope', '$rootScope', '$state', '$stateParams', 'QuerySet', 'GetBasePath', 'PortalJobsList', 'jobsDataset'];
+PortalModeJobsController.$inject = ['$scope', '$state', 'QuerySet', 'GetBasePath', 'PortalJobsList', 'jobsDataset'];

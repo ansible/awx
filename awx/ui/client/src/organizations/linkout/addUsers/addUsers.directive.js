@@ -7,7 +7,7 @@
 /* jshint unused: vars */
 import addUsers from './addUsers.controller';
 export default
-    ['Wait', 'templateUrl', '$state', '$view', '$compile', function(Wait, templateUrl, $state, $view, $compile) {
+    ['Wait', 'templateUrl', '$compile', function(Wait, templateUrl, $compile) {
             return {
                 restrict: 'E',
                 scope: {

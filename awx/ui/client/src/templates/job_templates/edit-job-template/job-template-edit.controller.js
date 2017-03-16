@@ -11,19 +11,19 @@
 */
 
 export default
-    [   '$filter', '$scope', '$rootScope', '$compile',
-        '$location', '$log', '$stateParams', 'JobTemplateForm', 'GenerateForm',
-        'Rest', 'Alert',  'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'md5Setup',
-        'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait',
-        'Empty', 'Prompt', 'ParseVariableString', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
+    [   '$filter', '$scope', '$rootScope',
+        '$location', '$stateParams', 'JobTemplateForm', 'GenerateForm',
+        'Rest', 'Alert',  'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup',
+        'ParseTypeChange', 'Wait',
+        'Empty', 'Prompt', 'ToJSON', 'GetChoices', 'CallbackHelpInit',
         'InitiatePlaybookRun' , 'initSurvey', '$state', 'CreateSelect2',
         'ToggleNotification','$q',
         function(
-            $filter, $scope, $rootScope, $compile,
-            $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
-            ProcessErrors, ReturnToCaller, ClearScope, GetBasePath, md5Setup,
-            ParseTypeChange, JobStatusToolTip, FormatDate, Wait,
-            Empty, Prompt, ParseVariableString, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
+            $filter, $scope, $rootScope,
+            $location, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+            ProcessErrors, ClearScope, GetBasePath, md5Setup,
+            ParseTypeChange, Wait,
+            Empty, Prompt, ToJSON, GetChoices, CallbackHelpInit, InitiatePlaybookRun, SurveyControllerInit, $state,
             CreateSelect2, ToggleNotification, $q
         ) {
 

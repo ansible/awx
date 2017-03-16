@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log', '$stateParams',
-    'OrganizationForm', 'Rest', 'Alert', 'ProcessErrors', 'Prompt', 'ClearScope',
+export default ['$scope', '$location', '$stateParams',
+    'OrganizationForm', 'Rest', 'ProcessErrors', 'Prompt', 'ClearScope',
     'GetBasePath', 'Wait', '$state', 'ToggleNotification',
-    function($scope, $rootScope, $location, $log, $stateParams,
-        OrganizationForm, Rest, Alert, ProcessErrors, Prompt, ClearScope,
+    function($scope, $location, $stateParams,
+        OrganizationForm, Rest, ProcessErrors, Prompt, ClearScope,
         GetBasePath, Wait, $state, ToggleNotification) {
 
         ClearScope();

@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'Prompt', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-    'GetBasePath', 'JobTemplateForm', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
-    '$compile', '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
-    function($scope, $rootScope, $location, $log,
-        $stateParams, Rest, Alert, Prompt, ReturnToCaller, ClearScope, ProcessErrors,
-        GetBasePath, JobTemplateForm, InitiatePlaybookRun, Wait, TemplateCopyService,
-        $compile, $state, OrgJobTemplateList, Dataset, qs) {
+export default ['$scope', '$rootScope',
+    '$stateParams', 'Rest', 'ProcessErrors',
+    'GetBasePath', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
+    '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
+    function($scope, $rootScope,
+        $stateParams, Rest, ProcessErrors,
+        GetBasePath, InitiatePlaybookRun, Wait, TemplateCopyService,
+        $state, OrgJobTemplateList, Dataset, qs) {
 
         var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');

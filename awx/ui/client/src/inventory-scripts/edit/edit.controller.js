@@ -6,11 +6,11 @@
 
 export default ['Rest', 'Wait',
     'InventoryScriptsForm', 'ProcessErrors', 'GetBasePath',
-    'GenerateForm', 'OrganizationList', 'inventory_scriptData',
+    'GenerateForm', 'inventory_scriptData',
     '$scope', '$state',
     function(
         Rest, Wait, InventoryScriptsForm, ProcessErrors, GetBasePath,
-        GenerateForm, OrganizationList, inventory_scriptData,
+        GenerateForm, inventory_scriptData,
         $scope, $state
     ) {
         var generator = GenerateForm,

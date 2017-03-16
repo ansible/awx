@@ -1,5 +1,5 @@
 export default
-    function LoadConfig($log, $rootScope, $http, $location, GetBasePath, ProcessErrors, Rest, Store) {
+    function LoadConfig($log, $rootScope, $http, Store) {
         return function() {
 
             // These ettings used to be found in config.js, hardcoded now.
@@ -82,6 +82,6 @@ export default
     }
 
 LoadConfig.$inject =
-    [   '$log', '$rootScope', '$http', '$location',
-        'GetBasePath', 'ProcessErrors', 'Rest', 'Store'
+    [   '$log', '$rootScope', '$http',
+        'Store'
     ];

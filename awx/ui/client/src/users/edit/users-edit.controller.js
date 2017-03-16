@@ -12,10 +12,10 @@ const user_type_options = [
  { type: 'system_administrator', label: N_('System Administrator') },
 ];
 
-export default ['$scope', '$rootScope', '$location',
+export default ['$scope', '$rootScope',
     '$stateParams', 'UserForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
     'Wait', 'CreateSelect2', '$state', 'i18n',
-    function($scope, $rootScope, $location,
+    function($scope, $rootScope,
     $stateParams, UserForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, Wait, CreateSelect2, $state, i18n) {
 

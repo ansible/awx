@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$log',
-    '$stateParams', 'Rest', 'Alert', 'TeamList', 'Prompt', 'ClearScope',
+export default ['$scope',
+    'Rest', 'TeamList', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset',
-    function($scope, $rootScope, $log, $stateParams,
-    Rest, Alert, TeamList, Prompt, ClearScope, ProcessErrors,
+    function($scope,
+    Rest, TeamList, Prompt, ClearScope, ProcessErrors,
     GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset) {
 
         ClearScope();

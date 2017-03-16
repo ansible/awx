@@ -4,11 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'CredentialList', 'Prompt', 'ClearScope',
+export default ['$scope', 'Rest', 'CredentialList', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, $rootScope, $location, $log,
-    $stateParams, Rest, Alert, CredentialList, Prompt, ClearScope,
+    function($scope, Rest, CredentialList, Prompt, ClearScope,
     ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService, Dataset,
     i18n) {
 

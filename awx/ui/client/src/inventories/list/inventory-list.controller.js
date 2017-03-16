@@ -10,9 +10,9 @@
  * @description This controller's for the Inventory page
  */
 
-function InventoriesList($scope, $rootScope, $location, $log,
-    $stateParams, $compile, $filter, Rest, Alert, InventoryList, Prompt,
-    ClearScope, ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
+function InventoriesList($scope, $rootScope, $location,
+    $compile, $filter, Rest, InventoryList, Prompt,
+    ProcessErrors, GetBasePath, Wait, Find, Empty, $state, rbacUiControlService, Dataset) {
 
     let list = InventoryList,
         defaultUrl = GetBasePath('inventory');
@@ -303,7 +303,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
     };
 }
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList',
-    'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
+export default ['$scope', '$rootScope', '$location',
+    '$compile', '$filter', 'Rest', 'InventoryList',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state', 'rbacUiControlService', 'Dataset', InventoriesList
 ];

@@ -10,8 +10,8 @@
  * @description This controller's for the Inventory page
  */
 
-function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
-    $stateParams, GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
+function InventoriesAdd($scope, $location,
+    GenerateForm, InventoryForm, rbacUiControlService, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     $state) {
 
@@ -96,8 +96,8 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log,
     };
 }
 
-export default ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
+export default ['$scope', '$location',
+    'GenerateForm', 'InventoryForm', 'rbacUiControlService', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange',
     'Wait', 'ToJSON', '$state', InventoriesAdd
 ];

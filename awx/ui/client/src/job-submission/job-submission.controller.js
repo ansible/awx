@@ -62,11 +62,11 @@
 */
 
 export default
-    [   '$scope', '$location', 'GetBasePath', 'Empty', 'Wait', 'Rest', 'ProcessErrors',
-        'LaunchJob', '$state', 'generateList', 'InventoryList', 'CredentialList', 'ParseTypeChange',
+    [   '$scope', 'GetBasePath', 'Wait', 'Rest', 'ProcessErrors',
+        'LaunchJob', '$state', 'InventoryList', 'CredentialList', 'ParseTypeChange',
         'GetSurveyQuestions',
-        function($scope, $location, GetBasePath, Empty, Wait, Rest, ProcessErrors,
-            LaunchJob, $state, GenerateList, InventoryList, CredentialList, ParseTypeChange,
+        function($scope, GetBasePath, Wait, Rest, ProcessErrors,
+            LaunchJob, $state, InventoryList, CredentialList, ParseTypeChange,
             GetSurveyQuestions) {
 
             var launch_url;

@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$compile', '$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
+export default ['$filter', '$state', '$stateParams', 'AddSchedule', 'Wait',
     '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'GetBasePath',
-    'Rest', 'ParamPass', 'ParentObject',
-    function($compile, $filter, $state, $stateParams, AddSchedule, Wait, $scope,
-        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParamPass, ParentObject) {
+    'Rest', 'ParentObject',
+    function($filter, $state, $stateParams, AddSchedule, Wait, $scope,
+        $rootScope, CreateSelect2, ParseTypeChange, GetBasePath, Rest, ParentObject) {
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight
         var dt = new Date($scope.schedulerUTCTime);

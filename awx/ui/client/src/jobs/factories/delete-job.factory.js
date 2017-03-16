@@ -1,5 +1,5 @@
 export default
-    function DeleteJob($state, Find, GetBasePath, Rest, Wait, ProcessErrors, Prompt, Alert,
+    function DeleteJob($state, Find, Rest, Wait, ProcessErrors, Prompt, Alert,
         $filter, i18n) {
         return function(params) {
             var scope = params.scope,
@@ -132,6 +132,6 @@ export default
     }
 
 DeleteJob.$inject =
-    [   '$state', 'Find', 'GetBasePath', 'Rest', 'Wait',
+    [   '$state', 'Find', 'Rest', 'Wait',
         'ProcessErrors', 'Prompt', 'Alert', '$filter', 'i18n'
     ];

@@ -54,12 +54,12 @@
  * This is usage information.
  */
 
-export default ['$log', '$cookies', '$compile', '$window', '$rootScope',
-    '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait', 'Timer',
-    'Empty', 'ClearScope', '$scope', 'pendoService', 'ConfigService',
+export default ['$log', '$cookies', '$compile', '$rootScope',
+    '$location', 'Authorization', 'Alert', 'Wait', 'Timer',
+    'Empty', '$scope', 'pendoService', 'ConfigService',
     'CheckLicense', 'FeaturesService', 'SocketService',
-    function ($log, $cookies, $compile, $window, $rootScope, $location,
-        Authorization, ToggleClass, Alert, Wait, Timer, Empty, ClearScope,
+    function ($log, $cookies, $compile, $rootScope, $location,
+        Authorization, Alert, Wait, Timer, Empty,
         scope, pendoService, ConfigService, CheckLicense, FeaturesService,
         SocketService) {
     var lastPath, lastUser, sessionExpired, loginAgain;

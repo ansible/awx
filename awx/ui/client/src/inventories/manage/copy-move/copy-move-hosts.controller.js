@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'generateList', 'HostManageService', 'GetBasePath', 'CopyMoveGroupList', 'host', 'Dataset',
-    function($scope, $state, $stateParams, GenerateList, HostManageService, GetBasePath, CopyMoveGroupList, host, Dataset){
+    ['$scope', '$state', '$stateParams', 'HostManageService', 'CopyMoveGroupList', 'host', 'Dataset',
+    function($scope, $state, $stateParams, HostManageService, CopyMoveGroupList, host, Dataset){
         var list = CopyMoveGroupList;
 
         $scope.item = host;

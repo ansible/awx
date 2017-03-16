@@ -5,9 +5,9 @@
  *************************************************/
 
 export default ['$stateParams', '$scope', 'OrgUserList','Rest', '$state',
-    'generateList', '$compile', 'Wait', 'OrgUsersDataset',
+    '$compile', 'Wait', 'OrgUsersDataset',
     'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
-    function($stateParams, $scope, OrgUserList, Rest, $state, GenerateList,
+    function($stateParams, $scope, OrgUserList, Rest, $state,
         $compile, Wait, OrgUsersDataset, Prompt, ProcessErrors,
         GetBasePath, $filter) {
 

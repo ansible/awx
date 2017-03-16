@@ -4,10 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', '$scope', 'Wait', 'generateList', 'InventoryScriptsList',
+export default ['$rootScope', '$scope', 'Wait', 'InventoryScriptsList',
     'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', '$filter', 'Dataset', 'rbacUiControlService',
     function(
-        $rootScope, $scope, Wait, GenerateList, InventoryScriptsList,
+        $rootScope, $scope, Wait, InventoryScriptsList,
         GetBasePath, Rest, ProcessErrors, Prompt, $state, $filter, Dataset, rbacUiControlService
     ) {
         var defaultUrl = GetBasePath('inventory_scripts'),

@@ -7,16 +7,16 @@
 export default ['Rest', 'Wait',
     'NotificationsFormObject', 'ProcessErrors', 'GetBasePath',
     'GenerateForm',
-    'OrganizationList', 'notification_template',
+    'notification_template',
     '$scope', '$state', 'GetChoices', 'CreateSelect2', 'Empty',
-    '$rootScope', 'NotificationsTypeChange', 'ParseTypeChange',
+    'NotificationsTypeChange', 'ParseTypeChange',
     function(
         Rest, Wait,
         NotificationsFormObject, ProcessErrors, GetBasePath,
         GenerateForm,
-        OrganizationList, notification_template,
+        notification_template,
         $scope, $state, GetChoices, CreateSelect2, Empty,
-        $rootScope, NotificationsTypeChange, ParseTypeChange
+        NotificationsTypeChange, ParseTypeChange
     ) {
         var generator = GenerateForm,
             id = notification_template.id,

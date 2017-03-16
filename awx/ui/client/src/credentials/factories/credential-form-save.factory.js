@@ -1,5 +1,5 @@
 export default
-    function CredentialFormSave($rootScope, $location, Alert, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state, i18n) {
+    function CredentialFormSave($rootScope, $location, Rest, ProcessErrors, GetBasePath, CredentialForm, ReturnToCaller, Wait, $state, i18n) {
         return function(params) {
             var scope = params.scope,
             mode = params.mode,
@@ -99,7 +99,7 @@ export default
     }
 
 CredentialFormSave.$inject =
-    [   '$rootScope', '$location', 'Alert', 'Rest',
-        'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm',
+    [   '$rootScope', '$location', 'Rest',
+        'ProcessErrors', 'GetBasePath', 'CredentialForm',
         'ReturnToCaller', 'Wait', '$state', 'i18n'
     ];

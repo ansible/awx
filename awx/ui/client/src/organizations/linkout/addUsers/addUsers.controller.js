@@ -12,9 +12,9 @@
  */
 
 export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
-'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
+'$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
 function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-    templateUrl, $state, Rest, $q, Wait, $window, qs, UserList) {
+    $state, Rest, $q, Wait, $window, qs, UserList) {
     $scope.$on("linkLists", function() {
 
         if ($state.current.name.split(".")[1] === "users") {

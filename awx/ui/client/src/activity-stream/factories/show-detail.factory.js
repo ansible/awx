@@ -1,5 +1,5 @@
 export default
-     function ShowDetail($filter, $rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
+     function ShowDetail($filter, Find) {
          return function (params, scope) {
 
              var activity_id = params.activity_id,
@@ -35,5 +35,4 @@ export default
          };
      }
 
- ShowDetail.$inject = ['$filter', '$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate',
-     'ActivityDetailForm', 'Empty', 'Find'];
+ ShowDetail.$inject = ['$filter', 'Find'];

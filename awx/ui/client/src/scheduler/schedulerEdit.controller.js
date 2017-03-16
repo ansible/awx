@@ -1,5 +1,5 @@
-export default ['$filter', '$compile', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'ParentObject',
-function($filter, $compile, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, ParentObject) {
+export default ['$filter', '$state', '$stateParams', 'EditSchedule', 'Wait', '$scope', '$rootScope', 'CreateSelect2', 'ParseTypeChange', 'ParentObject',
+function($filter, $state, $stateParams, EditSchedule, Wait, $scope, $rootScope, CreateSelect2, ParseTypeChange, ParentObject) {
 
     $scope.processSchedulerEndDt = function(){
         // set the schedulerEndDt to be equal to schedulerStartDt + 1 day @ midnight

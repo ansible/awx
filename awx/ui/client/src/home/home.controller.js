@@ -4,10 +4,10 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$compile', '$stateParams', '$rootScope', '$location', '$log','Wait',
-    'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$window', 'graphData',
-    function($scope, $compile, $stateParams, $rootScope, $location, $log, Wait,
-    ClearScope, Rest, GetBasePath, ProcessErrors, $window, graphData) {
+export default ['$scope', '$rootScope','Wait',
+    'ClearScope', 'Rest', 'GetBasePath', 'ProcessErrors', 'graphData',
+    function($scope, $rootScope, Wait,
+    ClearScope, Rest, GetBasePath, ProcessErrors, graphData) {
 
         ClearScope('home');
 

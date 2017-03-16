@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', 'WorkflowService', 'generateList', 'TemplateList', 'ProjectList',
-    'GetBasePath', 'Wait', 'TemplatesService', '$state',
-    'ProcessErrors', 'InventorySourcesList', 'CreateSelect2', 'WorkflowMakerForm',
-    'GenerateForm', 'InventoryList', 'CredentialList', '$q',
-    function($scope, WorkflowService, GenerateList, TemplateList, ProjectList,
-        GetBasePath, Wait, TemplatesService, $state,
-        ProcessErrors, InventorySourcesList, CreateSelect2, WorkflowMakerForm,
-        GenerateForm, InventoryList, CredentialList, $q) {
+export default ['$scope', 'WorkflowService',
+    'GetBasePath', 'TemplatesService', '$state',
+    'ProcessErrors', 'CreateSelect2', 'WorkflowMakerForm',
+    '$q',
+    function($scope, WorkflowService,
+        GetBasePath, TemplatesService, $state,
+        ProcessErrors, CreateSelect2, WorkflowMakerForm,
+        $q) {
 
         let form = WorkflowMakerForm();
 

@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest', 'Alert',
+export default ['$scope', '$rootScope',
+    '$log', '$stateParams', 'CredentialForm', 'GenerateForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'GetChoices', 'Empty', 'KindChange', 'BecomeMethodChange',
     'OwnerChange', 'CredentialFormSave', '$state', 'CreateSelect2', 'i18n',
-    function($scope, $rootScope, $compile, $location, $log,
-    $stateParams, CredentialForm, GenerateForm, Rest, Alert, ProcessErrors,
+    function($scope, $rootScope, $log,
+    $stateParams, CredentialForm, GenerateForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, GetChoices, Empty, KindChange, BecomeMethodChange,
     OwnerChange, CredentialFormSave, $state, CreateSelect2, i18n) {
 

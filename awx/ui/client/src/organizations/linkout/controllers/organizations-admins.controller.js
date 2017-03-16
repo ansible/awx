@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$stateParams', '$scope', 'UserList', 'Rest', '$state',
-    'generateList', '$compile', 'Wait', 'OrgAdminList',
+export default ['$stateParams', '$scope', 'Rest', '$state',
+    '$compile', 'Wait', 'OrgAdminList',
     'OrgAdminsDataset',
     'Prompt', 'ProcessErrors', 'GetBasePath', '$filter',
-    function($stateParams, $scope, UserList, Rest, $state, GenerateList,
+    function($stateParams, $scope, Rest, $state,
         $compile, Wait, OrgAdminList, OrgAdminsDataset, Prompt, ProcessErrors,
         GetBasePath, $filter) {
 

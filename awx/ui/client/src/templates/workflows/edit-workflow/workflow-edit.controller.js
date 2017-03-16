@@ -8,12 +8,12 @@
  [   '$scope', '$stateParams', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors',
      'ClearScope', 'GetBasePath', '$q', 'ParseTypeChange', 'Wait', 'Empty',
      'ToJSON', 'initSurvey', '$state', 'CreateSelect2', 'ParseVariableString',
-     'TemplatesService', 'OrganizationList', 'Rest', 'WorkflowService', 'ToggleNotification',
+     'TemplatesService', 'Rest', 'ToggleNotification',
      function(
          $scope, $stateParams, WorkflowForm, GenerateForm, Alert, ProcessErrors,
          ClearScope, GetBasePath, $q, ParseTypeChange, Wait, Empty,
          ToJSON, SurveyControllerInit, $state, CreateSelect2, ParseVariableString,
-         TemplatesService, OrganizationList, Rest, WorkflowService, ToggleNotification
+         TemplatesService, Rest, ToggleNotification
      ) {
 
         ClearScope();

@@ -1,5 +1,5 @@
-export default ['$stateParams', '$scope', '$state', 'QuerySet', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n',
-    function($stateParams, $scope, $state, QuerySet, GetBasePath, qs, SmartSearchService, i18n) {
+export default ['$stateParams', '$scope', '$state', 'GetBasePath', 'QuerySet', 'SmartSearchService', 'i18n',
+    function($stateParams, $scope, $state, GetBasePath, qs, SmartSearchService, i18n) {
 
         let path,
             defaults,

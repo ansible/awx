@@ -7,11 +7,11 @@
  export default
  [   '$scope', 'WorkflowForm', 'GenerateForm', 'Alert', 'ProcessErrors', 'ClearScope',
      'Wait', '$state', 'CreateSelect2', 'TemplatesService', 'ToJSON',
-     'ParseTypeChange', 'OrganizationList', '$q', 'Rest', 'GetBasePath',
+     'ParseTypeChange', '$q', 'Rest', 'GetBasePath',
      function(
          $scope, WorkflowForm, GenerateForm, Alert, ProcessErrors, ClearScope,
          Wait, $state, CreateSelect2, TemplatesService, ToJSON,
-         ParseTypeChange, OrganizationList, $q, Rest, GetBasePath
+         ParseTypeChange, $q, Rest, GetBasePath
      ) {
 
          Rest.setUrl(GetBasePath('workflow_job_templates'));

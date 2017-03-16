@@ -12,8 +12,8 @@
 
 
 export default
-    ['$rootScope', 'Alert', 'Rest', 'GetBasePath', 'ProcessErrors', '$cookies',
-    function ($rootScope, Alert, Rest, GetBasePath, ProcessErrors, $cookies) {
+    ['$rootScope', 'Alert', 'Rest', 'ProcessErrors', '$cookies',
+    function ($rootScope, Alert, Rest, ProcessErrors, $cookies) {
         return function (params) {
             // set PermissionAddAllowed to true or false based on user access. admins and org admins are granted
             // accesss.

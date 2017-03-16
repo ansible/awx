@@ -7,13 +7,13 @@
 // import listGenerator from 'tower/shared/list-generator/main';
 
 export default
-    [   'Wait', '$compile',  'CreateDialog', 'GetBasePath' ,
-        'SchedulesList', 'Rest' ,
-        'ProcessErrors', 'managementJobsListObject', '$rootScope', '$state',
+    [   'Wait',  'CreateDialog', 'GetBasePath' ,
+        'Rest' ,
+        'ProcessErrors', '$rootScope', '$state',
         '$scope', 'CreateSelect2', 'i18n',
-        function( Wait, $compile, CreateDialog, GetBasePath,
-            SchedulesList, Rest, ProcessErrors,
-            managementJobsListObject, $rootScope, $state, $scope,
+        function( Wait, CreateDialog, GetBasePath,
+            Rest, ProcessErrors,
+            $rootScope, $state, $scope,
             CreateSelect2, i18n) {
 
                 var defaultUrl = GetBasePath('system_job_templates') + "?order_by=name";

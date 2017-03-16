@@ -1,5 +1,5 @@
-export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'Rest', '$state', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket',
-function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, Rest, $state, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket) {
+export default ['jobData', 'jobDataOptions', 'jobLabels', 'jobFinished', 'count', '$scope', 'ParseTypeChange', 'ParseVariableString', 'jobResultsService', 'eventQueue', '$compile', '$log', 'Dataset', '$q', 'QuerySet', '$rootScope', 'moment', '$stateParams', 'i18n', 'fieldChoices', 'fieldLabels', 'workflowResultsService', 'statusSocket',
+function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTypeChange, ParseVariableString, jobResultsService, eventQueue, $compile, $log, Dataset, $q, QuerySet, $rootScope, moment, $stateParams, i18n, fieldChoices, fieldLabels, workflowResultsService, statusSocket) {
     var toDestroy = [];
     var cancelRequests = false;
     var runTimeElapsedTimer = null;

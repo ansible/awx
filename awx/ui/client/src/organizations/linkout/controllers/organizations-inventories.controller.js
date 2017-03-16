@@ -4,14 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', '$compile', '$filter', 'Rest', 'Alert', 'InventoryList',
-    'generateList', 'Prompt', 'ReturnToCaller', 'OrgInventoryDataset', 'OrgInventoryList',
-    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state',
-    function($scope, $rootScope, $location, $log,
-        $stateParams, $compile, $filter, Rest, Alert, InventoryList,
-        generateList, Prompt, ReturnToCaller, Dataset, OrgInventoryList,
-        ClearScope, ProcessErrors, GetBasePath, Wait,
+export default ['$scope', '$rootScope', '$location',
+    '$stateParams', '$compile', '$filter', 'Rest', 'InventoryList',
+    'OrgInventoryDataset', 'OrgInventoryList',
+    'ProcessErrors', 'GetBasePath', 'Wait', 'Find', 'Empty', '$state',
+    function($scope, $rootScope, $location,
+        $stateParams, $compile, $filter, Rest, InventoryList,
+        Dataset, OrgInventoryList,
+        ProcessErrors, GetBasePath, Wait,
         Find, Empty, $state) {
 
         var list = OrgInventoryList,

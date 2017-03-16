@@ -1,6 +1,6 @@
 export default
-    function CallbackHelpInit($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors, ParseTypeChange,
-             ParseVariableString, Empty, InventoryList, CredentialList, ProjectList, Wait) {
+    function CallbackHelpInit($location, GetBasePath, Rest, JobTemplateForm, GenerateForm, $stateParams, ProcessErrors,
+             ParseVariableString, Empty, CredentialList, Wait) {
         return function(params) {
             var scope = params.scope,
             defaultUrl = GetBasePath('job_templates'),
@@ -151,6 +151,6 @@ export default
 
 CallbackHelpInit.$inject =
     [   '$location', 'GetBasePath', 'Rest', 'JobTemplateForm', 'GenerateForm',
-        '$stateParams', 'ProcessErrors', 'ParseTypeChange', 'ParseVariableString',
-        'Empty', 'InventoryList', 'CredentialList','ProjectList', 'Wait'
+        '$stateParams', 'ProcessErrors', 'ParseVariableString',
+        'Empty', 'CredentialList', 'Wait'
     ];

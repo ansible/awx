@@ -1,7 +1,5 @@
 export default
-     function Stream($rootScope, $location, $state, Rest, GetBasePath, ProcessErrors,
-         Wait, StreamList, GenerateList, FormatDate,
-         BuildDescription, ShowDetail) {
+     function Stream($rootScope, $state, BuildDescription, ShowDetail) {
          return function (params) {
 
              var scope = params.scope;
@@ -49,6 +47,4 @@ export default
          };
      }
 
- Stream.$inject = ['$rootScope', '$location', '$state', 'Rest', 'GetBasePath',
-     'ProcessErrors', 'Wait', 'StreamList', 'generateList', 'FormatDate', 'BuildDescription',
-     'ShowDetail'];
+ Stream.$inject = ['$rootScope', '$state', 'BuildDescription', 'ShowDetail'];
