@@ -196,6 +196,7 @@ export default ['i18n', function(i18n) {
             },
             from_number: {
                 label: i18n._('Source Phone Number'),
+                dataTitle: i18n._('Source Phone Number'),
                 type: 'text',
                 awPopOver: '<p>' + i18n._('Number associated with the "Messaging Service" in Twilio.') + '</p>'+
                             '<p>' + i18n.sprintf(i18n._('This must be of the form %s.'), '<code>+18005550199</code>') + '</p>',
@@ -209,11 +210,11 @@ export default ['i18n', function(i18n) {
             },
             to_numbers: {
                 label: i18n._('Destination SMS Number'),
+                dataTitle: i18n._('Destination SMS Number'),
                 type: 'textarea',
                 rows: 3,
                 awPopOver: '<p>' + i18n._('Type an option on each line.') + '</p>'+
                             '<p>' + i18n._('For example:') + '<br><code>+12125552368</code><br>\n<code>+19105556162</code><br>\n',
-                dataTitle: i18n._('Destination SMS Number'),
                 dataPlacement: 'right',
                 dataContainer: "body",
                 awRequiredWhen: {
@@ -293,6 +294,7 @@ export default ['i18n', function(i18n) {
             },
             color: {
                 label: i18n._('Notification Color'),
+                dataTitle: i18n._('Notification Color'),
                 type: 'text',
                 awPopOver: '<p>' + i18n.sprintf(i18n._('Color can be one of %s.'), '<code>yellow</code>, <code>green</code>, <code>red</code>, ' +
                            '<code>purple</code>, <code>gray</code>, <code>random</code>') + '\n',
@@ -324,6 +326,7 @@ export default ['i18n', function(i18n) {
             },
             headers: {
                 label: i18n._('HTTP Headers'),
+                dataTitle: i18n._('HTTP Headers'),
                 type: 'textarea',
                 name: 'headers',
                 rows: 5,

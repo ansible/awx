@@ -404,20 +404,27 @@ textarea.allowresize {
 /* TB tooltip overrides */
   .popover-content {
       width: 100%;
+      padding: 0;
 
       .table>tbody>tr>td {
+          padding-left: 0;
           border-top: 1px solid @b7grey;
       }
   }
   h3.popover-title, .popover-content, .popover-content blockquote, .popover-content a {
       font-size: 12px;
   }
+  .flyout {
+      margin-bottom: 0;
+  }
   .flyout thead> tr> th, .flyout tbody> tr> td, .flyout tbody> tr> td> a {
       font-size: 12px;
   }
+  .flyout tbody > tr:last-child > td {
+      padding-bottom: 0;
+  }
   .popover-title {
-      padding-top: 5px;
-      padding-bottom: 5px;
+      padding: 0 0 5px 0;
       background-color: @default-interface-txt;
       color: @default-bg;
       font-weight: 600;
@@ -431,6 +438,8 @@ textarea.allowresize {
       background-color: @default-interface-txt;
       color: @default-bg; //white
       text-align: left;
+      padding: 10px;
+      font-weight: 400;
 
       code {
           color: @default-data-txt;
@@ -443,6 +452,14 @@ textarea.allowresize {
           &:hover {
               color: @default-warning-hov;
           }
+      }
+
+      p {
+          font-weight: 400;
+      }
+
+      p:last-child {
+          margin-bottom: 0;
       }
   }
   .popover.right>.arrow:after  {
@@ -1030,10 +1047,10 @@ input[type="checkbox"].checkbox-no-label {
 
 .table.table-condensed.flyout {
     thead>tr>th {
+        padding-left: 0;
         border: none;
     }
 }
-
 
 /* Table info rows */
 
@@ -2205,6 +2222,12 @@ a:hover {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     background-color: @default-link;
+}
+
+.select2-selection {
+    & > .select2-selection__arrow {
+        border-left: none;
+    }
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {

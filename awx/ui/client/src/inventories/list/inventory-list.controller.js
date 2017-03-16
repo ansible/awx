@@ -102,9 +102,6 @@ function InventoriesList($scope, $rootScope, $location, $log,
         elem.removeAttr('ng-click');
         $compile(elem)($scope);
         $scope.triggerPopover(event);
-
-        $('.popover-content').addClass('Inventories Inventories--popover-content');
-        $('.popover-title').addClass('Inventories Inventories--popover-title');
     } 
     if ($scope.removeHostSummaryReady) {
         $scope.removeHostSummaryReady();
