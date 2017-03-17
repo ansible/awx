@@ -2678,7 +2678,8 @@ class JobTemplateCallback(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         extra_vars = None
-        if request.content_type == "application/json":
+        # Be careful here: content_type can look like '<content_type>; charset=blar'
+        if request.content_type.startswith("application/json"):
             extra_vars = request.data.get("extra_vars", None)
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
