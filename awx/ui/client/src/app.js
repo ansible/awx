@@ -37,7 +37,6 @@ if ($basePath) {
 }
 
 // Modules
-import './forms';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -88,6 +87,8 @@ var tower = angular.module('Tower', [
     'I18N',
     uiRouter,
     'ui.router.state.events',
+    'pendolytics',
+    'lrInfiniteScroll',
 
     about.name,
     access.name,
@@ -125,9 +126,7 @@ var tower = angular.module('Tower', [
     'templates',
     'PromptDialog',
     'AWDirectives',
-    'lrInfiniteScroll',
     'features',
-    'pendolytics',
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
