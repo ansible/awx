@@ -14,6 +14,7 @@ import RelaunchInventory from './factories/relaunch-inventory.factory';
 import RelaunchJob from './factories/relaunch-job.factory';
 import RelaunchPlaybook from './factories/relaunch-playbook.factory';
 import RelaunchSCM from './factories/relaunch-scm.factory';
+import AllJobsList from './all-jobs.list';
 
 export default
     angular.module('JobsModule', [])
@@ -28,4 +29,5 @@ export default
         .factory('RelaunchInventory', RelaunchInventory)
         .factory('RelaunchJob', RelaunchJob)
         .factory('RelaunchPlaybook', RelaunchPlaybook)
-        .factory('RelaunchSCM', RelaunchSCM);
+        .factory('RelaunchSCM', RelaunchSCM)
+        .factory('AllJobsList', AllJobsList);

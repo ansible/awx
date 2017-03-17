@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('AllJobsDefinition', [])
-    .factory('AllJobsList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'jobs',
@@ -118,4 +116,4 @@ export default
             }
         }
     };
-}]);
+}];

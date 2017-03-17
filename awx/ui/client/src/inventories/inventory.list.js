@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('InventoriesListDefinition', [])
-    .factory('InventoryList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'inventories',
@@ -96,4 +94,4 @@ export default
                 ngShow: 'inventory.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

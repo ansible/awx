@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('PortalJobsListDefinition', [])
-    .factory('PortalJobsList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'jobs',
@@ -44,4 +42,4 @@ export default
         },
 
         actions: { }
-    };}]);
+    };}];

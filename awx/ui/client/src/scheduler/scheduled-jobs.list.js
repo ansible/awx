@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('ScheduledJobsDefinition', [])
-    .factory('ScheduledJobsList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'schedules',
@@ -85,4 +83,4 @@ export default
                 ngShow: 'schedule.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

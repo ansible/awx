@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('CompletedJobsDefinition', [])
-    .factory('CompletedJobsList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
         // These tooltip fields are consumed to build disabled related tabs tooltips in the form > add view
         awToolTip: i18n._('Please save and run a job to view'),
@@ -84,4 +82,4 @@ export default
                 ngShow: 'completed_job.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

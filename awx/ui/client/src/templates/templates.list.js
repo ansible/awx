@@ -5,9 +5,7 @@
  *************************************************/
 
 
-export default
-    angular.module('TemplatesListDefinition', [])
-    .factory('TemplateList', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
     return {
 
         name: 'templates',
@@ -129,4 +127,4 @@ export default
                 ngShow: 'template.summary_fields.user_capabilities.delete'
             }
         }
-    };}]);
+    };}];

@@ -12,7 +12,7 @@
 
 
 export default
-    angular.module('JobTemplateFormDefinition', [ 'CompletedJobsDefinition'])
+    angular.module('JobTemplateFormDefinition', [])
 
         .factory('JobTemplateFormObject', ['i18n', function(i18n) {
         return {

@@ -38,7 +38,6 @@ if ($basePath) {
 
 // Modules
 import './forms';
-import './lists';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -126,25 +125,14 @@ var tower = angular.module('Tower', [
     'templates',
     'PromptDialog',
     'AWDirectives',
-    'InventoriesListDefinition',
     'InventoryFormDefinition',
-    'InventoryGroupsDefinition',
-    'InventoryHostsDefinition',
     'HostFormDefinition',
-    'HostListDefinition',
     'GroupFormDefinition',
-    'GroupListDefinition',
-    'TemplatesListDefinition',
     'JobTemplateFormDefinition',
-    'CompletedJobsDefinition',
-    'AllJobsDefinition',
     'HostGroupsFormDefinition',
-    'ScheduledJobsDefinition',
     'lrInfiniteScroll',
-    'PortalJobsListDefinition',
     'features',
     'pendolytics',
-    'InventorySourcesListDefinition',
 ])
 
     .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
