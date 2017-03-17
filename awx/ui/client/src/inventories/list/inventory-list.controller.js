@@ -102,8 +102,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
         elem.removeAttr('ng-click');
         $compile(elem)($scope);
         $scope.triggerPopover(event);
-    }
-
+    } 
     if ($scope.removeHostSummaryReady) {
         $scope.removeHostSummaryReady();
     }
@@ -125,7 +124,7 @@ function InventoriesList($scope, $rootScope, $location, $log,
             data.results.forEach(function(row) {
                 html += "<tr>\n";
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
-                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa icon-job-" + row.status + "\"></i></a></td>\n";
+                    ". Click for details\" aw-tip-placement=\"top\"><i class=\"fa SmartStatus-tooltip--" + row.status + " icon-job-" + row.status + "\"></i></a></td>\n";
                 html += "<td>" + ($filter('longDate')(row.finished)).replace(/ /,'<br />') + "</td>";
                 html += "<td><a href=\"#/jobs/" + row.id + "\" " + "aw-tool-tip=\"" + row.status.charAt(0).toUpperCase() + row.status.slice(1) +
                     ". Click for details\" aw-tip-placement=\"top\">" + $filter('sanitize')(ellipsis(row.name)) + "</a></td>";
