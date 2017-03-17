@@ -11,8 +11,8 @@
 */
 
 
-export default ['NotificationsList', 'CompletedJobsList',
-function(NotificationsList, CompletedJobsList) {
+export default ['NotificationsList', 'CompletedJobsList', 'i18n',
+function(NotificationsList, CompletedJobsList, i18n) {
     return function() {
         var JobTemplateFormObject = {
 
