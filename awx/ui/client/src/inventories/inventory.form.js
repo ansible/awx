@@ -10,9 +10,7 @@
  * @description This form is for adding/editing an inventory
  */
 
-export default
-angular.module('InventoryFormDefinition', [])
-    .factory('InventoryForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
         addTitle: i18n._('NEW INVENTORY'),
@@ -134,4 +132,4 @@ angular.module('InventoryFormDefinition', [])
             }
         }
 
-    };}]);
+    };}];

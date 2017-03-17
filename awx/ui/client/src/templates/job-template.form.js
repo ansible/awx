@@ -11,11 +11,10 @@
 */
 
 
-export default
-    angular.module('JobTemplateFormDefinition', [])
-
-        .factory('JobTemplateFormObject', ['i18n', function(i18n) {
-        return {
+export default ['NotificationsList', 'CompletedJobsList',
+function(NotificationsList, CompletedJobsList) {
+    return function() {
+        var JobTemplateFormObject = {
 
             addTitle: i18n._('NEW JOB TEMPLATE'),
             editTitle: '{{ name }}',
@@ -487,26 +486,22 @@ export default
                     class: 'Form-primaryButton'
                 }
             }
-        };}])
+        };
+        var itm;
 
-        .factory('JobTemplateForm', ['JobTemplateFormObject', 'NotificationsList', 'CompletedJobsList',
-        function(JobTemplateFormObject, NotificationsList, CompletedJobsList) {
-            return function() {
-                var itm;
+        for (itm in JobTemplateFormObject.related) {
+            if (JobTemplateFormObject.related[itm].include === "NotificationsList") {
+                JobTemplateFormObject.related[itm] = _.clone(NotificationsList);
+                JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.notifications')";
+                JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
+            }
+            if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {
+                JobTemplateFormObject.related[itm] = CompletedJobsList;
+                JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.completed_jobs')";
+                JobTemplateFormObject.related[itm].generateList = true;
+            }
+        }
 
-                for (itm in JobTemplateFormObject.related) {
-                    if (JobTemplateFormObject.related[itm].include === "NotificationsList") {
-                        JobTemplateFormObject.related[itm] = _.clone(NotificationsList);
-                        JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.notifications')";
-                        JobTemplateFormObject.related[itm].generateList = true;   // tell form generator to call list generator and inject a list
-                    }
-                    if (JobTemplateFormObject.related[itm].include === "CompletedJobsList") {
-                        JobTemplateFormObject.related[itm] = CompletedJobsList;
-                        JobTemplateFormObject.related[itm].ngClick = "$state.go('templates.editJobTemplate.completed_jobs')";
-                        JobTemplateFormObject.related[itm].generateList = true;
-                    }
-                }
-
-                return JobTemplateFormObject;
-            };
-        }]);
+        return JobTemplateFormObject;
+    };
+}];

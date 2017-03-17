@@ -10,9 +10,7 @@
  * @description This form is for adding/editing a host on the inventory page
 */
 
-export default
-    angular.module('HostFormDefinition', [])
-        .factory('HostForm', ['i18n', function(i18n) {
+export default ['i18n', function(i18n) {
         return {
 
             addTitle: i18n._('CREATE HOST'),
@@ -102,4 +100,4 @@ export default
                 }
             },
         };
-    }]);
+    }];

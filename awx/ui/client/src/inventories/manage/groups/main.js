@@ -12,6 +12,7 @@ import GetSyncStatusMsg from './factories/get-sync-status-msg.factory';
 import GroupsCancelUpdate from './factories/groups-cancel-update.factory';
 import ViewUpdateStatus from './factories/view-update-status.factory';
 import InventoryGroups from './inventory-groups.list';
+import GroupForm from './groups.form';
 
 export default
 angular.module('manageGroups', [])
@@ -20,6 +21,7 @@ angular.module('manageGroups', [])
     .factory('GetSyncStatusMsg', GetSyncStatusMsg)
     .factory('GroupsCancelUpdate', GroupsCancelUpdate)
     .factory('ViewUpdateStatus', ViewUpdateStatus)
+    .factory('GroupForm', GroupForm)
     .value('InventoryGroups', InventoryGroups)
     .controller('GroupAddController', GroupAddController)
     .controller('GroupEditController', GroupEditController);

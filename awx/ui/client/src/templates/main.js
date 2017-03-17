@@ -24,6 +24,7 @@ import WorkflowForm from './workflows.form';
 import CompletedJobsList from './completed-jobs.list';
 import InventorySourcesList from './inventory-sources.list';
 import TemplateList from './templates.list';
+import JobTemplateForm from './job-template.form';
 
 export default
 angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesAdd.name,
@@ -38,6 +39,7 @@ angular.module('templates', [surveyMaker.name, templatesList.name, jobTemplatesA
     .factory('WorkflowForm', WorkflowForm)
     .factory('CompletedJobsList', CompletedJobsList)
     .factory('TemplateList', TemplateList)
+    .factory('JobTemplateForm', JobTemplateForm)
     .value('InventorySourcesList', InventorySourcesList)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
