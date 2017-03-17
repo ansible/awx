@@ -300,6 +300,8 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
+        # It is worthwhile to find out if this function is now only used by
+        # provisioning callback.
         variables_needed = False
         if callback_extra_vars:
             extra_vars_dict = parse_yaml_or_json(callback_extra_vars)
@@ -310,10 +312,13 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         elif self.variables_needed_to_start:
             variables_needed = True
         prompting_needed = False
-        for key, value in self._ask_for_vars_dict().iteritems():
-            if value and not (key == 'extra_vars' and
-                              callback_extra_vars is not None):
-                prompting_needed = True
+        # The behavior of provisioning callback should mimic
+        # that of job template launch, so prompting_needed should
+        # not block a provisioning callback from creating/launching jobs.
+        if callback_extra_vars is None:
+            for value in self._ask_for_vars_dict().values():
+                if value:
+                    prompting_needed = True
         return (not prompting_needed and
                 not self.passwords_needed_to_start and
                 not variables_needed)
