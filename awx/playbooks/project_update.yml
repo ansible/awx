@@ -160,6 +160,11 @@
         scm_version: "{{scm_version|regex_replace('^.*Revision: ([0-9]+).*$', '\\1')}}"
       when: scm_type == 'svn'
 
+    - name: parse hg version string properly
+      set_fact:
+        scm_version: "{{scm_version|regex_replace('^([A-Za-z0-9]+).*$', '\\1')}}"
+      when: scm_type == 'hg'
+
     - name: Repository Version
       debug: msg="Repository Version {{ scm_version }}"
       when: scm_version is defined
