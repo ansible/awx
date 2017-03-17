@@ -126,14 +126,13 @@ def test_callback_plugin_receives_events(executor, cache, event, playbook):
       when: false
 '''},  # noqa
 {'no_log_on_play.yml': '''
-- name: play-level no_log set
+- name: args should not be logged when play-level no_log set
   connection: local
   hosts: all
   gather_facts: no
   no_log: true
   tasks:
-      - name: args should not be logged when play-level no_log set
-        shell: echo "SENSITIVE"
+      - shell: echo "SENSITIVE"
 '''},  # noqa
 {'async_no_log.yml': '''
 - name: async task args should suppressed with no_log
@@ -146,6 +145,19 @@ def test_callback_plugin_receives_events(executor, cache, event, playbook):
       poll: 1
       shell: echo "SENSITIVE"
       no_log: true
+'''},  # noqa
+{'with_items.yml': '''
+- name: with_items tasks should be suppressed with no_log
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+      - shell: echo {{ item }}
+        no_log: true
+        with_items: [ "SENSITIVE", "SENSITIVE-SKIPPED", "SENSITIVE-FAILED" ]
+        when: item != "SENSITIVE-SKIPPED"
+        failed_when: item == "SENSITIVE-FAILED"
+        ignore_errors: yes
 '''},  # noqa
 ])
 def test_callback_plugin_no_log_filters(executor, cache, playbook):
@@ -167,4 +179,4 @@ def test_callback_plugin_strips_task_environ_variables(executor, cache, playbook
     executor.run()
     assert len(cache)
     for event in cache.values():
-        assert os.environ['VIRTUAL_ENV'] not in json.dumps(event)
+        assert os.environ['PATH'] not in json.dumps(event)
