@@ -1955,9 +1955,6 @@ tr td button i {
       padding-left: 15px;
       padding-right: 15px;
   }
-
-
-
 }
 
 // lists.less uses 600px as the breakpoint, doing same for consistency
@@ -1970,15 +1967,26 @@ tr td button i {
 
 .nvtooltip {
     border-radius: 4px;
-    padding: 3px 10px;
-}
 
-.nvtooltip td.value {
-    padding-right: 0px;
-}
+    td.value {
+        padding-right: 0px;
+    }
 
-.nvtooltip p {
-    padding: 3px 0px;
+    p {
+        padding: 3px 0px;
+    }
+
+    & > table > thead > tr > td {
+        font-weight: 700;
+
+        &:first-child {
+            padding-top: 0;
+        }
+    }
+
+    & > table > tbody > tr:last-child > td {
+        padding-bottom: 0;
+    }
 }
 
 .nvd3 g.nv-groups path.nv-line {
