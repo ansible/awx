@@ -167,6 +167,37 @@ def test_callback_plugin_no_log_filters(executor, cache, playbook):
 
 
 @pytest.mark.parametrize('playbook', [
+{'no_log_on_ok.yml': '''
+- name: args should not be logged when task-level no_log is set
+  connection: local
+  hosts: all
+  gather_facts: no
+  tasks:
+    - shell: echo "SENSITIVE"
+    - shell: echo "PRIVATE"
+      no_log: true
+'''},  # noqa
+])
+def test_callback_plugin_task_args_leak(executor, cache, playbook):
+    executor.run()
+    events = cache.values()
+    assert events[0]['event'] == 'playbook_on_start'
+    assert events[1]['event'] == 'playbook_on_play_start'
+
+    # task 1
+    assert events[2]['event'] == 'playbook_on_task_start'
+    assert 'SENSITIVE' in events[2]['event_data']['task_args']
+    assert events[3]['event'] == 'runner_on_ok'
+    assert 'SENSITIVE' in events[3]['event_data']['task_args']
+
+    # task 2 no_log=True
+    assert events[4]['event'] == 'playbook_on_task_start'
+    assert events[4]['event_data']['task_args'] == "the output has been hidden due to the fact that 'no_log: true' was specified for this result"  # noqa
+    assert events[5]['event'] == 'runner_on_ok'
+    assert events[5]['event_data']['task_args'] == "the output has been hidden due to the fact that 'no_log: true' was specified for this result"  # noqa
+
+
+@pytest.mark.parametrize('playbook', [
 {'strip_env_vars.yml': '''
 - name: sensitive environment variables should be stripped from events
   connection: local
