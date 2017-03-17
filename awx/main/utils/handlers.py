@@ -6,6 +6,7 @@ import logging
 import json
 import requests
 import time
+import re
 from concurrent.futures import ThreadPoolExecutor
 from copy import copy
 
@@ -118,10 +119,18 @@ class BaseHTTPSHandler(logging.Handler):
 
     def get_http_host(self):
         host = self.host or ''
-        if not host.startswith('http'):
-            host = 'http://%s' % self.host
-        if self.port != 80 and self.port is not None:
-            host = '%s:%s' % (host, str(self.port))
+        # Force using http(s) protocol
+        if re.match(r'https?://', host) is None:
+            if re.match(r'[a-zA-Z]+://', host) is None:
+                host = 'http://%s' % self.host
+            else:
+                host = re.sub(r'[a-zA-Z]+://', r'http://', host, count=1)
+        # Insert self.port if its special and port number not given in host
+        if (self.port != 80 and self.port is not None and
+            re.match(r'https?://[^:/]+:[0-9]+', host) is None):
+            host = re.sub(r'https?://[^/]+',
+                          lambda m: '%s:%s' % (m.group(0), str(self.port),
+                          host, count=1)
         return host
 
     def get_post_kwargs(self, payload_input):
