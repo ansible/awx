@@ -300,8 +300,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        # It is worthwhile to find out if this function is now only used by
-        # provisioning callback.
         variables_needed = False
         if callback_extra_vars:
             extra_vars_dict = parse_yaml_or_json(callback_extra_vars)
