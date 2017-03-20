@@ -149,7 +149,11 @@ export function JobStdoutController ($rootScope, $scope, $state, $stateParams,
                 }
 
                 if (data.extra_vars) {
-                    ParseTypeChange({ scope: $scope, field_id: 'pre-formatted-variables' });
+                    ParseTypeChange({
+                        scope: $scope,
+                        field_id: 'pre-formatted-variables',
+                        readOnly: true
+                    });
                 }
 
                 if ($scope.job.type === 'inventory_update' && !$scope.inv_manage_group_link) {
