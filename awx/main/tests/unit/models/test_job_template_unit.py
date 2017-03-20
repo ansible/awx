@@ -115,3 +115,16 @@ def test_job_template_survey_mixin_length(job_template_factory):
                                 {'type':'password', 'variable':'my_other_variable'}]}
     kwargs = obj._update_unified_job_kwargs(extra_vars={'my_variable':'$encrypted$'})
     assert kwargs['extra_vars'] == '{"my_variable": "my_default"}'
+
+
+def test_job_template_can_start_with_callback_extra_vars_provided(job_template_factory):
+    objects = job_template_factory(
+        'callback_extra_vars_test',
+        organization='org1',
+        inventory='inventory1',
+        credential='cred1',
+        persisted=False,
+    )
+    obj = objects.job_template
+    obj.ask_variables_on_launch = True
+    assert obj.can_start_without_user_input(callback_extra_vars='{"foo": "bar"}') is True

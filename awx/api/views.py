@@ -2678,7 +2678,8 @@ class JobTemplateCallback(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         extra_vars = None
-        if request.content_type == "application/json":
+        # Be careful here: content_type can look like '<content_type>; charset=blar'
+        if request.content_type.startswith("application/json"):
             extra_vars = request.data.get("extra_vars", None)
         # Permission class should have already validated host_config_key.
         job_template = self.get_object()
@@ -2727,14 +2728,14 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # Everything is fine; actually create the job.
+        kv = {"limit": limit, "launch_type": 'callback'}
+        if extra_vars is not None and job_template.ask_variables_on_launch:
+            kv['extra_vars'] = callback_filter_out_ansible_extra_vars(extra_vars)
         with transaction.atomic():
-            job = job_template.create_job(limit=limit, launch_type='callback')
+            job = job_template.create_job(**kv)
 
         # Send a signal to celery that the job should be started.
-        kv = {"inventory_sources_already_updated": inventory_sources_already_updated}
-        if extra_vars is not None:
-            kv['extra_vars'] = callback_filter_out_ansible_extra_vars(extra_vars)
-        result = job.signal_start(**kv)
+        result = job.signal_start(inventory_sources_already_updated=inventory_sources_already_updated)
         if not result:
             data = dict(msg=_('Error starting job!'))
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
