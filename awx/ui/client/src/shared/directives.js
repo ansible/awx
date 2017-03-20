@@ -745,9 +745,6 @@ function(ConfigurationUtils, i18n, $rootScope) {
 .directive('awToolTip', [function() {
     return {
         link: function(scope, element, attrs) {
-            // if (attrs.class.indexOf("JobResultsStdOut") > -1) {
-            //     debugger;
-            // }
             var delay = { show: 200, hide: 0 },
                 placement,
                 stateChangeWatcher;
