@@ -55,30 +55,9 @@ class BaseCallbackModule(CallbackBase):
         'playbook_on_no_hosts_remaining',
     ]
 
-    CENSOR_FIELD_WHITELIST = [
-        'msg',
-        'failed',
-        'changed',
-        'results',
-        'start',
-        'end',
-        'delta',
-        'cmd',
-        '_ansible_no_log',
-        'rc',
-        'failed_when_result',
-        'skipped',
-        'skip_reason',
-    ]
-
     def __init__(self):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
-
-    def censor_result(self, res):
-        if res.get('_ansible_no_log', False):
-            return {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}  # noqa
-        return res
 
     @contextlib.contextmanager
     def capture_event_data(self, event, **event_data):
@@ -89,6 +68,9 @@ class BaseCallbackModule(CallbackBase):
             task = event_data.pop('task', None)
         else:
             task = None
+
+        if event_data.get('res') and event_data['res'].get('_ansible_no_log', False):
+            event_data['res'] = {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}  # noqa
 
         with event_context.display_lock:
             try:
@@ -137,7 +119,9 @@ class BaseCallbackModule(CallbackBase):
             task_ctx['task_path'] = task.get_path()
         except AttributeError:
             pass
-        if not task.no_log:
+        if task.no_log:
+            task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        else:
             task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
             task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):
@@ -315,13 +299,11 @@ class BaseCallbackModule(CallbackBase):
         if result._task.get_name() == 'setup':
             result._result.get('ansible_facts', {}).pop('ansible_env', None)
 
-        res = self.censor_result(result._result)
-
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,
             task=result._task,
-            res=res,
+            res=result._result,
             event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
         )
         with self.capture_event_data('runner_on_ok', **event_data):
@@ -329,13 +311,10 @@ class BaseCallbackModule(CallbackBase):
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         # FIXME: Add verbosity for exception/results output.
-
-        res = self.censor_result(result._result)
-
         event_data = dict(
             host=result._host.get_name(),
             remote_addr=result._host.address,
-            res=res,
+            res=result._result,
             task=result._task,
             ignore_errors=ignore_errors,
             event_loop=result._task.loop if hasattr(result._task, 'loop') else None,
@@ -425,31 +404,28 @@ class BaseCallbackModule(CallbackBase):
             super(BaseCallbackModule, self).v2_on_file_diff(result)
 
     def v2_runner_item_on_ok(self, result):
-        res = self.censor_result(result._result)
         event_data = dict(
             host=result._host.get_name(),
             task=result._task,
-            res=res,
+            res=result._result,
         )
         with self.capture_event_data('runner_item_on_ok', **event_data):
             super(BaseCallbackModule, self).v2_runner_item_on_ok(result)
 
     def v2_runner_item_on_failed(self, result):
-        res = self.censor_result(result._result)
         event_data = dict(
             host=result._host.get_name(),
             task=result._task,
-            res=res,
+            res=result._result,
         )
         with self.capture_event_data('runner_item_on_failed', **event_data):
             super(BaseCallbackModule, self).v2_runner_item_on_failed(result)
 
     def v2_runner_item_on_skipped(self, result):
-        res = self.censor_result(result._result)
         event_data = dict(
             host=result._host.get_name(),
             task=result._task,
-            res=res,
+            res=result._result,
         )
         with self.capture_event_data('runner_item_on_skipped', **event_data):
             super(BaseCallbackModule, self).v2_runner_item_on_skipped(result)
