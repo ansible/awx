@@ -38,7 +38,8 @@ function(jobData, jobDataOptions, jobLabels, jobFinished, count, $scope, ParseTy
 
     // used for tag search
     $scope.list = {
-        basePath: jobData.related.job_events
+        basePath: jobData.related.job_events,
+        name: 'job_events'
     };
 
     // used for tag search
