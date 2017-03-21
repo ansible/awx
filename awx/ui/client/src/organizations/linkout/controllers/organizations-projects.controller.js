@@ -4,15 +4,14 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$log',
-    '$stateParams', 'Rest', 'Alert', 'Prompt',
-    'ReturnToCaller', 'ClearScope', 'OrgProjectList', 'OrgProjectDataset',
-    'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
-    'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter', '$state',
-    function($scope, $rootScope, $location, $log, $stateParams, Rest, Alert, Prompt,
-        ReturnToCaller, ClearScope, OrgProjectList, Dataset,
-        ProcessErrors, GetBasePath, ProjectUpdate,
-        Wait, GetChoices, Empty, Find, GetProjectIcon, GetProjectToolTip, $filter, $state) {
+export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
+    'OrgProjectList', 'OrgProjectDataset', 'ProcessErrors', 'GetBasePath',
+    'ProjectUpdate', 'Wait', 'GetChoices', 'Empty', 'Find', 'GetProjectIcon',
+    'GetProjectToolTip', '$filter', '$state',
+    function($scope, $rootScope, $log, $stateParams, Rest, Alert,
+    OrgProjectList, Dataset, ProcessErrors, GetBasePath, ProjectUpdate,
+    Wait, GetChoices, Empty, Find, GetProjectIcon, GetProjectToolTip, $filter,
+    $state) {
 
         var list = OrgProjectList,
             projUrl,

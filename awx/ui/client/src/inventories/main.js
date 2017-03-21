@@ -13,6 +13,11 @@ import { copyMoveGroupRoute, copyMoveHostRoute } from './manage/copy-move/copy-m
 import adHocRoute from './manage/adhoc/adhoc.route';
 import { templateUrl } from '../shared/template-url/template-url.factory';
 import { N_ } from '../i18n';
+
+// actual inventory list config object
+import InventoryList from './inventory.list';
+import InventoryForm from './inventory.form';
+
 export default
 angular.module('inventory', [
         inventoryAdd.name,
@@ -20,6 +25,8 @@ angular.module('inventory', [
         inventoryList.name,
         inventoryManage.name,
     ])
+    .factory('InventoryList', InventoryList)
+    .factory('InventoryForm', InventoryForm)
     .config(['$stateProvider', '$stateExtenderProvider', 'stateDefinitionsProvider',
         function($stateProvider, $stateExtenderProvider, stateDefinitionsProvider) {
             // When stateDefinition.lazyLoad() resolves, states matching name.** or /url** will be de-registered and replaced with resolved states

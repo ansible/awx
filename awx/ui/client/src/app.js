@@ -37,8 +37,6 @@ if ($basePath) {
 }
 
 // Modules
-import './forms';
-import './lists';
 import portalMode from './portal-mode/main';
 import systemTracking from './system-tracking/main';
 import inventories from './inventories/main';
@@ -89,6 +87,8 @@ var tower = angular.module('Tower', [
     'I18N',
     uiRouter,
     'ui.router.state.events',
+    'pendolytics',
+    'lrInfiniteScroll',
 
     about.name,
     access.name,
@@ -100,7 +100,6 @@ var tower = angular.module('Tower', [
     inventories.name,
     inventoryScripts.name,
     organizations.name,
-    //permissions.name,
     managementJobs.name,
     setupMenu.name,
     mainMenu.name,
@@ -121,53 +120,16 @@ var tower = angular.module('Tower', [
     teams.name,
     users.name,
     projects.name,
-    //'templates',
+    scheduler.name,
+
     'Utilities',
-    'OrganizationFormDefinition',
-    'UserFormDefinition',
-    'OrganizationListDefinition',
     'templates',
-    'UserListDefinition',
     'PromptDialog',
     'AWDirectives',
-    'InventoriesListDefinition',
-    'InventoryFormDefinition',
-    'InventoryGroupsDefinition',
-    'InventoryHostsDefinition',
-    'HostFormDefinition',
-    'HostListDefinition',
-    'GroupFormDefinition',
-    'GroupListDefinition',
-    'TeamsListDefinition',
-    'TeamFormDefinition',
-    'CredentialsListDefinition',
-    'CredentialFormDefinition',
-    'TemplatesListDefinition',
-    'PortalJobTemplatesListDefinition',
-    'JobTemplateFormDefinition',
-    'CompletedJobsDefinition',
-    'AllJobsDefinition',
-    'JobSummaryDefinition',
-    'HostGroupsFormDefinition',
-    'StreamListDefinition',
-    'ActivityDetailDefinition',
-    'SchedulesListDefinition',
-    'ScheduledJobsDefinition',
-    //'Timezones',
-    'JobsListDefinition',
-    'LogViewerStatusDefinition',
-    'LogViewerOptionsDefinition',
-    'lrInfiniteScroll',
-    'PortalJobsListDefinition',
     'features',
-    'pendolytics',
-    scheduler.name,
-    'WorkflowFormDefinition',
-    'InventorySourcesListDefinition',
-    'WorkflowMakerFormDefinition'
 ])
 
-.constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
+    .constant('AngularScheduler.partials', urlPrefix + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', true)
     .constant('AngularScheduler.showUTCField', true)
     .constant('$timezones.definitions.location', urlPrefix + 'lib/angular-tz-extensions/tz/data')

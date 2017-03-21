@@ -8,8 +8,8 @@ export default ['$scope', '$rootScope', '$location', '$stateParams',
     'OrganizationForm', 'GenerateForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'Wait','$state',
     function($scope, $rootScope, $location, $stateParams, OrganizationForm,
-        GenerateForm, Rest, Alert, ProcessErrors,
-        ClearScope, GetBasePath, Wait, $state) {
+    GenerateForm, Rest, Alert, ProcessErrors, ClearScope, GetBasePath, Wait,
+    $state) {
 
         Rest.setUrl(GetBasePath('organizations'));
         Rest.options()

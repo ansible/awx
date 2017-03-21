@@ -11,11 +11,13 @@
  * Controller for handling permissions adding
  */
 
-export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath', 'generateList',
-'templateUrl', '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet', 'UserList',
-function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
-    templateUrl, $state, Rest, $q, Wait, $window, qs, UserList) {
-    $scope.$on("linkLists", function() {
+export default ['$scope', '$rootScope', 'ProcessErrors', 'GetBasePath',
+    'generateList', '$state', 'Rest', '$q', 'Wait', '$window', 'QuerySet',
+    'UserList',
+    function($scope, $rootScope, ProcessErrors, GetBasePath, generateList,
+    $state, Rest, $q, Wait, $window, qs, UserList) {
+
+        $scope.$on("linkLists", function() {
 
         if ($state.current.name.split(".")[1] === "users") {
             $scope.addType = "Users";

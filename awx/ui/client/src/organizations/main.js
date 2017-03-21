@@ -10,6 +10,8 @@ import OrganizationsAdd from './add/organizations-add.controller';
 import OrganizationsEdit from './edit/organizations-edit.controller';
 import organizationsLinkout from './linkout/main';
 import OrganizationsLinkoutStates from './linkout/organizations-linkout.route';
+import OrganizationForm from './organizations.form';
+import OrganizationList from './organizations.list';
 import { N_ } from '../i18n';
 
 
@@ -20,6 +22,8 @@ angular.module('Organizations', [
     .controller('OrganizationsList', OrganizationsList)
     .controller('OrganizationsAdd', OrganizationsAdd)
     .controller('OrganizationsEdit', OrganizationsEdit)
+    .factory('OrganizationForm', OrganizationForm)
+    .factory('OrganizationList', OrganizationList)
     .config(['$stateProvider', 'stateDefinitionsProvider', '$stateExtenderProvider',
         function($stateProvider, stateDefinitionsProvider, $stateExtenderProvider) {
             let stateExtender = $stateExtenderProvider.$get(),

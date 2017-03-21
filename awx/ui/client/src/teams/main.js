@@ -7,6 +7,8 @@
 import TeamsList from './list/teams-list.controller';
 import TeamsAdd from './add/teams-add.controller';
 import TeamsEdit from './edit/teams-edit.controller';
+import TeamList from './teams.list';
+import TeamForm from './teams.form';
 import { N_ } from '../i18n';
 
 export default
@@ -14,6 +16,8 @@ angular.module('Teams', [])
     .controller('TeamsList', TeamsList)
     .controller('TeamsAdd', TeamsAdd)
     .controller('TeamsEdit', TeamsEdit)
+    .factory('TeamList', TeamList)
+    .factory('TeamForm', TeamForm)
     .config(['$stateProvider', 'stateDefinitionsProvider',
         function($stateProvider, stateDefinitionsProvider) {
             let stateDefinitions = stateDefinitionsProvider.$get();

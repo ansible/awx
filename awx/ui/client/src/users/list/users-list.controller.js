@@ -12,12 +12,12 @@ const user_type_options = [
  { type: 'system_administrator', label: N_('System Administrator') },
 ];
 
-export default ['$scope', '$rootScope', '$stateParams',
-    'Rest', 'Alert', 'UserList', 'Prompt', 'ClearScope', 'ProcessErrors', 'GetBasePath',
-    'Wait', '$state', '$filter', 'rbacUiControlService', 'Dataset', 'i18n',
-    function($scope, $rootScope, $stateParams,
-    Rest, Alert, UserList, Prompt, ClearScope, ProcessErrors, GetBasePath,
-    Wait, $state, $filter, rbacUiControlService, Dataset, i18n) {
+export default ['$scope', '$rootScope', 'Rest', 'UserList', 'Prompt',
+    'ClearScope', 'ProcessErrors', 'GetBasePath', 'Wait', '$state', '$filter',
+    'rbacUiControlService', 'Dataset', 'i18n',
+    function($scope, $rootScope, Rest, UserList, Prompt, ClearScope,
+    ProcessErrors, GetBasePath, Wait, $state, $filter, rbacUiControlService,
+    Dataset, i18n) {
 
         for (var i = 0; i < user_type_options.length; i++) {
             user_type_options[i].label = i18n._(user_type_options[i].label);

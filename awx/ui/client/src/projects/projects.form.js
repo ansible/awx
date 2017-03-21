@@ -13,7 +13,6 @@
 export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
     return function() {
     var projectsFormObj = {
-
         addTitle: i18n._('NEW PROJECT'),
         editTitle: '{{ name }}',
         name: 'project',

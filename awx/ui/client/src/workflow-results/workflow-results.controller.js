@@ -1,30 +1,9 @@
-export default ['workflowData',
-    'workflowResultsService',
-    'workflowDataOptions',
-    'jobLabels',
-    'workflowNodes',
-    '$scope',
-    'ParseTypeChange',
-    'ParseVariableString',
-    'WorkflowService',
-    'count',
-    '$state',
-    'i18n',
-    'moment',
-    function(workflowData,
-        workflowResultsService,
-        workflowDataOptions,
-        jobLabels,
-        workflowNodes,
-        $scope,
-        ParseTypeChange,
-        ParseVariableString,
-        WorkflowService,
-        count,
-        $state,
-        i18n,
-        moment
-    ) {
+export default ['workflowData', 'workflowResultsService', 'workflowDataOptions',
+    'jobLabels', 'workflowNodes', '$scope', 'ParseTypeChange',
+    'ParseVariableString', 'WorkflowService', 'count', '$state', 'i18n',
+    'moment', function(workflowData, workflowResultsService,
+    workflowDataOptions, jobLabels, workflowNodes, $scope, ParseTypeChange,
+    ParseVariableString, WorkflowService, count, $state, i18n, moment) {
         var runTimeElapsedTimer = null;
 
         var getTowerLinks = function() {
