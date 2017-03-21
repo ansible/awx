@@ -2,7 +2,7 @@
 
 import pytest
 
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ParseError
 from awx.api.filters import FieldLookupBackend
 from awx.main.models import (AdHocCommand, AuthToken, CustomInventoryScript,
                              Credential, Job, JobTemplate, SystemJob,
@@ -77,3 +77,10 @@ def test_filter_sensitive_fields_and_relations(model, query):
     with pytest.raises(PermissionDenied) as excinfo:
         field, new_lookup = field_lookup.get_field_from_lookup(model, query)
     assert 'not allowed' in str(excinfo.value)
+
+
+def test_looping_filters_prohibited():
+    field_lookup = FieldLookupBackend()
+    with pytest.raises(ParseError) as loop_exc:
+        field_lookup.get_field_from_lookup(Job, 'job_events__job__job_events')
+    assert 'job_events' in str(loop_exc.value)
