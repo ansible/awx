@@ -1,8 +1,10 @@
 import base64
+import cStringIO
 import json
 import logging
 from uuid import uuid4
 
+from django.conf import settings
 from django.conf import LazySettings
 import pytest
 import requests
@@ -44,15 +46,25 @@ def http_adapter():
     return FakeHTTPAdapter()
 
 
-def test_https_logging_handler_requests_sync_implementation():
-    handler = HTTPSHandler(async=False)
-    assert not isinstance(handler.session, FuturesSession)
-    assert isinstance(handler.session, requests.Session)
+@pytest.fixture()
+def connection_error_adapter():
+    class ConnectionErrorAdapter(requests.adapters.HTTPAdapter):
+
+        def send(self, request, **kwargs):
+            err = requests.packages.urllib3.exceptions.SSLError()
+            raise requests.exceptions.ConnectionError(err, request=request)
+
+    return ConnectionErrorAdapter()
 
 
 def test_https_logging_handler_requests_async_implementation():
-    handler = HTTPSHandler(async=True)
+    handler = HTTPSHandler()
     assert isinstance(handler.session, FuturesSession)
+
+
+def test_https_logging_handler_has_default_http_timeout():
+    handler = HTTPSHandler.from_django_settings(settings)
+    assert handler.http_timeout == 5
 
 
 @pytest.mark.parametrize('param', PARAM_NAMES.keys())
@@ -154,18 +166,39 @@ def test_https_logging_handler_skip_log(params, logger_name, expected):
     assert handler.skip_log(logger_name) is expected
 
 
-@pytest.mark.parametrize('message_type, async', [
-    ('logstash', False),
-    ('logstash', True),
-    ('splunk', False),
-    ('splunk', True),
-])
+def test_https_logging_handler_connection_error(connection_error_adapter,
+                                                dummy_log_record):
+    handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
+                           message_type='logstash',
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
+    handler.setFormatter(LogstashFormatter())
+    handler.session.mount('http://', connection_error_adapter)
+
+    buff = cStringIO.StringIO()
+    logging.getLogger('awx.main.utils.handlers').addHandler(
+        logging.StreamHandler(buff)
+    )
+
+    async_futures = handler.emit(dummy_log_record)
+    with pytest.raises(requests.exceptions.ConnectionError):
+        [future.result() for future in async_futures]
+    assert 'failed to emit log to external aggregator\nTraceback' in buff.getvalue()
+
+    # we should only log failures *periodically*, so causing *another*
+    # immediate failure shouldn't report a second ConnectionError
+    buff.truncate(0)
+    async_futures = handler.emit(dummy_log_record)
+    with pytest.raises(requests.exceptions.ConnectionError):
+        [future.result() for future in async_futures]
+    assert buff.getvalue() == ''
+
+
+@pytest.mark.parametrize('message_type', ['logstash', 'splunk'])
 def test_https_logging_handler_emit(http_adapter, dummy_log_record,
-                                    message_type, async):
+                                    message_type):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            message_type=message_type,
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -191,14 +224,12 @@ def test_https_logging_handler_emit(http_adapter, dummy_log_record,
     assert body['message'] == 'User joe logged in'
 
 
-@pytest.mark.parametrize('async', (True, False))
 def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
-                                                        dummy_log_record, async):
+                                                        dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            username='user', password='pass',
                            message_type='logstash',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)
@@ -209,13 +240,11 @@ def test_https_logging_handler_emit_logstash_with_creds(http_adapter,
     assert request.headers['Authorization'] == 'Basic %s' % base64.b64encode("user:pass")
 
 
-@pytest.mark.parametrize('async', (True, False))
 def test_https_logging_handler_emit_splunk_with_creds(http_adapter,
-                                                      dummy_log_record, async):
+                                                      dummy_log_record):
     handler = HTTPSHandler(host='127.0.0.1', enabled_flag=True,
                            password='pass', message_type='splunk',
-                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'],
-                           async=async)
+                           enabled_loggers=['awx', 'activity_stream', 'job_events', 'system_tracking'])
     handler.setFormatter(LogstashFormatter())
     handler.session.mount('http://', http_adapter)
     async_futures = handler.emit(dummy_log_record)

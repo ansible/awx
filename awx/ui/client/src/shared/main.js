@@ -29,13 +29,14 @@ import config from './config/main';
 import PromptDialog from './prompt-dialog';
 import directives from './directives';
 import features from './features/main';
+import orgAdminLookup from './org-admin-lookup/main';
 import 'angular-duration-format';
 
 export default
 angular.module('shared', [listGenerator.name,
         formGenerator.name,
         lookupModal.name,
-		smartSearch.name,
+        smartSearch.name,
         paginate.name,
         columnSort.name,
         filters.name,
@@ -55,6 +56,7 @@ angular.module('shared', [listGenerator.name,
         directives.name,
         filters.name,
         features.name,
+        orgAdminLookup.name,
         require('angular-cookies'),
         'angular-duration-format'
     ])

@@ -55,22 +55,6 @@ class BaseCallbackModule(CallbackBase):
         'playbook_on_no_hosts_remaining',
     ]
 
-    CENSOR_FIELD_WHITELIST = [
-        'msg',
-        'failed',
-        'changed',
-        'results',
-        'start',
-        'end',
-        'delta',
-        'cmd',
-        '_ansible_no_log',
-        'rc',
-        'failed_when_result',
-        'skipped',
-        'skip_reason',
-    ]
-
     def __init__(self):
         super(BaseCallbackModule, self).__init__()
         self.task_uuids = set()
@@ -84,6 +68,9 @@ class BaseCallbackModule(CallbackBase):
             task = event_data.pop('task', None)
         else:
             task = None
+
+        if event_data.get('res') and event_data['res'].get('_ansible_no_log', False):
+            event_data['res'] = {'censored': "the output has been hidden due to the fact that 'no_log: true' was specified for this result"}  # noqa
 
         with event_context.display_lock:
             try:
@@ -132,7 +119,9 @@ class BaseCallbackModule(CallbackBase):
             task_ctx['task_path'] = task.get_path()
         except AttributeError:
             pass
-        if not task.no_log:
+        if task.no_log:
+            task_ctx['task_args'] = "the output has been hidden due to the fact that 'no_log: true' was specified for this result"
+        else:
             task_args = ', '.join(('%s=%s' % a for a in task.args.items()))
             task_ctx['task_args'] = task_args
         if getattr(task, '_role', None):

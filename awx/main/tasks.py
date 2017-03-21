@@ -90,7 +90,7 @@ def celery_startup(conf=None, **kwargs):
 @worker_process_init.connect
 def task_set_logger_pre_run(*args, **kwargs):
     cache.close()
-    configure_external_logger(settings, async_flag=False, is_startup=False)
+    configure_external_logger(settings, is_startup=False)
 
 
 def _clear_cache_keys(set_of_keys):
@@ -1160,6 +1160,7 @@ class RunProjectUpdate(BaseTask):
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
         env = self.add_ansible_venv(env)
+        env['ANSIBLE_RETRY_FILES_ENABLED'] = str(False)
         env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.

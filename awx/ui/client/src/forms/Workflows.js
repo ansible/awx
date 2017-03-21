@@ -54,7 +54,8 @@ export default
                     dataContainer: 'body',
                     dataPlacement: 'right',
                     column: 1,
-                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate)'
+                    ngDisabled: '!(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) || !canEditOrg',
+                    awLookupWhen: '(workflow_job_template_obj.summary_fields.user_capabilities.edit || canAddWorkflowJobTemplate) && canEditOrg'
                 },
                 labels: {
                     label: i18n._('Labels'),

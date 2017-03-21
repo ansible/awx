@@ -128,4 +128,5 @@ wrapt==1.10.8             # via debtcollector, positional
 xmltodict==0.10.2         # via pywinrm
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via cryptography
+pip==8.1.2
+setuptools==23.0.0

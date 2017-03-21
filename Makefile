@@ -176,11 +176,11 @@ UI_RELEASE_FLAG_FILE = awx/ui/.release_built
 
 .PHONY: clean clean-tmp clean-venv rebase push requirements requirements_dev \
 	develop refresh adduser migrate dbchange dbshell runserver celeryd \
-	receiver test test_unit test_coverage coverage_html test_jenkins dev_build \
-	release_build release_clean sdist rpmtar mock-rpm mock-srpm rpm-sign \
-	deb deb-src debian debsign pbuilder reprepro setup_tarball \
-	virtualbox-ovf virtualbox-centos-7 virtualbox-centos-6 \
-	clean-bundle setup_bundle_tarball \
+	receiver test test_unit test_ansible test_coverage coverage_html \
+	test_jenkins dev_build release_build release_clean sdist rpmtar mock-rpm \
+	mock-srpm rpm-sign deb deb-src debian debsign pbuilder \
+	reprepro setup_tarball virtualbox-ovf virtualbox-centos-7 \
+	virtualbox-centos-6 clean-bundle setup_bundle_tarball \
 	ui-docker-machine ui-docker ui-release ui-devel \
 	ui-test ui-deps ui-test-ci ui-test-saucelabs jlaska
 
@@ -264,8 +264,8 @@ virtualenv_ansible:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/ansible" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/ansible && \
-			$(VENV_BASE)/ansible/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/ansible/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==23.0.0 && \
+			$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==8.1.2; \
 		fi; \
 	fi
 
@@ -276,42 +276,32 @@ virtualenv_tower:
 		fi; \
 		if [ ! -d "$(VENV_BASE)/tower" ]; then \
 			virtualenv --system-site-packages --setuptools $(VENV_BASE)/tower && \
-			$(VENV_BASE)/tower/bin/pip install -I setuptools==23.0.0 && \
-			$(VENV_BASE)/tower/bin/pip install -I pip==8.1.2; \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed setuptools==23.0.0 && \
+			$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed pip==8.1.2; \
 		fi; \
 	fi
 
 requirements_ansible: virtualenv_ansible
+	$(VENV_BASE)/ansible/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt
+	$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt
+
+requirements_ansible_dev:
 	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/ansible/bin/activate; \
-		$(VENV_BASE)/ansible/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ;\
-		$(VENV_BASE)/ansible/bin/pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
-	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements_ansible.txt ; \
-	pip uninstall --yes -r requirements/requirements_ansible_uninstall.txt; \
+		$(VENV_BASE)/ansible/bin/pip install pytest; \
 	fi
 
 # Install third-party requirements needed for Tower's environment.
 requirements_tower: virtualenv_tower
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ;\
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
-	else \
-	pip install --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt ; \
-	pip uninstall --yes -r requirements/requirements_tower_uninstall.txt; \
-	fi
+	$(VENV_BASE)/tower/bin/pip install $(PIP_OPTIONS) --ignore-installed --no-binary $(SRC_ONLY_PKGS) -r requirements/requirements.txt
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_tower_uninstall.txt
 
 requirements_tower_dev:
-	if [ "$(VENV_BASE)" ]; then \
-		. $(VENV_BASE)/tower/bin/activate; \
-		$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt; \
-		$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt; \
-	fi
+	$(VENV_BASE)/tower/bin/pip install -r requirements/requirements_dev.txt
+	$(VENV_BASE)/tower/bin/pip uninstall --yes -r requirements/requirements_dev_uninstall.txt
 
 requirements: requirements_ansible requirements_tower
 
-requirements_dev: requirements requirements_tower_dev
+requirements_dev: requirements requirements_tower_dev requirements_ansible_dev
 
 requirements_test: requirements
 
@@ -482,7 +472,7 @@ check: flake8 pep8 # pyflakes pylint
 
 TEST_DIRS ?= awx/main/tests awx/conf/tests awx/sso/tests
 # Run all API unit tests.
-test:
+test: test_ansible
 	@if [ "$(VENV_BASE)" ]; then \
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
@@ -493,6 +483,12 @@ test_unit:
 		. $(VENV_BASE)/tower/bin/activate; \
 	fi; \
 	py.test awx/main/tests/unit awx/conf/tests/unit awx/sso/tests/unit
+
+test_ansible:
+	@if [ "$(VENV_BASE)" ]; then \
+		. $(VENV_BASE)/ansible/bin/activate; \
+	fi; \
+	py.test awx/lib/tests -c awx/lib/tests/pytest.ini
 
 # Run all API unit tests with coverage enabled.
 test_coverage:
@@ -712,6 +708,30 @@ rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
+brewrpmtar: rpm-build/python-deps.tar.gz rpmtar
+
+rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
+	tar czf rpm-build/python-deps.tar.gz requirements/vendor
+
+requirements/vendor:
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements_ansible.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
+	pip download \
+	    --no-binary=:all: \
+	    --requirement=requirements/requirements_setup_requires.txt \
+	    --dest=$@ \
+	    --exists-action=i
+
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
 	   --define "tower_version $(VERSION)" --define "tower_release $(RELEASE)" $(SCL_DEFINES)
@@ -721,6 +741,8 @@ mock-srpm: rpmtar rpm-build/$(RPM_NVR).src.rpm
 	@echo "Artifacts:"
 	@echo rpm-build/$(RPM_NVR).src.rpm
 	@echo "#############################################"
+
+brew-srpm: brewrpmtar mock-srpm
 
 rpm-build/$(RPM_NVR).$(RPM_ARCH).rpm: rpm-build/$(RPM_NVR).src.rpm
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --rebuild rpm-build/$(RPM_NVR).src.rpm \

@@ -49,7 +49,8 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 required: true,
                 dataContainer: 'body',
                 dataPlacement: 'right',
-                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(project_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                awLookupWhen: '(project_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
             scm_type: {
                 label: i18n._('SCM Type'),
@@ -133,6 +134,11 @@ export default ['i18n', 'NotificationsList', function(i18n, NotificationsList) {
                 // apply a default search filter to show only scm credentials
                 search: {
                     kind: 'scm'
+                },
+                autopopulateLookup: false,
+                awRequiredWhen: {
+                    reqExpression: "credRequired",
+                    init: false
                 },
                 ngShow: "scm_type && scm_type.value !== 'manual'",
                 sourceModel: 'credential',

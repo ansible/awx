@@ -49,7 +49,8 @@ angular.module('InventoryFormDefinition', [])
                     reqExpression: "organizationrequired",
                     init: "true"
                 },
-                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd)'
+                ngDisabled: '!(inventory_obj.summary_fields.user_capabilities.edit || canAdd) || !canEditOrg',
+                awLookupWhen: '(inventory_obj.summary_fields.user_capabilities.edit || canAdd) && canEditOrg'
             },
             variables: {
                 label: i18n._('Variables'),

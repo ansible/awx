@@ -95,6 +95,7 @@ export default ['i18n', function(i18n) {
                 awToolTip: "{{ project.scm_schedule_tooltip }}",
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top',
+                ngShow: "project.summary_fields.user_capabilities.schedule"
             },
             edit: {
                 ngClick: "editProject(project.id)",

@@ -7,13 +7,17 @@
 import jobSubInvListController from './job-sub-inv-list.controller';
 
 export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$compile', 'InventoryList',
-    function(templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList) {
+    (templateUrl, qs, GetBasePath, GenerateList, $compile, InventoryList) => {
     return {
-        scope: {},
+        scope: {
+          selectedInventory: '='
+        },
         templateUrl: templateUrl('job-submission/lists/inventory/job-sub-inv-list'),
         controller: jobSubInvListController,
         restrict: 'E',
-        link: function(scope) {
+        link: scope => {
+            let toDestroy = [];
+
             scope.inventory_default_params = {
                 order_by: 'name',
                 page_size: 5
@@ -26,11 +30,11 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
             // Fire off the initial search
             qs.search(GetBasePath('inventory'), scope.inventory_default_params)
-                .then(function(res) {
+                .then(res => {
                     scope.inventory_dataset = res.data;
                     scope.inventories = scope.inventory_dataset.results;
 
-                    var invList = _.cloneDeep(InventoryList);
+                    let invList = _.cloneDeep(InventoryList);
                     let html = GenerateList.build({
                         list: invList,
                         input_type: 'radio',
@@ -41,11 +45,11 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
 
                     $('#job-submission-inventory-lookup').append($compile(html)(scope));
 
-                    scope.$watchCollection('inventories', function () {
-                        if(scope.selected_inventory) {
+                    toDestroy.push(scope.$watchCollection('selectedInventory', () => {
+                        if(scope.selectedInventory) {
                             // Loop across the inventories and see if one of them should be "checked"
-                            scope.inventories.forEach(function(row, i) {
-                                if (row.id === scope.selected_inventory.id) {
+                            scope.inventories.forEach((row, i) => {
+                                if (row.id === scope.selectedInventory.id) {
                                     scope.inventories[i].checked = 1;
                                 }
                                 else {
@@ -53,8 +57,10 @@ export default [ 'templateUrl', 'QuerySet', 'GetBasePath', 'generateList', '$com
                                 }
                             });
                         }
-                    });
+                    }));
                 });
+
+            scope.$on('$destroy', () => toDestroy.forEach(watcher => watcher()));
         }
     };
 }];

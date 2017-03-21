@@ -347,6 +347,20 @@ export default [ '$state','moment', '$timeout', '$window',
                                     if(!d.isStartNode) {
                                         let resourceName = (d.unifiedJobTemplate && d.unifiedJobTemplate.name) ? d.unifiedJobTemplate.name : "";
                                         if(resourceName && resourceName.length > maxNodeTextLength) {
+                                            // When the graph is initially rendered all the links come after the nodes (when you look at the dom).
+                                            // SVG components are painted in order of appearance.  There is no concept of z-index, only the order.
+                                            // As such, we need to move the nodes after the links so that when the tooltip renders it shows up on top
+                                            // of the links and not underneath them.  I tried rendering the links before the nodes but that lead to
+                                            // some weird link animation that I didn't care to try to fix.
+                                            svgGroup.selectAll("g.node").each(function() {
+                                                this.parentNode.appendChild(this);
+                                            });
+                                            // After the nodes have been properly placed after the links, we need to make sure that the node that
+                                            // the user is hovering over is at the very end of the list.  This way the tooltip will appear on top
+                                            // of all other nodes.
+                                            svgGroup.selectAll("g.node").sort(function (a) {
+                                                return (a.id !== d.id) ? -1 : 1;
+                                            });
                                             // Render the tooltip quickly in the dom and then remove.  This lets us know how big the tooltip is so that we can place
                                             // it properly on the workflow
                                             let tooltipDimensionChecker = $("<div style='visibility:hidden;font-size:12px;position:absolute;' class='WorkflowChart-tooltipContents'><span>" + resourceName + "</span></div>");

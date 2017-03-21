@@ -14,7 +14,7 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
     $log, $stateParams, InventoryForm, Rest, Alert, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
     ParseVariableString, Prompt, InitiatePlaybookRun,
-    TemplatesService, $state) {
+    TemplatesService, $state, OrgAdminLookup) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -77,6 +77,11 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
                 field_id: 'inventory_variables'
             });
 
+            OrgAdminLookup.checkForAdminAccess({organization: data.organization})
+            .then(function(canEditOrg){
+                $scope.canEditOrg = canEditOrg;
+            });
+
             $scope.inventory_obj = data;
             $scope.name = data.name;
 
@@ -132,5 +137,5 @@ export default ['$scope', '$rootScope', '$compile', '$location',
     '$log', '$stateParams', 'InventoryForm', 'Rest', 'Alert',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
     'ToJSON', 'ParseVariableString', 'Prompt', 'InitiatePlaybookRun',
-    'TemplatesService', '$state', InventoriesEdit,
+    'TemplatesService', '$state', 'OrgAdminLookup', InventoriesEdit,
 ];

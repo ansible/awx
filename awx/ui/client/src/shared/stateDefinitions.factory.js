@@ -150,7 +150,7 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                         url: url,
                         ncyBreadcrumb: {
                             [params.parent ? 'parent' : null]: `${params.parent}`,
-                            label: i18n.sprintf(i18n._("CREATE %s"), i18n._(`${form.breadcrumbName || form.name}`))
+                            label: i18n.sprintf(i18n._("CREATE %s"), i18n._(`${form.breadcrumbName || form.name.toUpperCase()}`))
                         },
                         views: {
                             'form': {
@@ -386,14 +386,15 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
 
             function buildNotificationState(field) {
                 let state,
-                    list = field.include ? $injector.get(field.include) : field;
+                    list = field.include ? $injector.get(field.include) : field,
+                    breadcrumbLabel = (field.iterator.replace('_', ' ') + 's').toUpperCase();
                 state = $stateExtender.buildDefinition({
                     searchPrefix: `${list.iterator}`,
                     name: `${formStateDefinition.name}.${list.iterator}s`,
                     url: `/${list.iterator}s`,
                     ncyBreadcrumb: {
                         parent: `${formStateDefinition.name}`,
-                        label: `${field.iterator}s`
+                        label: `${breadcrumbLabel}`
                     },
                     params: {
                         [list.iterator + '_search']: {
@@ -581,14 +582,14 @@ export default ['$injector', '$stateExtender', '$log', 'i18n', function($injecto
                 list = field.include ? $injector.get(field.include) : field,
                 // Added this line specifically for Completed Jobs but should be OK
                 // for all the rest of the related tabs
-                breadcrumbLabel = field.iterator.replace('_', ' '),
+                breadcrumbLabel = (field.iterator.replace('_', ' ') + 's').toUpperCase(),
                 stateConfig = {
                     searchPrefix: `${list.iterator}`,
                     name: `${formStateDefinition.name}.${list.iterator}s`,
                     url: `/${list.iterator}s`,
                     ncyBreadcrumb: {
                         parent: `${formStateDefinition.name}`,
-                        label: `${breadcrumbLabel}s`
+                        label: `${breadcrumbLabel}`
                     },
                     params: {
                         [list.iterator + '_search']: {

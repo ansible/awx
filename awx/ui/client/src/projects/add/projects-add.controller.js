@@ -19,6 +19,7 @@ export default ['$scope', '$location', '$stateParams', 'GenerateForm',
         init();
 
         function init() {
+            $scope.canEditOrg = true;
             Rest.setUrl(GetBasePath('projects'));
             Rest.options()
                 .success(function(data) {

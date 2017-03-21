@@ -12,7 +12,7 @@
 function adhocController($q, $scope, $location, $stateParams,
     $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
-    KindChange, CredentialList, Empty, Wait) {
+    KindChange, CredentialList, ParseTypeChange, Empty, Wait) {
 
     ClearScope();
 
@@ -162,6 +162,12 @@ function adhocController($q, $scope, $location, $stateParams,
 
     privateFn.initializeForm(id, urls, hostPattern);
 
+    // init codemirror
+    $scope.extra_vars = '---';
+    $scope.parseType = 'yaml';
+    $scope.envParseType = 'yaml';
+    ParseTypeChange({ scope: $scope, field_id: 'adhoc_extra_vars' , variable: "extra_vars"});
+
     $scope.formCancel = function(){
         $state.go('inventoryManage');
     };
@@ -199,6 +205,7 @@ function adhocController($q, $scope, $location, $stateParams,
             "module_args": "",
             "forks": 0,
             "verbosity": 0,
+            "extra_vars": "",
             "privilege_escalation": ""
         };
 
@@ -297,5 +304,5 @@ function adhocController($q, $scope, $location, $stateParams,
 export default ['$q', '$scope', '$location', '$stateParams',
     '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
      'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
-    'GetChoices', 'KindChange', 'CredentialList', 'Empty', 'Wait',
+    'GetChoices', 'KindChange', 'CredentialList', 'ParseTypeChange', 'Empty', 'Wait',
     adhocController];

@@ -23,6 +23,7 @@ export default ['$scope', '$rootScope', '$compile', '$location',
         init();
 
         function init() {
+            $scope.canEditOrg = true;
             // Load the list of options for Kind
             GetChoices({
                 scope: $scope,

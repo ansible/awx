@@ -28,6 +28,7 @@ export default ['$scope', '$rootScope', '$stateParams', 'TeamForm', 'GenerateFor
         init();
 
         function init() {
+            $scope.canEditOrg = true;
             // apply form definition's default field values
             GenerateForm.applyDefaults(form, $scope);
 
