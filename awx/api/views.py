@@ -3666,7 +3666,7 @@ class AdHocCommandRelaunch(GenericAPIView):
         data = {}
         for field in ('job_type', 'inventory_id', 'limit', 'credential_id',
                       'module_name', 'module_args', 'forks', 'verbosity',
-                      'become_enabled'):
+                      'extra_vars', 'become_enabled'):
             if field.endswith('_id'):
                 data[field[:-3]] = getattr(obj, field)
             else:
