@@ -92,6 +92,9 @@ class FieldLookupBackend(BaseFilterBackend):
         # sure user cannot query using objects he could not view.
         new_parts = []
 
+        # Store of all the fields used to detect repeats
+        field_set = set([])
+
         for name in parts[:-1]:
             # HACK: Make project and inventory source filtering by old field names work for backwards compatibility.
             if model._meta.object_name in ('Project', 'InventorySource'):
@@ -124,6 +127,10 @@ class FieldLookupBackend(BaseFilterBackend):
                     raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
                 elif getattr(field, '__prevent_search__', False):
                     raise PermissionDenied(_('Filtering on %s is not allowed.' % name))
+            if field in field_set:
+                # Field traversed twice, could create infinite JOINs, DoSing Tower
+                raise ParseError(_('Loops not allowed in filters, detected on field {}.').format(field.name))
+            field_set.add(field)
             model = getattr(field, 'related_model', None) or field.model
 
         if parts:
