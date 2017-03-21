@@ -490,13 +490,22 @@ input[type='radio']:checked:before {
     margin: 0 0 0 10px;
     padding-bottom: 5px;
 
-    .btn.btn-xs {
-        padding: 0px 10px;
+    label {
+        &:first-child {
+            border-right: none;
+        }
+        &:last-child {
+            border-left: none;
+        }
     }
 
     input {
         visibility: hidden;
         position: absolute;
+    }
+
+    .btn.btn-xs {
+        padding: 0px 10px;
     }
 }
 
