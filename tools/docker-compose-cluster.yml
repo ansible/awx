@@ -67,3 +67,7 @@ services:
     image: postgres:9.4.1
   memcached:
     image: memcached:alpine
+  logstash:
+    build:
+      context: ./docker-compose
+      dockerfile: Dockerfile-logstash
