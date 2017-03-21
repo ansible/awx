@@ -478,6 +478,28 @@ input[type='radio']:checked:before {
     width: 100%;
     display: block !important;
 }
+
+.Form-inputLabelContainer[for=variables] {
+    width: auto;
+    display: inline-block !important;
+}
+
+.FormToggle {}
+.FormToggle-container {
+    float: right;
+    margin: 0 0 0 10px;
+    padding-bottom: 5px;
+
+    .btn.btn-xs {
+        padding: 0px 10px;
+    }
+
+    input {
+        visibility: hidden;
+        position: absolute;
+    }
+}
+
 .Form-inputLabel{
     text-transform: uppercase;
     color: @default-interface-txt;
