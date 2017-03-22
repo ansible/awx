@@ -196,7 +196,8 @@ def test_job_reject_invalid_prompted_extra_vars(runtime_data, job_template_promp
         reverse('api:job_template_launch', args=[job_template.pk]),
         dict(extra_vars='{"unbalanced brackets":'), admin_user, expect=400)
 
-    assert response.data['extra_vars'] == ['Must be a valid JSON or YAML dictionary.']
+    assert 'extra_vars' in response.data
+    assert 'valid JSON or YAML' in str(response.data['extra_vars'][0])
 
 
 @pytest.mark.django_db
