@@ -12,13 +12,13 @@
 
 
 export default [
-    '$scope', '$compile', '$location', '$stateParams', 'ScheduleList', 'Rest',
-    'ProcessErrors', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Wait', 'rbacUiControlService',
-    'Find', 'ToggleSchedule', 'DeleteSchedule', 'GetChoices', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
-    function($scope, $compile, $location, $stateParams,
-        ScheduleList, Rest, ProcessErrors, ReturnToCaller, ClearScope,
-        GetBasePath, Wait, rbacUiControlService, Find,
-        ToggleSchedule, DeleteSchedule, GetChoices,
+    '$scope', '$location', '$stateParams', 'ScheduleList', 'Rest',
+    'ClearScope', 'rbacUiControlService',
+    'ToggleSchedule', 'DeleteSchedule', '$q', '$state', 'Dataset', 'ParentObject', 'UnifiedJobsOptions',
+    function($scope, $location, $stateParams,
+        ScheduleList, Rest, ClearScope,
+        rbacUiControlService,
+        ToggleSchedule, DeleteSchedule,
         $q, $state, Dataset, ParentObject, UnifiedJobsOptions) {
 
         ClearScope();

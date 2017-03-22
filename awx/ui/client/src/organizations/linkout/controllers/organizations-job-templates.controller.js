@@ -4,12 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$stateParams', 'Rest', 'ProcessErrors',
+export default ['$scope', '$rootScope',
+    '$stateParams', 'Rest', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', 'TemplateCopyService',
     '$state', 'OrgJobTemplateList', 'OrgJobTemplateDataset', 'QuerySet',
-    function($scope, $rootScope, $stateParams, Rest, ProcessErrors, GetBasePath,
-    InitiatePlaybookRun, Wait, TemplateCopyService, $state, OrgJobTemplateList,
-    Dataset, qs) {
+    function($scope, $rootScope,
+        $stateParams, Rest, ProcessErrors,
+        GetBasePath, InitiatePlaybookRun, Wait, TemplateCopyService,
+        $state, OrgJobTemplateList, Dataset, qs) {
+
         var list = OrgJobTemplateList,
             orgBase = GetBasePath('organizations');
 

@@ -5,8 +5,8 @@
  *************************************************/
 
  export default
-    ['$scope', '$state', '$stateParams', 'GroupManageService', 'GetBasePath', 'CopyMoveGroupList', 'group', 'Dataset',
-    function($scope, $state, $stateParams, GroupManageService, GetBasePath, CopyMoveGroupList, group, Dataset){
+    ['$scope', '$state', '$stateParams', 'GroupManageService', 'CopyMoveGroupList', 'group', 'Dataset',
+    function($scope, $state, $stateParams, GroupManageService, CopyMoveGroupList, group, Dataset){
         var list = CopyMoveGroupList;
 
         $scope.item = group;

@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$log', '$stateParams', 'Rest', 'Alert',
+export default ['$scope', '$rootScope', '$log', 'Rest', 'Alert',
     'ProjectList', 'Prompt', 'ProcessErrors', 'GetBasePath', 'ProjectUpdate',
     'Wait', 'Empty', 'Find', 'GetProjectIcon', 'GetProjectToolTip', '$filter',
     '$state', 'rbacUiControlService', 'Dataset', 'i18n', 'QuerySet',
-    function($scope, $rootScope, $log, $stateParams,Rest, Alert, ProjectList,
+    function($scope, $rootScope, $log, Rest, Alert, ProjectList,
     Prompt, ProcessErrors, GetBasePath, ProjectUpdate, Wait, Empty, Find,
     GetProjectIcon, GetProjectToolTip, $filter, $state, rbacUiControlService,
     Dataset, i18n, qs) {

@@ -14,8 +14,8 @@
  *
  */
 
-export default ['Wait', 'GetBasePath', 'ProcessErrors', 'Rest',
-    function(Wait, GetBasePath, ProcessErrors, Rest) {
+export default ['Wait', 'ProcessErrors', 'Rest',
+    function(Wait, ProcessErrors, Rest) {
     return function(params) {
         var scope = params.scope,
             notifier = params.notifier,

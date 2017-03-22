@@ -4,16 +4,16 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$stateParams', 'Rest',
+export default ['$scope', '$rootScope',
     'Alert','TemplateList', 'Prompt', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'InitiatePlaybookRun', 'Wait', '$state', '$filter',
     'Dataset', 'rbacUiControlService', 'TemplatesService','QuerySet',
-    'GetChoices', 'TemplateCopyService',
+    'TemplateCopyService',
     function(
-        $scope, $rootScope, $location, $stateParams, Rest, Alert,
+        $scope, $rootScope, Alert,
         TemplateList, Prompt, ClearScope, ProcessErrors, GetBasePath,
         InitiatePlaybookRun, Wait, $state, $filter, Dataset, rbacUiControlService, TemplatesService,
-        qs, GetChoices, TemplateCopyService
+        qs, TemplateCopyService
     ) {
         ClearScope();
 

@@ -139,13 +139,13 @@ import listGenerator from './list-generator/main';
 export default
 angular.module('FormGenerator', [GeneratorHelpers.name, 'Utilities', listGenerator.name])
 
-.factory('GenerateForm', ['$rootScope', '$location', '$compile', 'generateList',
+.factory('GenerateForm', ['$rootScope', '$compile', 'generateList',
     'Attr', 'Icon', 'Column',
-    'NavigationLink', 'HelpCollapse', 'DropDown', 'Empty', 'SelectIcon',
-    'Store', 'ActionButton', '$log', 'i18n',
-    function ($rootScope, $location, $compile, GenerateList,
+    'NavigationLink', 'HelpCollapse', 'Empty', 'SelectIcon',
+    'ActionButton', '$log', 'i18n',
+    function ($rootScope, $compile, GenerateList,
         Attr, Icon, Column, NavigationLink, HelpCollapse,
-        DropDown, Empty, SelectIcon, Store, ActionButton, $log, i18n) {
+        Empty, SelectIcon, ActionButton, $log, i18n) {
         return {
 
             setForm: function (form) { this.form = form; },

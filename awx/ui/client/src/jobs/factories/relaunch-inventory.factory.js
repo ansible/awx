@@ -1,5 +1,5 @@
 export default
-    function RelaunchInventory(Find, Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
+    function RelaunchInventory(Wait, Rest, InventoryUpdate, ProcessErrors, GetBasePath) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -25,6 +25,6 @@ export default
     }
 
 RelaunchInventory.$inject =
-    [   'Find', 'Wait', 'Rest',
+    [   'Wait', 'Rest',
         'InventoryUpdate', 'ProcessErrors', 'GetBasePath'
     ];

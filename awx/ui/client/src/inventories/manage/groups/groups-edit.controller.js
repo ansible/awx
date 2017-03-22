@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'ToggleNotification', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
+export default ['$state', '$stateParams', '$scope', 'ParseVariableString', 'rbacUiControlService', 'ToJSON',
     'ParseTypeChange', 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'groupData', 'inventorySourceData',
-    function($state, $stateParams, $scope, ToggleNotification, ParseVariableString, rbacUiControlService, ToJSON,
+    function($state, $stateParams, $scope, ParseVariableString, rbacUiControlService, ToJSON,
         ParseTypeChange, GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, groupData, inventorySourceData) {
 
         init();

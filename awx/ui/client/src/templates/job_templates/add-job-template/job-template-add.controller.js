@@ -5,16 +5,16 @@
  *************************************************/
 
  export default
-     [   '$filter', '$scope', '$rootScope', '$compile', '$location', '$log',
+     [   '$filter', '$scope',
         '$stateParams', 'JobTemplateForm', 'GenerateForm', 'Rest', 'Alert',
         'ProcessErrors', 'ClearScope', 'GetBasePath', 'md5Setup', 'ParseTypeChange', 'Wait',
-        'Empty', 'ToJSON', 'CallbackHelpInit', 'Prompt', 'GetChoices', '$state',
+        'Empty', 'ToJSON', 'CallbackHelpInit', 'GetChoices', '$state',
          'CreateSelect2', '$q', 'i18n',
          function(
-             $filter, $scope, $rootScope, $compile,
-             $location, $log, $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
+             $filter, $scope,
+             $stateParams, JobTemplateForm, GenerateForm, Rest, Alert,
              ProcessErrors, ClearScope, GetBasePath, md5Setup, ParseTypeChange, Wait,
-             Empty, ToJSON, CallbackHelpInit, Prompt, GetChoices,
+             Empty, ToJSON, CallbackHelpInit, GetChoices,
              $state, CreateSelect2, $q, i18n
          ) {
 

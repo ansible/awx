@@ -1,6 +1,6 @@
 export default
         function Init(DeleteSurvey, EditSurvey, AddSurvey, GenerateForm, SurveyQuestionForm, Wait, Alert,
-            GetBasePath, Rest, ProcessErrors, $compile, EditQuestion, CreateSelect2) {
+            GetBasePath, Rest, ProcessErrors, EditQuestion, CreateSelect2) {
         return function(params) {
             var scope = params.scope,
                 id = params.id,
@@ -525,7 +525,6 @@ Init.$inject =
         'GetBasePath',
         'Rest',
         'ProcessErrors',
-        '$compile',
         'editQuestion',
         'CreateSelect2'
     ];

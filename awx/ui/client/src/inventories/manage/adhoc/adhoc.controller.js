@@ -9,10 +9,10 @@
  * @name controllers.function:Adhoc
  * @description This controller controls the adhoc form creation, command launching and navigating to standard out after command has been succesfully ran.
 */
-function adhocController($q, $scope, $location, $stateParams,
+function adhocController($q, $scope, $stateParams,
     $state, CheckPasswords, PromptForPasswords, CreateLaunchDialog, CreateSelect2, adhocForm,
     GenerateForm, Rest, ProcessErrors, ClearScope, GetBasePath, GetChoices,
-    KindChange, CredentialList, ParseTypeChange, Empty, Wait) {
+    KindChange, Wait, ParseTypeChange) {
 
     ClearScope();
 
@@ -301,8 +301,8 @@ function adhocController($q, $scope, $location, $stateParams,
 
 }
 
-export default ['$q', '$scope', '$location', '$stateParams',
+export default ['$q', '$scope', '$stateParams',
     '$state', 'CheckPasswords', 'PromptForPasswords', 'CreateLaunchDialog', 'CreateSelect2',
      'adhocForm', 'GenerateForm', 'Rest', 'ProcessErrors', 'ClearScope', 'GetBasePath',
-    'GetChoices', 'KindChange', 'CredentialList', 'ParseTypeChange', 'Empty', 'Wait',
+    'GetChoices', 'KindChange', 'Wait', 'ParseTypeChange',
     adhocController];

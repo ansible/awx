@@ -7,8 +7,8 @@ import controller from './rbac-resource.controller';
 
 /* jshint unused: vars */
 export default ['templateUrl', '$state',
-    'Wait', 'addPermissionsUsersList', 'addPermissionsTeamsList',
-    function(templateUrl, $state, Wait, usersList, teamsList) {
+    'addPermissionsUsersList', 'addPermissionsTeamsList',
+    function(templateUrl, $state, usersList, teamsList) {
         return {
             restrict: 'E',
             scope: {

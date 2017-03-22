@@ -4,14 +4,14 @@
   * All Rights Reserved
   *************************************************/
 
- export default ['$rootScope', '$scope', 'Wait', 'generateList', 'NotificationTemplatesList',
-     'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state', 'GetChoices',
-     'Empty', 'Find', 'ngToast', '$compile', '$filter', 'Dataset', 'rbacUiControlService',
+ export default ['$scope', 'Wait', 'NotificationTemplatesList',
+     'GetBasePath', 'Rest', 'ProcessErrors', 'Prompt', '$state',
+     'ngToast', '$filter', 'Dataset', 'rbacUiControlService',
      'i18n',
      function(
-         $rootScope, $scope, Wait, GenerateList, NotificationTemplatesList,
-         GetBasePath, Rest, ProcessErrors, Prompt, $state, GetChoices,
-         Empty, Find, ngToast, $compile, $filter, Dataset, rbacUiControlService,
+         $scope, Wait, NotificationTemplatesList,
+         GetBasePath, Rest, ProcessErrors, Prompt, $state,
+         ngToast, $filter, Dataset, rbacUiControlService,
          i18n) {
 
          var defaultUrl = GetBasePath('notification_templates'),

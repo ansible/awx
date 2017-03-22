@@ -6,8 +6,8 @@
 
 
  export default
-    ['$stateParams', '$scope', '$state', 'Wait', 'jobResultsService', 'hostEvent',
-    function($stateParams, $scope, $state, Wait, jobResultsService, hostEvent){
+    ['$scope', '$state', 'jobResultsService', 'hostEvent',
+    function($scope, $state, jobResultsService, hostEvent){
 
         $scope.processEventStatus = jobResultsService.processEventStatus;
         $scope.processResults = function(value){

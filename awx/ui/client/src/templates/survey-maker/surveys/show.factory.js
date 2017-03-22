@@ -1,5 +1,5 @@
 export default
-    function ShowFactory(Wait, CreateDialog, Empty, $compile) {
+    function ShowFactory(Wait, CreateDialog, $compile) {
         return function(params) {
             // Set modal dimensions based on viewport width
 
@@ -47,6 +47,5 @@ export default
 ShowFactory.$inject =
     [   'Wait',
         'CreateDialog',
-        'Empty',
         '$compile'
     ];

@@ -1,5 +1,5 @@
 export default
-    function InventoryUpdate(PromptForPasswords, LaunchJob, Rest, GetBasePath, ProcessErrors, Alert, Wait) {
+    function InventoryUpdate(PromptForPasswords, LaunchJob, Rest, ProcessErrors, Alert, Wait) {
         return function (params) {
 
             var scope = params.scope,
@@ -69,7 +69,6 @@ InventoryUpdate.$inject =
     [   'PromptForPasswords',
         'LaunchJob',
         'Rest',
-        'GetBasePath',
         'ProcessErrors',
         'Alert',
         'Wait'

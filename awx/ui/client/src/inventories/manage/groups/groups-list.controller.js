@@ -4,12 +4,12 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'generateList', 'InventoryUpdate',
+    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryGroups', 'InventoryUpdate',
     'GroupManageService', 'GroupsCancelUpdate', 'ViewUpdateStatus', 'rbacUiControlService', 'GetBasePath',
-    'InventoryManageService', 'groupsUrl', 'GetSyncStatusMsg', 'GetHostsStatusMsg', 'groupsDataset', 'Find', 'QuerySet',
-    function($scope, $rootScope, $state, $stateParams, InventoryGroups, generateList, InventoryUpdate,
+    'GetSyncStatusMsg', 'GetHostsStatusMsg', 'groupsDataset', 'Find', 'QuerySet',
+    function($scope, $rootScope, $state, $stateParams, InventoryGroups, InventoryUpdate,
         GroupManageService, GroupsCancelUpdate, ViewUpdateStatus, rbacUiControlService, GetBasePath,
-        InventoryManageService, groupsUrl, GetSyncStatusMsg, GetHostsStatusMsg, groupsDataset, Find, qs){
+        GetSyncStatusMsg, GetHostsStatusMsg, groupsDataset, Find, qs){
 
         let list = InventoryGroups;
 

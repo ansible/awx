@@ -5,11 +5,11 @@
  *************************************************/
 
 
-export default ['$stateParams', '$scope', '$rootScope', '$location',
-    '$log', '$compile', 'Rest', 'OrganizationList', 'Alert', 'Prompt', 'ClearScope',
+export default ['$stateParams', '$scope', '$rootScope',
+    'Rest', 'OrganizationList', 'Prompt', 'ClearScope',
     'ProcessErrors', 'GetBasePath', 'Wait', '$state', 'rbacUiControlService', '$filter', 'Dataset', 'i18n',
-    function($stateParams, $scope, $rootScope, $location,
-        $log, $compile, Rest, OrganizationList, Alert, Prompt, ClearScope,
+    function($stateParams, $scope, $rootScope,
+        Rest, OrganizationList, Prompt, ClearScope,
         ProcessErrors, GetBasePath, Wait, $state, rbacUiControlService, $filter, Dataset, i18n) {
 
         ClearScope();

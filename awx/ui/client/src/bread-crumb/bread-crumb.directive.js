@@ -1,6 +1,6 @@
 export default
-    ['templateUrl', '$state', 'FeaturesService', 'ProcessErrors','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n',
-    function(templateUrl, $state, FeaturesService, ProcessErrors, $rootScope, Store, Empty, $window, BreadCrumbService, i18n) {
+    ['templateUrl', '$state', 'FeaturesService','$rootScope', 'Store', 'Empty', '$window', 'BreadCrumbService', 'i18n',
+    function(templateUrl, $state, FeaturesService, $rootScope, Store, Empty, $window, BreadCrumbService, i18n) {
         return {
             restrict: 'E',
             templateUrl: templateUrl('bread-crumb/bread-crumb'),
