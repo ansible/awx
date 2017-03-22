@@ -7,10 +7,10 @@
 import {N_} from "../i18n";
 
 export default
-    ['Wait', '$state', '$scope', '$rootScope', '$location', 'GetBasePath',
-    'Rest', 'ProcessErrors', 'CheckLicense', 'moment','$window',
+    ['Wait', '$state', '$scope', '$rootScope',
+    'ProcessErrors', 'CheckLicense', 'moment','$window',
     'ConfigService', 'FeaturesService', 'pendoService', 'i18n',
-    function( Wait, $state, $scope, $rootScope, $location, GetBasePath, Rest,
+    function( Wait, $state, $scope, $rootScope,
         ProcessErrors, CheckLicense, moment, $window, ConfigService,
         FeaturesService, pendoService, i18n){
 

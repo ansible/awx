@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
  export default
-    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'generateList', 'InventoryManageService', 'HostManageService',
+    ['$scope', '$rootScope', '$state', '$stateParams', 'InventoryHosts', 'HostManageService',
      'hostsUrl', 'SetStatus', 'Prompt', 'Wait', 'inventoryData', '$filter', 'hostsDataset', 'GetBasePath', 'rbacUiControlService', 'QuerySet',
-    function($scope, $rootScope, $state, $stateParams, InventoryHosts, generateList, InventoryManageService, HostManageService,
+    function($scope, $rootScope, $state, $stateParams, InventoryHosts, HostManageService,
      hostsUrl, SetStatus, Prompt, Wait, inventoryData, $filter, hostsDataset, GetBasePath, rbacUiControlService, qs){
         var list = InventoryHosts;
 

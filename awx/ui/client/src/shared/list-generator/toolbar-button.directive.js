@@ -4,7 +4,7 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$compile', 'Attr', 'SelectIcon', function($compile, Attr, SelectIcon) {
+export default ['SelectIcon', function(SelectIcon) {
     return {
         restrict: 'A',
         scope: {},

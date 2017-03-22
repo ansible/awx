@@ -10,11 +10,10 @@
  * @description This controller's for the Inventory page
  */
 
-function InventoriesEdit($scope, $rootScope, $compile, $location,
-    $log, $stateParams, InventoryForm, Rest, Alert, ProcessErrors,
+function InventoriesEdit($scope, $location,
+    $stateParams, InventoryForm, Rest, ProcessErrors,
     ClearScope, GetBasePath, ParseTypeChange, Wait, ToJSON,
-    ParseVariableString, Prompt, InitiatePlaybookRun,
-    TemplatesService, $state, OrgAdminLookup) {
+    ParseVariableString, $state, OrgAdminLookup) {
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('inventory'),
@@ -133,9 +132,9 @@ function InventoriesEdit($scope, $rootScope, $compile, $location,
 
 }
 
-export default ['$scope', '$rootScope', '$compile', '$location',
-    '$log', '$stateParams', 'InventoryForm', 'Rest', 'Alert',
+export default ['$scope', '$location',
+    '$stateParams', 'InventoryForm', 'Rest',
     'ProcessErrors', 'ClearScope', 'GetBasePath', 'ParseTypeChange', 'Wait',
-    'ToJSON', 'ParseVariableString', 'Prompt', 'InitiatePlaybookRun',
-    'TemplatesService', '$state', 'OrgAdminLookup', InventoriesEdit,
+    'ToJSON', 'ParseVariableString',
+    '$state', 'OrgAdminLookup', InventoriesEdit,
 ];

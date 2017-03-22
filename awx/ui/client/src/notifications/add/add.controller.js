@@ -4,13 +4,13 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', 'Rest', 'Wait', 'NotificationsFormObject',
-    'ProcessErrors', 'GetBasePath', 'Empty', 'Alert',
+export default ['Rest', 'Wait', 'NotificationsFormObject',
+    'ProcessErrors', 'GetBasePath', 'Alert',
     'GenerateForm', '$scope', '$state', 'CreateSelect2', 'GetChoices',
     'NotificationsTypeChange', 'ParseTypeChange',
     function(
-        $rootScope, Rest, Wait, NotificationsFormObject,
-        ProcessErrors, GetBasePath, Empty, Alert,
+        Rest, Wait, NotificationsFormObject,
+        ProcessErrors, GetBasePath, Alert,
         GenerateForm, $scope, $state, CreateSelect2, GetChoices,
         NotificationsTypeChange, ParseTypeChange
     ) {

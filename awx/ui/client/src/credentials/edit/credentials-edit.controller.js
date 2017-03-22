@@ -4,15 +4,15 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$rootScope', '$location', '$stateParams',
-    'CredentialForm', 'Rest', 'ProcessErrors', 'ClearScope', 'Prompt',
-    'GetBasePath', 'GetChoices', 'KindChange', 'BecomeMethodChange', 'Empty',
-    'OwnerChange', 'Wait', '$state', 'CreateSelect2',
-    'Authorization', 'i18n', 'CredentialFormSave',
-    function($scope, $rootScope, $location, $stateParams, CredentialForm, Rest,
-    ProcessErrors, ClearScope, Prompt, GetBasePath, GetChoices, KindChange,
-    BecomeMethodChange, Empty, OwnerChange, Wait, $state,
-    CreateSelect2, Authorization, i18n, CredentialFormSave) {
+export default ['$scope', '$rootScope', '$location',
+    '$stateParams', 'CredentialForm', 'Rest',
+    'ProcessErrors', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
+    'KindChange', 'BecomeMethodChange', 'Empty', 'OwnerChange',
+    'CredentialFormSave', 'Wait', '$state', 'CreateSelect2', 'Authorization', 'i18n',
+    function($scope, $rootScope, $location,
+    $stateParams, CredentialForm, Rest, ProcessErrors, ClearScope, Prompt,
+    GetBasePath, GetChoices, KindChange, BecomeMethodChange, Empty, OwnerChange, CredentialFormSave, Wait,
+    $state, CreateSelect2, Authorization, i18n) {
 
         ClearScope();
 

@@ -5,19 +5,15 @@
  *************************************************/
 
  export default
-    [   '$rootScope',
-        '$compile',
-        '$location' ,
-        '$window',
-        'Wait',
+    [   '$window',
         'adjustGraphSize',
-        'jobStatusGraphData',
         'templateUrl',
         'i18n',
+        'jobStatusGraphData',
         JobStatusGraph
     ];
 
-function JobStatusGraph($rootScope, $compile , $location, $window, Wait, adjustGraphSize, graphDataService, templateUrl, i18n) {
+function JobStatusGraph($window, adjustGraphSize, templateUrl, i18n, graphDataService) {
             return {
                 restrict: 'E',
                 scope: {

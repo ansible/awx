@@ -4,9 +4,9 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$state', '$stateParams', '$scope', 'GroupForm', 'CredentialList', 'ParseTypeChange', 'GenerateForm', 'inventoryData',
+export default ['$state', '$stateParams', '$scope', 'GroupForm', 'ParseTypeChange', 'GenerateForm', 'inventoryData',
                 'GroupManageService', 'GetChoices', 'GetBasePath', 'CreateSelect2', 'GetSourceTypeOptions', 'rbacUiControlService', 'ToJSON',
-                function($state, $stateParams, $scope, GroupForm, CredentialList,  ParseTypeChange, GenerateForm, inventoryData,
+                function($state, $stateParams, $scope, GroupForm,  ParseTypeChange, GenerateForm, inventoryData,
                          GroupManageService, GetChoices, GetBasePath, CreateSelect2, GetSourceTypeOptions, rbacUiControlService, ToJSON) {
 
         let form = GroupForm();

@@ -1,5 +1,5 @@
 export default
-    function EditQuestion(GetBasePath, Rest, Wait, ProcessErrors, $compile, GenerateForm, SurveyQuestionForm, CreateSelect2) {
+    function EditQuestion(GenerateForm, CreateSelect2, SurveyQuestionForm) {
         return function(params) {
 
             var scope = params.scope,
@@ -94,12 +94,7 @@ export default
     }
 
 EditQuestion.$inject =
-    [   'GetBasePath',
-        'Rest',
-        'Wait',
-        'ProcessErrors',
-        '$compile',
-        'GenerateForm',
-        'questionDefinitionForm',
-        'CreateSelect2'
+    [   'GenerateForm',
+        'CreateSelect2',
+        'questionDefinitionForm'
     ];

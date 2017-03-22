@@ -10,11 +10,11 @@
  * @description This controller's for the jobs page
  */
 
- export default ['$state', '$rootScope', '$log', '$scope', '$compile', '$stateParams',
-     'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob', 'AllJobsList', 'ScheduledJobsList',
+ export default ['$state', '$rootScope', '$scope', '$stateParams',
+     'ClearScope', 'Find', 'DeleteJob', 'RelaunchJob',
      'GetBasePath', 'Dataset', 'QuerySet', 'ListDefinition', '$interpolate',
-     function($state, $rootScope, $log, $scope, $compile, $stateParams,
-         ClearScope, Find, DeleteJob, RelaunchJob, AllJobsList, ScheduledJobsList,
+     function($state, $rootScope, $scope, $stateParams,
+         ClearScope, Find, DeleteJob, RelaunchJob,
          GetBasePath, Dataset, qs, ListDefinition, $interpolate) {
 
     ClearScope();

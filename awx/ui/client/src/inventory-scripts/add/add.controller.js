@@ -4,11 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', 'Rest', 'Wait',
-    'InventoryScriptsForm', 'ProcessErrors', 'GetBasePath', 'Empty',
+export default ['Rest', 'Wait',
+    'InventoryScriptsForm', 'ProcessErrors', 'GetBasePath',
     'GenerateForm',  '$scope', '$state', 'Alert',
-    function($rootScope, Rest, Wait,
-        InventoryScriptsForm, ProcessErrors, GetBasePath, Empty,
+    function(Rest, Wait,
+        InventoryScriptsForm, ProcessErrors, GetBasePath,
         GenerateForm, $scope, $state, Alert
     ) {
         var form = InventoryScriptsForm,

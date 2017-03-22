@@ -8,10 +8,9 @@ import dedupeVersions from './dedupe-versions';
 
 export default
     [   'factScanDataService',
-        'getModuleOptions',
         'resolveEmptyVersions',
         'lodashAsPromised',
-        function(factScanDataService, getModuleOptions, resolveEmptyVersions, _) {
+        function(factScanDataService, resolveEmptyVersions, _) {
             return function(hostIds, moduleName, leftDate, rightDate) {
 
                 var singleHostMode = false;

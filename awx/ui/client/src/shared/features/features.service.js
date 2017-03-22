@@ -4,10 +4,8 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$rootScope', 'Rest', 'GetBasePath', 'ProcessErrors', '$http',
-    '$q', 'ConfigService',
-function ($rootScope, Rest, GetBasePath, ProcessErrors, $http, $q,
-    ConfigService) {
+export default ['$rootScope', 'ConfigService',
+function ($rootScope, ConfigService) {
     return {
             get: function(){
                 if (_.isEmpty($rootScope.features)) {

@@ -40,8 +40,8 @@
  */
 
  export default
-     function AdhocRun($location, $stateParams, LaunchJob, PromptForPasswords,
-         Rest, GetBasePath, Alert, ProcessErrors, Wait, Empty, CreateLaunchDialog, $state) {
+     function AdhocRun($location, PromptForPasswords,
+         Rest, GetBasePath, ProcessErrors, Wait, Empty, CreateLaunchDialog, $state) {
          return function(params) {
              var id = params.project_id,
                  scope = params.scope.$new(),
@@ -156,7 +156,7 @@
      }
 
  AdhocRun.$inject =
-     [   '$location','$stateParams', 'LaunchJob',
-         'PromptForPasswords', 'Rest', 'GetBasePath', 'Alert', 'ProcessErrors',
+     [   '$location',
+         'PromptForPasswords', 'Rest', 'GetBasePath', 'ProcessErrors',
          'Wait', 'Empty', 'CreateLaunchDialog', '$state'
      ];

@@ -4,10 +4,11 @@
  * All Rights Reserved
  *************************************************/
 
-export default ['$scope', '$stateParams', 'OrgTeamList', 'Rest',
-    'OrgTeamsDataset', 'GetBasePath', 'Wait', '$state',
-    function($scope, $stateParams, OrgTeamList, Rest, Dataset, GetBasePath,
-    Wait, $state) {
+export default ['$scope', '$stateParams', 'OrgTeamList', 'Rest', 'OrgTeamsDataset',
+    'GetBasePath', '$state',
+    function($scope, $stateParams, OrgTeamList, Rest, Dataset,
+    GetBasePath, $state) {
+
         var list = OrgTeamList,
             orgBase = GetBasePath('organizations');
 

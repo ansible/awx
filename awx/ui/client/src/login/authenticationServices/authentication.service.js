@@ -15,9 +15,9 @@
  */
 
 export default
-    ['$http', '$rootScope', '$location', '$cookies', 'GetBasePath', 'Store', '$q',
+    ['$http', '$rootScope', '$cookies', 'GetBasePath', 'Store', '$q',
     '$injector',
-    function ($http, $rootScope, $location, $cookies, GetBasePath, Store, $q,
+    function ($http, $rootScope, $cookies, GetBasePath, Store, $q,
     $injector) {
         return {
             setToken: function (token, expires) {

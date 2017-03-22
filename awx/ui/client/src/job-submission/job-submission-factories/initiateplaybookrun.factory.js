@@ -1,5 +1,5 @@
 export default
-    function InitiatePlaybookRun($location, GetBasePath, Empty, $compile) {
+    function InitiatePlaybookRun($compile) {
 
             // This factory drops the submit-job directive into the dom which
             // either launches the job (when no user input is needed) or shows
@@ -19,8 +19,5 @@ export default
         }
 
 InitiatePlaybookRun.$inject =
-    [   '$location',
-        'GetBasePath',
-        'Empty',
-        '$compile'
+    [   '$compile'
     ];

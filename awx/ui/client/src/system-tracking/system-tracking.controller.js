@@ -9,8 +9,7 @@ import {compareFacts} from './compare-facts/main';
 import {formatFactForDisplay} from './format-facts';
 import FactTemplate from './compare-facts/fact-template';
 
-function controller($rootScope,
-                    $scope,
+function controller($scope,
                     $stateParams,
                     $location,
                     $q,
@@ -321,8 +320,7 @@ function controller($rootScope,
 }
 
 export default
-    [   '$rootScope',
-        '$scope',
+    [   '$scope',
         '$stateParams',
         '$location',
         '$q',

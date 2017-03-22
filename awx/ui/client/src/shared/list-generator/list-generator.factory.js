@@ -97,9 +97,9 @@
 
 import { templateUrl } from '../../shared/template-url/template-url.factory';
 
-export default ['$location', '$compile', '$rootScope', 'Attr', 'Icon',
-    'Column', 'DropDown', 'NavigationLink', 'SelectIcon', 'ActionButton', 'i18n',
-    function($location, $compile, $rootScope, Attr, Icon, Column, DropDown, NavigationLink,
+export default ['$compile', 'Attr', 'Icon',
+    'Column', 'DropDown', 'SelectIcon', 'ActionButton', 'i18n',
+    function($compile, Attr, Icon, Column, DropDown,
         SelectIcon, ActionButton, i18n) {
         return {
 

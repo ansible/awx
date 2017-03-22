@@ -11,8 +11,8 @@
  * Controller for handling permissions adding
  */
 
-export default ['$rootScope', '$scope', '$state', 'i18n', 'CreateSelect2', 'GetBasePath', 'Rest', '$q', 'Wait', 'ProcessErrors',
-function(rootScope, scope, $state, i18n, CreateSelect2, GetBasePath, Rest, $q, Wait, ProcessErrors) {
+export default ['$scope', '$state', 'i18n', 'CreateSelect2', 'Rest', '$q', 'Wait', 'ProcessErrors',
+function(scope, $state, i18n, CreateSelect2, Rest, $q, Wait, ProcessErrors) {
 
     init();
 

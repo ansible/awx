@@ -5,10 +5,10 @@
  *************************************************/
 
 /* jshint unused: vars */
-export default ['$compile','templateUrl', 'i18n', 'generateList',
+export default ['$compile', 'i18n', 'generateList',
     'ProjectList', 'TemplateList', 'InventoryList', 'CredentialList',
     'OrganizationList',
-    function($compile, templateUrl, i18n, generateList,
+    function($compile, i18n, generateList,
     ProjectList, TemplateList, InventoryList, CredentialList,
     OrganizationList) {
         return {
