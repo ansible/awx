@@ -1216,7 +1216,7 @@ class HostSerializer(BaseSerializerWithVariables):
                     vars_dict['ansible_ssh_port'] = port
                     attrs['variables'] = yaml.dump(vars_dict)
                 except (yaml.YAMLError, TypeError):
-                    raise serializers.ValidationError(_('Must be valid JSON or YAML.'))
+                    raise serializers.ValidationError({'variables': _('Must be valid JSON or YAML.')})
 
         return super(HostSerializer, self).validate(attrs)
 
@@ -2693,7 +2693,7 @@ class JobLaunchSerializer(BaseSerializer):
                     extra_vars = yaml.safe_load(extra_vars)
                     assert isinstance(extra_vars, dict)
                 except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = _('Must be a valid JSON or YAML dictionary.')
+                    errors['extra_vars'] = _('Must be valid JSON or YAML.')
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
@@ -2764,7 +2764,7 @@ class WorkflowJobLaunchSerializer(BaseSerializer):
                     extra_vars = yaml.safe_load(extra_vars)
                     assert isinstance(extra_vars, dict)
                 except (yaml.YAMLError, TypeError, AttributeError, AssertionError):
-                    errors['extra_vars'] = 'Must be a valid JSON or YAML dictionary.'
+                    errors['extra_vars'] = _('Must be valid JSON or YAML.')
 
         if not isinstance(extra_vars, dict):
             extra_vars = {}
