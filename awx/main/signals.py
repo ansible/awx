@@ -181,7 +181,7 @@ def rbac_activity_stream(instance, sender, **kwargs):
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
                 # don't record implicit creation / parents in activity stream
-                if role is not None and is_implicit_parent(role, instance):
+                if role is not None and is_implicit_parent(parent_role=role, child_role=instance):
                     return
             else:
                 role = instance
