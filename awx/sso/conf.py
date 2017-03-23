@@ -531,7 +531,7 @@ register(
     default='',
     label=_('TACACS+ Server'),
     help_text=_('Hostname of TACACS+ server.'),
-    category=_('TACACSPLUS'),
+    category=_('TACACS+'),
     category_slug='tacacsplus',
     feature_required='enterprise_auth',
 )
@@ -544,19 +544,20 @@ register(
     default=49,
     label=_('TACACS+ Port'),
     help_text=_('Port number of TACACS+ server.'),
-    category=_('TACACSPLUS'),
+    category=_('TACACS+'),
     category_slug='tacacsplus',
     feature_required='enterprise_auth',
 )
 
 register(
     'TACACSPLUS_SECRET',
-    field_class=fields.TACACSPLUSSecretField,
+    field_class=fields.CharField,
     allow_blank=True,
     default='',
+    validators=[validate_tacacsplus_disallow_nonascii],
     label=_('TACACS+ Secret'),
     help_text=_('Shared secret for authenticating to TACACS+ server.'),
-    category=_('TACACSPLUS'),
+    category=_('TACACS+'),
     category_slug='tacacsplus',
     feature_required='enterprise_auth',
     encrypted=True,
@@ -568,8 +569,8 @@ register(
     min_value=0,
     default=5,
     label=_('TACACS+ Auth Session Timeout'),
-    help_text=_('TACACS+ session timeout value in seconds. Set to 0 to cancel timeout.'),
-    category=_('TACACSPLUS'),
+    help_text=_('TACACS+ session timeout value in seconds, 0 disables timeout.'),
+    category=_('TACACS+'),
     category_slug='tacacsplus',
     feature_required='enterprise_auth',
 )
@@ -581,7 +582,7 @@ register(
     default='ascii',
     label=_('TACACS+ Authentication Protocol'),
     help_text=_('Choose the authentication protocol used by TACACS+ client.'),
-    category=_('TACACSPLUS'),
+    category=_('TACACS+'),
     category_slug='tacacsplus',
     feature_required='enterprise_auth',
 )

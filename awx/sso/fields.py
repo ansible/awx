@@ -470,11 +470,6 @@ class RADIUSSecretField(fields.CharField):
         return value
 
 
-class TACACSPLUSSecretField(RADIUSSecretField):
-
-    pass
-
-
 class SocialMapStringRegexField(fields.CharField):
 
     def to_representation(self, value):

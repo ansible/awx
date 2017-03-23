@@ -286,6 +286,7 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = (
     'awx.sso.backends.LDAPBackend',
     'awx.sso.backends.RADIUSBackend',
+    'awx.sso.backends.TACACSPlusBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.github.GithubOAuth2',
     'social.backends.github.GithubOrganizationOAuth2',

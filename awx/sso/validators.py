@@ -10,7 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 
 __all__ = ['validate_ldap_dn', 'validate_ldap_dn_with_user',
            'validate_ldap_bind_dn', 'validate_ldap_filter',
-           'validate_ldap_filter_with_user']
+           'validate_ldap_filter_with_user',
+           'validate_tacacsplus_disallow_nonascii']
 
 
 def validate_ldap_dn(value, with_user=False):
@@ -58,3 +59,8 @@ def validate_ldap_filter(value, with_user=False):
 
 def validate_ldap_filter_with_user(value):
     validate_ldap_filter(value, with_user=True)
+
+
+def validate_tacacsplus_disallow_nonascii(value):
+    if not all(ord(c) < 128 for c in value):
+        raise ValidationError(_('TACACS+ secret does not allow non-ascii characters'))
