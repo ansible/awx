@@ -690,18 +690,23 @@ setup_bundle_tarball: setup-bundle-build setup-bundle-build/$(OFFLINE_TAR_FILE) 
 rpm-build:
 	mkdir -p $@
 
-rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE)
+rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_TAR_FILE)
 	cp packaging/rpm/$(NAME).spec rpm-build/
 	cp packaging/rpm/tower.te rpm-build/
 	cp packaging/rpm/tower.fc rpm-build/
 	cp packaging/rpm/$(NAME).sysconfig rpm-build/
 	cp packaging/remove_tower_source.py rpm-build/
 	cp packaging/bytecompile.sh rpm-build/
+	cp tar-build/$(SETUP_TAR_FILE) rpm-build/
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	  (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
 	  (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
 	  (cd dist/ && tar czf ../rpm-build/$(SDIST_TAR_FILE) $(NAME)-$(VERSION)) ; \
 	  ln -sf $(SDIST_TAR_FILE) rpm-build/$(NAME)-$(VERSION).tar.gz ; \
+	  (cd tar-build/ && tar zxf $(SETUP_TAR_FILE)) ; \
+	  (cd tar-build/ && mv $(NAME)-setup-$(VERSION)-$(BUILD) $(NAME)-setup-$(VERSION)) ; \
+	  (cd tar-build/ && tar czf ../rpm-build/$(SETUP_TAR_FILE) $(NAME)-setup-$(VERSION)) ; \
+	  ln -sf $(SETUP_TAR_FILE) rpm-build/$(NAME)-setup-$(VERSION).tar.gz ; \
 	else \
 	  cp -a dist/$(SDIST_TAR_FILE) rpm-build/ ; \
 	fi
