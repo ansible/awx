@@ -21,21 +21,22 @@
 	right: 35px;
 	display: flex;
 	align-items: center;
-  	justify-content: center;
+ 	justify-content: center;
 
-    .PortalMode-filter > button {
-        &:first-child {
-            border-right: none;
-        }
-        &:last-child {
-            border-left: none;
-        }
+  .btn.btn-xs {
+      padding: 1px 10px;
+  }
+}
+
+.PortalMode-filterButton--edges {
+    &:first-child {
+        border-right: none;
     }
-
-    .btn.btn-xs {
-        padding: 1px 10px;
+    &:last-child {
+        border-left: none;
     }
 }
+
 .PortalMode-refresh {
 	margin-left: 10px;
 }
