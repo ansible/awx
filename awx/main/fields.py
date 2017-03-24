@@ -111,7 +111,11 @@ def is_implicit_parent(parent_role, child_role):
 
     # Check to see if the role matches any in the implicit parents list
     for implicit_parent_path in implicit_parents:
-        if '.' in implicit_parent_path:
+        if implicit_parent_path.startswith('singleton:'):
+            # Singleton role isn't an object role, `singleton_name` uniquely identifies it
+            if parent_role.is_singleton() and parent_role.singleton_name == implicit_parent_path[10:]:
+                return True
+        else:
             # Walk over multiple related objects to obtain the implicit parent
             related_obj = child_role.content_object
             for next_field in implicit_parent_path.split('.'):
@@ -119,14 +123,6 @@ def is_implicit_parent(parent_role, child_role):
                 if related_obj is None:
                     break
             if related_obj and parent_role == related_obj:
-                return True
-        elif implicit_parent_path.startswith('singleton:'):
-            # Singleton role isn't an object role, `singleton_name` uniquely identifies it
-            if parent_role.is_singleton() and parent_role.singleton_name == implicit_parent_path[10:]:
-                return True
-        else:
-            # Direct field on the content object
-            if parent_role == getattr(child_role.content_object, implicit_parent_path):
                 return True
     return False
 
