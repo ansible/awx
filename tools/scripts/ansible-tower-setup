@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec /var/lib/awx/setup/setup.sh "$@"
