@@ -27,7 +27,8 @@
             var container = document.getElementById(el);
             var editor = CodeMirror.fromTextArea(container, {  // jshint ignore:line
                 lineNumbers: true,
-                mode: mode
+                mode: mode,
+                readOnly: true
             });
             editor.setSize("100%", 200);
             editor.getDoc().setValue(data);
