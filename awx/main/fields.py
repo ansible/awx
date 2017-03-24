@@ -96,6 +96,37 @@ def resolve_role_field(obj, field):
     return ret
 
 
+def is_implicit_parent(parent_role, child_role):
+    '''
+    Determine if the parent_role is an implicit parent as defined by
+    the model definition. This does not include any role parents that
+    might have been set by the user.
+    '''
+    # Get the list of implicit parents that were defined at the class level.
+    implicit_parents = getattr(
+        child_role.content_object.__class__, child_role.role_field
+    ).field.parent_role
+    if type(implicit_parents) != list:
+        implicit_parents = [implicit_parents]
+
+    # Check to see if the role matches any in the implicit parents list
+    for implicit_parent_path in implicit_parents:
+        if implicit_parent_path.startswith('singleton:'):
+            # Singleton role isn't an object role, `singleton_name` uniquely identifies it
+            if parent_role.is_singleton() and parent_role.singleton_name == implicit_parent_path[10:]:
+                return True
+        else:
+            # Walk over multiple related objects to obtain the implicit parent
+            related_obj = child_role.content_object
+            for next_field in implicit_parent_path.split('.'):
+                related_obj = getattr(related_obj, next_field)
+                if related_obj is None:
+                    break
+            if related_obj and parent_role == related_obj:
+                return True
+    return False
+
+
 class ImplicitRoleDescriptor(ReverseSingleRelatedObjectDescriptor):
     pass
 

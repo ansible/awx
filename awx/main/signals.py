@@ -22,6 +22,7 @@ from awx.api.serializers import * # noqa
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 from awx.main.utils import ignore_inventory_computed_fields, ignore_inventory_group_removal, _inventory_updates
 from awx.main.tasks import update_inventory_computed_fields
+from awx.main.fields import is_implicit_parent
 
 from awx.main.consumers import emit_channel_notification
 
@@ -179,30 +180,9 @@ def rbac_activity_stream(instance, sender, **kwargs):
                 return
             elif sender.__name__ == 'Role_parents':
                 role = kwargs['model'].objects.filter(pk__in=kwargs['pk_set']).first()
-                # don't record implicit creation / parents
-                if role is not None:
-                    if role.content_type is None:
-                        if role.is_singleton():
-                            parent = 'singleton:' + role.singleton_name
-                        else:
-                            # Ill-defined role, may need additional logic in the
-                            # case of future expansions of the RBAC system
-                            parent = str(role.role_field)
-                    else:
-                        parent = role.content_type.name + "." + role.role_field
-                    # Get the list of implicit parents that were defined at the class level.
-                    # We have to take this list from the class property to avoid including parents
-                    # that may have been added since the creation of the ImplicitRoleField
-                    implicit_parents = getattr(instance.content_object.__class__, instance.role_field).field.parent_role
-                    if type(implicit_parents) != list:
-                        implicit_parents = [implicit_parents]
-                    # Ignore any singleton parents we find. If the parent for the role
-                    # matches any of the implicit parents we find, skip recording the activity stream.
-                    for ip in implicit_parents:
-                        if '.' not in ip and 'singleton:' not in ip:
-                            ip = instance.content_type.name + "." + ip
-                        if parent == ip:
-                            return
+                # don't record implicit creation / parents in activity stream
+                if role is not None and is_implicit_parent(parent_role=role, child_role=instance):
+                    return
             else:
                 role = instance
             instance = instance.content_object
