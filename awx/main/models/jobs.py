@@ -3,6 +3,7 @@
 
 # Python
 import datetime
+import hashlib
 import hmac
 import logging
 import time
@@ -480,7 +481,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin):
     def task_auth_token(self):
         '''Return temporary auth token used for task requests via API.'''
         if self.status == 'running':
-            h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
+            h = hmac.new(settings.SECRET_KEY, self.created.isoformat(), digestmod=hashlib.sha1)
             return '%d-%s' % (self.pk, h.hexdigest())
 
     @property
