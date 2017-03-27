@@ -108,8 +108,8 @@
     - name: update project using insights
       uri:
         url: "{{insights_url}}/r/insights/v1/maintenance?ansible=true"
-        user: "{{scm_username|quote}}"
-        password: "{{scm_password|quote}}"
+        user: "{{scm_username}}"
+        password: "{{scm_password}}"
         force_basic_auth: yes
       when: scm_type == 'insights'
       register: insights_output
