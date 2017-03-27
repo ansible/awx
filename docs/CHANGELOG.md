@@ -12,3 +12,5 @@
   group serializer and added `user_capabilities` to inventory source
   serializer, allow user creation and naming of inventory sources
   [[#5741](https://github.com/ansible/ansible-tower/issues/5741)]
+* support sourcing inventory from a file inside of a project's source
+  tree [[#2477](https://github.com/ansible/ansible-tower/issues/2477)]

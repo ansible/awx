@@ -268,7 +268,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                     try:
                         inventory = Inventory.objects.get(pk=inventory_pk)
                         inventory.update_computed_fields()
-                    except Inventory.DoesNotExist:
+                    except (Inventory.DoesNotExist, Project.DoesNotExist):
                         pass
 
 

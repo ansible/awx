@@ -25,6 +25,13 @@ def team_project_list(organization_factory):
 
 
 @pytest.mark.django_db
+def test_get_project_path(project):
+    # Test combining projects root with project local path
+    with mock.patch('awx.main.models.projects.settings.PROJECTS_ROOT', '/var/lib/awx'):
+        assert project.get_project_path(check_if_exists=False) == '/var/lib/awx/_92__test_proj'
+
+
+@pytest.mark.django_db
 def test_user_project_paged_list(get, organization_factory):
     'Test project listing that spans multiple pages'
 
