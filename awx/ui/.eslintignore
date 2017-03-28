@@ -1,0 +1,13 @@
+webpack.*.js
+Gruntfile.js
+karma.*.js
+
+etc
+grunt-tasks
+node_modules
+po
+static
+templates
+tests
+client/**/*.js
+
