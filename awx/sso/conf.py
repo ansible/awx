@@ -33,7 +33,7 @@ multiple organizations, otherwise the single default organization is used
 regardless of the key.  Values are dictionaries defining the options for
 each organization's membership.  For each organization it is possible to
 specify which users are automatically users of the organization and also
-which users can administer the organization. 
+which users can administer the organization.
 
 - admins: None, True/False, string or list of strings.
   If None, organization admins will not be updated.
@@ -51,7 +51,7 @@ which users can administer the organization.
   administrative list.
 - users: None, True/False, string or list of strings. Same rules apply as for
   admins.
-- remove_users: True/False. Defaults to True. Same rules as apply for 
+- remove_users: True/False. Defaults to True. Same rules as apply for
   remove_admins.\
 ''')
 
@@ -518,6 +518,72 @@ register(
     category_slug='radius',
     feature_required='enterprise_auth',
     encrypted=True,
+)
+
+###############################################################################
+# TACACSPLUS AUTHENTICATION SETTINGS
+###############################################################################
+
+register(
+    'TACACSPLUS_HOST',
+    field_class=fields.CharField,
+    allow_blank=True,
+    default='',
+    label=_('TACACS+ Server'),
+    help_text=_('Hostname of TACACS+ server.'),
+    category=_('TACACSPLUS'),
+    category_slug='tacacsplus',
+    feature_required='enterprise_auth',
+)
+
+register(
+    'TACACSPLUS_PORT',
+    field_class=fields.IntegerField,
+    min_value=1,
+    max_value=65535,
+    default=49,
+    label=_('TACACS+ Port'),
+    help_text=_('Port number of TACACS+ server.'),
+    category=_('TACACSPLUS'),
+    category_slug='tacacsplus',
+    feature_required='enterprise_auth',
+)
+
+register(
+    'TACACSPLUS_SECRET',
+    field_class=fields.TACACSPLUSSecretField,
+    allow_blank=True,
+    default='',
+    label=_('TACACS+ Secret'),
+    help_text=_('Shared secret for authenticating to TACACS+ server.'),
+    category=_('TACACSPLUS'),
+    category_slug='tacacsplus',
+    feature_required='enterprise_auth',
+    encrypted=True,
+)
+
+register(
+    'TACACSPLUS_SESSION_TIMEOUT',
+    field_class=fields.IntegerField,
+    min_value=0,
+    default=5,
+    label=_('TACACS+ Auth Session Timeout'),
+    help_text=_('TACACS+ session timeout value in seconds. Set to 0 to cancel timeout.'),
+    category=_('TACACSPLUS'),
+    category_slug='tacacsplus',
+    feature_required='enterprise_auth',
+)
+
+register(
+    'TACACSPLUS_AUTH_PROTOCOL',
+    field_class=fields.ChoiceField,
+    choices=['ascii', 'pap'],
+    default='ascii',
+    label=_('TACACS+ Authentication Protocol'),
+    help_text=_('Choose the authentication protocol used by TACACS+ client.'),
+    category=_('TACACSPLUS'),
+    category_slug='tacacsplus',
+    feature_required='enterprise_auth',
 )
 
 ###############################################################################
