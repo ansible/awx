@@ -45,6 +45,12 @@
             return $scope.hostResults.indexOf(result[0]);
         };
 
+        $scope.closeHostEvent = function() {
+            // Unbind the listener so it doesn't fire when we close the modal via navigation
+            $('#HostEvent').off('hidden.bs.modal');
+            $state.go('jobDetail');
+        };
+
         var init = function(){
             hostEvent.event_name = hostEvent.event;
             $scope.event = _.cloneDeep(hostEvent);
@@ -98,6 +104,10 @@
                 }
             }
             $('#HostEvent').modal('show');
+
+            $('#HostEvent').on('hidden.bs.modal', function () {
+                $scope.closeHostEvent();
+            });
         };
         init();
     }];
