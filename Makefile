@@ -225,11 +225,13 @@ clean-tmp:
 clean-venv:
 	rm -rf venv/
 
+clean-dist:
+	rm -rf dist
+
 # Remove temporary build files, compiled Python files.
-clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle
+clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-dist
 	rm -rf awx/public
 	rm -rf awx/lib/site-packages
-	rm -rf dist/*
 	rm -rf awx/job_status
 	rm -rf awx/job_output
 	rm -rf reports
