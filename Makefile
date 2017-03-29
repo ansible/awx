@@ -723,21 +723,21 @@ rpm-build/$(SDIST_TAR_FILE): rpm-build dist/$(SDIST_TAR_FILE) tar-build/$(SETUP_
 
 rpmtar: sdist rpm-build/$(SDIST_TAR_FILE)
 
-brewrpmtar: rpm-build/python-deps.tar.gz rpmtar
+brewrpmtar: rpm-build/python-deps.tar.gz requirements/requirements_local.txt requirements/requirements_ansible_local.txt rpmtar
 
 rpm-build/python-deps.tar.gz: requirements/vendor rpm-build
 	tar czf rpm-build/python-deps.tar.gz requirements/vendor
 
 requirements/vendor:
-	pip download \
+	cat requirements/requirements.txt requirements/requirements_git.txt | pip download \
 	    --no-binary=:all: \
-	    --requirement=requirements/requirements_ansible.txt \
+	    --requirement=/dev/stdin \
 	    --dest=$@ \
 	    --exists-action=i
 
-	pip download \
+	cat requirements/requirements_ansible.txt requirements/requirements_ansible_git.txt | pip download \
 	    --no-binary=:all: \
-	    --requirement=requirements/requirements.txt \
+	    --requirement=/dev/stdin \
 	    --dest=$@ \
 	    --exists-action=i
 
@@ -746,6 +746,21 @@ requirements/vendor:
 	    --requirement=requirements/requirements_setup_requires.txt \
 	    --dest=$@ \
 	    --exists-action=i
+
+requirements/requirements_local.txt:
+	@echo "This is going to take a while..."
+	pip download \
+	    --requirement=requirements/requirements_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
+
+requirements/requirements_ansible_local.txt:
+	pip download \
+	    --requirement=requirements/requirements_ansible_git.txt \
+	    --no-deps \
+	    --exists-action=w \
+	    --dest=requirements/vendor 2>/dev/null | sed -n 's/^\s*Saved\s*//p' > $@
 
 rpm-build/$(RPM_NVR).src.rpm: /etc/mock/$(MOCK_CFG).cfg
 	$(MOCK_BIN) -r $(MOCK_CFG) --resultdir rpm-build --buildsrpm --spec rpm-build/$(NAME).spec --sources rpm-build \
