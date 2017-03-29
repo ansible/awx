@@ -236,6 +236,7 @@ clean: clean-rpm clean-deb clean-ui clean-tar clean-packer clean-bundle clean-di
 	rm -rf awx/job_output
 	rm -rf reports
 	rm -f awx/awx_test.sqlite3
+	rm -rf requirements/vendor
 	rm -rf tmp
 	mkdir tmp
 	rm -rf build $(NAME)-$(VERSION) *.egg-info
