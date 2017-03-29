@@ -3,7 +3,9 @@ FROM centos:7
 ADD Makefile /tmp/Makefile
 RUN mkdir /tmp/requirements
 ADD requirements/requirements.txt \
+requirements/requirements_git.txt \
 requirements/requirements_ansible.txt \
+requirements/requirements_ansible_git.txt \
 requirements/requirements_dev.txt \
 requirements/requirements_ansible_uninstall.txt \
 requirements/requirements_tower_uninstall.txt \
